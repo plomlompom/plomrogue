@@ -219,9 +219,9 @@ int main () {
       update_info (&win_info);
       update_log (&win_log, "\nYou wait.");
       draw_all_windows(&win_meta); }
-    else if (key == '>' && win_meta.active != 0)            // cycle forwards
+    else if (key == '>' && win_meta.active != 0)            // cycle forwards in windows chain
       cycle_active_window(&win_meta, 'n');
-    else if (key == '<' && win_meta.active != 0)            // cycle backwards
+    else if (key == '<' && win_meta.active != 0)            // cycle backwards in windows chain
       cycle_active_window(&win_meta, 'p');
     else if (key == 'y' && win_meta.active != 0)            // shift window forwards
       shift_window(&win_meta, 'f');
