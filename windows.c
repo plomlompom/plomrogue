@@ -120,7 +120,8 @@ void draw_windows (struct WinMeta * win_meta, struct Win * win) {
 
 void draw_all_windows (struct WinMeta * win_meta) {
 // Draw all windows from the chain start on.
-  draw_windows (win_meta, win_meta->chain_start); }
+  if (win_meta->chain_start)
+    draw_windows (win_meta, win_meta->chain_start); }
 
 void draw_window(struct WinMeta * win_meta, struct Win * win) {
 // Draw win's content, including border and title (the latter dependent on space available for it).
