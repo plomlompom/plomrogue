@@ -224,5 +224,4 @@ void shift_window (struct WinMeta * win_meta, char dir) {
           append_window(win_meta, wins[i]);
     free(wins);
     win_meta->active = win_shift;
-    update_windows(win_meta, win_meta->chain_start);
     draw_all_windows(win_meta); } }
