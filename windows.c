@@ -60,34 +60,29 @@ void place_window (struct WinMeta * win_meta, struct Win * win) {
   win->start_x = 0; // if window is first in chain, place it on top-left corner
   win->start_y = 0;
   if (0 != win->prev) {
-    win->start_x = win->prev->start_x + win->prev->width; // next best default: open new window column with it
-    if (win->prev->height < win_meta->height) { // ... unless the previous window does not fill a whole column
-      struct Win * last_ceiling;
-      last_ceiling = win->prev;
-      while (last_ceiling->start_y != 0                               // determine last window serving as a
-             && (last_ceiling->prev->start_y == last_ceiling->start_y // ceiling to other windows or filling
-                 || last_ceiling->prev->width > last_ceiling->width)) // the whole last column's width
-         last_ceiling = last_ceiling->prev;
-      if (win->prev == last_ceiling) {
-        if (win->width <= win->prev->width
-            && win->prev->start_y + win->prev->height + win->height <= win_meta->height) {
-          win->start_x = win->prev->start_x;                         // if prev window is last ceiling, try to
-          win->start_y = win->prev->start_y + win->prev->height; } } // fit window below it; else: use default
-      else {
-        int remaining_width = last_ceiling->width; // calculate free width remaining in last row of last
-        struct Win * win_p = last_ceiling->next;   // window column
-        while (win != win_p) {
-          remaining_width = remaining_width - win_p->width;
-          win_p = win_p->next; }
-        if (win->width <= remaining_width && win->height <= win->prev->height) { // if enough space left in
-          win->start_y = win->prev->start_y;                                     // last column, place window
-          win->start_x = win->prev->start_x + win->prev->width; }                // here
-        else if (win->width <= last_ceiling->width
-                 && win->height + win->prev->height + win->prev->start_y <= win_meta->height ) {
-          win->start_y = last_ceiling->next->start_y + last_ceiling->next->height; // else, try to put it
-          win->start_x = last_ceiling->start_x; }                                  // below
-        else                                                                  // else, put it next to max
-          win->start_x = last_ceiling->width + last_ceiling->start_x; } } } } // width of the last last column
+    if (win->prev->height == win_meta->height)               // if prev window fills entire column, place win
+      win->start_x = win->prev->start_x + win->prev->width;  // in new column next to it
+    else {
+      struct Win * first_ceiling = win->prev;                        // first_ceiling determines column with;
+      while (first_ceiling->start_y != 0)                            // default: place window in new column
+        first_ceiling = first_ceiling->prev;                         // next to it
+      win->start_x = first_ceiling->start_x + first_ceiling->width;
+      if (first_ceiling->width >= win->width) {   // only place windows in prev column that fit into its width
+        struct Win * win_p = first_ceiling;
+        struct Win * lastrow_startwin = win_p;
+        while (win_p != win) {
+          if (win_p->start_x == first_ceiling->start_x)
+            lastrow_startwin = win_p;                              // try to fit window at the end of the last
+          win_p = win_p ->next; }                                  // row of windows inside the column; if
+        int lastcol_start = win->prev->start_x + win->prev->width; // that fails, try to open a new row below
+        if (win->width <= first_ceiling->start_x + first_ceiling->width - lastcol_start
+            && win->height <= lastrow_startwin->height) {
+          win->start_x = lastcol_start;
+          win->start_y = lastrow_startwin->start_y; }
+        else if (win->height <= win_meta->height - (lastrow_startwin->start_y + lastrow_startwin->height)
+                 && win->width <= first_ceiling->width) {
+          win->start_x = first_ceiling->start_x;
+          win->start_y = lastrow_startwin->start_y + lastrow_startwin->height; } } } } }
 
 void update_windows (struct WinMeta * win_meta, struct Win * win) {
 // Update geometry of win and its next of kin. Before, destroy window, if visible. After, (re-)build it.
@@ -195,48 +190,39 @@ void cycle_active_window (struct WinMeta * win_meta, char dir) {
 
 void shift_window (struct WinMeta * win_meta, char dir) {
 // Move active window forward/backward in window chain. If jumping beyond start/end, move to other chain end.
-  if (win_meta->active != win_meta->chain_start || win_meta->active != win_meta->chain_end) {
-    if ('f' == dir) {
-      if (win_meta->active == win_meta->chain_end) { // move forward beyond chain end
-        win_meta->active->prev->next = 0;
-        win_meta->chain_end = win_meta->active->prev;
-        win_meta->active->prev = 0;
-        win_meta->active->next = win_meta->chain_start;
-        win_meta->chain_start->prev = win_meta->active;
-        win_meta->chain_start = win_meta->active; }
-      else {                                        // move forward before chain end
-        if (win_meta->chain_start != win_meta->active)
-          win_meta->active->prev->next = win_meta->active->next;
-        else
-          win_meta->chain_start = win_meta->active->next;
-        win_meta->active->next->prev = win_meta->active->prev;
-        win_meta->active->prev = win_meta->active->next;
-        win_meta->active->next = win_meta->active->next->next;
-        win_meta->active->prev->next = win_meta->active;
-        if (0 != win_meta->active->next)
-          win_meta->active->next->prev = win_meta->active;
-        else
-          win_meta->chain_end = win_meta->active; } }
-    else { // mirror of above, backwards
-      if (win_meta->active == win_meta->chain_start) {
-        win_meta->active->next->prev = 0;
-        win_meta->chain_start = win_meta->active->next;
-        win_meta->active->next = 0;
-        win_meta->active->prev = win_meta->chain_end;
-        win_meta->chain_end->next = win_meta->active;
-        win_meta->chain_end = win_meta->active; }
+  if (win_meta->chain_start != win_meta->chain_end && (dir == 'f' || dir == 'b')) {
+    int i, i_max;
+    struct Win * win_shift = win_meta->active;
+    char wrap = 0;
+    if ((dir == 'f' && win_shift == win_meta->chain_end)
+        || (dir == 'b' && win_shift == win_meta->chain_start))
+      wrap = 1;
+    struct Win * win_p, * win_p_next;
+    for (i_max = 1, win_p = win_meta->chain_start; win_p != win_meta->chain_end; i_max++, win_p = win_p->next);
+    struct Win ** wins = malloc(i_max * sizeof(struct Win *));
+    for (i = 0, win_p = win_meta->chain_start; i < i_max; i++) {
+      win_p_next = win_p->next;
+      suspend_window(win_meta, win_p);
+      wins[i] = win_p;
+      win_p = win_p_next; }
+    if (wrap)
+      if (dir == 'f') {
+        append_window(win_meta, win_shift);
+        for (i = 0; i < i_max - 1; i++)
+          append_window(win_meta, wins[i]); }
       else {
-        if (win_meta->chain_end != win_meta->active)
-          win_meta->active->next->prev = win_meta->active->prev;
+        for (i = 1; i < i_max; i++)
+          append_window(win_meta, wins[i]);
+        append_window(win_meta, win_shift); }
+    else
+      for (i = 0; i < i_max; i++)
+        if ((dir == 'f' && win_shift == wins[i]) || (dir == 'b' && win_shift == wins[i+1])) {
+          append_window(win_meta, wins[i+1]);
+          append_window(win_meta, wins[i]);
+          i++; }
         else
-          win_meta->chain_end = win_meta->active->prev;
-        win_meta->active->prev->next = win_meta->active->next;
-        win_meta->active->next = win_meta->active->prev;
-        win_meta->active->prev = win_meta->active->prev->prev;
-        win_meta->active->next->prev = win_meta->active;
-        if (0 != win_meta->active->prev)
-          win_meta->active->prev->next = win_meta->active;
-        else
-          win_meta->chain_start = win_meta->active; } }
-  update_windows(win_meta, win_meta->chain_start);
-  draw_all_windows(win_meta); } }
+          append_window(win_meta, wins[i]);
+    free(wins);
+    win_meta->active = win_shift;
+    update_windows(win_meta, win_meta->chain_start);
+    draw_all_windows(win_meta); } }
