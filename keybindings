@@ -1,0 +1,25 @@
+81 quit
+258 keys nav down
+259 keys nav up
+10 keys mod
+265 toggle keys window
+266 toggle map window
+267 toggle info window
+268 toggle log window
+62 cycle forwards
+60 cycle backwards
+121 shift forwards
+89 shift backwards
+42 grow hor
+95 shrink hor
+43 grow ver
+45 shrink ver
+119 map up
+120 map down
+97 map left
+100 map right
+116 player up
+98 player down
+104 player left
+102 player right
+46 wait
