@@ -268,7 +268,7 @@ void init_keybindings(struct World * world) {
   world->keyswindata = keyswindata; }
 
 void save_keybindings(struct World * world) {
-// Write keybidings to keybindings file.
+// Write keybindings to keybindings file.
   struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
   struct KeyBinding * keybindings = world->keybindings;
   FILE * file = fopen("keybindings", "w");
