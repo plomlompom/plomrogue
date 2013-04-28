@@ -318,6 +318,7 @@ int main () {
 
   int key;
   while (1) {
+    draw_all_windows (&win_meta);
     key = getch();
     if      (key == get_action_key(world.keybindings, "quit"))
       break;
@@ -350,53 +351,42 @@ int main () {
     else if (key == get_action_key(world.keybindings, "keys nav up") && world.keyswindata->select > 0) {
       world.keyswindata->select--;
       draw_all_windows (&win_meta); }
-    else if (key == get_action_key(world.keybindings, "keys nav down") && world.keyswindata->select < world.keyswindata->max) {
+    else if (key == get_action_key(world.keybindings, "keys nav down") && world.keyswindata->select < world.keyswindata->max)
       world.keyswindata->select++;
-      draw_all_windows (&win_meta); }
     else if (key == get_action_key(world.keybindings, "keys mod")) {
       world.keyswindata->edit = 1;
       draw_all_windows (&win_meta);
       key = getch();
       if (key < 1000) // ensure maximum of three digits in key code field
         world.keybindings[world.keyswindata->select].key = key;
-      world.keyswindata->edit = 0;
-      draw_all_windows (&win_meta); }
-    else if (key == get_action_key(world.keybindings, "map up") && map.offset_y > 0) {
+      world.keyswindata->edit = 0; }
+    else if (key == get_action_key(world.keybindings, "map up") && map.offset_y > 0)
       map.offset_y--;
-      draw_all_windows (&win_meta); }
-    else if (key == get_action_key(world.keybindings, "map down")) {
+    else if (key == get_action_key(world.keybindings, "map down"))
       map.offset_y++;
-      draw_all_windows (&win_meta); }
-    else if (key == get_action_key(world.keybindings, "map right")) {
+    else if (key == get_action_key(world.keybindings, "map right"))
       map.offset_x++;
-      draw_all_windows (&win_meta); }
-    else if (key == get_action_key(world.keybindings, "map left") && map.offset_x > 0) {
+    else if (key == get_action_key(world.keybindings, "map left") && map.offset_x > 0)
       map.offset_x--;
-      draw_all_windows (&win_meta); }
     else if (key == get_action_key(world.keybindings, "player down") && map.player_y < map.height - 1) {
       update_info (&win_info);
       update_log (&win_log, "\nYou move south.");
-      map.player_y++;
-      draw_all_windows (&win_meta); }
+      map.player_y++; }
     else if (key == get_action_key(world.keybindings, "player up") && map.player_y > 0) {
       update_info (&win_info);
       update_log (&win_log, "\nYou move north.");
-      map.player_y--;
-      draw_all_windows (&win_meta); }
+      map.player_y--; }
     else if (key == get_action_key(world.keybindings, "player right") && map.player_x < map.width - 1) {
       update_info (&win_info);
       update_log (&win_log, "\nYou move east.");
-      map.player_x++;
-      draw_all_windows (&win_meta); }
+      map.player_x++; }
     else if (key == get_action_key(world.keybindings, "player left") && map.player_x > 0) {
       update_info (&win_info);
       update_log (&win_log, "\nYou move west.");
-      map.player_x--;
-      draw_all_windows (&win_meta); }
+      map.player_x--; }
     else if (key == get_action_key(world.keybindings, "wait") ) {
       update_info (&win_info);
-      update_log (&win_log, "\nYou wait.");
-      draw_all_windows(&win_meta); } }
+      update_log (&win_log, "\nYou wait."); } }
 
   endwin();
   return 0; }

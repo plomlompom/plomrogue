@@ -31,8 +31,7 @@ void append_window (struct WinMeta * win_meta, struct Win * win) {
     win_meta->active = win;
     win_meta->chain_start = win; }
   win_meta->chain_end = win;
-  update_windows(win_meta, win);
-  draw_all_windows(win_meta); }
+  update_windows(win_meta, win); }
 
 void suspend_window (struct WinMeta * win_meta, struct Win * win) {
 // Destroy win, suspend from window chain. Update geometry of following rows, as well as activity selection.
@@ -51,9 +50,7 @@ void suspend_window (struct WinMeta * win_meta, struct Win * win) {
     if (win_meta->active == win)                                   // ... or else to the previous element.
       win_meta->active = win->prev; }
   win->prev = 0;
-  win->next = 0;
-  if (0 != win_meta->chain_start)
-    draw_all_windows(win_meta); }
+  win->next = 0; }
 
 void place_window (struct WinMeta * win_meta, struct Win * win) {
 // Based on position and sizes of previous window, find fitting place for current window.
@@ -171,8 +168,7 @@ void resize_window (struct WinMeta * win_meta, char change) {
       win_meta->active->width--;
   else if (change == '*')
     win_meta->active->width++;
-  update_windows(win_meta, win_meta->chain_start);
-  draw_all_windows(win_meta); }
+  update_windows(win_meta, win_meta->chain_start); }
 
 void cycle_active_window (struct WinMeta * win_meta, char dir) {
 // Cycle active window selection forwards (dir = 'n') or backwards.
@@ -185,8 +181,7 @@ void cycle_active_window (struct WinMeta * win_meta, char dir) {
     if (win_meta->active->prev != 0)
       win_meta->active = win_meta->active->prev;
     else
-      win_meta->active = win_meta->chain_end; }
-  draw_all_windows(win_meta); }
+      win_meta->active = win_meta->chain_end; } }
 
 void shift_window (struct WinMeta * win_meta, char dir) {
 // Move active window forward/backward in window chain. If jumping beyond start/end, move to other chain end.
@@ -223,5 +218,4 @@ void shift_window (struct WinMeta * win_meta, char dir) {
         else
           append_window(win_meta, wins[i]);
     free(wins);
-    win_meta->active = win_shift;
-    draw_all_windows(win_meta); } }
+    win_meta->active = win_shift; } }
