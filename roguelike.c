@@ -215,15 +215,21 @@ void init_keybindings(struct World * world) {
   FILE * file = fopen("keybindings", "r");
   int lines = 0;
   int c = 0;
+  int linemax = 0;
+  int c_count = 0;
   while (EOF != c) {
+    c_count++;
     c = getc(file);
-    if ('\n' == c)
-      lines++; }
+    if ('\n' == c) {
+      if (c_count > linemax)
+        linemax = c_count;
+      c_count = 0;
+      lines++; } }
   struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
   fseek(file, 0, SEEK_SET);
-  char * command = malloc(100);
+  char * command = malloc(linemax);
   char commcount = 0;
-  char * digits = malloc(10);
+  char * digits = malloc(3);
   char digicount = 0;
   int key, digimax;
   int keycount = 0;
@@ -260,6 +266,24 @@ void init_keybindings(struct World * world) {
   keyswindata->edit = 0;
   world->keybindings = keybindings;
   world->keyswindata = keyswindata; }
+
+void save_keybindings(struct World * world) {
+// Write keybidings to keybindings file.
+  struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
+  struct KeyBinding * keybindings = world->keybindings;
+  FILE * file = fopen("keybindings", "w");
+  int linemax = 0;
+  int i;
+  for (i = 0; i <= keyswindata->max; i++)
+    if (strlen(keybindings[i].name) > linemax)
+      linemax = strlen(keybindings[i].name);
+  linemax = linemax + 6; // + 6 = + 3 digits + whitespace + newline + null byte
+  char * line = malloc(linemax);
+  for (i = 0; i <= keyswindata->max; i++) {
+    snprintf(line, linemax, "%d %s\n", keybindings[i].key, keybindings[i].name);
+    fwrite(line, sizeof(char), strlen(line), file); }
+  free(line);
+  fclose(file); }
 
 int main () {
   struct World world;
@@ -321,6 +345,8 @@ int main () {
       resize_window(&win_meta, '+');
     else if (key == get_action_key(world.keybindings, "shrink ver") && win_meta.active != 0)
       resize_window(&win_meta, '-');
+    else if (key == get_action_key(world.keybindings, "save keys"))
+      save_keybindings(&world);
     else if (key == get_action_key(world.keybindings, "keys nav up") && world.keyswindata->select > 0) {
       world.keyswindata->select--;
       draw_all_windows (&win_meta); }
@@ -331,7 +357,8 @@ int main () {
       world.keyswindata->edit = 1;
       draw_all_windows (&win_meta);
       key = getch();
-      world.keybindings[world.keyswindata->select].key = key;
+      if (key < 1000) // ensure maximum of three digits in key code field
+        world.keybindings[world.keyswindata->select].key = key;
       world.keyswindata->edit = 0;
       draw_all_windows (&win_meta); }
     else if (key == get_action_key(world.keybindings, "map up") && map.offset_y > 0) {
