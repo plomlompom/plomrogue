@@ -172,6 +172,49 @@ int get_action_key (struct KeyBinding * keybindings, char * name) {
     i++;
   return keybindings[i].key; }
 
+char * get_keyname(int keycode) {
+// Translate some keycodes to readable names of max 9 chars.
+  char * keyname;
+  keyname = malloc(15);
+  if (32 < keycode && keycode < 127)
+    sprintf(keyname, "%c", keycode);
+  else if (keycode == 9)
+    sprintf(keyname, "TAB");
+  else if (keycode == 10)
+    sprintf(keyname, "RETURN");
+  else if (keycode == 27)
+    sprintf(keyname, "ESCAPE");
+  else if (keycode == 32)
+    sprintf(keyname, "SPACE");
+  else if (keycode == KEY_UP)
+    sprintf(keyname, "UP");
+  else if (keycode == KEY_DOWN)
+    sprintf(keyname, "DOWN");
+  else if (keycode == KEY_LEFT)
+    sprintf(keyname, "LEFT");
+  else if (keycode == KEY_RIGHT)
+    sprintf(keyname, "RIGHT");
+  else if (keycode == KEY_HOME)
+    sprintf(keyname, "HOME");
+  else if (keycode == KEY_BACKSPACE)
+    sprintf(keyname, "BACKSPACE");
+  else if (keycode >= KEY_F0 && keycode <= KEY_F(63)) {
+    int f = keycode - KEY_F0;
+    sprintf(keyname, "F%d", f); }
+  else if (keycode == KEY_DC)
+    sprintf(keyname, "DELETE");
+  else if (keycode == KEY_IC)
+    sprintf(keyname, "INSERT");
+  else if (keycode == KEY_NPAGE)
+    sprintf(keyname, "NEXT PAGE");
+  else if (keycode == KEY_PPAGE)
+    sprintf(keyname, "PREV PAGE");
+  else if (keycode == KEY_END)
+    sprintf(keyname, "END");
+  else
+    sprintf(keyname, "(unknown)");
+  return keyname;  }
+
 void draw_keys_window (struct Win * win) {
 // Draw keybinding window.
   struct World * world = (struct World *) win->data;
@@ -186,17 +229,20 @@ void draw_keys_window (struct Win * win) {
         offset = keyswindata->select - (height_av / 2);
       else
         offset = keyswindata->max - height_av + 1; }
-  int keydescwidth = 3;
+  int keydescwidth = 9; // max length assured by get_keyname()
   char * keydesc = malloc(keydescwidth + 1);
   attr_t attri;
   int y, x;
+  char * keyname;
   for (y = 0; 0 != keybindings[offset + y].name && y < height_av; y++) {
     attri = 0;
     if (y == keyswindata->select - offset) {
       attri = A_REVERSE;
       if (1 == keyswindata->edit)
         attri = attri | A_BLINK; }
-    snprintf(keydesc, keydescwidth + 1, "%3d         ", keybindings[y + offset].key);
+    keyname = get_keyname(keybindings[y + offset].key);
+    snprintf(keydesc, keydescwidth + 1, "%-9s", keyname);
+    free(keyname);
     for (x = 0; x < width_av; x++)
       if (strlen(keydesc) > x)
         mvwaddch(win->curses_win, y + 1, x + win->border_left, keydesc[x] | attri);
