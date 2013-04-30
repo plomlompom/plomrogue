@@ -2,8 +2,7 @@ struct WinMeta {
   struct Win * chain_start;
   struct Win * chain_end;
   struct Win * active;
-  int height;
-  int width; };
+  int height; };
 
 struct Win {
   struct Win * prev;

@@ -7,7 +7,6 @@ struct WinMeta init_win_meta (WINDOW * screen) {
 // Create and populate WinMeta struct with sane default values.
   struct WinMeta win_meta;
   win_meta.height = screen->_maxy + 1;
-  win_meta.width = screen->_maxx + 1;
   win_meta.chain_start = 0;
   win_meta.chain_end = 0;
   return win_meta; }
@@ -147,10 +146,7 @@ void draw_windows (struct Win * win) {
 
 void draw_all_windows (struct WinMeta * win_meta) {
 // Draw all windows and their borders.
-  int y, x;
-  for (y = 0; y < win_meta->height; y++)
-    for (x = 0; x < win_meta->width; x++)
-    mvaddch(y, x, ' ');
+  clear();
   if (win_meta->chain_start) {
     int n_wins = 1;
     struct Win * win_p = win_meta->chain_start;
@@ -160,11 +156,12 @@ void draw_all_windows (struct WinMeta * win_meta) {
     struct Corners * all_corners = malloc(sizeof(struct Corners) * n_wins);
     draw_windows_borders (win_meta->chain_start, win_meta->active, all_corners, 0);
     draw_windows (win_meta->chain_start);
-    for (y = 0; y < n_wins; y++) {
-      mvaddch(all_corners[y].tl.y, all_corners[y].tl.x, '+');
-      mvaddch(all_corners[y].tr.y, all_corners[y].tr.x, '+');
-      mvaddch(all_corners[y].bl.y, all_corners[y].bl.x, '+');
-      mvaddch(all_corners[y].br.y, all_corners[y].br.x, '+'); }
+    int i;
+    for (i = 0; i < n_wins; i++) {
+      mvaddch(all_corners[i].tl.y, all_corners[i].tl.x, '+');
+      mvaddch(all_corners[i].tr.y, all_corners[i].tr.x, '+');
+      mvaddch(all_corners[i].bl.y, all_corners[i].bl.x, '+');
+      mvaddch(all_corners[i].br.y, all_corners[i].br.x, '+'); }
     free(all_corners); } }
 
 void draw_window(struct Win * win) {
