@@ -10,8 +10,6 @@ struct Win {
   struct Win * next;
   int width;
   int height;
-  int start_x;
-  int start_y;
   WINDOW * curses_win;
   char border_left;
   char border_down;
@@ -19,21 +17,21 @@ struct Win {
   void (* draw) (struct Win *);
   void * data; };
 
+struct yx {
+  int y;
+  int x; };
+
 struct Corners {
-  int tl_y;
-  int tl_x;
-  int tr_y;
-  int tr_x;
-  int bl_y;
-  int bl_x;
-  int br_y;
-  int br_x; };
+  struct yx tl;
+  struct yx tr;
+  struct yx bl;
+  struct yx br; };
 
 struct  WinMeta init_win_meta (WINDOW *);
 struct Win init_window (struct WinMeta *, char *);
 void append_window (struct WinMeta *, struct Win *);
 void suspend_window (struct WinMeta *, struct Win *);
-void place_window (struct WinMeta *, struct Win *);
+struct yx place_window (struct WinMeta *, struct Win *);
 void update_windows (struct WinMeta *, struct Win *);
 void destroy_window (struct Win *);
 void draw_window(struct Win *);
