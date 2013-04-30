@@ -161,10 +161,10 @@ void draw_all_windows (struct WinMeta * win_meta) {
     draw_windows_borders (win_meta->chain_start, win_meta->active, all_corners, 0);
     draw_windows (win_meta->chain_start);
     for (y = 0; y < n_wins; y++) {
-      mvaddch(all_corners[y].tl.y, all_corners[y].tl.x, 'o');
-      mvaddch(all_corners[y].tr.y, all_corners[y].tr.x, 'o');
-      mvaddch(all_corners[y].bl.y, all_corners[y].bl.x, 'o');
-      mvaddch(all_corners[y].br.y, all_corners[y].br.x, 'o'); }
+      mvaddch(all_corners[y].tl.y, all_corners[y].tl.x, '+');
+      mvaddch(all_corners[y].tr.y, all_corners[y].tr.x, '+');
+      mvaddch(all_corners[y].bl.y, all_corners[y].bl.x, '+');
+      mvaddch(all_corners[y].br.y, all_corners[y].br.x, '+'); }
     free(all_corners); } }
 
 void draw_window(struct Win * win) {
