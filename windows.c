@@ -94,7 +94,7 @@ void update_windows (struct WinMeta * win_meta, struct Win * win) {
     update_windows (win_meta, win->next); }
 
 void destroy_window (struct Win * win) {
-// Undraw and delete window.
+// Delete window.
   delwin(win->curses_win);
   win->curses_win = 0; }
 
