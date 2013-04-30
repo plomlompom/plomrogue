@@ -11,8 +11,6 @@ struct Win {
   int width;
   int height;
   WINDOW * curses_win;
-  char border_left;
-  char border_down;
   char * title;
   void (* draw) (struct Win *);
   void * data; };
