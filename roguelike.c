@@ -40,7 +40,6 @@ void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
        if (0 == toggle) {
          z++;
          if ('\n' == text[z]) {
-           mvwaddch(win->curses_win, y, x, ' ');
            toggle = 1;
            continue; }
          else
@@ -50,9 +49,7 @@ void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
            toggle = 1; }
          else if (0 == text[z+1]) {
             toggle = 1;
-            fin = 1; } }
-       else
-         mvwaddch(win->curses_win, y, x, ' '); } } }
+            fin = 1; } } } } }
 
 void draw_text_from_bottom (struct Win * win) {
 // Draw text in win->data from end/bottom to the top.
@@ -73,11 +70,8 @@ void draw_text_from_bottom (struct Win * win) {
         break; } }
   z = -1;
   int start_y = 0;
-  if (y < win->height) {          // Depending on what is bigger, determine start point in window or in text.
+  if (y < win->height)             // Depending on what is bigger, determine start point in window or in text.
     start_y = win->height - y;
-    for (y = 0; y < start_y; y++)
-      for (x = 0; x < win->width; x++)
-        mvwaddch(win->curses_win, y, x, ' '); }
   else if (y > win->height) {
     offset = y - win->height;
     for (y = 0; y < offset; y++)
@@ -106,9 +100,7 @@ void draw_map (struct Win * win) {
           mvwaddch(win->curses_win, y, x, '@');
         else
           mvwaddch(win->curses_win, y, x, cells[z]);
-        z++; }
-      else
-        mvwaddch(win->curses_win, y, x, ' '); } } }
+        z++; } } } }
 
 void draw_info (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
@@ -221,8 +213,8 @@ void draw_keys_window (struct Win * win) {
         offset = keyswindata->select - (win->height / 2);
       else
         offset = keyswindata->max - win->height + 1; }
-  int keydescwidth = 9; // max length assured by get_keyname()
-  char * keydesc = malloc(keydescwidth + 1);
+  int keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
+  char * keydesc = malloc(keydescwidth);
   attr_t attri;
   int y, x;
   char * keyname;
@@ -233,20 +225,16 @@ void draw_keys_window (struct Win * win) {
       if (1 == keyswindata->edit)
         attri = attri | A_BLINK; }
     keyname = get_keyname(keybindings[y + offset].key);
-    snprintf(keydesc, keydescwidth + 1, "%-9s", keyname);
+    snprintf(keydesc, keydescwidth, "%-9s", keyname);
     free(keyname);
     for (x = 0; x < win->width; x++)
-      if (strlen(keydesc) > x)
+      if (x < strlen(keydesc))
         mvwaddch(win->curses_win, y, x, keydesc[x] | attri);
       else if (strlen(keydesc) < x && x < strlen(keybindings[y + offset].name) + strlen(keydesc) + 1)
         mvwaddch(win->curses_win, y, x, keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
       else
         mvwaddch(win->curses_win, y, x, ' ' | attri); }
-  free(keydesc);
-  if (y < win->height)
-    for (; y < win->height; y++)
-      for (x = 0; x < win->width; x++)
-        mvwaddch(win->curses_win, y, x, ' '); }
+  free(keydesc); }
 
 void init_keybindings(struct World * world) {
 // Initialize keybindings from file "keybindings".
