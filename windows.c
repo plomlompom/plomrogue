@@ -6,9 +6,13 @@
 struct WinMeta init_win_meta (WINDOW * screen) {
 // Create and populate WinMeta struct with sane default values.
   struct WinMeta win_meta;
+  win_meta.screen = screen;
   win_meta.height = screen->_maxy + 1;
+  win_meta.width = screen->_maxx + 1;
   win_meta.chain_start = 0;
   win_meta.chain_end = 0;
+  win_meta.pad_offset = 0;
+  win_meta.pad = newpad(win_meta.height, 1);
   return win_meta; }
 
 struct Win init_window (struct WinMeta * win_meta, char * title) {
@@ -84,11 +88,21 @@ struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
   return start; }
 
 void update_windows (struct WinMeta * win_meta, struct Win * win) {
-// Update geometry of win and its next of kin. Before, destroy window, if visible. After, (re-)build it.
+// Update geometry of win and its next of kin. Destroy (if visible), (re-)build window. If need, resize pad.
   if (0 != win->curses_win)
     destroy_window (win);
   struct yx startyx = place_window(win_meta, win);
-  win->curses_win = newwin(win->height, win->width, startyx.y, startyx.x);
+  int lastwincol = 0;
+  struct Win * win_p = win_meta->chain_start;
+  while (win_p != 0) {
+    if (win_p != win && win_p->curses_win->_begx + win_p->width > lastwincol + 1)
+      lastwincol = win_p->curses_win->_begx + win_p->width - 1;
+    else if (win_p == win && startyx.x + win->width > lastwincol + 1)
+      lastwincol = startyx.x + win->width - 1;
+    win_p = win_p->next; }
+  if (win_meta->pad->_maxx != lastwincol + 1) {
+    wresize(win_meta->pad, win_meta->pad->_maxy + 1, lastwincol + 2); }
+  win->curses_win = subpad(win_meta->pad, win->height, win->width, startyx.y, startyx.x);
   if (0 != win->next)
     update_windows (win_meta, win->next); }
 
@@ -101,11 +115,11 @@ void draw_window_borders (struct Win * win, char active) {
 // Draw borders of window win, including title. Decorate in a special way if window is marked as active.
   int y, x;
   for (y = win->curses_win->_begy; y <= win->curses_win->_begy + win->height; y++) {
-    mvaddch(y, win->curses_win->_begx - 1, '|');
-    mvaddch(y, win->curses_win->_begx + win->width, '|'); }
+    mvwaddch(win->curses_win->_parent, y, win->curses_win->_begx - 1, '|');
+    mvwaddch(win->curses_win->_parent, y, win->curses_win->_begx + win->width, '|'); }
   for (x = win->curses_win->_begx; x <= win->curses_win->_begx + win->width; x++) {
-    mvaddch(win->curses_win->_begy - 1, x, '-');
-    mvaddch(win->curses_win->_begy + win->height, x, '-'); }
+    mvwaddch(win->curses_win->_parent, win->curses_win->_begy - 1, x, '-');
+    mvwaddch(win->curses_win->_parent, win->curses_win->_begy + win->height, x, '-'); }
   char min_title_length_visible = 3; // 1 char minimal, plus 2 chars for decoration left/right of title
   if (win->width > min_title_length_visible) {
     int title_length = strlen(win->title);
@@ -118,8 +132,7 @@ void draw_window_borders (struct Win * win, char active) {
     memcpy(title + 1, win->title, length_visible);
     title[0] = title[length_visible + 1] = decoration;
     title[length_visible + 2] = '\0';
-    mvaddstr(win->curses_win->_begy - 1, win->curses_win->_begx + title_offset, title); }
-  refresh(); }
+    mvwaddstr(win->curses_win->_parent, win->curses_win->_begy - 1, win->curses_win->_begx + title_offset, title); } }
 
 void draw_windows_borders (struct Win * win, struct Win * win_active, struct Corners * corners, int ccount) {
 // Craw draw_window_borders() for all windows in chain from win on. Save current window's border corners.
@@ -138,6 +151,11 @@ void draw_windows_borders (struct Win * win, struct Win * win_active, struct Cor
   if (0 != win->next) {
     draw_windows_borders (win->next, win_active, corners, ccount + 1); } }
 
+void draw_window(struct Win * win) {
+// Draw window content if visible.
+  if (win->height > 1 && win->width > 1) ;
+    win->draw(win); }
+
 void draw_windows (struct Win * win) {
 // Draw contents of all windows in window chain from win on.
   draw_window(win);
@@ -146,7 +164,9 @@ void draw_windows (struct Win * win) {
 
 void draw_all_windows (struct WinMeta * win_meta) {
 // Draw all windows and their borders.
-  clear();
+  erase();
+  wnoutrefresh(win_meta->screen);
+  werase(win_meta->pad);
   if (win_meta->chain_start) {
     int n_wins = 1;
     struct Win * win_p = win_meta->chain_start;
@@ -154,21 +174,17 @@ void draw_all_windows (struct WinMeta * win_meta) {
       win_p = win_p->next;
       n_wins++; }
     struct Corners * all_corners = malloc(sizeof(struct Corners) * n_wins);
-    draw_windows_borders (win_meta->chain_start, win_meta->active, all_corners, 0);
     draw_windows (win_meta->chain_start);
+    draw_windows_borders (win_meta->chain_start, win_meta->active, all_corners, 0);
     int i;
     for (i = 0; i < n_wins; i++) {
-      mvaddch(all_corners[i].tl.y, all_corners[i].tl.x, '+');
-      mvaddch(all_corners[i].tr.y, all_corners[i].tr.x, '+');
-      mvaddch(all_corners[i].bl.y, all_corners[i].bl.x, '+');
-      mvaddch(all_corners[i].br.y, all_corners[i].br.x, '+'); }
-    free(all_corners); } }
-
-void draw_window(struct Win * win) {
-// Draw window content if visible.
-  if (win->height > 1 && win->width > 1) ;
-    win->draw(win);
-  wrefresh(win->curses_win); }
+      mvwaddch(win_meta->pad, all_corners[i].tl.y, all_corners[i].tl.x, '+');
+      mvwaddch(win_meta->pad, all_corners[i].tr.y, all_corners[i].tr.x, '+');
+      mvwaddch(win_meta->pad, all_corners[i].bl.y, all_corners[i].bl.x, '+');
+      mvwaddch(win_meta->pad, all_corners[i].br.y, all_corners[i].br.x, '+'); }
+    pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1);
+    free(all_corners); }
+  doupdate(); }
 
 void resize_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink currently active window. Correct its geometry and that of its followers.

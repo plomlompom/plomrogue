@@ -1,5 +1,7 @@
 81 quit
 83 save keys
+260 scroll pad left
+261 scroll pad right
 258 keys nav down
 259 keys nav up
 10 keys mod

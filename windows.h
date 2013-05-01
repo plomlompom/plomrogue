@@ -1,7 +1,11 @@
 struct WinMeta {
+  WINDOW * screen;
+  WINDOW * pad;
+  int pad_offset;
   struct Win * chain_start;
   struct Win * chain_end;
   struct Win * active;
+  int width;
   int height; };
 
 struct Win {

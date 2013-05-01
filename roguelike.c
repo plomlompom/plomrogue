@@ -332,7 +332,6 @@ int main () {
   curs_set(0);
   keypad(screen, TRUE);
   raw();
-
   struct WinMeta win_meta = init_win_meta(screen);
 
   struct Win win_keys = init_window(&win_meta, "Keys");
@@ -360,6 +359,10 @@ int main () {
     key = getch();
     if      (key == get_action_key(world.keybindings, "quit"))
       break;
+    else if (key == get_action_key(world.keybindings, "scroll pad right"))
+      win_meta.pad_offset++;
+    else if (key == get_action_key(world.keybindings, "scroll pad left") && win_meta.pad_offset > 0)
+      win_meta.pad_offset--;
     else if (key == get_action_key(world.keybindings, "toggle keys window"))
       toggle_window(&win_meta, &win_keys);
     else if (key == get_action_key(world.keybindings, "toggle map window"))
