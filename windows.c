@@ -153,7 +153,7 @@ void draw_windows_borders (struct Win * win, struct Win * win_active, struct Cor
 
 void draw_window(struct Win * win) {
 // Draw window content if visible.
-  if (win->height > 1 && win->width > 1) ;
+  if (win->height > 1 && win->width > 1)
     win->draw(win); }
 
 void draw_windows (struct Win * win) {
