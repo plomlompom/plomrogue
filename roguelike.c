@@ -208,11 +208,11 @@ void draw_keys_window (struct Win * win) {
   struct KeyBinding * keybindings = world->keybindings;
   int offset = 0;
   if (keyswindata->max >= win->height) {
-    if (keyswindata->select > win->height / 2)
+    if (keyswindata->select > win->height / 2) {
       if (keyswindata->select < (keyswindata->max - (win->height / 2)))
         offset = keyswindata->select - (win->height / 2);
       else
-        offset = keyswindata->max - win->height + 1; }
+        offset = keyswindata->max - win->height + 1; } }
   int keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
   char * keydesc = malloc(keydescwidth);
   attr_t attri;
@@ -254,9 +254,9 @@ void init_keybindings(struct World * world) {
   struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
   fseek(file, 0, SEEK_SET);
   char * command = malloc(linemax);
-  char commcount = 0;
+  int commcount = 0;
   char * digits = malloc(3);
-  char digicount = 0;
+  int digicount = 0;
   int key, digimax;
   int keycount = 0;
   c = getc(file);
