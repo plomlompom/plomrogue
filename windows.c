@@ -7,8 +7,8 @@ struct WinMeta init_win_meta (WINDOW * screen) {
 // Create and populate WinMeta struct with sane default values.
   struct WinMeta win_meta;
   win_meta.screen = screen;
-  win_meta.height = screen->_maxy + 1;
-  win_meta.width = screen->_maxx + 1;
+  win_meta.height = getmaxy(screen);
+  win_meta.width = getmaxx(screen);
   win_meta.chain_start = 0;
   win_meta.chain_end = 0;
   win_meta.pad_offset = 0;
