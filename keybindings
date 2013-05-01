@@ -13,10 +13,10 @@
 60 cycle backwards
 121 shift forwards
 89 shift backwards
-42 grow hor
-95 shrink hor
-43 grow ver
-45 shrink ver
+42 grow horizontally
+95 shrink horizontally
+43 grow vertically
+45 shrink vertically
 119 map up
 120 map down
 97 map left

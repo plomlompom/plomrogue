@@ -379,13 +379,13 @@ int main () {
       shift_window(&win_meta, 'f');
     else if (key == get_action_key(world.keybindings, "shift backwards") && win_meta.active != 0)
       shift_window(&win_meta, 'b');
-    else if (key == get_action_key(world.keybindings, "grow hor") && win_meta.active != 0)
+    else if (key == get_action_key(world.keybindings, "grow horizontally") && win_meta.active != 0)
       resize_window(&win_meta, '*');
-    else if (key == get_action_key(world.keybindings, "shrink hor") && win_meta.active != 0)
+    else if (key == get_action_key(world.keybindings, "shrink horizontally") && win_meta.active != 0)
       resize_window(&win_meta, '_');
-    else if (key == get_action_key(world.keybindings, "grow ver") && win_meta.active != 0)
+    else if (key == get_action_key(world.keybindings, "grow vertically") && win_meta.active != 0)
       resize_window(&win_meta, '+');
-    else if (key == get_action_key(world.keybindings, "shrink ver") && win_meta.active != 0)
+    else if (key == get_action_key(world.keybindings, "shrink vertically") && win_meta.active != 0)
       resize_window(&win_meta, '-');
     else if (key == get_action_key(world.keybindings, "save keys"))
       save_keybindings(&world);
