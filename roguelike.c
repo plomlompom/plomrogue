@@ -262,7 +262,7 @@ void init_keybindings(struct World * world) {
   c = getc(file);
   while (EOF != c) {
     if ('\n' == c) {
-      keybindings[keycount].name = calloc(commcount, sizeof(char));
+      keybindings[keycount].name = calloc(commcount + 1, sizeof(char));
       memcpy(keybindings[keycount].name, command, commcount);
       keybindings[keycount].key = key;
       keycount++;
