@@ -63,28 +63,28 @@ struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
   start.y = 1;
   if (0 != win->prev) {
     if (win->prev->height == win_meta->height - 1)                      // if prev window fills entire column,
-      start.x = win->prev->curses_win->_begx + win->prev->width + 1;    // place win in new column next to it
+      start.x = getbegx(win->prev->curses_win) + win->prev->width + 1;  // place win in new column next to it
     else {
       struct Win * first_ceiling = win->prev;                         // first_ceiling determines column with;
-      while (first_ceiling->curses_win->_begy != 1)                   // default: place window in new column
+      while (getbegy(first_ceiling->curses_win) != 1)                 // default: place window in new column
         first_ceiling = first_ceiling->prev;                          // next to it
-      start.x = first_ceiling->curses_win->_begx + first_ceiling->width + 1;
+      start.x = getbegx(first_ceiling->curses_win) + first_ceiling->width + 1;
       if (first_ceiling->width >= win->width) {      // only place wins in prev column that fit into its width
         struct Win * win_p = first_ceiling;
         struct Win * lastrow_startwin = win_p;
         while (win_p != win) {
-          if (win_p->curses_win->_begx == first_ceiling->curses_win->_begx)
+          if (getbegx(win_p->curses_win) == getbegx(first_ceiling->curses_win))
             lastrow_startwin = win_p;               // try to fit window at the end of the last row of windows
           win_p = win_p ->next; }                   // inside column; if failure, try opening a new row below
-        int lastcol_start = win->prev->curses_win->_begx + win->prev->width + 1;
-        if (win->width <= first_ceiling->curses_win->_begx + first_ceiling->width - lastcol_start
+        int lastcol_start = getbegx(win->prev->curses_win) + win->prev->width + 1;
+        if (win->width <= getbegx(first_ceiling->curses_win) + first_ceiling->width - lastcol_start
             && win->height <= lastrow_startwin->height) {
           start.x = lastcol_start;
-          start.y = lastrow_startwin->curses_win->_begy; }
-        else if (win->height < win_meta->height - (lastrow_startwin->curses_win->_begy + lastrow_startwin->height)
+          start.y = getbegy(lastrow_startwin->curses_win); }
+        else if (win->height < win_meta->height - (getbegy(lastrow_startwin->curses_win) + lastrow_startwin->height)
                  && win->width <= first_ceiling->width) {
-          start.x = first_ceiling->curses_win->_begx;
-          start.y = lastrow_startwin->curses_win->_begy + lastrow_startwin->height + 1; } } } }
+          start.x = getbegx(first_ceiling->curses_win);
+          start.y = getbegy(lastrow_startwin->curses_win) + lastrow_startwin->height + 1; } } } }
   return start; }
 
 void update_windows (struct WinMeta * win_meta, struct Win * win) {
@@ -95,13 +95,13 @@ void update_windows (struct WinMeta * win_meta, struct Win * win) {
   int lastwincol = 0;
   struct Win * win_p = win_meta->chain_start;
   while (win_p != 0) {
-    if (win_p != win && win_p->curses_win->_begx + win_p->width > lastwincol + 1)
-      lastwincol = win_p->curses_win->_begx + win_p->width - 1;
+    if (win_p != win && getbegx(win_p->curses_win) + win_p->width > lastwincol + 1)
+      lastwincol = getbegx(win_p->curses_win) + win_p->width - 1;
     else if (win_p == win && startyx.x + win->width > lastwincol + 1)
       lastwincol = startyx.x + win->width - 1;
     win_p = win_p->next; }
-  if (win_meta->pad->_maxx != lastwincol + 1) {
-    wresize(win_meta->pad, win_meta->pad->_maxy + 1, lastwincol + 2); }
+  if (getmaxx(win_meta->pad) != lastwincol) {
+    wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2); }
   win->curses_win = subpad(win_meta->pad, win->height, win->width, startyx.y, startyx.x);
   if (0 != win->next)
     update_windows (win_meta, win->next); }
@@ -114,12 +114,12 @@ void destroy_window (struct Win * win) {
 void draw_window_borders (struct Win * win, char active) {
 // Draw borders of window win, including title. Decorate in a special way if window is marked as active.
   int y, x;
-  for (y = win->curses_win->_begy; y <= win->curses_win->_begy + win->height; y++) {
-    mvwaddch(win->curses_win->_parent, y, win->curses_win->_begx - 1, '|');
-    mvwaddch(win->curses_win->_parent, y, win->curses_win->_begx + win->width, '|'); }
-  for (x = win->curses_win->_begx; x <= win->curses_win->_begx + win->width; x++) {
-    mvwaddch(win->curses_win->_parent, win->curses_win->_begy - 1, x, '-');
-    mvwaddch(win->curses_win->_parent, win->curses_win->_begy + win->height, x, '-'); }
+  for (y = getbegy(win->curses_win); y <= getbegy(win->curses_win) + win->height; y++) {
+    mvwaddch(wgetparent(win->curses_win), y, getbegx(win->curses_win) - 1, '|');
+    mvwaddch(wgetparent(win->curses_win), y, getbegx(win->curses_win) + win->width, '|'); }
+  for (x = getbegx(win->curses_win); x <= getbegx(win->curses_win) + win->width; x++) {
+    mvwaddch(wgetparent(win->curses_win), getbegy(win->curses_win) - 1, x, '-');
+    mvwaddch(wgetparent(win->curses_win), getbegy(win->curses_win) + win->height, x, '-'); }
   char min_title_length_visible = 3; // 1 char minimal, plus 2 chars for decoration left/right of title
   if (win->width > min_title_length_visible) {
     int title_length = strlen(win->title);
@@ -132,7 +132,7 @@ void draw_window_borders (struct Win * win, char active) {
     memcpy(title + 1, win->title, length_visible);
     title[0] = title[length_visible + 1] = decoration;
     title[length_visible + 2] = '\0';
-    mvwaddstr(win->curses_win->_parent, win->curses_win->_begy - 1, win->curses_win->_begx + title_offset, title); } }
+    mvwaddstr(wgetparent(win->curses_win), getbegy(win->curses_win) - 1, getbegx(win->curses_win) + title_offset, title); } }
 
 void draw_windows_borders (struct Win * win, struct Win * win_active, struct Corners * corners, int ccount) {
 // Craw draw_window_borders() for all windows in chain from win on. Save current window's border corners.
@@ -140,14 +140,14 @@ void draw_windows_borders (struct Win * win, struct Win * win_active, struct Cor
   if (win == win_active)
     active = 1;
    draw_window_borders(win, active);
-  corners[ccount].tl.y = win->curses_win->_begy - 1;
-  corners[ccount].tl.x = win->curses_win->_begx - 1;
-  corners[ccount].tr.y = win->curses_win->_begy - 1;
-  corners[ccount].tr.x = win->curses_win->_begx + win->width;
-  corners[ccount].bl.y = win->curses_win->_begy + win->height;
-  corners[ccount].bl.x = win->curses_win->_begx - 1;
-  corners[ccount].br.y = win->curses_win->_begy + win->height;
-  corners[ccount].br.x = win->curses_win->_begx + win->width;
+  corners[ccount].tl.y = getbegy(win->curses_win) - 1;
+  corners[ccount].tl.x = getbegx(win->curses_win) - 1;
+  corners[ccount].tr.y = getbegy(win->curses_win) - 1;
+  corners[ccount].tr.x = getbegx(win->curses_win) + win->width;
+  corners[ccount].bl.y = getbegy(win->curses_win) + win->height;
+  corners[ccount].bl.x = getbegx(win->curses_win) - 1;
+  corners[ccount].br.y = getbegy(win->curses_win) + win->height;
+  corners[ccount].br.x = getbegx(win->curses_win) + win->width;
   if (0 != win->next) {
     draw_windows_borders (win->next, win_active, corners, ccount + 1); } }
 
