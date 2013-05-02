@@ -218,7 +218,7 @@ void draw_keys_window (struct Win * win) {
   attr_t attri;
   int y, x;
   char * keyname;
-  for (y = 0; 0 != keybindings[offset + y].name && y < win->height; y++) {
+  for (y = 0; y <= keyswindata->max && y < win->height; y++) {
     attri = 0;
     if (y == keyswindata->select - offset) {
       attri = A_REVERSE;
