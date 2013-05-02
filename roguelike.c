@@ -416,5 +416,13 @@ int main () {
       update_info (&win_info);
       update_log (&win_log, "\nYou wait."); } }
 
+  free(map.cells);
+  for (key = 0; key <= world.keyswindata->max; key++)
+    free(world.keybindings[key].name);
+  free(world.keybindings);
+  free(world.keyswindata);
+  free(win_info.data);
+  free(win_log.data);
+
   endwin();
   return 0; }
