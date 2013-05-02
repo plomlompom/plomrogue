@@ -8,6 +8,8 @@ fashion.
 Install/run
 -----------
 
+Dependencies: ncurses.
+
 git clone https://github.com/plomlompom/plomrogue
 cd plomrogue
 make
