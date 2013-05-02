@@ -41,6 +41,7 @@ t       move player up
 b       move player down
 f       move player left
 h       move player rifght
+.       wait one turn
 
 S       save current keybindings
 UP      navigate selection upwards in keybinding editing window
