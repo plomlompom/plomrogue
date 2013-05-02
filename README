@@ -1,4 +1,48 @@
 plomrogue
 =========
 
-plomlompom tries to build his own RogueLike
+plomlompom tries to build his own roguelike. Currently, it doesn't do
+much, apart from managing some example ncurses windows in a bizarre 
+fashion.
+
+Install/run
+-----------
+
+git clone https://github.com/plomlompom/plomrogue
+cd plomrogue
+make
+./roguelike
+
+Default keybindings
+-------------------
+
+Q       quit
+F1      toggle keybinding editing window
+F2      toggle map window
+F3      toggle info window
+F4      toggle log window
+
+LEFT    scroll windows pad left
+RIGHT   scroll windows pad right
+>       cycle window selection forwards
+<       cycle window selection backwards
+y       shift window forwards
+Y       shift window backwards
+*       grow window horizontally
+_       shrink window horizontally
++       grow window vertically
+-       shrink window vertically
+
+w       scroll map up
+x       scroll map down
+a       scroll map left
+d       scroll map right
+t       move player up
+b       move player down
+f       move player left
+h       move player rifght
+
+S       save current keybindings
+UP      navigate selection upwards in keybinding editing window
+DOWN    navigate selection downwards in keybinding editing window
+RETURN  modify keybinding selected in keybinding editing window
