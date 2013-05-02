@@ -151,14 +151,9 @@ void draw_windows_borders (struct Win * win, struct Win * win_active, struct Cor
   if (0 != win->next) {
     draw_windows_borders (win->next, win_active, corners, ccount + 1); } }
 
-void draw_window(struct Win * win) {
-// Draw window content if visible.
-  if (win->height > 1 && win->width > 1)
-    win->draw(win); }
-
 void draw_windows (struct Win * win) {
 // Draw contents of all windows in window chain from win on.
-  draw_window(win);
+  win->draw(win);
   if (0 != win->next) {
     draw_windows (win->next); } }
 

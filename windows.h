@@ -35,7 +35,6 @@ void suspend_window (struct WinMeta *, struct Win *);
 struct yx place_window (struct WinMeta *, struct Win *);
 void update_windows (struct WinMeta *, struct Win *);
 void destroy_window (struct Win *);
-void draw_window(struct Win *);
 void draw_windows (struct Win *);
 void draw_windows_borders (struct Win *, struct Win *, struct Corners *, int);
 void draw_window_borders (struct Win *, char);
