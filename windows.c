@@ -121,10 +121,11 @@ void draw_window_borders (struct Win * win, char active) {
     mvwaddch(wgetparent(win->curses_win), getbegy(win->curses_win) - 1, x, '-');
     mvwaddch(wgetparent(win->curses_win), getbegy(win->curses_win) + win->height, x, '-'); }
   char min_title_length_visible = 3; // 1 char minimal, plus 2 chars for decoration left/right of title
-  if (win->width > min_title_length_visible) {
-    int title_length = strlen(win->title);
-    int title_offset = (((win->width) - (title_length + 2)) / 2); // + 2 is for decoration
-    int length_visible = strnlen(win->title, win->width - min_title_length_visible);
+  if (win->width >= min_title_length_visible) {
+    int title_offset = 0;
+    if (win->width > strlen(win->title) + 2)
+      title_offset = (win->width - (strlen(win->title) + 2)) / 2; // + 2 is for decoration
+    int length_visible = strnlen(win->title, win->width - 2);
     char title[length_visible + 3];
     char decoration = ' ';
     if (1 == active)
