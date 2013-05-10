@@ -24,6 +24,7 @@ struct KeysWinData {
   int select; };
 
 struct World {
+  int turn;
   struct KeyBinding * keybindings;
   struct KeysWinData * keyswindata; };
 
@@ -104,7 +105,8 @@ void draw_map (struct Win * win) {
 
 void draw_info (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
-  int count = * (int *) win->data;
+  struct World world = * (struct World *) win->data;
+  int count = world.turn;
   char text[100];
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
@@ -135,9 +137,9 @@ struct Map init_map () {
   map.cells[(8 * map.width) + 3] = 'X';
   return map; }
 
-void update_info (struct Win * win) {
+void update_info (struct World * world) {
 // Update info data by incrementing turn value.
-  * (int *) win->data = * (int *) win->data + 1; }
+  world->turn++; }
 
 void update_log (struct Win * win, char * text) {
 // Update log with new text to be appended.
@@ -331,10 +333,10 @@ int main () {
   struct Map map = init_map();
   win_map.data = &map;
 
+  world.turn = 0;
   struct Win win_info = init_window(&win_meta, "Info");
   win_info.draw = draw_info;
-  win_info.data = malloc(sizeof(int));
-  * (int *) win_info.data = 0;
+  win_info.data = &world;
 
   struct Win win_log = init_window(&win_meta, "Log");
   win_log.draw = draw_text_from_bottom;
@@ -397,23 +399,23 @@ int main () {
     else if (key == get_action_key(world.keybindings, "map left") && map.offset_x > 0)
       map.offset_x--;
     else if (key == get_action_key(world.keybindings, "player down") && map.player_y < map.height - 1) {
-      update_info (&win_info);
+      update_info (&world);
       update_log (&win_log, "\nYou move south.");
       map.player_y++; }
     else if (key == get_action_key(world.keybindings, "player up") && map.player_y > 0) {
-      update_info (&win_info);
+      update_info (&world);
       update_log (&win_log, "\nYou move north.");
       map.player_y--; }
     else if (key == get_action_key(world.keybindings, "player right") && map.player_x < map.width - 1) {
-      update_info (&win_info);
+      update_info (&world);
       update_log (&win_log, "\nYou move east.");
       map.player_x++; }
     else if (key == get_action_key(world.keybindings, "player left") && map.player_x > 0) {
-      update_info (&win_info);
+      update_info (&world);
       update_log (&win_log, "\nYou move west.");
       map.player_x--; }
     else if (key == get_action_key(world.keybindings, "wait") ) {
-      update_info (&win_info);
+      update_info (&world);
       update_log (&win_log, "\nYou wait."); } }
 
   free(map.cells);
@@ -421,7 +423,6 @@ int main () {
     free(world.keybindings[key].name);
   free(world.keybindings);
   free(world.keyswindata);
-  free(win_info.data);
   free(win_log.data);
 
   endwin();
