@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include "windows.h"
 
 struct Map {
@@ -255,43 +254,22 @@ void init_keybindings(struct World * world) {
     c = getc(file);
     if ('\n' == c) {
       if (c_count > linemax)
-        linemax = c_count;
+        linemax = c_count + 1;
       c_count = 0;
       lines++; } }
   struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
   fseek(file, 0, SEEK_SET);
   char * command = malloc(linemax);
   int commcount = 0;
-  char * digits = malloc(3);
-  int digicount = 0;
-  int key, digimax;
-  int keycount = 0;
-  c = getc(file);
-  while (EOF != c) {
-    if ('\n' == c) {
-      keybindings[keycount].name = calloc(commcount + 1, sizeof(char));
-      memcpy(keybindings[keycount].name, command, commcount);
-      keybindings[keycount].key = key;
-      keycount++;
-      digicount = 0;
-      commcount = 0; }
-    else if (-1 != digicount) {
-      if (' ' == c) {
-        key = 0;
-        digimax = digicount - 1;
-        while (digicount > 0) {
-          digicount--;
-          key = key + ((digits[digicount] - 48) * pow(10, digimax - digicount)); }
-        digicount = -1; }
-      else {
-        digits[digicount] = c;
-        digicount++; } }
-    else {
-      command[commcount] = c;
-      commcount++; }
-    c = getc(file); }
+  char * cmdptr;
+  while (fgets(command, linemax, file)) {
+    keybindings[commcount].key = atoi(command);
+    cmdptr = strchr(command, ' ') + 1;
+    keybindings[commcount].name = malloc(strlen(cmdptr));
+    memcpy(keybindings[commcount].name, cmdptr, strlen(cmdptr) - 1);
+    keybindings[commcount].name[strlen(cmdptr) - 1] = '\0';
+    commcount++; }
   free(command);
-  free(digits);
   fclose(file);
   struct KeysWinData * keyswindata = malloc(sizeof(struct KeysWinData));
   keyswindata->max = lines - 1;
