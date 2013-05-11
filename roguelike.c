@@ -146,7 +146,6 @@ void update_info (struct World * world) {
 // Update info data by incrementing turn value.
   world->turn++; }
 
-//void update_log (struct Win * win, char * text) {
 void update_log (struct World * world, char * text) {
 // Update log with new text to be appended.
   char * new_text;
