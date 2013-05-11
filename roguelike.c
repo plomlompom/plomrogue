@@ -24,6 +24,7 @@ struct KeysWinData {
   int select; };
 
 struct World {
+  char * log;
   int turn;
   struct KeyBinding * keybindings;
   struct KeysWinData * keyswindata; };
@@ -52,9 +53,8 @@ void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
             toggle = 1;
             fin = 1; } } } } }
 
-void draw_text_from_bottom (struct Win * win) {
-// Draw text in win->data from end/bottom to the top.
-  char * text = (char *) win->data;
+void draw_text_from_bottom (struct Win * win, char * text) {
+// Draw text from end/bottom to the top.
   char toggle = 0;
   int x, y, offset;
   int z = -1;
@@ -85,6 +85,11 @@ void draw_text_from_bottom (struct Win * win) {
           break; } }
     text = text + (sizeof(char) * (z + 1)); }
   draw_with_linebreaks(win, text, start_y); }
+
+void draw_log (struct Win * win) {
+// Draw log text from world struct in win->data from bottom to top.
+  struct World world = * (struct World *) win->data;
+  draw_text_from_bottom(win, world.log); }
 
 void draw_map (struct Win * win) {
 // Draw map determined by win->data Map struct into window. Respect offset.
@@ -141,17 +146,18 @@ void update_info (struct World * world) {
 // Update info data by incrementing turn value.
   world->turn++; }
 
-void update_log (struct Win * win, char * text) {
+//void update_log (struct Win * win, char * text) {
+void update_log (struct World * world, char * text) {
 // Update log with new text to be appended.
   char * new_text;
-  int len_old = strlen(win->data);
+  int len_old = strlen(world->log);
   int len_new = strlen(text);
   int len_whole = len_old + len_new + 1;
   new_text = calloc(len_whole, sizeof(char));
-  memcpy(new_text, win->data, len_old);
+  memcpy(new_text, world->log, len_old);
   memcpy(new_text + len_old, text, len_new);
-  free(win->data);
-  win->data = new_text; }
+  free(world->log);
+  world->log = new_text; }
 
 int get_action_key (struct KeyBinding * keybindings, char * name) {
 // Return key matching name in keybindings.
@@ -338,10 +344,11 @@ int main () {
   win_info.draw = draw_info;
   win_info.data = &world;
 
+  world.log = calloc(1, sizeof(char));
   struct Win win_log = init_window(&win_meta, "Log");
-  win_log.draw = draw_text_from_bottom;
-  win_log.data = calloc(1, sizeof(char));
-  update_log (&win_log, "Start!");
+  win_log.draw = draw_log;
+  win_log.data = &world;
+  update_log (&world, "Start!");
 
   int key;
   while (1) {
@@ -400,30 +407,30 @@ int main () {
       map.offset_x--;
     else if (key == get_action_key(world.keybindings, "player down") && map.player_y < map.height - 1) {
       update_info (&world);
-      update_log (&win_log, "\nYou move south.");
+      update_log (&world, "\nYou move south.");
       map.player_y++; }
     else if (key == get_action_key(world.keybindings, "player up") && map.player_y > 0) {
       update_info (&world);
-      update_log (&win_log, "\nYou move north.");
+      update_log (&world, "\nYou move north.");
       map.player_y--; }
     else if (key == get_action_key(world.keybindings, "player right") && map.player_x < map.width - 1) {
       update_info (&world);
-      update_log (&win_log, "\nYou move east.");
+      update_log (&world, "\nYou move east.");
       map.player_x++; }
     else if (key == get_action_key(world.keybindings, "player left") && map.player_x > 0) {
       update_info (&world);
-      update_log (&win_log, "\nYou move west.");
+      update_log (&world, "\nYou move west.");
       map.player_x--; }
     else if (key == get_action_key(world.keybindings, "wait") ) {
       update_info (&world);
-      update_log (&win_log, "\nYou wait."); } }
+      update_log (&world, "\nYou wait."); } }
 
   free(map.cells);
   for (key = 0; key <= world.keyswindata->max; key++)
     free(world.keybindings[key].name);
   free(world.keybindings);
   free(world.keyswindata);
-  free(win_log.data);
+  free(world.log);
 
   endwin();
   return 0; }
