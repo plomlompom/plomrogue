@@ -275,7 +275,7 @@ void init_keybindings(struct World * world) {
       keycount++;
       digicount = 0;
       commcount = 0; }
-    else if (-1 != digicount)
+    else if (-1 != digicount) {
       if (' ' == c) {
         key = 0;
         digimax = digicount - 1;
@@ -285,7 +285,7 @@ void init_keybindings(struct World * world) {
         digicount = -1; }
       else {
         digits[digicount] = c;
-        digicount++; }
+        digicount++; } }
     else {
       command[commcount] = c;
       commcount++; }
