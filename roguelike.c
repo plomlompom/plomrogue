@@ -288,7 +288,7 @@ void save_keybindings(struct World * world) {
   for (i = 0; i <= keyswindata->max; i++)
     if (strlen(keybindings[i].name) > linemax)
       linemax = strlen(keybindings[i].name);
-  linemax = linemax + 6; // + 6 = + 3 digits + whitespace + newline + null byte
+  linemax = linemax + 6;                                // + 6 = + 3 digits + whitespace + newline + null byte
   char * line = malloc(linemax);
   for (i = 0; i <= keyswindata->max; i++) {
     snprintf(line, linemax, "%d %s\n", keybindings[i].key, keybindings[i].name);
