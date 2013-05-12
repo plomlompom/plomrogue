@@ -4,6 +4,23 @@
 #include <stdlib.h>
 #include "windows.h"
 
+struct World {
+  struct KeyBinding * keybindings;
+  struct KeysWinData * keyswindata;
+  int turn;
+  char * log;
+  struct Map * map;
+  struct Player * player; };
+
+struct KeyBinding {
+  char * name;
+  int key; };
+
+struct KeysWinData {
+  int max;
+  char edit;
+  int select; };
+
 struct Map {
   int width;
   int height;
@@ -15,22 +32,20 @@ struct Player {
   int y;
   int x; };
 
-struct KeyBinding {
-  char * name;
-  int key; };
-
-struct KeysWinData {
-  int max;
-  char edit;
-  int select; };
-
-struct World {
-  char * log;
-  int turn;
-  struct Map * map;
-  struct Player * player;
-  struct KeyBinding * keybindings;
-  struct KeysWinData * keyswindata; };
+void draw_with_linebreaks (struct Win *, char *, int);
+void draw_text_from_bottom (struct Win *, char *);
+void draw_log (struct Win *);
+void draw_map (struct Win *);
+void draw_info (struct Win *);
+void draw_keys_window (struct Win *);
+void toggle_window (struct WinMeta *, struct Win *);
+void init_keybindings(struct World *);
+struct Map init_map ();
+void update_info (struct World *);
+void update_log (struct World *, char *);
+void save_keybindings(struct World *);
+int get_action_key (struct KeyBinding *, char *);
+char * get_keyname(int);
 
 void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
 // Write text into window content space. Start on row start_y. Fill unused rows with whitespace.
@@ -121,12 +136,83 @@ void draw_info (struct Win * win) {
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
 
+void draw_keys_window (struct Win * win) {
+// Draw keybinding window.
+  struct World * world = (struct World *) win->data;
+  struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
+  struct KeyBinding * keybindings = world->keybindings;
+  int offset = 0;
+  if (keyswindata->max >= win->height) {
+    if (keyswindata->select > win->height / 2) {
+      if (keyswindata->select < (keyswindata->max - (win->height / 2)))
+        offset = keyswindata->select - (win->height / 2);
+      else
+        offset = keyswindata->max - win->height + 1; } }
+  int keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
+  char * keydesc = malloc(keydescwidth);
+  attr_t attri;
+  int y, x;
+  char * keyname;
+  for (y = 0; y <= keyswindata->max && y < win->height; y++) {
+    attri = 0;
+    if (y == keyswindata->select - offset) {
+      attri = A_REVERSE;
+      if (1 == keyswindata->edit)
+        attri = attri | A_BLINK; }
+    keyname = get_keyname(keybindings[y + offset].key);
+    snprintf(keydesc, keydescwidth, "%-9s", keyname);
+    free(keyname);
+    for (x = 0; x < win->width; x++)
+      if (x < strlen(keydesc))
+        mvwaddch(win->curses, y, x, keydesc[x] | attri);
+      else if (strlen(keydesc) < x && x < strlen(keybindings[y + offset].name) + strlen(keydesc) + 1)
+        mvwaddch(win->curses, y, x, keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
+      else
+        mvwaddch(win->curses, y, x, ' ' | attri); }
+  free(keydesc); }
+
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
   if (0 != win->curses)
     suspend_window(win_meta, win);
   else
     append_window(win_meta, win); }
+
+void init_keybindings(struct World * world) {
+// Initialize keybindings from file "keybindings".
+  FILE * file = fopen("keybindings", "r");
+  int lines = 0;
+  int c = 0;
+  int linemax = 0;
+  int c_count = 0;
+  while (EOF != c) {
+    c_count++;
+    c = getc(file);
+    if ('\n' == c) {
+      if (c_count > linemax)
+        linemax = c_count + 1;
+      c_count = 0;
+      lines++; } }
+  struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
+  fseek(file, 0, SEEK_SET);
+  char * command = malloc(linemax);
+  int commcount = 0;
+  char * cmdptr;
+  while (fgets(command, linemax, file)) {
+    keybindings[commcount].key = atoi(command);
+    cmdptr = strchr(command, ' ') + 1;
+    keybindings[commcount].name = malloc(strlen(cmdptr));
+    memcpy(keybindings[commcount].name, cmdptr, strlen(cmdptr) - 1);
+    keybindings[commcount].name[strlen(cmdptr) - 1] = '\0';
+    commcount++; }
+  free(command);
+  fclose(file);
+  struct KeysWinData * keyswindata = malloc(sizeof(struct KeysWinData));
+  keyswindata->max = lines - 1;
+  keyswindata->select = 0;
+  keyswindata->edit = 0;
+  world->keybindings = keybindings;
+  world->keyswindata = keyswindata; }
 
 struct Map init_map () {
 // Initialize map with some experimental start values.
@@ -160,6 +246,24 @@ void update_log (struct World * world, char * text) {
   memcpy(new_text + len_old, text, len_new);
   free(world->log);
   world->log = new_text; }
+
+void save_keybindings(struct World * world) {
+// Write keybindings to keybindings file.
+  struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
+  struct KeyBinding * keybindings = world->keybindings;
+  FILE * file = fopen("keybindings", "w");
+  int linemax = 0;
+  int i;
+  for (i = 0; i <= keyswindata->max; i++)
+    if (strlen(keybindings[i].name) > linemax)
+      linemax = strlen(keybindings[i].name);
+  linemax = linemax + 6;                                // + 6 = + 3 digits + whitespace + newline + null byte
+  char * line = malloc(linemax);
+  for (i = 0; i <= keyswindata->max; i++) {
+    snprintf(line, linemax, "%d %s\n", keybindings[i].key, keybindings[i].name);
+    fwrite(line, sizeof(char), strlen(line), file); }
+  free(line);
+  fclose(file); }
 
 int get_action_key (struct KeyBinding * keybindings, char * name) {
 // Return key matching name in keybindings.
@@ -211,98 +315,12 @@ char * get_keyname(int keycode) {
     sprintf(keyname, "(unknown)");
   return keyname;  }
 
-void draw_keys_window (struct Win * win) {
-// Draw keybinding window.
-  struct World * world = (struct World *) win->data;
-  struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
-  struct KeyBinding * keybindings = world->keybindings;
-  int offset = 0;
-  if (keyswindata->max >= win->height) {
-    if (keyswindata->select > win->height / 2) {
-      if (keyswindata->select < (keyswindata->max - (win->height / 2)))
-        offset = keyswindata->select - (win->height / 2);
-      else
-        offset = keyswindata->max - win->height + 1; } }
-  int keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
-  char * keydesc = malloc(keydescwidth);
-  attr_t attri;
-  int y, x;
-  char * keyname;
-  for (y = 0; y <= keyswindata->max && y < win->height; y++) {
-    attri = 0;
-    if (y == keyswindata->select - offset) {
-      attri = A_REVERSE;
-      if (1 == keyswindata->edit)
-        attri = attri | A_BLINK; }
-    keyname = get_keyname(keybindings[y + offset].key);
-    snprintf(keydesc, keydescwidth, "%-9s", keyname);
-    free(keyname);
-    for (x = 0; x < win->width; x++)
-      if (x < strlen(keydesc))
-        mvwaddch(win->curses, y, x, keydesc[x] | attri);
-      else if (strlen(keydesc) < x && x < strlen(keybindings[y + offset].name) + strlen(keydesc) + 1)
-        mvwaddch(win->curses, y, x, keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
-      else
-        mvwaddch(win->curses, y, x, ' ' | attri); }
-  free(keydesc); }
-
-void init_keybindings(struct World * world) {
-// Initialize keybindings from file "keybindings".
-  FILE * file = fopen("keybindings", "r");
-  int lines = 0;
-  int c = 0;
-  int linemax = 0;
-  int c_count = 0;
-  while (EOF != c) {
-    c_count++;
-    c = getc(file);
-    if ('\n' == c) {
-      if (c_count > linemax)
-        linemax = c_count + 1;
-      c_count = 0;
-      lines++; } }
-  struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
-  fseek(file, 0, SEEK_SET);
-  char * command = malloc(linemax);
-  int commcount = 0;
-  char * cmdptr;
-  while (fgets(command, linemax, file)) {
-    keybindings[commcount].key = atoi(command);
-    cmdptr = strchr(command, ' ') + 1;
-    keybindings[commcount].name = malloc(strlen(cmdptr));
-    memcpy(keybindings[commcount].name, cmdptr, strlen(cmdptr) - 1);
-    keybindings[commcount].name[strlen(cmdptr) - 1] = '\0';
-    commcount++; }
-  free(command);
-  fclose(file);
-  struct KeysWinData * keyswindata = malloc(sizeof(struct KeysWinData));
-  keyswindata->max = lines - 1;
-  keyswindata->select = 0;
-  keyswindata->edit = 0;
-  world->keybindings = keybindings;
-  world->keyswindata = keyswindata; }
-
-void save_keybindings(struct World * world) {
-// Write keybindings to keybindings file.
-  struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
-  struct KeyBinding * keybindings = world->keybindings;
-  FILE * file = fopen("keybindings", "w");
-  int linemax = 0;
-  int i;
-  for (i = 0; i <= keyswindata->max; i++)
-    if (strlen(keybindings[i].name) > linemax)
-      linemax = strlen(keybindings[i].name);
-  linemax = linemax + 6;                                // + 6 = + 3 digits + whitespace + newline + null byte
-  char * line = malloc(linemax);
-  for (i = 0; i <= keyswindata->max; i++) {
-    snprintf(line, linemax, "%d %s\n", keybindings[i].key, keybindings[i].name);
-    fwrite(line, sizeof(char), strlen(line), file); }
-  free(line);
-  fclose(file); }
-
 int main () {
   struct World world;
   init_keybindings(&world);
+  world.turn = 0;
+  world.log = calloc(1, sizeof(char));
+  update_log (&world, "Start!");
   struct Map map = init_map();
   world.map = &map;
   struct Player player;
@@ -325,16 +343,13 @@ int main () {
   win_map.draw = draw_map;
   win_map.data = &world;
 
-  world.turn = 0;
   struct Win win_info = init_window(&win_meta, "Info");
   win_info.draw = draw_info;
   win_info.data = &world;
 
-  world.log = calloc(1, sizeof(char));
   struct Win win_log = init_window(&win_meta, "Log");
   win_log.draw = draw_log;
   win_log.data = &world;
-  update_log (&world, "Start!");
 
   int key;
   while (1) {
