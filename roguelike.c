@@ -106,8 +106,8 @@ void draw_text_from_bottom (struct Win * win, char * text) {
 
 void draw_log (struct Win * win) {
 // Draw log text from world struct in win->data from bottom to top.
-  struct World world = * (struct World *) win->data;
-  draw_text_from_bottom(win, world.log); }
+  struct World * world = (struct World *) win->data;
+  draw_text_from_bottom(win, world->log); }
 
 void draw_map (struct Win * win) {
 // Draw map determined by win->data Map struct into window. Respect offset.
@@ -130,8 +130,8 @@ void draw_map (struct Win * win) {
 
 void draw_info (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
-  struct World world = * (struct World *) win->data;
-  int count = world.turn;
+  struct World * world = (struct World *) win->data;
+  int count = world->turn;
   char text[100];
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
