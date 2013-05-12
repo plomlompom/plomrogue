@@ -62,29 +62,31 @@ struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
   start.x = 0;                                     // if window is first in chain, place it on top-left corner
   start.y = 1;
   if (0 != win->prev) {
-    if (win->prev->height == win_meta->height - 1)                      // if prev window fills entire column,
-      start.x = getbegx(win->prev->curses_win) + win->prev->width + 1;  // place win in new column next to it
+    struct Win * win_top = win->prev;
+    while (getbegy(win_top->curses_win) != 1)
+      win_top = win_top->prev;                                   // else, default to placing window in new top
+    start.x = getbegx(win_top->curses_win) + win_top->width + 1; // column to the right of the last one
+    int winprev_maxy = getbegy(win->prev->curses_win) + getmaxy(win->prev->curses_win);
+    if (win->width <= win->prev->width && win->height < win_meta->height - winprev_maxy) {
+      start.x = getbegx(win->prev->curses_win);            // place window below previous window if it fits
+      start.y = winprev_maxy + 1; }                        // vertically and is not wider than its predecessor
     else {
-      struct Win * first_ceiling = win->prev;                         // first_ceiling determines column with;
-      while (getbegy(first_ceiling->curses_win) != 1)                 // default: place window in new column
-        first_ceiling = first_ceiling->prev;                          // next to it
-      start.x = getbegx(first_ceiling->curses_win) + first_ceiling->width + 1;
-      if (first_ceiling->width >= win->width) {      // only place wins in prev column that fit into its width
-        struct Win * win_p = first_ceiling;
-        struct Win * lastrow_startwin = win_p;
-        while (win_p != win) {
-          if (getbegx(win_p->curses_win) == getbegx(first_ceiling->curses_win))
-            lastrow_startwin = win_p;               // try to fit window at the end of the last row of windows
-          win_p = win_p ->next; }                   // inside column; if failure, try opening a new row below
-        int lastcol_start = getbegx(win->prev->curses_win) + win->prev->width + 1;
-        if (win->width <= getbegx(first_ceiling->curses_win) + first_ceiling->width - lastcol_start
-            && win->height <= lastrow_startwin->height) {
-          start.x = lastcol_start;
-          start.y = getbegy(lastrow_startwin->curses_win); }
-        else if (win->height < win_meta->height - (getbegy(lastrow_startwin->curses_win) + lastrow_startwin->height)
-                 && win->width <= first_ceiling->width) {
-          start.x = getbegx(first_ceiling->curses_win);
-          start.y = getbegy(lastrow_startwin->curses_win) + lastrow_startwin->height + 1; } } } }
+      struct Win * win_up = win->prev;
+      struct Win * win_upup = win_up;
+      int widthdiff;
+      while (win_up != win_top) {
+        win_upup = win_up->prev;
+        while (1) {
+          if (getbegy(win_up->curses_win) != getbegy(win_upup->curses_win))
+            break;
+          win_upup = win_upup->prev; }
+        winprev_maxy = getbegy(win_upup->curses_win) + getmaxy(win_upup->curses_win);
+        widthdiff = (getbegx(win_upup->curses_win) + win_upup->width) - (getbegx(win_up->curses_win) + win_up->width);
+        if (win->height < win_meta->height - winprev_maxy && win->width < widthdiff) {
+          start.x = getbegx(win_up->curses_win) + win_up->width + 1;  // else try to open new sub column under
+          start.y = winprev_maxy + 1;                                 // last window below which enough space
+          break; }                                                    // for current window remains
+        win_up = win_upup; } } }
   return start; }
 
 void update_windows (struct WinMeta * win_meta, struct Win * win) {
