@@ -44,7 +44,7 @@ void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
            toggle = 1;
            continue; }
          else
-           mvwaddch(win->curses_win, y, x, text[z]);
+           mvwaddch(win->curses, y, x, text[z]);
          if ('\n' == text[z+1]) {
            z++;
            toggle = 1; }
@@ -57,12 +57,12 @@ void draw_text_from_bottom (struct Win * win, char * text) {
   char toggle = 0;
   int x, y, offset;
   int z = -1;
-  for (y = 0; 0 == toggle; y++)         // Determine number of lines text would have in a window of
-    for (x = 0; x < win->width; x++) {  // available width, but infinite height.
+  for (y = 0; 0 == toggle; y++)                           // Determine number of lines text would have in
+    for (x = 0; x < win->width; x++) {                    // a window of available width, but infinite height.
       z++;
-      if ('\n' == text[z])              // Treat \n and \0 as control characters for incrementing y and
-        break;                          // stopping the loop. Make sure they don't count as cell space
-      if ('\n' == text[z+1]) {          // themselves.
+      if ('\n' == text[z])            // Treat \n and \0 as control characters for incrementing y and stopping
+        break;                        // the loop. Make sure they don't count as cell space themselves.
+      if ('\n' == text[z+1]) {
         z++;
         break; }
       else if (0 == text[z+1]) {
@@ -102,9 +102,9 @@ void draw_map (struct Win * win) {
     for (x = 0; x < win->width; x++) {
       if (y < height_map_av && x < width_map_av) {
         if (z == (map.width * map.player_y) + map.player_x)
-          mvwaddch(win->curses_win, y, x, '@');
+          mvwaddch(win->curses, y, x, '@');
         else
-          mvwaddch(win->curses_win, y, x, cells[z]);
+          mvwaddch(win->curses, y, x, cells[z]);
         z++; } } } }
 
 void draw_info (struct Win * win) {
@@ -117,7 +117,7 @@ void draw_info (struct Win * win) {
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
-  if (0 != win->curses_win)
+  if (0 != win->curses)
     suspend_window(win_meta, win);
   else
     append_window(win_meta, win); }
@@ -235,11 +235,11 @@ void draw_keys_window (struct Win * win) {
     free(keyname);
     for (x = 0; x < win->width; x++)
       if (x < strlen(keydesc))
-        mvwaddch(win->curses_win, y, x, keydesc[x] | attri);
+        mvwaddch(win->curses, y, x, keydesc[x] | attri);
       else if (strlen(keydesc) < x && x < strlen(keybindings[y + offset].name) + strlen(keydesc) + 1)
-        mvwaddch(win->curses_win, y, x, keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
+        mvwaddch(win->curses, y, x, keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
       else
-        mvwaddch(win->curses_win, y, x, ' ' | attri); }
+        mvwaddch(win->curses, y, x, ' ' | attri); }
   free(keydesc); }
 
 void init_keybindings(struct World * world) {

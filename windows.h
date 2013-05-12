@@ -13,7 +13,7 @@ struct Win {
   struct Win * next;
   int width;
   int height;
-  WINDOW * curses_win;
+  WINDOW * curses;
   char * title;
   void (* draw) (struct Win *);
   void * data; };
