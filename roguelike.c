@@ -9,9 +9,11 @@ struct Map {
   int height;
   int offset_x;
   int offset_y;
-  int player_x;
-  int player_y;
   char * cells; };
+
+struct Player {
+  int y;
+  int x; };
 
 struct KeyBinding {
   char * name;
@@ -25,6 +27,8 @@ struct KeysWinData {
 struct World {
   char * log;
   int turn;
+  struct Map * map;
+  struct Player * player;
   struct KeyBinding * keybindings;
   struct KeysWinData * keyswindata; };
 
@@ -92,16 +96,18 @@ void draw_log (struct Win * win) {
 
 void draw_map (struct Win * win) {
 // Draw map determined by win->data Map struct into window. Respect offset.
-  struct Map map = * (struct Map *) win->data;
-  char * cells = map.cells;
-  int width_map_av = map.width - map.offset_x;
-  int height_map_av = map.height - map.offset_y;
+  struct World * world = (struct World *) win->data;
+  struct Map * map = world->map;
+  struct Player * player = world->player;
+  char * cells = map->cells;
+  int width_map_av = map->width - map->offset_x;
+  int height_map_av = map->height - map->offset_y;
   int x, y, z;
   for (y = 0; y < win->height; y++) {
-    z = map.offset_x + (map.offset_y + y) * (map.width);
+    z = map->offset_x + (map->offset_y + y) * (map->width);
     for (x = 0; x < win->width; x++) {
       if (y < height_map_av && x < width_map_av) {
-        if (z == (map.width * map.player_y) + map.player_x)
+        if (z == (map->width * player->y) + player->x)
           mvwaddch(win->curses, y, x, '@');
         else
           mvwaddch(win->curses, y, x, cells[z]);
@@ -129,8 +135,6 @@ struct Map init_map () {
   map.height = 128;
   map.offset_x = 0;
   map.offset_y = 0;
-  map.player_x = 2;
-  map.player_y = 2;
   map.cells = malloc(map.width * map.height);
   int x, y;
   for (y = 0; y < map.height; y++)
@@ -299,6 +303,12 @@ void save_keybindings(struct World * world) {
 int main () {
   struct World world;
   init_keybindings(&world);
+  struct Map map = init_map();
+  world.map = &map;
+  struct Player player;
+  player.y = 2;
+  player.x = 2;
+  world.player = &player;
 
   WINDOW * screen = initscr();
   noecho();
@@ -313,8 +323,7 @@ int main () {
 
   struct Win win_map = init_window(&win_meta, "Map");
   win_map.draw = draw_map;
-  struct Map map = init_map();
-  win_map.data = &map;
+  win_map.data = &world;
 
   world.turn = 0;
   struct Win win_info = init_window(&win_meta, "Info");
@@ -382,22 +391,22 @@ int main () {
       map.offset_x++;
     else if (key == get_action_key(world.keybindings, "map left") && map.offset_x > 0)
       map.offset_x--;
-    else if (key == get_action_key(world.keybindings, "player down") && map.player_y < map.height - 1) {
+    else if (key == get_action_key(world.keybindings, "player down") && player.y < map.height - 1) {
       update_info (&world);
       update_log (&world, "\nYou move south.");
-      map.player_y++; }
-    else if (key == get_action_key(world.keybindings, "player up") && map.player_y > 0) {
+      player.y++; }
+    else if (key == get_action_key(world.keybindings, "player up") && player.y > 0) {
       update_info (&world);
       update_log (&world, "\nYou move north.");
-      map.player_y--; }
-    else if (key == get_action_key(world.keybindings, "player right") && map.player_x < map.width - 1) {
+      player.y--; }
+    else if (key == get_action_key(world.keybindings, "player right") && player.x < map.width - 1) {
       update_info (&world);
       update_log (&world, "\nYou move east.");
-      map.player_x++; }
-    else if (key == get_action_key(world.keybindings, "player left") && map.player_x > 0) {
+      player.x++; }
+    else if (key == get_action_key(world.keybindings, "player left") && player.x > 0) {
       update_info (&world);
       update_log (&world, "\nYou move west.");
-      map.player_x--; }
+      player.x--; }
     else if (key == get_action_key(world.keybindings, "wait") ) {
       update_info (&world);
       update_log (&world, "\nYou wait."); } }
