@@ -327,10 +327,9 @@ char is_passable (struct World * world, int y, int x) {
 
 void move_player (struct World * world, char d) {
 // Move player in direction d, increment turn counter and update log.
-  update_info (world);
+  static char prev = 0;
   char success = 0;
   char * dir;
-  char * msg = calloc(25, sizeof(char));
   if ('s' == d) {
     dir = "south";
     if (is_passable(world, world->player->x, world->player->y + 1)) {
@@ -351,12 +350,18 @@ void move_player (struct World * world, char d) {
     if (is_passable(world, world->player->x + 1, world->player->y)) {
       world->player->x++;
       success = 1; } }
-  char * msg_content = "You fail to move";
-  if (success)
-    msg_content = "You move";
-  sprintf(msg, "\n%s %s.", msg_content, dir);
-  update_log (world, msg);
-  free(msg); }
+  if (prev == d)
+    update_log (world, ".");
+  else {
+  char * msg = calloc(25, sizeof(char));
+    char * msg_content = "You fail to move";
+    if (success)
+      msg_content = "You move";
+    sprintf(msg, "\n%s %s.", msg_content, dir);
+    update_log (world, msg);
+    free(msg); }
+  prev = success * d;
+  update_info (world); }
 
 int main () {
   struct World world;
