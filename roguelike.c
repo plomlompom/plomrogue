@@ -46,6 +46,7 @@ void update_log (struct World *, char *);
 void save_keybindings(struct World *);
 int get_action_key (struct KeyBinding *, char *);
 char * get_keyname(int);
+void move_player (struct World *, char);
 
 void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
 // Write text into window content space. Start on row start_y. Fill unused rows with whitespace.
@@ -315,6 +316,39 @@ char * get_keyname(int keycode) {
     sprintf(keyname, "(unknown)");
   return keyname;  }
 
+void move_player (struct World * world, char d) {
+// Move player in direction d, increment turn counter and update log.
+  update_info (world);
+  char success = 0;
+  char * dir;
+  char * msg = calloc(25, sizeof(char));
+  if ('s' == d) {
+    dir = "south";
+    if (world->player->y < world->map->height - 1) {
+      world->player->y++;
+      success = 1; } }
+  else if ('n' == d) {
+    dir = "north";
+    if (world->player->y > 0) {
+      world->player->y--;
+      success = 1; } }
+  else if ('w' == d) {
+    dir = "west";
+    if (world->player->x > 0) {
+      world->player->x--;
+      success = 1; } }
+  else if ('e' == d) {
+    dir = "east";
+    if (world->player->x < world->map->width - 1) {
+      world->player->x++;
+      success = 1; } }
+  char * msg_content = "You fail to move";
+  if (success)
+    msg_content = "You move";
+  sprintf(msg, "\n%s %s.", msg_content, dir);
+  update_log (world, msg);
+  free(msg); }
+
 int main () {
   struct World world;
   init_keybindings(&world);
@@ -403,22 +437,14 @@ int main () {
       map.offset_x++;
     else if (key == get_action_key(world.keybindings, "map left") && map.offset_x > 0)
       map.offset_x--;
-    else if (key == get_action_key(world.keybindings, "player down") && player.y < map.height - 1) {
-      update_info (&world);
-      update_log (&world, "\nYou move south.");
-      player.y++; }
-    else if (key == get_action_key(world.keybindings, "player up") && player.y > 0) {
-      update_info (&world);
-      update_log (&world, "\nYou move north.");
-      player.y--; }
-    else if (key == get_action_key(world.keybindings, "player right") && player.x < map.width - 1) {
-      update_info (&world);
-      update_log (&world, "\nYou move east.");
-      player.x++; }
-    else if (key == get_action_key(world.keybindings, "player left") && player.x > 0) {
-      update_info (&world);
-      update_log (&world, "\nYou move west.");
-      player.x--; }
+    else if (key == get_action_key(world.keybindings, "player down"))
+      move_player(&world, 's');
+    else if (key == get_action_key(world.keybindings, "player up"))
+      move_player(&world, 'n');
+    else if (key == get_action_key(world.keybindings, "player right"))
+      move_player(&world, 'e');
+    else if (key == get_action_key(world.keybindings, "player left"))
+      move_player(&world, 'w');
     else if (key == get_action_key(world.keybindings, "wait") ) {
       update_info (&world);
       update_log (&world, "\nYou wait."); } }
