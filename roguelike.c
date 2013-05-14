@@ -350,7 +350,7 @@ void move_player (struct World * world, char d) {
     if (is_passable(world, world->player->x + 1, world->player->y)) {
       world->player->x++;
       success = 1; } }
-  if (prev == d)
+  if (success * d == prev)
     update_log (world, ".");
   else {
   char * msg = calloc(25, sizeof(char));
