@@ -46,6 +46,7 @@ void update_log (struct World *, char *);
 void save_keybindings(struct World *);
 int get_action_key (struct KeyBinding *, char *);
 char * get_keyname(int);
+char is_passable (struct World *, int, int);
 void move_player (struct World *, char);
 
 void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
@@ -316,6 +317,14 @@ char * get_keyname(int keycode) {
     sprintf(keyname, "(unknown)");
   return keyname;  }
 
+char is_passable (struct World * world, int y, int x) {
+// Check if coordinate on (or beyond) map is accessible to movement.
+  char passable = 0;
+  if (0 <= x && x < world->map->width && 0 <= y && y < world->map->height)
+    if ('.' == world->map->cells[y * world->map->width + x])
+      passable = 1;
+  return passable; }
+
 void move_player (struct World * world, char d) {
 // Move player in direction d, increment turn counter and update log.
   update_info (world);
@@ -324,22 +333,22 @@ void move_player (struct World * world, char d) {
   char * msg = calloc(25, sizeof(char));
   if ('s' == d) {
     dir = "south";
-    if (world->player->y < world->map->height - 1) {
+    if (is_passable(world, world->player->x, world->player->y + 1)) {
       world->player->y++;
       success = 1; } }
   else if ('n' == d) {
     dir = "north";
-    if (world->player->y > 0) {
+    if (is_passable(world, world->player->x, world->player->y - 1)) {
       world->player->y--;
       success = 1; } }
   else if ('w' == d) {
     dir = "west";
-    if (world->player->x > 0) {
+    if (is_passable(world, world->player->x - 1, world->player->y)) {
       world->player->x--;
       success = 1; } }
   else if ('e' == d) {
     dir = "east";
-    if (world->player->x < world->map->width - 1) {
+    if (is_passable(world, world->player->x + 1, world->player->y)) {
       world->player->x++;
       success = 1; } }
   char * msg_content = "You fail to move";
