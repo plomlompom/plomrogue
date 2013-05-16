@@ -10,6 +10,7 @@ struct World {
   int turn;
   char * log;
   struct Map * map;
+  struct Monster * monster;
   struct Player * player; };
 
 struct KeyBinding {
@@ -29,6 +30,10 @@ struct Map {
   char * cells; };
 
 struct Player {
+  int y;
+  int x; };
+
+struct Monster {
   int y;
   int x; };
 
@@ -116,6 +121,7 @@ void draw_map (struct Win * win) {
   struct World * world = (struct World *) win->data;
   struct Map * map = world->map;
   struct Player * player = world->player;
+  struct Monster * monster = world->monster;
   char * cells = map->cells;
   int width_map_av = map->width - map->offset_x;
   int height_map_av = map->height - map->offset_y;
@@ -126,6 +132,8 @@ void draw_map (struct Win * win) {
       if (y < height_map_av && x < width_map_av) {
         if (z == (map->width * player->y) + player->x)
           mvwaddch(win->curses, y, x, '@');
+        else if (z == (map->width * monster->y) + monster->x)
+          mvwaddch(win->curses, y, x, 'M');
         else
           mvwaddch(win->curses, y, x, cells[z]);
         z++; } } } }
@@ -326,7 +334,8 @@ char is_passable (struct World * world, int x, int y) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
   if (0 <= x && x < world->map->width && 0 <= y && y < world->map->height)
-    if ('.' == world->map->cells[y * world->map->width + x])
+    if (   '.' == world->map->cells[y * world->map->width + x]
+        && (y != world->monster->y || x != world->monster->x))
       passable = 1;
   return passable; }
 
@@ -377,9 +386,13 @@ int main () {
   struct Map map = init_map();
   world.map = &map;
   struct Player player;
-  player.y = 10;
-  player.x = 10;
+  player.y = 16;
+  player.x = 16;
   world.player = &player;
+  struct Monster monster;
+  monster.y = 16;
+  monster.x = 80;
+  world.monster = &monster;
 
   WINDOW * screen = initscr();
   noecho();
