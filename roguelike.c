@@ -46,7 +46,7 @@ void draw_keys_window (struct Win *);
 void toggle_window (struct WinMeta *, struct Win *);
 void init_keybindings(struct World *);
 struct Map init_map ();
-void update_info (struct World *);
+void next_turn (struct World *);
 void update_log (struct World *, char *);
 void save_keybindings(struct World *);
 int get_action_key (struct KeyBinding *, char *);
@@ -246,9 +246,25 @@ struct Map init_map () {
       map.cells[(y * map.width) + x] = terrain; }
   return map; }
 
-void update_info (struct World * world) {
-// Update info data by incrementing turn value.
-  world->turn++; }
+void next_turn (struct World * world) {
+// Increment turn and move enemy.
+  world->turn++;
+  char d = rand() % 5;
+  char ty = world->monster->y;
+  char tx = world->monster->x;
+  if (1 == d)
+    ty++;
+  else if (2 == d)
+    ty--;
+  else if (3 == d)
+    tx++;
+  else if (4 == d)
+    tx--;
+  if (tx == world->player->x && ty == world->player->y)
+    update_log(world, "\nThe monster hits you.");
+  else if (is_passable(world, tx, ty)) {
+    world->monster->y = ty;
+    world->monster->x = tx; } }
 
 void update_log (struct World * world, char * text) {
 // Update log with new text to be appended.
@@ -334,8 +350,7 @@ char is_passable (struct World * world, int x, int y) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
   if (0 <= x && x < world->map->width && 0 <= y && y < world->map->height)
-    if (   '.' == world->map->cells[y * world->map->width + x]
-        && (y != world->monster->y || x != world->monster->x))
+    if ('.' == world->map->cells[y * world->map->width + x])
       passable = 1;
   return passable; }
 
@@ -344,38 +359,41 @@ void move_player (struct World * world, char d) {
   static char prev = 0;
   char success = 0;
   char * dir;
+  char ty = world->player->y;
+  char tx = world->player->x;
   if ('s' == d) {
     dir = "south";
-    if (is_passable(world, world->player->x, world->player->y + 1)) {
-      world->player->y++;
-      success = 1; } }
-  else if ('n' == d) {
+    ty++; }
+  if ('n' == d) {
     dir = "north";
-    if (is_passable(world, world->player->x, world->player->y - 1)) {
-      world->player->y--;
-      success = 1; } }
-  else if ('w' == d) {
+    ty--; }
+  if ('w' == d) {
     dir = "west";
-    if (is_passable(world, world->player->x - 1, world->player->y)) {
-      world->player->x--;
-      success = 1; } }
-  else if ('e' == d) {
+    tx--; }
+  if ('e' == d) {
     dir = "east";
-    if (is_passable(world, world->player->x + 1, world->player->y)) {
-      world->player->x++;
-      success = 1; } }
+    tx++; }
+  if (ty == world->monster->y && tx == world->monster->x)
+    success = 2;
+  else if (is_passable(world, tx, ty)) {
+    success = 1;
+    world->player->y = ty;
+    world->player->x = tx; }
   if (success * d == prev)
     update_log (world, ".");
   else {
-  char * msg = calloc(25, sizeof(char));
-    char * msg_content = "You fail to move";
-    if (success)
-      msg_content = "You move";
-    sprintf(msg, "\n%s %s.", msg_content, dir);
-    update_log (world, msg);
-    free(msg); }
+    if (2 == success)
+      update_log (world, "\nYou hit the monster.");
+    else {
+      char * msg = calloc(25, sizeof(char));
+      char * msg_content = "You fail to move";
+      if (1 == success)
+        msg_content = "You move";
+      sprintf(msg, "\n%s %s.", msg_content, dir);
+      update_log (world, msg);
+      free(msg); } }
   prev = success * d;
-  update_info (world); }
+  next_turn (world); }
 
 int main () {
   struct World world;
@@ -478,7 +496,7 @@ int main () {
     else if (key == get_action_key(world.keybindings, "player left"))
       move_player(&world, 'w');
     else if (key == get_action_key(world.keybindings, "wait") ) {
-      update_info (&world);
+      next_turn (&world);
       update_log (&world, "\nYou wait."); } }
 
   free(map.cells);
