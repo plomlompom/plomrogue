@@ -53,6 +53,7 @@ int get_action_key (struct KeyBinding *, char *);
 char * get_keyname(int);
 char is_passable (struct World *, int, int);
 void move_player (struct World *, char);
+void player_wait(struct World *);
 
 void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
 // Write text into window content space. Start on row start_y. Fill unused rows with whitespace.
@@ -395,6 +396,11 @@ void move_player (struct World * world, char d) {
   prev = success * d;
   next_turn (world); }
 
+void player_wait(struct World * world) {
+// Make player wait one turn.
+  next_turn (world);
+  update_log (world, "\nYou wait."); }
+
 int main () {
   struct World world;
   init_keybindings(&world);
@@ -495,9 +501,8 @@ int main () {
       move_player(&world, 'e');
     else if (key == get_action_key(world.keybindings, "player left"))
       move_player(&world, 'w');
-    else if (key == get_action_key(world.keybindings, "wait") ) {
-      next_turn (&world);
-      update_log (&world, "\nYou wait."); } }
+    else if (key == get_action_key(world.keybindings, "wait") )
+      player_wait (&world); }
 
   free(map.cells);
   for (key = 0; key <= world.keyswindata->max; key++)
