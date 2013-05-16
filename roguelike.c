@@ -219,18 +219,23 @@ void init_keybindings(struct World * world) {
 struct Map init_map () {
 // Initialize map with some experimental start values.
   struct Map map;
-  map.width = 128;
-  map.height = 128;
+  map.width = 96;
+  map.height = 32;
   map.offset_x = 0;
   map.offset_y = 0;
   map.cells = malloc(map.width * map.height);
-  int x, y;
+  int x, y, ran;
+  char terrain;
   for (y = 0; y < map.height; y++)
-    for (x = 0; x < map.width; x++)
-      map.cells[(y * map.width) + x] = '.';
-  map.cells[(5 * map.width) + 5] = 'X';
-  map.cells[(3 * map.width) + 8] = 'X';
-  map.cells[(8 * map.width) + 3] = 'X';
+    for (x = 0; x < map.width; x++) {
+      terrain = '.';
+      ran = rand();
+      if (   0 == ran % ((x*x) / 3 + 1)
+          || 0 == ran % ((y*y) / 3 + 1)
+          || 0 == ran % ((map.width - x - 1) * (map.width - x - 1) / 3 + 1)
+          || 0 == ran %((map.height - y - 1) * (map.height - y - 1) / 3 + 1))
+        terrain = ' ';
+      map.cells[(y * map.width) + x] = terrain; }
   return map; }
 
 void update_info (struct World * world) {
@@ -372,8 +377,8 @@ int main () {
   struct Map map = init_map();
   world.map = &map;
   struct Player player;
-  player.y = 2;
-  player.x = 2;
+  player.y = 10;
+  player.x = 10;
   world.player = &player;
 
   WINDOW * screen = initscr();
