@@ -317,7 +317,7 @@ char * get_keyname(int keycode) {
     sprintf(keyname, "(unknown)");
   return keyname;  }
 
-char is_passable (struct World * world, int y, int x) {
+char is_passable (struct World * world, int x, int y) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
   if (0 <= x && x < world->map->width && 0 <= y && y < world->map->height)
