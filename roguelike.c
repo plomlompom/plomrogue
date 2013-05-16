@@ -51,6 +51,7 @@ void update_log (struct World *, char *);
 void save_keybindings(struct World *);
 int get_action_key (struct KeyBinding *, char *);
 char * get_keyname(int);
+void mod_key (struct World *, struct WinMeta *);
 char is_passable (struct World *, int, int);
 void move_player (struct World *, char);
 void player_wait(struct World *);
@@ -347,6 +348,15 @@ char * get_keyname(int keycode) {
     sprintf(keyname, "(unknown)");
   return keyname;  }
 
+void mod_key (struct World * world, struct WinMeta * win_meta) {
+// In keybinding window, mark selection modifiable, modify key. Ensure max of three digits in key code field.
+  world->keyswindata->edit = 1;
+  draw_all_windows (win_meta);
+  int key = getch();
+  if (key < 1000)
+    world->keybindings[world->keyswindata->select].key = key;
+  world->keyswindata->edit = 0; }
+
 char is_passable (struct World * world, int x, int y) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
@@ -478,13 +488,8 @@ int main () {
       world.keyswindata->select--;
     else if (key == get_action_key(world.keybindings, "keys nav down") && world.keyswindata->select < world.keyswindata->max)
       world.keyswindata->select++;
-    else if (key == get_action_key(world.keybindings, "keys mod")) {
-      world.keyswindata->edit = 1;
-      draw_all_windows (&win_meta);
-      key = getch();
-      if (key < 1000) // ensure maximum of three digits in key code field
-        world.keybindings[world.keyswindata->select].key = key;
-      world.keyswindata->edit = 0; }
+    else if (key == get_action_key(world.keybindings, "keys mod"))
+      mod_key (&world, &win_meta);
     else if (key == get_action_key(world.keybindings, "map up") && map.offset_y > 0)
       map.offset_y--;
     else if (key == get_action_key(world.keybindings, "map down"))
