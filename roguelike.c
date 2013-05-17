@@ -51,7 +51,7 @@ void update_log (struct World *, char *);
 void save_keybindings(struct World *);
 int get_action_key (struct KeyBinding *, char *);
 char * get_keyname(int);
-void mod_key (struct World *, struct WinMeta *);
+void keyswin_mod_key (struct World *, struct WinMeta *);
 void keyswin_move_selection (struct World *, char);
 char is_passable (struct World *, int, int);
 void move_player (struct World *, char);
@@ -349,8 +349,8 @@ char * get_keyname(int keycode) {
     sprintf(keyname, "(unknown)");
   return keyname;  }
 
-void mod_key (struct World * world, struct WinMeta * win_meta) {
-// In keybinding window, mark selection modifiable, modify key. Ensure max of three digits in key code field.
+void keyswin_mod_key (struct World * world, struct WinMeta * win_meta) {
+// In keybindings window, mark selection modifiable, modify key. Ensure max of three digits in key code field.
   world->keyswindata->edit = 1;
   draw_all_windows (win_meta);
   int key = getch();
@@ -497,7 +497,7 @@ int main () {
     else if (key == get_action_key(world.keybindings, "keys nav down"))
       keyswin_move_selection (&world, 'd');
     else if (key == get_action_key(world.keybindings, "keys mod"))
-      mod_key (&world, &win_meta);
+      keyswin_mod_key (&world, &win_meta);
     else if (key == get_action_key(world.keybindings, "map up") && map.offset_y > 0)
       map.offset_y--;
     else if (key == get_action_key(world.keybindings, "map down"))
