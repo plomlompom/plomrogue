@@ -192,17 +192,11 @@ void draw_all_windows (struct WinMeta * win_meta) {
     free(all_corners); }
   doupdate(); }
 
-void resize_window (struct WinMeta * win_meta, char change) {
+void resize_active_window (struct WinMeta * win_meta, int height, int width) {
 // Grow or shrink currently active window. Correct its geometry and that of its followers.
-  if (0 != win_meta->active) {
-    if      (change == '-' && win_meta->active->height > 1)
-      win_meta->active->height--;
-    else if (change == '+' && win_meta->active->height < win_meta->height - 1)
-      win_meta->active->height++;
-    else if (change == '_' && win_meta->active->width > 1)
-      win_meta->active->width--;
-    else if (change == '*')
-      win_meta->active->width++;
+  if (0 != win_meta->active && width > 0 && height > 0 && height < win_meta->height) {
+    win_meta->active->height = height;
+    win_meta->active->width  = width;
     update_windows(win_meta, win_meta->chain_start); } }
 
 void cycle_active_window (struct WinMeta * win_meta, char dir) {

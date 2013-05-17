@@ -44,6 +44,7 @@ void draw_map (struct Win *);
 void draw_info (struct Win *);
 void draw_keys_window (struct Win *);
 void toggle_window (struct WinMeta *, struct Win *);
+void growshrink_active_window (struct WinMeta *, char);
 void init_keybindings(struct World *);
 struct Map init_map ();
 void map_scroll (struct Map *, char);
@@ -191,6 +192,21 @@ void toggle_window (struct WinMeta * win_meta, struct Win * win) {
     suspend_window(win_meta, win);
   else
     append_window(win_meta, win); }
+
+void growshrink_active_window (struct WinMeta * win_meta, char change) {
+// Grow or shrink active window horizontally or vertically by one cell size.
+  if (0 != win_meta->active) {
+    int height = win_meta->active->height;
+    int width = win_meta->active->width;
+    if      (change == '-')
+      height--;
+    else if (change == '+')
+      height++;
+    else if (change == '_')
+      width--;
+    else if (change == '*')
+      width++;
+    resize_active_window (win_meta, height, width); } }
 
 void init_keybindings(struct World * world) {
 // Initialize keybindings from file "keybindings".
@@ -495,13 +511,13 @@ int main () {
     else if (key == get_action_key(world.keybindings, "shift backwards"))
       shift_window(&win_meta, 'b');
     else if (key == get_action_key(world.keybindings, "grow horizontally"))
-      resize_window(&win_meta, '*');
+      growshrink_active_window(&win_meta, '*');
     else if (key == get_action_key(world.keybindings, "shrink horizontally"))
-      resize_window(&win_meta, '_');
+      growshrink_active_window(&win_meta, '_');
     else if (key == get_action_key(world.keybindings, "grow vertically"))
-      resize_window(&win_meta, '+');
+      growshrink_active_window(&win_meta, '+');
     else if (key == get_action_key(world.keybindings, "shrink vertically"))
-      resize_window(&win_meta, '-');
+      growshrink_active_window(&win_meta, '-');
     else if (key == get_action_key(world.keybindings, "save keys"))
       save_keybindings(&world);
     else if (key == get_action_key(world.keybindings, "keys nav up"))

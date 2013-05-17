@@ -40,6 +40,6 @@ void draw_windows (struct Win *);
 void draw_windows_borders (struct Win *, struct Win *, struct Corners *, int);
 void draw_window_borders (struct Win *, char);
 void draw_all_windows (struct WinMeta *);
-void resize_window (struct WinMeta *, char);
+void resize_active_window (struct WinMeta *, int, int);
 void cycle_active_window (struct WinMeta *, char);
 void shift_window (struct WinMeta *, char);
