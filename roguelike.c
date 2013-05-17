@@ -46,6 +46,7 @@ void draw_keys_window (struct Win *);
 void toggle_window (struct WinMeta *, struct Win *);
 void init_keybindings(struct World *);
 struct Map init_map ();
+void map_scroll (struct Map *, char);
 void next_turn (struct World *);
 void update_log (struct World *, char *);
 void save_keybindings(struct World *);
@@ -248,6 +249,17 @@ struct Map init_map () {
         terrain = ' ';
       map.cells[(y * map.width) + x] = terrain; }
   return map; }
+
+void map_scroll (struct Map * map, char dir) {
+// Scroll map into direction dir if possible by changing the offset.
+  if      ('n' == dir && map->offset_y > 0)
+    map->offset_y--;
+  else if ('s' == dir)
+    map->offset_y++;
+  else if ('w' == dir && map->offset_x > 0)
+    map->offset_x--;
+  else if ('e' == dir)
+    map->offset_x++; }
 
 void next_turn (struct World * world) {
 // Increment turn and move enemy.
@@ -498,14 +510,14 @@ int main () {
       keyswin_move_selection (&world, 'd');
     else if (key == get_action_key(world.keybindings, "keys mod"))
       keyswin_mod_key (&world, &win_meta);
-    else if (key == get_action_key(world.keybindings, "map up") && map.offset_y > 0)
-      map.offset_y--;
+    else if (key == get_action_key(world.keybindings, "map up"))
+      map_scroll (&map, 'n');
     else if (key == get_action_key(world.keybindings, "map down"))
-      map.offset_y++;
+      map_scroll (&map, 's');
     else if (key == get_action_key(world.keybindings, "map right"))
-      map.offset_x++;
-    else if (key == get_action_key(world.keybindings, "map left") && map.offset_x > 0)
-      map.offset_x--;
+      map_scroll (&map, 'e');
+    else if (key == get_action_key(world.keybindings, "map left"))
+      map_scroll (&map, 'w');
     else if (key == get_action_key(world.keybindings, "player down"))
       move_player(&world, 's');
     else if (key == get_action_key(world.keybindings, "player up"))
