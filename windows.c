@@ -15,6 +15,13 @@ struct WinMeta init_win_meta (WINDOW * screen) {
   win_meta.pad = newpad(win_meta.height, 1);
   return win_meta; }
 
+void scroll_pad (struct WinMeta * win_meta, char dir) {
+// Scroll pad left (if possible) or right.
+  if      ('+' == dir)
+    win_meta->pad_offset++;
+  else if ('-' == dir && win_meta->pad_offset > 0)
+    win_meta->pad_offset--; }
+
 struct Win init_window (struct WinMeta * win_meta, char * title) {
 // Create and populate Win struct with sane default values.
   struct Win win;
