@@ -507,9 +507,9 @@ int main () {
     else if (key == get_action_key(world.keybindings, "cycle backwards"))
       cycle_active_window(&win_meta, 'p');
     else if (key == get_action_key(world.keybindings, "shift forwards"))
-      shift_window(&win_meta, 'f');
+      shift_active_window(&win_meta, 'f');
     else if (key == get_action_key(world.keybindings, "shift backwards"))
-      shift_window(&win_meta, 'b');
+      shift_active_window(&win_meta, 'b');
     else if (key == get_action_key(world.keybindings, "grow horizontally"))
       growshrink_active_window(&win_meta, '*');
     else if (key == get_action_key(world.keybindings, "shrink horizontally"))

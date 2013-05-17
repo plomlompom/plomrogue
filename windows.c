@@ -213,7 +213,7 @@ void cycle_active_window (struct WinMeta * win_meta, char dir) {
       else
         win_meta->active = win_meta->chain_end; } } }
 
-void shift_window (struct WinMeta * win_meta, char dir) {
+void shift_active_window (struct WinMeta * win_meta, char dir) {
 // Move active window forward/backward in window chain. If jumping beyond start/end, move to other chain end.
   if (0 != win_meta->active && win_meta->chain_start != win_meta->chain_end && (dir == 'f' || dir == 'b')) {
     int i, i_max;
