@@ -193,15 +193,16 @@ void draw_all_windows (struct WinMeta * win_meta) {
 
 void resize_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink currently active window. Correct its geometry and that of its followers.
-  if      (change == '-' && win_meta->active->height > 1)
+  if (0 != win_meta->active) {
+    if      (change == '-' && win_meta->active->height > 1)
       win_meta->active->height--;
-  else if (change == '+' && win_meta->active->height < win_meta->height - 1)
-    win_meta->active->height++;
-  else if (change == '_' && win_meta->active->width > 1)
+    else if (change == '+' && win_meta->active->height < win_meta->height - 1)
+      win_meta->active->height++;
+    else if (change == '_' && win_meta->active->width > 1)
       win_meta->active->width--;
-  else if (change == '*')
-    win_meta->active->width++;
-  update_windows(win_meta, win_meta->chain_start); }
+    else if (change == '*')
+      win_meta->active->width++;
+    update_windows(win_meta, win_meta->chain_start); } }
 
 void cycle_active_window (struct WinMeta * win_meta, char dir) {
 // Cycle active window selection forwards (dir = 'n') or backwards.
