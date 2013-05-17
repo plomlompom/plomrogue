@@ -198,16 +198,17 @@ void resize_window (struct WinMeta * win_meta, char change) {
 
 void cycle_active_window (struct WinMeta * win_meta, char dir) {
 // Cycle active window selection forwards (dir = 'n') or backwards.
-  if ('n' == dir) {
-    if (win_meta->active->next != 0)
-      win_meta->active = win_meta->active->next;
-    else
-      win_meta->active = win_meta->chain_start; }
-  else {
-    if (win_meta->active->prev != 0)
-      win_meta->active = win_meta->active->prev;
-    else
-      win_meta->active = win_meta->chain_end; } }
+  if (0 != win_meta->active) {
+    if ('n' == dir) {
+      if (win_meta->active->next != 0)
+        win_meta->active = win_meta->active->next;
+      else
+        win_meta->active = win_meta->chain_start; }
+    else {
+      if (win_meta->active->prev != 0)
+        win_meta->active = win_meta->active->prev;
+      else
+        win_meta->active = win_meta->chain_end; } } }
 
 void shift_window (struct WinMeta * win_meta, char dir) {
 // Move active window forward/backward in window chain. If jumping beyond start/end, move to other chain end.

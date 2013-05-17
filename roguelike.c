@@ -474,9 +474,9 @@ int main () {
       toggle_window(&win_meta, &win_info);
     else if (key == get_action_key(world.keybindings, "toggle log window"))
       toggle_window(&win_meta, &win_log);
-    else if (key == get_action_key(world.keybindings, "cycle forwards") && win_meta.active != 0)
+    else if (key == get_action_key(world.keybindings, "cycle forwards"))
       cycle_active_window(&win_meta, 'n');
-    else if (key == get_action_key(world.keybindings, "cycle backwards") && win_meta.active != 0)
+    else if (key == get_action_key(world.keybindings, "cycle backwards"))
       cycle_active_window(&win_meta, 'p');
     else if (key == get_action_key(world.keybindings, "shift forwards")  && win_meta.active != 0)
       shift_window(&win_meta, 'f');
