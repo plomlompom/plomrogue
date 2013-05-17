@@ -52,6 +52,7 @@ void save_keybindings(struct World *);
 int get_action_key (struct KeyBinding *, char *);
 char * get_keyname(int);
 void mod_key (struct World *, struct WinMeta *);
+void keyswin_move_selection (struct World *, char);
 char is_passable (struct World *, int, int);
 void move_player (struct World *, char);
 void player_wait(struct World *);
@@ -357,6 +358,13 @@ void mod_key (struct World * world, struct WinMeta * win_meta) {
     world->keybindings[world->keyswindata->select].key = key;
   world->keyswindata->edit = 0; }
 
+void keyswin_move_selection (struct World * world, char dir) {
+// In keybindings window, move selection upwards or downwards (if within limits of list length).
+  if ('u' == dir && world->keyswindata->select > 0)
+    world->keyswindata->select--;
+  else if ('d' == dir && world->keyswindata->select < world->keyswindata->max)
+    world->keyswindata->select++; }
+
 char is_passable (struct World * world, int x, int y) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
@@ -484,10 +492,10 @@ int main () {
       resize_window(&win_meta, '-');
     else if (key == get_action_key(world.keybindings, "save keys"))
       save_keybindings(&world);
-    else if (key == get_action_key(world.keybindings, "keys nav up") && world.keyswindata->select > 0)
-      world.keyswindata->select--;
-    else if (key == get_action_key(world.keybindings, "keys nav down") && world.keyswindata->select < world.keyswindata->max)
-      world.keyswindata->select++;
+    else if (key == get_action_key(world.keybindings, "keys nav up"))
+      keyswin_move_selection (&world, 'u');
+    else if (key == get_action_key(world.keybindings, "keys nav down"))
+      keyswin_move_selection (&world, 'd');
     else if (key == get_action_key(world.keybindings, "keys mod"))
       mod_key (&world, &win_meta);
     else if (key == get_action_key(world.keybindings, "map up") && map.offset_y > 0)
