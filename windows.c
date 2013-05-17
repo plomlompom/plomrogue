@@ -13,6 +13,7 @@ struct WinMeta init_win_meta (WINDOW * screen) {
   win_meta.chain_end = 0;
   win_meta.pad_offset = 0;
   win_meta.pad = newpad(win_meta.height, 1);
+  win_meta.active = 0;
   return win_meta; }
 
 void scroll_pad (struct WinMeta * win_meta, char dir) {
