@@ -471,18 +471,10 @@ int main () {
   raw();
   struct WinMeta win_meta = init_win_meta(screen);
 
-  struct Win win_keys = init_window(&win_meta, "Keys");
-  win_keys.draw = draw_keys_window;
-  win_keys.data = &world;
-  struct Win win_map = init_window(&win_meta, "Map");
-  win_map.draw = draw_map;
-  win_map.data = &world;
-  struct Win win_info = init_window(&win_meta, "Info");
-  win_info.draw = draw_info;
-  win_info.data = &world;
-  struct Win win_log = init_window(&win_meta, "Log");
-  win_log.draw = draw_log;
-  win_log.data = &world;
+  struct Win win_keys = init_window(&win_meta, "Keys", &world, draw_keys_window);
+  struct Win win_map = init_window(&win_meta, "Map", &world, draw_map);
+  struct Win win_info = init_window(&win_meta, "Info", &world, draw_info);
+  struct Win win_log = init_window(&win_meta, "Log", &world, draw_log);
 
   int key;
   while (1) {

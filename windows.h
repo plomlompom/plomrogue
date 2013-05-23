@@ -30,7 +30,7 @@ struct Corners {
 
 struct  WinMeta init_win_meta (WINDOW *);
 void scroll_pad (struct WinMeta *, char);
-struct Win init_window (struct WinMeta *, char *);
+struct Win init_window (struct WinMeta *, char *, void *, void *);
 void append_window (struct WinMeta *, struct Win *);
 void suspend_window (struct WinMeta *, struct Win *);
 struct yx place_window (struct WinMeta *, struct Win *);

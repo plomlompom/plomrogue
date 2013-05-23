@@ -23,7 +23,7 @@ void scroll_pad (struct WinMeta * win_meta, char dir) {
   else if ('-' == dir && win_meta->pad_offset > 0)
     win_meta->pad_offset--; }
 
-struct Win init_window (struct WinMeta * win_meta, char * title) {
+struct Win init_window (struct WinMeta * win_meta, char * title, void * data, void * func) {
 // Create and populate Win struct with sane default values.
   struct Win win;
   win.prev = 0;
@@ -32,6 +32,8 @@ struct Win init_window (struct WinMeta * win_meta, char * title) {
   win.title = title;
   win.width = 20;
   win.height = win_meta->height - 1;
+  win.data = data;
+  win.draw = func;
   return win; }
 
 void append_window (struct WinMeta * win_meta, struct Win * win) {
