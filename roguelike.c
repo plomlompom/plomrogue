@@ -39,10 +39,10 @@ struct Monster {
 
 void draw_with_linebreaks (struct Win *, char *, int);
 void draw_text_from_bottom (struct Win *, char *);
-void draw_log (struct Win *);
-void draw_map (struct Win *);
-void draw_info (struct Win *);
-void draw_keys_window (struct Win *);
+void draw_log_win (struct Win *);
+void draw_map_win (struct Win *);
+void draw_info_win (struct Win *);
+void draw_keys_win (struct Win *);
 void toggle_window (struct WinMeta *, struct Win *);
 void growshrink_active_window (struct WinMeta *, char);
 void init_keybindings(struct World *);
@@ -116,12 +116,12 @@ void draw_text_from_bottom (struct Win * win, char * text) {
     text = text + (sizeof(char) * (z + 1)); }
   draw_with_linebreaks(win, text, start_y); }
 
-void draw_log (struct Win * win) {
+void draw_log_win (struct Win * win) {
 // Draw log text from world struct in win->data from bottom to top.
   struct World * world = (struct World *) win->data;
   draw_text_from_bottom(win, world->log); }
 
-void draw_map (struct Win * win) {
+void draw_map_win (struct Win * win) {
 // Draw map determined by win->data Map struct into window. Respect offset.
   struct World * world = (struct World *) win->data;
   struct Map * map = world->map;
@@ -143,7 +143,7 @@ void draw_map (struct Win * win) {
           mvwaddch(win->curses, y, x, cells[z]);
         z++; } } } }
 
-void draw_info (struct Win * win) {
+void draw_info_win (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
   struct World * world = (struct World *) win->data;
   int count = world->turn;
@@ -151,7 +151,7 @@ void draw_info (struct Win * win) {
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
 
-void draw_keys_window (struct Win * win) {
+void draw_keys_win (struct Win * win) {
 // Draw keybinding window.
   struct World * world = (struct World *) win->data;
   struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
@@ -470,10 +470,10 @@ int main () {
   keypad(screen, TRUE);
   raw();
   struct WinMeta win_meta = init_win_meta(screen);
-  struct Win win_keys = init_window(&win_meta, "Keys", &world, draw_keys_window);
-  struct Win win_map = init_window(&win_meta, "Map", &world, draw_map);
-  struct Win win_info = init_window(&win_meta, "Info", &world, draw_info);
-  struct Win win_log = init_window(&win_meta, "Log", &world, draw_log);
+  struct Win win_keys = init_window(&win_meta, "Keys", &world, draw_keys_win);
+  struct Win win_map = init_window(&win_meta, "Map", &world, draw_map_win);
+  struct Win win_info = init_window(&win_meta, "Info", &world, draw_info_win);
+  struct Win win_log = init_window(&win_meta, "Log", &world, draw_log_win);
 
   int key;
   while (1) {
