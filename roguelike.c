@@ -470,7 +470,6 @@ int main () {
   keypad(screen, TRUE);
   raw();
   struct WinMeta win_meta = init_win_meta(screen);
-
   struct Win win_keys = init_window(&win_meta, "Keys", &world, draw_keys_window);
   struct Win win_map = init_window(&win_meta, "Map", &world, draw_map);
   struct Win win_info = init_window(&win_meta, "Info", &world, draw_info);
