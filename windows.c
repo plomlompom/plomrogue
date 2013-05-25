@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <ncurses.h>
 #include <string.h>
 #include "windows.h"
@@ -76,14 +77,14 @@ struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
     while (getbegy(win_top->curses) != 1)
       win_top = win_top->prev;                                   // else, default to placing window in new top
     start.x = getbegx(win_top->curses) + win_top->width + 1;     // column to the right of the last one
-    int winprev_maxy = getbegy(win->prev->curses) + getmaxy(win->prev->curses);
+    uint16_t winprev_maxy = getbegy(win->prev->curses) + getmaxy(win->prev->curses);
     if (win->width <= win->prev->width && win->height < win_meta->height - winprev_maxy) {
       start.x = getbegx(win->prev->curses);                // place window below previous window if it fits
       start.y = winprev_maxy + 1; }                        // vertically and is not wider than its predecessor
     else {
       struct Win * win_up = win->prev;
       struct Win * win_upup = win_up;
-      int widthdiff;
+      uint16_t widthdiff;
       while (win_up != win_top) {
         win_upup = win_up->prev;
         while (1) {
@@ -104,7 +105,7 @@ void update_windows (struct WinMeta * win_meta, struct Win * win) {
   if (0 != win->curses)
     destroy_window (win);
   struct yx startyx = place_window(win_meta, win);
-  int lastwincol = 0;
+  uint16_t lastwincol = 0;
   struct Win * win_p = win_meta->chain_start;
   while (win_p != 0) {
     if (win_p != win && getbegx(win_p->curses) + win_p->width > lastwincol + 1)
@@ -125,7 +126,7 @@ void destroy_window (struct Win * win) {
 
 void draw_window_borders (struct Win * win, char active) {
 // Draw borders of window win, including title. Decorate in a special way if window is marked as active.
-  int y, x;
+  uint16_t y, x;
   for (y = getbegy(win->curses); y <= getbegy(win->curses) + win->height; y++) {
     mvwaddch(wgetparent(win->curses), y, getbegx(win->curses) - 1, '|');
     mvwaddch(wgetparent(win->curses), y, getbegx(win->curses) + win->width, '|'); }
@@ -134,10 +135,10 @@ void draw_window_borders (struct Win * win, char active) {
     mvwaddch(wgetparent(win->curses), getbegy(win->curses) + win->height, x, '-'); }
   char min_title_length_visible = 3;        // 1 char minimal, plus 2 chars for decoration left/right of title
   if (win->width >= min_title_length_visible) {
-    int title_offset = 0;
+    uint16_t title_offset = 0;
     if (win->width > strlen(win->title) + 2)
       title_offset = (win->width - (strlen(win->title) + 2)) / 2;                     // + 2 is for decoration
-    int length_visible = strnlen(win->title, win->width - 2);
+    uint16_t length_visible = strnlen(win->title, win->width - 2);
     char title[length_visible + 3];
     char decoration = ' ';
     if (1 == active)
@@ -147,7 +148,7 @@ void draw_window_borders (struct Win * win, char active) {
     title[length_visible + 2] = '\0';
     mvwaddstr (wgetparent(win->curses), getbegy(win->curses)-1, getbegx(win->curses)+title_offset, title); } }
 
-void draw_windows_borders (struct Win * win, struct Win * win_active, struct Corners * corners, int ccount) {
+void draw_windows_borders (struct Win * win, struct Win * win_active, struct Corners * corners, uint16_t ccount) {
 // Craw draw_window_borders() for all windows in chain from win on. Save current window's border corners.
   char active = 0;
   if (win == win_active)
@@ -176,7 +177,7 @@ void draw_all_windows (struct WinMeta * win_meta) {
   wnoutrefresh(win_meta->screen);
   werase(win_meta->pad);
   if (win_meta->chain_start) {
-    int n_wins = 1;
+    uint16_t n_wins = 1;
     struct Win * win_p = win_meta->chain_start;
     while (0 != win_p->next) {
       win_p = win_p->next;
@@ -184,7 +185,7 @@ void draw_all_windows (struct WinMeta * win_meta) {
     struct Corners * all_corners = malloc(sizeof(struct Corners) * n_wins);
     draw_windows (win_meta->chain_start);
     draw_windows_borders (win_meta->chain_start, win_meta->active, all_corners, 0);
-    int i;
+    uint16_t i;
     for (i = 0; i < n_wins; i++) {
       mvwaddch(win_meta->pad, all_corners[i].tl.y, all_corners[i].tl.x, '+');
       mvwaddch(win_meta->pad, all_corners[i].tr.y, all_corners[i].tr.x, '+');
@@ -194,7 +195,7 @@ void draw_all_windows (struct WinMeta * win_meta) {
     free(all_corners); }
   doupdate(); }
 
-void resize_active_window (struct WinMeta * win_meta, int height, int width) {
+void resize_active_window (struct WinMeta * win_meta, uint16_t height, uint16_t width) {
 // Grow or shrink currently active window. Correct its geometry and that of its followers.
   if (0 != win_meta->active && width > 0 && height > 0 && height < win_meta->height) {
     win_meta->active->height = height;
@@ -218,12 +219,12 @@ void cycle_active_window (struct WinMeta * win_meta, char dir) {
 void shift_active_window (struct WinMeta * win_meta, char dir) {
 // Move active window forward/backward in window chain. If jumping beyond start/end, move to other chain end.
   if (0 != win_meta->active && win_meta->chain_start != win_meta->chain_end && (dir == 'f' || dir == 'b')) {
-    int i, i_max;
     struct Win * win_shift = win_meta->active;
     char wrap = 0;
     if ((dir == 'f' && win_shift == win_meta->chain_end)
         || (dir == 'b' && win_shift == win_meta->chain_start))
       wrap = 1;
+    uint16_t i, i_max;
     struct Win * win_p, * win_p_next;
     for (i_max = 1, win_p = win_meta->chain_start; win_p != win_meta->chain_end; i_max++)
       win_p = win_p->next;

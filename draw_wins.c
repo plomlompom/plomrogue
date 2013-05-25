@@ -1,17 +1,18 @@
+#include <stdlib.h>
+#include <stdint.h>
 #include <ncurses.h>
 #include <string.h>
-#include <stdlib.h>
 #include "windows.h"
 #include "draw_wins.h"
 #include "roguelike.h"
 #include "keybindings.h"
 
-void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
+void draw_with_linebreaks (struct Win * win, char * text, uint16_t start_y) {
 // Write text into window content space. Start on row start_y. Fill unused rows with whitespace.
-  int x, y;
+  uint16_t x, y;
   char toggle;
   char fin = 0;
-  int z = -1;
+  int16_t z = -1;
   for (y = start_y; y < win->height; y++) {
     if (0 == fin)
       toggle = 0;
@@ -33,8 +34,8 @@ void draw_with_linebreaks (struct Win * win, char * text, int start_y) {
 void draw_text_from_bottom (struct Win * win, char * text) {
 // Draw text from end/bottom to the top.
   char toggle = 0;
-  int x, y, offset;
-  int z = -1;
+  uint16_t x, y, offset;
+  int16_t z = -1;
   for (y = 0; 0 == toggle; y++)                           // Determine number of lines text would have in
     for (x = 0; x < win->width; x++) {                    // a window of available width, but infinite height.
       z++;
@@ -47,7 +48,7 @@ void draw_text_from_bottom (struct Win * win, char * text) {
         toggle = 1;
         break; } }
   z = -1;
-  int start_y = 0;
+  uint16_t start_y = 0;
   if (y < win->height)             // Depending on what is bigger, determine start point in window or in text.
     start_y = win->height - y;
   else if (y > win->height) {
@@ -75,9 +76,9 @@ void draw_map_win (struct Win * win) {
   struct Player * player = world->player;
   struct Monster * monster = world->monster;
   char * cells = map->cells;
-  int width_map_av = map->width - map->offset_x;
-  int height_map_av = map->height - map->offset_y;
-  int x, y, z;
+  uint16_t width_map_av = map->width - map->offset_x;
+  uint16_t height_map_av = map->height - map->offset_y;
+  uint16_t x, y, z;
   for (y = 0; y < win->height; y++) {
     z = map->offset_x + (map->offset_y + y) * (map->width);
     for (x = 0; x < win->width; x++) {
@@ -93,7 +94,7 @@ void draw_map_win (struct Win * win) {
 void draw_info_win (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
   struct World * world = (struct World *) win->data;
-  int count = world->turn;
+  uint16_t count = world->turn;
   char text[100];
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
@@ -103,17 +104,17 @@ void draw_keys_win (struct Win * win) {
   struct World * world = (struct World *) win->data;
   struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
   struct KeyBinding * keybindings = world->keybindings;
-  int offset = 0;
+  uint16_t offset = 0;
   if (keyswindata->max >= win->height) {
     if (keyswindata->select > win->height / 2) {
       if (keyswindata->select < (keyswindata->max - (win->height / 2)))
         offset = keyswindata->select - (win->height / 2);
       else
         offset = keyswindata->max - win->height + 1; } }
-  int keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
+  uint8_t keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
   char * keydesc = malloc(keydescwidth);
   attr_t attri;
-  int y, x;
+  uint16_t y, x;
   char * keyname;
   for (y = 0; y <= keyswindata->max && y < win->height; y++) {
     attri = 0;

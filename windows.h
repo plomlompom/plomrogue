@@ -1,26 +1,26 @@
 struct WinMeta {
   WINDOW * screen;
   WINDOW * pad;
-  int pad_offset;
+  uint16_t  pad_offset;
   struct Win * chain_start;
   struct Win * chain_end;
   struct Win * active;
-  int width;
-  int height; };
+  uint16_t width;
+  uint16_t height; };
 
 struct Win {
   struct Win * prev;
   struct Win * next;
-  int width;
-  int height;
+  uint16_t width;
+  uint16_t height;
   WINDOW * curses;
   char * title;
   void (* draw) (struct Win *);
   void * data; };
 
 struct yx {
-  int y;
-  int x; };
+  uint16_t y;
+  uint16_t x; };
 
 struct Corners {
   struct yx tl;
@@ -37,9 +37,9 @@ struct yx place_window (struct WinMeta *, struct Win *);
 void update_windows (struct WinMeta *, struct Win *);
 void destroy_window (struct Win *);
 void draw_windows (struct Win *);
-void draw_windows_borders (struct Win *, struct Win *, struct Corners *, int);
+void draw_windows_borders (struct Win *, struct Win *, struct Corners *, uint16_t);
 void draw_window_borders (struct Win *, char);
 void draw_all_windows (struct WinMeta *);
-void resize_active_window (struct WinMeta *, int, int);
+void resize_active_window (struct WinMeta *, uint16_t, uint16_t);
 void cycle_active_window (struct WinMeta *, char);
 void shift_active_window (struct WinMeta *, char);

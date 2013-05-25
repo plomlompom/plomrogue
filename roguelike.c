@@ -1,6 +1,7 @@
+#include <stdlib.h>
+#include <stdint.h>
 #include <ncurses.h>
 #include <string.h>
-#include <stdlib.h>
 #include "windows.h"
 #include "draw_wins.h"
 #include "roguelike.h"
@@ -16,8 +17,8 @@ void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 void growshrink_active_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink active window horizontally or vertically by one cell size.
   if (0 != win_meta->active) {
-    int height = win_meta->active->height;
-    int width = win_meta->active->width;
+    uint16_t height = win_meta->active->height;
+    uint16_t width = win_meta->active->width;
     if      (change == '-')
       height--;
     else if (change == '+')
@@ -36,7 +37,7 @@ struct Map init_map () {
   map.offset_x = 0;
   map.offset_y = 0;
   map.cells = malloc(map.width * map.height);
-  int x, y, ran;
+  uint16_t x, y, ran;
   char terrain;
   for (y = 0; y < map.height; y++)
     for (x = 0; x < map.width; x++) {
@@ -84,16 +85,16 @@ void next_turn (struct World * world) {
 void update_log (struct World * world, char * text) {
 // Update log with new text to be appended.
   char * new_text;
-  int len_old = strlen(world->log);
-  int len_new = strlen(text);
-  int len_whole = len_old + len_new + 1;
+  uint16_t len_old = strlen(world->log);
+  uint16_t len_new = strlen(text);
+  uint16_t len_whole = len_old + len_new + 1;
   new_text = calloc(len_whole, sizeof(char));
   memcpy(new_text, world->log, len_old);
   memcpy(new_text + len_old, text, len_new);
   free(world->log);
   world->log = new_text; }
 
-char is_passable (struct World * world, int x, int y) {
+char is_passable (struct World * world, uint16_t x, uint16_t y) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
   if (0 <= x && x < world->map->width && 0 <= y && y < world->map->height)
