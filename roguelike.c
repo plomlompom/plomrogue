@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <limits.h>
 #include <stdint.h>
 #include <ncurses.h>
 #include <string.h>
@@ -143,10 +144,44 @@ void move_player (struct World * world, char d) {
   prev = success * d;
   next_turn (world); }
 
-void player_wait(struct World * world) {
+void player_wait (struct World * world) {
 // Make player wait one turn.
   next_turn (world);
   update_log (world, "\nYou wait."); }
+
+void save_map (struct Map * map) {
+// Save map to file "map".
+  FILE * file = fopen("map", "w");
+  fputc(map->width / CHAR_MAX, file);
+  fputc(map->width % CHAR_MAX, file);
+  uint16_t y, x;
+  for (y = 0; y < map->height; y++)
+    for (x = 0; x < map->width; x++)
+      fputc(map->cells[y * map->width + x], file);
+  fclose(file); }
+
+struct Map load_map () {
+// Load map from file.
+  FILE * file = fopen("map", "r");
+  struct Map map;
+  map.width = (fgetc(file) * CHAR_MAX) + fgetc(file);
+  long pos = ftell(file);
+  int c = fgetc(file);
+  uint32_t i = 0;
+  while (EOF != c) {
+    i++;
+    c = fgetc(file); }
+  map.cells = malloc(i * sizeof(char));
+  map.height = i / map.width;
+  fseek(file, pos, SEEK_SET);
+  c = fgetc(file);
+  i = 0;
+  while (EOF != c) {
+    map.cells[i] = (char) c;
+    c = fgetc(file);
+    i++; }
+  fclose(file);
+  return map; }
 
 int main () {
   struct World world;
@@ -218,6 +253,10 @@ int main () {
       keyswin_move_selection (&world, 'd');
     else if (key == get_action_key(world.keybindings, "keys mod"))
       keyswin_mod_key (&world, &win_meta);
+    else if (key == get_action_key(world.keybindings, "load map"))
+      map = load_map();
+    else if (key == get_action_key(world.keybindings, "save map"))
+      save_map(&map);
     else if (key == get_action_key(world.keybindings, "map up"))
       map_scroll (&map, 'n');
     else if (key == get_action_key(world.keybindings, "map down"))
