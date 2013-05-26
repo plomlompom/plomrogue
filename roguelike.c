@@ -10,12 +10,9 @@
 
 uint16_t rrand() {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
-  uint32_t a   = 1103515245;      // Values for a and b as recommended by POSIX.1-2001 (see man page rand(3)).
-  uint16_t b   =      12345;
-  uint32_t mod = 2147483648;
   static uint32_t seed = 0;
-  seed = ((seed * a) + b) % mod;
-  return (seed / 65536); }        // Ignore least significant 16 bits (they are less random).
+  seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
+  return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
