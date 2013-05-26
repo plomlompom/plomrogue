@@ -22,6 +22,7 @@ struct Monster {
   uint16_t y;
   uint16_t x; };
 
+uint16_t rrand();
 void toggle_window (struct WinMeta *, struct Win *);
 void growshrink_active_window (struct WinMeta *, char);
 struct Map init_map ();

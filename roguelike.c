@@ -8,6 +8,16 @@
 #include "roguelike.h"
 #include "keybindings.h"
 
+static uint32_t seed = 0;
+
+uint16_t rrand() {
+// Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
+  uint32_t a   = 1103515245;      // Values for a and b as recommended by POSIX.1-2001 (see man page rand(3)).
+  uint16_t b   =      12345;
+  uint32_t mod = 2147483648;
+  seed = ((seed * a) + b) % mod;
+  return (seed / 65536); }        // Ignore least significant 16 bits (they are less random).
+
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
   if (0 != win->curses)
@@ -43,7 +53,7 @@ struct Map init_map () {
   for (y = 0; y < map.height; y++)
     for (x = 0; x < map.width; x++) {
       terrain = '.';
-      ran = rand();
+      ran = rrand();
       if (   0 == ran % ((x*x) / 3 + 1)
           || 0 == ran % ((y*y) / 3 + 1)
           || 0 == ran % ((map.width - x - 1) * (map.width - x - 1) / 3 + 1)
@@ -66,7 +76,7 @@ void map_scroll (struct Map * map, char dir) {
 void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;
-  char d = rand() % 5;
+  char d = rrand() % 5;
   char ty = world->monster->y;
   char tx = world->monster->x;
   if (1 == d)
