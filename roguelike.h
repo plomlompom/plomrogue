@@ -22,10 +22,12 @@ struct Monster {
   uint16_t y;
   uint16_t x; };
 
-uint16_t rrand();
+uint16_t rrand(char, uint32_t);
+uint32_t load_seed();
+void save_seed(uint32_t);
 void toggle_window (struct WinMeta *, struct Win *);
 void growshrink_active_window (struct WinMeta *, char);
-struct Map init_map ();
+struct Map init_map (uint32_t);
 void map_scroll (struct Map *, char);
 void next_turn (struct World *);
 void update_log (struct World *, char *);

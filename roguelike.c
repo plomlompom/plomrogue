@@ -1,18 +1,49 @@
 #include <stdlib.h>
-#include <limits.h>
+//#include <limits.h>
 #include <stdint.h>
 #include <ncurses.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
 #include "windows.h"
 #include "draw_wins.h"
 #include "roguelike.h"
 #include "keybindings.h"
 
-uint16_t rrand() {
+uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
   static uint32_t seed = 0;
+  if (0 != use_seed)
+    seed = new_seed;
   seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
   return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
+
+uint32_t load_seed() {
+// Load seed integer from seed file.
+  uint32_t seed;
+  const uint16_t nchar = 256;
+  FILE * file = fopen("seed", "r");
+  unsigned char a = fgetc(file);
+  unsigned char b = fgetc(file);
+  unsigned char c = fgetc(file);
+  unsigned char d = fgetc(file);
+  seed = (a * nchar * nchar * nchar) + (b * nchar * nchar) + (c * nchar) + d;
+  fclose(file);
+  return seed; }
+
+void save_seed(uint32_t seed) {
+// Save seed integer to seed file.
+  const uint16_t nchar = 256;
+  unsigned char a = seed / (nchar * nchar * nchar);
+  unsigned char b = (seed - (a * nchar * nchar * nchar)) / (nchar * nchar);
+  unsigned char c = (seed - ((a * nchar * nchar * nchar) + (b * nchar * nchar))) / nchar;
+  unsigned char d = seed % nchar;
+  FILE * file = fopen("seed", "w");
+  fputc(a, file);
+  fputc(b, file);
+  fputc(c, file);
+  fputc(d, file);
+  fclose(file); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
@@ -36,8 +67,9 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
       width++;
     resize_active_window (win_meta, height, width); } }
 
-struct Map init_map () {
+struct Map init_map (uint32_t seed) {
 // Initialize map with some experimental start values.
+  rrand(1, seed);
   struct Map map;
   map.width = 96;
   map.height = 32;
@@ -49,7 +81,7 @@ struct Map init_map () {
   for (y = 0; y < map.height; y++)
     for (x = 0; x < map.width; x++) {
       terrain = '.';
-      ran = rrand();
+      ran = rrand(0, 0);
       if (   0 == ran % ((x*x) / 3 + 1)
           || 0 == ran % ((y*y) / 3 + 1)
           || 0 == ran % ((map.width - x - 1) * (map.width - x - 1) / 3 + 1)
@@ -72,7 +104,7 @@ void map_scroll (struct Map * map, char dir) {
 void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;
-  char d = rrand() % 5;
+  char d = rrand(0, 0) % 5;
   char ty = world->monster->y;
   char tx = world->monster->x;
   if (1 == d)
@@ -155,47 +187,23 @@ void player_wait (struct World * world) {
   next_turn (world);
   update_log (world, "\nYou wait."); }
 
-void save_map (struct Map * map) {
-// Save map to file "map".
-  FILE * file = fopen("map", "w");
-  fputc(map->width / CHAR_MAX, file);
-  fputc(map->width % CHAR_MAX, file);
-  uint16_t y, x;
-  for (y = 0; y < map->height; y++)
-    for (x = 0; x < map->width; x++)
-      fputc(map->cells[y * map->width + x], file);
-  fclose(file); }
+int main (int argc, char *argv[]) {
+  uint32_t seed = time(NULL);
+  int opt;
+  while ((opt = getopt(argc, argv, "l")) != -1) {
+    switch (opt) {
+      case 'l':
+	seed = load_seed();
+        break;
+      default:
+        exit(EXIT_FAILURE); } }
 
-struct Map load_map () {
-// Load map from file.
-  FILE * file = fopen("map", "r");
-  struct Map map;
-  map.width = (fgetc(file) * CHAR_MAX) + fgetc(file);
-  long pos = ftell(file);
-  int c = fgetc(file);
-  uint32_t i = 0;
-  while (EOF != c) {
-    i++;
-    c = fgetc(file); }
-  map.cells = malloc(i * sizeof(char));
-  map.height = i / map.width;
-  fseek(file, pos, SEEK_SET);
-  c = fgetc(file);
-  i = 0;
-  while (EOF != c) {
-    map.cells[i] = (char) c;
-    c = fgetc(file);
-    i++; }
-  fclose(file);
-  return map; }
-
-int main () {
   struct World world;
   init_keybindings(&world);
   world.turn = 0;
   world.log = calloc(1, sizeof(char));
   update_log (&world, "Start!");
-  struct Map map = init_map();
+  struct Map map = init_map(seed);
   world.map = &map;
   struct Player player;
   player.y = 16;
@@ -259,10 +267,8 @@ int main () {
       keyswin_move_selection (&world, 'd');
     else if (key == get_action_key(world.keybindings, "keys mod"))
       keyswin_mod_key (&world, &win_meta);
-    else if (key == get_action_key(world.keybindings, "load map"))
-      map = load_map();
-    else if (key == get_action_key(world.keybindings, "save map"))
-      save_map(&map);
+    else if (key == get_action_key(world.keybindings, "save seed"))
+      save_seed(seed);
     else if (key == get_action_key(world.keybindings, "map up"))
       map_scroll (&map, 'n');
     else if (key == get_action_key(world.keybindings, "map down"))
