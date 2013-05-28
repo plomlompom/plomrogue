@@ -3,7 +3,9 @@ plomrogue
 
 plomlompom tries to build his own roguelike. Currently, it doesn't do
 much, apart from managing some example ncurses windows in a bizarre 
-fashion.
+fashion. You can move around a player and meet an enemy, but they don't
+really fight. A map gets generated randomly; it's seed can be saved and
+later reloaded.
 
 Install/run
 -----------
@@ -14,6 +16,8 @@ git clone https://github.com/plomlompom/plomrogue
 cd plomrogue
 make
 ./roguelike
+
+Use option -l to load an existing map seed.
 
 Default keybindings
 -------------------
@@ -34,6 +38,8 @@ Y       shift window backwards
 _       shrink window horizontally
 +       grow window vertically
 -       shrink window vertically
+
+s       save seed of map
 
 w       scroll map up
 x       scroll map down
