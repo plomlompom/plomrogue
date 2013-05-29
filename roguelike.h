@@ -1,7 +1,8 @@
 struct World {
   struct KeyBinding * keybindings;
   struct KeysWinData * keyswindata;
-  uint16_t turn;
+  uint32_t seed;
+  uint32_t turn;
   char * log;
   struct Map * map;
   struct Monster * monster;
@@ -23,8 +24,12 @@ struct Monster {
   uint16_t x; };
 
 uint16_t rrand(char, uint32_t);
-uint32_t load_seed();
-void save_seed(uint32_t);
+uint16_t read_uint16_bigendian(FILE * file);
+void write_uint16_bigendian(uint16_t x, FILE * file);
+uint32_t read_uint32_bigendian(FILE * file);
+void write_uint32_bigendian(uint32_t x, FILE * file);
+void load_seed(struct World *);
+void save_seed(struct World *);
 void toggle_window (struct WinMeta *, struct Win *);
 void growshrink_active_window (struct WinMeta *, char);
 struct Map init_map ();

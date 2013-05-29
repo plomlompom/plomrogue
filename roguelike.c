@@ -18,31 +18,62 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
   seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
   return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
 
-uint32_t load_seed() {
-// Load seed integer from seed file.
-  uint32_t seed;
+uint16_t read_uint16_bigendian(FILE * file) {
+// Read uint16 from file in big-endian order.
   const uint16_t nchar = UCHAR_MAX + 1;
-  FILE * file = fopen("seed", "r");
+  unsigned char a = fgetc(file);
+  unsigned char b = fgetc(file);
+  return (a * nchar) + b; }
+
+void write_uint16_bigendian(uint16_t x, FILE * file) {
+// Write uint16 to file in beg-endian order.
+  const uint16_t nchar = UCHAR_MAX + 1;
+  unsigned char a = x / nchar;
+  unsigned char b = x % nchar;
+  fputc(a, file);
+  fputc(b, file); }
+
+uint32_t read_uint32_bigendian(FILE * file) {
+// Read uint32 from file in big-endian order.
+  const uint16_t nchar = UCHAR_MAX + 1;
   unsigned char a = fgetc(file);
   unsigned char b = fgetc(file);
   unsigned char c = fgetc(file);
   unsigned char d = fgetc(file);
-  seed = (a * nchar * nchar * nchar) + (b * nchar * nchar) + (c * nchar) + d;
-  fclose(file);
-  return seed; }
+  return (a * nchar * nchar * nchar) + (b * nchar * nchar) + (c * nchar) + d; }
 
-void save_seed(uint32_t seed) {
-// Save seed integer to seed file.
+void write_uint32_bigendian(uint32_t x, FILE * file) {
+// Write uint32 to file in beg-endian order.
   const uint16_t nchar = UCHAR_MAX + 1;
-  unsigned char a = seed / (nchar * nchar * nchar);
-  unsigned char b = (seed - (a * nchar * nchar * nchar)) / (nchar * nchar);
-  unsigned char c = (seed - ((a * nchar * nchar * nchar) + (b * nchar * nchar))) / nchar;
-  unsigned char d = seed % nchar;
-  FILE * file = fopen("seed", "w");
+  unsigned char a = x / (nchar * nchar * nchar);
+  unsigned char b = (x - (a * nchar * nchar * nchar)) / (nchar * nchar);
+  unsigned char c = (x - ((a * nchar * nchar * nchar) + (b * nchar * nchar))) / nchar;
+  unsigned char d = x % nchar;
   fputc(a, file);
   fputc(b, file);
   fputc(c, file);
-  fputc(d, file);
+  fputc(d, file); }
+
+void load_seed(struct World * world) {
+// Load seed integer from seed file.
+  FILE * file = fopen("savefile", "r");
+  world->seed = read_uint32_bigendian(file);
+  world->turn = read_uint32_bigendian(file);
+  world->player->y = read_uint16_bigendian(file);
+  world->player->x = read_uint16_bigendian(file);
+  world->monster->y = read_uint16_bigendian(file);
+  world->monster->x = read_uint16_bigendian(file);
+  fclose(file); }
+
+void save_seed(struct World * world) {
+// Save seed integer to seed file.
+  FILE * file = fopen("savefile", "w");
+  write_uint32_bigendian(world->seed, file);
+  write_uint32_bigendian(world->turn, file);
+  write_uint16_bigendian(world->player->y, file);
+  write_uint16_bigendian(world->player->x, file);
+  write_uint16_bigendian(world->monster->y, file);
+  write_uint16_bigendian(world->monster->x, file);
   fclose(file); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
@@ -187,28 +218,27 @@ void player_wait (struct World * world) {
   update_log (world, "\nYou wait."); }
 
 int main (int argc, char *argv[]) {
-  uint32_t seed;
-  if (0 == access("seed", F_OK))
-    seed = load_seed();
-  else
-    seed = time(NULL);
-  rrand(1, seed);
-
   struct World world;
+  struct Player player;
+  world.player = &player;
+  struct Monster monster;
+  world.monster = &monster;
+  if (0 == access("savefile", F_OK))
+    load_seed(&world);
+  else {
+    player.y = 8;
+    player.x = 8;
+    monster.y = 55;
+    monster.x = 55;
+    world.seed = time(NULL);
+    world.turn = 0; }
+  rrand(1, world.seed);
+
   init_keybindings(&world);
-  world.turn = 0;
   world.log = calloc(1, sizeof(char));
   update_log (&world, "Start!");
   struct Map map = init_map();
   world.map = &map;
-  struct Player player;
-  player.y = 8;
-  player.x = 8;
-  world.player = &player;
-  struct Monster monster;
-  monster.y = 55;
-  monster.x = 55;
-  world.monster = &monster;
 
   WINDOW * screen = initscr();
   noecho();
@@ -263,8 +293,8 @@ int main (int argc, char *argv[]) {
       keyswin_move_selection (&world, 'd');
     else if (key == get_action_key(world.keybindings, "keys mod"))
       keyswin_mod_key (&world, &win_meta);
-    else if (key == get_action_key(world.keybindings, "save seed"))
-      save_seed(seed);
+    else if (key == get_action_key(world.keybindings, "save game"))
+      save_seed(&world);
     else if (key == get_action_key(world.keybindings, "map up"))
       map_scroll (&map, 'n');
     else if (key == get_action_key(world.keybindings, "map down"))
