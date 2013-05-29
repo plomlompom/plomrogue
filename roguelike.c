@@ -1,5 +1,5 @@
 #include <stdlib.h>
-//#include <limits.h>
+#include <limits.h>
 #include <stdint.h>
 #include <ncurses.h>
 #include <string.h>
@@ -21,7 +21,7 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
 uint32_t load_seed() {
 // Load seed integer from seed file.
   uint32_t seed;
-  const uint16_t nchar = 256;
+  const uint16_t nchar = UCHAR_MAX + 1;
   FILE * file = fopen("seed", "r");
   unsigned char a = fgetc(file);
   unsigned char b = fgetc(file);
@@ -33,7 +33,7 @@ uint32_t load_seed() {
 
 void save_seed(uint32_t seed) {
 // Save seed integer to seed file.
-  const uint16_t nchar = 256;
+  const uint16_t nchar = UCHAR_MAX + 1;
   unsigned char a = seed / (nchar * nchar * nchar);
   unsigned char b = (seed - (a * nchar * nchar * nchar)) / (nchar * nchar);
   unsigned char c = (seed - ((a * nchar * nchar * nchar) + (b * nchar * nchar))) / nchar;
