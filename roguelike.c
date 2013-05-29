@@ -69,7 +69,6 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
 
 struct Map init_map (uint32_t seed) {
 // Initialize map with some experimental start values.
-  rrand(1, seed);
   struct Map map;
   map.width = 64;
   map.height = 64;
@@ -197,6 +196,7 @@ int main (int argc, char *argv[]) {
         break;
       default:
         exit(EXIT_FAILURE); } }
+  rrand(1, seed);
 
   struct World world;
   init_keybindings(&world);
