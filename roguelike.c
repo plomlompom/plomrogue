@@ -71,8 +71,8 @@ struct Map init_map (uint32_t seed) {
 // Initialize map with some experimental start values.
   rrand(1, seed);
   struct Map map;
-  map.width = 96;
-  map.height = 32;
+  map.width = 64;
+  map.height = 64;
   map.offset_x = 0;
   map.offset_y = 0;
   map.cells = malloc(map.width * map.height);
@@ -105,8 +105,8 @@ void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;
   char d = rrand(0, 0) % 5;
-  char ty = world->monster->y;
-  char tx = world->monster->x;
+  uint16_t ty = world->monster->y;
+  uint16_t tx = world->monster->x;
   if (1 == d)
     ty++;
   else if (2 == d)
@@ -146,8 +146,8 @@ void move_player (struct World * world, char d) {
   static char prev = 0;
   char success = 0;
   char * dir;
-  char ty = world->player->y;
-  char tx = world->player->x;
+  uint16_t ty = world->player->y;
+  uint16_t tx = world->player->x;
   if ('s' == d) {
     dir = "south";
     ty++; }
@@ -206,12 +206,12 @@ int main (int argc, char *argv[]) {
   struct Map map = init_map(seed);
   world.map = &map;
   struct Player player;
-  player.y = 16;
-  player.x = 16;
+  player.y = 8;
+  player.x = 8;
   world.player = &player;
   struct Monster monster;
-  monster.y = 16;
-  monster.x = 80;
+  monster.y = 55;
+  monster.x = 55;
   world.monster = &monster;
 
   WINDOW * screen = initscr();
