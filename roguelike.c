@@ -220,6 +220,10 @@ void player_wait (struct World * world) {
 
 int main (int argc, char *argv[]) {
   struct World world;
+  init_keybindings(&world);
+
+  world.log = calloc(1, sizeof(char));
+  update_log (&world, " ");
   struct Player player;
   world.player = &player;
   struct Monster monster;
@@ -234,10 +238,6 @@ int main (int argc, char *argv[]) {
     world.seed = time(NULL);
     world.turn = 1; }
   rrand(1, world.seed);
-
-  init_keybindings(&world);
-  world.log = calloc(1, sizeof(char));
-  update_log (&world, "Start!");
   struct Map map = init_map();
   world.map = &map;
 
