@@ -134,6 +134,7 @@ void map_scroll (struct Map * map, char dir) {
 void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;
+  rrand(1, world->seed * world->turn);
   char d = rrand(0, 0) % 5;
   uint16_t ty = world->monster->y;
   uint16_t tx = world->monster->x;
