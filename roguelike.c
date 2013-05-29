@@ -12,7 +12,7 @@
 
 uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
-  static uint32_t seed = 0;
+  static uint32_t seed;
   if (0 != use_seed)
     seed = new_seed;
   seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
