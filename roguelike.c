@@ -55,7 +55,7 @@ void write_uint32_bigendian(uint32_t x, FILE * file) {
   fputc(d, file); }
 
 void load_game(struct World * world) {
-// Load seed integer from seed file.
+// Load game data from game file.
   FILE * file = fopen("savefile", "r");
   world->seed = read_uint32_bigendian(file);
   world->turn = read_uint32_bigendian(file);
@@ -66,7 +66,7 @@ void load_game(struct World * world) {
   fclose(file); }
 
 void save_game(struct World * world) {
-// Save seed integer to seed file.
+// Save game data to game file.
   FILE * file = fopen("savefile", "w");
   write_uint32_bigendian(world->seed, file);
   write_uint32_bigendian(world->turn, file);
