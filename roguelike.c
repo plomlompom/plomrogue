@@ -187,15 +187,11 @@ void player_wait (struct World * world) {
   update_log (world, "\nYou wait."); }
 
 int main (int argc, char *argv[]) {
-  uint32_t seed = time(NULL);
-  int opt;
-  while ((opt = getopt(argc, argv, "l")) != -1) {
-    switch (opt) {
-      case 'l':
-	seed = load_seed();
-        break;
-      default:
-        exit(EXIT_FAILURE); } }
+  uint32_t seed;
+  if (0 == access("seed", F_OK))
+    seed = load_seed();
+  else
+    seed = time(NULL);
   rrand(1, seed);
 
   struct World world;
