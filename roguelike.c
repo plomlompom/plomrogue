@@ -67,7 +67,7 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
       width++;
     resize_active_window (win_meta, height, width); } }
 
-struct Map init_map (uint32_t seed) {
+struct Map init_map () {
 // Initialize map with some experimental start values.
   struct Map map;
   map.width = 64;
@@ -199,7 +199,7 @@ int main (int argc, char *argv[]) {
   world.turn = 0;
   world.log = calloc(1, sizeof(char));
   update_log (&world, "Start!");
-  struct Map map = init_map(seed);
+  struct Map map = init_map();
   world.map = &map;
   struct Player player;
   player.y = 8;
