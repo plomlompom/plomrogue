@@ -232,7 +232,7 @@ int main (int argc, char *argv[]) {
     monster.y = 55;
     monster.x = 55;
     world.seed = time(NULL);
-    world.turn = 0; }
+    world.turn = 1; }
   rrand(1, world.seed);
 
   init_keybindings(&world);
@@ -253,7 +253,11 @@ int main (int argc, char *argv[]) {
   struct Win win_log = init_window(&win_meta, "Log", &world, draw_log_win);
 
   int key;
+  uint32_t last_turn = 0;
   while (1) {
+    if (last_turn != world.turn) {
+      save_seed(&world);
+      last_turn = world.turn; }
     draw_all_windows (&win_meta);
     key = getch();
     if      (key == get_action_key(world.keybindings, "quit"))
@@ -294,8 +298,6 @@ int main (int argc, char *argv[]) {
       keyswin_move_selection (&world, 'd');
     else if (key == get_action_key(world.keybindings, "keys mod"))
       keyswin_mod_key (&world, &win_meta);
-    else if (key == get_action_key(world.keybindings, "save game"))
-      save_seed(&world);
     else if (key == get_action_key(world.keybindings, "map up"))
       map_scroll (&map, 'n');
     else if (key == get_action_key(world.keybindings, "map down"))
