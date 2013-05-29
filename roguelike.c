@@ -251,6 +251,14 @@ int main (int argc, char *argv[]) {
   struct Win win_map = init_window(&win_meta, "Map", &world, draw_map_win);
   struct Win win_info = init_window(&win_meta, "Info", &world, draw_info_win);
   struct Win win_log = init_window(&win_meta, "Log", &world, draw_log_win);
+  win_keys.width = 29;
+  win_map.width = win_meta.width - win_keys.width - win_log.width - 2;
+  win_info.height = 1;
+  win_log.height = win_meta.height - 3;
+  toggle_window(&win_meta, &win_keys);
+  toggle_window(&win_meta, &win_map);
+  toggle_window(&win_meta, &win_info);
+  toggle_window(&win_meta, &win_log);
 
   int key;
   uint32_t last_turn = 0;
