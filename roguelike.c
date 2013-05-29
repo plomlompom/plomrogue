@@ -54,7 +54,7 @@ void write_uint32_bigendian(uint32_t x, FILE * file) {
   fputc(c, file);
   fputc(d, file); }
 
-void load_seed(struct World * world) {
+void load_game(struct World * world) {
 // Load seed integer from seed file.
   FILE * file = fopen("savefile", "r");
   world->seed = read_uint32_bigendian(file);
@@ -65,7 +65,7 @@ void load_seed(struct World * world) {
   world->monster->x = read_uint16_bigendian(file);
   fclose(file); }
 
-void save_seed(struct World * world) {
+void save_game(struct World * world) {
 // Save seed integer to seed file.
   FILE * file = fopen("savefile", "w");
   write_uint32_bigendian(world->seed, file);
@@ -225,7 +225,7 @@ int main (int argc, char *argv[]) {
   struct Monster monster;
   world.monster = &monster;
   if (0 == access("savefile", F_OK))
-    load_seed(&world);
+    load_game(&world);
   else {
     player.y = 8;
     player.x = 8;
@@ -256,7 +256,7 @@ int main (int argc, char *argv[]) {
   uint32_t last_turn = 0;
   while (1) {
     if (last_turn != world.turn) {
-      save_seed(&world);
+      save_game(&world);
       last_turn = world.turn; }
     draw_all_windows (&win_meta);
     key = getch();
