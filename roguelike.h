@@ -1,4 +1,5 @@
 struct World {
+  char interactive;
   struct KeyBinding * keybindings;
   struct KeysWinData * keyswindata;
   uint32_t seed;
@@ -37,5 +38,8 @@ void map_scroll (struct Map *, char);
 void next_turn (struct World *);
 void update_log (struct World *, char *);
 char is_passable (struct World *, uint16_t, uint16_t);
+void record_action (char);
 void move_player (struct World *, char);
 void player_wait(struct World *);
+void startpos(struct World *);
+unsigned char meta_keys(int, struct World *, struct WinMeta *, struct Win *, struct Win *, struct Win *, struct Win *);

@@ -172,6 +172,12 @@ char is_passable (struct World * world, uint16_t x, uint16_t y) {
       passable = 1;
   return passable; }
 
+void record_action (char action) {
+//
+  FILE * file = fopen("record", "a");
+  fputc(action, file);
+  fclose(file); }
+
 void move_player (struct World * world, char d) {
 // Move player in direction d, increment turn counter and update log.
   static char prev = 0;
@@ -211,32 +217,110 @@ void move_player (struct World * world, char d) {
       update_log (world, msg);
       free(msg); } }
   prev = success * d;
+  if (1 == world->interactive)
+    record_action(d);
   next_turn (world); }
 
 void player_wait (struct World * world) {
 // Make player wait one turn.
+  if (1 == world->interactive)
+    record_action(0);
   next_turn (world);
   update_log (world, "\nYou wait."); }
 
+void startpos(struct World * world) {
+// Initialize some default starting values.
+  world->turn = 1;
+  world->player->y = 8;
+  world->player->x = 8;
+  world->monster->y = 55;
+  world->monster->x = 55; }
+
+unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
+                        struct Win * win_map, struct Win * win_info, struct Win * win_log) {
+// Call some meta program / window management actions dependent on key. Return 1 to signal quitting.
+  if (key == get_action_key(world->keybindings, "quit"))
+    return 1;
+  if (key == get_action_key(world->keybindings, "scroll pad right"))
+    scroll_pad (win_meta, '+');
+  else if (key == get_action_key(world->keybindings, "scroll pad left"))
+    scroll_pad (win_meta, '-');
+  else if (key == get_action_key(world->keybindings, "toggle keys window"))
+    toggle_window(win_meta, win_keys);
+  else if (key == get_action_key(world->keybindings, "toggle map window"))
+    toggle_window(win_meta, win_map);
+  else if (key == get_action_key(world->keybindings, "toggle info window"))
+    toggle_window(win_meta, win_info);
+  else if (key == get_action_key(world->keybindings, "toggle log window"))
+    toggle_window(win_meta, win_log);
+  else if (key == get_action_key(world->keybindings, "cycle forwards"))
+    cycle_active_window(win_meta, 'n');
+  else if (key == get_action_key(world->keybindings, "cycle backwards"))
+    cycle_active_window(win_meta, 'p');
+  else if (key == get_action_key(world->keybindings, "shift forwards"))
+    shift_active_window(win_meta, 'f');
+  else if (key == get_action_key(world->keybindings, "shift backwards"))
+    shift_active_window(win_meta, 'b');
+  else if (key == get_action_key(world->keybindings, "grow horizontally"))
+    growshrink_active_window(win_meta, '*');
+  else if (key == get_action_key(world->keybindings, "shrink horizontally"))
+    growshrink_active_window(win_meta, '_');
+  else if (key == get_action_key(world->keybindings, "grow vertically"))
+    growshrink_active_window(win_meta, '+');
+  else if (key == get_action_key(world->keybindings, "shrink vertically"))
+    growshrink_active_window(win_meta, '-');
+  else if (key == get_action_key(world->keybindings, "save keys"))
+    save_keybindings(world);
+  else if (key == get_action_key(world->keybindings, "keys nav up"))
+    keyswin_move_selection (world, 'u');
+  else if (key == get_action_key(world->keybindings, "keys nav down"))
+    keyswin_move_selection (world, 'd');
+  else if (key == get_action_key(world->keybindings, "keys mod"))
+    keyswin_mod_key (world, win_meta);
+  else if (key == get_action_key(world->keybindings, "map up"))
+    map_scroll (world->map, 'n');
+  else if (key == get_action_key(world->keybindings, "map down"))
+    map_scroll (world->map, 's');
+  else if (key == get_action_key(world->keybindings, "map right"))
+    map_scroll (world->map, 'e');
+  else if (key == get_action_key(world->keybindings, "map left"))
+    map_scroll (world->map, 'w');
+  return 0; }
+
 int main (int argc, char *argv[]) {
   struct World world;
-  init_keybindings(&world);
+  world.interactive = 1;
+  int opt;
+  while ((opt = getopt(argc, argv, "s")) != -1) {
+    switch (opt) {
+      case 's':
+        world.interactive = 0;
+        break;
+      default:
+        exit(EXIT_FAILURE); } }
 
+  init_keybindings(&world);
   world.log = calloc(1, sizeof(char));
   update_log (&world, " ");
   struct Player player;
   world.player = &player;
   struct Monster monster;
   world.monster = &monster;
-  if (0 == access("savefile", F_OK))
-    load_game(&world);
+  FILE * file;
+
+  if (0 == world.interactive) {
+    startpos(&world);
+    file = fopen("record", "r");
+    world.seed = read_uint32_bigendian(file); }
   else {
-    player.y = 8;
-    player.x = 8;
-    monster.y = 55;
-    monster.x = 55;
-    world.seed = time(NULL);
-    world.turn = 1; }
+    if (0 == access("savefile", F_OK))
+      load_game(&world);
+    else {
+      startpos(&world);
+      world.seed = time(NULL);
+      file = fopen("record", "w");
+      write_uint32_bigendian(world.seed, file);
+      fclose(file); } }
   rrand(1, world.seed);
   struct Map map = init_map();
   world.map = &map;
@@ -261,69 +345,52 @@ int main (int argc, char *argv[]) {
   toggle_window(&win_meta, &win_log);
 
   int key;
-  uint32_t last_turn = 0;
-  while (1) {
-    if (last_turn != world.turn) {
-      save_game(&world);
-      last_turn = world.turn; }
-    draw_all_windows (&win_meta);
-    key = getch();
-    if      (key == get_action_key(world.keybindings, "quit"))
-      break;
-    else if (key == get_action_key(world.keybindings, "scroll pad right"))
-      scroll_pad (&win_meta, '+');
-    else if (key == get_action_key(world.keybindings, "scroll pad left"))
-      scroll_pad (&win_meta, '-');
-    else if (key == get_action_key(world.keybindings, "toggle keys window"))
-      toggle_window(&win_meta, &win_keys);
-    else if (key == get_action_key(world.keybindings, "toggle map window"))
-      toggle_window(&win_meta, &win_map);
-    else if (key == get_action_key(world.keybindings, "toggle info window"))
-      toggle_window(&win_meta, &win_info);
-    else if (key == get_action_key(world.keybindings, "toggle log window"))
-      toggle_window(&win_meta, &win_log);
-    else if (key == get_action_key(world.keybindings, "cycle forwards"))
-      cycle_active_window(&win_meta, 'n');
-    else if (key == get_action_key(world.keybindings, "cycle backwards"))
-      cycle_active_window(&win_meta, 'p');
-    else if (key == get_action_key(world.keybindings, "shift forwards"))
-      shift_active_window(&win_meta, 'f');
-    else if (key == get_action_key(world.keybindings, "shift backwards"))
-      shift_active_window(&win_meta, 'b');
-    else if (key == get_action_key(world.keybindings, "grow horizontally"))
-      growshrink_active_window(&win_meta, '*');
-    else if (key == get_action_key(world.keybindings, "shrink horizontally"))
-      growshrink_active_window(&win_meta, '_');
-    else if (key == get_action_key(world.keybindings, "grow vertically"))
-      growshrink_active_window(&win_meta, '+');
-    else if (key == get_action_key(world.keybindings, "shrink vertically"))
-      growshrink_active_window(&win_meta, '-');
-    else if (key == get_action_key(world.keybindings, "save keys"))
-      save_keybindings(&world);
-    else if (key == get_action_key(world.keybindings, "keys nav up"))
-      keyswin_move_selection (&world, 'u');
-    else if (key == get_action_key(world.keybindings, "keys nav down"))
-      keyswin_move_selection (&world, 'd');
-    else if (key == get_action_key(world.keybindings, "keys mod"))
-      keyswin_mod_key (&world, &win_meta);
-    else if (key == get_action_key(world.keybindings, "map up"))
-      map_scroll (&map, 'n');
-    else if (key == get_action_key(world.keybindings, "map down"))
-      map_scroll (&map, 's');
-    else if (key == get_action_key(world.keybindings, "map right"))
-      map_scroll (&map, 'e');
-    else if (key == get_action_key(world.keybindings, "map left"))
-      map_scroll (&map, 'w');
-    else if (key == get_action_key(world.keybindings, "player down"))
-      move_player(&world, 's');
-    else if (key == get_action_key(world.keybindings, "player up"))
-      move_player(&world, 'n');
-    else if (key == get_action_key(world.keybindings, "player right"))
-      move_player(&world, 'e');
-    else if (key == get_action_key(world.keybindings, "player left"))
-      move_player(&world, 'w');
-    else if (key == get_action_key(world.keybindings, "wait") )
-      player_wait (&world); }
+  unsigned char result;
+  if (0 == world.interactive) {
+    int action;
+    while (1) {
+      draw_all_windows (&win_meta);
+      key = getch();
+      if (key == get_action_key(world.keybindings, "wait / next turn") ) {
+        action = getc(file);
+        if (EOF == action)
+          break;
+        else if (0 == action)
+          player_wait (&world);
+        else if ('s' == action)
+          move_player(&world, 's');
+        else if ('n' == action)
+          move_player(&world, 'n');
+        else if ('e' == action)
+          move_player(&world, 'e');
+        else if ('w' == action)
+          move_player(&world, 'w'); }
+      else
+        result = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
+        if (1 == result)
+          break; } }
+  else {
+    uint32_t last_turn = 0;
+    while (1) {
+      if (last_turn != world.turn) {
+        save_game(&world);
+        last_turn = world.turn; }
+      draw_all_windows (&win_meta);
+      key = getch();
+      if      (key == get_action_key(world.keybindings, "player down"))
+        move_player(&world, 's');
+      else if (key == get_action_key(world.keybindings, "player up"))
+        move_player(&world, 'n');
+      else if (key == get_action_key(world.keybindings, "player right"))
+        move_player(&world, 'e');
+      else if (key == get_action_key(world.keybindings, "player left"))
+        move_player(&world, 'w');
+      else if (key == get_action_key(world.keybindings, "wait / next turn"))
+        player_wait (&world);
+      else
+        result = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
+        if (1 == result)
+          break; } }
 
   free(map.cells);
   for (key = 0; key <= world.keyswindata->max; key++)
