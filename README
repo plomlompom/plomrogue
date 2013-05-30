@@ -52,3 +52,11 @@ S       save current keybindings
 UP      navigate selection upwards in keybinding editing window
 DOWN    navigate selection downwards in keybinding editing window
 RETURN  modify keybinding selected in keybinding editing window
+
+Replay game recording
+---------------------
+
+Run "./roguelike -s" to watch a recording of the current game from the
+beginning. Hit the "next turn / wait" key to increment turns. Keys to
+manage windows, scroll on the map and quit the program are active; keys
+to perform player actions are inactive.
