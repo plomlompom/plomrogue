@@ -173,7 +173,7 @@ char is_passable (struct World * world, uint16_t x, uint16_t y) {
   return passable; }
 
 void record_action (char action) {
-//
+// Append action to game record file.
   FILE * file = fopen("record", "a");
   fputc(action, file);
   fclose(file); }
@@ -241,7 +241,7 @@ unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta
 // Call some meta program / window management actions dependent on key. Return 1 to signal quitting.
   if (key == get_action_key(world->keybindings, "quit"))
     return 1;
-  if (key == get_action_key(world->keybindings, "scroll pad right"))
+  else if (key == get_action_key(world->keybindings, "scroll pad right"))
     scroll_pad (win_meta, '+');
   else if (key == get_action_key(world->keybindings, "scroll pad left"))
     scroll_pad (win_meta, '-');
