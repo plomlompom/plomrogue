@@ -347,14 +347,15 @@ int main (int argc, char *argv[]) {
   int key;
   unsigned char quit_called;
   if (0 == world.interactive) {
+    unsigned char still_reading_file = 1;
     int action;
     while (1) {
       draw_all_windows (&win_meta);
       key = getch();
-      if (key == get_action_key(world.keybindings, "wait / next turn") ) {
+      if (1 == still_reading_file && key == get_action_key(world.keybindings, "wait / next turn") ) {
         action = getc(file);
         if (EOF == action)
-          break;
+          still_reading_file = 0;
         else if (0 == action)
           player_wait (&world);
         else if ('s' == action)
