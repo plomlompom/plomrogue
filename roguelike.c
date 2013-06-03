@@ -105,19 +105,25 @@ struct Map init_map () {
   map.height = 64;
   map.offset_x = 0;
   map.offset_y = 0;
-  map.cells = malloc(map.width * map.height);
-  uint16_t x, y, ran;
-  char terrain;
+  uint32_t size = map.width * map.height;
+  map.cells = malloc(size);
+  uint16_t y, x;
   for (y = 0; y < map.height; y++)
-    for (x = 0; x < map.width; x++) {
-      terrain = '.';
-      ran = rrand(0, 0);
-      if (   0 == ran % ((x*x) / 3 + 1)
-          || 0 == ran % ((y*y) / 3 + 1)
-          || 0 == ran % ((map.width - x - 1) * (map.width - x - 1) / 3 + 1)
-          || 0 == ran %((map.height - y - 1) * (map.height - y - 1) / 3 + 1))
-        terrain = ' ';
-      map.cells[(y * map.width) + x] = terrain; }
+    for (x = 0; x < map.width; x++)
+      map.cells[(y * map.width) + x] = '~';
+  map.cells[size / 2 + (map.width / 2)] = '.';
+  uint32_t repeats, root, curpos;
+  for (root = 0; root * root * root < size; root++);
+  for (repeats = 0; repeats < size * root; repeats++) {
+    y = rrand(0, 0) % map.height;
+    x = rrand(0, 0) % map.width;
+    curpos = y * map.width + x;
+    if ('~' == map.cells[curpos] &&
+        (   (curpos >= map.width && '.' == map.cells[curpos - map.width])
+         || (curpos < map.width * (map.height - 1) && '.' == map.cells[curpos + map.width])
+         || (curpos > 0 && '.' == map.cells[curpos - 1] && curpos % map.width != 0)
+         || (curpos < (map.width * map.height) && '.' == map.cells[curpos + 1]) && (curpos + 1) % map.width != 0))
+      map.cells[y * map.width + x] = '.'; }
   return map; }
 
 void map_scroll (struct Map * map, char dir) {
