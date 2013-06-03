@@ -345,7 +345,7 @@ int main (int argc, char *argv[]) {
   toggle_window(&win_meta, &win_log);
 
   int key;
-  unsigned char result;
+  unsigned char quit_called;
   if (0 == world.interactive) {
     int action;
     while (1) {
@@ -366,8 +366,8 @@ int main (int argc, char *argv[]) {
         else if ('w' == action)
           move_player(&world, 'w'); }
       else
-        result = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
-        if (1 == result)
+        quit_called = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
+        if (1 == quit_called)
           break; } }
   else {
     uint32_t last_turn = 0;
@@ -388,8 +388,8 @@ int main (int argc, char *argv[]) {
       else if (key == get_action_key(world.keybindings, "wait / next turn"))
         player_wait (&world);
       else
-        result = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
-        if (1 == result)
+        quit_called = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
+        if (1 == quit_called)
           break; } }
 
   free(map.cells);
