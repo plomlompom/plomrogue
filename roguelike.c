@@ -291,10 +291,14 @@ int main (int argc, char *argv[]) {
   struct World world;
   world.interactive = 1;
   int opt;
-  while ((opt = getopt(argc, argv, "s")) != -1) {
+  uint32_t start_turn;
+  while ((opt = getopt(argc, argv, "s::")) != -1) {
     switch (opt) {
       case 's':
         world.interactive = 0;
+        start_turn = 0;
+        if (optarg)
+          start_turn = atoi(optarg);
         break;
       default:
         exit(EXIT_FAILURE); } }
@@ -350,12 +354,17 @@ int main (int argc, char *argv[]) {
     unsigned char still_reading_file = 1;
     int action;
     while (1) {
-      draw_all_windows (&win_meta);
-      key = getch();
-      if (1 == still_reading_file && key == get_action_key(world.keybindings, "wait / next turn") ) {
+      if (start_turn == world.turn)
+        start_turn = 0;
+      if (0 == start_turn) {
+        draw_all_windows (&win_meta);
+        key = getch(); }
+      if (1 == still_reading_file &&
+          (world.turn < start_turn || key == get_action_key(world.keybindings, "wait / next turn")) ) {
         action = getc(file);
-        if (EOF == action)
-          still_reading_file = 0;
+        if (EOF == action) {
+          start_turn = 0;
+          still_reading_file = 0; }
         else if (0 == action)
           player_wait (&world);
         else if ('s' == action)

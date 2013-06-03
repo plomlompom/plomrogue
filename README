@@ -59,4 +59,5 @@ Replay game recording
 Run "./roguelike -s" to watch a recording of the current game from the
 beginning. Hit the "next turn / wait" key to increment turns. Keys to
 manage windows, scroll on the map and quit the program are active; keys
-to perform player actions are inactive.
+to perform player actions are inactive. Append a number to the -s option
+(like "-s100") to start the recording at the respective turn number.
