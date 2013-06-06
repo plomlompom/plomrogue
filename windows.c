@@ -191,7 +191,6 @@ void draw_all_windows (struct WinMeta * win_meta) {
       mvwaddch(win_meta->pad, all_corners[i].tr.y, all_corners[i].tr.x, '+');
       mvwaddch(win_meta->pad, all_corners[i].bl.y, all_corners[i].bl.x, '+');
       mvwaddch(win_meta->pad, all_corners[i].br.y, all_corners[i].br.x, '+'); }
-      // pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1);
     free(all_corners);
     uint16_t y;
     if (win_meta->pad_offset > 0)
