@@ -172,7 +172,7 @@ void draw_windows (struct Win * win) {
     draw_windows (win->next); } }
 
 void draw_all_windows (struct WinMeta * win_meta) {
-// Draw all windows and their borders.
+// Draw pad with all windows and their borders, plus scrolling hints.
   erase();
   wnoutrefresh(win_meta->screen);
   werase(win_meta->pad);
@@ -191,8 +191,16 @@ void draw_all_windows (struct WinMeta * win_meta) {
       mvwaddch(win_meta->pad, all_corners[i].tr.y, all_corners[i].tr.x, '+');
       mvwaddch(win_meta->pad, all_corners[i].bl.y, all_corners[i].bl.x, '+');
       mvwaddch(win_meta->pad, all_corners[i].br.y, all_corners[i].br.x, '+'); }
-    pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1);
-    free(all_corners); }
+      // pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1);
+    free(all_corners);
+    uint16_t y;
+    if (win_meta->pad_offset > 0)
+      for (y = 0; y < win_meta->height; y++)
+        mvwaddch(win_meta->pad, y, win_meta->pad_offset, '<' | A_REVERSE);
+    if (win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad))
+      for (y = 0; y < win_meta->height; y++)
+        mvwaddch(win_meta->pad, y, win_meta->pad_offset + win_meta->width - 1, '>' | A_REVERSE);
+    pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1); }
   doupdate(); }
 
 void resize_active_window (struct WinMeta * win_meta, uint16_t height, uint16_t width) {
