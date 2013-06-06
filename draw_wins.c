@@ -99,37 +99,55 @@ void draw_info_win (struct Win * win) {
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
 
+void draw_scroll_hint (struct Win * win, uint16_t y, uint32_t more_lines, char dir) {
+// Draw scroll hint line in win at row y, announce more_lines more lines in direction dir.
+  uint16_t x, offset;
+  char phrase[] = "more lines";
+  char * scrolldesc = malloc((3 * sizeof(char)) + strlen(phrase) + 10); // 10 = max chars for uint32_t string
+  sprintf(scrolldesc, " %d %s ", more_lines, phrase);
+  offset = 1;
+  if (win->width > (strlen(scrolldesc) + 1))
+    offset = (win->width - strlen(scrolldesc)) / 2;
+  for (x = 0; x < win->width; x++)
+    if (x >= offset && x < strlen(scrolldesc) + offset)
+      mvwaddch(win->curses, y, x, scrolldesc[x - offset] | A_REVERSE);
+    else
+      mvwaddch(win->curses, y, x, dir | A_REVERSE);
+  free(scrolldesc); }
+
 void draw_keys_win (struct Win * win) {
-// Draw keybinding window.
+// Draw keybindings window.
   struct World * world = (struct World *) win->data;
-  struct KeysWinData * keyswindata = (struct KeysWinData *) world->keyswindata;
-  struct KeyBinding * keybindings = world->keybindings;
-  uint16_t offset = 0;
-  if (keyswindata->max >= win->height) {
-    if (keyswindata->select > win->height / 2) {
-      if (keyswindata->select < (keyswindata->max - (win->height / 2)))
-        offset = keyswindata->select - (win->height / 2);
+  uint16_t offset = 0, y, x;
+  if (world->keyswindata->max >= win->height) {
+    if (world->keyswindata->select > win->height / 2) {
+      if (world->keyswindata->select < (world->keyswindata->max - (win->height / 2)))
+        offset = world->keyswindata->select - (win->height / 2);
       else
-        offset = keyswindata->max - win->height + 1; } }
+        offset = world->keyswindata->max - win->height + 1; } }
   uint8_t keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
-  char * keydesc = malloc(keydescwidth);
+  char * keydesc = malloc(keydescwidth), * keyname;
   attr_t attri;
-  uint16_t y, x;
-  char * keyname;
-  for (y = 0; y <= keyswindata->max && y < win->height; y++) {
+  for (y = 0; y <= world->keyswindata->max && y < win->height; y++) {
+    if (0 == y && offset > 0) {
+      draw_scroll_hint (win, y, offset + 1, '^');
+      continue; }
+    else if (win->height == y + 1 && 0 < world->keyswindata->max - (win->height + offset - 1)) {
+      draw_scroll_hint (win, y, world->keyswindata->max - (offset + win->height) + 2, 'v');
+      continue; }
     attri = 0;
-    if (y == keyswindata->select - offset) {
+    if (y == world->keyswindata->select - offset) {
       attri = A_REVERSE;
-      if (1 == keyswindata->edit)
+      if (1 == world->keyswindata->edit)
         attri = attri | A_BLINK; }
-    keyname = get_keyname(keybindings[y + offset].key);
+    keyname = get_keyname(world->keybindings[y + offset].key);
     snprintf(keydesc, keydescwidth, "%-9s", keyname);
     free(keyname);
     for (x = 0; x < win->width; x++)
       if (x < strlen(keydesc))
         mvwaddch(win->curses, y, x, keydesc[x] | attri);
-      else if (strlen(keydesc) < x && x < strlen(keybindings[y + offset].name) + strlen(keydesc) + 1)
-        mvwaddch(win->curses, y, x, keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
+      else if (strlen(keydesc) < x && x < strlen(world->keybindings[y + offset].name) + strlen(keydesc) + 1)
+        mvwaddch(win->curses, y, x, world->keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
       else
         mvwaddch(win->curses, y, x, ' ' | attri); }
   free(keydesc); }
