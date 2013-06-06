@@ -19,7 +19,7 @@ struct WinMeta init_win_meta (WINDOW * screen) {
 
 void scroll_pad (struct WinMeta * win_meta, char dir) {
 // Scroll pad left or right (if possible).
-  if      ('+' == dir && win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad))
+  if      ('+' == dir && win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad) - 1)
     win_meta->pad_offset++;
   else if ('-' == dir && win_meta->pad_offset > 0)
     win_meta->pad_offset--; }
@@ -196,7 +196,7 @@ void draw_all_windows (struct WinMeta * win_meta) {
     if (win_meta->pad_offset > 0)
       for (y = 0; y < win_meta->height; y++)
         mvwaddch(win_meta->pad, y, win_meta->pad_offset, '<' | A_REVERSE);
-    if (win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad))
+    if (win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad) - 1)
       for (y = 0; y < win_meta->height; y++)
         mvwaddch(win_meta->pad, y, win_meta->pad_offset + win_meta->width - 1, '>' | A_REVERSE);
     pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1); }
