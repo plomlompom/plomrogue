@@ -18,8 +18,8 @@ struct WinMeta init_win_meta (WINDOW * screen) {
   return win_meta; }
 
 void scroll_pad (struct WinMeta * win_meta, char dir) {
-// Scroll pad left (if possible) or right.
-  if      ('+' == dir)
+// Scroll pad left or right (if possible).
+  if      ('+' == dir && win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad))
     win_meta->pad_offset++;
   else if ('-' == dir && win_meta->pad_offset > 0)
     win_meta->pad_offset--; }
