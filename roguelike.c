@@ -122,7 +122,7 @@ struct Map init_map () {
         (   (curpos >= map.width && '.' == map.cells[curpos - map.width])
          || (curpos < map.width * (map.height - 1) && '.' == map.cells[curpos + map.width])
          || (curpos > 0 && '.' == map.cells[curpos - 1] && curpos % map.width != 0)
-         || (curpos < (map.width * map.height) && '.' == map.cells[curpos + 1]) && (curpos + 1) % map.width != 0))
+         || (curpos < (map.width * map.height) && '.' == map.cells[curpos + 1] && (curpos + 1) % map.width != 0)))
       map.cells[y * map.width + x] = '.'; }
   return map; }
 
