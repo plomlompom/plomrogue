@@ -39,6 +39,7 @@ void destroy_window (struct Win *);
 void draw_windows (struct Win *);
 void draw_windows_borders (struct Win *, struct Win *, struct Corners *, uint16_t);
 void draw_window_borders (struct Win *, char);
+void draw_vertical_scroll_hint (struct WinMeta *, uint16_t, uint32_t, char);
 void draw_all_windows (struct WinMeta *);
 void resize_active_window (struct WinMeta *, uint16_t, uint16_t);
 void cycle_active_window (struct WinMeta *, char);

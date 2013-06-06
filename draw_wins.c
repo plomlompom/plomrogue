@@ -99,7 +99,7 @@ void draw_info_win (struct Win * win) {
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
 
-void draw_scroll_hint (struct Win * win, uint16_t y, uint32_t more_lines, char dir) {
+void draw_horizontal_scroll_hint (struct Win * win, uint16_t y, uint32_t more_lines, char dir) {
 // Draw scroll hint line in win at row y, announce more_lines more lines in direction dir.
   uint16_t x, offset;
   char phrase[] = "more lines";
@@ -130,10 +130,10 @@ void draw_keys_win (struct Win * win) {
   attr_t attri;
   for (y = 0; y <= world->keyswindata->max && y < win->height; y++) {
     if (0 == y && offset > 0) {
-      draw_scroll_hint (win, y, offset + 1, '^');
+      draw_horizontal_scroll_hint (win, y, offset + 1, '^');
       continue; }
     else if (win->height == y + 1 && 0 < world->keyswindata->max - (win->height + offset - 1)) {
-      draw_scroll_hint (win, y, world->keyswindata->max - (offset + win->height) + 2, 'v');
+      draw_horizontal_scroll_hint (win, y, world->keyswindata->max - (offset + win->height) + 2, 'v');
       continue; }
     attri = 0;
     if (y == world->keyswindata->select - offset) {

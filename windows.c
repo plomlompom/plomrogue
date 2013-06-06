@@ -171,6 +171,23 @@ void draw_windows (struct Win * win) {
   if (0 != win->next) {
     draw_windows (win->next); } }
 
+void draw_vertical_scroll_hint (struct WinMeta * win_meta, uint16_t x, uint32_t more_cols, char dir) {
+// Draw scroll hint line in win at col x of pad display, announce more_cols more columns in direction dir.
+  uint16_t y, offset;
+  offset = 0;
+  char phrase[] = "more columns";
+  char * scrolldesc = malloc((3 * sizeof(char)) + strlen(phrase) + 10); // 10 = max chars for uint32_t string
+  sprintf(scrolldesc, " %d %s ", more_cols, phrase);
+  offset = 1;
+  if (win_meta->height > (strlen(scrolldesc) + 1))
+    offset = (win_meta->height - strlen(scrolldesc)) / 2;
+  for (y = 0; y < win_meta->height; y++)
+    if (y >= offset && y < strlen(scrolldesc) + offset)
+      mvwaddch(win_meta->pad, y, x, scrolldesc[y - offset] | A_REVERSE);
+    else
+      mvwaddch(win_meta->pad, y, x, dir | A_REVERSE);
+  free(scrolldesc); }
+
 void draw_all_windows (struct WinMeta * win_meta) {
 // Draw pad with all windows and their borders, plus scrolling hints.
   erase();
@@ -194,11 +211,11 @@ void draw_all_windows (struct WinMeta * win_meta) {
     free(all_corners);
     uint16_t y;
     if (win_meta->pad_offset > 0)
-      for (y = 0; y < win_meta->height; y++)
-        mvwaddch(win_meta->pad, y, win_meta->pad_offset, '<' | A_REVERSE);
+        draw_vertical_scroll_hint(win_meta, win_meta->pad_offset, win_meta->pad_offset + 1, '<');
     if (win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad) - 1)
       for (y = 0; y < win_meta->height; y++)
-        mvwaddch(win_meta->pad, y, win_meta->pad_offset + win_meta->width - 1, '>' | A_REVERSE);
+        draw_vertical_scroll_hint(win_meta, win_meta->pad_offset + win_meta->width - 1,
+                                  getmaxx(win_meta->pad) - (win_meta->pad_offset + win_meta->width + 1), '>');
     pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1); }
   doupdate(); }
 
