@@ -54,17 +54,6 @@ void write_uint32_bigendian(uint32_t x, FILE * file) {
   fputc(c, file);
   fputc(d, file); }
 
-void load_game(struct World * world) {
-// Load game data from game file.
-  FILE * file = fopen("savefile", "r");
-  world->seed = read_uint32_bigendian(file);
-  world->turn = read_uint32_bigendian(file);
-  world->player->y = read_uint16_bigendian(file);
-  world->player->x = read_uint16_bigendian(file);
-  world->monster->y = read_uint16_bigendian(file);
-  world->monster->x = read_uint16_bigendian(file);
-  fclose(file); }
-
 void save_game(struct World * world) {
 // Save game data to game file.
   FILE * file = fopen("savefile", "w");
@@ -154,7 +143,7 @@ void next_turn (struct World * world) {
     tx--;
   if (tx == world->player->x && ty == world->player->y)
     update_log(world, "\nThe monster hits you.");
-  else if (is_passable(world, tx, ty)) {
+  else if (is_passable(world->map, ty, tx)) {
     world->monster->y = ty;
     world->monster->x = tx; } }
 
@@ -170,11 +159,11 @@ void update_log (struct World * world, char * text) {
   free(world->log);
   world->log = new_text; }
 
-char is_passable (struct World * world, uint16_t x, uint16_t y) {
+char is_passable (struct Map * map, uint16_t y, uint16_t x) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
-  if (0 <= x && x < world->map->width && 0 <= y && y < world->map->height)
-    if ('.' == world->map->cells[y * world->map->width + x])
+  if (0 <= x && x < map->width && 0 <= y && y < map->height)
+    if ('.' == map->cells[y * map->width + x])
       passable = 1;
   return passable; }
 
@@ -205,7 +194,7 @@ void move_player (struct World * world, char d) {
     tx++; }
   if (ty == world->monster->y && tx == world->monster->x)
     success = 2;
-  else if (is_passable(world, tx, ty)) {
+  else if (is_passable(world->map, ty, tx)) {
     success = 1;
     world->player->y = ty;
     world->player->x = tx; }
@@ -233,14 +222,6 @@ void player_wait (struct World * world) {
     record_action(0);
   next_turn (world);
   update_log (world, "\nYou wait."); }
-
-void startpos(struct World * world) {
-// Initialize some default starting values.
-  world->turn = 1;
-  world->player->y = 8;
-  world->player->x = 8;
-  world->monster->y = 55;
-  world->monster->x = 55; }
 
 unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
                         struct Win * win_map, struct Win * win_info, struct Win * win_log) {
@@ -309,7 +290,6 @@ int main (int argc, char *argv[]) {
       default:
         exit(EXIT_FAILURE); } }
 
-  init_keybindings(&world);
   world.log = calloc(1, sizeof(char));
   update_log (&world, " ");
   struct Player player;
@@ -317,29 +297,42 @@ int main (int argc, char *argv[]) {
   struct Monster monster;
   world.monster = &monster;
   FILE * file;
-
-  if (0 == world.interactive) {
-    startpos(&world);
-    file = fopen("record", "r");
-    world.seed = read_uint32_bigendian(file); }
+  if (1 == world.interactive && 0 == access("savefile", F_OK)) {
+    file = fopen("savefile", "r");
+    world.seed = read_uint32_bigendian(file);
+    world.turn = read_uint32_bigendian(file);
+    player.y = read_uint16_bigendian(file);
+    player.x = read_uint16_bigendian(file);
+    monster.y = read_uint16_bigendian(file);
+    monster.x = read_uint16_bigendian(file);
+    fclose(file); }
   else {
-    if (0 == access("savefile", F_OK))
-      load_game(&world);
+    world.turn = 1;
+    if (0 == world.interactive) {
+      file = fopen("record", "r");
+      world.seed = read_uint32_bigendian(file); }
     else {
-      startpos(&world);
-      world.seed = time(NULL);
       file = fopen("record", "w");
+      world.seed = time(NULL);
       write_uint32_bigendian(world.seed, file);
       fclose(file); } }
   rrand(1, world.seed);
   struct Map map = init_map();
   world.map = &map;
+  if (1 == world.turn) {
+    for (player.y = player.x = 0; 0 == is_passable(&map, player.y, player.x);) {
+      player.y = rrand(0, 0) % map.height;
+      player.x = rrand(0, 0) % map.width; }
+    for (monster.y = monster.x = 0; 0 == is_passable(&map, monster.y, monster.x);) {
+      monster.y = rrand(0, 0) % map.height;
+      monster.x = rrand(0, 0) % map.width; } }
 
   WINDOW * screen = initscr();
   noecho();
   curs_set(0);
   keypad(screen, TRUE);
   raw();
+  init_keybindings(&world);
   struct WinMeta win_meta = init_win_meta(screen);
   struct Win win_keys = init_window(&win_meta, "Keys", &world, draw_keys_win);
   struct Win win_map = init_window(&win_meta, "Map", &world, draw_map_win);
