@@ -58,12 +58,15 @@ void suspend_window (struct WinMeta * win_meta, struct Win * win) {
   if (win_meta->chain_end != win) {                 // Let chain element next to win know its new predecessor.
     win->next->prev = win->prev;
     if (win_meta->active == win)                          // If win was active, shift active window pointer to
-      win_meta->active = win->next;                       // the next chain element, if that is a window ...
-    update_windows(win_meta, win->next); }
+      win_meta->active = win->next; }                     // the next chain element, if that is a window ...
   else {
     win_meta->chain_end = win->prev;
     if (win_meta->active == win)                                       // ... or else to the previous element.
       win_meta->active = win->prev; }
+  if (0 != win->prev)
+    update_windows(win_meta, win->prev);
+  else if (0 != win->next)
+    update_windows(win_meta, win->next);
   win->prev = 0;
   win->next = 0; }
 
