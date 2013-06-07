@@ -215,7 +215,7 @@ void draw_all_windows (struct WinMeta * win_meta) {
     if (win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad) - 1)
       for (y = 0; y < win_meta->height; y++)
         draw_vertical_scroll_hint(win_meta, win_meta->pad_offset + win_meta->width - 1,
-                                  getmaxx(win_meta->pad) - (win_meta->pad_offset + win_meta->width + 1), '>');
+                                  getmaxx(win_meta->pad) - (win_meta->pad_offset + win_meta->width), '>');
     pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1); }
   doupdate(); }
 
