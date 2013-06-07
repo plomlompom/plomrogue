@@ -109,9 +109,9 @@ struct Map init_map () {
     curpos = y * map.width + x;
     if ('~' == map.cells[curpos] &&
         (   (curpos >= map.width && '.' == map.cells[curpos - map.width])
-         || (curpos < map.width * (map.height - 1) && '.' == map.cells[curpos + map.width])
-         || (curpos > 0 && '.' == map.cells[curpos - 1] && curpos % map.width != 0)
-         || (curpos < (map.width * map.height) && '.' == map.cells[curpos + 1] && (curpos + 1) % map.width != 0)))
+         || (curpos < map.width * (map.height-1) && '.' == map.cells[curpos + map.width])
+         || (curpos > 0 && curpos % map.width != 0 && '.' == map.cells[curpos-1])
+         || (curpos < (map.width * map.height) && (curpos+1) % map.width != 0 && '.' == map.cells[curpos+1])))
       map.cells[y * map.width + x] = '.'; }
   return map; }
 
@@ -348,7 +348,7 @@ int main (int argc, char *argv[]) {
   toggle_window(&win_meta, &win_log);
 
   int key;
-  unsigned char quit_called;
+  unsigned char quit_called = 0;
   if (0 == world.interactive) {
     unsigned char still_reading_file = 1;
     int action;
