@@ -49,26 +49,34 @@ void append_window (struct WinMeta * win_meta, struct Win * win) {
   update_windows(win_meta, win); }
 
 void suspend_window (struct WinMeta * win_meta, struct Win * win) {
-// Destroy win, suspend from window chain. Update geometry of following rows, as well as activity selection.
+// Destroy win, suspend from chain. Update geometry of following rows and pad, as well as activity selection.
   destroy_window(win);
   if (win_meta->chain_start != win)    // Give win's position in the chain to element next to it in the chain.
     win->prev->next = win->next;
   else
     win_meta->chain_start = win->next;
+  char pad_refitted = 0;
   if (win_meta->chain_end != win) {                 // Let chain element next to win know its new predecessor.
     win->next->prev = win->prev;
     if (win_meta->active == win)                          // If win was active, shift active window pointer to
-      win_meta->active = win->next; }                     // the next chain element, if that is a window ...
+      win_meta->active = win->next;                       // the next chain element, if that is a window ...
+    update_windows(win_meta, win->next);
+    pad_refitted = 1; }
   else {
     win_meta->chain_end = win->prev;
     if (win_meta->active == win)                                       // ... or else to the previous element.
       win_meta->active = win->prev; }
-  if (0 != win->prev)
-    update_windows(win_meta, win->prev);
-  else if (0 != win->next)
-    update_windows(win_meta, win->next);
   win->prev = 0;
-  win->next = 0; }
+  win->next = 0;
+  if (0 == pad_refitted) {                                                          // Refit pad if necessary.
+    uint16_t lastwincol = 0;
+    struct Win * win_p = win_meta->chain_start;
+    while (win_p != 0) {
+      if (getbegx(win_p->curses) + win_p->width > lastwincol + 1)
+        lastwincol = getbegx(win_p->curses) + win_p->width - 1;
+      win_p = win_p->next; }
+    if (getmaxx(win_meta->pad) != lastwincol)
+      wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2); } }
 
 struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
 // Based on position and sizes of previous window, find fitting place for current window.
@@ -116,8 +124,8 @@ void update_windows (struct WinMeta * win_meta, struct Win * win) {
     else if (win_p == win && startyx.x + win->width > lastwincol + 1)
       lastwincol = startyx.x + win->width - 1;
     win_p = win_p->next; }
-  if (getmaxx(win_meta->pad) != lastwincol) {
-    wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2); }
+  if (getmaxx(win_meta->pad) != lastwincol)
+    wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2);
   win->curses = subpad(win_meta->pad, win->height, win->width, startyx.y, startyx.x);
   if (0 != win->next)
     update_windows (win_meta, win->next); }
