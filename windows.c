@@ -4,7 +4,25 @@
 #include <string.h>
 #include "windows.h"
 
-struct WinMeta init_win_meta (WINDOW * screen) {
+struct yx {
+  uint16_t y;
+  uint16_t x; };
+
+struct Corners {
+  struct yx tl;
+  struct yx tr;
+  struct yx bl;
+  struct yx br; };
+
+static struct yx place_window (struct WinMeta *, struct Win *);
+static void update_windows (struct WinMeta *, struct Win *);
+static void destroy_window (struct Win *);
+static void draw_windows_borders (struct Win *, struct Win *, struct Corners *, uint16_t);
+static void draw_window_borders (struct Win *, char);
+static void draw_windows (struct Win *);
+static void draw_vertical_scroll_hint (struct WinMeta *, uint16_t, uint32_t, char);
+
+extern struct WinMeta init_win_meta (WINDOW * screen) {
 // Create and populate WinMeta struct with sane default values.
   struct WinMeta win_meta;
   win_meta.screen = screen;
@@ -17,7 +35,7 @@ struct WinMeta init_win_meta (WINDOW * screen) {
   win_meta.active = 0;
   return win_meta; }
 
-struct Win init_window (struct WinMeta * win_meta, char * title, void * data, void * func) {
+extern struct Win init_window (struct WinMeta * win_meta, char * title, void * data, void * func) {
 // Create and populate Win struct with sane default values.
   struct Win win;
   win.prev = 0;
@@ -30,7 +48,7 @@ struct Win init_window (struct WinMeta * win_meta, char * title, void * data, vo
   win.draw = func;
   return win; }
 
-void append_window (struct WinMeta * win_meta, struct Win * win) {
+extern void append_window (struct WinMeta * win_meta, struct Win * win) {
 // Append win to window chain. Set active, if first window. Update geometry of windows from new window on.
   if (0 != win_meta->chain_start) {
     win->prev = win_meta->chain_end;
@@ -41,7 +59,7 @@ void append_window (struct WinMeta * win_meta, struct Win * win) {
   win_meta->chain_end = win;
   update_windows(win_meta, win); }
 
-void suspend_window (struct WinMeta * win_meta, struct Win * win) {
+extern void suspend_window (struct WinMeta * win_meta, struct Win * win) {
 // Destroy win, suspend from chain. Update geometry of following rows and pad, as well as activity selection.
   destroy_window(win);
   if (win_meta->chain_start != win)    // Give win's position in the chain to element next to it in the chain.
@@ -71,7 +89,7 @@ void suspend_window (struct WinMeta * win_meta, struct Win * win) {
     if (getmaxx(win_meta->pad) != lastwincol)
       wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2); } }
 
-struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
+static struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
 // Based on position and sizes of previous window, find fitting place for current window.
   struct yx start;
   start.x = 0;                                     // if window is first in chain, place it on top-left corner
@@ -104,7 +122,7 @@ struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
         win_up = win_upup; } } }
   return start; }
 
-void update_windows (struct WinMeta * win_meta, struct Win * win) {
+static void update_windows (struct WinMeta * win_meta, struct Win * win) {
 // Update geometry of win and its next of kin. Destroy (if visible), (re-)build window. If need, resize pad.
   if (0 != win->curses)
     destroy_window (win);
@@ -123,12 +141,12 @@ void update_windows (struct WinMeta * win_meta, struct Win * win) {
   if (0 != win->next)
     update_windows (win_meta, win->next); }
 
-void destroy_window (struct Win * win) {
+static void destroy_window (struct Win * win) {
 // Delete window.
   delwin(win->curses);
   win->curses = 0; }
 
-void draw_window_borders (struct Win * win, char active) {
+static void draw_window_borders (struct Win * win, char active) {
 // Draw borders of window win, including title. Decorate in a special way if window is marked as active.
   uint16_t y, x;
   for (y = getbegy(win->curses); y <= getbegy(win->curses) + win->height; y++) {
@@ -152,7 +170,7 @@ void draw_window_borders (struct Win * win, char active) {
     title[length_visible + 2] = '\0';
     mvwaddstr (wgetparent(win->curses), getbegy(win->curses)-1, getbegx(win->curses)+title_offset, title); } }
 
-void draw_windows_borders (struct Win * win, struct Win * win_active, struct Corners * corners, uint16_t ccount) {
+static void draw_windows_borders (struct Win * win, struct Win * win_active, struct Corners * corners, uint16_t ccount) {
 // Craw draw_window_borders() for all windows in chain from win on. Save current window's border corners.
   char active = 0;
   if (win == win_active)
@@ -169,13 +187,13 @@ void draw_windows_borders (struct Win * win, struct Win * win_active, struct Cor
   if (0 != win->next) {
     draw_windows_borders (win->next, win_active, corners, ccount + 1); } }
 
-void draw_windows (struct Win * win) {
+static void draw_windows (struct Win * win) {
 // Draw contents of all windows in window chain from win on.
   win->draw(win);
   if (0 != win->next) {
     draw_windows (win->next); } }
 
-void draw_vertical_scroll_hint (struct WinMeta * win_meta, uint16_t x, uint32_t more_cols, char dir) {
+static void draw_vertical_scroll_hint (struct WinMeta * win_meta, uint16_t x, uint32_t more_cols, char dir) {
 // Draw scroll hint line in win at col x of pad display, announce more_cols more columns in direction dir.
   uint16_t y, offset;
   char phrase[] = "more columns";
@@ -191,7 +209,7 @@ void draw_vertical_scroll_hint (struct WinMeta * win_meta, uint16_t x, uint32_t 
       mvwaddch(win_meta->pad, y, x, dir | A_REVERSE);
   free(scrolldesc); }
 
-void draw_all_windows (struct WinMeta * win_meta) {
+extern void draw_all_windows (struct WinMeta * win_meta) {
 // Draw pad with all windows and their borders, plus scrolling hints.
   erase();
   wnoutrefresh(win_meta->screen);
@@ -222,14 +240,14 @@ void draw_all_windows (struct WinMeta * win_meta) {
     pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1); }
   doupdate(); }
 
-void resize_active_window (struct WinMeta * win_meta, uint16_t height, uint16_t width) {
+extern void resize_active_window (struct WinMeta * win_meta, uint16_t height, uint16_t width) {
 // Grow or shrink currently active window. Correct its geometry and that of its followers.
   if (0 != win_meta->active && width > 0 && height > 0 && height < win_meta->height) {
     win_meta->active->height = height;
     win_meta->active->width  = width;
     update_windows(win_meta, win_meta->chain_start); } }
 
-void cycle_active_window (struct WinMeta * win_meta, char dir) {
+extern void cycle_active_window (struct WinMeta * win_meta, char dir) {
 // Cycle active window selection forwards (dir = 'n') or backwards.
   if (0 != win_meta->active) {
     if ('n' == dir) {
@@ -243,7 +261,7 @@ void cycle_active_window (struct WinMeta * win_meta, char dir) {
       else
         win_meta->active = win_meta->chain_end; } } }
 
-void shift_active_window (struct WinMeta * win_meta, char dir) {
+extern void shift_active_window (struct WinMeta * win_meta, char dir) {
 // Move active window forward/backward in window chain. If jumping beyond start/end, move to other chain end.
   if (0 != win_meta->active && win_meta->chain_start != win_meta->chain_end && (dir == 'f' || dir == 'b')) {
     struct Win * win_shift = win_meta->active;
@@ -281,7 +299,7 @@ void shift_active_window (struct WinMeta * win_meta, char dir) {
     free(wins);
     win_meta->active = win_shift; } }
 
-void reset_pad_offset(struct WinMeta * win_meta, uint16_t new_offset) {
+extern void reset_pad_offset(struct WinMeta * win_meta, uint16_t new_offset) {
 // Apply new_offset to windows pad, if it proves to be sane.
   if (new_offset >= 0 && new_offset + win_meta->width < getmaxx(win_meta->pad))
     win_meta->pad_offset = new_offset; }

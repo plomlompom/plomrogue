@@ -18,29 +18,12 @@ struct Win {
   void (* draw) (struct Win *);
   void * data; };
 
-struct yx {
-  uint16_t y;
-  uint16_t x; };
-
-struct Corners {
-  struct yx tl;
-  struct yx tr;
-  struct yx bl;
-  struct yx br; };
-
-struct  WinMeta init_win_meta (WINDOW *);
-struct Win init_window (struct WinMeta *, char *, void *, void *);
-void append_window (struct WinMeta *, struct Win *);
-void suspend_window (struct WinMeta *, struct Win *);
-struct yx place_window (struct WinMeta *, struct Win *);
-void update_windows (struct WinMeta *, struct Win *);
-void destroy_window (struct Win *);
-void draw_windows (struct Win *);
-void draw_windows_borders (struct Win *, struct Win *, struct Corners *, uint16_t);
-void draw_window_borders (struct Win *, char);
-void draw_vertical_scroll_hint (struct WinMeta *, uint16_t, uint32_t, char);
-void draw_all_windows (struct WinMeta *);
-void resize_active_window (struct WinMeta *, uint16_t, uint16_t);
-void cycle_active_window (struct WinMeta *, char);
-void shift_active_window (struct WinMeta *, char);
-void reset_pad_offset (struct WinMeta *, uint16_t);
+extern struct  WinMeta init_win_meta (WINDOW *);
+extern struct Win init_window (struct WinMeta *, char *, void *, void *);
+extern void append_window (struct WinMeta *, struct Win *);
+extern void suspend_window (struct WinMeta *, struct Win *);
+extern void draw_all_windows (struct WinMeta *);
+extern void resize_active_window (struct WinMeta *, uint16_t, uint16_t);
+extern void cycle_active_window (struct WinMeta *, char);
+extern void shift_active_window (struct WinMeta *, char);
+extern void reset_pad_offset (struct WinMeta *, uint16_t);
