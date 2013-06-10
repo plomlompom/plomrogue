@@ -175,7 +175,7 @@ static void draw_windows_borders (struct Win * win, struct Win * win_active, str
   char active = 0;
   if (win == win_active)
     active = 1;
-   draw_window_borders(win, active);
+  draw_window_borders(win, active);
   corners[ccount].tl.y = getbegy(win->curses) - 1;
   corners[ccount].tl.x = getbegx(win->curses) - 1;
   corners[ccount].tr.y = getbegy(win->curses) - 1;
