@@ -185,7 +185,6 @@ void draw_windows (struct Win * win) {
 void draw_vertical_scroll_hint (struct WinMeta * win_meta, uint16_t x, uint32_t more_cols, char dir) {
 // Draw scroll hint line in win at col x of pad display, announce more_cols more columns in direction dir.
   uint16_t y, offset;
-  offset = 0;
   char phrase[] = "more columns";
   char * scrolldesc = malloc((3 * sizeof(char)) + strlen(phrase) + 10); // 10 = max chars for uint32_t string
   sprintf(scrolldesc, " %d %s ", more_cols, phrase);
