@@ -29,7 +29,6 @@ struct Corners {
   struct yx br; };
 
 struct  WinMeta init_win_meta (WINDOW *);
-void scroll_pad (struct WinMeta *, char);
 struct Win init_window (struct WinMeta *, char *, void *, void *);
 void append_window (struct WinMeta *, struct Win *);
 void suspend_window (struct WinMeta *, struct Win *);
@@ -44,3 +43,4 @@ void draw_all_windows (struct WinMeta *);
 void resize_active_window (struct WinMeta *, uint16_t, uint16_t);
 void cycle_active_window (struct WinMeta *, char);
 void shift_active_window (struct WinMeta *, char);
+void reset_pad_offset (struct WinMeta *, uint16_t);

@@ -31,6 +31,7 @@ uint32_t read_uint32_bigendian(FILE * file);
 void write_uint32_bigendian(uint32_t x, FILE * file);
 void save_game(struct World *);
 void toggle_window (struct WinMeta *, struct Win *);
+void scroll_pad (struct WinMeta *, char);
 void growshrink_active_window (struct WinMeta *, char);
 struct Map init_map ();
 void map_scroll (struct Map *, char);

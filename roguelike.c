@@ -72,6 +72,13 @@ void toggle_window (struct WinMeta * win_meta, struct Win * win) {
   else
     append_window(win_meta, win); }
 
+void scroll_pad (struct WinMeta * win_meta, char dir) {
+// Try to scroll pad left or right.
+  if      ('+' == dir)
+    reset_pad_offset(win_meta, win_meta->pad_offset + 1);
+  else if ('-' == dir)
+    reset_pad_offset(win_meta, win_meta->pad_offset - 1); }
+
 void growshrink_active_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink active window horizontally or vertically by one cell size.
   if (0 != win_meta->active) {

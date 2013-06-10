@@ -17,13 +17,6 @@ struct WinMeta init_win_meta (WINDOW * screen) {
   win_meta.active = 0;
   return win_meta; }
 
-void scroll_pad (struct WinMeta * win_meta, char dir) {
-// Scroll pad left or right (if possible).
-  if      ('+' == dir && win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad) - 1)
-    win_meta->pad_offset++;
-  else if ('-' == dir && win_meta->pad_offset > 0)
-    win_meta->pad_offset--; }
-
 struct Win init_window (struct WinMeta * win_meta, char * title, void * data, void * func) {
 // Create and populate Win struct with sane default values.
   struct Win win;
@@ -221,7 +214,7 @@ void draw_all_windows (struct WinMeta * win_meta) {
     free(all_corners);
     uint16_t y;
     if (win_meta->pad_offset > 0)
-        draw_vertical_scroll_hint(win_meta, win_meta->pad_offset, win_meta->pad_offset + 1, '<');
+      draw_vertical_scroll_hint(win_meta, win_meta->pad_offset, win_meta->pad_offset + 1, '<');
     if (win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad) - 1)
       for (y = 0; y < win_meta->height; y++)
         draw_vertical_scroll_hint(win_meta, win_meta->pad_offset + win_meta->width - 1,
@@ -287,3 +280,8 @@ void shift_active_window (struct WinMeta * win_meta, char dir) {
           append_window(win_meta, wins[i]);
     free(wins);
     win_meta->active = win_shift; } }
+
+void reset_pad_offset(struct WinMeta * win_meta, uint16_t new_offset) {
+// Apply new_offset to windows pad, if it proves to be sane.
+  if (new_offset >= 0 && new_offset + win_meta->width < getmaxx(win_meta->pad))
+    win_meta->pad_offset = new_offset; }
