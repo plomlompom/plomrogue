@@ -12,6 +12,7 @@ struct Win {
   struct Win * prev;
   struct Win * next;
   uint16_t startx;
+  uint16_t starty;
   uint16_t width;
   uint16_t height;
   WINDOW * curses;
