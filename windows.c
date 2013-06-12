@@ -15,7 +15,7 @@ struct Corners {
   struct yx br; };
 
 static void refit_pad (struct WinMeta *);
-static struct yx place_window (struct WinMeta *, struct Win *);
+static void place_window (struct WinMeta *, struct Win *);
 static void update_windows (struct WinMeta *, struct Win *);
 static void destroy_window (struct Win *);
 static void draw_windows_borders (struct Win *, struct Win *, struct Corners *, uint16_t);
@@ -94,20 +94,19 @@ extern void suspend_window (struct WinMeta * win_meta, struct Win * win) {
   if (0 == pad_refitted)                                                            // Refit pad if necessary.
     refit_pad(win_meta); }
 
-static struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
+static void place_window (struct WinMeta * win_meta, struct Win * win) {
 // Based on position and sizes of previous window, find fitting place for current window.
-  struct yx start;
-  start.x = 0;                                     // if window is first in chain, place it on top-left corner
-  start.y = 1;
+  win->startx = 0;                                 // if window is first in chain, place it on top-left corner
+  win->starty = 1;
   if (0 != win->prev) {
     struct Win * win_top = win->prev;
     while (win_top->starty != 1)
       win_top = win_top->prev;                                   // else, default to placing window in new top
-    start.x = win_top->startx + win_top->width + 1;              // column to the right of the last one
+    win->startx = win_top->startx + win_top->width + 1;          // column to the right of the last one
     uint16_t winprev_maxy = win->prev->starty + getmaxy(win->prev->curses);
     if (win->width <= win->prev->width && win->height < win_meta->height - winprev_maxy) {
-      start.x = win->prev->startx;                         // place window below previous window if it fits
-      start.y = winprev_maxy + 1; }                        // vertically and is not wider than its predecessor
+      win->startx = win->prev->startx;                     // place window below previous window if it fits
+      win->starty = winprev_maxy + 1; }                    // vertically and is not wider than its predecessor
     else {
       struct Win * win_up = win->prev;
       struct Win * win_upup = win_up;
@@ -121,21 +120,18 @@ static struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
         winprev_maxy = win_upup->starty + getmaxy(win_upup->curses);
         widthdiff = (win_upup->startx + win_upup->width) - (win_up->startx + win_up->width);
         if (win->height < win_meta->height - winprev_maxy && win->width < widthdiff) {
-          start.x = win_up->startx + win_up->width + 1;          // else try to open new sub column under last
-          start.y = winprev_maxy + 1;                            // window below which enough space remains
+          win->startx = win_up->startx + win_up->width + 1;      // else try to open new sub column under last
+          win->starty = winprev_maxy + 1;                        // window below which enough space remains
           break; }
-        win_up = win_upup; } } }
-  return start; }
+        win_up = win_upup; } } } }
 
 static void update_windows (struct WinMeta * win_meta, struct Win * win) {
 // Update geometry of win and its next of kin. Destroy (if visible), (re-)build window. If need, resize pad.
   if (0 != win->curses)
     destroy_window (win);
-  struct yx startyx = place_window(win_meta, win);
-  win->startx = startyx.x;
-  win->starty = startyx.y;
+  place_window(win_meta, win);
   refit_pad(win_meta);
-  win->curses = subpad(win_meta->pad, win->height, win->width, startyx.y, startyx.x);
+  win->curses = subpad(win_meta->pad, win->height, win->width, win->starty, win->startx);
   if (0 != win->next)
     update_windows (win_meta, win->next); }
 
