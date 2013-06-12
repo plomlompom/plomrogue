@@ -5,7 +5,7 @@ struct yx_uint16 {
 struct WinMeta {
   WINDOW * screen;
   WINDOW * pad;
-  uint16_t  pad_offset;
+  uint16_t pad_offset;
   struct Win * chain_start;
   struct Win * chain_end;
   struct Win * active;
@@ -21,7 +21,7 @@ struct Win {
   void (* draw) (struct Win *);
   void * data; };
 
-extern struct  WinMeta init_win_meta (WINDOW *);
+extern struct WinMeta init_win_meta (WINDOW *);
 extern struct Win init_window (struct WinMeta *, char *, void *, void *);
 extern void append_window (struct WinMeta *, struct Win *);
 extern void suspend_window (struct WinMeta *, struct Win *);
