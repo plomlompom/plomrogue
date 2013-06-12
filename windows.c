@@ -103,10 +103,10 @@ static struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
     struct Win * win_top = win->prev;
     while (getbegy(win_top->curses) != 1)
       win_top = win_top->prev;                                   // else, default to placing window in new top
-    start.x = getbegx(win_top->curses) + win_top->width + 1;     // column to the right of the last one
+    start.x = win_top->startx + win_top->width + 1;              // column to the right of the last one
     uint16_t winprev_maxy = getbegy(win->prev->curses) + getmaxy(win->prev->curses);
     if (win->width <= win->prev->width && win->height < win_meta->height - winprev_maxy) {
-      start.x = getbegx(win->prev->curses);                // place window below previous window if it fits
+      start.x = win->prev->startx;                         // place window below previous window if it fits
       start.y = winprev_maxy + 1; }                        // vertically and is not wider than its predecessor
     else {
       struct Win * win_up = win->prev;
@@ -119,9 +119,9 @@ static struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
             break;
           win_upup = win_upup->prev; }
         winprev_maxy = getbegy(win_upup->curses) + getmaxy(win_upup->curses);
-        widthdiff = (getbegx(win_upup->curses) + win_upup->width) - (getbegx(win_up->curses) + win_up->width);
+        widthdiff = (win_upup->startx + win_upup->width) - (win_up->startx + win_up->width);
         if (win->height < win_meta->height - winprev_maxy && win->width < widthdiff) {
-          start.x = getbegx(win_up->curses) + win_up->width + 1; // else try to open new sub column under last
+          start.x = win_up->startx + win_up->width + 1;          // else try to open new sub column under last
           start.y = winprev_maxy + 1;                            // window below which enough space remains
           break; }
         win_up = win_upup; } } }
@@ -147,9 +147,9 @@ static void draw_window_borders (struct Win * win, char active) {
 // Draw borders of window win, including title. Decorate in a special way if window is marked as active.
   uint16_t y, x;
   for (y = getbegy(win->curses); y <= getbegy(win->curses) + win->height; y++) {
-    mvwaddch(wgetparent(win->curses), y, getbegx(win->curses) - 1, '|');
-    mvwaddch(wgetparent(win->curses), y, getbegx(win->curses) + win->width, '|'); }
-  for (x = getbegx(win->curses); x <= getbegx(win->curses) + win->width; x++) {
+    mvwaddch(wgetparent(win->curses), y, win->startx - 1, '|');
+    mvwaddch(wgetparent(win->curses), y, win->startx + win->width, '|'); }
+  for (x = win->startx; x <= win->startx + win->width; x++) {
     mvwaddch(wgetparent(win->curses), getbegy(win->curses) - 1, x, '-');
     mvwaddch(wgetparent(win->curses), getbegy(win->curses) + win->height, x, '-'); }
   char min_title_length_visible = 3;        // 1 char minimal, plus 2 chars for decoration left/right of title
@@ -165,7 +165,7 @@ static void draw_window_borders (struct Win * win, char active) {
     memcpy(title + 1, win->title, length_visible);
     title[0] = title[length_visible + 1] = decoration;
     title[length_visible + 2] = '\0';
-    mvwaddstr (wgetparent(win->curses), getbegy(win->curses)-1, getbegx(win->curses)+title_offset, title); } }
+    mvwaddstr(wgetparent(win->curses), getbegy(win->curses) - 1, win->startx + title_offset, title); } }
 
 static void draw_windows_borders (struct Win * win, struct Win * win_active, struct Corners * corners, uint16_t ccount) {
 // Craw draw_window_borders() for all windows in chain from win on. Save current window's border corners.
@@ -174,13 +174,13 @@ static void draw_windows_borders (struct Win * win, struct Win * win_active, str
     active = 1;
   draw_window_borders(win, active);
   corners[ccount].tl.y = getbegy(win->curses) - 1;
-  corners[ccount].tl.x = getbegx(win->curses) - 1;
+  corners[ccount].tl.x = win->startx - 1;
   corners[ccount].tr.y = getbegy(win->curses) - 1;
-  corners[ccount].tr.x = getbegx(win->curses) + win->width;
+  corners[ccount].tr.x = win->startx + win->width;
   corners[ccount].bl.y = getbegy(win->curses) + win->height;
-  corners[ccount].bl.x = getbegx(win->curses) - 1;
+  corners[ccount].bl.x = win->startx - 1;
   corners[ccount].br.y = getbegy(win->curses) + win->height;
-  corners[ccount].br.x = getbegx(win->curses) + win->width;
+  corners[ccount].br.x = win->startx + win->width;
   if (0 != win->next) {
     draw_windows_borders (win->next, win_active, corners, ccount + 1); } }
 
