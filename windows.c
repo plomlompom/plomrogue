@@ -14,6 +14,7 @@ struct Corners {
   struct yx bl;
   struct yx br; };
 
+static void refit_pad (struct WinMeta *);
 static struct yx place_window (struct WinMeta *, struct Win *);
 static void update_windows (struct WinMeta *, struct Win *);
 static void destroy_window (struct Win *);
@@ -59,6 +60,17 @@ extern void append_window (struct WinMeta * win_meta, struct Win * win) {
   win_meta->chain_end = win;
   update_windows(win_meta, win); }
 
+static void refit_pad (struct WinMeta * win_meta) {
+// Fit pad width to minimum width demanded by current windows' geometries.
+  uint16_t lastwincol = 0;
+  struct Win * win_p = win_meta->chain_start;
+  while (win_p != 0) {
+    if (win_p->startx + win_p->width > lastwincol + 1)
+      lastwincol = win_p->startx + win_p->width - 1;
+    win_p = win_p->next; }
+  if (getmaxx(win_meta->pad) != lastwincol)
+    wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2); }
+
 extern void suspend_window (struct WinMeta * win_meta, struct Win * win) {
 // Destroy win, suspend from chain. Update geometry of following rows and pad, as well as activity selection.
   destroy_window(win);
@@ -79,15 +91,8 @@ extern void suspend_window (struct WinMeta * win_meta, struct Win * win) {
       win_meta->active = win->prev; }
   win->prev = 0;
   win->next = 0;
-  if (0 == pad_refitted) {                                                          // Refit pad if necessary.
-    uint16_t lastwincol = 0;
-    struct Win * win_p = win_meta->chain_start;
-    while (win_p != 0) {
-      if (getbegx(win_p->curses) + win_p->width > lastwincol + 1)
-        lastwincol = getbegx(win_p->curses) + win_p->width - 1;
-      win_p = win_p->next; }
-    if (getmaxx(win_meta->pad) != lastwincol)
-      wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2); } }
+  if (0 == pad_refitted)                                                            // Refit pad if necessary.
+    refit_pad(win_meta); }
 
 static struct yx place_window (struct WinMeta * win_meta, struct Win * win) {
 // Based on position and sizes of previous window, find fitting place for current window.
@@ -127,16 +132,8 @@ static void update_windows (struct WinMeta * win_meta, struct Win * win) {
   if (0 != win->curses)
     destroy_window (win);
   struct yx startyx = place_window(win_meta, win);
-  uint16_t lastwincol = 0;
-  struct Win * win_p = win_meta->chain_start;
-  while (win_p != 0) {
-    if (win_p != win && getbegx(win_p->curses) + win_p->width > lastwincol + 1)
-      lastwincol = getbegx(win_p->curses) + win_p->width - 1;
-    else if (win_p == win && startyx.x + win->width > lastwincol + 1)
-      lastwincol = startyx.x + win->width - 1;
-    win_p = win_p->next; }
-  if (getmaxx(win_meta->pad) != lastwincol)
-    wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2);
+  win->startx = startyx.x;
+  refit_pad(win_meta);
   win->curses = subpad(win_meta->pad, win->height, win->width, startyx.y, startyx.x);
   if (0 != win->next)
     update_windows (win_meta, win->next); }
