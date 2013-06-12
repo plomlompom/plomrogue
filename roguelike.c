@@ -82,8 +82,8 @@ void scroll_pad (struct WinMeta * win_meta, char dir) {
 void growshrink_active_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink active window horizontally or vertically by one cell size.
   if (0 != win_meta->active) {
-    uint16_t height = win_meta->active->height;
-    uint16_t width = win_meta->active->width;
+    uint16_t height = win_meta->active->size.y;
+    uint16_t width = win_meta->active->size.x;
     if      (change == '-')
       height--;
     else if (change == '+')
@@ -345,10 +345,10 @@ int main (int argc, char *argv[]) {
   struct Win win_map = init_window(&win_meta, "Map", &world, draw_map_win);
   struct Win win_info = init_window(&win_meta, "Info", &world, draw_info_win);
   struct Win win_log = init_window(&win_meta, "Log", &world, draw_log_win);
-  win_keys.width = 29;
-  win_map.width = win_meta.width - win_keys.width - win_log.width - 2;
-  win_info.height = 1;
-  win_log.height = win_meta.height - 3;
+  win_keys.size.x = 29;
+  win_map.size.x = win_meta.size.x - win_keys.size.x - win_log.size.x - 2;
+  win_info.size.y = 1;
+  win_log.size.y = win_meta.size.y - 3;
   toggle_window(&win_meta, &win_keys);
   toggle_window(&win_meta, &win_map);
   toggle_window(&win_meta, &win_info);

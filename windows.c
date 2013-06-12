@@ -23,12 +23,12 @@ extern struct WinMeta init_win_meta (WINDOW * screen) {
 // Create and populate WinMeta struct with sane default values.
   struct WinMeta win_meta;
   win_meta.screen = screen;
-  win_meta.height = getmaxy(screen);
-  win_meta.width = getmaxx(screen);
+  win_meta.size.y = getmaxy(screen);
+  win_meta.size.x = getmaxx(screen);
   win_meta.chain_start = 0;
   win_meta.chain_end = 0;
   win_meta.pad_offset = 0;
-  win_meta.pad = newpad(win_meta.height, 1);
+  win_meta.pad = newpad(win_meta.size.y, 1);
   win_meta.active = 0;
   return win_meta; }
 
@@ -39,8 +39,8 @@ extern struct Win init_window (struct WinMeta * win_meta, char * title, void * d
   win.next = 0;
   win.curses = 0;
   win.title = title;
-  win.width = 20;
-  win.height = win_meta->height - 1;
+  win.size.x = 20;
+  win.size.y = win_meta->size.y - 1;
   win.data = data;
   win.draw = func;
   return win; }
@@ -61,8 +61,8 @@ static void refit_pad (struct WinMeta * win_meta) {
   uint16_t lastwincol = 0;
   struct Win * win_p = win_meta->chain_start;
   while (win_p != 0) {
-    if (win_p->start.x + win_p->width > lastwincol + 1)
-      lastwincol = win_p->start.x + win_p->width - 1;
+    if (win_p->start.x + win_p->size.x > lastwincol + 1)
+      lastwincol = win_p->start.x + win_p->size.x - 1;
     win_p = win_p->next; }
   if (getmaxx(win_meta->pad) != lastwincol)
     wresize(win_meta->pad, getmaxy(win_meta->pad), lastwincol + 2); }
@@ -98,9 +98,9 @@ static void place_window (struct WinMeta * win_meta, struct Win * win) {
     struct Win * win_top = win->prev;
     while (win_top->start.y != 1)
       win_top = win_top->prev;                                   // else, default to placing window in new top
-    win->start.x = win_top->start.x + win_top->width + 1;        // column to the right of the last one
+    win->start.x = win_top->start.x + win_top->size.x + 1;       // column to the right of the last one
     uint16_t winprev_maxy = win->prev->start.y + getmaxy(win->prev->curses);
-    if (win->width <= win->prev->width && win->height < win_meta->height - winprev_maxy) {
+    if (win->size.x <= win->prev->size.x && win->size.y < win_meta->size.y - winprev_maxy) {
       win->start.x = win->prev->start.x;                   // place window below previous window if it fits
       win->start.y = winprev_maxy + 1; }                   // vertically and is not wider than its predecessor
     else {
@@ -114,9 +114,9 @@ static void place_window (struct WinMeta * win_meta, struct Win * win) {
             break;
           win_upup = win_upup->prev; }
         winprev_maxy = win_upup->start.y + getmaxy(win_upup->curses);
-        widthdiff = (win_upup->start.x + win_upup->width) - (win_up->start.x + win_up->width);
-        if (win->height < win_meta->height - winprev_maxy && win->width < widthdiff) {
-          win->start.x = win_up->start.x + win_up->width + 1;    // else try to open new sub column under last
+        widthdiff = (win_upup->start.x + win_upup->size.x) - (win_up->start.x + win_up->size.x);
+        if (win->size.y < win_meta->size.y - winprev_maxy && win->size.x < widthdiff) {
+          win->start.x = win_up->start.x + win_up->size.x + 1;   // else try to open new sub column under last
           win->start.y = winprev_maxy + 1;                       // window below which enough space remains
           break; }
         win_up = win_upup; } } } }
@@ -127,7 +127,7 @@ static void update_windows (struct WinMeta * win_meta, struct Win * win) {
     destroy_window (win);
   place_window(win_meta, win);
   refit_pad(win_meta);
-  win->curses = subpad(win_meta->pad, win->height, win->width, win->start.y, win->start.x);
+  win->curses = subpad(win_meta->pad, win->size.y, win->size.x, win->start.y, win->start.x);
   if (0 != win->next)
     update_windows (win_meta, win->next); }
 
@@ -139,18 +139,18 @@ static void destroy_window (struct Win * win) {
 static void draw_window_borders (struct Win * win, char active) {
 // Draw borders of window win, including title. Decorate in a special way if window is marked as active.
   uint16_t y, x;
-  for (y = win->start.y; y <= win->start.y + win->height; y++) {
+  for (y = win->start.y; y <= win->start.y + win->size.y; y++) {
     mvwaddch(wgetparent(win->curses), y, win->start.x - 1, '|');
-    mvwaddch(wgetparent(win->curses), y, win->start.x + win->width, '|'); }
-  for (x = win->start.x; x <= win->start.x + win->width; x++) {
+    mvwaddch(wgetparent(win->curses), y, win->start.x + win->size.x, '|'); }
+  for (x = win->start.x; x <= win->start.x + win->size.x; x++) {
     mvwaddch(wgetparent(win->curses), win->start.y - 1, x, '-');
-    mvwaddch(wgetparent(win->curses), win->start.y + win->height, x, '-'); }
+    mvwaddch(wgetparent(win->curses), win->start.y + win->size.y, x, '-'); }
   char min_title_length_visible = 3;        // 1 char minimal, plus 2 chars for decoration left/right of title
-  if (win->width >= min_title_length_visible) {
+  if (win->size.x >= min_title_length_visible) {
     uint16_t title_offset = 0;
-    if (win->width > strlen(win->title) + 2)
-      title_offset = (win->width - (strlen(win->title) + 2)) / 2;                     // + 2 is for decoration
-    uint16_t length_visible = strnlen(win->title, win->width - 2);
+    if (win->size.x > strlen(win->title) + 2)
+      title_offset = (win->size.x - (strlen(win->title) + 2)) / 2;                    // + 2 is for decoration
+    uint16_t length_visible = strnlen(win->title, win->size.x - 2);
     char title[length_visible + 3];
     char decoration = ' ';
     if (1 == active)
@@ -169,11 +169,11 @@ static void draw_windows_borders (struct Win * win, struct Win * win_active, str
   corners[ccount].tl.y = win->start.y - 1;
   corners[ccount].tl.x = win->start.x - 1;
   corners[ccount].tr.y = win->start.y - 1;
-  corners[ccount].tr.x = win->start.x + win->width;
-  corners[ccount].bl.y = win->start.y + win->height;
+  corners[ccount].tr.x = win->start.x + win->size.x;
+  corners[ccount].bl.y = win->start.y + win->size.y;
   corners[ccount].bl.x = win->start.x - 1;
-  corners[ccount].br.y = win->start.y + win->height;
-  corners[ccount].br.x = win->start.x + win->width;
+  corners[ccount].br.y = win->start.y + win->size.y;
+  corners[ccount].br.x = win->start.x + win->size.x;
   if (0 != win->next) {
     draw_windows_borders (win->next, win_active, corners, ccount + 1); } }
 
@@ -190,9 +190,9 @@ static void draw_vertical_scroll_hint (struct WinMeta * win_meta, uint16_t x, ui
   char * scrolldesc = malloc((3 * sizeof(char)) + strlen(phrase) + 10); // 10 = max chars for uint32_t string
   sprintf(scrolldesc, " %d %s ", more_cols, phrase);
   offset = 1;
-  if (win_meta->height > (strlen(scrolldesc) + 1))
-    offset = (win_meta->height - strlen(scrolldesc)) / 2;
-  for (y = 0; y < win_meta->height; y++)
+  if (win_meta->size.y > (strlen(scrolldesc) + 1))
+    offset = (win_meta->size.y - strlen(scrolldesc)) / 2;
+  for (y = 0; y < win_meta->size.y; y++)
     if (y >= offset && y < strlen(scrolldesc) + offset)
       mvwaddch(win_meta->pad, y, x, scrolldesc[y - offset] | A_REVERSE);
     else
@@ -223,18 +223,18 @@ extern void draw_all_windows (struct WinMeta * win_meta) {
     uint16_t y;
     if (win_meta->pad_offset > 0)
       draw_vertical_scroll_hint(win_meta, win_meta->pad_offset, win_meta->pad_offset + 1, '<');
-    if (win_meta->pad_offset + win_meta->width < getmaxx(win_meta->pad) - 1)
-      for (y = 0; y < win_meta->height; y++)
-        draw_vertical_scroll_hint(win_meta, win_meta->pad_offset + win_meta->width - 1,
-                                  getmaxx(win_meta->pad) - (win_meta->pad_offset + win_meta->width), '>');
-    pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->height, win_meta->width - 1); }
+    if (win_meta->pad_offset + win_meta->size.x < getmaxx(win_meta->pad) - 1)
+      for (y = 0; y < win_meta->size.y; y++)
+        draw_vertical_scroll_hint(win_meta, win_meta->pad_offset + win_meta->size.x - 1,
+                                  getmaxx(win_meta->pad) - (win_meta->pad_offset + win_meta->size.x), '>');
+    pnoutrefresh(win_meta->pad, 0, win_meta->pad_offset, 0, 0, win_meta->size.y, win_meta->size.x - 1); }
   doupdate(); }
 
 extern void resize_active_window (struct WinMeta * win_meta, uint16_t height, uint16_t width) {
 // Grow or shrink currently active window. Correct its geometry and that of its followers.
-  if (0 != win_meta->active && width > 0 && height > 0 && height < win_meta->height) {
-    win_meta->active->height = height;
-    win_meta->active->width  = width;
+  if (0 != win_meta->active && width > 0 && height > 0 && height < win_meta->size.y) {
+    win_meta->active->size.y = height;
+    win_meta->active->size.x = width;
     update_windows(win_meta, win_meta->chain_start); } }
 
 extern void cycle_active_window (struct WinMeta * win_meta, char dir) {
@@ -290,5 +290,5 @@ extern void shift_active_window (struct WinMeta * win_meta, char dir) {
 
 extern void reset_pad_offset(struct WinMeta * win_meta, uint16_t new_offset) {
 // Apply new_offset to windows pad, if it proves to be sane.
-  if (new_offset >= 0 && new_offset + win_meta->width < getmaxx(win_meta->pad))
+  if (new_offset >= 0 && new_offset + win_meta->size.x < getmaxx(win_meta->pad))
     win_meta->pad_offset = new_offset; }

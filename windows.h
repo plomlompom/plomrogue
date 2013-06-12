@@ -9,15 +9,13 @@ struct WinMeta {
   struct Win * chain_start;
   struct Win * chain_end;
   struct Win * active;
-  uint16_t width;
-  uint16_t height; };
+  struct yx_uint16 size; };
 
 struct Win {
   struct Win * prev;
   struct Win * next;
   struct yx_uint16 start;
-  uint16_t width;
-  uint16_t height;
+  struct yx_uint16 size;
   WINDOW * curses;
   char * title;
   void (* draw) (struct Win *);
