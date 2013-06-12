@@ -261,13 +261,12 @@ extern void cycle_active_window (struct WinMeta * win_meta, char dir) {
 extern void shift_active_window (struct WinMeta * win_meta, char dir) {
 // Move active window forward/backward in window chain. If jumping beyond start/end, move to other chain end.
   if (0 != win_meta->active && win_meta->chain_start != win_meta->chain_end && (dir == 'f' || dir == 'b')) {
-    struct Win * win_shift = win_meta->active;
+    struct Win * win_shift = win_meta->active, * win_p, * win_p_next;
     char wrap = 0;
     if ((dir == 'f' && win_shift == win_meta->chain_end)
         || (dir == 'b' && win_shift == win_meta->chain_start))
       wrap = 1;
     uint16_t i, i_max;
-    struct Win * win_p, * win_p_next;
     for (i_max = 1, win_p = win_meta->chain_start; win_p != win_meta->chain_end; i_max++)
       win_p = win_p->next;
     struct Win ** wins = malloc(i_max * sizeof(struct Win *));
