@@ -1,3 +1,7 @@
+struct yx_uint16 {
+  uint16_t y;
+  uint16_t x; };
+
 struct WinMeta {
   WINDOW * screen;
   WINDOW * pad;
@@ -11,8 +15,7 @@ struct WinMeta {
 struct Win {
   struct Win * prev;
   struct Win * next;
-  uint16_t startx;
-  uint16_t starty;
+  struct yx_uint16 start;
   uint16_t width;
   uint16_t height;
   WINDOW * curses;
