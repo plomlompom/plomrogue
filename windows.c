@@ -4,15 +4,15 @@
 #include <string.h>
 #include "windows.h"
 
-struct yx {
+struct yx_uint16 {
   uint16_t y;
   uint16_t x; };
 
 struct Corners {
-  struct yx tl;
-  struct yx tr;
-  struct yx bl;
-  struct yx br; };
+  struct yx_uint16 tl;
+  struct yx_uint16 tr;
+  struct yx_uint16 bl;
+  struct yx_uint16 br; };
 
 static void refit_pad (struct WinMeta *);
 static void place_window (struct WinMeta *, struct Win *);
