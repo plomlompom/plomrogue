@@ -67,7 +67,7 @@ void save_game(struct World * world) {
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
-  if (0 != win->curses)
+  if (0 != win->frame.curses_win)
     suspend_window(win_meta, win);
   else
     append_window(win_meta, win); }
@@ -82,8 +82,8 @@ void scroll_pad (struct WinMeta * win_meta, char dir) {
 void growshrink_active_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink active window horizontally or vertically by one cell size.
   if (0 != win_meta->active) {
-    uint16_t height = win_meta->active->size.y;
-    uint16_t width = win_meta->active->size.x;
+    uint16_t height = win_meta->active->frame.size.y;
+    uint16_t width = win_meta->active->frame.size.x;
     if      (change == '-')
       height--;
     else if (change == '+')
@@ -345,10 +345,10 @@ int main (int argc, char *argv[]) {
   struct Win win_map = init_window(&win_meta, "Map", &world, draw_map_win);
   struct Win win_info = init_window(&win_meta, "Info", &world, draw_info_win);
   struct Win win_log = init_window(&win_meta, "Log", &world, draw_log_win);
-  win_keys.size.x = 29;
-  win_map.size.x = win_meta.size.x - win_keys.size.x - win_log.size.x - 2;
-  win_info.size.y = 1;
-  win_log.size.y = win_meta.size.y - 3;
+  win_keys.frame.size.x = 29;
+  win_map.frame.size.x = win_meta.pad.size.x - win_keys.frame.size.x - win_log.frame.size.x - 2;
+  win_info.frame.size.y = 1;
+  win_log.frame.size.y = win_meta.pad.size.y - 3;
   toggle_window(&win_meta, &win_keys);
   toggle_window(&win_meta, &win_map);
   toggle_window(&win_meta, &win_info);

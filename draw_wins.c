@@ -13,17 +13,17 @@ void draw_with_linebreaks (struct Win * win, char * text, uint16_t start_y) {
   char toggle;
   char fin = 0;
   int16_t z = -1;
-  for (y = start_y; y < win->size.y; y++) {
+  for (y = start_y; y < win->frame.size.y; y++) {
     if (0 == fin)
       toggle = 0;
-    for (x = 0; x < win->size.x; x++) {
+    for (x = 0; x < win->frame.size.x; x++) {
        if (0 == toggle) {
          z++;
          if ('\n' == text[z]) {
            toggle = 1;
            continue; }
          else
-           mvwaddch(win->curses, y, x, text[z]);
+           mvwaddch(win->frame.curses_win, y, x, text[z]);
          if ('\n' == text[z+1]) {
            z++;
            toggle = 1; }
@@ -37,7 +37,7 @@ void draw_text_from_bottom (struct Win * win, char * text) {
   uint16_t x, y, offset;
   int16_t z = -1;
   for (y = 0; 0 == toggle; y++)                           // Determine number of lines text would have in
-    for (x = 0; x < win->size.x; x++) {                   // a window of available width, but infinite height.
+    for (x = 0; x < win->frame.size.x; x++) {             // a window of available width, but infinite height.
       z++;
       if ('\n' == text[z])            // Treat \n and \0 as control characters for incrementing y and stopping
         break;                        // the loop. Make sure they don't count as cell space themselves.
@@ -49,12 +49,12 @@ void draw_text_from_bottom (struct Win * win, char * text) {
         break; } }
   z = -1;
   uint16_t start_y = 0;
-  if (y < win->size.y)             // Depending on what is bigger, determine start point in window or in text.
-    start_y = win->size.y - y;
-  else if (y > win->size.y) {
-    offset = y - win->size.y;
+  if (y < win->frame.size.y)       // Depending on what is bigger, determine start point in window or in text.
+    start_y = win->frame.size.y - y;
+  else if (y > win->frame.size.y) {
+    offset = y - win->frame.size.y;
     for (y = 0; y < offset; y++)
-      for (x = 0; x < win->size.x; x++) {
+      for (x = 0; x < win->frame.size.x; x++) {
         z++;
         if ('\n' == text[z])
           break;
@@ -79,16 +79,16 @@ void draw_map_win (struct Win * win) {
   uint16_t width_map_av = map->width - map->offset_x;
   uint16_t height_map_av = map->height - map->offset_y;
   uint16_t x, y, z;
-  for (y = 0; y < win->size.y; y++) {
+  for (y = 0; y < win->frame.size.y; y++) {
     z = map->offset_x + (map->offset_y + y) * (map->width);
-    for (x = 0; x < win->size.x; x++) {
+    for (x = 0; x < win->frame.size.x; x++) {
       if (y < height_map_av && x < width_map_av) {
         if (z == (map->width * player->y) + player->x)
-          mvwaddch(win->curses, y, x, '@');
+          mvwaddch(win->frame.curses_win, y, x, '@');
         else if (z == (map->width * monster->y) + monster->x)
-          mvwaddch(win->curses, y, x, 'M');
+          mvwaddch(win->frame.curses_win, y, x, 'M');
         else
-          mvwaddch(win->curses, y, x, cells[z]);
+          mvwaddch(win->frame.curses_win, y, x, cells[z]);
         z++; } } } }
 
 void draw_info_win (struct Win * win) {
@@ -103,37 +103,37 @@ void draw_horizontal_scroll_hint (struct Win * win, uint16_t y, uint32_t more_li
 // Draw scroll hint line in win at row y, announce more_lines more lines in direction dir.
   uint16_t x, offset;
   char phrase[] = "more lines";
-  char * scrolldesc = malloc((3 * sizeof(char)) + strlen(phrase) + 10); // 10 = max chars for uint32_t string
+  char * scrolldesc = malloc((3 * sizeof(char)) + strlen(phrase) + 10);  // 10 = max chars for uint32_t string
   sprintf(scrolldesc, " %d %s ", more_lines, phrase);
   offset = 1;
-  if (win->size.x > (strlen(scrolldesc) + 1))
-    offset = (win->size.x - strlen(scrolldesc)) / 2;
-  for (x = 0; x < win->size.x; x++)
+  if (win->frame.size.x > (strlen(scrolldesc) + 1))
+    offset = (win->frame.size.x - strlen(scrolldesc)) / 2;
+  for (x = 0; x < win->frame.size.x; x++)
     if (x >= offset && x < strlen(scrolldesc) + offset)
-      mvwaddch(win->curses, y, x, scrolldesc[x - offset] | A_REVERSE);
+      mvwaddch(win->frame.curses_win, y, x, scrolldesc[x - offset] | A_REVERSE);
     else
-      mvwaddch(win->curses, y, x, dir | A_REVERSE);
+      mvwaddch(win->frame.curses_win, y, x, dir | A_REVERSE);
   free(scrolldesc); }
 
 void draw_keys_win (struct Win * win) {
 // Draw keybindings window.
   struct World * world = (struct World *) win->data;
   uint16_t offset = 0, y, x;
-  if (world->keyswindata->max >= win->size.y) {
-    if (world->keyswindata->select > win->size.y / 2) {
-      if (world->keyswindata->select < (world->keyswindata->max - (win->size.y / 2)))
-        offset = world->keyswindata->select - (win->size.y / 2);
+  if (world->keyswindata->max >= win->frame.size.y) {
+    if (world->keyswindata->select > win->frame.size.y / 2) {
+      if (world->keyswindata->select < (world->keyswindata->max - (win->frame.size.y / 2)))
+        offset = world->keyswindata->select - (win->frame.size.y / 2);
       else
-        offset = world->keyswindata->max - win->size.y + 1; } }
+        offset = world->keyswindata->max - win->frame.size.y + 1; } }
   uint8_t keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
   char * keydesc = malloc(keydescwidth), * keyname;
   attr_t attri;
-  for (y = 0; y <= world->keyswindata->max && y < win->size.y; y++) {
+  for (y = 0; y <= world->keyswindata->max && y < win->frame.size.y; y++) {
     if (0 == y && offset > 0) {
       draw_horizontal_scroll_hint (win, y, offset + 1, '^');
       continue; }
-    else if (win->size.y == y + 1 && 0 < world->keyswindata->max - (win->size.y + offset - 1)) {
-      draw_horizontal_scroll_hint (win, y, world->keyswindata->max - (offset + win->size.y) + 2, 'v');
+    else if (win->frame.size.y == y + 1 && 0 < world->keyswindata->max - (win->frame.size.y + offset - 1)) {
+      draw_horizontal_scroll_hint (win, y, world->keyswindata->max - (offset + win->frame.size.y) + 2, 'v');
       continue; }
     attri = 0;
     if (y == world->keyswindata->select - offset) {
@@ -143,11 +143,12 @@ void draw_keys_win (struct Win * win) {
     keyname = get_keyname(world->keybindings[y + offset].key);
     snprintf(keydesc, keydescwidth, "%-9s", keyname);
     free(keyname);
-    for (x = 0; x < win->size.x; x++)
+    for (x = 0; x < win->frame.size.x; x++)
       if (x < strlen(keydesc))
-        mvwaddch(win->curses, y, x, keydesc[x] | attri);
+        mvwaddch(win->frame.curses_win, y, x, keydesc[x] | attri);
       else if (strlen(keydesc) < x && x < strlen(world->keybindings[y + offset].name) + strlen(keydesc) + 1)
-        mvwaddch(win->curses, y, x, world->keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
+        mvwaddch(win->frame.curses_win, y, x,
+                 world->keybindings[y + offset].name[x - strlen(keydesc) - 1] | attri);
       else
-        mvwaddch(win->curses, y, x, ' ' | attri); }
+        mvwaddch(win->frame.curses_win, y, x, ' ' | attri); }
   free(keydesc); }

@@ -2,21 +2,23 @@ struct yx_uint16 {
   uint16_t y;
   uint16_t x; };
 
+struct Frame {
+  WINDOW * curses_win;
+  struct yx_uint16 size; };
+
 struct WinMeta {
   WINDOW * screen;
-  WINDOW * pad;
   uint16_t pad_offset;
+  struct Frame pad;
   struct Win * chain_start;
   struct Win * chain_end;
-  struct Win * active;
-  struct yx_uint16 size; };
+  struct Win * active; };
 
 struct Win {
   struct Win * prev;
   struct Win * next;
   struct yx_uint16 start;
-  struct yx_uint16 size;
-  WINDOW * curses;
+  struct Frame frame;
   char * title;
   void (* draw) (struct Win *);
   void * data; };
