@@ -195,7 +195,7 @@ extern void draw_scroll_hint (struct Frame * frame, uint16_t pos, uint32_t dist,
   if ('<' == dir || '>' == dir) {
     dsc_space = frame->size.y;
     unit = unit_cols; }
-  char * scrolldsc = malloc((4 * sizeof(char)) + strlen(more) + strlen(unit) + 10); // 10: strlen for uint32_t
+  char * scrolldsc = malloc((4 * sizeof(char)) + strlen(more) + strlen(unit) + 10);  // 10 = uint32 max strlen
   sprintf(scrolldsc, " %d %s %s ", dist, more, unit);
   char offset = 1, q;
   if (dsc_space > strlen(scrolldsc) + 1)
