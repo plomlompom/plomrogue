@@ -99,22 +99,6 @@ void draw_info_win (struct Win * win) {
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
 
-void draw_horizontal_scroll_hint (struct Win * win, uint16_t y, uint32_t more_lines, char dir) {
-// Draw scroll hint line in win at row y, announce more_lines more lines in direction dir.
-  uint16_t x, offset;
-  char phrase[] = "more lines";
-  char * scrolldesc = malloc((3 * sizeof(char)) + strlen(phrase) + 10);  // 10 = max chars for uint32_t string
-  sprintf(scrolldesc, " %d %s ", more_lines, phrase);
-  offset = 1;
-  if (win->frame.size.x > (strlen(scrolldesc) + 1))
-    offset = (win->frame.size.x - strlen(scrolldesc)) / 2;
-  for (x = 0; x < win->frame.size.x; x++)
-    if (x >= offset && x < strlen(scrolldesc) + offset)
-      mvwaddch(win->frame.curses_win, y, x, scrolldesc[x - offset] | A_REVERSE);
-    else
-      mvwaddch(win->frame.curses_win, y, x, dir | A_REVERSE);
-  free(scrolldesc); }
-
 void draw_keys_win (struct Win * win) {
 // Draw keybindings window.
   struct World * world = (struct World *) win->data;
@@ -130,10 +114,10 @@ void draw_keys_win (struct Win * win) {
   attr_t attri;
   for (y = 0; y <= world->keyswindata->max && y < win->frame.size.y; y++) {
     if (0 == y && offset > 0) {
-      draw_horizontal_scroll_hint (win, y, offset + 1, '^');
+      draw_scroll_hint(&win->frame, y, offset + 1, '^');
       continue; }
     else if (win->frame.size.y == y + 1 && 0 < world->keyswindata->max - (win->frame.size.y + offset - 1)) {
-      draw_horizontal_scroll_hint (win, y, world->keyswindata->max - (offset + win->frame.size.y) + 2, 'v');
+      draw_scroll_hint(&win->frame, y, world->keyswindata->max - (offset + win->frame.size.y) + 2, 'v');
       continue; }
     attri = 0;
     if (y == world->keyswindata->select - offset) {

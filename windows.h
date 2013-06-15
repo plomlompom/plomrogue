@@ -27,6 +27,7 @@ extern struct WinMeta init_win_meta (WINDOW *);
 extern struct Win init_window (struct WinMeta *, char *, void *, void *);
 extern void append_window (struct WinMeta *, struct Win *);
 extern void suspend_window (struct WinMeta *, struct Win *);
+extern void draw_scroll_hint (struct Frame *, uint16_t, uint32_t, char);
 extern void draw_all_windows (struct WinMeta *);
 extern void resize_active_window (struct WinMeta *, uint16_t, uint16_t);
 extern void cycle_active_window (struct WinMeta *, char);
