@@ -68,9 +68,9 @@ void save_game(struct World * world) {
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
   if (0 != win->frame.curses_win)
-    suspend_window(win_meta, win);
+    suspend_win(win_meta, win);
   else
-    append_window(win_meta, win); }
+    append_win(win_meta, win); }
 
 void scroll_pad (struct WinMeta * win_meta, char dir) {
 // Try to scroll pad left or right.
@@ -92,7 +92,7 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
       width--;
     else if (change == '*')
       width++;
-    resize_active_window (win_meta, height, width); } }
+    resize_active_win (win_meta, height, width); } }
 
 struct Map init_map () {
 // Initialize map with some experimental start values.
@@ -248,13 +248,13 @@ unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta
   else if (key == get_action_key(world->keybindings, "toggle log window"))
     toggle_window(win_meta, win_log);
   else if (key == get_action_key(world->keybindings, "cycle forwards"))
-    cycle_active_window(win_meta, 'n');
+    cycle_active_win(win_meta, 'n');
   else if (key == get_action_key(world->keybindings, "cycle backwards"))
-    cycle_active_window(win_meta, 'p');
+    cycle_active_win(win_meta, 'p');
   else if (key == get_action_key(world->keybindings, "shift forwards"))
-    shift_active_window(win_meta, 'f');
+    shift_active_win(win_meta, 'f');
   else if (key == get_action_key(world->keybindings, "shift backwards"))
-    shift_active_window(win_meta, 'b');
+    shift_active_win(win_meta, 'b');
   else if (key == get_action_key(world->keybindings, "grow horizontally"))
     growshrink_active_window(win_meta, '*');
   else if (key == get_action_key(world->keybindings, "shrink horizontally"))
@@ -341,10 +341,10 @@ int main (int argc, char *argv[]) {
   raw();
   init_keybindings(&world);
   struct WinMeta win_meta = init_win_meta(screen);
-  struct Win win_keys = init_window(&win_meta, "Keys", &world, draw_keys_win);
-  struct Win win_map = init_window(&win_meta, "Map", &world, draw_map_win);
-  struct Win win_info = init_window(&win_meta, "Info", &world, draw_info_win);
-  struct Win win_log = init_window(&win_meta, "Log", &world, draw_log_win);
+  struct Win win_keys = init_win(&win_meta, "Keys", &world, draw_keys_win);
+  struct Win win_map = init_win(&win_meta, "Map", &world, draw_map_win);
+  struct Win win_info = init_win(&win_meta, "Info", &world, draw_info_win);
+  struct Win win_log = init_win(&win_meta, "Log", &world, draw_log_win);
   win_keys.frame.size.x = 29;
   win_map.frame.size.x = win_meta.pad.size.x - win_keys.frame.size.x - win_log.frame.size.x - 2;
   win_info.frame.size.y = 1;
@@ -363,7 +363,7 @@ int main (int argc, char *argv[]) {
       if (start_turn == world.turn)
         start_turn = 0;
       if (0 == start_turn) {
-        draw_all_windows (&win_meta);
+        draw_all_wins (&win_meta);
         key = getch(); }
       if (1 == still_reading_file &&
           (world.turn < start_turn || key == get_action_key(world.keybindings, "wait / next turn")) ) {
@@ -391,7 +391,7 @@ int main (int argc, char *argv[]) {
       if (last_turn != world.turn) {
         save_game(&world);
         last_turn = world.turn; }
-      draw_all_windows (&win_meta);
+      draw_all_wins (&win_meta);
       key = getch();
       if      (key == get_action_key(world.keybindings, "player down"))
         move_player(&world, 's');

@@ -113,7 +113,7 @@ char * get_keyname(uint16_t keycode) {
 void keyswin_mod_key (struct World * world, struct WinMeta * win_meta) {
 // In keybindings window, mark selection modifiable, modify key. Ensure max of three digits in key code field.
   world->keyswindata->edit = 1;
-  draw_all_windows (win_meta);
+  draw_all_wins (win_meta);
   int key = getch();
   if (key < 1000)
     world->keybindings[world->keyswindata->select].key = key;
