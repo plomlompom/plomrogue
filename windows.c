@@ -263,8 +263,7 @@ extern void shift_active_win (struct WinMeta * wmeta, char dir) {
   if (0 != wmeta->active && wmeta->chain_start != wmeta->chain_end && (dir == 'f' || dir == 'b')) {
     struct Win * w_shift = wmeta->active, * w_p, * w_p_next;
     char wrap = 0;
-    if ((dir == 'f' && w_shift == wmeta->chain_end)
-        || (dir == 'b' && w_shift == wmeta->chain_start))
+    if ((dir == 'f' && w_shift == wmeta->chain_end) || (dir == 'b' && w_shift == wmeta->chain_start))
       wrap = 1;
     uint16_t i, i_max;
     for (i_max = 1, w_p = wmeta->chain_start; w_p != wmeta->chain_end; i_max++)
