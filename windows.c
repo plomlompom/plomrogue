@@ -215,7 +215,7 @@ extern void draw_all_wins (struct WinMeta * wmeta) {
   wnoutrefresh(wmeta->screen);
   werase(wmeta->pad.curses_win);
   if (wmeta->chain_start) {
-    uint16_t n_wins = 1, i, y;
+    uint16_t n_wins = 1, i;
     struct Win * win_p = wmeta->chain_start;
     while (0 != win_p->next) {
       win_p = win_p->next;
