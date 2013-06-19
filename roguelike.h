@@ -25,10 +25,6 @@ struct Monster {
   uint16_t x; };
 
 uint16_t rrand(char, uint32_t);
-uint16_t read_uint16_bigendian(FILE * file);
-void write_uint16_bigendian(uint16_t x, FILE * file);
-uint32_t read_uint32_bigendian(FILE * file);
-void write_uint32_bigendian(uint32_t x, FILE * file);
 void save_game(struct World *);
 void toggle_window (struct WinMeta *, struct Win *);
 void scroll_pad (struct WinMeta *, char);

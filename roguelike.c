@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <limits.h>
 #include <stdint.h>
 #include <ncurses.h>
 #include <string.h>
@@ -9,6 +8,7 @@
 #include "draw_wins.h"
 #include "roguelike.h"
 #include "keybindings.h"
+#include "readwrite.h"
 
 uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
@@ -17,42 +17,6 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
     seed = new_seed;
   seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
   return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
-
-uint16_t read_uint16_bigendian(FILE * file) {
-// Read uint16 from file in big-endian order.
-  const uint16_t nchar = UCHAR_MAX + 1;
-  unsigned char a = fgetc(file);
-  unsigned char b = fgetc(file);
-  return (a * nchar) + b; }
-
-void write_uint16_bigendian(uint16_t x, FILE * file) {
-// Write uint16 to file in beg-endian order.
-  const uint16_t nchar = UCHAR_MAX + 1;
-  unsigned char a = x / nchar;
-  unsigned char b = x % nchar;
-  fputc(a, file);
-  fputc(b, file); }
-
-uint32_t read_uint32_bigendian(FILE * file) {
-// Read uint32 from file in big-endian order.
-  const uint16_t nchar = UCHAR_MAX + 1;
-  unsigned char a = fgetc(file);
-  unsigned char b = fgetc(file);
-  unsigned char c = fgetc(file);
-  unsigned char d = fgetc(file);
-  return (a * nchar * nchar * nchar) + (b * nchar * nchar) + (c * nchar) + d; }
-
-void write_uint32_bigendian(uint32_t x, FILE * file) {
-// Write uint32 to file in beg-endian order.
-  const uint16_t nchar = UCHAR_MAX + 1;
-  unsigned char a = x / (nchar * nchar * nchar);
-  unsigned char b = (x - (a * nchar * nchar * nchar)) / (nchar * nchar);
-  unsigned char c = (x - ((a * nchar * nchar * nchar) + (b * nchar * nchar))) / nchar;
-  unsigned char d = x % nchar;
-  fputc(a, file);
-  fputc(b, file);
-  fputc(c, file);
-  fputc(d, file); }
 
 void save_game(struct World * world) {
 // Save game data to game file.
