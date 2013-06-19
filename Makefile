@@ -1,10 +1,13 @@
-roguelike:
-	cc -Wall -g -o windows.o -c windows.c
-	cc -Wall -g -o draw_wins.o -c draw_wins.c
-	cc -Wall -g -o keybindings.o -c keybindings.c
-	cc -Wall -g -o readwrite.o -c readwrite.c
-	cc -Wall -g -o roguelike.o -c roguelike.c
-	cc -Wall -g -o roguelike windows.o draw_wins.o keybindings.o readwrite.o roguelike.o -lncurses
+CC=cc
+CFLAGS=-Wall -g
+TARGET=roguelike
+OBJECTS=windows.o draw_wins.o keybindings.o readwrite.o roguelike.o
+
+roguelike: $(OBJECTS)
+	$(CC) $(CFLAGS) -o roguelike $(OBJECTS) -lncurses
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm *.o; rm roguelike
+	rm $(OBJECTS); rm roguelike
