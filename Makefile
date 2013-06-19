@@ -9,5 +9,6 @@ roguelike: $(OBJECTS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+.PHONY: clean
 clean:
 	rm $(OBJECTS); rm roguelike
