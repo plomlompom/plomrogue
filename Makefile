@@ -1,15 +1,19 @@
 CC=cc
 CFLAGS=-Wall -g
 TARGET=roguelike
-SOURCES=$(shell find . -type f -name \*.c)
-OBJECTS=$(SOURCES:.c=.o)
+SRCDIR=src
+BUILDDIR=build
+SOURCES=$(shell find $(SRCDIR)/ -type f -name \*.c)
+OBJECTS=$(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.c=.o))
 
 roguelike: $(OBJECTS)
 	$(CC) $(CFLAGS) -o roguelike $(OBJECTS) -lncurses
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	mkdir -p $(BUILDDIR); $(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
-	rm $(OBJECTS); rm roguelike
+	rm $(OBJECTS)
+	rmdir $(BUILDDIR)
+	rm $(TARGET)
