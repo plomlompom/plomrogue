@@ -1,7 +1,8 @@
 CC=cc
 CFLAGS=-Wall -g
 TARGET=roguelike
-OBJECTS=windows.o draw_wins.o keybindings.o readwrite.o roguelike.o
+SOURCES=$(shell find . -type f -name \*.c)
+OBJECTS=$(SOURCES:.c=.o)
 
 roguelike: $(OBJECTS)
 	$(CC) $(CFLAGS) -o roguelike $(OBJECTS) -lncurses
