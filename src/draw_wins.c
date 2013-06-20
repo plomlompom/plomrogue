@@ -74,22 +74,24 @@ void draw_map_win (struct Win * win) {
   struct World * world = (struct World *) win->data;
   struct Map * map = world->map;
   struct Player * player = world->player;
-  struct Monster * monster = world->monster;
+  struct Monster * monster;
   char * cells = map->cells;
-  uint16_t width_map_av = map->width - map->offset_x;
+  uint16_t width_map_av  = map->width  - map->offset_x;
   uint16_t height_map_av = map->height - map->offset_y;
   uint16_t x, y, z;
   for (y = 0; y < win->frame.size.y; y++) {
     z = map->offset_x + (map->offset_y + y) * (map->width);
     for (x = 0; x < win->frame.size.x; x++) {
       if (y < height_map_av && x < width_map_av) {
-        if (z == (map->width * player->y) + player->x)
-          mvwaddch(win->frame.curses_win, y, x, '@');
-        else if (z == (map->width * monster->y) + monster->x)
-          mvwaddch(win->frame.curses_win, y, x, 'M');
-        else
           mvwaddch(win->frame.curses_win, y, x, cells[z]);
-        z++; } } } }
+        z++; } } }
+  if (   player->y >= map->offset_y && player->y < map->offset_y + win->frame.size.y
+      && player->x >= map->offset_x && player->x < map->offset_x + win->frame.size.x)
+    mvwaddch(win->frame.curses_win, player->y - map->offset_y, player->x - map->offset_x, '@');
+  for (monster = world->monster; monster != 0; monster = monster->next)
+    if (   monster->y >= map->offset_y && monster->y < map->offset_y + win->frame.size.y
+        && monster->x >= map->offset_x && monster->x < map->offset_x + win->frame.size.x)
+      mvwaddch(win->frame.curses_win, monster->y - map->offset_y, monster->x - map->offset_x, monster->name); }
 
 void draw_info_win (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.

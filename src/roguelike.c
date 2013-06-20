@@ -55,6 +55,10 @@ void save_game(struct World * world) {
   write_uint16_bigendian(world->player->x, file);
   write_uint16_bigendian(world->monster->y, file);
   write_uint16_bigendian(world->monster->x, file);
+  write_uint16_bigendian(world->monster->next->y, file);
+  write_uint16_bigendian(world->monster->next->x, file);
+  write_uint16_bigendian(world->monster->next->next->y, file);
+  write_uint16_bigendian(world->monster->next->next->x, file);
   fclose(file); }
 
 void record_action (char action) {
@@ -67,22 +71,26 @@ void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;
   rrand(1, world->seed * world->turn);
-  char d = rrand(0, 0) % 5;
-  uint16_t ty = world->monster->y;
-  uint16_t tx = world->monster->x;
-  if (1 == d)
-    ty++;
-  else if (2 == d)
-    ty--;
-  else if (3 == d)
-    tx++;
-  else if (4 == d)
-    tx--;
-  if (tx == world->player->x && ty == world->player->y)
-    update_log(world, "\nThe monster hits you.");
-  else if (is_passable(world->map, ty, tx)) {
-    world->monster->y = ty;
-    world->monster->x = tx; } }
+  char d;
+  struct Monster * monster;
+  uint16_t ty, tx;
+  for (monster = world->monster; monster != 0; monster = monster->next) {
+    d = rrand(0, 0) % 5;
+    ty = monster->y;
+    tx = monster->x;
+    if (1 == d)
+      ty++;
+    else if (2 == d)
+      ty--;
+    else if (3 == d)
+      tx++;
+    else if (4 == d)
+      tx--;
+    if (tx == world->player->x && ty == world->player->y)
+      update_log(world, "\nThe monster hits you.");
+    else if (is_passable(world->map, ty, tx)) {
+      monster->y = ty;
+      monster->x = tx; } } }
 
 void update_log (struct World * world, char * text) {
 // Update log with new text to be appended.
@@ -115,9 +123,12 @@ void move_player (struct World * world, char d) {
   if ('e' == d) {
     dir = "east";
     tx++; }
-  if (ty == world->monster->y && tx == world->monster->x)
-    success = 2;
-  else if (is_passable(world->map, ty, tx)) {
+  struct Monster * monster;
+  for (monster = world->monster; monster != 0; monster = monster->next)
+    if (ty == monster->y && tx == monster->x) {
+      success = 2;
+      break; }
+  if (2 != success && is_passable(world->map, ty, tx)) {
     success = 1;
     world->player->y = ty;
     world->player->x = tx; }
@@ -265,8 +276,16 @@ int main (int argc, char *argv[]) {
   update_log (&world, " ");
   struct Player player;
   world.player = &player;
-  struct Monster monster;
-  world.monster = &monster;
+  struct Monster monster1;
+  struct Monster monster2;
+  struct Monster monster3;
+  world.monster = &monster1;
+  monster1.next = &monster2;
+  monster2.next = &monster3;
+  monster3.next = 0;
+  monster1.name = 'A';
+  monster2.name = 'B';
+  monster3.name = 'C';
   FILE * file;
   if (1 == world.interactive && 0 == access("savefile", F_OK)) {
     file = fopen("savefile", "r");
@@ -274,8 +293,12 @@ int main (int argc, char *argv[]) {
     world.turn = read_uint32_bigendian(file);
     player.y = read_uint16_bigendian(file);
     player.x = read_uint16_bigendian(file);
-    monster.y = read_uint16_bigendian(file);
-    monster.x = read_uint16_bigendian(file);
+    monster1.y = read_uint16_bigendian(file);
+    monster1.x = read_uint16_bigendian(file);
+    monster2.y = read_uint16_bigendian(file);
+    monster2.x = read_uint16_bigendian(file);
+    monster3.y = read_uint16_bigendian(file);
+    monster3.x = read_uint16_bigendian(file);
     fclose(file); }
   else {
     world.turn = 1;
@@ -294,9 +317,11 @@ int main (int argc, char *argv[]) {
     for (player.y = player.x = 0; 0 == is_passable(&map, player.y, player.x);) {
       player.y = rrand(0, 0) % map.height;
       player.x = rrand(0, 0) % map.width; }
-    for (monster.y = monster.x = 0; 0 == is_passable(&map, monster.y, monster.x);) {
-      monster.y = rrand(0, 0) % map.height;
-      monster.x = rrand(0, 0) % map.width; } }
+    struct Monster * monster;
+    for (monster = world.monster; monster != 0; monster = monster->next)
+      for (monster->y = monster->x = 0; 0 == is_passable(&map, monster->y, monster->x);) {
+        monster->y = rrand(0, 0) % map.height;
+        monster->x = rrand(0, 0) % map.width; } }
 
   WINDOW * screen = initscr();
   noecho();

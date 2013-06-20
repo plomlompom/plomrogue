@@ -21,6 +21,8 @@ struct Player {
   uint16_t x; };
 
 struct Monster {
+  struct Monster * next;
+  char name;
   uint16_t y;
   uint16_t x; };
 
