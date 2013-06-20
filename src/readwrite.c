@@ -1,35 +1,36 @@
 #include <stdio.h>
 #include <limits.h>
 #include <stdint.h>
-#define UCHARSIZE (UCHAR_MAX + 1)
 
-uint16_t read_uint16_bigendian(FILE * file) {
+static const uint16_t uchar_s = UCHAR_MAX + 1;
+
+extern uint16_t read_uint16_bigendian(FILE * file) {
 // Read uint16 from file in big-endian order.
   unsigned char a = fgetc(file);
   unsigned char b = fgetc(file);
-  return (a * UCHARSIZE) + b; }
+  return (a * uchar_s) + b; }
 
-void write_uint16_bigendian(uint16_t x, FILE * file) {
+extern void write_uint16_bigendian(uint16_t x, FILE * file) {
 // Write uint16 to file in beg-endian order.
-  unsigned char a = x / UCHARSIZE;
-  unsigned char b = x % UCHARSIZE;
+  unsigned char a = x / uchar_s;
+  unsigned char b = x % uchar_s;
   fputc(a, file);
   fputc(b, file); }
 
-uint32_t read_uint32_bigendian(FILE * file) {
+extern uint32_t read_uint32_bigendian(FILE * file) {
 // Read uint32 from file in big-endian order.
   unsigned char a = fgetc(file);
   unsigned char b = fgetc(file);
   unsigned char c = fgetc(file);
   unsigned char d = fgetc(file);
-  return (a * UCHARSIZE * UCHARSIZE * UCHARSIZE) + (b * UCHARSIZE * UCHARSIZE) + (c * UCHARSIZE) + d; }
+  return (a * uchar_s * uchar_s * uchar_s) + (b * uchar_s * uchar_s) + (c * uchar_s) + d; }
 
-void write_uint32_bigendian(uint32_t x, FILE * file) {
+extern void write_uint32_bigendian(uint32_t x, FILE * file) {
 // Write uint32 to file in beg-endian order.
-  unsigned char a = x / (UCHARSIZE * UCHARSIZE * UCHARSIZE);
-  unsigned char b = (x - (a * UCHARSIZE * UCHARSIZE * UCHARSIZE)) / (UCHARSIZE * UCHARSIZE);
-  unsigned char c = (x - ((a * UCHARSIZE * UCHARSIZE * UCHARSIZE) + (b * UCHARSIZE * UCHARSIZE))) / UCHARSIZE;
-  unsigned char d = x % UCHARSIZE;
+  unsigned char a = x / (uchar_s * uchar_s * uchar_s);
+  unsigned char b = (x - (a * uchar_s * uchar_s * uchar_s)) / (uchar_s * uchar_s);
+  unsigned char c = (x - ((a * uchar_s * uchar_s * uchar_s) + (b * uchar_s * uchar_s))) / uchar_s;
+  unsigned char d = x % uchar_s;
   fputc(a, file);
   fputc(b, file);
   fputc(c, file);
