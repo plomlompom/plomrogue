@@ -18,46 +18,6 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
   seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
   return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
 
-void save_game(struct World * world) {
-// Save game data to game file.
-  FILE * file = fopen("savefile", "w");
-  write_uint32_bigendian(world->seed, file);
-  write_uint32_bigendian(world->turn, file);
-  write_uint16_bigendian(world->player->y, file);
-  write_uint16_bigendian(world->player->x, file);
-  write_uint16_bigendian(world->monster->y, file);
-  write_uint16_bigendian(world->monster->x, file);
-  fclose(file); }
-
-void toggle_window (struct WinMeta * win_meta, struct Win * win) {
-// Toggle display of window win.
-  if (0 != win->frame.curses_win)
-    suspend_win(win_meta, win);
-  else
-    append_win(win_meta, win); }
-
-void scroll_pad (struct WinMeta * win_meta, char dir) {
-// Try to scroll pad left or right.
-  if      ('+' == dir)
-    reset_pad_offset(win_meta, win_meta->pad_offset + 1);
-  else if ('-' == dir)
-    reset_pad_offset(win_meta, win_meta->pad_offset - 1); }
-
-void growshrink_active_window (struct WinMeta * win_meta, char change) {
-// Grow or shrink active window horizontally or vertically by one cell size.
-  if (0 != win_meta->active) {
-    uint16_t height = win_meta->active->frame.size.y;
-    uint16_t width = win_meta->active->frame.size.x;
-    if      (change == '-')
-      height--;
-    else if (change == '+')
-      height++;
-    else if (change == '_')
-      width--;
-    else if (change == '*')
-      width++;
-    resize_active_win (win_meta, height, width); } }
-
 struct Map init_map () {
 // Initialize map with some experimental start values.
   struct Map map;
@@ -86,16 +46,22 @@ struct Map init_map () {
       map.cells[y * map.width + x] = '.'; }
   return map; }
 
-void map_scroll (struct Map * map, char dir) {
-// Scroll map into direction dir if possible by changing the offset.
-  if      ('n' == dir && map->offset_y > 0)
-    map->offset_y--;
-  else if ('s' == dir)
-    map->offset_y++;
-  else if ('w' == dir && map->offset_x > 0)
-    map->offset_x--;
-  else if ('e' == dir)
-    map->offset_x++; }
+void save_game(struct World * world) {
+// Save game data to game file.
+  FILE * file = fopen("savefile", "w");
+  write_uint32_bigendian(world->seed, file);
+  write_uint32_bigendian(world->turn, file);
+  write_uint16_bigendian(world->player->y, file);
+  write_uint16_bigendian(world->player->x, file);
+  write_uint16_bigendian(world->monster->y, file);
+  write_uint16_bigendian(world->monster->x, file);
+  fclose(file); }
+
+void record_action (char action) {
+// Append action to game record file.
+  FILE * file = fopen("record", "a");
+  fputc(action, file);
+  fclose(file); }
 
 void next_turn (struct World * world) {
 // Increment turn and move enemy.
@@ -129,20 +95,6 @@ void update_log (struct World * world, char * text) {
   memcpy(new_text + len_old, text, len_new);
   free(world->log);
   world->log = new_text; }
-
-char is_passable (struct Map * map, uint16_t y, uint16_t x) {
-// Check if coordinate on (or beyond) map is accessible to movement.
-  char passable = 0;
-  if (0 <= x && x < map->width && 0 <= y && y < map->height)
-    if ('.' == map->cells[y * map->width + x])
-      passable = 1;
-  return passable; }
-
-void record_action (char action) {
-// Append action to game record file.
-  FILE * file = fopen("record", "a");
-  fputc(action, file);
-  fclose(file); }
 
 void move_player (struct World * world, char d) {
 // Move player in direction d, increment turn counter and update log.
@@ -187,12 +139,60 @@ void move_player (struct World * world, char d) {
     record_action(d);
   next_turn (world); }
 
+char is_passable (struct Map * map, uint16_t y, uint16_t x) {
+// Check if coordinate on (or beyond) map is accessible to movement.
+  char passable = 0;
+  if (0 <= x && x < map->width && 0 <= y && y < map->height)
+    if ('.' == map->cells[y * map->width + x])
+      passable = 1;
+  return passable; }
+
 void player_wait (struct World * world) {
 // Make player wait one turn.
   if (1 == world->interactive)
     record_action(0);
   next_turn (world);
   update_log (world, "\nYou wait."); }
+
+void toggle_window (struct WinMeta * win_meta, struct Win * win) {
+// Toggle display of window win.
+  if (0 != win->frame.curses_win)
+    suspend_win(win_meta, win);
+  else
+    append_win(win_meta, win); }
+
+void scroll_pad (struct WinMeta * win_meta, char dir) {
+// Try to scroll pad left or right.
+  if      ('+' == dir)
+    reset_pad_offset(win_meta, win_meta->pad_offset + 1);
+  else if ('-' == dir)
+    reset_pad_offset(win_meta, win_meta->pad_offset - 1); }
+
+void growshrink_active_window (struct WinMeta * win_meta, char change) {
+// Grow or shrink active window horizontally or vertically by one cell size.
+  if (0 != win_meta->active) {
+    uint16_t height = win_meta->active->frame.size.y;
+    uint16_t width = win_meta->active->frame.size.x;
+    if      (change == '-')
+      height--;
+    else if (change == '+')
+      height++;
+    else if (change == '_')
+      width--;
+    else if (change == '*')
+      width++;
+    resize_active_win (win_meta, height, width); } }
+
+void map_scroll (struct Map * map, char dir) {
+// Scroll map into direction dir if possible by changing the offset.
+  if      ('n' == dir && map->offset_y > 0)
+    map->offset_y--;
+  else if ('s' == dir)
+    map->offset_y++;
+  else if ('w' == dir && map->offset_x > 0)
+    map->offset_x--;
+  else if ('e' == dir)
+    map->offset_x++; }
 
 unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
                         struct Win * win_map, struct Win * win_info, struct Win * win_log) {
