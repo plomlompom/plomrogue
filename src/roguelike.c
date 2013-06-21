@@ -258,9 +258,11 @@ unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta
 
 int main (int argc, char *argv[]) {
   struct World world;
-  world.interactive = 1;
+
+  // Read in startup options (i.e. replay option and replay start turn).
   int opt;
   uint32_t start_turn;
+  world.interactive = 1;
   while ((opt = getopt(argc, argv, "s::")) != -1) {
     switch (opt) {
       case 's':
@@ -272,6 +274,7 @@ int main (int argc, char *argv[]) {
       default:
         exit(EXIT_FAILURE); } }
 
+  // Initialize log, player and monsters.
   world.log = calloc(1, sizeof(char));
   update_log (&world, " ");
   struct Player player;
@@ -286,6 +289,8 @@ int main (int argc, char *argv[]) {
   monster1.name = 'A';
   monster2.name = 'B';
   monster3.name = 'C';
+
+  // For interactive mode, try to load world state from savefile.
   FILE * file;
   if (1 == world.interactive && 0 == access("savefile", F_OK)) {
     file = fopen("savefile", "r");
@@ -300,16 +305,22 @@ int main (int argc, char *argv[]) {
     monster3.y = read_uint16_bigendian(file);
     monster3.x = read_uint16_bigendian(file);
     fclose(file); }
+
+  // For non-interactive mode, try to load world state from frecord file.
   else {
     world.turn = 1;
     if (0 == world.interactive) {
       file = fopen("record", "r");
       world.seed = read_uint32_bigendian(file); }
+
+    // For interactive-mode in newly started world, generate a start seed from the current time.
     else {
       file = fopen("record", "w");
       world.seed = time(NULL);
       write_uint32_bigendian(world.seed, file);
       fclose(file); } }
+
+  // Generate map from seed and, if newly generated world, start positions of actors.
   rrand(1, world.seed);
   struct Map map = init_map();
   world.map = &map;
@@ -323,6 +334,7 @@ int main (int argc, char *argv[]) {
         monster->y = rrand(0, 0) % map.height;
         monster->x = rrand(0, 0) % map.width; } }
 
+  // Initialize window system and windows.
   WINDOW * screen = initscr();
   noecho();
   curs_set(0);
@@ -343,6 +355,7 @@ int main (int argc, char *argv[]) {
   toggle_window(&win_meta, &win_info);
   toggle_window(&win_meta, &win_log);
 
+  // Replay mode.
   int key;
   unsigned char quit_called = 0;
   if (0 == world.interactive) {
@@ -374,6 +387,8 @@ int main (int argc, char *argv[]) {
         quit_called = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
         if (1 == quit_called)
           break; } }
+
+  // Interactive mode.
   else {
     uint32_t last_turn = 0;
     while (1) {
@@ -397,12 +412,12 @@ int main (int argc, char *argv[]) {
         if (1 == quit_called)
           break; } }
 
+  // Clean up and exit.
   free(map.cells);
   for (key = 0; key <= world.keyswindata->max; key++)
     free(world.keybindings[key].name);
   free(world.keybindings);
   free(world.keyswindata);
   free(world.log);
-
   endwin();
   return 0; }
