@@ -17,19 +17,19 @@ struct Map {
   char * cells; };
 
 struct Player {
-  uint16_t y;
-  uint16_t x; };
+  struct yx_uint16 pos; };
 
 struct Monster {
   struct Monster * next;
   char name;
-  uint16_t y;
-  uint16_t x; };
+  struct yx_uint16 pos; };
 
 uint16_t rrand(char, uint32_t);
 struct Map init_map ();
 void save_game(struct World *);
 void record_action (char);
+struct yx_uint16 mv_yx_in_dir (char, struct yx_uint16);
+char yx_uint16_cmp (struct yx_uint16, struct yx_uint16);
 void next_turn (struct World *);
 void update_log (struct World *, char *);
 void move_player (struct World *, char);

@@ -10,6 +10,11 @@
 #include "keybindings.h"
 #include "readwrite.h"
 
+#define NORTH 1
+#define EAST 2
+#define SOUTH 3
+#define WEST 4
+
 uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
   static uint32_t seed;
@@ -51,14 +56,14 @@ void save_game(struct World * world) {
   FILE * file = fopen("savefile", "w");
   write_uint32_bigendian(world->seed, file);
   write_uint32_bigendian(world->turn, file);
-  write_uint16_bigendian(world->player->y, file);
-  write_uint16_bigendian(world->player->x, file);
-  write_uint16_bigendian(world->monster->y, file);
-  write_uint16_bigendian(world->monster->x, file);
-  write_uint16_bigendian(world->monster->next->y, file);
-  write_uint16_bigendian(world->monster->next->x, file);
-  write_uint16_bigendian(world->monster->next->next->y, file);
-  write_uint16_bigendian(world->monster->next->next->x, file);
+  write_uint16_bigendian(world->player->pos.y, file);
+  write_uint16_bigendian(world->player->pos.x, file);
+  write_uint16_bigendian(world->monster->pos.y, file);
+  write_uint16_bigendian(world->monster->pos.x, file);
+  write_uint16_bigendian(world->monster->next->pos.y, file);
+  write_uint16_bigendian(world->monster->next->pos.x, file);
+  write_uint16_bigendian(world->monster->next->next->pos.y, file);
+  write_uint16_bigendian(world->monster->next->next->pos.x, file);
   fclose(file); }
 
 void record_action (char action) {
@@ -67,30 +72,32 @@ void record_action (char action) {
   fputc(action, file);
   fclose(file); }
 
+struct yx_uint16 mv_yx_in_dir (char d, struct yx_uint16 yx) {
+// Return yx coordinates one step to the direction d of yx.
+  if      (d == NORTH) yx.y--;
+  else if (d == EAST)  yx.x++;
+  else if (d == SOUTH) yx.y++;
+  else if (d == WEST)  yx.x--;
+  return yx; }
+
+char yx_uint16_cmp (struct yx_uint16 a, struct yx_uint16 b) {
+// Compare two coordinates of type yx_uint16.
+  if (a.y == b.y && a.x == b.x) return 1;
+  else                          return 0; }
+
 void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;
   rrand(1, world->seed * world->turn);
   char d;
   struct Monster * monster;
-  uint16_t ty, tx;
   for (monster = world->monster; monster != 0; monster = monster->next) {
     d = rrand(0, 0) % 5;
-    ty = monster->y;
-    tx = monster->x;
-    if (1 == d)
-      ty++;
-    else if (2 == d)
-      ty--;
-    else if (3 == d)
-      tx++;
-    else if (4 == d)
-      tx--;
-    if (tx == world->player->x && ty == world->player->y)
+    struct yx_uint16 t = mv_yx_in_dir (d, monster->pos);
+    if (yx_uint16_cmp(t, world->player->pos))
       update_log(world, "\nThe monster hits you.");
-    else if (is_passable(world->map, ty, tx)) {
-      monster->y = ty;
-      monster->x = tx; } } }
+    else if (is_passable(world->map, t.y, t.x))
+      monster->pos = t; } }
 
 void update_log (struct World * world, char * text) {
 // Update log with new text to be appended.
@@ -109,35 +116,25 @@ void move_player (struct World * world, char d) {
   static char prev = 0;
   char success = 0;
   char * dir;
-  uint16_t ty = world->player->y;
-  uint16_t tx = world->player->x;
-  if ('s' == d) {
-    dir = "south";
-    ty++; }
-  if ('n' == d) {
-    dir = "north";
-    ty--; }
-  if ('w' == d) {
-    dir = "west";
-    tx--; }
-  if ('e' == d) {
-    dir = "east";
-    tx++; }
+  struct yx_uint16 t = mv_yx_in_dir (d, world->player->pos);
   struct Monster * monster;
   for (monster = world->monster; monster != 0; monster = monster->next)
-    if (ty == monster->y && tx == monster->x) {
+    if (yx_uint16_cmp (t, monster->pos)) {
       success = 2;
       break; }
-  if (2 != success && is_passable(world->map, ty, tx)) {
+  if (2 != success && is_passable(world->map, t.y, t.x)) {
     success = 1;
-    world->player->y = ty;
-    world->player->x = tx; }
+    world->player->pos = t; }
   if (success * d == prev)
     update_log (world, ".");
   else {
     if (2 == success)
       update_log (world, "\nYou hit the monster.");
     else {
+      if      (NORTH == d) dir = "north";
+      else if (EAST  == d) dir = "east" ;
+      else if (SOUTH == d) dir = "south";
+      else if (WEST  == d) dir = "west" ;
       char * msg = calloc(25, sizeof(char));
       char * msg_content = "You fail to move";
       if (1 == success)
@@ -296,14 +293,14 @@ int main (int argc, char *argv[]) {
     file = fopen("savefile", "r");
     world.seed = read_uint32_bigendian(file);
     world.turn = read_uint32_bigendian(file);
-    player.y = read_uint16_bigendian(file);
-    player.x = read_uint16_bigendian(file);
-    monster1.y = read_uint16_bigendian(file);
-    monster1.x = read_uint16_bigendian(file);
-    monster2.y = read_uint16_bigendian(file);
-    monster2.x = read_uint16_bigendian(file);
-    monster3.y = read_uint16_bigendian(file);
-    monster3.x = read_uint16_bigendian(file);
+    player.pos.y = read_uint16_bigendian(file);
+    player.pos.x = read_uint16_bigendian(file);
+    monster1.pos.y = read_uint16_bigendian(file);
+    monster1.pos.x = read_uint16_bigendian(file);
+    monster2.pos.y = read_uint16_bigendian(file);
+    monster2.pos.x = read_uint16_bigendian(file);
+    monster3.pos.y = read_uint16_bigendian(file);
+    monster3.pos.x = read_uint16_bigendian(file);
     fclose(file); }
 
   // For non-interactive mode, try to load world state from frecord file.
@@ -325,14 +322,14 @@ int main (int argc, char *argv[]) {
   struct Map map = init_map();
   world.map = &map;
   if (1 == world.turn) {
-    for (player.y = player.x = 0; 0 == is_passable(&map, player.y, player.x);) {
-      player.y = rrand(0, 0) % map.height;
-      player.x = rrand(0, 0) % map.width; }
+    for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos.y, player.pos.x);) {
+      player.pos.y = rrand(0, 0) % map.height;
+      player.pos.x = rrand(0, 0) % map.width; }
     struct Monster * monster;
     for (monster = world.monster; monster != 0; monster = monster->next)
-      for (monster->y = monster->x = 0; 0 == is_passable(&map, monster->y, monster->x);) {
-        monster->y = rrand(0, 0) % map.height;
-        monster->x = rrand(0, 0) % map.width; } }
+      for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos.y, monster->pos.x);) {
+        monster->pos.y = rrand(0, 0) % map.height;
+        monster->pos.x = rrand(0, 0) % map.width; } }
 
   // Initialize window system and windows.
   WINDOW * screen = initscr();
@@ -375,14 +372,14 @@ int main (int argc, char *argv[]) {
           still_reading_file = 0; }
         else if (0 == action)
           player_wait (&world);
-        else if ('s' == action)
-          move_player(&world, 's');
-        else if ('n' == action)
-          move_player(&world, 'n');
-        else if ('e' == action)
-          move_player(&world, 'e');
-        else if ('w' == action)
-          move_player(&world, 'w'); }
+        else if (NORTH == action)
+          move_player(&world, NORTH);
+        else if (EAST  == action)
+          move_player(&world, EAST);
+        else if (SOUTH == action)
+          move_player(&world, SOUTH);
+        else if (WEST == action)
+          move_player(&world, WEST); }
       else
         quit_called = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
         if (1 == quit_called)
@@ -397,14 +394,14 @@ int main (int argc, char *argv[]) {
         last_turn = world.turn; }
       draw_all_wins (&win_meta);
       key = getch();
-      if      (key == get_action_key(world.keybindings, "player down"))
-        move_player(&world, 's');
-      else if (key == get_action_key(world.keybindings, "player up"))
-        move_player(&world, 'n');
+      if      (key == get_action_key(world.keybindings, "player up"))
+        move_player(&world, NORTH);
       else if (key == get_action_key(world.keybindings, "player right"))
-        move_player(&world, 'e');
+        move_player(&world, EAST);
+      else if (key == get_action_key(world.keybindings, "player down"))
+        move_player(&world, SOUTH);
       else if (key == get_action_key(world.keybindings, "player left"))
-        move_player(&world, 'w');
+        move_player(&world, WEST);
       else if (key == get_action_key(world.keybindings, "wait / next turn"))
         player_wait (&world);
       else
