@@ -29,7 +29,6 @@ struct Map init_map ();
 void save_game(struct World *);
 void record_action (char);
 struct yx_uint16 mv_yx_in_dir (char, struct yx_uint16);
-char yx_uint16_cmp (struct yx_uint16, struct yx_uint16);
 void next_turn (struct World *);
 void update_log (struct World *, char *);
 void move_player (struct World *, char);

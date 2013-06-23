@@ -80,11 +80,6 @@ struct yx_uint16 mv_yx_in_dir (char d, struct yx_uint16 yx) {
   else if (d == WEST)  yx.x--;
   return yx; }
 
-char yx_uint16_cmp (struct yx_uint16 a, struct yx_uint16 b) {
-// Compare two coordinates of type yx_uint16.
-  if (a.y == b.y && a.x == b.x) return 1;
-  else                          return 0; }
-
 void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;

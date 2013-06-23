@@ -1,6 +1,4 @@
-struct yx_uint16 {
-  uint16_t y;
-  uint16_t x; };
+#include "yx_uint16.h"
 
 struct Frame {
   WINDOW * curses_win;
