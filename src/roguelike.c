@@ -188,14 +188,10 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
 
 void map_scroll (struct Map * map, char dir) {
 // Scroll map into direction dir if possible by changing the offset.
-  if      ('n' == dir && map->offset_y > 0)
-    map->offset_y--;
-  else if ('s' == dir)
-    map->offset_y++;
-  else if ('w' == dir && map->offset_x > 0)
-    map->offset_x--;
-  else if ('e' == dir)
-    map->offset_x++; }
+  if      (NORTH == dir && map->offset_y > 0) map->offset_y--;
+  else if (SOUTH == dir)                      map->offset_y++;
+  else if (WEST  == dir && map->offset_x > 0) map->offset_x--;
+  else if (EAST  == dir)                      map->offset_x++; }
 
 unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
                         struct Win * win_map, struct Win * win_info, struct Win * win_log) {
@@ -239,13 +235,13 @@ unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta
   else if (key == get_action_key(world->keybindings, "keys mod"))
     keyswin_mod_key (world, win_meta);
   else if (key == get_action_key(world->keybindings, "map up"))
-    map_scroll (world->map, 'n');
+    map_scroll (world->map, NORTH);
   else if (key == get_action_key(world->keybindings, "map down"))
-    map_scroll (world->map, 's');
+    map_scroll (world->map, SOUTH);
   else if (key == get_action_key(world->keybindings, "map right"))
-    map_scroll (world->map, 'e');
+    map_scroll (world->map, EAST);
   else if (key == get_action_key(world->keybindings, "map left"))
-    map_scroll (world->map, 'w');
+    map_scroll (world->map, WEST);
   return 0; }
 
 int main (int argc, char *argv[]) {
