@@ -1,3 +1,6 @@
+#ifndef WINDOWS_H
+#define WINDOWS_H
+
 #include "yx_uint16.h"
 
 struct Frame {
@@ -31,3 +34,5 @@ extern void resize_active_win (struct WinMeta *, uint16_t, uint16_t);
 extern void cycle_active_win (struct WinMeta *, char);
 extern void shift_active_win (struct WinMeta *, char);
 extern void reset_pad_offset (struct WinMeta *, uint16_t);
+
+#endif

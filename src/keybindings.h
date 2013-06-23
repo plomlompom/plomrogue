@@ -1,3 +1,5 @@
+#ifndef KEYBINDINGS_H
+
 struct KeyBinding {
   char * name;
   uint16_t key; };
@@ -13,3 +15,5 @@ uint16_t get_action_key (struct KeyBinding *, char *);
 char * get_keyname(uint16_t);
 void keyswin_mod_key (struct World *, struct WinMeta *);
 void keyswin_move_selection (struct World *, char);
+
+#endif

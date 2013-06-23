@@ -1,3 +1,6 @@
+#ifndef ROGUELIKE_H
+#define ROGUELIKE_H
+
 struct World {
   char interactive;
   struct KeyBinding * keybindings;
@@ -39,3 +42,5 @@ void scroll_pad (struct WinMeta *, char);
 void growshrink_active_window (struct WinMeta *, char);
 void map_scroll (struct Map *, char);
 unsigned char meta_keys(int, struct World *, struct WinMeta *, struct Win *, struct Win *, struct Win *, struct Win *);
+
+#endif
