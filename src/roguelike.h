@@ -13,10 +13,8 @@ struct World {
   struct Player * player; };
 
 struct Map {
-  uint16_t width;
-  uint16_t height;
-  uint16_t offset_x;
-  uint16_t offset_y;
+  struct yx_uint16 size;
+  struct yx_uint16 offset;
   char * cells; };
 
 struct Player {

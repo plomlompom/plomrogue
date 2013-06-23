@@ -26,29 +26,29 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
 struct Map init_map () {
 // Initialize map with some experimental start values.
   struct Map map;
-  map.width = 64;
-  map.height = 64;
-  map.offset_x = 0;
-  map.offset_y = 0;
-  uint32_t size = map.width * map.height;
+  map.size.x = 64;
+  map.size.y = 64;
+  map.offset.x = 0;
+  map.offset.y = 0;
+  uint32_t size = map.size.x * map.size.y;
   map.cells = malloc(size);
   uint16_t y, x;
-  for (y = 0; y < map.height; y++)
-    for (x = 0; x < map.width; x++)
-      map.cells[(y * map.width) + x] = '~';
-  map.cells[size / 2 + (map.width / 2)] = '.';
+  for (y = 0; y < map.size.y; y++)
+    for (x = 0; x < map.size.x; x++)
+      map.cells[(y * map.size.x) + x] = '~';
+  map.cells[size / 2 + (map.size.x / 2)] = '.';
   uint32_t repeats, root, curpos;
   for (root = 0; root * root * root < size; root++);
   for (repeats = 0; repeats < size * root; repeats++) {
-    y = rrand(0, 0) % map.height;
-    x = rrand(0, 0) % map.width;
-    curpos = y * map.width + x;
+    y = rrand(0, 0) % map.size.y;
+    x = rrand(0, 0) % map.size.x;
+    curpos = y * map.size.x + x;
     if ('~' == map.cells[curpos] &&
-        (   (curpos >= map.width && '.' == map.cells[curpos - map.width])
-         || (curpos < map.width * (map.height-1) && '.' == map.cells[curpos + map.width])
-         || (curpos > 0 && curpos % map.width != 0 && '.' == map.cells[curpos-1])
-         || (curpos < (map.width * map.height) && (curpos+1) % map.width != 0 && '.' == map.cells[curpos+1])))
-      map.cells[y * map.width + x] = '.'; }
+        (   (curpos >= map.size.x && '.' == map.cells[curpos - map.size.x])
+         || (curpos < map.size.x * (map.size.y-1) && '.' == map.cells[curpos + map.size.x])
+         || (curpos > 0 && curpos % map.size.x != 0 && '.' == map.cells[curpos-1])
+         || (curpos < (map.size.x * map.size.y) && (curpos+1) % map.size.x != 0 && '.' == map.cells[curpos+1])))
+      map.cells[y * map.size.x + x] = '.'; }
   return map; }
 
 void save_game(struct World * world) {
@@ -145,8 +145,8 @@ void move_player (struct World * world, char d) {
 char is_passable (struct Map * map, uint16_t y, uint16_t x) {
 // Check if coordinate on (or beyond) map is accessible to movement.
   char passable = 0;
-  if (0 <= x && x < map->width && 0 <= y && y < map->height)
-    if ('.' == map->cells[y * map->width + x])
+  if (0 <= x && x < map->size.x && 0 <= y && y < map->size.y)
+    if ('.' == map->cells[y * map->size.x + x])
       passable = 1;
   return passable; }
 
@@ -188,10 +188,10 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
 
 void map_scroll (struct Map * map, char dir) {
 // Scroll map into direction dir if possible by changing the offset.
-  if      (NORTH == dir && map->offset_y > 0) map->offset_y--;
-  else if (SOUTH == dir)                      map->offset_y++;
-  else if (WEST  == dir && map->offset_x > 0) map->offset_x--;
-  else if (EAST  == dir)                      map->offset_x++; }
+  if      (NORTH == dir && map->offset.y > 0) map->offset.y--;
+  else if (SOUTH == dir)                      map->offset.y++;
+  else if (WEST  == dir && map->offset.x > 0) map->offset.x--;
+  else if (EAST  == dir)                      map->offset.x++; }
 
 unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
                         struct Win * win_map, struct Win * win_info, struct Win * win_log) {
@@ -314,13 +314,13 @@ int main (int argc, char *argv[]) {
   world.map = &map;
   if (1 == world.turn) {
     for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos.y, player.pos.x);) {
-      player.pos.y = rrand(0, 0) % map.height;
-      player.pos.x = rrand(0, 0) % map.width; }
+      player.pos.y = rrand(0, 0) % map.size.y;
+      player.pos.x = rrand(0, 0) % map.size.x; }
     struct Monster * monster;
     for (monster = world.monster; monster != 0; monster = monster->next)
       for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos.y, monster->pos.x);) {
-        monster->pos.y = rrand(0, 0) % map.height;
-        monster->pos.x = rrand(0, 0) % map.width; } }
+        monster->pos.y = rrand(0, 0) % map.size.y;
+        monster->pos.x = rrand(0, 0) % map.size.x; } }
 
   // Initialize window system and windows.
   WINDOW * screen = initscr();

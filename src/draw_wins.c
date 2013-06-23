@@ -76,22 +76,22 @@ void draw_map_win (struct Win * win) {
   struct Player * player = world->player;
   struct Monster * monster;
   char * cells = map->cells;
-  uint16_t width_map_av  = map->width  - map->offset_x;
-  uint16_t height_map_av = map->height - map->offset_y;
+  uint16_t width_map_av  = map->size.x  - map->offset.x;
+  uint16_t height_map_av = map->size.y - map->offset.y;
   uint16_t x, y, z;
   for (y = 0; y < win->frame.size.y; y++) {
-    z = map->offset_x + (map->offset_y + y) * (map->width);
+    z = map->offset.x + (map->offset.y + y) * (map->size.x);
     for (x = 0; x < win->frame.size.x; x++) {
       if (y < height_map_av && x < width_map_av) {
           mvwaddch(win->frame.curses_win, y, x, cells[z]);
         z++; } } }
-  if (   player->pos.y >= map->offset_y && player->pos.y < map->offset_y + win->frame.size.y
-      && player->pos.x >= map->offset_x && player->pos.x < map->offset_x + win->frame.size.x)
-    mvwaddch(win->frame.curses_win, player->pos.y - map->offset_y, player->pos.x - map->offset_x, '@');
+  if (   player->pos.y >= map->offset.y && player->pos.y < map->offset.y + win->frame.size.y
+      && player->pos.x >= map->offset.x && player->pos.x < map->offset.x + win->frame.size.x)
+    mvwaddch(win->frame.curses_win, player->pos.y - map->offset.y, player->pos.x - map->offset.x, '@');
   for (monster = world->monster; monster != 0; monster = monster->next)
-    if (   monster->pos.y >= map->offset_y && monster->pos.y < map->offset_y + win->frame.size.y
-        && monster->pos.x >= map->offset_x && monster->pos.x < map->offset_x + win->frame.size.x)
-      mvwaddch(win->frame.curses_win, monster->pos.y - map->offset_y, monster->pos.x - map->offset_x, monster->name); }
+    if (   monster->pos.y >= map->offset.y && monster->pos.y < map->offset.y + win->frame.size.y
+        && monster->pos.x >= map->offset.x && monster->pos.x < map->offset.x + win->frame.size.x)
+      mvwaddch(win->frame.curses_win, monster->pos.y - map->offset.y, monster->pos.x - map->offset.x, monster->name); }
 
 void draw_info_win (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
