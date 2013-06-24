@@ -26,20 +26,25 @@ struct Monster {
   struct yx_uint16 pos; };
 
 uint16_t rrand(char, uint32_t);
-struct Map init_map ();
-void save_game(struct World *);
-void record_action (char);
-struct yx_uint16 mv_yx_in_dir (char, struct yx_uint16);
-void next_turn (struct World *);
 void update_log (struct World *, char *);
+
+struct Map init_map ();
+void map_scroll (struct Map *, char);
+
+void record_action (char);
+void next_turn (struct World *);
+void save_game(struct World *);
+
+char is_passable (struct Map *, uint16_t, uint16_t);
+struct yx_uint16 mv_yx_in_dir (char, struct yx_uint16);
 void move_monster (struct World *, struct Monster *);
 void move_player (struct World *, char);
-char is_passable (struct Map *, uint16_t, uint16_t);
 void player_wait(struct World *);
+
 void toggle_window (struct WinMeta *, struct Win *);
 void scroll_pad (struct WinMeta *, char);
 void growshrink_active_window (struct WinMeta *, char);
-void map_scroll (struct Map *, char);
+
 unsigned char meta_keys(int, struct World *, struct WinMeta *, struct Win *, struct Win *, struct Win *, struct Win *);
 
 #endif

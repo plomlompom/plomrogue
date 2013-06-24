@@ -23,6 +23,18 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
   seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
   return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
 
+void update_log (struct World * world, char * text) {
+// Update log with new text to be appended.
+  char * new_text;
+  uint16_t len_old = strlen(world->log);
+  uint16_t len_new = strlen(text);
+  uint16_t len_whole = len_old + len_new + 1;
+  new_text = calloc(len_whole, sizeof(char));
+  memcpy(new_text, world->log, len_old);
+  memcpy(new_text + len_old, text, len_new);
+  free(world->log);
+  world->log = new_text; }
+
 struct Map init_map () {
 // Initialize map with some experimental start values.
   struct Map map;
@@ -51,6 +63,27 @@ struct Map init_map () {
       map.cells[y * map.size.x + x] = '.'; }
   return map; }
 
+void map_scroll (struct Map * map, char dir) {
+// Scroll map into direction dir if possible by changing the offset.
+  if      (NORTH == dir && map->offset.y > 0) map->offset.y--;
+  else if (SOUTH == dir)                      map->offset.y++;
+  else if (WEST  == dir && map->offset.x > 0) map->offset.x--;
+  else if (EAST  == dir)                      map->offset.x++; }
+
+void record_action (char action) {
+// Append action to game record file.
+  FILE * file = fopen("record", "a");
+  fputc(action, file);
+  fclose(file); }
+
+void next_turn (struct World * world) {
+// Increment turn and move enemy.
+  world->turn++;
+  rrand(1, world->seed * world->turn);
+  struct Monster * monster;
+  for (monster = world->monster; monster != 0; monster = monster->next)
+    move_monster(world, monster); }
+
 void save_game(struct World * world) {
 // Save game data to game file.
   FILE * file = fopen("savefile", "w");
@@ -66,11 +99,13 @@ void save_game(struct World * world) {
   write_uint16_bigendian(world->monster->next->next->pos.x, file);
   fclose(file); }
 
-void record_action (char action) {
-// Append action to game record file.
-  FILE * file = fopen("record", "a");
-  fputc(action, file);
-  fclose(file); }
+char is_passable (struct Map * map, uint16_t y, uint16_t x) {
+// Check if coordinate on (or beyond) map is accessible to movement.
+  char passable = 0;
+  if (0 <= x && x < map->size.x && 0 <= y && y < map->size.y)
+    if ('.' == map->cells[y * map->size.x + x])
+      passable = 1;
+  return passable; }
 
 struct yx_uint16 mv_yx_in_dir (char d, struct yx_uint16 yx) {
 // Return yx coordinates one step to the direction d of yx.
@@ -79,26 +114,6 @@ struct yx_uint16 mv_yx_in_dir (char d, struct yx_uint16 yx) {
   else if (d == SOUTH) yx.y++;
   else if (d == WEST)  yx.x--;
   return yx; }
-
-void next_turn (struct World * world) {
-// Increment turn and move enemy.
-  world->turn++;
-  rrand(1, world->seed * world->turn);
-  struct Monster * monster;
-  for (monster = world->monster; monster != 0; monster = monster->next)
-    move_monster(world, monster); }
-
-void update_log (struct World * world, char * text) {
-// Update log with new text to be appended.
-  char * new_text;
-  uint16_t len_old = strlen(world->log);
-  uint16_t len_new = strlen(text);
-  uint16_t len_whole = len_old + len_new + 1;
-  new_text = calloc(len_whole, sizeof(char));
-  memcpy(new_text, world->log, len_old);
-  memcpy(new_text + len_old, text, len_new);
-  free(world->log);
-  world->log = new_text; }
 
 void move_monster (struct World * world, struct Monster * monster) {
 // Move monster in random direction, trigger fighting when hindered by player/monster.
@@ -156,14 +171,6 @@ void move_player (struct World * world, char d) {
     record_action(d);
   next_turn (world); }
 
-char is_passable (struct Map * map, uint16_t y, uint16_t x) {
-// Check if coordinate on (or beyond) map is accessible to movement.
-  char passable = 0;
-  if (0 <= x && x < map->size.x && 0 <= y && y < map->size.y)
-    if ('.' == map->cells[y * map->size.x + x])
-      passable = 1;
-  return passable; }
-
 void player_wait (struct World * world) {
 // Make player wait one turn.
   if (1 == world->interactive)
@@ -199,13 +206,6 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
     else if (change == '*')
       width++;
     resize_active_win (win_meta, height, width); } }
-
-void map_scroll (struct Map * map, char dir) {
-// Scroll map into direction dir if possible by changing the offset.
-  if      (NORTH == dir && map->offset.y > 0) map->offset.y--;
-  else if (SOUTH == dir)                      map->offset.y++;
-  else if (WEST  == dir && map->offset.x > 0) map->offset.x--;
-  else if (EAST  == dir)                      map->offset.x++; }
 
 unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
                         struct Win * win_map, struct Win * win_info, struct Win * win_log) {
