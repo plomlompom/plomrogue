@@ -173,10 +173,10 @@ void move_player (struct World * world, char d) {
 
 void player_wait (struct World * world) {
 // Make player wait one turn.
+  update_log (world, "\nYou wait.");
   if (1 == world->interactive)
     record_action(0);
-  next_turn (world);
-  update_log (world, "\nYou wait."); }
+  next_turn (world); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
