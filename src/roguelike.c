@@ -132,7 +132,7 @@ void move_monster (struct World * world, struct Monster * monster) {
       break; } }
   if (met_monster)
     update_log (world, "\nMonster hits monster.");
-  else if (0 == met_monster && is_passable(world->map, t.y, t.x))
+  else if (is_passable(world->map, t.y, t.x))
     monster->pos = t; }
 
 void move_player (struct World * world, char d) {
