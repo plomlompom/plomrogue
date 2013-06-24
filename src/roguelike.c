@@ -84,15 +84,9 @@ void next_turn (struct World * world) {
 // Increment turn and move enemy.
   world->turn++;
   rrand(1, world->seed * world->turn);
-  char d;
   struct Monster * monster;
-  for (monster = world->monster; monster != 0; monster = monster->next) {
-    d = rrand(0, 0) % 5;
-    struct yx_uint16 t = mv_yx_in_dir (d, monster->pos);
-    if (yx_uint16_cmp(t, world->player->pos))
-      update_log(world, "\nThe monster hits you.");
-    else if (is_passable(world->map, t.y, t.x))
-      monster->pos = t; } }
+  for (monster = world->monster; monster != 0; monster = monster->next)
+    move_monster(world, monster); }
 
 void update_log (struct World * world, char * text) {
 // Update log with new text to be appended.
@@ -105,6 +99,26 @@ void update_log (struct World * world, char * text) {
   memcpy(new_text + len_old, text, len_new);
   free(world->log);
   world->log = new_text; }
+
+void move_monster (struct World * world, struct Monster * monster) {
+// Move monster in random direction, trigger fighting when hindered by player/monster.
+  char d = rrand(0, 0) % 5;
+  struct yx_uint16 t = mv_yx_in_dir (d, monster->pos);
+  if (yx_uint16_cmp (t, world->player->pos)) {
+    update_log (world, "\nThe monster hits you.");
+    return; }
+  char met_monster = 0;
+  struct Monster * other_monster;
+  for (other_monster = world->monster; other_monster != 0; other_monster = other_monster->next) {
+    if (other_monster == monster)
+      continue;
+    if (yx_uint16_cmp (t, other_monster->pos)) {
+      met_monster = 1;
+      break; } }
+  if (met_monster)
+    update_log (world, "\nMonster hits monster.");
+  else if (0 == met_monster && is_passable(world->map, t.y, t.x))
+    monster->pos = t; }
 
 void move_player (struct World * world, char d) {
 // Move player in direction d, increment turn counter and update log.

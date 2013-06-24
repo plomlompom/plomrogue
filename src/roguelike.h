@@ -32,6 +32,7 @@ void record_action (char);
 struct yx_uint16 mv_yx_in_dir (char, struct yx_uint16);
 void next_turn (struct World *);
 void update_log (struct World *, char *);
+void move_monster (struct World *, struct Monster *);
 void move_player (struct World *, char);
 char is_passable (struct Map *, uint16_t, uint16_t);
 void player_wait(struct World *);
