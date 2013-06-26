@@ -1,6 +1,9 @@
 #ifndef ROGUELIKE_H
 #define ROGUELIKE_H
 
+#include "yx_uint16.h"
+#include "windows.h"
+
 struct World {
   char interactive;
   struct KeyBinding * keybindings;
@@ -17,14 +20,6 @@ struct Map {
   struct yx_uint16 offset;
   char * cells; };
 
-struct Player {
-  struct yx_uint16 pos; };
-
-struct Monster {
-  struct Monster * next;
-  char name;
-  struct yx_uint16 pos; };
-
 uint16_t rrand(char, uint32_t);
 void update_log (struct World *, char *);
 
@@ -33,11 +28,6 @@ void map_scroll (struct Map *, char);
 
 void turn_over (struct World *, char);
 void save_game(struct World *);
-
-char is_passable (struct Map *, uint16_t, uint16_t);
-void move_monster (struct World *, struct Monster *);
-void move_player (struct World *, char);
-void player_wait(struct World *);
 
 void toggle_window (struct WinMeta *, struct Win *);
 void scroll_pad (struct WinMeta *, char);

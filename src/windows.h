@@ -1,6 +1,7 @@
 #ifndef WINDOWS_H
 #define WINDOWS_H
 
+#include "ncurses.h"
 #include "yx_uint16.h"
 
 struct Frame {
