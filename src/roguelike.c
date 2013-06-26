@@ -135,9 +135,7 @@ void move_monster (struct World * world, struct Monster * monster) {
 
 void move_player (struct World * world, char d) {
 // Move player in direction d, increment turn counter and update log.
-  static char prev = 0;
   char success = 0;
-  char * dir;
   struct yx_uint16 t = mv_yx_in_dir (d, world->player->pos);
   struct Monster * monster;
   for (monster = world->monster; monster != 0; monster = monster->next)
@@ -147,24 +145,21 @@ void move_player (struct World * world, char d) {
   if (2 != success && is_passable(world->map, t.y, t.x)) {
     success = 1;
     world->player->pos = t; }
-  if (success * d == prev)
-    update_log (world, ".");
+  if (2 == success)
+    update_log (world, "\nYou hit the monster.");
   else {
-    if (2 == success)
-      update_log (world, "\nYou hit the monster.");
-    else {
-      if      (NORTH == d) dir = "north";
-      else if (EAST  == d) dir = "east" ;
-      else if (SOUTH == d) dir = "south";
-      else if (WEST  == d) dir = "west" ;
-      char * msg = calloc(25, sizeof(char));
-      char * msg_content = "You fail to move";
-      if (1 == success)
-        msg_content = "You move";
-      sprintf(msg, "\n%s %s.", msg_content, dir);
-      update_log (world, msg);
-      free(msg); } }
-  prev = success * d;
+    char * dir;
+    if      (NORTH == d) dir = "north";
+    else if (EAST  == d) dir = "east" ;
+    else if (SOUTH == d) dir = "south";
+    else if (WEST  == d) dir = "west" ;
+    char * msg = calloc(25, sizeof(char));
+    char * msg_content = "You fail to move";
+    if (1 == success)
+      msg_content = "You move";
+    sprintf(msg, "\n%s %s.", msg_content, dir);
+    update_log (world, msg);
+    free(msg); }
   turn_over (world, d); }
 
 void player_wait (struct World * world) {
