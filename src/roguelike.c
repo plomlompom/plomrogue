@@ -120,17 +120,14 @@ void move_monster (struct World * world, struct Monster * monster) {
   if (yx_uint16_cmp (t, world->player->pos)) {
     update_log (world, "\nThe monster hits you.");
     return; }
-  char met_monster = 0;
   struct Monster * other_monster;
   for (other_monster = world->monster; other_monster != 0; other_monster = other_monster->next) {
     if (other_monster == monster)
       continue;
     if (yx_uint16_cmp (t, other_monster->pos)) {
-      met_monster = 1;
-      break; } }
-  if (met_monster)
-    update_log (world, "\nMonster hits monster.");
-  else if (is_passable(world->map, t.y, t.x))
+      update_log (world, "\nMonster hits monster.");
+      return; } }
+  if (is_passable(world->map, t.y, t.x))
     monster->pos = t; }
 
 void move_player (struct World * world, char d) {
