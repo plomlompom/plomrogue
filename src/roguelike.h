@@ -35,7 +35,6 @@ void turn_over (struct World *, char);
 void save_game(struct World *);
 
 char is_passable (struct Map *, uint16_t, uint16_t);
-struct yx_uint16 mv_yx_in_dir (char, struct yx_uint16);
 void move_monster (struct World *, struct Monster *);
 void move_player (struct World *, char);
 void player_wait(struct World *);

@@ -10,11 +10,6 @@
 #include "keybindings.h"
 #include "readwrite.h"
 
-#define NORTH 1
-#define EAST 2
-#define SOUTH 3
-#define WEST 4
-
 uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
   static uint32_t seed;
@@ -104,14 +99,6 @@ char is_passable (struct Map * map, uint16_t y, uint16_t x) {
     if ('.' == map->cells[y * map->size.x + x])
       passable = 1;
   return passable; }
-
-struct yx_uint16 mv_yx_in_dir (char d, struct yx_uint16 yx) {
-// Return yx coordinates one step to the direction d of yx.
-  if      (d == NORTH) yx.y--;
-  else if (d == EAST)  yx.x++;
-  else if (d == SOUTH) yx.y++;
-  else if (d == WEST)  yx.x--;
-  return yx; }
 
 void move_monster (struct World * world, struct Monster * monster) {
 // Move monster in random direction, trigger fighting when hindered by player/monster.
