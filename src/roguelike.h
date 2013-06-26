@@ -31,8 +31,7 @@ void update_log (struct World *, char *);
 struct Map init_map ();
 void map_scroll (struct Map *, char);
 
-void record_action (char);
-void next_turn (struct World *);
+void turn_over (struct World *, char);
 void save_game(struct World *);
 
 char is_passable (struct Map *, uint16_t, uint16_t);

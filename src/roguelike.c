@@ -70,14 +70,12 @@ void map_scroll (struct Map * map, char dir) {
   else if (WEST  == dir && map->offset.x > 0) map->offset.x--;
   else if (EAST  == dir)                      map->offset.x++; }
 
-void record_action (char action) {
-// Append action to game record file.
-  FILE * file = fopen("record", "a");
-  fputc(action, file);
-  fclose(file); }
-
-void next_turn (struct World * world) {
-// Increment turn and move enemy.
+void turn_over (struct World * world, char action) {
+// Record action in game record file, increment turn and move enemy.
+  if (1 == world->interactive) {
+    FILE * file = fopen("record", "a");
+    fputc(action, file);
+    fclose(file); }
   world->turn++;
   rrand(1, world->seed * world->turn);
   struct Monster * monster;
@@ -167,16 +165,12 @@ void move_player (struct World * world, char d) {
       update_log (world, msg);
       free(msg); } }
   prev = success * d;
-  if (1 == world->interactive)
-    record_action(d);
-  next_turn (world); }
+  turn_over (world, d); }
 
 void player_wait (struct World * world) {
 // Make player wait one turn.
   update_log (world, "\nYou wait.");
-  if (1 == world->interactive)
-    record_action(0);
-  next_turn (world); }
+  turn_over (world, 0); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
