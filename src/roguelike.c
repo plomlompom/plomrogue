@@ -110,17 +110,12 @@ void scroll_pad (struct WinMeta * win_meta, char dir) {
 void growshrink_active_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink active window horizontally or vertically by one cell size.
   if (0 != win_meta->active) {
-    uint16_t height = win_meta->active->frame.size.y;
-    uint16_t width = win_meta->active->frame.size.x;
-    if      (change == '-')
-      height--;
-    else if (change == '+')
-      height++;
-    else if (change == '_')
-      width--;
-    else if (change == '*')
-      width++;
-    resize_active_win (win_meta, height, width); } }
+    struct yx_uint16 size = win_meta->active->frame.size;
+    if      (change == '-') size.y--;
+    else if (change == '+') size.y++;
+    else if (change == '_') size.x--;
+    else if (change == '*') size.x++;
+    resize_active_win (win_meta, size); } }
 
 unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
                         struct Win * win_map, struct Win * win_info, struct Win * win_log) {

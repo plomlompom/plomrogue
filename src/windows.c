@@ -237,11 +237,10 @@ extern void draw_all_wins (struct WinMeta * wmeta) {
     pnoutrefresh(wmeta->pad.curses_win, 0, wmeta->pad_offset, 0, 0, wmeta->pad.size.y, wmeta->pad.size.x-1); }
   doupdate(); }
 
-extern void resize_active_win (struct WinMeta * wmeta, uint16_t height, uint16_t width) {
+extern void resize_active_win (struct WinMeta * wmeta, struct yx_uint16 size) {
 // Grow or shrink currently active window. Correct its geometry and that of its followers.
-  if (0 != wmeta->active && width > 0 && height > 0 && height < wmeta->pad.size.y) {
-    wmeta->active->frame.size.y = height;
-    wmeta->active->frame.size.x = width;
+  if (0 != wmeta->active && size.x > 0 && size.y > 0 && size.y < wmeta->pad.size.y) {
+    wmeta->active->frame.size = size;
     update_wins(wmeta, wmeta->chain_start); } }
 
 extern void cycle_active_win (struct WinMeta * wmeta, char dir) {
