@@ -237,12 +237,12 @@ int main (int argc, char *argv[]) {
   struct Map map = init_map();
   world.map = &map;
   if (1 == world.turn) {
-    for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos.y, player.pos.x);) {
+    for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos);) {
       player.pos.y = rrand(0, 0) % map.size.y;
       player.pos.x = rrand(0, 0) % map.size.x; }
     struct Monster * monster;
     for (monster = world.monster; monster != 0; monster = monster->next)
-      for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos.y, monster->pos.x);) {
+      for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos);) {
         monster->pos.y = rrand(0, 0) % map.size.y;
         monster->pos.x = rrand(0, 0) % map.size.x; } }
 

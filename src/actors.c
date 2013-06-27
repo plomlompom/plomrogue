@@ -5,11 +5,11 @@
 #include "yx_uint16.h"
 #include "roguelike.h"
 
-extern char is_passable (struct Map * map, uint16_t y, uint16_t x) {
+extern char is_passable (struct Map * map, struct yx_uint16 pos) {
 // Check if coordinate on (or beyond) map is accessible to actor movement.
   char passable = 0;
-  if (0 <= x && x < map->size.x && 0 <= y && y < map->size.y)
-    if ('.' == map->cells[y * map->size.x + x])
+  if (0 <= pos.x && pos.x < map->size.x && 0 <= pos.y && pos.y < map->size.y)
+    if ('.' == map->cells[pos.y * map->size.x + pos.x])
       passable = 1;
   return passable; }
 
@@ -27,7 +27,7 @@ extern void move_monster (struct World * world, struct Monster * monster) {
     if (yx_uint16_cmp (t, other_monster->pos)) {
       update_log (world, "\nMonster hits monster.");
       return; } }
-  if (is_passable(world->map, t.y, t.x))
+  if (is_passable(world->map, t))
     monster->pos = t; }
 
 extern void move_player (struct World * world, char d) {
@@ -46,7 +46,7 @@ extern void move_player (struct World * world, char d) {
   else if (EAST  == d) dir = "east" ;
   else if (SOUTH == d) dir = "south";
   else if (WEST  == d) dir = "west" ;
-  if (is_passable(world->map, t.y, t.x)) {
+  if (is_passable(world->map, t)) {
     msg_content = "You move";
     world->player->pos = t; }
   sprintf(msg, "\n%s %s.", msg_content, dir);
