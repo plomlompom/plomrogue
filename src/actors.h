@@ -1,7 +1,6 @@
 #ifndef ACTORS_H
 #define ACTORS_H
 
-#include <stdint.h>
 #include "yx_uint16.h"
 
 struct World;

@@ -1,7 +1,6 @@
 #include "actors.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
 #include "yx_uint16.h"
 #include "roguelike.h"
 
