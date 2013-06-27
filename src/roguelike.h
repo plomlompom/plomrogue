@@ -1,8 +1,13 @@
 #ifndef ROGUELIKE_H
 #define ROGUELIKE_H
 
+#include <stdint.h>
 #include "yx_uint16.h"
-#include "windows.h"
+
+struct WinMeta;
+struct Win;
+struct KeyBinding;
+struct KeysWinData;
 
 struct World {
   char interactive;

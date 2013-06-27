@@ -1,8 +1,9 @@
-#include "stdlib.h"
-#include "stdint.h"
+#include "actors.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
 #include "yx_uint16.h"
 #include "roguelike.h"
-#include "actors.h"
 
 extern char is_passable (struct Map * map, uint16_t y, uint16_t x) {
 // Check if coordinate on (or beyond) map is accessible to actor movement.

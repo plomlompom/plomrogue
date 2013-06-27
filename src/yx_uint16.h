@@ -1,6 +1,8 @@
 #ifndef YX_UINT16_H
 #define YX_UINT16_H
 
+#include <stdint.h>
+
 #define NORTH 1
 #define EAST 2
 #define SOUTH 3

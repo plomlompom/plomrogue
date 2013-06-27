@@ -1,9 +1,9 @@
+#include "draw_wins.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include <ncurses.h>
 #include <string.h>
+#include <ncurses.h>
 #include "windows.h"
-#include "draw_wins.h"
 #include "roguelike.h"
 #include "keybindings.h"
 #include "actors.h"

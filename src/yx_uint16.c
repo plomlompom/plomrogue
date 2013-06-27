@@ -1,4 +1,3 @@
-#include "stdint.h"
 #include "yx_uint16.h"
 
 extern char yx_uint16_cmp (struct yx_uint16 a, struct yx_uint16 b) {

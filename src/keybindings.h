@@ -1,4 +1,10 @@
 #ifndef KEYBINDINGS_H
+#define KEYBINDINGS_H
+
+#include <stdint.h>
+
+struct World;
+struct WinMeta;
 
 struct KeyBinding {
   char * name;

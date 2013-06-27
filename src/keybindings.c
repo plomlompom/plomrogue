@@ -1,10 +1,10 @@
-#include <stdlib.h>
+#include "keybindings.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include <ncurses.h>
 #include <string.h>
 #include "windows.h"
 #include "roguelike.h"
-#include "keybindings.h"
 
 void init_keybindings(struct World * world) {
 // Initialize keybindings from file "keybindings".

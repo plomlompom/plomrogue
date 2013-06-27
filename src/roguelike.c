@@ -1,3 +1,4 @@
+#include "roguelike.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <ncurses.h>
@@ -6,7 +7,6 @@
 #include <unistd.h>
 #include "windows.h"
 #include "draw_wins.h"
-#include "roguelike.h"
 #include "keybindings.h"
 #include "readwrite.h"
 #include "actors.h"

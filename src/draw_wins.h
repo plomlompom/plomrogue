@@ -1,6 +1,10 @@
 #ifndef DRAW_WINS_H
 #define DRAW_WINS_H
 
+#include <stdint.h>
+
+struct Win;
+
 void draw_with_linebreaks (struct Win *, char *, uint16_t);
 void draw_text_from_bottom (struct Win *, char *);
 void draw_log_win (struct Win *);
