@@ -20,14 +20,25 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
   return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
 
 void update_log (struct World * world, char * text) {
-// Update log with new text to be appended.
+// Update log by appending text, or by appending a "." if text is the same as the last one.
+  static char * last_msg;
+  if (0 == last_msg)
+    last_msg = calloc(1, sizeof(char));
   char * new_text;
   uint16_t len_old = strlen(world->log);
-  uint16_t len_new = strlen(text);
-  uint16_t len_whole = len_old + len_new + 1;
-  new_text = calloc(len_whole, sizeof(char));
-  memcpy(new_text, world->log, len_old);
-  memcpy(new_text + len_old, text, len_new);
+  if (0 == strcmp(last_msg, text)) {
+    uint16_t len_whole = len_old + 1;
+    new_text = calloc(len_whole + 1, sizeof(char));
+    memcpy(new_text, world->log, len_old);
+    memcpy(new_text + len_old, ".", 1); }
+  else {
+    uint16_t len_new = strlen(text);
+    uint16_t len_whole = len_old + len_new + 1;
+    new_text = calloc(len_whole, sizeof(char));
+    memcpy(new_text, world->log, len_old);
+    memcpy(new_text + len_old, text, len_new);
+    last_msg = calloc(len_new + 1, sizeof(char));
+    memcpy(last_msg, text, len_new); }
   free(world->log);
   world->log = new_text; }
 

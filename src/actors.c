@@ -30,7 +30,7 @@ extern void move_monster (struct World * world, struct Monster * monster) {
     monster->pos = t; }
 
 extern void move_player (struct World * world, char d) {
-// Move player in direction d, increment turn counter and update log.
+// Move player in direction d, update log and turn over to the enemy.
   struct yx_uint16 t = mv_yx_in_dir (d, world->player->pos);
   struct Monster * monster;
   for (monster = world->monster; monster != 0; monster = monster->next)
