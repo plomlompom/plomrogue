@@ -25,19 +25,19 @@ struct Map {
   struct yx_uint16 offset;
   char * cells; };
 
-uint16_t rrand(char, uint32_t);
-void update_log (struct World *, char *);
+extern uint16_t rrand(char, uint32_t);
+extern void update_log (struct World *, char *);
 
-struct Map init_map ();
-void map_scroll (struct Map *, char);
+extern struct Map init_map ();
+extern void map_scroll (struct Map *, char);
 
-void turn_over (struct World *, char);
-void save_game(struct World *);
+extern void turn_over (struct World *, char);
+extern void save_game(struct World *);
 
-void toggle_window (struct WinMeta *, struct Win *);
-void scroll_pad (struct WinMeta *, char);
-void growshrink_active_window (struct WinMeta *, char);
+extern void toggle_window (struct WinMeta *, struct Win *);
+extern void scroll_pad (struct WinMeta *, char);
+extern void growshrink_active_window (struct WinMeta *, char);
 
-unsigned char meta_keys(int, struct World *, struct WinMeta *, struct Win *, struct Win *, struct Win *, struct Win *);
+extern unsigned char meta_keys(int, struct World *, struct WinMeta *, struct Win *, struct Win *, struct Win *, struct Win *);
 
 #endif
