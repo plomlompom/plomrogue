@@ -295,5 +295,6 @@ extern void shift_active_win (struct WinMeta * wmeta, char dir) {
 
 extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset) {
 // Apply new_offset to windows pad, if it proves to be sane.
-  if (new_offset >= 0 && new_offset + wmeta->pad.size.x < getmaxx(wmeta->pad.curses_win))
+  if (new_offset >= 0
+      && (new_offset < wmeta->pad_offset || new_offset + wmeta->pad.size.x < getmaxx(wmeta->pad.curses_win)))
     wmeta->pad_offset = new_offset; }
