@@ -94,16 +94,18 @@ void save_game(struct World * world) {
   FILE * file = fopen("savefile", "w");
   write_uint32_bigendian(world->seed, file);
   write_uint32_bigendian(world->turn, file);
-  write_uint16_bigendian(world->player->pos.y, file);
-  write_uint16_bigendian(world->player->pos.x, file);
+  write_uint16_bigendian(world->player->pos.y + 1, file);
+  write_uint16_bigendian(world->player->pos.x + 1, file);
   struct Monster * monster;
   for (monster = world->monster; monster != 0; monster = monster->next) {
-    write_uint16_bigendian(monster->pos.y, file);
-    write_uint16_bigendian(monster->pos.x, file); }
+    write_uint16_bigendian(monster->pos.y + 1, file);
+    write_uint16_bigendian(monster->pos.x + 1, file); }
+  write_uint16_bigendian(0, file);
   struct Item * item;
   for (item = world->item; item != 0; item = item->next) {
-    write_uint16_bigendian(item->pos.y, file);
-    write_uint16_bigendian(item->pos.x, file); }
+    write_uint16_bigendian(item->pos.y + 1, file);
+    write_uint16_bigendian(item->pos.x + 1, file); }
+  write_uint16_bigendian(0, file);
   fclose(file); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
@@ -204,23 +206,10 @@ int main (int argc, char *argv[]) {
   update_log (&world, " ");
   struct Player player;
   world.player = &player;
-  char i;
-  struct Monster * monster = malloc(sizeof(struct Monster));
-  world.monster = monster;
-  for (i = 0; i < 8; i++) {
-    monster->name = 'M';
-    monster->next = malloc(sizeof(struct Monster));
-    monster = monster->next; }
-  monster->name = 'M';
-  monster->next = 0;
-  struct Item * item = malloc(sizeof(struct Item));
-  world.item = item;
-  for (i = 0; i < 8; i++) {
-    item->name = '#';
-    item->next = malloc(sizeof(struct Item));
-    item = item->next; }
-  item->name = '#';
-  item->next = 0;
+  struct Monster * monster;
+  struct Item * item;
+  uint16_t test;
+  char start;
 
   // For interactive mode, try to load world state from savefile.
   FILE * file;
@@ -228,17 +217,47 @@ int main (int argc, char *argv[]) {
     file = fopen("savefile", "r");
     world.seed = read_uint32_bigendian(file);
     world.turn = read_uint32_bigendian(file);
-    player.pos.y = read_uint16_bigendian(file);
-    player.pos.x = read_uint16_bigendian(file);
-    for (monster = world.monster; monster != 0; monster = monster->next) {
-      monster->pos.y = read_uint16_bigendian(file);
-      monster->pos.x = read_uint16_bigendian(file); }
-    for (item = world.item; item != 0; item = item->next) {
-      item->pos.y = read_uint16_bigendian(file);
-      item->pos.x = read_uint16_bigendian(file); }
+    player.pos.y = read_uint16_bigendian(file) - 1;
+    player.pos.x = read_uint16_bigendian(file) - 1;
+    start = 1;
+    world.monster = 0;
+    while (1) {
+      test = read_uint16_bigendian(file);
+      if (0 == test)
+        break;
+      if (start) {
+        monster = malloc(sizeof(struct Monster));
+        world.monster = monster;
+        start = 0; }
+      else {
+        monster->next = malloc(sizeof(struct Monster));
+        monster = monster->next; }
+      monster->name = 'M';
+      monster->pos.y = test - 1;
+      monster->pos.x = read_uint16_bigendian(file) - 1; }
+    if (!start)
+      monster->next = 0;
+    start = 1;
+    world.item = 0;
+    while (1) {
+      test = read_uint16_bigendian(file);
+      if (0 == test)
+        break;
+      if (start) {
+        item = malloc(sizeof(struct Item));
+        world.item = item;
+        start = 0; }
+      else {
+        item->next = malloc(sizeof(struct Item));
+        item = item->next; }
+      item->name = '#';
+      item->pos.y = test - 1;
+      item->pos.x = read_uint16_bigendian(file) - 1; }
+    if (!start)
+      item->next = 0;
     fclose(file); }
 
-  // For non-interactive mode, try to load world state from frecord file.
+  // For non-interactive mode, try to load world state from record file.
   else {
     world.turn = 1;
     if (0 == world.interactive) {
@@ -260,14 +279,41 @@ int main (int argc, char *argv[]) {
     for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos);) {
       player.pos.y = rrand(0, 0) % map.size.y;
       player.pos.x = rrand(0, 0) % map.size.x; }
-    for (item = world.item; item != 0; item = item->next)
+    unsigned char n_monsters = rrand(0, 0) % 16;
+    unsigned char n_items    = rrand(0, 0) % 48;
+    unsigned char i;
+    start = 1;
+    world.monster = 0;
+    for (i = 0; i < n_monsters; i++) {
+      if (start) {
+        monster = malloc(sizeof(struct Monster));
+        world.monster = monster;
+        start = 0; }
+      else {
+        monster->next = malloc(sizeof(struct Monster));
+        monster = monster->next; }
+      for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos);) {
+        monster->pos.y = rrand(0, 0) % map.size.y;
+        monster->pos.x = rrand(0, 0) % map.size.x; }
+      monster->name = 'M'; }
+    if (!start)
+      monster->next = 0;
+    start = 1;
+    world.item = 0;
+    for (i = 0; i < n_items; i++) {
+      if (start) {
+        item = malloc(sizeof(struct Item));
+        world.item = item;
+        start = 0; }
+      else {
+        item->next = malloc(sizeof(struct Item));
+        item = item->next; }
       for (item->pos.y = item->pos.x = 0; 0 == is_passable(&map, item->pos);) {
         item->pos.y = rrand(0, 0) % map.size.y;
         item->pos.x = rrand(0, 0) % map.size.x; }
-    for (monster = world.monster; monster != 0; monster = monster->next)
-      for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos);) {
-        monster->pos.y = rrand(0, 0) % map.size.y;
-        monster->pos.x = rrand(0, 0) % map.size.x; } }
+      item->name = '#'; }
+    if (!start)
+      item->next = 0; }
 
   // Initialize window system and windows.
   WINDOW * screen = initscr();
