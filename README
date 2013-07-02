@@ -3,7 +3,7 @@ plomrogue
 
 plomlompom tries to build his own roguelike. Currently, it doesn't do
 much interesting, apart from managing some ncurses windows in a bizarre
-fashion. You can move around a player and meet three enemies; they will
+fashion. You can move around a player and meet nine enemies; they will
 occasionally hit you (and each other) on contact, but without
 consequences (no hitpoints implemented yet). The map gets generated
 randomly. There is only one save file (named "savefile"), and it gets
