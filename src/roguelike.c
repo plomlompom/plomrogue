@@ -96,18 +96,14 @@ void save_game(struct World * world) {
   write_uint32_bigendian(world->turn, file);
   write_uint16_bigendian(world->player->pos.y, file);
   write_uint16_bigendian(world->player->pos.x, file);
-  write_uint16_bigendian(world->monster->pos.y, file);
-  write_uint16_bigendian(world->monster->pos.x, file);
-  write_uint16_bigendian(world->monster->next->pos.y, file);
-  write_uint16_bigendian(world->monster->next->pos.x, file);
-  write_uint16_bigendian(world->monster->next->next->pos.y, file);
-  write_uint16_bigendian(world->monster->next->next->pos.x, file);
-  write_uint16_bigendian(world->item->pos.y, file);
-  write_uint16_bigendian(world->item->pos.x, file);
-  write_uint16_bigendian(world->item->next->pos.y, file);
-  write_uint16_bigendian(world->item->next->pos.x, file);
-  write_uint16_bigendian(world->item->next->next->pos.y, file);
-  write_uint16_bigendian(world->item->next->next->pos.x, file);
+  struct Monster * monster;
+  for (monster = world->monster; monster != 0; monster = monster->next) {
+    write_uint16_bigendian(monster->pos.y, file);
+    write_uint16_bigendian(monster->pos.x, file); }
+  struct Item * item;
+  for (item = world->item; item != 0; item = item->next) {
+    write_uint16_bigendian(item->pos.y, file);
+    write_uint16_bigendian(item->pos.x, file); }
   fclose(file); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
@@ -231,24 +227,20 @@ int main (int argc, char *argv[]) {
 
   // For interactive mode, try to load world state from savefile.
   FILE * file;
+  struct Item * item;
+  struct Monster * monster;
   if (1 == world.interactive && 0 == access("savefile", F_OK)) {
     file = fopen("savefile", "r");
     world.seed = read_uint32_bigendian(file);
     world.turn = read_uint32_bigendian(file);
     player.pos.y = read_uint16_bigendian(file);
     player.pos.x = read_uint16_bigendian(file);
-    monster1.pos.y = read_uint16_bigendian(file);
-    monster1.pos.x = read_uint16_bigendian(file);
-    monster2.pos.y = read_uint16_bigendian(file);
-    monster2.pos.x = read_uint16_bigendian(file);
-    monster3.pos.y = read_uint16_bigendian(file);
-    monster3.pos.x = read_uint16_bigendian(file);
-    item1.pos.y = read_uint16_bigendian(file);
-    item1.pos.x = read_uint16_bigendian(file);
-    item2.pos.y = read_uint16_bigendian(file);
-    item2.pos.x = read_uint16_bigendian(file);
-    item3.pos.y = read_uint16_bigendian(file);
-    item3.pos.x = read_uint16_bigendian(file);
+    for (monster = world.monster; monster != 0; monster = monster->next) {
+      monster->pos.y = read_uint16_bigendian(file);
+      monster->pos.x = read_uint16_bigendian(file); }
+    for (item = world.item; item != 0; item = item->next) {
+      item->pos.y = read_uint16_bigendian(file);
+      item->pos.x = read_uint16_bigendian(file); }
     fclose(file); }
 
   // For non-interactive mode, try to load world state from frecord file.
@@ -273,12 +265,10 @@ int main (int argc, char *argv[]) {
     for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos);) {
       player.pos.y = rrand(0, 0) % map.size.y;
       player.pos.x = rrand(0, 0) % map.size.x; }
-    struct Item * item;
     for (item = world.item; item != 0; item = item->next)
       for (item->pos.y = item->pos.x = 0; 0 == is_passable(&map, item->pos);) {
         item->pos.y = rrand(0, 0) % map.size.y;
         item->pos.x = rrand(0, 0) % map.size.x; }
-    struct Monster * monster;
     for (monster = world.monster; monster != 0; monster = monster->next)
       for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos);) {
         monster->pos.y = rrand(0, 0) % map.size.y;
