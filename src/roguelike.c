@@ -204,31 +204,26 @@ int main (int argc, char *argv[]) {
   update_log (&world, " ");
   struct Player player;
   world.player = &player;
-  struct Monster monster1;
-  struct Monster monster2;
-  struct Monster monster3;
-  world.monster = &monster1;
-  monster1.next = &monster2;
-  monster2.next = &monster3;
-  monster3.next = 0;
-  monster1.name = 'A';
-  monster2.name = 'B';
-  monster3.name = 'C';
-  struct Item item1;
-  struct Item item2;
-  struct Item item3;
-  world.item = &item1;
-  item1.next = &item2;
-  item2.next = &item3;
-  item3.next = 0;
-  item1.name = '&';
-  item2.name = '%';
-  item3.name = '#';
+  char i;
+  struct Monster * monster = malloc(sizeof(struct Monster));
+  world.monster = monster;
+  for (i = 0; i < 2; i++) {
+    monster->name = 'M';
+    monster->next = malloc(sizeof(struct Monster));
+    monster = monster->next; }
+  monster->name = 'M';
+  monster->next = 0;
+  struct Item * item = malloc(sizeof(struct Item));
+  world.item = item;
+  for (i = 0; i < 2; i++) {
+    item->name = '#';
+    item->next = malloc(sizeof(struct Item));
+    item = item->next; }
+  item->name = '#';
+  item->next = 0;
 
   // For interactive mode, try to load world state from savefile.
   FILE * file;
-  struct Item * item;
-  struct Monster * monster;
   if (1 == world.interactive && 0 == access("savefile", F_OK)) {
     file = fopen("savefile", "r");
     world.seed = read_uint32_bigendian(file);
