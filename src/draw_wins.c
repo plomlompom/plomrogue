@@ -76,6 +76,7 @@ void draw_map_win (struct Win * win) {
   struct Map * map = world->map;
   struct Player * player = world->player;
   struct Monster * monster;
+  struct Item * item;
   char * cells = map->cells;
   uint16_t width_map_av  = map->size.x  - map->offset.x;
   uint16_t height_map_av = map->size.y - map->offset.y;
@@ -86,13 +87,17 @@ void draw_map_win (struct Win * win) {
       if (y < height_map_av && x < width_map_av) {
           mvwaddch(win->frame.curses_win, y, x, cells[z]);
         z++; } } }
-  if (   player->pos.y >= map->offset.y && player->pos.y < map->offset.y + win->frame.size.y
-      && player->pos.x >= map->offset.x && player->pos.x < map->offset.x + win->frame.size.x)
-    mvwaddch(win->frame.curses_win, player->pos.y - map->offset.y, player->pos.x - map->offset.x, '@');
+  for (item = world->item; item != 0; item = item->next)
+    if (   item->pos.y >= map->offset.y && item->pos.y < map->offset.y + win->frame.size.y
+        && item->pos.x >= map->offset.x && item->pos.x < map->offset.x + win->frame.size.x)
+      mvwaddch(win->frame.curses_win, item->pos.y - map->offset.y, item->pos.x - map->offset.x, item->name);
   for (monster = world->monster; monster != 0; monster = monster->next)
     if (   monster->pos.y >= map->offset.y && monster->pos.y < map->offset.y + win->frame.size.y
         && monster->pos.x >= map->offset.x && monster->pos.x < map->offset.x + win->frame.size.x)
-      mvwaddch(win->frame.curses_win, monster->pos.y - map->offset.y, monster->pos.x - map->offset.x, monster->name); }
+      mvwaddch(win->frame.curses_win, monster->pos.y - map->offset.y, monster->pos.x - map->offset.x, monster->name);
+  if (   player->pos.y >= map->offset.y && player->pos.y < map->offset.y + win->frame.size.y
+      && player->pos.x >= map->offset.x && player->pos.x < map->offset.x + win->frame.size.x)
+    mvwaddch(win->frame.curses_win, player->pos.y - map->offset.y, player->pos.x - map->offset.x, '@'); }
 
 void draw_info_win (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.

@@ -102,6 +102,12 @@ void save_game(struct World * world) {
   write_uint16_bigendian(world->monster->next->pos.x, file);
   write_uint16_bigendian(world->monster->next->next->pos.y, file);
   write_uint16_bigendian(world->monster->next->next->pos.x, file);
+  write_uint16_bigendian(world->item->pos.y, file);
+  write_uint16_bigendian(world->item->pos.x, file);
+  write_uint16_bigendian(world->item->next->pos.y, file);
+  write_uint16_bigendian(world->item->next->pos.x, file);
+  write_uint16_bigendian(world->item->next->next->pos.y, file);
+  write_uint16_bigendian(world->item->next->next->pos.x, file);
   fclose(file); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
@@ -197,7 +203,7 @@ int main (int argc, char *argv[]) {
       default:
         exit(EXIT_FAILURE); } }
 
-  // Initialize log, player and monsters.
+  // Initialize log, player, monsters and items.
   world.log = calloc(1, sizeof(char));
   update_log (&world, " ");
   struct Player player;
@@ -212,6 +218,16 @@ int main (int argc, char *argv[]) {
   monster1.name = 'A';
   monster2.name = 'B';
   monster3.name = 'C';
+  struct Item item1;
+  struct Item item2;
+  struct Item item3;
+  world.item = &item1;
+  item1.next = &item2;
+  item2.next = &item3;
+  item3.next = 0;
+  item1.name = '&';
+  item2.name = '%';
+  item3.name = '#';
 
   // For interactive mode, try to load world state from savefile.
   FILE * file;
@@ -227,6 +243,12 @@ int main (int argc, char *argv[]) {
     monster2.pos.x = read_uint16_bigendian(file);
     monster3.pos.y = read_uint16_bigendian(file);
     monster3.pos.x = read_uint16_bigendian(file);
+    item1.pos.y = read_uint16_bigendian(file);
+    item1.pos.x = read_uint16_bigendian(file);
+    item2.pos.y = read_uint16_bigendian(file);
+    item2.pos.x = read_uint16_bigendian(file);
+    item3.pos.y = read_uint16_bigendian(file);
+    item3.pos.x = read_uint16_bigendian(file);
     fclose(file); }
 
   // For non-interactive mode, try to load world state from frecord file.
@@ -251,6 +273,11 @@ int main (int argc, char *argv[]) {
     for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos);) {
       player.pos.y = rrand(0, 0) % map.size.y;
       player.pos.x = rrand(0, 0) % map.size.x; }
+    struct Item * item;
+    for (item = world.item; item != 0; item = item->next)
+      for (item->pos.y = item->pos.x = 0; 0 == is_passable(&map, item->pos);) {
+        item->pos.y = rrand(0, 0) % map.size.y;
+        item->pos.x = rrand(0, 0) % map.size.x; }
     struct Monster * monster;
     for (monster = world.monster; monster != 0; monster = monster->next)
       for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos);) {
