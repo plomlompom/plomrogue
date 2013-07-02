@@ -3,11 +3,12 @@ plomrogue
 
 plomlompom tries to build his own roguelike. Currently, it doesn't do
 much interesting, apart from managing some ncurses windows in a bizarre
-fashion. You can move around a player and meet nine enemies; they will
-occasionally hit you (and each other) on contact, but without
+fashion. You can move around a player and meet a random number enemies;
+they will occasionally hit you (and each other) on contact, but without
 consequences (no hitpoints implemented yet). The map gets generated
-randomly. There is only one save file (named "savefile"), and it gets
-overwritten each new turn. To start over with a new world, delete it.
+randomly, too. There is only one save file (named "savefile"), and it
+gets overwritten each new turn. To start over with a new world, delete
+it.
 
 Install/run
 -----------
