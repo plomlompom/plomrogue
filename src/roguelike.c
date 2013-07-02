@@ -207,7 +207,7 @@ int main (int argc, char *argv[]) {
   char i;
   struct Monster * monster = malloc(sizeof(struct Monster));
   world.monster = monster;
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 8; i++) {
     monster->name = 'M';
     monster->next = malloc(sizeof(struct Monster));
     monster = monster->next; }
@@ -215,7 +215,7 @@ int main (int argc, char *argv[]) {
   monster->next = 0;
   struct Item * item = malloc(sizeof(struct Item));
   world.item = item;
-  for (i = 0; i < 2; i++) {
+  for (i = 0; i < 8; i++) {
     item->name = '#';
     item->next = malloc(sizeof(struct Item));
     item = item->next; }
