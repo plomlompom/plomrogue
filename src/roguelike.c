@@ -9,7 +9,7 @@
 #include "draw_wins.h"
 #include "keybindings.h"
 #include "readwrite.h"
-#include "actors.h"
+#include "objects_on_map.h"
 
 uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
@@ -69,14 +69,6 @@ struct Map init_map () {
          || (curpos < (map.size.x * map.size.y) && (curpos+1) % map.size.x != 0 && '.' == map.cells[curpos+1])))
       map.cells[y * map.size.x + x] = '.'; }
   return map; }
-
-struct yx_uint16 find_passable_pos (struct Map * map) {
-// Return a random passable position on map.
-  struct yx_uint16 pos;
-  for (pos.y = pos.x = 0; 0 == is_passable(map, pos);) {
-      pos.y = rrand(0, 0) % map->size.y;
-      pos.x = rrand(0, 0) % map->size.x; }
-  return pos; }
 
 void map_scroll (struct Map * map, char dir) {
 // Scroll map into direction dir if possible by changing the offset.

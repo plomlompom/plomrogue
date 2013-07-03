@@ -6,7 +6,7 @@
 #include "windows.h"
 #include "roguelike.h"
 #include "keybindings.h"
-#include "actors.h"
+#include "objects_on_map.h"
 
 void draw_with_linebreaks (struct Win * win, char * text, uint16_t start_y) {
 // Write text into window content space. Start on row start_y. Fill unused rows with whitespace.

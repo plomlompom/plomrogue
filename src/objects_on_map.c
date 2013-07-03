@@ -1,4 +1,4 @@
-#include "actors.h"
+#include "objects_on_map.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "yx_uint16.h"
@@ -11,6 +11,14 @@ extern char is_passable (struct Map * map, struct yx_uint16 pos) {
     if ('.' == map->cells[pos.y * map->size.x + pos.x])
       passable = 1;
   return passable; }
+
+extern struct yx_uint16 find_passable_pos (struct Map * map) {
+// Return a random passable position on map.
+  struct yx_uint16 pos;
+  for (pos.y = pos.x = 0; 0 == is_passable(map, pos);) {
+      pos.y = rrand(0, 0) % map->size.y;
+      pos.x = rrand(0, 0) % map->size.x; }
+  return pos; }
 
 extern void move_monster (struct World * world, struct Monster * monster) {
 // Move monster in random direction, trigger fighting when hindered by player/monster.

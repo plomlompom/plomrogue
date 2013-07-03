@@ -26,16 +26,10 @@ struct Map {
   struct yx_uint16 offset;
   char * cells; };
 
-struct Item {
-  struct Item * next;
-  char name;
-  struct yx_uint16 pos; };
-
 extern uint16_t rrand(char, uint32_t);
 extern void update_log (struct World *, char *);
 
 extern struct Map init_map ();
-extern struct yx_uint16 find_passable_pos (struct Map *);
 extern void map_scroll (struct Map *, char);
 
 extern void turn_over (struct World *, char);
