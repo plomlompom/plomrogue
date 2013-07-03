@@ -70,6 +70,14 @@ struct Map init_map () {
       map.cells[y * map.size.x + x] = '.'; }
   return map; }
 
+struct yx_uint16 find_passable_pos (struct Map * map) {
+// Return a random passable position on map.
+  struct yx_uint16 pos;
+  for (pos.y = pos.x = 0; 0 == is_passable(map, pos);) {
+      pos.y = rrand(0, 0) % map->size.y;
+      pos.x = rrand(0, 0) % map->size.x; }
+  return pos; }
+
 void map_scroll (struct Map * map, char dir) {
 // Scroll map into direction dir if possible by changing the offset.
   if      (NORTH == dir && map->offset.y > 0) map->offset.y--;
@@ -276,9 +284,7 @@ int main (int argc, char *argv[]) {
   struct Map map = init_map();
   world.map = &map;
   if (1 == world.turn) {
-    for (player.pos.y = player.pos.x = 0; 0 == is_passable(&map, player.pos);) {
-      player.pos.y = rrand(0, 0) % map.size.y;
-      player.pos.x = rrand(0, 0) % map.size.x; }
+    player.pos = find_passable_pos(&map);
     unsigned char n_monsters = rrand(0, 0) % 16;
     unsigned char n_items    = rrand(0, 0) % 48;
     unsigned char i;
@@ -292,9 +298,7 @@ int main (int argc, char *argv[]) {
       else {
         monster->next = malloc(sizeof(struct Monster));
         monster = monster->next; }
-      for (monster->pos.y = monster->pos.x = 0; 0 == is_passable(&map, monster->pos);) {
-        monster->pos.y = rrand(0, 0) % map.size.y;
-        monster->pos.x = rrand(0, 0) % map.size.x; }
+      monster->pos = find_passable_pos(&map);
       monster->name = 'M'; }
     if (!start)
       monster->next = 0;
@@ -308,9 +312,7 @@ int main (int argc, char *argv[]) {
       else {
         item->next = malloc(sizeof(struct Item));
         item = item->next; }
-      for (item->pos.y = item->pos.x = 0; 0 == is_passable(&map, item->pos);) {
-        item->pos.y = rrand(0, 0) % map.size.y;
-        item->pos.x = rrand(0, 0) % map.size.x; }
+      item->pos = find_passable_pos(&map);
       item->name = '#'; }
     if (!start)
       item->next = 0; }
