@@ -99,12 +99,14 @@ void save_game(struct World * world) {
   struct Monster * monster;
   for (monster = world->monster; monster != 0; monster = monster->next) {
     write_uint16_bigendian(monster->pos.y + 1, file);
-    write_uint16_bigendian(monster->pos.x + 1, file); }
+    write_uint16_bigendian(monster->pos.x + 1, file);
+    fputc(monster->name, file); }
   write_uint16_bigendian(0, file);
   struct Item * item;
   for (item = world->item; item != 0; item = item->next) {
     write_uint16_bigendian(item->pos.y + 1, file);
-    write_uint16_bigendian(item->pos.x + 1, file); }
+    write_uint16_bigendian(item->pos.x + 1, file);
+    fputc(item->name, file); }
   write_uint16_bigendian(0, file);
   fclose(file); }
 
@@ -232,9 +234,9 @@ int main (int argc, char *argv[]) {
       else {
         monster->next = malloc(sizeof(struct Monster));
         monster = monster->next; }
-      monster->name = 'M';
       monster->pos.y = test - 1;
-      monster->pos.x = read_uint16_bigendian(file) - 1; }
+      monster->pos.x = read_uint16_bigendian(file) - 1;
+      monster->name = fgetc(file); }
     if (!start)
       monster->next = 0;
     start = 1;
@@ -250,9 +252,9 @@ int main (int argc, char *argv[]) {
       else {
         item->next = malloc(sizeof(struct Item));
         item = item->next; }
-      item->name = '#';
       item->pos.y = test - 1;
-      item->pos.x = read_uint16_bigendian(file) - 1; }
+      item->pos.x = read_uint16_bigendian(file) - 1;
+      item->name = fgetc(file); }
     if (!start)
       item->next = 0;
     fclose(file); }
@@ -291,7 +293,7 @@ int main (int argc, char *argv[]) {
         monster->next = malloc(sizeof(struct Monster));
         monster = monster->next; }
       monster->pos = find_passable_pos(&map);
-      monster->name = 'M'; }
+      monster->name = 'A' + (rrand(0, 0) % 8); }
     if (!start)
       monster->next = 0;
     start = 1;
@@ -305,7 +307,7 @@ int main (int argc, char *argv[]) {
         item->next = malloc(sizeof(struct Item));
         item = item->next; }
       item->pos = find_passable_pos(&map);
-      item->name = '#'; }
+      item->name = '#' + (rrand(0, 0) % 4); }
     if (!start)
       item->next = 0; }
 

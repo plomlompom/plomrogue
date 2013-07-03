@@ -11,12 +11,12 @@ struct Player {
 
 struct Item {
   struct Item * next;
-  char name;
+  unsigned char name;
   struct yx_uint16 pos; };
 
 struct Monster {
   struct Monster * next;
-  char name;
+  unsigned char name;
   struct yx_uint16 pos; };
 
 extern char is_passable (struct Map *, struct yx_uint16);
