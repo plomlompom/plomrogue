@@ -100,7 +100,8 @@ void save_game(struct World * world) {
   for (monster = world->monster; monster != 0; monster = monster->next) {
     write_uint16_bigendian(monster->pos.y + 1, file);
     write_uint16_bigendian(monster->pos.x + 1, file);
-    fputc(monster->name, file); }
+    fputc(monster->name, file);
+    fputc(monster->hitpoints, file); }
   write_uint16_bigendian(0, file);
   struct Item * item;
   for (item = world->item; item != 0; item = item->next) {
@@ -236,7 +237,8 @@ int main (int argc, char *argv[]) {
         monster = monster->next; }
       monster->pos.y = test - 1;
       monster->pos.x = read_uint16_bigendian(file) - 1;
-      monster->name = fgetc(file); }
+      monster->name = fgetc(file);
+      monster->hitpoints = fgetc(file); }
     if (!start)
       monster->next = 0;
     start = 1;
@@ -293,7 +295,8 @@ int main (int argc, char *argv[]) {
         monster->next = malloc(sizeof(struct Monster));
         monster = monster->next; }
       monster->pos = find_passable_pos(&map);
-      monster->name = 'A' + (rrand(0, 0) % 8); }
+      monster->name = 'A' + (rrand(0, 0) % 8);
+      monster->hitpoints = 5; }
     if (!start)
       monster->next = 0;
     start = 1;

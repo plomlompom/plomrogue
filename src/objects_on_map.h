@@ -17,7 +17,8 @@ struct Item {
 struct Monster {
   struct Monster * next;
   unsigned char name;
-  struct yx_uint16 pos; };
+  struct yx_uint16 pos;
+  unsigned char hitpoints; };
 
 extern char is_passable (struct Map *, struct yx_uint16);
 extern struct yx_uint16 find_passable_pos (struct Map *);

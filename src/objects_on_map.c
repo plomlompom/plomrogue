@@ -32,7 +32,7 @@ extern void move_monster (struct World * world, struct Monster * monster) {
     if (other_monster == monster)
       continue;
     if (yx_uint16_cmp (t, other_monster->pos)) {
-      update_log (world, "\nMonster hits monster.");
+      update_log (world, "\nMonster bumps into monster.");
       return; } }
   if (is_passable(world->map, t))
     monster->pos = t; }
@@ -44,6 +44,16 @@ extern void move_player (struct World * world, char d) {
   for (monster = world->monster; monster != 0; monster = monster->next)
     if (yx_uint16_cmp (t, monster->pos)) {
       update_log (world, "\nYou hit the monster.");
+      monster->hitpoints--;
+      if (0 == monster->hitpoints) {
+        update_log (world, "\nYou kill the monster.");
+        if (world->monster == monster)
+          world->monster = world->monster->next;
+        else {
+          struct Monster * m_prev;
+          for (m_prev = world->monster; m_prev->next != monster; m_prev = m_prev->next);
+          m_prev->next = monster->next; }
+        free(monster); }
       turn_over (world, d);
       return; }
   char * msg = calloc(25, sizeof(char));
