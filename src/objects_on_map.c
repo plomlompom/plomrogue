@@ -23,36 +23,36 @@ extern struct yx_uint16 find_passable_pos (struct Map * map) {
 extern void move_monster (struct World * world, struct Monster * monster) {
 // Move monster in random direction, trigger fighting when hindered by player/monster.
   char d = rrand(0, 0) % 5;
-  struct yx_uint16 t = mv_yx_in_dir (d, monster->pos);
+  struct yx_uint16 t = mv_yx_in_dir (d, monster->cmo.pos);
   if (yx_uint16_cmp (t, world->player->pos)) {
     update_log (world, "\nThe monster hits you.");
     return; }
   struct Monster * other_monster;
-  for (other_monster = world->monster; other_monster != 0; other_monster = other_monster->next) {
+  for (other_monster = world->monster; other_monster != 0; other_monster = other_monster->cmo.next) {
     if (other_monster == monster)
       continue;
-    if (yx_uint16_cmp (t, other_monster->pos)) {
+    if (yx_uint16_cmp (t, other_monster->cmo.pos)) {
       update_log (world, "\nMonster bumps into monster.");
       return; } }
   if (is_passable(world->map, t))
-    monster->pos = t; }
+    monster->cmo.pos = t; }
 
 extern void move_player (struct World * world, char d) {
 // Move player in direction d, update log and turn over to the enemy.
   struct yx_uint16 t = mv_yx_in_dir (d, world->player->pos);
   struct Monster * monster;
-  for (monster = world->monster; monster != 0; monster = monster->next)
-    if (yx_uint16_cmp (t, monster->pos)) {
+  for (monster = world->monster; monster != 0; monster = monster->cmo.next)
+    if (yx_uint16_cmp (t, monster->cmo.pos)) {
       update_log (world, "\nYou hit the monster.");
       monster->hitpoints--;
       if (0 == monster->hitpoints) {
         update_log (world, "\nYou kill the monster.");
         if (world->monster == monster)
-          world->monster = world->monster->next;
+          world->monster = world->monster->cmo.next;
         else {
           struct Monster * m_prev;
-          for (m_prev = world->monster; m_prev->next != monster; m_prev = m_prev->next);
-          m_prev->next = monster->next; }
+          for (m_prev = world->monster; m_prev->cmo.next != monster; m_prev = m_prev->cmo.next);
+          m_prev->cmo.next = monster->cmo.next; }
         free(monster); }
       turn_over (world, d);
       return; }

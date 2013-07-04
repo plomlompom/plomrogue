@@ -1,6 +1,7 @@
 #ifndef ROGUELIKE_H
 #define ROGUELIKE_H
 
+#include <stdio.h>
 #include <stdint.h>
 #include "yx_uint16.h"
 
@@ -40,5 +41,14 @@ extern void scroll_pad (struct WinMeta *, char);
 extern void growshrink_active_window (struct WinMeta *, char);
 
 extern unsigned char meta_keys(int, struct World *, struct WinMeta *, struct Win *, struct Win *, struct Win *, struct Win *);
+
+extern void write_map_objects_monsterdata (void *, FILE *);
+extern void readwrite_map_objects_dummy (void *, FILE *);
+extern void write_map_objects (void * start, FILE *, void (*) (void *, FILE *) );
+extern void read_map_objects_monsterdata (void *, FILE *);
+extern void read_map_objects (void *, FILE *, size_t, void (*) (void *, FILE *) );
+extern void build_map_objects_monsterdata (void *);
+extern void build_map_objects_itemdata (void *);
+extern void build_map_objects (void *, unsigned char, size_t, void (*) (void *), struct Map *);
 
 #endif

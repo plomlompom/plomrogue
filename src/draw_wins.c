@@ -8,7 +8,9 @@
 #include "keybindings.h"
 #include "objects_on_map.h"
 
-void draw_with_linebreaks (struct Win * win, char * text, uint16_t start_y) {
+static void draw_map_objects (void *, struct Map *, struct Win *);
+
+extern void draw_with_linebreaks (struct Win * win, char * text, uint16_t start_y) {
 // Write text into window content space. Start on row start_y. Fill unused rows with whitespace.
   uint16_t x, y;
   char toggle;
@@ -32,7 +34,7 @@ void draw_with_linebreaks (struct Win * win, char * text, uint16_t start_y) {
             toggle = 1;
             fin = 1; } } } } }
 
-void draw_text_from_bottom (struct Win * win, char * text) {
+extern void draw_text_from_bottom (struct Win * win, char * text) {
 // Draw text from end/bottom to the top.
   char toggle = 0;
   uint16_t x, y, offset;
@@ -65,18 +67,24 @@ void draw_text_from_bottom (struct Win * win, char * text) {
     text = text + (sizeof(char) * (z + 1)); }
   draw_with_linebreaks(win, text, start_y); }
 
-void draw_log_win (struct Win * win) {
+extern void draw_log_win (struct Win * win) {
 // Draw log text from world struct in win->data from bottom to top.
   struct World * world = (struct World *) win->data;
   draw_text_from_bottom(win, world->log); }
 
-void draw_map_win (struct Win * win) {
-// Draw map determined by win->data Map struct into window. Respect offset.
+static void draw_map_objects (void * start, struct Map * map, struct Win * win) {
+// Draw onto map in win the objects in the chain at start.
+  struct ChainMapObject * cmo;
+  for (cmo = start; cmo != 0; cmo = cmo->next)
+    if (   cmo->pos.y >= map->offset.y && cmo->pos.y < map->offset.y + win->frame.size.y
+        && cmo->pos.x >= map->offset.x && cmo->pos.x < map->offset.x + win->frame.size.x)
+      mvwaddch(win->frame.curses_win, cmo->pos.y - map->offset.y, cmo->pos.x - map->offset.x, cmo->name); }
+
+extern void draw_map_win (struct Win * win) {
+// Draw map determined by map (from win->data) and various actors/objects into window. Respect scroll offset.
   struct World * world = (struct World *) win->data;
   struct Map * map = world->map;
   struct Player * player = world->player;
-  struct Monster * monster;
-  struct Item * item;
   char * cells = map->cells;
   uint16_t width_map_av  = map->size.x  - map->offset.x;
   uint16_t height_map_av = map->size.y - map->offset.y;
@@ -87,19 +95,13 @@ void draw_map_win (struct Win * win) {
       if (y < height_map_av && x < width_map_av) {
           mvwaddch(win->frame.curses_win, y, x, cells[z]);
         z++; } } }
-  for (item = world->item; item != 0; item = item->next)
-    if (   item->pos.y >= map->offset.y && item->pos.y < map->offset.y + win->frame.size.y
-        && item->pos.x >= map->offset.x && item->pos.x < map->offset.x + win->frame.size.x)
-      mvwaddch(win->frame.curses_win, item->pos.y - map->offset.y, item->pos.x - map->offset.x, item->name);
-  for (monster = world->monster; monster != 0; monster = monster->next)
-    if (   monster->pos.y >= map->offset.y && monster->pos.y < map->offset.y + win->frame.size.y
-        && monster->pos.x >= map->offset.x && monster->pos.x < map->offset.x + win->frame.size.x)
-      mvwaddch(win->frame.curses_win, monster->pos.y - map->offset.y, monster->pos.x - map->offset.x, monster->name);
+  draw_map_objects (world->item, map, win);
+  draw_map_objects (world->monster, map, win);
   if (   player->pos.y >= map->offset.y && player->pos.y < map->offset.y + win->frame.size.y
       && player->pos.x >= map->offset.x && player->pos.x < map->offset.x + win->frame.size.x)
     mvwaddch(win->frame.curses_win, player->pos.y - map->offset.y, player->pos.x - map->offset.x, '@'); }
 
-void draw_info_win (struct Win * win) {
+extern void draw_info_win (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
   struct World * world = (struct World *) win->data;
   uint16_t count = world->turn;
@@ -107,7 +109,7 @@ void draw_info_win (struct Win * win) {
   snprintf(text, 100, "Turn: %d", count);
   draw_with_linebreaks(win, text, 0); }
 
-void draw_keys_win (struct Win * win) {
+extern void draw_keys_win (struct Win * win) {
 // Draw keybindings window.
   struct World * world = (struct World *) win->data;
   uint16_t offset = 0, y, x;

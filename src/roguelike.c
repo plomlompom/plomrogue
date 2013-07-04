@@ -86,7 +86,7 @@ void turn_over (struct World * world, char action) {
   world->turn++;
   rrand(1, world->seed * world->turn);
   struct Monster * monster;
-  for (monster = world->monster; monster != 0; monster = monster->next)
+  for (monster = world->monster; monster != 0; monster = monster->cmo.next)
     move_monster(world, monster); }
 
 void save_game(struct World * world) {
@@ -96,19 +96,8 @@ void save_game(struct World * world) {
   write_uint32_bigendian(world->turn, file);
   write_uint16_bigendian(world->player->pos.y + 1, file);
   write_uint16_bigendian(world->player->pos.x + 1, file);
-  struct Monster * monster;
-  for (monster = world->monster; monster != 0; monster = monster->next) {
-    write_uint16_bigendian(monster->pos.y + 1, file);
-    write_uint16_bigendian(monster->pos.x + 1, file);
-    fputc(monster->name, file);
-    fputc(monster->hitpoints, file); }
-  write_uint16_bigendian(0, file);
-  struct Item * item;
-  for (item = world->item; item != 0; item = item->next) {
-    write_uint16_bigendian(item->pos.y + 1, file);
-    write_uint16_bigendian(item->pos.x + 1, file);
-    fputc(item->name, file); }
-  write_uint16_bigendian(0, file);
+  write_map_objects (world->monster, file, write_map_objects_monsterdata);
+  write_map_objects (world->item, file, readwrite_map_objects_dummy);
   fclose(file); }
 
 void toggle_window (struct WinMeta * win_meta, struct Win * win) {
@@ -186,6 +175,88 @@ unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta
     map_scroll (world->map, WEST);
   return 0; }
 
+void write_map_objects_monsterdata (void * start, FILE * file) {
+// Write to file data specific tto map objects of type monster.
+  struct Monster * monster = (struct Monster *) start;
+  fputc(monster->hitpoints, file); }
+
+void readwrite_map_objects_dummy (void * dummy, FILE * file) {
+// Dummy function for calls of (write|read)_map_objects on map objects without specific attributes.
+  ; }
+
+void write_map_objects (void * start, FILE * file, void (* f) (void *, FILE *) ) {
+// Write into file the map object chain starting at start, use f() for object-type specific data.
+  struct ChainMapObject * cmo;
+  for (cmo = start; cmo != 0; cmo = cmo->next) {
+    write_uint16_bigendian(cmo->pos.y + 1, file);
+    write_uint16_bigendian(cmo->pos.x + 1, file);
+    fputc(cmo->name, file);
+    f (cmo, file); }
+  write_uint16_bigendian(0, file); }
+
+void read_map_objects_monsterdata (void * start, FILE * file) {
+// Read from file data speciifc to map objects of type monster.
+  struct Monster * monster = (struct Monster *) start;
+  monster->hitpoints = fgetc(file); }
+
+void read_map_objects (void * start, FILE * file, size_t size, void (* f) (void *, FILE *) ) {
+// Read from file chain of map objects starting at start, use f() for object-type specific data.
+  int * q = start;
+  * q = 0;
+  struct ChainMapObject * cmo;
+  struct ChainMapObject * * z = start;
+  uint16_t test;
+  char still_at_start = 1;
+  while (1) {
+    test = read_uint16_bigendian(file);
+    if (0 == test)
+      break;
+    if (still_at_start) {
+      cmo = malloc(size);
+      * z = cmo;
+      still_at_start = 0; }
+    else {
+      cmo->next = malloc(size);
+      cmo = cmo->next; }
+    cmo->pos.y = test - 1;
+    cmo->pos.x = read_uint16_bigendian(file) - 1;
+    cmo->name = fgetc(file);
+    f (cmo, file); }
+  if (!still_at_start)
+    cmo->next = 0; }
+
+void build_map_objects_monsterdata (void * start) {
+// Build data specific to map objects of type monster.
+  struct Monster * monster = (struct Monster *) start;
+  monster->cmo.name = 'A' + (rrand(0, 0) % 8);
+  monster->hitpoints = 5; }
+
+void build_map_objects_itemdata (void * start) {
+// Build data speciifc to map objects of type data.
+  struct Item * item = (struct Item *) start;
+  item->cmo.name = '#' + (rrand(0, 0) % 4); }
+
+void build_map_objects (void * start, unsigned char n, size_t size, void (* f) (void *), struct Map * map) {
+// Build chain of n map objects starting at start, use f() for object-specific data.
+  int * q = start;
+  * q = 0;
+  unsigned char i;
+  struct ChainMapObject * cmo;
+  struct ChainMapObject * * z = start;
+  char still_at_start = 1;
+  for (i = 0; i < n; i++) {
+    if (still_at_start) {
+      cmo = malloc(size);
+      * z = cmo;
+      still_at_start = 0; }
+    else {
+      cmo->next = malloc(size);
+      cmo = cmo->next; }
+    cmo->pos = find_passable_pos(map);
+    f(cmo); }
+  if (!still_at_start)
+    cmo->next = 0; }
+
 int main (int argc, char *argv[]) {
   struct World world;
 
@@ -209,10 +280,6 @@ int main (int argc, char *argv[]) {
   update_log (&world, " ");
   struct Player player;
   world.player = &player;
-  struct Monster * monster;
-  struct Item * item;
-  uint16_t test;
-  char start;
 
   // For interactive mode, try to load world state from savefile.
   FILE * file;
@@ -222,43 +289,8 @@ int main (int argc, char *argv[]) {
     world.turn = read_uint32_bigendian(file);
     player.pos.y = read_uint16_bigendian(file) - 1;
     player.pos.x = read_uint16_bigendian(file) - 1;
-    start = 1;
-    world.monster = 0;
-    while (1) {
-      test = read_uint16_bigendian(file);
-      if (0 == test)
-        break;
-      if (start) {
-        monster = malloc(sizeof(struct Monster));
-        world.monster = monster;
-        start = 0; }
-      else {
-        monster->next = malloc(sizeof(struct Monster));
-        monster = monster->next; }
-      monster->pos.y = test - 1;
-      monster->pos.x = read_uint16_bigendian(file) - 1;
-      monster->name = fgetc(file);
-      monster->hitpoints = fgetc(file); }
-    if (!start)
-      monster->next = 0;
-    start = 1;
-    world.item = 0;
-    while (1) {
-      test = read_uint16_bigendian(file);
-      if (0 == test)
-        break;
-      if (start) {
-        item = malloc(sizeof(struct Item));
-        world.item = item;
-        start = 0; }
-      else {
-        item->next = malloc(sizeof(struct Item));
-        item = item->next; }
-      item->pos.y = test - 1;
-      item->pos.x = read_uint16_bigendian(file) - 1;
-      item->name = fgetc(file); }
-    if (!start)
-      item->next = 0;
+    read_map_objects (&world.monster, file, sizeof(struct Monster), read_map_objects_monsterdata);
+    read_map_objects (&world.item,    file, sizeof(struct Item),    readwrite_map_objects_dummy);
     fclose(file); }
 
   // For non-interactive mode, try to load world state from record file.
@@ -283,36 +315,8 @@ int main (int argc, char *argv[]) {
     player.pos = find_passable_pos(&map);
     unsigned char n_monsters = rrand(0, 0) % 16;
     unsigned char n_items    = rrand(0, 0) % 48;
-    unsigned char i;
-    start = 1;
-    world.monster = 0;
-    for (i = 0; i < n_monsters; i++) {
-      if (start) {
-        monster = malloc(sizeof(struct Monster));
-        world.monster = monster;
-        start = 0; }
-      else {
-        monster->next = malloc(sizeof(struct Monster));
-        monster = monster->next; }
-      monster->pos = find_passable_pos(&map);
-      monster->name = 'A' + (rrand(0, 0) % 8);
-      monster->hitpoints = 5; }
-    if (!start)
-      monster->next = 0;
-    start = 1;
-    world.item = 0;
-    for (i = 0; i < n_items; i++) {
-      if (start) {
-        item = malloc(sizeof(struct Item));
-        world.item = item;
-        start = 0; }
-      else {
-        item->next = malloc(sizeof(struct Item));
-        item = item->next; }
-      item->pos = find_passable_pos(&map);
-      item->name = '#' + (rrand(0, 0) % 4); }
-    if (!start)
-      item->next = 0; }
+    build_map_objects (&world.monster, n_monsters, sizeof(struct Monster), build_map_objects_monsterdata, &map);
+    build_map_objects (&world.item,    n_items,    sizeof(struct Item),    build_map_objects_itemdata,    &map); }
 
   // Initialize window system and windows.
   WINDOW * screen = initscr();

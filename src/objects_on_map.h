@@ -9,15 +9,16 @@ struct Map;
 struct Player {
   struct yx_uint16 pos; };
 
-struct Item {
-  struct Item * next;
+struct ChainMapObject {
+  void * next;
   unsigned char name;
   struct yx_uint16 pos; };
 
+struct Item {
+  struct ChainMapObject cmo; };
+
 struct Monster {
-  struct Monster * next;
-  unsigned char name;
-  struct yx_uint16 pos;
+  struct ChainMapObject cmo;
   unsigned char hitpoints; };
 
 extern char is_passable (struct Map *, struct yx_uint16);
