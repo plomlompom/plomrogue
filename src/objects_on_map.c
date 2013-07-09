@@ -2,15 +2,86 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "yx_uint16.h"
+#include "readwrite.h"
 #include "roguelike.h"
 
-extern char is_passable (struct Map * map, struct yx_uint16 pos) {
-// Check if coordinate on (or beyond) map is accessible to actor movement.
-  char passable = 0;
-  if (0 <= pos.x && pos.x < map->size.x && 0 <= pos.y && pos.y < map->size.y)
-    if ('.' == map->cells[pos.y * map->size.x + pos.x])
-      passable = 1;
-  return passable; }
+extern void readwrite_map_objects_dummy (void * dummy, FILE * file) {
+// Dummy function for calls of (write|read)_map_objects on map objects without specific attributes.
+  ; }
+
+extern void write_map_objects_monsterdata (void * start, FILE * file) {
+// Write to file data specific tto map objects of type monster.
+  struct Monster * monster = (struct Monster *) start;
+  fputc(monster->hitpoints, file); }
+
+extern void write_map_objects (void * start, FILE * file, void (* f) (void *, FILE *) ) {
+// Write into file the map object chain starting at start, use f() for object-type specific data.
+  struct ChainMapObject * cmo;
+  for (cmo = start; cmo != 0; cmo = cmo->next) {
+    write_uint16_bigendian(cmo->pos.y + 1, file);
+    write_uint16_bigendian(cmo->pos.x + 1, file);
+    fputc(cmo->name, file);
+    f (cmo, file); }
+  write_uint16_bigendian(0, file); }
+
+extern void read_map_objects_monsterdata (void * start, FILE * file) {
+// Read from file data speciifc to map objects of type monster.
+  struct Monster * monster = (struct Monster *) start;
+  monster->hitpoints = fgetc(file); }
+
+extern void read_map_objects (void * start, FILE * file, size_t size, void (* f) (void *, FILE *) ) {
+// Read from file chain of map objects starting at start, use f() for object-type specific data.
+  struct ChainMapObject * cmo;
+  struct ChainMapObject * * z = start;
+  uint16_t test;
+  char still_at_start = 1;
+  while (1) {
+    test = read_uint16_bigendian(file);
+    if (0 == test)
+      break;
+    if (still_at_start) {
+      cmo = malloc(size);
+      * z = cmo;
+      still_at_start = 0; }
+    else {
+      cmo->next = malloc(size);
+      cmo = cmo->next; }
+    cmo->pos.y = test - 1;
+    cmo->pos.x = read_uint16_bigendian(file) - 1;
+    cmo->name = fgetc(file);
+    f (cmo, file); }
+  if (!still_at_start)
+    cmo->next = 0; }
+
+extern void build_map_objects_monsterdata (void * start) {
+// Build data specific to map objects of type monster.
+  struct Monster * monster = (struct Monster *) start;
+  monster->cmo.name = 'A' + (rrand(0, 0) % 8);
+  monster->hitpoints = 5; }
+
+extern void build_map_objects_itemdata (void * start) {
+// Build data speciifc to map objects of type data.
+  struct Item * item = (struct Item *) start;
+  item->cmo.name = '#' + (rrand(0, 0) % 4); }
+
+extern void build_map_objects (void * start, unsigned char n, size_t size, void (* f) (void *), struct Map * map) {
+// Build chain of n map objects starting at start, use f() for object-specific data.
+  unsigned char i;
+  struct ChainMapObject * cmo;
+  struct ChainMapObject * * z = start;
+  char still_at_start = 1;
+  for (i = 0; i < n; i++) {
+    if (still_at_start) {
+      cmo = malloc(size);
+      * z = cmo;
+      still_at_start = 0; }
+    else {
+      cmo->next = malloc(size);
+      cmo = cmo->next; }
+    cmo->pos = find_passable_pos(map);
+    f(cmo); }
+  if (!still_at_start)
+    cmo->next = 0; }
 
 extern struct yx_uint16 find_passable_pos (struct Map * map) {
 // Return a random passable position on map.
@@ -19,6 +90,14 @@ extern struct yx_uint16 find_passable_pos (struct Map * map) {
       pos.y = rrand(0, 0) % map->size.y;
       pos.x = rrand(0, 0) % map->size.x; }
   return pos; }
+
+extern char is_passable (struct Map * map, struct yx_uint16 pos) {
+// Check if coordinate on (or beyond) map is accessible to actor movement.
+  char passable = 0;
+  if (0 <= pos.x && pos.x < map->size.x && 0 <= pos.y && pos.y < map->size.y)
+    if ('.' == map->cells[pos.y * map->size.x + pos.x])
+      passable = 1;
+  return passable; }
 
 extern void move_monster (struct World * world, struct Monster * monster) {
 // Move monster in random direction, trigger fighting when hindered by player/monster.
