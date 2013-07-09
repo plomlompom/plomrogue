@@ -56,9 +56,8 @@ struct Map init_map () {
     for (x = 0; x < map.size.x; x++)
       map.cells[(y * map.size.x) + x] = '~';
   map.cells[size / 2 + (map.size.x / 2)] = '.';
-  uint32_t repeats, root, curpos;
-  for (root = 0; root * root * root < size; root++);
-  for (repeats = 0; repeats < size * root; repeats++) {
+  uint32_t curpos;
+  while (1) {
     y = rrand(0, 0) % map.size.y;
     x = rrand(0, 0) % map.size.x;
     curpos = y * map.size.x + x;
@@ -66,8 +65,10 @@ struct Map init_map () {
         (   (curpos >= map.size.x && '.' == map.cells[curpos - map.size.x])
          || (curpos < map.size.x * (map.size.y-1) && '.' == map.cells[curpos + map.size.x])
          || (curpos > 0 && curpos % map.size.x != 0 && '.' == map.cells[curpos-1])
-         || (curpos < (map.size.x * map.size.y) && (curpos+1) % map.size.x != 0 && '.' == map.cells[curpos+1])))
-      map.cells[y * map.size.x + x] = '.'; }
+         || (curpos < (map.size.x * map.size.y) && (curpos+1) % map.size.x != 0 && '.' == map.cells[curpos+1]))) {
+      if (y == 0 || y == map.size.y - 1 || x == 0 || x == map.size.x - 1)
+        break;
+      map.cells[y * map.size.x + x] = '.'; } }
   return map; }
 
 void map_scroll (struct Map * map, char dir) {
