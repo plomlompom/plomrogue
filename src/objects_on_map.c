@@ -5,6 +5,8 @@
 #include "readwrite.h"
 #include "roguelike.h"
 
+static struct ChainMapObject * get_next_cmo (void *, char *, size_t, struct ChainMapObject *);
+
 extern void readwrite_map_objects_dummy (void * dummy, FILE * file) {
 // Dummy function for calls of (write|read)_map_objects on map objects without specific attributes.
   ; }
@@ -29,23 +31,28 @@ extern void read_map_objects_monsterdata (void * start, FILE * file) {
   struct Monster * monster = (struct Monster *) start;
   monster->hitpoints = fgetc(file); }
 
+static struct ChainMapObject * get_next_cmo (void * start, char * still_at_start, size_t size, struct ChainMapObject * cmo) {
+// Return pointer to map object of size "size". If first in chain ("still_at_start"), make "start" point to it.
+  if (*still_at_start) {
+    struct ChainMapObject * * z = start;
+    cmo = malloc(size);
+    * z = cmo;
+    *still_at_start = 0; }
+  else {
+    cmo->next = malloc(size);
+    cmo = cmo->next; }
+  return cmo; }
+
 extern void read_map_objects (void * start, FILE * file, size_t size, void (* f) (void *, FILE *) ) {
 // Read from file chain of map objects starting at start, use f() for object-type specific data.
   struct ChainMapObject * cmo;
-  struct ChainMapObject * * z = start;
   uint16_t test;
   char still_at_start = 1;
   while (1) {
     test = read_uint16_bigendian(file);
     if (0 == test)
       break;
-    if (still_at_start) {
-      cmo = malloc(size);
-      * z = cmo;
-      still_at_start = 0; }
-    else {
-      cmo->next = malloc(size);
-      cmo = cmo->next; }
+    cmo = get_next_cmo(start, &still_at_start, size, cmo);
     cmo->pos.y = test - 1;
     cmo->pos.x = read_uint16_bigendian(file) - 1;
     cmo->name = fgetc(file);
@@ -68,18 +75,11 @@ extern void build_map_objects (void * start, unsigned char n, size_t size, void 
 // Build chain of n map objects starting at start, use f() for object-specific data.
   unsigned char i;
   struct ChainMapObject * cmo;
-  struct ChainMapObject * * z = start;
   char still_at_start = 1;
   for (i = 0; i < n; i++) {
-    if (still_at_start) {
-      cmo = malloc(size);
-      * z = cmo;
-      still_at_start = 0; }
-    else {
-      cmo->next = malloc(size);
-      cmo = cmo->next; }
+    cmo = get_next_cmo(start, &still_at_start, size, cmo);
     cmo->pos = find_passable_pos(map);
-    f(cmo); }
+    f (cmo); }
   if (!still_at_start)
     cmo->next = 0; }
 
