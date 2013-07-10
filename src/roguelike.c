@@ -72,6 +72,7 @@ void save_game(struct World * world) {
   write_uint32_bigendian(world->turn, file);
   write_uint16_bigendian(world->player->pos.y + 1, file);
   write_uint16_bigendian(world->player->pos.x + 1, file);
+  fputc(world->player->hitpoints, file);
   write_map_objects (world->monster, file, write_map_objects_monsterdata);
   write_map_objects (world->item, file, readwrite_map_objects_dummy);
   fclose(file); }
@@ -188,6 +189,7 @@ int main (int argc, char *argv[]) {
     world.turn = read_uint32_bigendian(file);
     player.pos.y = read_uint16_bigendian(file) - 1;
     player.pos.x = read_uint16_bigendian(file) - 1;
+    player.hitpoints = fgetc(file);
     read_map_objects (&world.monster, file, sizeof(struct Monster), read_map_objects_monsterdata);
     read_map_objects (&world.item,    file, sizeof(struct Item),    readwrite_map_objects_dummy);
     fclose(file); }
