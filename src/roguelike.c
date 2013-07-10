@@ -82,14 +82,21 @@ void map_scroll (struct Map * map, char dir, struct yx_uint16 win_size) {
   else if (EAST  == dir && map->offset.x + win_size.x < map->size.x)
     map->offset.x++; }
 
-void map_center_player (struct Map * map, struct Player * player, struct yx_uint16 win_size) {
+uint16_t center_offset (uint16_t pos, uint16_t mapsize, uint16_t framesize) {
+// Return the offset for display of a map inside a frame centered on pos.
+  uint16_t offset = 0;
+  if (mapsize > framesize) {
+    if (pos > framesize / 2) {
+      if (pos < mapsize - (framesize / 2))
+        offset = pos - (framesize / 2);
+      else
+        offset = mapsize - framesize; } }
+  return offset; }
+
+void map_center_player (struct Map * map, struct Player * player, struct yx_uint16 frame_size) {
 // Center map on player.
-  if (player->pos.y < win_size.y / 2)                      map->offset.y = 0;
-  else if (player->pos.y < map->size.y - (win_size.y / 2)) map->offset.y = player->pos.y - (win_size.y / 2);
-  else                                                     map->offset.y = map->size.y - win_size.y;
-  if (player->pos.x < win_size.x / 2)                      map->offset.x = 0;
-  else if (player->pos.x < map->size.x - (win_size.x / 2)) map->offset.x = player->pos.x - (win_size.x / 2);
-  else                                                     map->offset.x = map->size.x - win_size.x; }
+  map->offset.y = center_offset (player->pos.y, map->size.y, frame_size.y);
+  map->offset.x = center_offset (player->pos.x, map->size.x, frame_size.x); }
 
 void turn_over (struct World * world, char action) {
 // Record action in game record file, increment turn and move enemy.

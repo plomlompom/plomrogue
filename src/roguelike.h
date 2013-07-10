@@ -31,6 +31,7 @@ extern void update_log (struct World *, char *);
 
 extern struct Map init_map ();
 extern void map_scroll (struct Map *, char, struct yx_uint16);
+uint16_t center_offset (uint16_t, uint16_t, uint16_t);
 extern void map_center_player (struct Map *, struct Player *, struct yx_uint16);
 
 extern void turn_over (struct World *, char);
