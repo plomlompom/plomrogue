@@ -8,7 +8,7 @@
 #include "map.h"
 #include "main.h"
 
-uint16_t rrand(char use_seed, uint32_t new_seed) {
+extern uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
   static uint32_t seed;
   if (0 != use_seed)
@@ -16,7 +16,7 @@ uint16_t rrand(char use_seed, uint32_t new_seed) {
   seed = ((seed * 1103515245) + 12345) % 2147483648;   // Values as recommended by POSIX.1-2001 (see rand(3)).
   return (seed / 65536); }                         // Ignore least significant 16 bits (they are less random).
 
-void update_log (struct World * world, char * text) {
+extern void update_log (struct World * world, char * text) {
 // Update log by appending text, or by appending a "." if text is the same as the last one.
   static char * last_msg;
   if (0 == last_msg)
@@ -39,7 +39,7 @@ void update_log (struct World * world, char * text) {
   free(world->log);
   world->log = new_text; }
 
-uint16_t center_offset (uint16_t pos, uint16_t mapsize, uint16_t framesize) {
+extern uint16_t center_offset (uint16_t pos, uint16_t mapsize, uint16_t framesize) {
 // Return the offset for display of a map inside a frame centered on pos.
   uint16_t offset = 0;
   if (mapsize > framesize) {
@@ -50,7 +50,7 @@ uint16_t center_offset (uint16_t pos, uint16_t mapsize, uint16_t framesize) {
         offset = mapsize - framesize; } }
   return offset; }
 
-void turn_over (struct World * world, char action) {
+extern void turn_over (struct World * world, char action) {
 // Record action in game record file, increment turn and move enemy.
   if (1 == world->interactive) {
     FILE * file = fopen("record", "a");
@@ -62,7 +62,7 @@ void turn_over (struct World * world, char action) {
   for (monster = world->monster; monster != 0; monster = monster->cmo.next)
     move_monster(world, monster); }
 
-void save_game(struct World * world) {
+extern void save_game(struct World * world) {
 // Save game data to game file.
   FILE * file = fopen("savefile", "w");
   write_uint32_bigendian(world->seed, file);
@@ -74,21 +74,21 @@ void save_game(struct World * world) {
   write_map_objects (world->item, file, readwrite_map_objects_dummy);
   fclose(file); }
 
-void toggle_window (struct WinMeta * win_meta, struct Win * win) {
+extern void toggle_window (struct WinMeta * win_meta, struct Win * win) {
 // Toggle display of window win.
   if (0 != win->frame.curses_win)
     suspend_win(win_meta, win);
   else
     append_win(win_meta, win); }
 
-void scroll_pad (struct WinMeta * win_meta, char dir) {
+extern void scroll_pad (struct WinMeta * win_meta, char dir) {
 // Try to scroll pad left or right.
   if      ('+' == dir)
     reset_pad_offset(win_meta, win_meta->pad_offset + 1);
   else if ('-' == dir)
     reset_pad_offset(win_meta, win_meta->pad_offset - 1); }
 
-void growshrink_active_window (struct WinMeta * win_meta, char change) {
+extern void growshrink_active_window (struct WinMeta * win_meta, char change) {
 // Grow or shrink active window horizontally or vertically by one cell size.
   if (0 != win_meta->active) {
     struct yx_uint16 size = win_meta->active->frame.size;
@@ -98,8 +98,9 @@ void growshrink_active_window (struct WinMeta * win_meta, char change) {
     else if (change == '*') size.x++;
     resize_active_win (win_meta, size); } }
 
-unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta, struct Win * win_keys,
-                        struct Win * win_map, struct Win * win_info, struct Win * win_log) {
+extern unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta,
+                               struct Win * win_keys, struct Win * win_map, struct Win * win_info,
+                               struct Win * win_log) {
 // Call some meta program / window management actions dependent on key. Return 1 to signal quitting.
   if (key == get_action_key(world->keybindings, "quit"))
     return 1;

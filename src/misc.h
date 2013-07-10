@@ -9,7 +9,7 @@ struct Win;
 
 extern uint16_t rrand(char, uint32_t);
 extern void update_log (struct World *, char *);
-uint16_t center_offset (uint16_t, uint16_t, uint16_t);
+extern uint16_t center_offset (uint16_t, uint16_t, uint16_t);
 extern void turn_over (struct World *, char);
 extern void save_game(struct World *);
 extern void toggle_window (struct WinMeta *, struct Win *);
