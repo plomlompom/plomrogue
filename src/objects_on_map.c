@@ -4,6 +4,7 @@
 #include "yx_uint16.h"
 #include "readwrite.h"
 #include "roguelike.h"
+#include "map.h"
 
 static struct ChainMapObject * get_next_cmo (void *, char *, size_t, struct ChainMapObject *);
 

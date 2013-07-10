@@ -7,6 +7,7 @@
 #include "roguelike.h"
 #include "keybindings.h"
 #include "objects_on_map.h"
+#include "map.h"
 
 static void draw_map_objects (void *, struct Map *, struct Win *);
 
