@@ -105,6 +105,9 @@ extern void move_monster (struct World * world, struct Monster * monster) {
   struct yx_uint16 t = mv_yx_in_dir (d, monster->cmo.pos);
   if (yx_uint16_cmp (t, world->player->pos)) {
     update_log (world, "\nThe monster hits you.");
+    world->player->hitpoints--;
+    if (0 == world->player->hitpoints)
+      update_log (world, "\nYou are dead.");
     return; }
   struct Monster * other_monster;
   for (other_monster = world->monster; other_monster != 0; other_monster = other_monster->cmo.next) {

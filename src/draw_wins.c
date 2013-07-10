@@ -104,9 +104,8 @@ extern void draw_map_win (struct Win * win) {
 extern void draw_info_win (struct Win * win) {
 // Draw info window by appending win->data integer value to "Turn: " display.
   struct World * world = (struct World *) win->data;
-  uint16_t count = world->turn;
   char text[100];
-  snprintf(text, 100, "Turn: %d", count);
+  snprintf(text, 100, "Turn: %d\nHitpoints: %d", world->turn, world->player->hitpoints);
   draw_with_linebreaks(win, text, 0); }
 
 extern void draw_keys_win (struct Win * win) {

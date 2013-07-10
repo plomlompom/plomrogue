@@ -8,7 +8,8 @@ struct World;
 struct Map;
 
 struct Player {
-  struct yx_uint16 pos; };
+  struct yx_uint16 pos;
+  unsigned char hitpoints; };
 
 struct ChainMapObject {
   void * next;

@@ -3,13 +3,12 @@ plomrogue
 
 plomlompom tries to build his own roguelike. Currently, it doesn't do
 much interesting, apart from managing some ncurses windows in a bizarre
-fashion. You can move around a player and meet a random number enemies;
-they will occasionally hit you on contact, but without consequence to
-you: The player has no hitpoints so far. Enemies have 5 hitpoints at
-start and disappear if their hitpoints reach 0. The map gets generated
-randomly, too. There is only one save file (named "savefile"), and it
-gets overwritten each new turn. To start over with a new world, delete
-it.
+fashion. You can move around a player and meet a random number enemies.
+They move randomly and will only accidentally hit you. You have 5
+hitpoints to lose before death, and so has each of them. The map gets
+generated randomly, too. There is only one save file (named "savefile"),
+and it gets overwritten each new turn. To start over with a new world,
+delete it.
 
 Install/run
 -----------

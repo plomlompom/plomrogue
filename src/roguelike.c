@@ -198,6 +198,7 @@ int main (int argc, char *argv[]) {
   world.log = calloc(1, sizeof(char));
   update_log (&world, " ");
   struct Player player;
+  player.hitpoints = 5;
   world.player = &player;
   world.monster = 0;
   world.item = 0;
@@ -253,8 +254,8 @@ int main (int argc, char *argv[]) {
   struct Win win_log = init_win(&win_meta, "Log", &world, draw_log_win);
   win_keys.frame.size.x = 29;
   win_map.frame.size.x = win_meta.pad.size.x - win_keys.frame.size.x - win_log.frame.size.x - 2;
-  win_info.frame.size.y = 1;
-  win_log.frame.size.y = win_meta.pad.size.y - 3;
+  win_info.frame.size.y = 2;
+  win_log.frame.size.y = win_meta.pad.size.y - (2 + win_info.frame.size.y);
   toggle_window(&win_meta, &win_keys);
   toggle_window(&win_meta, &win_map);
   toggle_window(&win_meta, &win_info);
@@ -263,8 +264,8 @@ int main (int argc, char *argv[]) {
   // Replay mode.
   int key;
   unsigned char quit_called = 0;
+  unsigned char await_actions = 1;
   if (0 == world.interactive) {
-    unsigned char still_reading_file = 1;
     int action;
     while (1) {
       if (start_turn == world.turn)
@@ -272,12 +273,12 @@ int main (int argc, char *argv[]) {
       if (0 == start_turn) {
         draw_all_wins (&win_meta);
         key = getch(); }
-      if (1 == still_reading_file &&
+      if (1 == await_actions &&
           (world.turn < start_turn || key == get_action_key(world.keybindings, "wait / next turn")) ) {
         action = getc(file);
         if (EOF == action) {
           start_turn = 0;
-          still_reading_file = 0; }
+          await_actions = 0; }
         else if (0 == action)
           player_wait (&world);
         else if (NORTH == action)
@@ -300,17 +301,19 @@ int main (int argc, char *argv[]) {
       if (last_turn != world.turn) {
         save_game(&world);
         last_turn = world.turn; }
+      if (1 == await_actions && 0 == player.hitpoints)
+        await_actions = 0;
       draw_all_wins (&win_meta);
       key = getch();
-      if      (key == get_action_key(world.keybindings, "player up"))
+      if      (1 == await_actions && key == get_action_key(world.keybindings, "player up"))
         move_player(&world, NORTH);
-      else if (key == get_action_key(world.keybindings, "player right"))
+      else if (1 == await_actions && key == get_action_key(world.keybindings, "player right"))
         move_player(&world, EAST);
-      else if (key == get_action_key(world.keybindings, "player down"))
+      else if (1 == await_actions && key == get_action_key(world.keybindings, "player down"))
         move_player(&world, SOUTH);
-      else if (key == get_action_key(world.keybindings, "player left"))
+      else if (1 == await_actions && key == get_action_key(world.keybindings, "player left"))
         move_player(&world, WEST);
-      else if (key == get_action_key(world.keybindings, "wait / next turn"))
+      else if (1 == await_actions && key == get_action_key(world.keybindings, "wait / next turn"))
         player_wait (&world);
       else
         quit_called = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
