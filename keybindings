@@ -21,6 +21,7 @@
 120 map down
 97 map left
 100 map right
+115 map center player
 116 player up
 98 player down
 102 player left

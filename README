@@ -44,6 +44,7 @@ w       scroll map up
 x       scroll map down
 a       scroll map left
 d       scroll map right
+s       center map on player
 t       move player up
 b       move player down
 f       move player left

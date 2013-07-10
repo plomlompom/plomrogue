@@ -82,6 +82,15 @@ void map_scroll (struct Map * map, char dir, struct yx_uint16 win_size) {
   else if (EAST  == dir && map->offset.x + win_size.x < map->size.x)
     map->offset.x++; }
 
+void map_center_player (struct Map * map, struct Player * player, struct yx_uint16 win_size) {
+// Center map on player.
+  if (player->pos.y < win_size.y / 2)                      map->offset.y = 0;
+  else if (player->pos.y < map->size.y - (win_size.y / 2)) map->offset.y = player->pos.y - (win_size.y / 2);
+  else                                                     map->offset.y = map->size.y - win_size.y;
+  if (player->pos.x < win_size.x / 2)                      map->offset.x = 0;
+  else if (player->pos.x < map->size.x - (win_size.x / 2)) map->offset.x = player->pos.x - (win_size.x / 2);
+  else                                                     map->offset.x = map->size.x - win_size.x; }
+
 void turn_over (struct World * world, char action) {
 // Record action in game record file, increment turn and move enemy.
   if (1 == world->interactive) {
@@ -178,6 +187,8 @@ unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta
     map_scroll (world->map, EAST, win_map->frame.size);
   else if (key == get_action_key(world->keybindings, "map left"))
     map_scroll (world->map, WEST, win_map->frame.size);
+  else if (key == get_action_key(world->keybindings, "map center player"))
+    map_center_player (world->map, world->player, win_map->frame.size);
   return 0; }
 
 int main (int argc, char *argv[]) {
