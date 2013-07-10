@@ -1,4 +1,4 @@
-#include "objects_on_map.h"
+#include "map_objects.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "yx_uint16.h"

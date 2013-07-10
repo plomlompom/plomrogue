@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "misc.h"
-#include "objects_on_map.h"
+#include "map_objects.h"
 
 struct Map init_map () {
 // Initialize map with some experimental start values.

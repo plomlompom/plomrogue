@@ -6,7 +6,7 @@
 #include "windows.h"
 #include "misc.h"
 #include "keybindings.h"
-#include "objects_on_map.h"
+#include "map_objects.h"
 #include "map.h"
 #include "main.h"
 
