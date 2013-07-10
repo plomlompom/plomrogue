@@ -111,13 +111,8 @@ extern void draw_info_win (struct Win * win) {
 extern void draw_keys_win (struct Win * win) {
 // Draw keybindings window.
   struct World * world = (struct World *) win->data;
-  uint16_t offset = 0, y, x;
-  if (world->keyswindata->max >= win->frame.size.y) {
-    if (world->keyswindata->select > win->frame.size.y / 2) {
-      if (world->keyswindata->select < (world->keyswindata->max - (win->frame.size.y / 2)))
-        offset = world->keyswindata->select - (win->frame.size.y / 2);
-      else
-        offset = world->keyswindata->max - win->frame.size.y + 1; } }
+  uint16_t offset, y, x;
+  offset = center_offset (world->keyswindata->select, world->keyswindata->max, win->frame.size.y - 1);
   uint8_t keydescwidth = 9 + 1; // max length assured by get_keyname() + \0
   char * keydesc = malloc(keydescwidth), * keyname;
   attr_t attri;
