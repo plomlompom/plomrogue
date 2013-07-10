@@ -1,7 +1,7 @@
 #include "map.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include "roguelike.h"
+#include "misc.h"
 #include "objects_on_map.h"
 
 struct Map init_map () {

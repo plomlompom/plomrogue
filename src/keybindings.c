@@ -4,7 +4,8 @@
 #include <ncurses.h>
 #include <string.h>
 #include "windows.h"
-#include "roguelike.h"
+#include "misc.h"
+#include "main.h"
 
 void init_keybindings(struct World * world) {
 // Initialize keybindings from file "keybindings".

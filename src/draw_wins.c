@@ -4,10 +4,11 @@
 #include <string.h>
 #include <ncurses.h>
 #include "windows.h"
-#include "roguelike.h"
+#include "misc.h"
 #include "keybindings.h"
 #include "objects_on_map.h"
 #include "map.h"
+#include "main.h"
 
 static void draw_map_objects (void *, struct Map *, struct Win *);
 
