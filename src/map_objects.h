@@ -1,5 +1,5 @@
-#ifndef ACTORS_H
-#define ACTORS_H
+#ifndef MAP_OBJECTS_H
+#define MAP_OBJECTS_H
 
 #include <stdio.h>
 #include "yx_uint16.h"

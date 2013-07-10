@@ -1,5 +1,5 @@
-#ifndef ROGUELIKE_H
-#define ROGUELIKE_H
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <stdint.h>
 
