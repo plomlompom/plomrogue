@@ -30,7 +30,7 @@ extern uint16_t rrand(char, uint32_t);
 extern void update_log (struct World *, char *);
 
 extern struct Map init_map ();
-extern void map_scroll (struct Map *, char);
+extern void map_scroll (struct Map *, char, struct yx_uint16);
 
 extern void turn_over (struct World *, char);
 extern void save_game(struct World *);

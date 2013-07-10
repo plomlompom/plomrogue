@@ -71,12 +71,16 @@ struct Map init_map () {
       map.cells[y * map.size.x + x] = '.'; } }
   return map; }
 
-void map_scroll (struct Map * map, char dir) {
+void map_scroll (struct Map * map, char dir, struct yx_uint16 win_size) {
 // Scroll map into direction dir if possible by changing the offset.
-  if      (NORTH == dir && map->offset.y > 0) map->offset.y--;
-  else if (SOUTH == dir)                      map->offset.y++;
-  else if (WEST  == dir && map->offset.x > 0) map->offset.x--;
-  else if (EAST  == dir)                      map->offset.x++; }
+  if      (NORTH == dir && map->offset.y > 0)
+    map->offset.y--;
+  else if (WEST  == dir && map->offset.x > 0)
+    map->offset.x--;
+  else if (SOUTH == dir && map->offset.y + win_size.y < map->size.y)
+    map->offset.y++;
+  else if (EAST  == dir && map->offset.x + win_size.x < map->size.x)
+    map->offset.x++; }
 
 void turn_over (struct World * world, char action) {
 // Record action in game record file, increment turn and move enemy.
@@ -167,13 +171,13 @@ unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta
   else if (key == get_action_key(world->keybindings, "keys mod"))
     keyswin_mod_key (world, win_meta);
   else if (key == get_action_key(world->keybindings, "map up"))
-    map_scroll (world->map, NORTH);
+    map_scroll (world->map, NORTH, win_map->frame.size);
   else if (key == get_action_key(world->keybindings, "map down"))
-    map_scroll (world->map, SOUTH);
+    map_scroll (world->map, SOUTH, win_map->frame.size);
   else if (key == get_action_key(world->keybindings, "map right"))
-    map_scroll (world->map, EAST);
+    map_scroll (world->map, EAST, win_map->frame.size);
   else if (key == get_action_key(world->keybindings, "map left"))
-    map_scroll (world->map, WEST);
+    map_scroll (world->map, WEST, win_map->frame.size);
   return 0; }
 
 int main (int argc, char *argv[]) {
