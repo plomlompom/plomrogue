@@ -8,6 +8,8 @@ struct Win;
 struct KeyBinding;
 struct KeysWinData;
 struct Map;
+struct ItemDef;
+struct MonsterDef;
 
 struct World {
   char interactive;
@@ -17,7 +19,9 @@ struct World {
   uint32_t turn;
   char * log;
   struct Map * map;
+  struct ItemDef * item_def;
   struct Item * item;
+  struct MonsterDef * monster_def;
   struct Monster * monster;
   struct Player * player; };
 

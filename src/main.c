@@ -37,6 +37,34 @@ int main (int argc, char *argv[]) {
   world.player = &player;
   world.monster = 0;
   world.item = 0;
+  struct MonsterDef monster_def_A;
+  monster_def_A.map_obj_def.id = 1;
+  monster_def_A.map_obj_def.mapchar = 'a';
+  monster_def_A.map_obj_def.desc = "ANT";
+  monster_def_A.hitpoints_start = 1;
+  struct MonsterDef monster_def_B;
+  monster_def_B.map_obj_def.id = 2;
+  monster_def_B.map_obj_def.mapchar = 'z';
+  monster_def_B.map_obj_def.desc = "ZOMBIE";
+  monster_def_B.hitpoints_start = 3;
+  struct MonsterDef monster_def_C;
+  monster_def_C.map_obj_def.id = 3;
+  monster_def_C.map_obj_def.mapchar = 'S';
+  monster_def_C.map_obj_def.desc = "SHOGGOTH";
+  monster_def_C.hitpoints_start = 9;
+  world.monster_def = &monster_def_A;
+  monster_def_A.map_obj_def.next = (struct MapObjDef *) &monster_def_B;
+  monster_def_B.map_obj_def.next = (struct MapObjDef *) &monster_def_C;
+  monster_def_C.map_obj_def.next = NULL;
+  struct ItemDef item_def_A;
+  item_def_A.map_obj_def.id = 4;
+  item_def_A.map_obj_def.mapchar = '#';
+  struct ItemDef item_def_B;
+  item_def_B.map_obj_def.id = 5;
+  item_def_B.map_obj_def.mapchar = '%';
+  world.item_def = &item_def_A;
+  item_def_A.map_obj_def.next = (struct MapObjDef *) &item_def_B;
+  item_def_B.map_obj_def.next = NULL;
 
   // For interactive mode, try to load world state from savefile.
   FILE * file;
@@ -71,10 +99,15 @@ int main (int argc, char *argv[]) {
   world.map = &map;
   if (1 == world.turn) {
     player.pos = find_passable_pos(&map);
-    unsigned char n_monsters = rrand(0, 0) % 16;
-    unsigned char n_items    = rrand(0, 0) % 48;
-    build_map_objects (&world.monster, n_monsters, sizeof(struct Monster), build_map_objects_monsterdata, &map);
-    build_map_objects (&world.item,    n_items,    sizeof(struct Item),    build_map_objects_itemdata,    &map); }
+    void * foo = build_map_objects (&world, &world.monster, 1, 1 + rrand(0,0) % 27, sizeof(struct Monster),
+                                    build_map_objects_monsterdata);
+    foo = build_map_objects (&world, foo, 2, 1 + rrand(0,0) % 9, sizeof(struct Monster),
+                             build_map_objects_monsterdata);
+    build_map_objects (&world, foo, 3, 1 + rrand(0,0) % 3, sizeof(struct Monster),
+                       build_map_objects_monsterdata);
+    foo = build_map_objects (&world, &world.item, 4, 1 + rrand(0,0) % 3, sizeof(struct Item),
+                             build_map_objects_itemdata);
+    build_map_objects (&world, foo, 5, 1 + rrand(0,0) % 3, sizeof(struct Item), build_map_objects_itemdata); }
 
   // Initialize window system and windows.
   WINDOW * screen = initscr();

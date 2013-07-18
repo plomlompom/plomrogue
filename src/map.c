@@ -48,4 +48,3 @@ void map_center_player (struct Map * map, struct Player * player, struct yx_uint
 // Center map on player.
   map->offset.y = center_offset (player->pos.y, map->size.y, frame_size.y);
   map->offset.x = center_offset (player->pos.x, map->size.x, frame_size.x); }
-

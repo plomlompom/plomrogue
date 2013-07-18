@@ -59,7 +59,7 @@ extern void turn_over (struct World * world, char action) {
   world->turn++;
   rrand(1, world->seed * world->turn);
   struct Monster * monster;
-  for (monster = world->monster; monster != 0; monster = monster->cmo.next)
+  for (monster = world->monster; monster != 0; monster = monster->map_obj.next)
     move_monster(world, monster); }
 
 extern void save_game(struct World * world) {

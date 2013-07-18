@@ -10,7 +10,7 @@
 #include "map.h"
 #include "main.h"
 
-static void draw_map_objects (void *, struct Map *, struct Win *);
+static void draw_map_objects (struct World *, struct MapObj *, struct Map *, struct Win *);
 
 extern void draw_with_linebreaks (struct Win * win, char * text, uint16_t start_y) {
 // Write text into window content space. Start on row start_y. Fill unused rows with whitespace.
@@ -74,13 +74,17 @@ extern void draw_log_win (struct Win * win) {
   struct World * world = (struct World *) win->data;
   draw_text_from_bottom(win, world->log); }
 
-static void draw_map_objects (void * start, struct Map * map, struct Win * win) {
+static void draw_map_objects (struct World * world, struct MapObj * start, struct Map * map, struct Win * win) {
 // Draw onto map in win the objects in the chain at start.
-  struct ChainMapObject * cmo;
-  for (cmo = start; cmo != 0; cmo = cmo->next)
-    if (   cmo->pos.y >= map->offset.y && cmo->pos.y < map->offset.y + win->frame.size.y
-        && cmo->pos.x >= map->offset.x && cmo->pos.x < map->offset.x + win->frame.size.x)
-      mvwaddch(win->frame.curses_win, cmo->pos.y - map->offset.y, cmo->pos.x - map->offset.x, cmo->name); }
+  struct MapObj * o;
+  struct MapObjDef * d;
+  char c;
+  for (o = start; o != 0; o = o->next)
+    if (   o->pos.y >= map->offset.y && o->pos.y < map->offset.y + win->frame.size.y
+        && o->pos.x >= map->offset.x && o->pos.x < map->offset.x + win->frame.size.x) {
+      d = get_map_obj_def (world, o->type);
+      c = d->mapchar;
+      mvwaddch(win->frame.curses_win, o->pos.y - map->offset.y, o->pos.x - map->offset.x, c); } }
 
 extern void draw_map_win (struct Win * win) {
 // Draw map determined by map (from win->data) and various actors/objects into window. Respect scroll offset.
@@ -97,8 +101,8 @@ extern void draw_map_win (struct Win * win) {
       if (y < height_map_av && x < width_map_av) {
           mvwaddch(win->frame.curses_win, y, x, cells[z]);
         z++; } } }
-  draw_map_objects (world->item, map, win);
-  draw_map_objects (world->monster, map, win);
+  draw_map_objects (world, world->item, map, win);
+  draw_map_objects (world, world->monster, map, win);
   if (   player->pos.y >= map->offset.y && player->pos.y < map->offset.y + win->frame.size.y
       && player->pos.x >= map->offset.x && player->pos.x < map->offset.x + win->frame.size.x)
     mvwaddch(win->frame.curses_win, player->pos.y - map->offset.y, player->pos.x - map->offset.x, '@'); }
