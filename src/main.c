@@ -8,6 +8,7 @@
 #include "keybindings.h"
 #include "readwrite.h"
 #include "map_objects.h"
+#include "map_object_actions.h"
 #include "map.h"
 #include "misc.h"
 

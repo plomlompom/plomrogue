@@ -5,8 +5,10 @@
 #include "keybindings.h"
 #include "readwrite.h"
 #include "map_objects.h"
+#include "map_object_actions.h"
 #include "map.h"
 #include "main.h"
+#include "yx_uint16.h"
 
 extern uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
@@ -97,6 +99,14 @@ extern void growshrink_active_window (struct WinMeta * win_meta, char change) {
     else if (change == '_') size.x--;
     else if (change == '*') size.x++;
     resize_active_win (win_meta, size); } }
+
+extern struct yx_uint16 find_passable_pos (struct Map * map) {
+// Return a random passable position on map.
+  struct yx_uint16 pos;
+  for (pos.y = pos.x = 0; 0 == is_passable(map, pos);) {
+      pos.y = rrand(0, 0) % map->size.y;
+      pos.x = rrand(0, 0) % map->size.x; }
+  return pos; }
 
 extern unsigned char meta_keys(int key, struct World * world, struct WinMeta * win_meta,
                                struct Win * win_keys, struct Win * win_map, struct Win * win_info,

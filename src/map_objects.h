@@ -5,7 +5,6 @@
 #include "yx_uint16.h"
 
 struct World;
-struct Map;
 
 struct Player {
   struct yx_uint16 pos;
@@ -46,11 +45,5 @@ extern void build_map_objects_itemdata (struct MapObjDef *, void *);
 extern void * build_map_objects (struct World *, void *, char, unsigned char, size_t,
                                  void (*) (struct MapObjDef *, void *));
 extern struct MapObjDef * get_map_obj_def (struct World *, char);
-
-extern struct yx_uint16 find_passable_pos (struct Map *);
-extern char is_passable (struct Map *, struct yx_uint16);
-extern void move_monster (struct World *, struct Monster *);
-extern void move_player (struct World *, char);
-extern void player_wait(struct World *);
 
 #endif

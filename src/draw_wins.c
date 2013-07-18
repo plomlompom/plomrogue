@@ -101,8 +101,8 @@ extern void draw_map_win (struct Win * win) {
       if (y < height_map_av && x < width_map_av) {
           mvwaddch(win->frame.curses_win, y, x, cells[z]);
         z++; } } }
-  draw_map_objects (world, world->item, map, win);
-  draw_map_objects (world, world->monster, map, win);
+  draw_map_objects (world, (struct MapObj *) world->item, map, win);
+  draw_map_objects (world, (struct MapObj *) world->monster, map, win);
   if (   player->pos.y >= map->offset.y && player->pos.y < map->offset.y + win->frame.size.y
       && player->pos.x >= map->offset.x && player->pos.x < map->offset.x + win->frame.size.x)
     mvwaddch(win->frame.curses_win, player->pos.y - map->offset.y, player->pos.x - map->offset.x, '@'); }
