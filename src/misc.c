@@ -93,7 +93,7 @@ extern void save_game(struct World * world) {
   write_uint16_bigendian(world->player->pos.x + 1, file);
   fputc(world->player->hitpoints, file);
   write_map_objects (world->monster, file, write_map_objects_monsterdata);
-  write_map_objects (world->item, file, readwrite_map_objects_dummy);
+  write_map_objects (world->item, file, NULL);
   fclose(file); }
 
 extern void toggle_window (struct WinMeta * win_meta, struct Win * win) {

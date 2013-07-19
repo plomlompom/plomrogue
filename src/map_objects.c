@@ -49,10 +49,6 @@ extern void init_map_object_defs (struct World * world, char * filename) {
   free(defline);
   fclose(file); };
 
-extern void readwrite_map_objects_dummy (void * dummy, FILE * file) {
-// Dummy function for calls of (write|read)_map_objects on map objects without specific attributes.
-  ; }
-
 extern void write_map_objects_monsterdata (void * start, FILE * file) {
 // Write to file data specific to map objects of type monster.
   struct Monster * m = (struct Monster *) start;
@@ -65,7 +61,8 @@ extern void write_map_objects (void * start, FILE * file, void (* w_typedata) (v
     write_uint16_bigendian(map_obj->pos.y + 1, file);
     write_uint16_bigendian(map_obj->pos.x + 1, file);
     fputc(map_obj->type, file);
-    w_typedata (map_obj, file); }
+    if (w_typedata)
+      w_typedata (map_obj, file); }
   write_uint16_bigendian(0, file); }
 
 extern void read_map_objects_monsterdata (void * start, FILE * file) {
@@ -98,7 +95,8 @@ extern void read_map_objects (void * start, FILE * file, size_t size, void (* r_
     map_obj->pos.y = test - 1;
     map_obj->pos.x = read_uint16_bigendian(file) - 1;
     map_obj->type = fgetc(file);
-    r_typedata (map_obj, file); }
+    if (r_typedata)
+      r_typedata (map_obj, file); }
   if (!first)
     map_obj->next = 0; }
 

@@ -50,7 +50,7 @@ int main (int argc, char *argv[]) {
     player.pos.x = read_uint16_bigendian(file) - 1;
     player.hitpoints = fgetc(file);
     read_map_objects (&world.monster, file, sizeof(struct Monster), read_map_objects_monsterdata);
-    read_map_objects (&world.item,    file, sizeof(struct Item),    readwrite_map_objects_dummy);
+    read_map_objects (&world.item,    file, sizeof(struct Item),    NULL);
     fclose(file); }
 
   // For non-interactive mode, try to load world state from record file.
