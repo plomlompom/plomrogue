@@ -45,11 +45,11 @@ x       scroll map down
 a       scroll map left
 d       scroll map right
 s       center map on player
-t       move player up
-b       move player down
-f       move player left
-h       move player rifght
-.       next turn / wait
+W       move player up
+X       move player down
+A       move player left
+D       move player right
+S       next turn / wait
 
 S       save current keybindings
 UP      navigate selection upwards in keybinding editing window

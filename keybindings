@@ -1,5 +1,5 @@
 81 quit
-83 save keys
+75 save keys
 260 scroll pad left
 261 scroll pad right
 258 keys nav down
@@ -22,8 +22,8 @@
 97 map left
 100 map right
 115 map center player
-116 player up
-98 player down
-102 player left
-104 player right
-46 wait / next turn
+87 player up
+88 player down
+65 player left
+68 player right
+83 wait / next turn
