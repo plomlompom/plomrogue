@@ -35,6 +35,7 @@ struct MonsterDef {
   struct MapObjDef map_obj_def;
   unsigned char hitpoints_start; };
 
+extern void init_map_object_defs (struct World *, char *);
 extern void readwrite_map_objects_dummy (void *, FILE *);
 extern void write_map_objects_monsterdata (void *, FILE *);
 extern void write_map_objects (void * start, FILE *, void (*) (void *, FILE *) );

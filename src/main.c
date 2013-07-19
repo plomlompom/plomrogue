@@ -3,8 +3,6 @@
 #include <ncurses.h>
 #include <time.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
 #include "windows.h"
 #include "draw_wins.h"
 #include "keybindings.h"
@@ -40,46 +38,10 @@ int main (int argc, char *argv[]) {
   world.player = &player;
   world.monster = 0;
   world.item = 0;
-  world.item_def = 0;
-  world.monster_def = 0;
-  FILE * file = fopen("defs", "r");
-  uint16_t linemax;
-  textfile_sizes (file, &linemax, NULL);
-  char                  m_or_i;
-  struct MapObjDef      mod;
-  struct ItemDef        id;
-  struct MonsterDef     md;
-  struct ItemDef    * * p_p_id  = &world.item_def;
-  struct MonsterDef * * p_p_md  = &world.monster_def;
-  char *                defline = malloc(linemax);
-  char *                line_p;
-  while (fgets (defline, linemax, file)) {
-    mod.next    = 0;
-    mod.id      = atoi(defline);
-    line_p      = strchr(defline, ' ') + 1;
-    m_or_i      = * line_p;
-    mod.mapchar = * (line_p + 2);
-    if ('i' == m_or_i)
-      line_p = line_p + 5;
-    else {
-      md.hitpoints_start = atoi   (line_p + 4);
-      line_p             = strchr (line_p + 4, ' ') + 1; }
-    mod.desc = calloc (strlen (line_p), sizeof(char));
-    memcpy (mod.desc, line_p, strlen(line_p) - 1);
-    if ('i' == m_or_i) {
-      id.map_obj_def = mod;
-      * p_p_id       = malloc (sizeof (struct ItemDef));
-      * * p_p_id     = id;
-      p_p_id         = (struct ItemDef    * *) * p_p_id; }
-    else {
-      md.map_obj_def = mod;
-      * p_p_md       = malloc (sizeof (struct MonsterDef));
-      * * p_p_md     = md;
-      p_p_md         = (struct MonsterDef * *) * p_p_md; } }
-  free(defline);
-  fclose(file);
+  init_map_object_defs(&world, "defs");
 
   // For interactive mode, try to load world state from savefile.
+  FILE * file;
   if (1 == world.interactive && 0 == access("savefile", F_OK)) {
     file = fopen("savefile", "r");
     world.seed = read_uint32_bigendian(file);

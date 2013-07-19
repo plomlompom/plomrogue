@@ -1,11 +1,53 @@
 #include "map_objects.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "readwrite.h"
 #include "misc.h"
 #include "main.h"
 
 static struct MapObj * get_next_map_obj (void *, char *, size_t, struct MapObj *);
+
+extern void init_map_object_defs (struct World * world, char * filename) {
+// Initialize map object definitions from file at path "filename".
+  world->item_def = 0;
+  world->monster_def = 0;
+  FILE *                file    = fopen(filename, "r");
+  uint16_t              linemax;
+  textfile_sizes (file, &linemax, NULL);
+  struct MapObjDef      mod;
+  struct ItemDef        id;
+  struct MonsterDef     md;
+  struct ItemDef    * * p_p_id  = &world->item_def;
+  struct MonsterDef * * p_p_md  = &world->monster_def;
+  char *                defline = malloc(linemax);
+  char *                line_p;
+  char                  m_or_i;
+  while (fgets (defline, linemax, file)) {
+    mod.next    = 0;
+    mod.id      = atoi(defline);
+    line_p      = strchr(defline, ' ') + 1;
+    m_or_i      = * line_p;
+    mod.mapchar = * (line_p + 2);
+    if ('i' == m_or_i)
+      line_p = line_p + 5;
+    else {
+      md.hitpoints_start = atoi   (line_p + 4);
+      line_p             = strchr (line_p + 4, ' ') + 1; }
+    mod.desc = calloc (strlen (line_p), sizeof(char));
+    memcpy (mod.desc, line_p, strlen(line_p) - 1);
+    if ('i' == m_or_i) {
+      id.map_obj_def = mod;
+      * p_p_id       = malloc (sizeof (struct ItemDef));
+      * * p_p_id     = id;
+      p_p_id         = (struct ItemDef    * *) * p_p_id; }
+    else {
+      md.map_obj_def = mod;
+      * p_p_md       = malloc (sizeof (struct MonsterDef));
+      * * p_p_md     = md;
+      p_p_md         = (struct MonsterDef * *) * p_p_md; } }
+  free(defline);
+  fclose(file); };
 
 extern void readwrite_map_objects_dummy (void * dummy, FILE * file) {
 // Dummy function for calls of (write|read)_map_objects on map objects without specific attributes.

@@ -2,8 +2,8 @@
 #define MISC_H
 
 #include <stdint.h>
-#include "yx_uint16.h"
 #include <stdio.h>
+#include "yx_uint16.h"
 
 struct World;
 struct WinMeta;
