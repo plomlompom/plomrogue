@@ -3,12 +3,14 @@
 
 #include <stdint.h>
 #include "yx_uint16.h"
+#include <stdio.h>
 
 struct World;
 struct WinMeta;
 struct Win;
 struct Map;
 
+extern void textfile_sizes (FILE *, uint16_t *, uint16_t *);
 extern uint16_t rrand(char, uint32_t);
 extern void update_log (struct World *, char *);
 extern uint16_t center_offset (uint16_t, uint16_t, uint16_t);

@@ -10,6 +10,26 @@
 #include "main.h"
 #include "yx_uint16.h"
 
+extern void textfile_sizes (FILE * file, uint16_t * linemax_p, uint16_t * n_lines_p) {
+// Learn largest line length (linemax_p) and (n_lines_p if not set to NULL) number of lines.
+  uint16_t n_lines = 0;
+  int c = 0;
+  uint16_t linemax = 0;
+  uint16_t c_count = 0;
+  while (EOF != c) {
+    c_count++;
+    c = getc(file);
+    if ('\n' == c) {
+      if (c_count > linemax)
+        linemax = c_count + 1;
+      c_count = 0;
+      if (n_lines_p)
+        n_lines++; } }
+  fseek(file, 0, SEEK_SET);
+  * linemax_p = linemax;
+  if (n_lines_p)
+    * n_lines_p = n_lines; }
+
 extern uint16_t rrand(char use_seed, uint32_t new_seed) {
 // Pseudo-random number generator (LGC algorithm). Use instead of rand() to ensure portable predictability.
   static uint32_t seed;

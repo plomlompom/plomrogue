@@ -10,20 +10,9 @@
 void init_keybindings(struct World * world) {
 // Initialize keybindings from file "keybindings".
   FILE * file = fopen("keybindings", "r");
-  uint16_t lines = 0;
-  int c = 0;
-  uint16_t linemax = 0;
-  uint16_t c_count = 0;
-  while (EOF != c) {
-    c_count++;
-    c = getc(file);
-    if ('\n' == c) {
-      if (c_count > linemax)
-        linemax = c_count + 1;
-      c_count = 0;
-      lines++; } }
+  uint16_t lines, linemax;
+  textfile_sizes (file, &linemax, &lines);
   struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
-  fseek(file, 0, SEEK_SET);
   char * command = malloc(linemax);
   uint16_t commcount = 0;
   char * cmdptr;
