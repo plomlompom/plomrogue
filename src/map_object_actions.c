@@ -43,7 +43,7 @@ extern void move_monster (struct World * world, struct Monster * monster) {
   if (is_passable(world->map, t))
     monster->map_obj.pos = t; }
 
-extern void move_player (struct World * world, char d) {
+extern void move_player (struct World * world, enum dir d) {
 // Move player in direction d, update log and turn over to the enemy.
   struct yx_uint16 t = mv_yx_in_dir (d, world->player->pos);
   struct Monster * monster;

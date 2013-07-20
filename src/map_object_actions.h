@@ -9,7 +9,7 @@ struct Monster;
 
 extern char is_passable (struct Map *, struct yx_uint16);
 extern void move_monster (struct World *, struct Monster *);
-extern void move_player (struct World *, char);
+extern void move_player (struct World *, enum dir);
 extern void player_wait(struct World *);
 
 #endif
