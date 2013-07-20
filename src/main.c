@@ -171,4 +171,4 @@ int main (int argc, char *argv[]) {
   free(world.keyswindata);
   free(world.log);
   endwin();
-  return 0; }
+  exit (EXIT_SUCCESS); }
