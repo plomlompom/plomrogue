@@ -10,6 +10,18 @@
 #include "main.h"
 #include "yx_uint16.h"
 
+extern void exit_game(struct World * world, struct Map * map) {
+// Clean up and exit.
+  endwin();
+  free(map->cells);
+  uint16_t key;
+  for (key = 0; key <= world->keyswindata->max; key++)
+    free(world->keybindings[key].name);
+  free(world->keybindings);
+  free(world->keyswindata);
+  free(world->log);
+  exit (EXIT_SUCCESS); }
+
 extern void textfile_sizes (FILE * file, uint16_t * linemax_p, uint16_t * n_lines_p) {
 // Learn largest line length (linemax_p) and (n_lines_p if not set to NULL) number of lines.
   uint16_t n_lines = 0;

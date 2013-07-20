@@ -135,7 +135,7 @@ int main (int argc, char *argv[]) {
       else
         quit_called = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
         if (1 == quit_called)
-          break; } }
+          exit_game(&world, &map); } }
 
   // Interactive mode.
   else {
@@ -161,14 +161,4 @@ int main (int argc, char *argv[]) {
       else
         quit_called = meta_keys(key, &world, &win_meta, &win_keys, &win_map, &win_info, &win_log);
         if (1 == quit_called)
-          break; } }
-
-  // Clean up and exit.
-  free(map.cells);
-  for (key = 0; key <= world.keyswindata->max; key++)
-    free(world.keybindings[key].name);
-  free(world.keybindings);
-  free(world.keyswindata);
-  free(world.log);
-  endwin();
-  exit (EXIT_SUCCESS); }
+          exit_game(&world, &map); } } }

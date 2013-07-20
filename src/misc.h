@@ -10,6 +10,7 @@ struct WinMeta;
 struct Win;
 struct Map;
 
+extern void exit_game(struct World *, struct Map *);
 extern void textfile_sizes (FILE *, uint16_t *, uint16_t *);
 extern uint16_t rrand(char, uint32_t);
 extern void update_log (struct World *, char *);
