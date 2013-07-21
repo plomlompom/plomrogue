@@ -30,7 +30,7 @@ extern void write_uint16_bigendian( uint16_t x, FILE * file )
 
 extern void write_uint32_bigendian( uint32_t x, FILE * file )
 {
-    fputc( ( x >> 24 ) & 0xFF, file);
+    fputc(   x >> 24,          file);
     fputc( ( x >> 16 ) & 0xFF, file);
     fputc( ( x >>  8 ) & 0xFF, file);
     fputc(   x         & 0xFF, file);
