@@ -7,18 +7,18 @@
 extern uint16_t read_uint16_bigendian( FILE * file )
 {
     uint16_t x;
-    x =     (uint16_t) fgetc(file) << 8 ;
-    x = x + (uint16_t) fgetc(file)      ;
+    x =     (uint16_t) fgetc(file) << 8;
+    x = x + (uint16_t) fgetc(file);
     return x;
 }
 
 extern uint32_t read_uint32_bigendian( FILE * file )
 {
     uint32_t x;
-    x =       (uint32_t) fgetc(file) << 24   ;
-    x = x + ( (uint32_t) fgetc(file) << 16 ) ;
-    x = x + ( (uint32_t) fgetc(file) <<  8 ) ;
-    x = x +   (uint32_t) fgetc(file)         ;
+    x =       (uint32_t) fgetc(file) << 24;
+    x = x + ( (uint32_t) fgetc(file) << 16 );
+    x = x + ( (uint32_t) fgetc(file) <<  8 );
+    x = x +   (uint32_t) fgetc(file);
     return x;
 }
 
