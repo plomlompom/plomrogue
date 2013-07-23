@@ -1,6 +1,10 @@
 /* yx_uint16.c */
 
-#include "yx_uint16.h"
+
+
+#include "yx_uint16.h" /* for uint16_t */
+
+
 
 extern char yx_uint16_cmp(struct yx_uint16 a, struct yx_uint16 b)
 {
@@ -9,6 +13,8 @@ extern char yx_uint16_cmp(struct yx_uint16 a, struct yx_uint16 b)
     else
         return 0;
 }
+
+
 
 extern struct yx_uint16 mv_yx_in_dir(enum dir d, struct yx_uint16 yx)
 {

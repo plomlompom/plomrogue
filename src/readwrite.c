@@ -1,8 +1,10 @@
 /* readwrite.c */
 
 #include "readwrite.h"
-#include <stdio.h>
-#include <stdint.h>
+#include <stdio.h> /* for FILE typedef*/
+#include <stdint.h> /* for uint16_t, uint32_t */
+
+
 
 extern uint16_t read_uint16_bigendian(FILE * file)
 {
@@ -11,6 +13,8 @@ extern uint16_t read_uint16_bigendian(FILE * file)
     x = x + (uint16_t) fgetc(file);
     return x;
 }
+
+
 
 extern uint32_t read_uint32_bigendian(FILE * file)
 {
@@ -22,11 +26,15 @@ extern uint32_t read_uint32_bigendian(FILE * file)
     return x;
 }
 
+
+
 extern void write_uint16_bigendian(uint16_t x, FILE * file)
 {
     fputc( x >> 8,   file );
     fputc( x & 0xFF, file );
 }
+
+
 
 extern void write_uint32_bigendian(uint32_t x, FILE * file)
 {

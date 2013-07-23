@@ -1,13 +1,17 @@
-/*  yx_uint16.h
+/* yx_uint16.h
  *
- *  Structs and routines for coordinates and movement in 2-dimensional space
- *  (such as the ncurses screen and game maps).
+ * Structs and routines for coordinates and movement in 2-dimensional space
+ * (such as the ncurses screen and game maps).
  */
 
 #ifndef YX_UINT16_H
 #define YX_UINT16_H
 
-#include <stdint.h>
+
+
+#include <stdint.h> /* for uint16_t */
+
+
 
 /* Coordinates for maps of max. 65536x65536 cells. */
 struct yx_uint16
@@ -16,14 +20,13 @@ struct yx_uint16
     uint16_t x;
 };
 
-/* This encodes directions. */
-
+/* Directions available for movement. */
 enum dir
 {
     NORTH = 1,
-    EAST  = 2,
-    SOUTH = 3,
-    WEST  = 4
+    EAST,
+    SOUTH,
+    WEST
 };
 
 /* Return 1 if two yx_uint16 coordinates a and b are equal, else 0. */

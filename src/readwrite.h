@@ -1,14 +1,18 @@
-/*  readwrite.h:
+/* readwrite.h:
  *
- *  Routines for reading/writing multibyte data from/to files. They ensure a
- *  defined endianness.
+ * Routines for reading/writing multibyte data from/to files. They ensure a
+ * defined endianness.
  */
 
 #ifndef READWRITE_H
 #define READWRITE_H
 
-#include <stdio.h>
-#include <stdint.h>
+
+
+#include <stdio.h> /* for FILE typedef */
+#include <stdint.h> /* for uint16_t, uint32_t */
+
+
 
 extern uint16_t read_uint16_bigendian(FILE * file);
 extern uint32_t read_uint32_bigendian(FILE * file);
