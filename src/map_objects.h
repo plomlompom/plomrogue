@@ -16,7 +16,6 @@ struct World;
 
 
 /* Player is non-standard: single and of a hard-coded type. */
-
 struct Player
 {
     struct yx_uint16 pos;
@@ -118,5 +117,7 @@ extern void read_map_objects_monsterdata( void * start, FILE * file);
 
 /* Get pointer to the map object definition of identifier "def_id". */
 extern struct MapObjDef * get_map_obj_def(struct World * world, char def_id);
+
+
 
 #endif
