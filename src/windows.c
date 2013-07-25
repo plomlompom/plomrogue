@@ -226,8 +226,8 @@ static void draw_win_borders(struct Win * w, char active)
     uint16_t title_offset = 0;
     if (w->frame.size.x > strlen(w->title) + 2)
     {
-      title_offset = (w->frame.size.x - (strlen(w->title) + 2)) / 2;                  // + 2 is for decoration
-    }
+      title_offset = (w->frame.size.x - (strlen(w->title) + 2)) / 2; /* + 2 */
+    }                                          /* is for padding/decoration */
     uint16_t length_visible = strnlen(w->title, w->frame.size.x - 2);
     char title[length_visible + 3];
     char decoration = ' ';
