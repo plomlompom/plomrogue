@@ -111,8 +111,8 @@ extern void write_map_objects(void * start, FILE * file,
 
 
 
-extern void read_map_objects (void * start, FILE * file, size_t size,
-                              void (* r_typedata) (void *, FILE *) )
+extern void read_map_objects(void * start, FILE * file, size_t size,
+                             void (* r_typedata) (void *, FILE *) )
 {
     struct MapObj * map_obj;
     uint16_t test;
@@ -212,5 +212,5 @@ extern struct MapObjDef * get_map_obj_def (struct World * world, char def_id)
              d->id != def_id && 0 != d->next;
              d = d->next);
     }
-  return d;
+    return d;
 }
