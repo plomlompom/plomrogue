@@ -38,8 +38,8 @@ extern struct Map init_map();
  */
 extern void map_scroll(struct Map * map, enum dir d, struct yx_uint16 win_size);
 
-/* Scroll map to center on the player by changing the scroll offset as far as is
- * possible sans leaving the size of the map window as described by "win_size".
+/* Scroll map to center on the player by changing the scroll offset following
+ * (and constrained by) the window size as described by "win_size".
  */
 extern void map_center_player(struct Map * map, struct Player * player,
                               struct yx_uint16 win_size);
