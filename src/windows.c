@@ -243,6 +243,8 @@ static void draw_win_borders(struct Win * w, char active)
   }
 }
 
+
+
 static void draw_wins_borders(struct Win * w, struct Win * w_active,
                               struct Corners * corners, uint16_t i)
 {
