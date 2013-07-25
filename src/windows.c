@@ -575,7 +575,7 @@ extern void draw_scroll_hint(struct Frame * frame, uint16_t pos, uint32_t dist,
         unit = unit_cols;
     }
     char * scrolldsc = malloc((4 * sizeof(char)) + strlen(more) + strlen(unit)
-                              + 10);  /* 10 = uint32 max strlen */
+                              + 10);                /* 10 = uint32 max strlen */
     sprintf(scrolldsc, " %d %s %s ", dist, more, unit);
 
     /* Decide on offset of the description text inside the scroll hint line. */
