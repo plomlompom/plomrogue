@@ -204,43 +204,43 @@ static void draw_wins (struct Win * w)
 
 static void draw_win_borders(struct Win * w, char active)
 {
-  /* Draw vertical and horizontal border lines. */
-  uint16_t y, x;
-  for (y = w->start.y; y <= w->start.y + w->frame.size.y; y++)
-  {
-    mvwaddch(wgetparent(w->frame.curses_win), y, w->start.x - 1, '|');
-    mvwaddch(wgetparent(w->frame.curses_win),
-             y, w->start.x + w->frame.size.x, '|');
-  }
-  for (x = w->start.x; x <= w->start.x + w->frame.size.x; x++)
-  {
-    mvwaddch(wgetparent(w->frame.curses_win), w->start.y - 1, x, '-');
-    mvwaddch(wgetparent(w->frame.curses_win),
-             w->start.y + w->frame.size.y, x, '-');
-  }
-
-  /* Draw as much as possible of the title into center of top border line. */
-  char min_title_length_visible = 3; /* minimum 1 char + 2 padding/decoration */
-  if (w->frame.size.x >= min_title_length_visible)
-  {
-    uint16_t title_offset = 0;
-    if (w->frame.size.x > strlen(w->title) + 2)
+    /* Draw vertical and horizontal border lines. */
+    uint16_t y, x;
+    for (y = w->start.y; y <= w->start.y + w->frame.size.y; y++)
     {
-      title_offset = (w->frame.size.x - (strlen(w->title) + 2)) / 2; /* + 2 */
-    }                                          /* is for padding/decoration */
-    uint16_t length_visible = strnlen(w->title, w->frame.size.x - 2);
-    char title[length_visible + 3];
-    char decoration = ' ';
-    if (1 == active)
-    {
-      decoration = '$';
+        mvwaddch(wgetparent(w->frame.curses_win), y, w->start.x - 1, '|');
+        mvwaddch(wgetparent(w->frame.curses_win),
+                 y, w->start.x + w->frame.size.x, '|');
     }
-    memcpy(title + 1, w->title, length_visible);
-    title[0] = title[length_visible + 1] = decoration;
-    title[length_visible + 2] = '\0';
-    mvwaddstr(wgetparent(w->frame.curses_win),
-              w->start.y - 1, w->start.x + title_offset, title);
-  }
+    for (x = w->start.x; x <= w->start.x + w->frame.size.x; x++)
+    {
+        mvwaddch(wgetparent(w->frame.curses_win), w->start.y - 1, x, '-');
+        mvwaddch(wgetparent(w->frame.curses_win),
+                 w->start.y + w->frame.size.y, x, '-');
+    }
+
+    /* Draw as much as possible of the title into center of top border line. */
+    char min_title_length_visible = 3;  /* min. 1 char + 2 padding/decoration */
+    if (w->frame.size.x >= min_title_length_visible)
+    {
+        uint16_t title_offset = 0;
+        if (w->frame.size.x > strlen(w->title) + 2)
+        {
+            title_offset = (w->frame.size.x - (strlen(w->title) + 2)) / 2;
+        }                                     /* +2 is for padding/decoration */
+        uint16_t length_visible = strnlen(w->title, w->frame.size.x - 2);
+        char title[length_visible + 3];
+        char decoration = ' ';
+        if (1 == active)
+        {
+            decoration = '$';
+        }
+        memcpy(title + 1, w->title, length_visible);
+        title[0] = title[length_visible + 1] = decoration;
+        title[length_visible + 2] = '\0';
+        mvwaddstr(wgetparent(w->frame.curses_win),
+                  w->start.y - 1, w->start.x + title_offset, title);
+    }
 }
 
 
