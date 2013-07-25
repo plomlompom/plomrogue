@@ -27,8 +27,8 @@ struct Map
  * starting with a sea containing one land cell in the middle and then going
  * into a cycle of repeatedly selecting a random cell on the map and
  * transforming it into a land cell if it is horizontally or vertically neighbor
- * to one. The cycle ends when a land cell is created that is only one cell away
- * from the edge of the map. The map scroll offset is initialized to 0,0.
+ * to one; the cycle ends when a land cell is due to be created right at the
+ * border of the map. The map scroll offset is initialized to 0,0.
  */
 extern struct Map init_map();
 
