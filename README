@@ -5,10 +5,10 @@ plomlompom tries to build his own roguelike. Currently, it doesn't do
 much interesting, apart from managing some ncurses windows in a bizarre
 fashion. You can move around a player and meet a number of different
 enemies. They move randomly and will only accidentally hit you. You have
-5 hitpoints to lose before death, and so has each of them. The map gets
-generated randomly, too. There is only one save file (named "savefile"),
-and it gets overwritten each new turn. To start over with a new world,
-delete it.
+5 hitpoints to lose before death; they have either 1, 3 or 9. The map
+get generated randomly, too. There is only one save file (named
+"savefile"), and it gets overwritten each new turn. To start over with
+a new world, delete it.
 
 Install/run
 -----------
