@@ -1,25 +1,66 @@
+/* keybindings.h
+ *
+ * Retrieval and storage of keybindings.
+ */
+
 #ifndef KEYBINDINGS_H
 #define KEYBINDINGS_H
 
-#include <stdint.h>
 
+
+#include <stdint.h> /* for uint16_t */
 struct World;
 struct WinMeta;
 
-struct KeyBinding {
-  char * name;
-  uint16_t key; };
 
-struct KeysWinData {
-  uint16_t max;
-  char edit;
-  uint16_t select; };
 
-extern void init_keybindings(struct World *);
-extern void save_keybindings(struct World *);
-extern uint16_t get_action_key (struct KeyBinding *, char *);
-extern char * get_keyname(uint16_t);
-extern void keyswin_mod_key (struct World *, struct WinMeta *);
-extern void keyswin_move_selection (struct World *, char);
+/* Individual keybinding. */
+struct KeyBinding
+{
+  char * name;  /* name of functionality bound to keycode */
+  uint16_t key; /* keycode */
+};
+
+
+
+/* Metadata for the keybindings plurality and their editing window. */
+struct KeysWinData
+{
+  uint16_t max;    /* ? */
+  char edit;       /* ? */
+  uint16_t select; /* ? */
+};
+
+
+
+/* Read keybindings data from / write them to the file "keybindings". */
+extern void init_keybindings(struct World * world);
+extern void save_keybindings(struct World * world);
+
+
+
+/* Return keycode matching a key (functionality) name. */
+extern uint16_t get_action_key(struct KeyBinding * keybindings, char * name);
+
+
+
+/* Translate keycode to readable names of max 9 chars where possible. */
+extern char * get_keyname(uint16_t keycode);
+
+
+
+/* Mark selection in keybindings window modifiable, get user input to modify
+ * key. Ensure there are max. three digits in the keycode ASCII representation.
+ */
+extern void keyswin_mod_key(struct World * world, struct WinMeta * win_meta);
+
+
+
+/* Move selection in keybinding window upwards ("dir" = "u") or downwards ("dir"
+ * = "d") within the limits of the keybindings list length.
+ */
+extern void keyswin_move_selection(struct World * world, char dir);
+
+
 
 #endif
