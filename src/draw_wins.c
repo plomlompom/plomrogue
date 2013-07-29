@@ -247,20 +247,20 @@ extern void draw_keys_win(struct Win * win)
 static void draw_map_objects(struct World * world, struct MapObj * start,
                              struct Map * map, struct Win * win)
 {
-  struct MapObj * o;
-  struct MapObjDef * d;
-  char c;
-  for (o = start; o != 0; o = o->next)
-  {
-    if (   o->pos.y >= map->offset.y
-        && o->pos.y < map->offset.y + win->frame.size.y
-        && o->pos.x >= map->offset.x
-        && o->pos.x < map->offset.x + win->frame.size.x)
+    struct MapObj * o;
+    struct MapObjDef * d;
+    char c;
+    for (o = start; o != 0; o = o->next)
     {
-      d = get_map_obj_def (world, o->type);
-      c = d->mapchar;
-      mvwaddch(win->frame.curses_win,
-               o->pos.y - map->offset.y, o->pos.x - map->offset.x, c);
+        if (   o->pos.y >= map->offset.y
+            && o->pos.y < map->offset.y + win->frame.size.y
+            && o->pos.x >= map->offset.x
+            && o->pos.x < map->offset.x + win->frame.size.x)
+        {
+            d = get_map_obj_def (world, o->type);
+            c = d->mapchar;
+            mvwaddch(win->frame.curses_win,
+                     o->pos.y - map->offset.y, o->pos.x - map->offset.x, c);
+        }
     }
-  }
 }
