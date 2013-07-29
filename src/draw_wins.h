@@ -12,15 +12,19 @@
 struct Win;
 
 
-/* Write "text" into window "win". Start on row "start_y". Fill unused rows with
- * whitespace.
+/* Write "text" into window "win" as far as possible. Start on row "start_y".
+ *
+ * TODO: Why is this external?
  */
 extern void draw_with_linebreaks(struct Win * win, char * text,
                                  uint16_t start_y);
 
 
 
-/* Write "text" not starting from the top but from the bottom of "win". */
+/* Write "text" not starting from the top but from the bottom of "win".
+ *
+ * TODO: Why is this external?
+ */
 extern void draw_text_from_bottom(struct Win * win, char * text);
 
 
