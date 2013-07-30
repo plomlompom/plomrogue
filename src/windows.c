@@ -35,9 +35,9 @@ static void draw_wins(struct Win * w);
 
 
 /* draw_win_borderlines() draws the vertical and horizontal borders of window
- * "w" sans corners, and draws the top border line as the windows' title bar
- * (highlighted if the window is described active by "active" being set).
- * draw_wins_borderlines().
+ * "w" sans corners into the virtual screen "pad", and draws the top border
+ * line as the windows' title bar (highlighted if the window is described
+ * active by "active" being set). draw_wins_borderlines().
  *
  * draw_wins_borderlines() calls draw_win_borderlines() recursively on all
  * windows from "w" on. "w_active" is a pointer to the one window that
@@ -46,8 +46,9 @@ static void draw_wins(struct Win * w);
  * Finally, draw_wins_bordercorners draws into "pad" the borders of window "w"
  * and all its successors.
  */
-static void draw_win_borderlines(struct Win * w, char active);
-static void draw_wins_borderlines(struct Win * w, struct Win * w_active);
+static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad);
+static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
+                                  WINDOW * pad);
 static void draw_wins_bordercorners(struct Win * w, WINDOW * pad);
 
 
@@ -180,21 +181,19 @@ static void draw_wins (struct Win * w)
 
 
 
-static void draw_win_borderlines(struct Win * w, char active)
+static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad)
 {
     /* Draw vertical and horizontal border lines. */
     uint16_t y, x;
     for (y = w->start.y; y <= w->start.y + w->frame.size.y; y++)
     {
-        mvwaddch(wgetparent(w->frame.curses_win), y, w->start.x - 1, '|');
-        mvwaddch(wgetparent(w->frame.curses_win),
-                 y, w->start.x + w->frame.size.x, '|');
+        mvwaddch(pad, y, w->start.x - 1,               '|');
+        mvwaddch(pad, y, w->start.x + w->frame.size.x, '|');
     }
     for (x = w->start.x; x <= w->start.x + w->frame.size.x; x++)
     {
-        mvwaddch(wgetparent(w->frame.curses_win), w->start.y - 1, x, '-');
-        mvwaddch(wgetparent(w->frame.curses_win),
-                 w->start.y + w->frame.size.y, x, '-');
+        mvwaddch(pad, w->start.y - 1,               x, '-');
+        mvwaddch(pad, w->start.y + w->frame.size.y, x, '-');
     }
 
     /* Draw as much as possible of the title into center of top border line. */
@@ -216,24 +215,24 @@ static void draw_win_borderlines(struct Win * w, char active)
         memcpy(title + 1, w->title, length_visible);
         title[0] = title[length_visible + 1] = decoration;
         title[length_visible + 2] = '\0';
-        mvwaddstr(wgetparent(w->frame.curses_win),
-                  w->start.y - 1, w->start.x + title_offset, title);
+        mvwaddstr(pad, w->start.y - 1, w->start.x + title_offset, title);
     }
 }
 
 
 
-static void draw_wins_borderlines(struct Win * w, struct Win * w_active)
+static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
+                                  WINDOW * pad)
 {
     char active = 0;
     if (w == w_active)
     {
         active = 1;
     }
-    draw_win_borderlines(w, active);
+    draw_win_borderlines(w, active, pad);
     if (0 != w->next)
     {
-        draw_wins_borderlines (w->next, w_active);
+        draw_wins_borderlines (w->next, w_active, pad);
     }
 }
 
@@ -495,7 +494,8 @@ extern void draw_all_wins(struct WinMeta * wmeta)
 
         /* Draw windows' contents first, then their borders. */
         draw_wins(wmeta->chain_start);
-        draw_wins_borderlines(wmeta->chain_start, wmeta->active);
+        draw_wins_borderlines(wmeta->chain_start, wmeta->active,
+                              wmeta->pad.curses_win);
         draw_wins_bordercorners(wmeta->chain_start, wmeta->pad.curses_win);
 
         /* Draw virtual screen scroll hints. */
