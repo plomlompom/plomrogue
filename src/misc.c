@@ -85,9 +85,8 @@ extern uint16_t rrand(char use_seed, uint32_t new_seed)
     /* Constants as recommended by POSIX.1-2001 (see man page rand(3)). */
     seed = ((seed * 1103515245) + 12345) % 2147483648;
 
-    return (seed / 65536);    /* TODO: Use bit-shifting for ignoring the less */
-}                             /* random least significant 16 bits.            */
-
+    return (seed >> 16);     /* Ignore less random least significant 16 bits. */
+}
 
 
 extern void update_log(struct World * world, char * text)
