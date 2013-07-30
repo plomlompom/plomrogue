@@ -138,10 +138,11 @@ int main(int argc, char *argv[])
     struct Win win_info = init_win(&win_meta, "Info", &world, draw_info_win);
     struct Win win_log = init_win(&win_meta, "Log", &world, draw_log_win);
     win_keys.frame.size.x = 29;
-    win_map.frame.size.x = win_meta.pad.size.x - win_keys.frame.size.x
+    win_map.frame.size.x = win_meta.padframe.size.x - win_keys.frame.size.x
                            - win_log.frame.size.x - 2;
     win_info.frame.size.y = 2;
-    win_log.frame.size.y = win_meta.pad.size.y - (2 + win_info.frame.size.y);
+    win_log.frame.size.y = win_meta.padframe.size.y
+                           - (2 + win_info.frame.size.y);
     toggle_window(&win_meta, &win_keys);
     toggle_window(&win_meta, &win_map);
     toggle_window(&win_meta, &win_info);

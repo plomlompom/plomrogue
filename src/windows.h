@@ -47,8 +47,8 @@
 struct Frame
 {
     WINDOW * curses_win;
-    struct yx_uint16 size;        /* designated size of curses_win */
-};
+    struct yx_uint16 size;  /* the size curses_win fits into; for the virtual */
+};                          /* screen padframe: the terminal screen size      */
 
 struct Win
 {
@@ -71,7 +71,7 @@ struct WinMeta
 {
     WINDOW * screen;          /* terminal screen */
     uint16_t pad_offset;      /* number of cells view is moved to the right */
-    struct Frame pad;         /* virtual screen */
+    struct Frame padframe;    /* virtual screen fitted into terminal screen */
     struct Win * chain_start; /* first Win, whose .prev shall point to 0 */
     struct Win * chain_end;   /* last Win, whose .next shall point to 0 */
     struct Win * active;      /* window highlighted/selected for manipulation */
@@ -79,11 +79,10 @@ struct WinMeta
 
 
 
-/* Create on the terminal "screen" an empty WinMeta whose virtual screen at the
- * beginning is sized just like the terminal screen. Note that emptiness is
- * marked by WinMeta.chain_start=0. Other struct values are also initialized 0.
- *
- * TODO: Why is an *empty* virtual screen's size that of the terminal screen?
+/* Create on the terminal "screen" an empty WinMeta. Note that emptiness is
+ * marked by WinMeta.chain_start=0. Other struct values are also initialized 0,
+ * except for the virtual screen (terminal screen height, width = 1) and its
+ * terminal-sized frame.
  */
 extern struct WinMeta init_win_meta(WINDOW * screen);
 

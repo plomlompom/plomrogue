@@ -68,10 +68,10 @@ static void refit_pad(struct WinMeta * wmeta)
     }
 
     /* Only resize the pad if the rightmost window column has changed. */
-    if (getmaxx(wmeta->pad.curses_win) != lastwincol)
+    if (getmaxx(wmeta->padframe.curses_win) != lastwincol)
     {
-        wresize(wmeta->pad.curses_win,
-                getmaxy(wmeta->pad.curses_win), lastwincol + 2);
+        wresize(wmeta->padframe.curses_win,
+                getmaxy(wmeta->padframe.curses_win), lastwincol + 2);
     }
 }
 
@@ -85,7 +85,7 @@ static void update_wins (struct WinMeta * wmeta, struct Win * w)
     }
     place_win(wmeta, w);
     refit_pad(wmeta);
-    w->frame.curses_win = subpad(wmeta->pad.curses_win,
+    w->frame.curses_win = subpad(wmeta->padframe.curses_win,
                                  w->frame.size.y, w->frame.size.x,
                                  w->start.y, w->start.x);
     if (0 != w->next)
@@ -118,7 +118,7 @@ static void place_win (struct WinMeta * wmeta, struct Win * w)
         uint16_t w_prev_maxy = w->prev->start.y
                                + getmaxy(w->prev->frame.curses_win);
         if (   w->frame.size.x <= w->prev->frame.size.x
-            && w->frame.size.y <  wmeta->pad.size.y - w_prev_maxy)
+            && w->frame.size.y <  wmeta->padframe.size.y - w_prev_maxy)
         {
             w->start.x = w->prev->start.x;
             w->start.y = w_prev_maxy + 1;
@@ -147,7 +147,7 @@ static void place_win (struct WinMeta * wmeta, struct Win * w)
                               + getmaxy(w_upup->frame.curses_win);
                 widthdiff = (w_upup->start.x + w_upup->frame.size.x)
                             - (w_up->start.x + w_up->frame.size.x);
-                if (   w->frame.size.y < wmeta->pad.size.y - w_prev_maxy
+                if (   w->frame.size.y < wmeta->padframe.size.y - w_prev_maxy
                     && w->frame.size.x < widthdiff)
                 {
                     w->start.x = w_up->start.x + w_up->frame.size.x + 1 ;
@@ -256,14 +256,14 @@ static void draw_wins_bordercorners(struct Win * w, WINDOW * pad)
 extern struct WinMeta init_win_meta(WINDOW * screen)
 {
     struct WinMeta wmeta;
-    wmeta.screen         = screen;
-    wmeta.pad.size.y     = getmaxy(screen);
-    wmeta.pad.size.x     = getmaxx(screen);
-    wmeta.chain_start    = 0;
-    wmeta.chain_end      = 0;
-    wmeta.pad_offset     = 0;
-    wmeta.pad.curses_win = newpad(wmeta.pad.size.y, 1);
-    wmeta.active         = 0;
+    wmeta.screen              = screen;
+    wmeta.padframe.size.y     = getmaxy(screen);
+    wmeta.padframe.size.x     = getmaxx(screen);
+    wmeta.chain_start         = 0;
+    wmeta.chain_end           = 0;
+    wmeta.pad_offset          = 0;
+    wmeta.padframe.curses_win = newpad(wmeta.padframe.size.y, 1);
+    wmeta.active              = 0;
     return wmeta;
 }
 
@@ -278,7 +278,7 @@ extern struct Win init_win(struct WinMeta * wmeta, char * title,
     w.frame.curses_win = 0;
     w.title            = title;
     w.frame.size.x     = 20;
-    w.frame.size.y     = wmeta->pad.size.y - 1;
+    w.frame.size.y     = wmeta->padframe.size.y - 1;
     w.data             = data;
     w.draw             = func;
     return w;
@@ -351,7 +351,8 @@ extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset)
 {
     if (new_offset >= 0
         && (new_offset < wmeta->pad_offset
-            || new_offset + wmeta->pad.size.x < getmaxx(wmeta->pad.curses_win)))
+            || new_offset + wmeta->padframe.size.x
+               < getmaxx(wmeta->padframe.curses_win)))
     {
         wmeta->pad_offset = new_offset;
     }
@@ -363,7 +364,7 @@ extern void resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size)
 {
     if (0 != wmeta->active
         && size.x > 0 && size.y > 0
-        && size.y < wmeta->pad.size.y)
+        && size.y < wmeta->padframe.size.y)
     {
         wmeta->active->frame.size = size;
         update_wins(wmeta, wmeta->chain_start);   /* Positioning of successor */
@@ -488,35 +489,36 @@ extern void draw_all_wins(struct WinMeta * wmeta)
     /* Empty everything before filling it a-new. */
     erase();
     wnoutrefresh(wmeta->screen);
-    werase(wmeta->pad.curses_win);
+    werase(wmeta->padframe.curses_win);
     if (wmeta->chain_start)
     {
 
         /* Draw windows' contents first, then their borders. */
         draw_wins(wmeta->chain_start);
         draw_wins_borderlines(wmeta->chain_start, wmeta->active,
-                              wmeta->pad.curses_win);
-        draw_wins_bordercorners(wmeta->chain_start, wmeta->pad.curses_win);
+                              wmeta->padframe.curses_win);
+        draw_wins_bordercorners(wmeta->chain_start, wmeta->padframe.curses_win);
 
         /* Draw virtual screen scroll hints. */
         if (wmeta->pad_offset > 0)
         {
-            draw_scroll_hint(&wmeta->pad,
+            draw_scroll_hint(&wmeta->padframe,
                              wmeta->pad_offset, wmeta->pad_offset + 1, '<');
         }
-        if (wmeta->pad_offset + wmeta->pad.size.x
-            < getmaxx(wmeta->pad.curses_win) - 1)
+        if (wmeta->pad_offset + wmeta->padframe.size.x
+            < getmaxx(wmeta->padframe.curses_win) - 1)
         {
-            draw_scroll_hint(&wmeta->pad,
-                             wmeta->pad_offset + wmeta->pad.size.x - 1,
-                             getmaxx(wmeta->pad.curses_win)
-                             - (wmeta->pad_offset + wmeta->pad.size.x), '>');
+            draw_scroll_hint(&wmeta->padframe,
+                             wmeta->pad_offset + wmeta->padframe.size.x - 1,
+                             getmaxx(wmeta->padframe.curses_win)
+                             - (wmeta->pad_offset + wmeta->padframe.size.x),
+                             '>');
         }
 
         /* Write virtual screen segment to be shown on physical screen into */
         /* ncurses screen buffer. */
-        pnoutrefresh(wmeta->pad.curses_win, 0, wmeta->pad_offset, 0, 0,
-                     wmeta->pad.size.y, wmeta->pad.size.x-1);
+        pnoutrefresh(wmeta->padframe.curses_win, 0, wmeta->pad_offset, 0, 0,
+                     wmeta->padframe.size.y, wmeta->padframe.size.x-1);
     }
 
     /* Only at the end write accumulated changes to the physical screen. */
