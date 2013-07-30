@@ -14,118 +14,16 @@
 
 
 
+/* Write "text" into window "win" as far as possible. Start on row "start_y". */
+static void draw_with_linebreaks(struct Win * win, char * text,
+                                 uint16_t start_y);
+
+/* Write "text" not starting from the top but from the bottom of "win". */
+static void draw_text_from_bottom(struct Win * win, char * text);
+
 /* Draw onto "map" in "win" the objects in the chain at "start". */
 static void draw_map_objects(struct World * world, struct MapObj * start,
                              struct Map * map, struct Win * win);
-
-
-
-extern void draw_with_linebreaks(struct Win * win, char * text,
-                                 uint16_t start_y)
-{
-    uint16_t x, y;
-    char toggle;
-    char fin = 0;
-    int16_t z = -1;
-    for (y = start_y; y < win->frame.size.y; y++)
-    {
-        if (0 == fin)
-        {
-            toggle = 0;
-        }
-        for (x = 0; x < win->frame.size.x; x++)
-        {
-            if (0 == toggle)
-            {
-                z++;
-                if ('\n' == text[z])
-                {
-                    toggle = 1;
-                    continue;
-                }
-                else
-                {
-                    mvwaddch(win->frame.curses_win, y, x, text[z]);
-                }
-                if ('\n' == text[z+1])
-                {
-                    z++;
-                    toggle = 1;
-                }
-                else if (0 == text[z+1])
-                {
-                    toggle = 1;
-                    fin = 1;
-                }
-            }
-        }
-    }
-}
-
-
-
-extern void draw_text_from_bottom (struct Win * win, char * text)
-{
-    /* Determine number of lines text would have in a window of win's width,
-     * but infinite height. Treat \n and \0 as control chars for incrementing
-     * y and stopping the loop. Make sure +they* don't count as cell space.
-     */
-    char toggle = 0;
-    uint16_t x, y, offset;
-    int16_t z = -1;
-    for (y = 0; 0 == toggle; y++)
-    {
-        for (x = 0; x < win->frame.size.x; x++)
-        {
-            z++;
-            if ('\n' == text[z])
-            {
-                break;
-            }
-            if ('\n' == text[z+1])
-            {
-                z++;
-                break;
-            }
-            else if (0 == text[z+1])
-            {
-                toggle = 1;
-                break;
-            }
-        }
-    }
-    z = -1;
-
-    /* Depending on what's bigger, determine start point in window or text. */
-    uint16_t start_y = 0;
-    if (y < win->frame.size.y)
-    {
-        start_y = win->frame.size.y - y;
-    }
-    else if (y > win->frame.size.y)
-    {
-        offset = y - win->frame.size.y;
-        for (y = 0; y < offset; y++)
-        {
-            for (x = 0; x < win->frame.size.x; x++)
-            {
-                z++;
-                if ('\n' == text[z])
-                {
-                    break;
-                }
-                if ('\n' == text[z+1])
-                {
-                    z++;
-                    break;
-                }
-            }
-        }
-        text = text + (sizeof(char) * (z + 1));
-    }
-
-    draw_with_linebreaks(win, text, start_y);
-}
 
 
 
@@ -242,6 +140,115 @@ extern void draw_keys_win(struct Win * win)
         }
     }
     free(keydesc);
+}
+
+
+
+static void draw_with_linebreaks(struct Win * win, char * text,
+                                 uint16_t start_y)
+{
+    uint16_t x, y;
+    char toggle;
+    char fin = 0;
+    int16_t z = -1;
+    for (y = start_y; y < win->frame.size.y; y++)
+    {
+        if (0 == fin)
+        {
+            toggle = 0;
+        }
+        for (x = 0; x < win->frame.size.x; x++)
+        {
+            if (0 == toggle)
+            {
+                z++;
+                if ('\n' == text[z])
+                {
+                    toggle = 1;
+                    continue;
+                }
+                else
+                {
+                    mvwaddch(win->frame.curses_win, y, x, text[z]);
+                }
+                if ('\n' == text[z+1])
+                {
+                    z++;
+                    toggle = 1;
+                }
+                else if (0 == text[z+1])
+                {
+                    toggle = 1;
+                    fin = 1;
+                }
+            }
+        }
+    }
+}
+
+
+
+static void draw_text_from_bottom (struct Win * win, char * text)
+{
+    /* Determine number of lines text would have in a window of win's width,
+     * but infinite height. Treat \n and \0 as control chars for incrementing
+     * y and stopping the loop. Make sure +they* don't count as cell space.
+     */
+    char toggle = 0;
+    uint16_t x, y, offset;
+    int16_t z = -1;
+    for (y = 0; 0 == toggle; y++)
+    {
+        for (x = 0; x < win->frame.size.x; x++)
+        {
+            z++;
+            if ('\n' == text[z])
+            {
+                break;
+            }
+            if ('\n' == text[z+1])
+            {
+                z++;
+                break;
+            }
+            else if (0 == text[z+1])
+            {
+                toggle = 1;
+                break;
+            }
+        }
+    }
+    z = -1;
+
+    /* Depending on what's bigger, determine start point in window or text. */
+    uint16_t start_y = 0;
+    if (y < win->frame.size.y)
+    {
+        start_y = win->frame.size.y - y;
+    }
+    else if (y > win->frame.size.y)
+    {
+        offset = y - win->frame.size.y;
+        for (y = 0; y < offset; y++)
+        {
+            for (x = 0; x < win->frame.size.x; x++)
+            {
+                z++;
+                if ('\n' == text[z])
+                {
+                    break;
+                }
+                if ('\n' == text[z+1])
+                {
+                    z++;
+                    break;
+                }
+            }
+        }
+        text = text + (sizeof(char) * (z + 1));
+    }
+
+    draw_with_linebreaks(win, text, start_y);
 }
 
 
