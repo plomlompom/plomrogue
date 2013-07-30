@@ -521,7 +521,7 @@ extern void draw_all_wins(struct WinMeta * wmeta)
             n_wins++;
         }
         struct Corners * all_corners = malloc(sizeof(struct Corners) * n_wins);
-        draw_wins_borders (wmeta->chain_start, wmeta->active, all_corners, 0);
+        draw_wins_borders(wmeta->chain_start, wmeta->active, all_corners, 0);
         for (i = 0; i < n_wins; i++)
         {
             mvwaddch(wmeta->pad.curses_win,
