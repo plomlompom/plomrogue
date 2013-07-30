@@ -96,7 +96,7 @@ extern struct WinMeta init_win_meta(WINDOW * screen);
  * of the window). Other values will be initialized to 0. The window will stay
  * invisible until appended to the chain of visible windows via append_win().
  *
- * TODO: Why a default start width instead of passing a start width?
+ * TODO: Why default start widths/heights instead of passing start values?
  */
 extern struct Win init_win(struct WinMeta * wmeta, char * title,
                            void * data, void * func);
