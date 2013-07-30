@@ -40,7 +40,7 @@ extern void move_monster(struct World * world, struct Monster * monster)
         }
         if (yx_uint16_cmp(t, other_monster->map_obj.pos))
         {
-            mod = get_map_obj_def(world, monster->map_obj.type);
+            mod = get_map_obj_def(world, other_monster->map_obj.type);
             desc_other = mod->desc;
             sprintf(msg, "\n%s bumps into %s.", desc, desc_other);
             update_log(world, msg);
