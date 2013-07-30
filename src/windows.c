@@ -438,11 +438,11 @@ extern void shift_active_win(struct WinMeta * wmeta, char dir)
 
         /* Suspend all visible windows. */
         uint16_t i, i_max;
-        for (i_max = 1, w_p = wmeta->chain_start;
+        for (w_p = wmeta->chain_start, i_max = 1;
              w_p != wmeta->chain_end;
-             i_max++)
+             w_p = w_p->next)
         {
-            w_p = w_p->next;
+            i_max++;
         }
         struct Win ** wins = malloc(i_max * sizeof(struct Win *));
         for (i = 0, w_p = wmeta->chain_start; i < i_max; i++)
