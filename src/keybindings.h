@@ -23,12 +23,12 @@ struct KeyBinding
 
 
 
-/* Metadata for the keybindings plurality and their editing window. */
+/* Metadata used by the keybinding editing window. */
 struct KeysWinData
 {
-  uint16_t max;    /* ? */
-  char edit;       /* ? */
-  uint16_t select; /* ? */
+  uint16_t max;    /* index of last keybinding (= n of keybindings - 1) */
+  char edit;       /* 1 if currently editing a keybinding, else 0 */
+  uint16_t select; /* index of keybinding selected for editing */
 };
 
 
