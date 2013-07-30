@@ -10,7 +10,7 @@
 
 
 /* Stores a window's border corners. This is a helper to draw_all_wins() (and
- * filled by its helper draw_wins_borders()) which draws the horizontal and
+ * filled by its helper draw_wins_borderlines()) which draws the horizontal and
  * vertical lines of all windows' borders first and the corner characters of
  * all windows only afterwards (so that corners are not overwritten by lines).
  * This delay of corner drawing necessitates temporarily storing their
@@ -18,7 +18,7 @@
  * series of such Corners structs to be released at the end.
  *
  * TODO: Maybe replace this complicated method by dropping the harvesting of
- * corners from draw_wins_borders() and instead collecting them in a second
+ * corners from draw_wins_borderlines() and instead collecting them in a second
  * border drawing cycle that repeats some cycles but works in a much more
  * straightforward way.
  */
@@ -57,19 +57,20 @@ static void draw_wins(struct Win * w);
 
 
 
-/* draw_win_borders() Draws the vertical and horizontal borders of window "w"
- * sans corners, and draws the top border line as the windows' title bar
+/* draw_win_borderlines() draws the vertical and horizontal borders of window
+ * "w" sans corners, and draws the top border line as the windows' title bar
  * (highlighted if the window is described active by "active" being set).
- * draw_wins_borders().
+ * draw_wins_borderlines().
  *
- * draw_wins_borders() calls draw_win_borders() recursively on all windows from
- * "w" on. It also fills "corners" with coordinates of each window's corners,
- * iterating over its Corners structs via the "i" index incremented by 1 over
- * each handled window. "w_active" is a pointer to the one window that
- * draw_win_borders() is supposed to handle as the active window.
+ * draw_wins_borderlines() calls draw_win_borderlines() recursively on all
+ * windows from "w" on. It also fills "corners" with coordinates of each
+ * window's corners, iterating over its Corners structs via the "i" index
+ * incremented by 1 over each handled window. "w_active" is a pointer to the
+ * one window that draw_win_borderlines() is supposed to handle as the active
+ * window.
  */
-static void draw_win_borders(struct Win * w, char active);
-static void draw_wins_borders(struct Win * w, struct Win * w_active,
+static void draw_win_borderlines(struct Win * w, char active);
+static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
                               struct Corners * corners, uint16_t i);
 
 
@@ -202,7 +203,7 @@ static void draw_wins (struct Win * w)
 
 
 
-static void draw_win_borders(struct Win * w, char active)
+static void draw_win_borderlines(struct Win * w, char active)
 {
     /* Draw vertical and horizontal border lines. */
     uint16_t y, x;
@@ -245,7 +246,7 @@ static void draw_win_borders(struct Win * w, char active)
 
 
 
-static void draw_wins_borders(struct Win * w, struct Win * w_active,
+static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
                               struct Corners * corners, uint16_t i)
 {
     char active = 0;
@@ -253,7 +254,7 @@ static void draw_wins_borders(struct Win * w, struct Win * w_active,
     {
         active = 1;
     }
-    draw_win_borders(w, active);
+    draw_win_borderlines(w, active);
     corners[i].tl.y = w->start.y - 1;
     corners[i].tl.x = w->start.x - 1;
     corners[i].tr.y = w->start.y - 1;
@@ -264,7 +265,7 @@ static void draw_wins_borders(struct Win * w, struct Win * w_active,
     corners[i].br.x = w->start.x + w->frame.size.x;
     if (0 != w->next)
     {
-        draw_wins_borders (w->next, w_active, corners, i + 1);
+        draw_wins_borderlines (w->next, w_active, corners, i + 1);
     }
 }
 
@@ -521,7 +522,7 @@ extern void draw_all_wins(struct WinMeta * wmeta)
             n_wins++;
         }
         struct Corners * all_corners = malloc(sizeof(struct Corners) * n_wins);
-        draw_wins_borders(wmeta->chain_start, wmeta->active, all_corners, 0);
+        draw_wins_borderlines(wmeta->chain_start, wmeta->active, all_corners, 0);
         for (i = 0; i < n_wins; i++)
         {
             mvwaddch(wmeta->pad.curses_win,
