@@ -9,29 +9,6 @@
 
 
 
-/* Stores a window's border corners. This is a helper to draw_all_wins() (and
- * filled by its helper draw_wins_borderlines()) which draws the horizontal and
- * vertical lines of all windows' borders first and the corner characters of
- * all windows only afterwards (so that corners are not overwritten by lines).
- * This delay of corner drawing necessitates temporarily storing their
- * coordinates (harvested during the previous border drawing activities) in a
- * series of such Corners structs to be released at the end.
- *
- * TODO: Maybe replace this complicated method by dropping the harvesting of
- * corners from draw_wins_borderlines() and instead collecting them in a second
- * border drawing cycle that repeats some cycles but works in a much more
- * straightforward way.
- */
-struct Corners
-{
-    struct yx_uint16 tl;
-    struct yx_uint16 tr;
-    struct yx_uint16 bl;
-    struct yx_uint16 br;
-};
-
-
-
 /* Fit virtual screen's width to minimum width demanded by current windows'
  * geometries.
  */
@@ -63,15 +40,15 @@ static void draw_wins(struct Win * w);
  * draw_wins_borderlines().
  *
  * draw_wins_borderlines() calls draw_win_borderlines() recursively on all
- * windows from "w" on. It also fills "corners" with coordinates of each
- * window's corners, iterating over its Corners structs via the "i" index
- * incremented by 1 over each handled window. "w_active" is a pointer to the
- * one window that draw_win_borderlines() is supposed to handle as the active
- * window.
+ * windows from "w" on. "w_active" is a pointer to the one window that
+ * draw_win_borderlines() is supposed to handle as the active window.
+ *
+ * Finally, draw_wins_bordercorners draws into "pad" the borders of window "w"
+ * and all its successors.
  */
 static void draw_win_borderlines(struct Win * w, char active);
-static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
-                              struct Corners * corners, uint16_t i);
+static void draw_wins_borderlines(struct Win * w, struct Win * w_active);
+static void draw_wins_bordercorners(struct Win * w, WINDOW * pad);
 
 
 
@@ -246,8 +223,7 @@ static void draw_win_borderlines(struct Win * w, char active)
 
 
 
-static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
-                              struct Corners * corners, uint16_t i)
+static void draw_wins_borderlines(struct Win * w, struct Win * w_active)
 {
     char active = 0;
     if (w == w_active)
@@ -255,17 +231,24 @@ static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
         active = 1;
     }
     draw_win_borderlines(w, active);
-    corners[i].tl.y = w->start.y - 1;
-    corners[i].tl.x = w->start.x - 1;
-    corners[i].tr.y = w->start.y - 1;
-    corners[i].tr.x = w->start.x + w->frame.size.x;
-    corners[i].bl.y = w->start.y + w->frame.size.y;
-    corners[i].bl.x = w->start.x - 1;
-    corners[i].br.y = w->start.y + w->frame.size.y;
-    corners[i].br.x = w->start.x + w->frame.size.x;
     if (0 != w->next)
     {
-        draw_wins_borderlines (w->next, w_active, corners, i + 1);
+        draw_wins_borderlines (w->next, w_active);
+    }
+}
+
+
+
+static void draw_wins_bordercorners(struct Win * w, WINDOW * pad)
+{
+    mvwaddch(pad, w->start.y - 1, w->start.x - 1, '+');
+    mvwaddch(pad, w->start.y - 1, w->start.x + w->frame.size.x, '+');
+    mvwaddch(pad, w->start.y + w->frame.size.y, w->start.x - 1, '+');
+    mvwaddch(pad,
+             w->start.y + w->frame.size.y, w->start.x + w->frame.size.x, '+');
+    if (0 != w->next)
+    {
+        draw_wins_bordercorners(w->next, pad);
     }
 }
 
@@ -510,31 +493,10 @@ extern void draw_all_wins(struct WinMeta * wmeta)
     if (wmeta->chain_start)
     {
 
-        /* Only draw the windows' *contents* first. */
-        draw_wins (wmeta->chain_start);
-
-        /* Draw windows' borders. Lines first, then line crossings / corners. */
-        uint16_t n_wins = 1, i;
-        struct Win * win_p = wmeta->chain_start;
-        while (0 != win_p->next)
-        {
-            win_p = win_p->next;
-            n_wins++;
-        }
-        struct Corners * all_corners = malloc(sizeof(struct Corners) * n_wins);
-        draw_wins_borderlines(wmeta->chain_start, wmeta->active, all_corners, 0);
-        for (i = 0; i < n_wins; i++)
-        {
-            mvwaddch(wmeta->pad.curses_win,
-                     all_corners[i].tl.y, all_corners[i].tl.x, '+');
-            mvwaddch(wmeta->pad.curses_win,
-                     all_corners[i].tr.y, all_corners[i].tr.x, '+');
-            mvwaddch(wmeta->pad.curses_win,
-                     all_corners[i].bl.y, all_corners[i].bl.x, '+');
-            mvwaddch(wmeta->pad.curses_win,
-                     all_corners[i].br.y, all_corners[i].br.x, '+');
-        }
-        free(all_corners);
+        /* Draw windows' contents first, then their borders. */
+        draw_wins(wmeta->chain_start);
+        draw_wins_borderlines(wmeta->chain_start, wmeta->active);
+        draw_wins_bordercorners(wmeta->chain_start, wmeta->pad.curses_win);
 
         /* Draw virtual screen scroll hints. */
         if (wmeta->pad_offset > 0)
