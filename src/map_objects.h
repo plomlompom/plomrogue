@@ -87,7 +87,8 @@ extern void init_map_object_defs(struct World * world, char * filename);
  */
 extern void * build_map_objects(struct World * world, void * start, char def_id,
                                  unsigned char n, size_t size,
-                                 void (*) (struct MapObjDef *, void *));
+                                 void (* b_typedata) (struct MapObjDef *,
+                                                      void *));
 extern void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
                                        void * start);
 extern void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,

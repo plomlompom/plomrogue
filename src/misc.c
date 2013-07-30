@@ -4,17 +4,20 @@
 #include <stdlib.h> /* for exit(), EXIT_SUCCESS define, calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
 #include <ncurses.h> /* for endwin() */
-#include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(), */
-                     /* resize_active_win(), cycle_active_win(),             */
-                     /* shift_active_win(), struct Win, struct WinMeta       */
-#include "keybindings.h" /* for get_action_key(), save_keybindings(),  */
-                         /* keyswin_move_selection(), keyswin_mod_key() */
-#include "readwrite.h" /* for write_uint16_bigendian() */
-                       /* write_uint32_bigendian()     */
-#include "map_objects.h" /* for struct Monster, write_map_objects(), */
-                         /* write_map_objects_monsterdata()          */
+#include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
+                      * resize_active_win(), cycle_active_win(),
+                      * shift_active_win(), struct Win, struct WinMeta
+                      */
+#include "keybindings.h" /* for get_action_key(), save_keybindings(),
+                          * keyswin_move_selection(), keyswin_mod_key()
+                          */
+#include "readwrite.h" /* for write_uint16_bigendian(), write_uint32_bigendian()
+                        */
+#include "map_objects.h" /* for struct Monster, write_map_objects(),
+                          * write_map_objects_monsterdata()
+                          */
 #include "map_object_actions.h" /* for is_passable(), move_monster() */
-#include "map.h" /* for map_scroll()/map_center_player(), Map struct, dir enum */
+#include "map.h" /* for map_scroll(),map_center_player(), Map struct,dir enum */
 #include "main.h" /* for World struct */
 #include "yx_uint16.h" /* for yx_uint16 */
 

@@ -159,7 +159,8 @@ extern void read_map_objects_monsterdata (void * start, FILE * file)
 
 extern void * build_map_objects(struct World * world, void * start, char def_id,
                                 unsigned char n, size_t size,
-                                void (* b_typedata) (struct MapObjDef *, void *))
+                                void (* b_typedata) (struct MapObjDef *,
+                                                     void *))
 {
     unsigned char i;
     struct MapObj * mo;
