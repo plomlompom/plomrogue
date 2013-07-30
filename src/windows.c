@@ -436,16 +436,18 @@ extern void shift_active_win(struct WinMeta * wmeta, char dir)
             wrap = 1;
         }
 
-        /* Suspend all visible windows. */
+        /* Suspend all visible windows, remember their order in wins[]. */
         uint16_t i, i_max;
-        for (w_p = wmeta->chain_start, i_max = 1;
+        for (w_p  = wmeta->chain_start, i_max = 1;
              w_p != wmeta->chain_end;
-             w_p = w_p->next)
+             w_p  = w_p->next)
         {
             i_max++;
         }
         struct Win ** wins = malloc(i_max * sizeof(struct Win *));
-        for (i = 0, w_p = wmeta->chain_start; i < i_max; i++)
+        for (i = 0, w_p = wmeta->chain_start;
+             i < i_max;
+             i++)
         {
             w_p_next = w_p->next;
             suspend_win(wmeta, w_p);
@@ -492,7 +494,7 @@ extern void shift_active_win(struct WinMeta * wmeta, char dir)
         }
         free(wins);
 
-        wmeta->active = w_shift;      /* TODO: Is this necessary? If so, why? */
+        wmeta->active = w_shift;  /* Otherwise lastly appended win is active. */
     }
 }
 
