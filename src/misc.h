@@ -32,17 +32,6 @@ extern void textfile_sizes(FILE * file, uint16_t * linemax_p,
 
 
 
-/* Pseudo-random number generator using a Linear Congruential Generator
- * algorithm with some proven constants. Used instead of rand() to ensure
- * portable pseudo-randomness predictability. Set "use_seed" to !0 to seed it
- * with "new_seed".
- *
- * TODO: Write a wrapper for all non-seeding uses that demands no input.
- */
-extern uint16_t rrand(char use_seed, uint32_t new_seed);
-
-
-
 /* Update game log by appending "text", or by appending a "." if "text" is the
  * same as the last one passed.
  */

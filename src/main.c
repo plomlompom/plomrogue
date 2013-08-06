@@ -23,10 +23,11 @@
                           */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "map.h" /* for struct Map, init_map() */
-#include "misc.h" /* for rrand(), update_log(), toggle_window(), exit_game(),
+#include "misc.h" /* for update_log(), toggle_window(), exit_game(),
                    * find_passable_pos(), meta_keys(), save_game()
                    */
 #include "yx_uint16.h" /* for dir enum */
+#include "rrand.h" /* for rrand(), rrand_seed() */
 
 int main(int argc, char *argv[])
 {
@@ -102,26 +103,26 @@ int main(int argc, char *argv[])
     /* Generate map from seed and, if newly generated world, start positions of
      * actors.
      */
-    rrand(1, world.seed);
+    rrand_seed(world.seed);
     struct Map map = init_map();
     world.map = &map;
     if (1 == world.turn)
     {
         player.pos = find_passable_pos(&map);
         void * foo = build_map_objects(&world, &world.monster,
-                                       0, 1 + rrand(0,0) % 27,
+                                       0, 1 + rrand() % 27,
                                        sizeof(struct Monster),
                                        build_map_objects_monsterdata);
-        foo = build_map_objects(&world, foo, 1, 1 + rrand(0,0) % 9,
+        foo = build_map_objects(&world, foo, 1, 1 + rrand() % 9,
                                 sizeof(struct Monster),
                                 build_map_objects_monsterdata);
-        build_map_objects(&world, foo, 2, 1 + rrand(0,0) % 3,
+        build_map_objects(&world, foo, 2, 1 + rrand() % 3,
                           sizeof(struct Monster),
                           build_map_objects_monsterdata);
-        foo = build_map_objects(&world, &world.item, 3, 1 + rrand(0,0) % 3,
+        foo = build_map_objects(&world, &world.item, 3, 1 + rrand() % 3,
                                 sizeof(struct Item),
                                 build_map_objects_itemdata);
-        build_map_objects(&world, foo, 4, 1 + rrand(0,0) % 3,
+        build_map_objects(&world, foo, 4, 1 + rrand() % 3,
                           sizeof(struct Item), build_map_objects_itemdata);
     }
 

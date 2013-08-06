@@ -20,6 +20,7 @@
 #include "map.h" /* for map_scroll(),map_center_player(), Map struct,dir enum */
 #include "main.h" /* for World struct */
 #include "yx_uint16.h" /* for yx_uint16 */
+#include "rrand.h" /* for rrand(), rrand_seed() */
 
 
 
@@ -72,21 +73,6 @@ extern void textfile_sizes(FILE * file, uint16_t * linemax_p,
     }
 }
 
-
-
-extern uint16_t rrand(char use_seed, uint32_t new_seed)
-{
-    static uint32_t seed;
-    if (0 != use_seed)
-    {
-        seed = new_seed;
-    }
-
-    /* Constants as recommended by POSIX.1-2001 (see man page rand(3)). */
-    seed = ((seed * 1103515245) + 12345) % 2147483648;
-
-    return (seed >> 16);     /* Ignore less random least significant 16 bits. */
-}
 
 
 extern void update_log(struct World * world, char * text)
@@ -153,7 +139,7 @@ extern void turn_over(struct World * world, char action)
         fclose(file);
     }
     world->turn++;
-    rrand(1, world->seed * world->turn);
+    rrand_seed(world->seed * world->turn);
     struct Monster * monster;
     for (monster = world->monster;
          monster != 0;
@@ -240,8 +226,8 @@ extern struct yx_uint16 find_passable_pos(struct Map * map)
     struct yx_uint16 pos;
     for (pos.y = pos.x = 0; 0 == is_passable(map, pos);)
     {
-        pos.y = rrand(0, 0) % map->size.y;
-        pos.x = rrand(0, 0) % map->size.x;
+        pos.y = rrand() % map->size.y;
+        pos.x = rrand() % map->size.x;
     }
     return pos;
 }

@@ -3,16 +3,17 @@
 #include "map_object_actions.h"
 #include <stdlib.h> /* for malloc(), calloc(), free() */
 #include "yx_uint16.h" /* for yx_uint16 struct, mv_yx_in_dir(), yx_uint16_cmp */
-#include "misc.h" /* for rrand(), update_log(), turn_over()*/
+#include "misc.h" /* for update_log(), turn_over()*/
 #include "map.h" /* for Map struct */
 #include "main.h" /* for World struct */
 #include "map_objects.h" /* for map object (definition) structs */
+#include "rrand.h" /* for rrand() */
 
 
 
 extern void move_monster(struct World * world, struct Monster * monster)
 {
-    char d = rrand(0, 0) % 5;
+    char d = rrand() % 5;
     struct yx_uint16 t = mv_yx_in_dir(d, monster->map_obj.pos);
     char * msg = malloc(100);
     struct MapObjDef * mod = get_map_obj_def(world, monster->map_obj.type);

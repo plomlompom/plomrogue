@@ -1,9 +1,10 @@
 #include "map.h"
 #include <stdlib.h>      /* for malloc() */
 #include <stdint.h>      /* for uint16_t, uint32_t */
-#include "misc.h"        /* for rrand() and center_offset() */
+#include "misc.h"        /* for center_offset() */
 #include "map_objects.h" /* for Player struct */
 #include "yx_uint16.h"   /* for yx_uint16 and dir enums */
+#include "rrand.h"       /* for rrand() */
 
 
 
@@ -28,8 +29,8 @@ struct Map init_map ()
     uint32_t curpos;
     while (1)
     {
-        y = rrand(0, 0) % map.size.y;
-        x = rrand(0, 0) % map.size.x;
+        y = rrand() % map.size.y;
+        x = rrand() % map.size.x;
         curpos = y * map.size.x + x;
         if ('~' == map.cells[curpos]
             && ((curpos >= map.size.x && '.' == map.cells[curpos - map.size.x])
