@@ -13,9 +13,7 @@
                           */
 #include "readwrite.h" /* for write_uint16_bigendian(), write_uint32_bigendian()
                         */
-#include "map_objects.h" /* for struct Monster, write_map_objects(),
-                          * write_map_objects_monsterdata()
-                          */
+#include "map_objects.h" /* for struct Monster, write_map_objects(), */
 #include "map_object_actions.h" /* for is_passable(), move_monster() */
 #include "map.h" /* for map_scroll(),map_center_player(), Map struct,dir enum */
 #include "main.h" /* for World struct */
@@ -159,8 +157,8 @@ extern void save_game(struct World * world)
     write_uint16_bigendian(world->player->pos.y + 1, file);
     write_uint16_bigendian(world->player->pos.x + 1, file);
     fputc(world->player->hitpoints, file);
-    write_map_objects (world->monster, file, write_map_objects_monsterdata);
-    write_map_objects (world->item, file, NULL);
+    write_map_objects(world, world->monster, file);
+    write_map_objects(world, world->item, file);
     fclose(file);
 }
 

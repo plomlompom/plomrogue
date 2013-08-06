@@ -18,8 +18,7 @@
                         */
 #include "map_objects.h" /* for structs Monster, Item, Player,
                           * init_map_object_defs(), read_map_objects(),
-                          * read_map_objects_monsterdata,
-                          * read_map_objects_itemdata, build_map_objects()
+                          * build_map_objects()
                           */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "map.h" /* for struct Map, init_map() */
@@ -72,9 +71,8 @@ int main(int argc, char *argv[])
         player.pos.y = read_uint16_bigendian(file) - 1;
         player.pos.x = read_uint16_bigendian(file) - 1;
         player.hitpoints = fgetc(file);
-        read_map_objects(&world.monster, file, sizeof(struct Monster),
-                          read_map_objects_monsterdata);
-        read_map_objects(&world.item,    file, sizeof(struct Item), NULL);
+        read_map_objects(&world, &world.monster, file);
+        read_map_objects(&world, &world.item,    file);
         fclose(file);
     }
 
@@ -109,21 +107,12 @@ int main(int argc, char *argv[])
     if (1 == world.turn)
     {
         player.pos = find_passable_pos(&map);
-        void * foo = build_map_objects(&world, &world.monster,
-                                       0, 1 + rrand() % 27,
-                                       sizeof(struct Monster),
-                                       build_map_objects_monsterdata);
-        foo = build_map_objects(&world, foo, 1, 1 + rrand() % 9,
-                                sizeof(struct Monster),
-                                build_map_objects_monsterdata);
-        build_map_objects(&world, foo, 2, 1 + rrand() % 3,
-                          sizeof(struct Monster),
-                          build_map_objects_monsterdata);
-        foo = build_map_objects(&world, &world.item, 3, 1 + rrand() % 3,
-                                sizeof(struct Item),
-                                build_map_objects_itemdata);
-        build_map_objects(&world, foo, 4, 1 + rrand() % 3,
-                          sizeof(struct Item), build_map_objects_itemdata);
+        void * foo;
+        foo = build_map_objects(&world, &world.monster, 1, 1 + rrand() % 27);
+        foo = build_map_objects(&world, foo, 2, 1 + rrand() % 9);
+        build_map_objects(&world, foo, 3, 1 + rrand() % 3);
+        foo = build_map_objects(&world, &world.item, 4, 1 + rrand() % 3);
+        build_map_objects(&world, foo, 5, 1 + rrand() % 3);
     }
 
     /* Initialize window system and windows. */

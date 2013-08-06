@@ -53,6 +53,7 @@ struct Monster
 struct MapObjDef
 {
     struct MapObjDef * next;
+    char m_or_i;  /* Is it item or monster? "i" for items, "m" for monsters. */
     char id;      /* Unique identifier of the map object type to describe. */
     char mapchar; /* Map object symbol to appear on map.*/
     char * desc;  /* String describing map object in the game log. */
@@ -77,42 +78,18 @@ extern void init_map_object_defs(struct World * world, char * filename);
 
 
 /* Build into memory starting at "start" chain of "n" map objects of type
- * "def_id", pass either "build_map_objects_itemdata" or
- * "build_map_objects_monsterdata" as "b_typedata"() to build data specific
- * to monsters or items (or more forms if they ever get invented).
- *
- * TODO: function should decide by itself what "b_typedata"() to call based
- * on monster-or-item info in MapObjDef struct or from a table mapping type
- * identifiers to these.
+ * "def_id".
  */
 extern void * build_map_objects(struct World * world, void * start, char def_id,
-                                 unsigned char n, size_t size,
-                                 void (* b_typedata) (struct MapObjDef *,
-                                                      void *));
-extern void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
-                                       void * start);
-extern void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
-                                          void * start);
+                                 unsigned char n);
 
 
 
 /* Write to/read from file chain of map objects starting/to start in memory at
- * "start", use "w_typedata"()"/"r_typedata" for data specific to monsters
- * (pass "write_map_objects_monsterdata"/"read_map_objects_itemdata") or items
- * (currently they have no data specific only to them, so pass NULL). Use "size"
- * in read_map_objects() to pass the size of structs of the affected map object
- * type.
- *
- * TODO: the size of these structs should not need to be passed but instead be
- * available via the type id of the affected map object type. The TODO above
- * towards the function deciding its helper function by itself also applies.
+ * "start".
  */
-extern void write_map_objects(void * start, FILE * file,
-                              void (* w_typedata) (void *, FILE *) );
-extern void read_map_objects(void * start, FILE * file, size_t size,
-                             void (* w_typedata) (void *, FILE *) );
-extern void write_map_objects_monsterdata(void * start, FILE * file);
-extern void read_map_objects_monsterdata( void * start, FILE * file);
+extern void write_map_objects(struct World * world, void * start, FILE * file);
+extern void read_map_objects(struct World * world, void * start, FILE * file);
 
 
 

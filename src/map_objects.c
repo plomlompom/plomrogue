@@ -18,6 +18,16 @@ static struct MapObj * get_next_map_obj(void * start, char * first,
 
 
 
+/* Map-object-type-specific helpers to (build|write|read)_map_objects(). */
+static void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
+                                       void * start);
+static void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
+                                          void * start);
+static void write_map_objects_monsterdata(void * start, FILE * file);
+static void read_map_objects_monsterdata( void * start, FILE * file);
+
+
+
 static struct MapObj * get_next_map_obj(void * start, char * first,
                                         size_t size, struct MapObj * map_obj)
 {
@@ -38,29 +48,64 @@ static struct MapObj * get_next_map_obj(void * start, char * first,
 
 
 
+static void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
+                                       void * start)
+{
+  struct Item * i = (struct Item *) start;
+  i->map_obj.type = map_obj_def->id;
+}
+
+
+
+static void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
+                                          void * start)
+{
+    struct Monster * m = (struct Monster *) start;
+    m->map_obj.type = map_obj_def->id;
+    struct MonsterDef * md = (struct MonsterDef *) map_obj_def;
+    m->hitpoints = md->hitpoints_start;
+}
+
+
+
+static void write_map_objects_monsterdata(void * start, FILE * file)
+{
+    struct Monster * m = (struct Monster *) start;
+    fputc(m->hitpoints, file);
+}
+
+
+
+static void read_map_objects_monsterdata (void * start, FILE * file)
+{
+    struct Monster * m = (struct Monster *) start;
+    m->hitpoints = fgetc(file);
+}
+
+
+
 extern void init_map_object_defs(struct World * world, char * filename)
 {
-    world->item_def = 0;
+    world->item_def    = 0;
     world->monster_def = 0;
-    FILE *                file    = fopen(filename, "r");
-    uint16_t              linemax;
+    FILE * file = fopen(filename, "r");
+    uint16_t linemax;
     textfile_sizes (file, &linemax, NULL);
-    struct MapObjDef      mod;
-    struct ItemDef        id;
-    struct MonsterDef     md;
+    struct MapObjDef  mod;
+    struct ItemDef    id;
+    struct MonsterDef md;
     struct ItemDef    * * p_p_id  = &world->item_def;
     struct MonsterDef * * p_p_md  = &world->monster_def;
-    char *                defline = malloc(linemax);
-    char *                line_p;
-    char                  m_or_i;
+    char * defline = malloc(linemax);
+    char * line_p;
     while (fgets(defline, linemax, file))
     {
         mod.next    = 0;
         mod.id      = atoi(defline);
         line_p      = strchr(defline, ' ') + 1;
-        m_or_i      = * line_p;
+        mod.m_or_i  = * line_p;
         mod.mapchar = * (line_p + 2);
-        if ('i' == m_or_i)
+        if ('i' == mod.m_or_i)
         {
             line_p = line_p + 5;
         }
@@ -71,7 +116,7 @@ extern void init_map_object_defs(struct World * world, char * filename)
         }
         mod.desc = calloc (strlen (line_p), sizeof(char));
         memcpy (mod.desc, line_p, strlen(line_p) - 1);
-        if ('i' == m_or_i)
+        if ('i' == mod.m_or_i)
         {
             id.map_obj_def = mod;
             * p_p_id       = malloc(sizeof(struct ItemDef));
@@ -92,18 +137,19 @@ extern void init_map_object_defs(struct World * world, char * filename)
 
 
 
-extern void write_map_objects(void * start, FILE * file,
-                              void (* w_typedata) (void *, FILE *) )
+extern void write_map_objects(struct World * world, void * start, FILE * file)
 {
     struct MapObj * map_obj;
+    struct MapObjDef * mod;
     for (map_obj = start; map_obj != 0; map_obj = map_obj->next)
     {
+        fputc(map_obj->type, file);
         write_uint16_bigendian(map_obj->pos.y + 1, file);
         write_uint16_bigendian(map_obj->pos.x + 1, file);
-        fputc(map_obj->type, file);
-        if (w_typedata)
+        mod = get_map_obj_def(world, map_obj->type);
+        if ('m' == mod->m_or_i)
         {
-            w_typedata (map_obj, file);
+            write_map_objects_monsterdata(map_obj, file);
         }
     }
     write_uint16_bigendian(0, file);
@@ -111,26 +157,39 @@ extern void write_map_objects(void * start, FILE * file,
 
 
 
-extern void read_map_objects(void * start, FILE * file, size_t size,
-                             void (* r_typedata) (void *, FILE *) )
+extern void read_map_objects(struct World * world, void * start, FILE * file)
 {
     struct MapObj * map_obj;
-    uint16_t test;
+    struct MapObjDef * mod;
+    size_t size;
+    char type;
     char first = 1;
+    long pos;
     while (1)
     {
-        test = read_uint16_bigendian(file);
-        if (0 == test)
+        pos = ftell(file);
+        if (0 == read_uint16_bigendian(file))
         {
             break;
         }
-        map_obj = get_next_map_obj(start, &first, size, map_obj);
-        map_obj->pos.y = test - 1;
-        map_obj->pos.x = read_uint16_bigendian(file) - 1;
-        map_obj->type = fgetc(file);
-        if (r_typedata)
+        fseek(file, pos, SEEK_SET);
+        type = fgetc(file);
+        mod = get_map_obj_def(world, type);
+        if ('m' == mod->m_or_i)
         {
-            r_typedata(map_obj, file);
+            size = sizeof(struct Monster);
+        }
+        else
+        {
+            size = sizeof(struct Item);
+        }
+        map_obj = get_next_map_obj(start, &first, size, map_obj);
+        map_obj->type = type;
+        map_obj->pos.y = read_uint16_bigendian(file) - 1;
+        map_obj->pos.x = read_uint16_bigendian(file) - 1;
+        if ('m' == mod->m_or_i)
+        {
+            read_map_objects_monsterdata(map_obj, file);
         }
     }
     if (!first)
@@ -141,62 +200,41 @@ extern void read_map_objects(void * start, FILE * file, size_t size,
 
 
 
-extern void write_map_objects_monsterdata(void * start, FILE * file)
-{
-  struct Monster * m = (struct Monster *) start;
-  fputc(m->hitpoints, file);
-}
-
-
-
-extern void read_map_objects_monsterdata (void * start, FILE * file)
-{
-  struct Monster * m = (struct Monster *) start;
-  m->hitpoints = fgetc(file);
-}
-
-
-
 extern void * build_map_objects(struct World * world, void * start, char def_id,
-                                unsigned char n, size_t size,
-                                void (* b_typedata) (struct MapObjDef *,
-                                                     void *))
+                                unsigned char n)
 {
     unsigned char i;
     struct MapObj * mo;
     char first = 1;
     struct MapObjDef * mod = get_map_obj_def(world, def_id);
+    size_t size = 0;
+    if ('i' == mod->m_or_i)
+    {
+        size = sizeof(struct Item);
+    }
+    else
+    {
+        size = sizeof(struct Monster);
+    }
     for (i = 0; i < n; i++)
     {
         mo = get_next_map_obj(start, &first, size, mo);
         mo->pos = find_passable_pos(world->map);
-        b_typedata(mod, mo);
+        if ('i' == mod->m_or_i)
+        {
+            build_map_objects_itemdata(mod, mo);
+        }
+        else
+        {
+            build_map_objects_monsterdata(mod, mo);
+        }
+
     }
     if (!first)
     {
         mo->next = 0;
     }
     return &mo->next;
-}
-
-
-
-extern void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
-                                       void * start)
-{
-  struct Item * i = (struct Item *) start;
-  i->map_obj.type = map_obj_def->id;
-}
-
-
-
-extern void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
-                                          void * start)
-{
-    struct Monster * m = (struct Monster *) start;
-    m->map_obj.type = map_obj_def->id;
-    struct MonsterDef * md = (struct MonsterDef *) map_obj_def;
-    m->hitpoints = md->hitpoints_start;
 }
 
 
