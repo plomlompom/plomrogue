@@ -81,7 +81,7 @@ extern void init_map_object_defs(struct World * world, char * filename);
  * "def_id".
  */
 extern void * build_map_objects(struct World * world, void * start, char def_id,
-                                 unsigned char n);
+                                unsigned char n);
 
 
 

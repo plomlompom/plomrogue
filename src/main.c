@@ -123,9 +123,12 @@ int main(int argc, char *argv[])
     raw();
     init_keybindings(&world);
     struct WinMeta win_meta = init_win_meta(screen);
-    struct Win win_keys = init_win(&win_meta, "Keys", 0, 29, &world, draw_keys_win);
-    struct Win win_info = init_win(&win_meta, "Info", 2, 20, &world, draw_info_win);
-    uint16_t height_logwin  = win_meta.padframe.size.y - (2 + win_info.frame.size.y);
+    struct Win win_keys = init_win(&win_meta, "Keys",
+                                   0, 29, &world, draw_keys_win);
+    struct Win win_info = init_win(&win_meta, "Info",
+                                   2, 20, &world, draw_info_win);
+    uint16_t height_logwin = win_meta.padframe.size.y
+                             - (2 + win_info.frame.size.y);
     struct Win win_log = init_win(&win_meta, "Log",
                                   height_logwin, 20, &world, draw_log_win);
     uint16_t width_mapwin = win_meta.padframe.size.x - win_keys.frame.size.x
