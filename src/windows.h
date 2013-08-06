@@ -88,17 +88,20 @@ extern struct WinMeta init_win_meta(WINDOW * screen);
 
 
 
-/* Create a window below inside "wmeta" titled "title" and appointing "func"()
- * to interpret and draw the content stored at "data" if the window is visible.
+/* Create a window below inside "wmeta" titled "title" of "height" and "width"
+ * and appointing "func"() to interpret and draw the content stored at "data"
+ * if the window is visible.
  *
- * The start size for the Frame will be a width of 20 cells and a height one
- * less than the height of the virtual screen (so as to fit the title bar on top
- * of the window). Other values will be initialized to 0. The window will stay
+ * A value for "width" <1 will trigger a fallback to width=1. A "height" <1 or
+ * larger than the maximum window height possible within the virtual screen will
+ * trigger a fallback to the maximum height possible (i.e. pass a "height" of 0
+ * to initialize the window to its largest possible height).
+ *
+ * Other values of the Win struct will be initialized to 0. The window will stay
  * invisible until appended to the chain of visible windows via append_win().
- *
- * TODO: Why default start widths/heights instead of passing start values?
  */
 extern struct Win init_win(struct WinMeta * wmeta, char * title,
+                           uint16_t height, uint16_t widtht,
                            void * data, void * func);
 
 

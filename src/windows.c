@@ -270,6 +270,7 @@ extern struct WinMeta init_win_meta(WINDOW * screen)
 
 
 extern struct Win init_win(struct WinMeta * wmeta, char * title,
+                           uint16_t height, uint16_t width,
                            void * data, void * func)
 {
     struct Win w;
@@ -277,10 +278,24 @@ extern struct Win init_win(struct WinMeta * wmeta, char * title,
     w.next             = 0;
     w.frame.curses_win = 0;
     w.title            = title;
-    w.frame.size.x     = 20;
-    w.frame.size.y     = wmeta->padframe.size.y - 1;
     w.data             = data;
     w.draw             = func;
+    if (width > 0)
+    {
+        w.frame.size.x = width;
+    }
+    else
+    {
+        w.frame.size.x = 1;
+    }
+    if (height > 0 && height <= wmeta->padframe.size.y - 1)
+    {
+        w.frame.size.y = height;
+    }
+    else
+    {
+        w.frame.size.y = wmeta->padframe.size.y - 1;
+    }
     return w;
 }
 
