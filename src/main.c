@@ -13,9 +13,7 @@
                         * draw_log_win()
                         */
 #include "keybindings.h" /* for initkeybindings(), get_action_key() */
-#include "readwrite.h" /* for read_uint16_bigendian, read_uint32_bigendian,
-                        * write_uint32_bigendian
-                        */
+#include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian]() */
 #include "map_objects.h" /* for structs Monster, Item, Player,
                           * init_map_object_defs(), read_map_objects(),
                           * build_map_objects()
@@ -62,19 +60,22 @@ int main(int argc, char *argv[])
     world.monster = 0;
     world.item = 0;
     init_map_object_defs(&world, "defs");
+    uint8_t fail = 0;
 
     /* For interactive mode, try to load world state from savefile. */
     FILE * file;
     if (1 == world.interactive && 0 == access("savefile", F_OK))
     {
         file = fopen("savefile", "r");
-        world.seed = read_uint32_bigendian(file);
-        world.turn = read_uint32_bigendian(file);
-        player.pos.y = read_uint16_bigendian(file) - 1;
-        player.pos.x = read_uint16_bigendian(file) - 1;
-        player.hitpoints = fgetc(file);
-        read_map_objects(&world, &world.monster, file);
-        read_map_objects(&world, &world.item,    file);
+        fail = fail | read_uint32_bigendian(file, &world.seed);
+        fail = fail | read_uint32_bigendian(file, &world.turn);
+        fail = fail | read_uint16_bigendian(file, &player.pos.y);
+        fail = fail | read_uint16_bigendian(file, &player.pos.x);
+        player.pos.y--;
+        player.pos.x--;
+        fail = fail | read_uint8(file, &player.hitpoints);
+        fail = fail | read_map_objects(&world, &world.monster, file);
+        fail = fail | read_map_objects(&world, &world.item,    file);
         fclose(file);
     }
 
@@ -85,20 +86,23 @@ int main(int argc, char *argv[])
         if (0 == world.interactive)
         {
             file = fopen("record", "r");
-            world.seed = read_uint32_bigendian(file);
+            fail = fail | read_uint32_bigendian(file, &world.seed);
         }
 
-      /* For interactive-mode in newly started world, generate a start seed
-       * from the current time.
-       */
-      else
-      {
-          file = fopen("record", "w");
-          world.seed = time(NULL);
-          write_uint32_bigendian(world.seed, file);
-          fclose(file);
-      }
-  }
+        /* For interactive-mode in newly started world, generate a start seed
+         * from the current time.
+         */
+        else
+        {
+            file = fopen("record", "w");
+            world.seed = time(NULL);
+            fail = fail | write_uint32_bigendian(world.seed, file);
+            fclose(file);
+        }
+    }
+
+    exit_err(fail, &world, "Failure initializing game.");
+
 
     /* Generate map from seed and, if newly generated world, start positions of
      * actors.

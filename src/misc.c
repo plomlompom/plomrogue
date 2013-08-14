@@ -10,15 +10,14 @@
 #include "keybindings.h" /* for get_action_key(), save_keybindings(),
                           * keyswin_move_selection(), keyswin_mod_key()
                           */
-#include "readwrite.h" /* for write_uint16_bigendian(), write_uint32_bigendian()
-                        */
+#include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian]() */
 #include "map_objects.h" /* for struct Monster, write_map_objects(), */
 #include "map_object_actions.h" /* for is_passable(), move_monster() */
 #include "map.h" /* for map_scroll(),map_center_player(), Map struct,dir enum */
 #include "main.h" /* for World struct */
 #include "yx_uint16.h" /* for yx_uint16 */
 #include "rrand.h" /* for rrand(), rrand_seed() */
-
+#include "rexit.h" /* for exit_err() */
 
 
 extern void textfile_sizes(FILE * file, uint16_t * linemax_p,
@@ -115,7 +114,7 @@ extern void turn_over(struct World * world, char action)
     if (1 == world->interactive)
     {
         FILE * file = fopen("record", "a");
-        fputc(action, file);
+        exit_err(write_uint8(action, file), world, "Record writing failure.");
         fclose(file);
     }
     world->turn++;
@@ -133,14 +132,16 @@ extern void turn_over(struct World * world, char action)
 
 extern void save_game(struct World * world)
 {
+    uint8_t fail;
     FILE * file = fopen("savefile", "w");
-    write_uint32_bigendian(world->seed, file);
-    write_uint32_bigendian(world->turn, file);
-    write_uint16_bigendian(world->player->pos.y + 1, file);
-    write_uint16_bigendian(world->player->pos.x + 1, file);
-    fputc(world->player->hitpoints, file);
-    write_map_objects(world, world->monster, file);
-    write_map_objects(world, world->item, file);
+    fail = write_uint32_bigendian(world->seed, file);
+    fail = fail | write_uint32_bigendian(world->turn, file);
+    fail = fail | write_uint16_bigendian(world->player->pos.y + 1, file);
+    fail = fail | write_uint16_bigendian(world->player->pos.x + 1, file);
+    fail = fail | write_uint8(world->player->hitpoints, file);
+    fail = fail | write_map_objects(world, world->monster, file);
+    fail = fail | write_map_objects(world, world->item, file);
+    exit_err(fail, world, "Error saving game.");
     fclose(file);
 }
 

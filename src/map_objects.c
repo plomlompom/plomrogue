@@ -4,7 +4,7 @@
 #include <stdlib.h> /* for malloc(), calloc(), free(), atoi() */
 #include <stdio.h> /* for FILE typedef */
 #include <string.h> /* for strchr(), strlen(), memcpy()  */
-#include "readwrite.h" /* for all the map object (def) loading/saving */
+#include "readwrite.h" /* for [read/write]_uint[8/16/23][_bigendian]() */
 #include "misc.h" /* for textfile_sizes(), find_passable_pos() */
 #include "main.h" /* for World struct */
 
@@ -23,8 +23,8 @@ static void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
                                        void * start);
 static void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
                                           void * start);
-static void write_map_objects_monsterdata(void * start, FILE * file);
-static void read_map_objects_monsterdata( void * start, FILE * file);
+static uint8_t write_map_objects_monsterdata(void * start, FILE * file);
+static uint8_t read_map_objects_monsterdata( void * start, FILE * file);
 
 
 
@@ -68,18 +68,18 @@ static void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
 
 
 
-static void write_map_objects_monsterdata(void * start, FILE * file)
+static uint8_t write_map_objects_monsterdata(void * start, FILE * file)
 {
     struct Monster * m = (struct Monster *) start;
-    fputc(m->hitpoints, file);
+    return write_uint8(m->hitpoints, file);
 }
 
 
 
-static void read_map_objects_monsterdata (void * start, FILE * file)
+static uint8_t read_map_objects_monsterdata (void * start, FILE * file)
 {
     struct Monster * m = (struct Monster *) start;
-    m->hitpoints = fgetc(file);
+    return read_uint8(file, &m->hitpoints);
 }
 
 
@@ -137,43 +137,48 @@ extern void init_map_object_defs(struct World * world, char * filename)
 
 
 
-extern void write_map_objects(struct World * world, void * start, FILE * file)
+extern uint8_t write_map_objects(struct World * world, void * start,
+                                 FILE * file)
 {
     struct MapObj * map_obj;
     struct MapObjDef * mod;
+    uint8_t fail = 0;
     for (map_obj = start; map_obj != 0; map_obj = map_obj->next)
     {
-        fputc(map_obj->type, file);
-        write_uint16_bigendian(map_obj->pos.y + 1, file);
-        write_uint16_bigendian(map_obj->pos.x + 1, file);
+        fail = fail | write_uint8(map_obj->type, file);
+        fail = fail | write_uint16_bigendian(map_obj->pos.y + 1, file);
+        fail = fail | write_uint16_bigendian(map_obj->pos.x + 1, file);
         mod = get_map_obj_def(world, map_obj->type);
         if ('m' == mod->m_or_i)
         {
-            write_map_objects_monsterdata(map_obj, file);
+            fail = fail | write_map_objects_monsterdata(map_obj, file);
         }
     }
-    write_uint16_bigendian(0, file);
+    return (fail | write_uint16_bigendian(0, file));
 }
 
 
 
-extern void read_map_objects(struct World * world, void * start, FILE * file)
+extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
 {
     struct MapObj * map_obj;
     struct MapObjDef * mod;
     size_t size;
-    char type;
+    uint8_t type;
     char first = 1;
     long pos;
+    uint16_t read_uint16 = 0;
+    uint8_t fail = 0;
     while (1)
     {
         pos = ftell(file);
-        if (0 == read_uint16_bigendian(file))
+        fail = fail | read_uint16_bigendian(file, &read_uint16);
+        if (0 == read_uint16)
         {
             break;
         }
         fseek(file, pos, SEEK_SET);
-        type = fgetc(file);
+        fail = fail | read_uint8(file, &type);
         mod = get_map_obj_def(world, type);
         if ('m' == mod->m_or_i)
         {
@@ -185,17 +190,20 @@ extern void read_map_objects(struct World * world, void * start, FILE * file)
         }
         map_obj = get_next_map_obj(start, &first, size, map_obj);
         map_obj->type = type;
-        map_obj->pos.y = read_uint16_bigendian(file) - 1;
-        map_obj->pos.x = read_uint16_bigendian(file) - 1;
+        fail = fail | read_uint16_bigendian(file, &map_obj->pos.y);
+        fail = fail | read_uint16_bigendian(file, &map_obj->pos.x);
+        map_obj->pos.y--;
+        map_obj->pos.x--;
         if ('m' == mod->m_or_i)
         {
-            read_map_objects_monsterdata(map_obj, file);
+            fail = fail | read_map_objects_monsterdata(map_obj, file);
         }
     }
     if (!first)
     {
         map_obj->next = 0;
     }
+    return fail;
 }
 
 

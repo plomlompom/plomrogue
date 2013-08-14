@@ -88,8 +88,9 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
 /* Write to/read from file chain of map objects starting/to start in memory at
  * "start".
  */
-extern void write_map_objects(struct World * world, void * start, FILE * file);
-extern void read_map_objects(struct World * world, void * start, FILE * file);
+extern uint8_t write_map_objects(struct World * world, void * start,
+                                 FILE * file);
+extern uint8_t read_map_objects(struct World * world, void * start, FILE * file);
 
 
 
