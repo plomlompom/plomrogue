@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     set_cleanup_flag(CLEANUP_MAP);
     if (1 == world.turn)
     {
-        player.pos = find_passable_pos(&map);
+        player.pos = find_passable_pos(world.map);
         void * foo;
         foo = build_map_objects(&world, &world.monster, 1, 1 + rrand() % 27);
         foo = build_map_objects(&world, foo, 2, 1 + rrand() % 9);
