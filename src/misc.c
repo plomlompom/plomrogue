@@ -1,9 +1,8 @@
 /* misc.c */
 
 #include "misc.h"
-#include <stdlib.h> /* for exit(), EXIT_SUCCESS define, calloc(), free() */
+#include <stdlib.h> /* for calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
-#include <ncurses.h> /* for endwin() */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
                       * resize_active_win(), cycle_active_win(),
                       * shift_active_win(), struct Win, struct WinMeta
@@ -19,23 +18,6 @@
 #include "main.h" /* for World struct */
 #include "yx_uint16.h" /* for yx_uint16 */
 #include "rrand.h" /* for rrand(), rrand_seed() */
-
-
-
-extern void exit_game(struct World * world, struct Map * map)
-{
-    endwin();
-    free(map->cells);
-    uint16_t key;
-    for (key = 0; key <= world->keyswindata->max; key++)
-    {
-        free(world->keybindings[key].name);
-    }
-    free(world->keybindings);
-    free(world->keyswindata);
-    free(world->log);
-    exit (EXIT_SUCCESS);
-}
 
 
 

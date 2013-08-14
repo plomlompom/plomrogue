@@ -22,11 +22,12 @@
                           */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "map.h" /* for struct Map, init_map() */
-#include "misc.h" /* for update_log(), toggle_window(), exit_game(),
-                   * find_passable_pos(), meta_keys(), save_game()
+#include "misc.h" /* for update_log(), toggle_window(), find_passable_pos(),
+                   * meta_keys(), save_game()
                    */
 #include "yx_uint16.h" /* for dir enum */
 #include "rrand.h" /* for rrand(), rrand_seed() */
+#include "rexit.h" /* for exit_game() */
 
 int main(int argc, char *argv[])
 {
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
 
     /* Initialize log, player, monster/item definitions and monsters/items. */
     world.log = calloc(1, sizeof(char));
+    set_cleanup_flag(CLEANUP_LOG);
     update_log (&world, " ");
     struct Player player;
     player.hitpoints = 5;
@@ -104,6 +106,7 @@ int main(int argc, char *argv[])
     rrand_seed(world.seed);
     struct Map map = init_map();
     world.map = &map;
+    set_cleanup_flag(CLEANUP_MAP);
     if (1 == world.turn)
     {
         player.pos = find_passable_pos(&map);
@@ -117,11 +120,13 @@ int main(int argc, char *argv[])
 
     /* Initialize window system and windows. */
     WINDOW * screen = initscr();
+    set_cleanup_flag(CLEANUP_NCURSES);
     noecho();
     curs_set(0);
     keypad(screen, TRUE);
     raw();
     init_keybindings(&world);
+    set_cleanup_flag(CLEANUP_KEYBINDINGS);
     struct WinMeta win_meta = init_win_meta(screen);
     struct Win win_keys = init_win(&win_meta, "Keys",
                                    0, 29, &world, draw_keys_win);
@@ -196,7 +201,7 @@ int main(int argc, char *argv[])
                                              &win_map, &win_info, &win_log);
                 if (1 == quit_called)
                 {
-                    exit_game(&world, &map);
+                    exit_game(&world);
                 }
             }
         }
@@ -255,7 +260,7 @@ int main(int argc, char *argv[])
                                              &win_map, &win_info, &win_log);
                 if (1 == quit_called)
                 {
-                    exit_game(&world, &map);
+                    exit_game(&world);
                 }
             }
         }

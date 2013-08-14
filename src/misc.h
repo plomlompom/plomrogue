@@ -19,11 +19,6 @@ struct Map;
 
 
 
-/* Reset terminal (end ncurses), clean up memory and exit. */
-extern void exit_game(struct World * world, struct Map * map);
-
-
-
 /* Learn from "file" the largest line length (pointed to by "linemax_p") and
  * (pointed to by "n_lines_p" if it is not set to NULL) the number of lines.
  */
