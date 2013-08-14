@@ -29,10 +29,16 @@ extern void set_cleanup_flag(enum cleanup_flag flag);
 
 
 
-/* Exit orderly without message or on error with an error message ("msg").
- */
+/* Exit orderly, clean up. */
 extern void exit_game(struct World * world);
-extern void exit_err(struct World * world, char * msg);
+
+
+
+/* If fail != 0, exit with an error message "msg" and clean up. (For  "fail",
+ * pass the result of functions that return non-zero as an error status and
+ * thereby avoid bloating up the code with if-error-conditionals.)
+ */
+extern void exit_err(unsigned char fail, struct World * world, char * msg);
 
 
 
