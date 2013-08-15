@@ -142,19 +142,19 @@ extern uint8_t write_map_objects(struct World * world, void * start,
 {
     struct MapObj * map_obj;
     struct MapObjDef * mod;
-    uint8_t fail = 0;
+    uint8_t err = 0;
     for (map_obj = start; map_obj != 0; map_obj = map_obj->next)
     {
-        fail = fail | write_uint8(map_obj->type, file);
-        fail = fail | write_uint16_bigendian(map_obj->pos.y + 1, file);
-        fail = fail | write_uint16_bigendian(map_obj->pos.x + 1, file);
+        err = err | write_uint8(map_obj->type, file);
+        err = err | write_uint16_bigendian(map_obj->pos.y + 1, file);
+        err = err | write_uint16_bigendian(map_obj->pos.x + 1, file);
         mod = get_map_obj_def(world, map_obj->type);
         if ('m' == mod->m_or_i)
         {
-            fail = fail | write_map_objects_monsterdata(map_obj, file);
+            err = err | write_map_objects_monsterdata(map_obj, file);
         }
     }
-    return (fail | write_uint16_bigendian(0, file));
+    return (err | write_uint16_bigendian(0, file));
 }
 
 
@@ -168,17 +168,17 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
     char first = 1;
     long pos;
     uint16_t read_uint16 = 0;
-    uint8_t fail = 0;
+    uint8_t err = 0;
     while (1)
     {
         pos = ftell(file);
-        fail = fail | read_uint16_bigendian(file, &read_uint16);
+        err = err | read_uint16_bigendian(file, &read_uint16);
         if (0 == read_uint16)
         {
             break;
         }
         fseek(file, pos, SEEK_SET);
-        fail = fail | read_uint8(file, &type);
+        err = err | read_uint8(file, &type);
         mod = get_map_obj_def(world, type);
         if ('m' == mod->m_or_i)
         {
@@ -190,20 +190,20 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
         }
         map_obj = get_next_map_obj(start, &first, size, map_obj);
         map_obj->type = type;
-        fail = fail | read_uint16_bigendian(file, &map_obj->pos.y);
-        fail = fail | read_uint16_bigendian(file, &map_obj->pos.x);
+        err = err | read_uint16_bigendian(file, &map_obj->pos.y);
+        err = err | read_uint16_bigendian(file, &map_obj->pos.x);
         map_obj->pos.y--;
         map_obj->pos.x--;
         if ('m' == mod->m_or_i)
         {
-            fail = fail | read_map_objects_monsterdata(map_obj, file);
+            err = err | read_map_objects_monsterdata(map_obj, file);
         }
     }
     if (!first)
     {
         map_obj->next = 0;
     }
-    return fail;
+    return err;
 }
 
 

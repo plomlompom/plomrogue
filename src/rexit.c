@@ -59,9 +59,9 @@ extern void exit_game(struct World * world)
 
 
 
-extern void exit_err(unsigned char fail, struct World * world, char * msg)
+extern void exit_err(unsigned char err, struct World * world, char * msg)
 {
-    if (0 == fail)
+    if (0 == err)
     {
         return;
     }

@@ -60,22 +60,22 @@ int main(int argc, char *argv[])
     world.monster = 0;
     world.item = 0;
     init_map_object_defs(&world, "defs");
-    uint8_t fail = 0;
+    uint8_t err = 0;
 
     /* For interactive mode, try to load world state from savefile. */
     FILE * file;
     if (1 == world.interactive && 0 == access("savefile", F_OK))
     {
         file = fopen("savefile", "r");
-        fail = fail | read_uint32_bigendian(file, &world.seed);
-        fail = fail | read_uint32_bigendian(file, &world.turn);
-        fail = fail | read_uint16_bigendian(file, &player.pos.y);
-        fail = fail | read_uint16_bigendian(file, &player.pos.x);
+        err = err | read_uint32_bigendian(file, &world.seed);
+        err = err | read_uint32_bigendian(file, &world.turn);
+        err = err | read_uint16_bigendian(file, &player.pos.y);
+        err = err | read_uint16_bigendian(file, &player.pos.x);
         player.pos.y--;
         player.pos.x--;
-        fail = fail | read_uint8(file, &player.hitpoints);
-        fail = fail | read_map_objects(&world, &world.monster, file);
-        fail = fail | read_map_objects(&world, &world.item,    file);
+        err = err | read_uint8(file, &player.hitpoints);
+        err = err | read_map_objects(&world, &world.monster, file);
+        err = err | read_map_objects(&world, &world.item,    file);
         fclose(file);
     }
 
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         if (0 == world.interactive)
         {
             file = fopen("record", "r");
-            fail = fail | read_uint32_bigendian(file, &world.seed);
+            err = err | read_uint32_bigendian(file, &world.seed);
         }
 
         /* For interactive-mode in newly started world, generate a start seed
@@ -96,12 +96,12 @@ int main(int argc, char *argv[])
         {
             file = fopen("record", "w");
             world.seed = time(NULL);
-            fail = fail | write_uint32_bigendian(world.seed, file);
+            err = err | write_uint32_bigendian(world.seed, file);
             fclose(file);
         }
     }
 
-    exit_err(fail, &world, "Failure initializing game.");
+    exit_err(err, &world, "Failure initializing game.");
 
 
     /* Generate map from seed and, if newly generated world, start positions of

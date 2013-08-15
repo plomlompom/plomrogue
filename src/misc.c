@@ -132,16 +132,16 @@ extern void turn_over(struct World * world, char action)
 
 extern void save_game(struct World * world)
 {
-    uint8_t fail;
+    uint8_t err;
     FILE * file = fopen("savefile", "w");
-    fail = write_uint32_bigendian(world->seed, file);
-    fail = fail | write_uint32_bigendian(world->turn, file);
-    fail = fail | write_uint16_bigendian(world->player->pos.y + 1, file);
-    fail = fail | write_uint16_bigendian(world->player->pos.x + 1, file);
-    fail = fail | write_uint8(world->player->hitpoints, file);
-    fail = fail | write_map_objects(world, world->monster, file);
-    fail = fail | write_map_objects(world, world->item, file);
-    exit_err(fail, world, "Error saving game.");
+    err = write_uint32_bigendian(world->seed, file);
+    err = err | write_uint32_bigendian(world->turn, file);
+    err = err | write_uint16_bigendian(world->player->pos.y + 1, file);
+    err = err | write_uint16_bigendian(world->player->pos.x + 1, file);
+    err = err | write_uint8(world->player->hitpoints, file);
+    err = err | write_map_objects(world, world->monster, file);
+    err = err | write_map_objects(world, world->item, file);
+    exit_err(err, world, "Error saving game.");
     fclose(file);
 }
 

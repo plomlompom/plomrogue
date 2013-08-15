@@ -34,11 +34,11 @@ extern void exit_game(struct World * world);
 
 
 
-/* If fail != 0, exit with an error message "msg" and clean up. (For  "fail",
+/* If "err" != 0, exit with an error message "msg" and clean up. (For "err",
  * pass the result of functions that return non-zero as an error status and
  * thereby avoid bloating up the code with if-error-conditionals.)
  */
-extern void exit_err(unsigned char fail, struct World * world, char * msg);
+extern void exit_err(unsigned char err, struct World * world, char * msg);
 
 
 

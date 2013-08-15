@@ -59,9 +59,9 @@ static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size)
 extern uint8_t read_uint8(FILE * file, uint8_t * x)
 {
     uint32_t y = * x;
-    uint8_t fail = read_uintX_bigendian(file, &y, 8);
+    uint8_t err = read_uintX_bigendian(file, &y, 8);
     * x = (uint8_t) y;
-    return fail;
+    return err;
 }
 
 
@@ -69,9 +69,9 @@ extern uint8_t read_uint8(FILE * file, uint8_t * x)
 extern uint8_t read_uint16_bigendian(FILE * file, uint16_t * x)
 {
     uint32_t y = * x;
-    uint8_t fail = read_uintX_bigendian(file, &y, 16);
+    uint8_t err = read_uintX_bigendian(file, &y, 16);
     * x = (uint16_t) y;
-    return fail;
+    return err;
 }
 
 
