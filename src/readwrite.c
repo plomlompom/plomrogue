@@ -58,6 +58,11 @@ static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size)
 
 extern uint8_t read_uint8(FILE * file, uint8_t * x)
 {
+    /* Since read_uintX_bigendian() works on -- and zeroes -- four bytes, work
+     * on values of fewer bytes corrupts their immediate neighbor bytes. This
+     * necessitates working on newly acquired separate memory areas (* y), only
+     * copying the sufficiently small end result to * x.
+     */
     uint32_t y = * x;
     uint8_t err = read_uintX_bigendian(file, &y, 8);
     * x = (uint8_t) y;
@@ -68,6 +73,7 @@ extern uint8_t read_uint8(FILE * file, uint8_t * x)
 
 extern uint8_t read_uint16_bigendian(FILE * file, uint16_t * x)
 {
+    /* See read_uint8() introductory comment for rationale. */
     uint32_t y = * x;
     uint8_t err = read_uintX_bigendian(file, &y, 16);
     * x = (uint16_t) y;
