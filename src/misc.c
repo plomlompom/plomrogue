@@ -3,6 +3,7 @@
 #include "misc.h"
 #include <stdlib.h> /* for calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
+#include <stdint.h> /* for uint8_t */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
                       * resize_active_win(), cycle_active_win(),
                       * shift_active_win(), struct Win, struct WinMeta
@@ -215,12 +216,10 @@ extern struct yx_uint16 find_passable_pos(struct Map * map)
 
 
 
-extern unsigned char meta_keys(int key, struct World * world,
-                               struct WinMeta * win_meta,
-                               struct Win * win_keys,
-                               struct Win * win_map,
-                               struct Win * win_info,
-                               struct Win * win_log)
+extern uint8_t meta_keys(int key, struct World * world,
+                         struct WinMeta * win_meta, struct Win * win_keys,
+                         struct Win * win_map, struct Win * win_info,
+                         struct Win * win_log)
 {
     if (key == get_action_key(world->keybindings, "quit"))
     {

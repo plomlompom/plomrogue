@@ -10,6 +10,7 @@
 
 
 #include <stdio.h> /* for FILE typedef */
+#include <stdint.h> /* for uint8_t */
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
 struct World;
 
@@ -19,7 +20,7 @@ struct World;
 struct Player
 {
     struct yx_uint16 pos;
-    unsigned char hitpoints;
+    uint8_t hitpoints;
 };
 
 
@@ -41,7 +42,7 @@ struct Item
 struct Monster
 {
     struct MapObj map_obj;
-    unsigned char hitpoints;
+    uint8_t hitpoints;
 };
 
 
@@ -67,7 +68,7 @@ struct ItemDef
 struct MonsterDef
 {
     struct MapObjDef map_obj_def;
-    unsigned char hitpoints_start; /* Hitpoints each monster starts with. */
+    uint8_t hitpoints_start; /* Hitpoints each monster starts with. */
 };
 
 
@@ -81,7 +82,7 @@ extern void init_map_object_defs(struct World * world, char * filename);
  * "def_id".
  */
 extern void * build_map_objects(struct World * world, void * start, char def_id,
-                                unsigned char n);
+                                uint8_t n);
 
 
 

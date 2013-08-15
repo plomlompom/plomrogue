@@ -9,6 +9,7 @@
 
 
 
+#include <stdint.h> /* for uint8_t */
 struct World;
 struct Map;
 
@@ -38,7 +39,7 @@ extern void exit_game(struct World * world);
  * pass the result of functions that return non-zero as an error status and
  * thereby avoid bloating up the code with if-error-conditionals.)
  */
-extern void exit_err(unsigned char err, struct World * world, char * msg);
+extern void exit_err(uint8_t err, struct World * world, char * msg);
 
 
 

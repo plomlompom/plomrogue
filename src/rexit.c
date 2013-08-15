@@ -3,6 +3,7 @@
 #include "rexit.h"
 #include <stdlib.h> /* for exit(), free(), defines EXIT_SUCESS, EXIT_FAILURE */
 #include <stdio.h> /* for printf() */
+#include <stdint.h> /* for uint8_t */
 #include <ncurses.h> /* for endwin() */
 #include "main.h" /* for World struct */
 #include "map.h" /* for Map struct */
@@ -11,7 +12,7 @@
 
 
 /* The clean-up routine and the flag resource by which it decides what to do. */
-static unsigned char cleanup_flags = 0x00;
+static uint8_t cleanup_flags = 0x00;
 static void cleanup(struct World * world);
 
 
@@ -59,7 +60,7 @@ extern void exit_game(struct World * world)
 
 
 
-extern void exit_err(unsigned char err, struct World * world, char * msg)
+extern void exit_err(uint8_t err, struct World * world, char * msg)
 {
     if (0 == err)
     {

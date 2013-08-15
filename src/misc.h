@@ -9,7 +9,7 @@
 
 
 
-#include <stdint.h>    /* for uint16_t, uint32_t */
+#include <stdint.h>    /* for uint8_t, uint16_t, uint32_t */
 #include <stdio.h>     /* for FILE typedef */
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
 struct World;
@@ -85,11 +85,9 @@ extern struct yx_uint16 find_passable_pos(struct Map * map);
 /* Call some meta game / window management actions dependent on key. If the
  * "quit" action is called, return 1 only instead of doing anything directly.
  */
-extern unsigned char meta_keys(int key, struct World * world,
-                               struct WinMeta * win_meta,
-                               struct Win * win_keys,
-                               struct Win * win_map,
-                               struct Win * win_info,
+extern uint8_t meta_keys(int key, struct World * world,
+                               struct WinMeta * win_meta, struct Win * win_keys,
+                               struct Win * win_map, struct Win * win_info,
                                struct Win * win_log);
 
 

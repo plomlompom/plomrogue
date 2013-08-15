@@ -2,6 +2,7 @@
 
 #include "map_objects.h"
 #include <stdlib.h> /* for malloc(), calloc(), free(), atoi() */
+#include <stdint.h> /* for uint8_t */
 #include <stdio.h> /* for FILE typedef */
 #include <string.h> /* for strchr(), strlen(), memcpy()  */
 #include "readwrite.h" /* for [read/write]_uint[8/16/23][_bigendian]() */
@@ -209,9 +210,9 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
 
 
 extern void * build_map_objects(struct World * world, void * start, char def_id,
-                                unsigned char n)
+                                uint8_t n)
 {
-    unsigned char i;
+    uint8_t i;
     struct MapObj * mo;
     char first = 1;
     struct MapObjDef * mod = get_map_obj_def(world, def_id);

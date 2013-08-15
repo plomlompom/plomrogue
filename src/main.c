@@ -6,6 +6,7 @@
 #include <ncurses.h> /* for initscr(), noecho(), curs_set(), keypad(), raw() */
 #include <time.h> /* for time() */
 #include <unistd.h> /* for getopt(), optarg */
+#include <stdint.h> /* for uint8_t */
 #include "windows.h" /* for structs WinMeta, Win, init_win(), init_win_meta(),
                       * draw_all_wins()
                       */
@@ -151,8 +152,8 @@ int main(int argc, char *argv[])
 
     /* Replay mode. */
     int key;
-    unsigned char quit_called = 0;
-    unsigned char await_actions = 1;
+    uint8_t quit_called = 0;
+    uint8_t await_actions = 1;
     if (0 == world.interactive)
     {
         int action;

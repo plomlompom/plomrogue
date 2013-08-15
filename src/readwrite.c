@@ -2,7 +2,7 @@
 
 #include "readwrite.h"
 #include <stdio.h> /* for FILE typedef*/
-#include <stdint.h> /* for uint16_t, uint32_t */
+#include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
 
 
 
