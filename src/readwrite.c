@@ -16,7 +16,7 @@
  * all extern functions calling / wrapping around either function). If this ever
  * changes, (re-)insert:
  *
- *    if (0 != size && size <= 32 && 0 != size % 8)
+ *    if (0 == size || size > 32 || 0 != size % 8)
  *    {
  *        return 1;
  *    }
