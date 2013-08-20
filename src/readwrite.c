@@ -10,11 +10,11 @@
  * failure, return 1, else 0. (As of of now, all extern read/write functions
  * build on top of these.)
  *
- * Only use multiples of 8 greater or equal 32 for "size". Originally a bit
- * number check prefaced the code of both functions. It was removed as redundant
- * due to all possible "size" values being hardcoded into the library (i.e. in
- * all extern functions calling / wrapping around either function). If this ever
- * changes, (re-)insert:
+ * Only use multiples of 8 greater or equal 32 for "size", so that storage
+ * inside uint32_t is possible. Originally a bit number check prefaced the code
+ * of both functions. It was removed as redundant due to all possible "size"
+ * values being hardcoded into the library (i.e. in all extern functions calling
+ * / wrapping around either function). If this ever changes, (re-)insert:
  *
  *    if (0 == size || size > 32 || 0 != size % 8)
  *    {
