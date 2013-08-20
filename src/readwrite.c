@@ -6,29 +6,29 @@
 
 
 
-/* Read/write "x" from/to "file" as bigendian representation of "size" bits.
- * Only multiples of 8 allowed for "size". On failure, return 1, else 0.
+/* Read/write "x" from/to "file" as bigendian representation of "size" bits. On
+ * failure, return 1, else 0. (As of of now, all extern read/write functions
+ * build on top of these.)
  *
- * As of of now, all other read/write functions build on top of these. TODO:
- * Consider externing these so-far internal functions and dropping the
- * interfaces to them, instead relying on their internal validity checks.
- * (Usage of padded memory copies instead of directly manipulating * x as is
- * done in read_uint* would need to be added, though.)
+ * Only use multiples of 8 greater or equal 32 for "size". Originally a bit
+ * number check prefaced the code of both functions. It was removed as redundant
+ * due to all possible "size" values being hardcoded into the library (i.e. in
+ * all extern functions calling / wrapping around either function). If this ever
+ * changes, (re-)insert:
+ *
+ *    if (0 != size && size <= 32 && 0 != size % 8)
+ *    {
+ *        return 1;
+ *    }
  */
 static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size);
 static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size);
 
 
-
 static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size)
 {
-    if (0 != size % 8)           /* This bit number validity check is redundant */
-    {                            /* as long as this function is only available  */
-        return 1;                /* through extern interfaces pre-defining the  */
-    }                            /* bit number. TODO: Consider dropping it.     */
-    int16_t bitshift = size - 8;
-
     * x = 0;
+    int16_t bitshift = size - 8;
     int test;
     for (; bitshift >= 0; bitshift = bitshift - 8)
     {
@@ -46,12 +46,7 @@ static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size)
 
 static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size)
 {
-    if (0 != size % 8)                             /* See comment             */
-    {                                              /* on identical            */
-        return 1;                                  /* code block in           */
-    }                                              /* read_uintX_bigendian(). */
     int16_t bitshift = size - 8;
-
     for (; bitshift >= 0; bitshift = bitshift - 8)
     {
         if (EOF == fputc((x >> bitshift) & 0xFF, file))
@@ -79,7 +74,7 @@ extern uint8_t read_uint8(FILE * file, uint8_t * x)
 
 extern uint8_t read_uint16_bigendian(FILE * file, uint16_t * x)
 {
-    /* See read_uint8() introductory comment for rationale. */
+    /* See read_uint8() introductory code comment for rationale. */
     uint32_t y = * x;
     uint8_t err = read_uintX_bigendian(file, &y, 16);
     * x = (uint16_t) y;
