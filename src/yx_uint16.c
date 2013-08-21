@@ -6,9 +6,9 @@
 
 
 
-extern uint8_t yx_uint16_cmp(struct yx_uint16 a, struct yx_uint16 b)
+extern uint8_t yx_uint16_cmp(struct yx_uint16 * a, struct yx_uint16 * b)
 {
-    if (a.y == b.y && a.x == b.x)
+    if (a->y == b->y && a->x == b->x)
     {
         return 1;
     }

@@ -19,7 +19,7 @@ extern void move_monster(struct World * world, struct Monster * monster)
     struct MapObjDef * mod = get_map_obj_def(world, monster->map_obj.type);
     char * desc = mod->desc;
     char * desc_other;
-    if (yx_uint16_cmp(t, world->player->pos))
+    if (yx_uint16_cmp(&t, &world->player->pos))
     {
         sprintf(msg, "\nThe %s hits you.", desc);
         update_log(world, msg);
@@ -39,7 +39,7 @@ extern void move_monster(struct World * world, struct Monster * monster)
         {
             continue;
         }
-        if (yx_uint16_cmp(t, other_monster->map_obj.pos))
+        if (yx_uint16_cmp(&t, &other_monster->map_obj.pos))
         {
             mod = get_map_obj_def(world, other_monster->map_obj.type);
             desc_other = mod->desc;
@@ -68,7 +68,7 @@ extern void move_player (struct World * world, enum dir d)
          monster != 0;
          monster = monster->map_obj.next)
     {
-        if (yx_uint16_cmp(t, monster->map_obj.pos))
+        if (yx_uint16_cmp(&t, &monster->map_obj.pos))
         {
             mod = get_map_obj_def(world, monster->map_obj.type);
             desc = mod->desc;
