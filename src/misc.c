@@ -133,11 +133,9 @@ extern void turn_over(struct World * world, char action)
 
 extern void save_game(struct World * world)
 {
-    char * err_msg = "Error saving game.";
-
     FILE * file = fopen("savefile", "w");
-    exit_err(0 == file, world, err_msg);
-
+    exit_err(0 == file, world,
+             "Error saving game: Unable to open savefile for writing.");
     uint8_t err;
     err = write_uint32_bigendian(world->seed, file);
     err = err | write_uint32_bigendian(world->turn, file);
@@ -146,8 +144,10 @@ extern void save_game(struct World * world)
     err = err | write_uint8(world->player->hitpoints, file);
     err = err | write_map_objects(world, world->monster, file);
     err = err | write_map_objects(world, world->item, file);
-    exit_err(err, world, err_msg);
-    exit_err(fclose(file), world, err_msg);
+    exit_err(err, world,
+             "Error saving game: Trouble writing to opened savefile.");
+    exit_err(fclose(file), world,
+             "Error saving game: Unable to close opened savefile.");
 }
 
 
