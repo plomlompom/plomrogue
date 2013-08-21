@@ -133,13 +133,12 @@ extern void turn_over(struct World * world, char action)
 
 extern void save_game(struct World * world)
 {
-    uint8_t err = 0;
     char * err_msg = "Error saving game.";
 
     FILE * file = fopen("savefile", "w");
-    // err = (0 == file);
     exit_err(0 == file, world, err_msg);
 
+    uint8_t err;
     err = write_uint32_bigendian(world->seed, file);
     err = err | write_uint32_bigendian(world->turn, file);
     err = err | write_uint16_bigendian(world->player->pos.y + 1, file);
