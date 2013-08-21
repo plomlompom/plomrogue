@@ -135,8 +135,6 @@ extern void turn_over(struct World * world, char action)
 
 extern void save_game(struct World * world)
 {
-    char * savefile_tmp = "savefile_tmp";
-    char * savefile     = "savefile";
     char * err_open  = "Error saving game: "
                        "Unable to open 'savefile_new' for writing.";
     char * err_write = "Error saving game: "
@@ -147,6 +145,8 @@ extern void save_game(struct World * world)
                        "Unable to unlink old 'savefile'.";
     char * err_move  = "Error saving game: "
                         "Unable to rename 'savefile_tmp' to 'savefile'.";
+    char * savefile_tmp = "savefile_tmp";
+    char * savefile     = "savefile";
     FILE * file = fopen(savefile_tmp, "w");
     exit_err(0 == file, world, err_open);
     if (   write_uint32_bigendian(world->seed, file)
