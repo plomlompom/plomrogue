@@ -1,6 +1,8 @@
 /* misc.c */
 
 #include "misc.h"
+#include <stdio.h> /* for rename() */
+#include <unistd.h> /* for unlink(), acess() */
 #include <stdlib.h> /* for calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
 #include <stdint.h> /* for uint8_t */
@@ -133,9 +135,11 @@ extern void turn_over(struct World * world, char action)
 
 extern void save_game(struct World * world)
 {
-    FILE * file = fopen("savefile", "w");
-    exit_err(0 == file, world,
-             "Error saving game: Unable to open savefile for writing.");
+    char * savefile_tmp = "savefile_tmp";
+    char * savefile = "savefile";
+    FILE * file = fopen(savefile_tmp, "w");
+    exit_err(0 == file, world, "Error saving game: "
+             "Unable to open new savefile for writing.");
     if (   write_uint32_bigendian(world->seed, file)
         || write_uint32_bigendian(world->turn, file)
         || write_uint16_bigendian(world->player->pos.y + 1, file)
@@ -144,11 +148,18 @@ extern void save_game(struct World * world)
         || write_map_objects(world, world->monster, file)
         || write_map_objects(world, world->item, file))
     {
-        exit_err(1, world,
-                 "Error saving game: Trouble writing to opened savefile.");
+        exit_err(1, world, "Error saving game: "
+                 "Trouble writing to opened new savefile.");
     }
-    exit_err(fclose(file), world,
-             "Error saving game: Unable to close opened savefile.");
+    exit_err(fclose(file), world, "Error saving game: "
+             "Unable to close opened new savefile.");
+    if (!access(savefile, F_OK))
+    {
+        exit_err(unlink(savefile), world, "Error saving game: "
+                 "Unable to unlink old savefile.");
+    }
+    exit_err(rename(savefile_tmp, "savefile"), world, "Error saving game: "
+             "Unable to rename 'savefile_tmp' to 'savefile'.");
 }
 
 
