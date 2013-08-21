@@ -115,15 +115,15 @@ extern uint16_t center_offset(uint16_t pos, uint16_t mapsize,
 extern void turn_over(struct World * world, char action)
 {
     char * err_open  = "Error recording move: "
-                       "Unable to open 'record_tmp' for appending.";
+                       "Unable to open file 'record_tmp' for appending.";
     char * err_write = "Error recording move: "
-                       "Trouble writing to opened 'record_tmp'.";
+                       "Trouble writing to opened file 'record_tmp'.";
     char * err_close = "Error recording move: "
-                       "Unable to close opened 'record_tmp'.";
+                       "Unable to close opened file 'record_tmp'.";
     char * err_unl   = "Error recording move: "
-                       "Unable to unlink old 'record' file.";
+                       "Unable to unlink old file 'record'.";
     char * err_move  = "Error recording move: "
-                        "Unable to rename 'record_tmp' to 'record'.";
+                        "Unable to rename file 'record_tmp' to 'record'.";
     char * recordfile_tmp = "record_tmp";
     char * recordfile     = "record";
     if (1 == world->interactive)
@@ -152,15 +152,15 @@ extern void turn_over(struct World * world, char action)
 extern void save_game(struct World * world)
 {
     char * err_open  = "Error saving game: "
-                       "Unable to open 'savefile_tmp' for writing.";
+                       "Unable to open file 'savefile_tmp' for writing.";
     char * err_write = "Error saving game: "
-                       "Trouble writing to opened 'savefile_tmp'.";
+                       "Trouble writing to opened file 'savefile_tmp'.";
     char * err_close = "Error saving game: "
-                       "Unable to close opened 'savefile_tmp'.";
+                       "Unable to close opened file 'savefile_tmp'.";
     char * err_unl   = "Error saving game: "
-                       "Unable to unlink old 'savefile'.";
+                       "Unable to unlink old 'savefile' file.";
     char * err_move  = "Error saving game: "
-                        "Unable to rename 'savefile_tmp' to 'savefile'.";
+                        "Unable to rename 'file savefile_tmp' to 'savefile'.";
     char * savefile_tmp = "savefile_tmp";
     char * savefile     = "savefile";
     FILE * file = fopen(savefile_tmp, "w");

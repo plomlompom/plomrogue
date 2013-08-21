@@ -61,33 +61,49 @@ int main(int argc, char *argv[])
     world.monster = 0;
     world.item = 0;
     init_map_object_defs(&world, "defs");
-    uint8_t err = 0;
 
     /* For interactive mode, try to load world state from savefile. */
+    char * err_o = "Error loading game: "
+                   "Unable to open 'savefile' for reading.";
+    char * err_r = "Error loading game: "
+                   "Trouble reading from opened 'savefile'.";
+    char * err_c = "Error loading game: "
+                   "Unable to close opened 'savefile'.";
+    char * savefile = "savefile";
     FILE * file;
-    if (1 == world.interactive && 0 == access("savefile", F_OK))
+    if (1 == world.interactive && 0 == access(savefile, F_OK))
     {
-        file = fopen("savefile", "r");
-        err = err | read_uint32_bigendian(file, &world.seed);
-        err = err | read_uint32_bigendian(file, &world.turn);
-        err = err | read_uint16_bigendian(file, &player.pos.y);
-        err = err | read_uint16_bigendian(file, &player.pos.x);
+        file = fopen(savefile, "r");
+        exit_err(0 == file, &world, err_o);
+        if (   read_uint32_bigendian(file, &world.seed)
+            || read_uint32_bigendian(file, &world.turn)
+            || read_uint16_bigendian(file, &player.pos.y)
+            || read_uint16_bigendian(file, &player.pos.x)
+            || read_uint8(file, &player.hitpoints)
+            || read_map_objects(&world, &world.monster, file)
+            || read_map_objects(&world, &world.item,    file))
+        {
+            exit_err(1, &world, err_r);
+        }
+        exit_err(fclose(file), &world, err_c);
         player.pos.y--;
         player.pos.x--;
-        err = err | read_uint8(file, &player.hitpoints);
-        err = err | read_map_objects(&world, &world.monster, file);
-        err = err | read_map_objects(&world, &world.item,    file);
-        fclose(file);
     }
 
     /* For non-interactive mode, try to load world state from record file. */
     else
     {
+        err_o = "Error loading record file: "
+                "Unable to open file 'record' for reading.";
+        err_r = "Error loading record file: "
+                "Trouble reading from opened file 'record'.";
+        char * recordfile = "record";
         world.turn = 1;
         if (0 == world.interactive)
         {
-            file = fopen("record", "r");
-            err = err | read_uint32_bigendian(file, &world.seed);
+            file = fopen(recordfile, "r");
+            exit_err(0 == file, &world, err_o);
+            exit_err(read_uint32_bigendian(file, &world.seed), &world, err_r);
         }
 
         /* For interactive-mode in newly started world, generate a start seed
@@ -95,14 +111,27 @@ int main(int argc, char *argv[])
          */
         else
         {
-            file = fopen("record", "w");
             world.seed = time(NULL);
-            err = err | write_uint32_bigendian(world.seed, file);
-            fclose(file);
+
+            char * err_x = "Error recording new seed: "
+                           "A file 'record' already exists, when it shouldn't.";
+            err_o        = "Error recording new seed: "
+                           "Unable to open 'record_tmp' file for writing.";
+            char * err_w = "Error recording new seed: "
+                           "Trouble writing to opened 'record_tmp' file.";
+            err_c        = "Error recording new seed: "
+                           "Unable to close opened file 'record_tmp'.";
+            char * err_m = "Error recording new seed: "
+                           "Unable to rename file 'record_tmp' to 'record'.";
+            char * recordfile_tmp = "record_tmp";
+            exit_err(!access(recordfile, F_OK), &world, err_x);
+            file = fopen(recordfile_tmp, "w");
+            exit_err(0 == file, &world, err_o);
+            exit_err(write_uint32_bigendian(world.seed, file), &world, err_w);
+            exit_err(fclose(file), &world, err_c);
+            exit_err(rename(recordfile_tmp, recordfile), &world, err_m);
         }
     }
-
-    exit_err(err, &world, "Failure initializing game.");
 
 
     /* Generate map from seed and, if newly generated world, start positions of
@@ -206,6 +235,8 @@ int main(int argc, char *argv[])
                                              &win_map, &win_info, &win_log);
                 if (1 == quit_called)
                 {
+                    err_c = "Error closing read 'record' file.";
+                    exit_err(fclose(file), &world, err_c);
                     exit_game(&world);
                 }
             }
