@@ -31,6 +31,16 @@
 int main(int argc, char *argv[])
 {
     struct World world;
+    char * recordfile_tmp = "record_tmp";
+    char * savefile_tmp   = "savefile_tmp";
+    char * err_x = "A file 'recordfile_tmp' exists, probably from a corrupted "
+                   "previous record saving process. To avoid game record "
+                   "corruption, I won't start until it is removed or renamed.";
+    exit_err(!access(recordfile_tmp, F_OK), &world, err_x);
+    err_x        = "A file 'savefile_tmp' exists, probably from a corrupted "
+                   "previous game saving process. To avoid savegame "
+                   "corruption, I won't start until it is removed or renamed.";
+    exit_err(!access(savefile_tmp,   F_OK), &world, err_x);
 
     /* Read in startup options (i.e. replay option and replay start turn). */
     int opt;
@@ -113,7 +123,7 @@ int main(int argc, char *argv[])
         {
             world.seed = time(NULL);
 
-            char * err_x = "Error recording new seed: "
+            err_x        = "Error recording new seed: "
                            "A file 'record' already exists, when it shouldn't.";
             err_o        = "Error recording new seed: "
                            "Unable to open 'record_tmp' file for writing.";
@@ -123,7 +133,6 @@ int main(int argc, char *argv[])
                            "Unable to close opened file 'record_tmp'.";
             char * err_m = "Error recording new seed: "
                            "Unable to rename file 'record_tmp' to 'record'.";
-            char * recordfile_tmp = "record_tmp";
             exit_err(!access(recordfile, F_OK), &world, err_x);
             file = fopen(recordfile_tmp, "w");
             exit_err(0 == file, &world, err_o);
