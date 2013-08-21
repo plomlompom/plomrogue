@@ -2,10 +2,10 @@
 
 #include "main.h"
 #include <stdlib.h> /* for atoi(), exit(), EXIT_FAILURE, calloc() */
-#include <stdio.h> /* for FILE typedef, F_OK */
+#include <stdio.h> /* for FILE typedef, F_OK, rename() */
 #include <ncurses.h> /* for initscr(), noecho(), curs_set(), keypad(), raw() */
 #include <time.h> /* for time() */
-#include <unistd.h> /* for getopt(), optarg */
+#include <unistd.h> /* for unlink(), getopt(), optarg */
 #include <stdint.h> /* for uint8_t */
 #include "windows.h" /* for structs WinMeta, Win, init_win(), init_win_meta(),
                       * draw_all_wins()
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
             err_o        = "Error recording new seed: "
                            "Unable to open 'record_tmp' file for writing.";
             char * err_w = "Error recording new seed: "
-                           "Trouble writing to opened 'record_tmp' file.";
+                           "Trouble writing to opened file 'record_tmp'.";
             err_c        = "Error recording new seed: "
                            "Unable to close opened file 'record_tmp'.";
             char * err_m = "Error recording new seed: "
