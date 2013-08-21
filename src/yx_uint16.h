@@ -20,6 +20,8 @@ struct yx_uint16
     uint16_t x;
 };
 
+
+
 /* Directions available for movement. */
 enum dir
 {
@@ -29,10 +31,19 @@ enum dir
     WEST
 };
 
+
+
 /* Return 1 if two yx_uint16 coordinates at "a" and "b" are equal, else 0. */
 extern uint8_t yx_uint16_cmp(struct yx_uint16 * a, struct yx_uint16 * b);
 
-/* Return yx_uint16 coordinate one step from coordinate yx in direction dir. */
+
+
+/* Return yx_uint16 coordinate one step from coordinate yx in direction dir.
+ *
+ * If an invalid dir "d" is passed, "yx" remains unchanged.
+ */
 extern struct yx_uint16 mv_yx_in_dir(enum dir d, struct yx_uint16 yx);
+
+
 
 #endif
