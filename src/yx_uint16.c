@@ -2,11 +2,11 @@
 
 
 
-#include "yx_uint16.h" /* for uint16_t */
+#include "yx_uint16.h" /* for uint8_t, uint16_t */
 
 
 
-extern char yx_uint16_cmp(struct yx_uint16 a, struct yx_uint16 b)
+extern uint8_t yx_uint16_cmp(struct yx_uint16 a, struct yx_uint16 b)
 {
     if (a.y == b.y && a.x == b.x)
     {

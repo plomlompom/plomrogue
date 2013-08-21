@@ -9,7 +9,7 @@
 
 
 
-#include <stdint.h> /* for uint16_t */
+#include <stdint.h> /* for uint8_t, uint16_t */
 
 
 
@@ -30,7 +30,7 @@ enum dir
 };
 
 /* Return 1 if two yx_uint16 coordinates a and b are equal, else 0. */
-extern char yx_uint16_cmp(struct yx_uint16 a, struct yx_uint16 b);
+extern uint8_t yx_uint16_cmp(struct yx_uint16 a, struct yx_uint16 b);
 
 /* Return yx_uint16 coordinate one step from coordinate yx in direction dir. */
 extern struct yx_uint16 mv_yx_in_dir(enum dir d, struct yx_uint16 yx);
