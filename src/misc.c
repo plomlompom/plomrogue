@@ -114,12 +114,28 @@ extern uint16_t center_offset(uint16_t pos, uint16_t mapsize,
 
 extern void turn_over(struct World * world, char action)
 {
+    char * err_open  = "Error recording move: "
+                       "Unable to open 'record_tmp' for appending.";
+    char * err_write = "Error recording move: "
+                       "Trouble writing to opened 'record_tmp'.";
+    char * err_close = "Error recording move: "
+                       "Unable to close opened 'record_tmp'.";
+    char * err_unl   = "Error recording move: "
+                       "Unable to unlink old 'record' file.";
+    char * err_move  = "Error recording move: "
+                        "Unable to rename 'record_tmp' to 'record'.";
+    char * recordfile_tmp = "record_tmp";
+    char * recordfile     = "record";
     if (1 == world->interactive)
     {
-        FILE * file = fopen("record", "a");
-        exit_err(write_uint8(action, file), world, "Record writing failure.");
-        fclose(file);
+        FILE * file = fopen(recordfile_tmp, "a");
+        exit_err(0 == file, world, err_open);
+        exit_err(write_uint8(action, file), world, err_write);
+        exit_err(fclose(file), world, err_close);
+        exit_err(unlink(recordfile), world, err_unl);
+        exit_err(rename(recordfile_tmp, recordfile), world, err_move);
     }
+
     world->turn++;
     rrand_seed(world->seed * world->turn);
     struct Monster * monster;
@@ -136,11 +152,11 @@ extern void turn_over(struct World * world, char action)
 extern void save_game(struct World * world)
 {
     char * err_open  = "Error saving game: "
-                       "Unable to open 'savefile_new' for writing.";
+                       "Unable to open 'savefile_tmp' for writing.";
     char * err_write = "Error saving game: "
-                       "Trouble writing to opened 'savefile_new'.";
+                       "Trouble writing to opened 'savefile_tmp'.";
     char * err_close = "Error saving game: "
-                       "Unable to close opened 'savefile_new'.";
+                       "Unable to close opened 'savefile_tmp'.";
     char * err_unl   = "Error saving game: "
                        "Unable to unlink old 'savefile'.";
     char * err_move  = "Error saving game: "
