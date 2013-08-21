@@ -67,6 +67,6 @@ extern void exit_err(uint8_t err, struct World * world, char * msg)
         return;
     }
     cleanup(world);
-    printf(msg);
+    printf("%s\n", msg);
     exit(EXIT_FAILURE);
 }
