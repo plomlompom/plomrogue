@@ -2,9 +2,12 @@
 
 #include "windows.h"
 #include <stdint.h>    /* for uint16_t, uint32_t */
-#include <ncurses.h>   /* for LOTS of stuff */
+#include <ncurses.h>   /* for typedefs WINDOW, chtype, wresize(), getmaxx(), */
+                       /* getmaxy(), supbad(), delwin(), mvwaddch(),         */
+                       /* mvwaddstr(), newpad(), wnoutrefres(), erase(),     */
+                       /* werase(), pnoutrefresh(), doupdate()               */
 #include <stdlib.h>    /* for malloc(), free() */
-#include <string.h>    /* for strlen(), memcpy() */
+#include <string.h>    /* for strlen(), strnlen(), memcpy() */
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
 
 
@@ -77,11 +80,11 @@ static void refit_pad(struct WinMeta * wmeta)
 
 
 
-static void update_wins (struct WinMeta * wmeta, struct Win * w)
+static void update_wins(struct WinMeta * wmeta, struct Win * w)
 {
     if (0 != w->frame.curses_win)
     {
-        destroy_win (w);
+        destroy_win(w);
     }
     place_win(wmeta, w);
     refit_pad(wmeta);
@@ -90,13 +93,13 @@ static void update_wins (struct WinMeta * wmeta, struct Win * w)
                                  w->start.y, w->start.x);
     if (0 != w->next)
     {
-        update_wins (wmeta, w->next);
+        update_wins(wmeta, w->next);
     }
 }
 
 
 
-static void place_win (struct WinMeta * wmeta, struct Win * w)
+static void place_win(struct WinMeta * wmeta, struct Win * w)
 {
     /* First window goes into the upper-left corner. */
     w->start.x = 0;
@@ -175,7 +178,7 @@ static void draw_wins (struct Win * w)
     w->draw(w);
     if (0 != w->next)
     {
-        draw_wins (w->next);
+        draw_wins(w->next);
     }
 }
 
@@ -232,7 +235,7 @@ static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
     draw_win_borderlines(w, active, pad);
     if (0 != w->next)
     {
-        draw_wins_borderlines (w->next, w_active, pad);
+        draw_wins_borderlines(w->next, w_active, pad);
     }
 }
 
