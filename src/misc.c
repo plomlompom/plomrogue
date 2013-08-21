@@ -136,10 +136,19 @@ extern void turn_over(struct World * world, char action)
 extern void save_game(struct World * world)
 {
     char * savefile_tmp = "savefile_tmp";
-    char * savefile = "savefile";
+    char * savefile     = "savefile";
+    char * err_open  = "Error saving game: "
+                       "Unable to open 'savefile_new' for writing.";
+    char * err_write = "Error saving game: "
+                       "Trouble writing to opened 'savefile_new'.";
+    char * err_close = "Error saving game: "
+                       "Unable to close opened 'savefile_new'.";
+    char * err_unl   = "Error saving game: "
+                       "Unable to unlink old 'savefile'.";
+    char * err_move  = "Error saving game: "
+                        "Unable to rename 'savefile_tmp' to 'savefile'.";
     FILE * file = fopen(savefile_tmp, "w");
-    exit_err(0 == file, world,
-             "Error saving game: Unable to open new savefile for writing.");
+    exit_err(0 == file, world, err_open);
     if (   write_uint32_bigendian(world->seed, file)
         || write_uint32_bigendian(world->turn, file)
         || write_uint16_bigendian(world->player->pos.y + 1, file)
@@ -148,19 +157,14 @@ extern void save_game(struct World * world)
         || write_map_objects(world, world->monster, file)
         || write_map_objects(world, world->item, file))
     {
-        exit_err(1, world,
-                 "Error saving game: Trouble writing to opened new savefile.");
+        exit_err(1, world, err_write);
     }
-    exit_err(fclose(file), world,
-             "Error saving game: Unable to close opened new savefile.");
+    exit_err(fclose(file), world, err_close);
     if (!access(savefile, F_OK))
     {
-        exit_err(unlink(savefile), world,
-                 "Error saving game: Unable to unlink old savefile.");
+        exit_err(unlink(savefile), world, err_unl);
     }
-    exit_err(rename(savefile_tmp, savefile), world,
-             "Error saving game: Unable to rename 'savefile_tmp' to "
-              "'savefile'.");
+    exit_err(rename(savefile_tmp, savefile), world, err_move);
 }
 
 
