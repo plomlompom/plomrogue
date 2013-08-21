@@ -147,7 +147,7 @@ extern void save_game(struct World * world)
     err = err | write_map_objects(world, world->monster, file);
     err = err | write_map_objects(world, world->item, file);
     exit_err(err, world, err_msg);
-    fclose(file);
+    exit_err(fclose(file), world, err_msg);
 }
 
 
