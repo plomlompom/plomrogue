@@ -170,7 +170,8 @@ int main(int argc, char *argv[])
     raw();
     init_keybindings(&world);
     set_cleanup_flag(CLEANUP_KEYBINDINGS);
-    struct WinMeta win_meta = init_win_meta(screen);
+    struct WinMeta win_meta;
+    init_win_meta(screen, &win_meta);
     struct Win win_keys = init_win(&win_meta, "Keys",
                                    0, 29, &world, draw_keys_win);
     struct Win win_info = init_win(&win_meta, "Info",

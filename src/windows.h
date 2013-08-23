@@ -79,12 +79,14 @@ struct WinMeta
 
 
 
-/* Create on the terminal "screen" an empty WinMeta. Note that emptiness is
- * marked by WinMeta.chain_start=0. Other struct values are also initialized 0,
- * except for the virtual screen (terminal screen height, width = 1) and its
- * terminal-sized frame.
+/* Initialize empty WinMeta "wmeta" on the terminal "screen". Note that
+ * emptiness is marked by WinMeta.chain_start=0. Other struct values are also
+ * initialized 0, except for the virtual screen (terminal screen height, width =
+ * 1) and its terminal-sized frame.
+ *
+ * Returns 0 on success, 1 on (ncurses newpad() memory allocation) error.
  */
-extern struct WinMeta init_win_meta(WINDOW * screen);
+extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
 
 
 
@@ -110,9 +112,11 @@ extern struct Win init_win(struct WinMeta * wmeta, char * title,
  * Appended windows will become active. Suspended active windows will move the
  * active window selection to their successor in the window chain or, failing
  * that, their predecessor; if no window remains, none will be active.
+ *
+ * Return 0 on success, and 1 on (ncurses window/pad memory allocation) error.
  */
-extern void append_win(struct WinMeta * wmeta, struct Win * w);
-extern void suspend_win(struct WinMeta * wmeta, struct Win * w);
+extern uint8_t append_win(struct WinMeta * wmeta, struct Win * w);
+extern uint8_t suspend_win(struct WinMeta * wmeta, struct Win * w);
 
 
 
@@ -129,8 +133,10 @@ extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset);
 /* Apply new size "size" to the active window, but only if it provides for at
  * least one cell width/height and is in height at least one cell smaller than
  * the screen's vertical height (to provide space for the title bar).
+ *
+ * Returns 0 on success, 1 on (ncurses window/pad memory allocation) error.
  */
-extern void resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size);
+extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size);
 
 
 
@@ -143,8 +149,10 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir);
 
 /* Move active window forwards (set dir="f") or backwards (set dir="b"). Wrap
  * around in the window chain if start / end of it is met.
+ *
+ * Return 0 on success, and 1 on (ncurses window/pad memory allocation) error.
  */
-extern void shift_active_win(struct WinMeta * wmeta, char dir);
+extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir);
 
 
 
@@ -162,9 +170,11 @@ extern void draw_all_wins(struct WinMeta * wmeta);
  * a column or a row dependent on "dir" being *either* "<"/">" *or* something
  * else). It will consist of a line of "dir" symbols bracketing a descriptive
  * text stating the number of rows/columns further available beyond the hint.
+ *
+ * Return 0 on success, and 1 on error (of scroll hint text memory allocation).
  */
-extern void draw_scroll_hint(struct Frame * frame, uint16_t pos, uint32_t dist,
-                             char dir);
+extern uint8_t draw_scroll_hint(struct Frame * frame, uint16_t pos,
+                                uint32_t dist, char dir);
 
 
 
