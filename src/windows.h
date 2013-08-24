@@ -103,7 +103,7 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
  * invisible until appended to the chain of visible windows via append_win().
  */
 extern struct Win init_win(struct WinMeta * wmeta, char * title,
-                           uint16_t height, uint16_t widtht,
+                           uint16_t height, uint16_t width,
                            void * data, void * func);
 
 
