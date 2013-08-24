@@ -67,6 +67,10 @@ extern void exit_err(uint8_t err, struct World * world, char * msg)
         return;
     }
     cleanup(world);
+    if (NULL == msg)
+    {
+        msg = "Some error encountered. Aborted.";
+    }
     printf("%s\n", msg);
     exit(EXIT_FAILURE);
 }
