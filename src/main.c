@@ -171,7 +171,8 @@ int main(int argc, char *argv[])
     init_keybindings(&world);
     set_cleanup_flag(CLEANUP_KEYBINDINGS);
     struct WinMeta win_meta;
-    init_win_meta(screen, &win_meta);
+    char * err_winmem = "Error: Window drawing memory allocation failed.";
+    exit_err(init_win_meta(screen, &win_meta), &world, err_winmem);
     struct Win win_keys = init_win(&win_meta, "Keys",
                                    0, 29, &world, draw_keys_win);
     struct Win win_info = init_win(&win_meta, "Info",
@@ -204,8 +205,8 @@ int main(int argc, char *argv[])
             }
             if (0 == start_turn)
             {
-                draw_all_wins (&win_meta);
-               key = getch();
+                exit_err(draw_all_wins(&win_meta), &world, err_winmem);
+                key = getch();
             }
             if (1 == await_actions
                 && (world.turn < start_turn

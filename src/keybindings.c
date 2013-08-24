@@ -169,7 +169,7 @@ extern char * get_keyname(uint16_t keycode)
 extern void keyswin_mod_key(struct World * world, struct WinMeta * win_meta)
 {
     world->keyswindata->edit = 1;
-    draw_all_wins (win_meta);
+    draw_all_wins(win_meta);
     int key = getch();
     if (key < 1000)
     {
