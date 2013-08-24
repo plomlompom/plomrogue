@@ -533,114 +533,11 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir)
 
 
 
-extern uint8_t shift_active_win_old(struct WinMeta * wmeta, char dir)
-{
-    if (0 != wmeta->active                         /* No shifting with less   */
-        && wmeta->chain_start != wmeta->chain_end  /* than 2 windows visible. */
-        && (dir == 'f' || dir == 'b'))             /* and wrong dir char.     */
-    {
-        struct Win * w_shift = wmeta->active, * w_p, * w_p_next;
-
-        /* Check if shifting will lead to wrapping. */
-        char wrap = 0;
-        if (   (dir == 'f' && w_shift == wmeta->chain_end)
-            || (dir == 'b' && w_shift == wmeta->chain_start))
-        {
-            wrap = 1;
-        }
-
-        /* Suspend all visible windows, remember their order in wins[]. */
-        uint16_t i, i_max;
-        for (w_p  = wmeta->chain_start, i_max = 1;
-             w_p != wmeta->chain_end;
-             w_p  = w_p->next)
-        {
-            i_max++;
-        }
-        struct Win ** wins = malloc(i_max * sizeof(struct Win *));
-        if (NULL == wins)
-        {
-            return 1;
-        }
-        for (i = 0, w_p = wmeta->chain_start;
-             i < i_max;
-             i++)
-        {
-            w_p_next = w_p->next;
-            suspend_win(wmeta, w_p);
-            wins[i] = w_p;
-            w_p = w_p_next;
-        }
-
-        /* Re-append all previously visible windows in the new order. */
-        if (wrap)
-        {
-            if (dir == 'f')
-            {
-                if (0 != append_win(wmeta, w_shift))
-                {
-                    return 1;
-                }
-                for (i = 0; i < i_max - 1; i++)
-                {
-                    if (0 != append_win(wmeta, wins[i]))
-                    {
-                        return 1;
-                    }
-                }
-            }
-            else
-            {
-                for (i = 1; i < i_max; i++)
-                {
-                    if (0 != append_win(wmeta, wins[i]))
-                    {
-                        return 1;
-                    }
-                }
-                if (0 != append_win(wmeta, w_shift))
-                {
-                    return 1;
-                }
-            }
-        }
-        else
-        {
-            for (i = 0; i < i_max; i++)
-            {
-                if (   (dir == 'f' && w_shift == wins[i])
-                    || (dir == 'b' && w_shift == wins[i+1]))
-                {
-                    if (   0 != append_win(wmeta, wins[i+1])
-                        || 0 != append_win(wmeta, wins[i]))
-                    {
-                        return 1;
-                    }
-                    i++;
-                }
-                else
-                {
-                    if (0 != append_win(wmeta, wins[i]))
-                    {
-                        return 1;
-                    }
-                }
-            }
-        }
-        free(wins);
-
-        wmeta->active = w_shift;  /* Otherwise lastly appended win is active. */
-    }
-    return 0;
-}
-
-
-
 extern void shift_active_win(struct WinMeta * wmeta, char dir)
 {
-    if (   0 == wmeta->active
-        || wmeta->chain_start == wmeta->chain_end
-        || (dir != 'f' && dir != 'b'))
+    if (   0 == wmeta->active                     /* No shifting with less    */
+        || wmeta->chain_start == wmeta->chain_end /* than two windows visible */
+        || (dir != 'f' && dir != 'b'))            /* or wrong direction char. */
     {
         return;
     }
