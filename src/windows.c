@@ -554,7 +554,7 @@ extern void shift_active_win(struct WinMeta * wmeta, char dir)
 
 
 
-extern void draw_all_wins(struct WinMeta * wmeta)
+extern uint8_t draw_all_wins(struct WinMeta * wmeta)
 {
     /* Empty everything before filling it a-new. */
     erase();
@@ -572,17 +572,23 @@ extern void draw_all_wins(struct WinMeta * wmeta)
         /* Draw virtual screen scroll hints. */
         if (wmeta->pad_offset > 0)
         {
-            draw_scroll_hint(&wmeta->padframe,
-                             wmeta->pad_offset, wmeta->pad_offset + 1, '<');
+            if (draw_scroll_hint(&wmeta->padframe,
+                                 wmeta->pad_offset, wmeta->pad_offset + 1, '<'))
+            {
+                return 1;
+            }
         }
         if (wmeta->pad_offset + wmeta->padframe.size.x
             < getmaxx(wmeta->padframe.curses_win) - 1)
         {
-            draw_scroll_hint(&wmeta->padframe,
-                             wmeta->pad_offset + wmeta->padframe.size.x - 1,
-                             getmaxx(wmeta->padframe.curses_win)
-                             - (wmeta->pad_offset + wmeta->padframe.size.x),
-                             '>');
+            if (draw_scroll_hint(&wmeta->padframe,
+                                 wmeta->pad_offset + wmeta->padframe.size.x - 1,
+                                 getmaxx(wmeta->padframe.curses_win)
+                                 - (wmeta->pad_offset + wmeta->padframe.size.x),
+                                 '>'))
+            {
+                return 1;
+            }
         }
 
         /* Write virtual screen segment to be shown on physical screen into */
@@ -593,6 +599,7 @@ extern void draw_all_wins(struct WinMeta * wmeta)
 
     /* Only at the end write accumulated changes to the physical screen. */
     doupdate();
+    return 0;
 }
 
 

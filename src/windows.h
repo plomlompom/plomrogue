@@ -153,12 +153,13 @@ extern void shift_active_win(struct WinMeta * wmeta, char dir);
 
 
 
-/* Draw virtual screen including all windows. Also add scroll hints (a line
- * stating that there is more to see on scrolling further into a certain
- * direction) for where the edges of the terminal screen hit non-edges of and
- * inside the virtual screen. Then update the terminal screen.
+/* Draw virtual screen including all windows. Also add scroll hints (see comment
+ * on draw_scroll_hint()) for where the edges of the terminal screen hit
+ * non-edges of and inside the virtual screen. Then update the terminal screen.
+ *
+ * Returns 0 on success, 1 on error (of scroll hint text memory allocation).
  */
-extern void draw_all_wins(struct WinMeta * wmeta);
+extern uint8_t draw_all_wins(struct WinMeta * wmeta);
 
 
 
