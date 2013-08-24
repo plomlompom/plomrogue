@@ -10,6 +10,7 @@
 #include "windows.h" /* for draw_all_wins() and WinMeta struct */
 #include "misc.h"    /* for texfile_sizes() */
 #include "main.h"    /* for World struct */
+#include "rexit.h"   /* for err_exit() */
 
 
 
@@ -169,7 +170,7 @@ extern char * get_keyname(uint16_t keycode)
 extern void keyswin_mod_key(struct World * world, struct WinMeta * win_meta)
 {
     world->keyswindata->edit = 1;
-    draw_all_wins(win_meta);
+    exit_err(draw_all_wins(win_meta), world, "Window drawing error.");
     int key = getch();
     if (key < 1000)
     {

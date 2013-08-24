@@ -11,6 +11,7 @@
 #include "map_objects.h" /* for structs MapObj, Player */
 #include "map.h"         /* for Map struct */
 #include "main.h"        /* for World struct */
+#include "rexit.h"       /* for err_exit() */
 
 
 
@@ -227,16 +228,18 @@ extern void draw_keys_win(struct Win * win)
     {
         if (0 == y && offset > 0)
         {
-            draw_scroll_hint(&win->frame, y, offset + 1, '^');
+            exit_err(draw_scroll_hint(&win->frame, y, offset + 1, '^'),
+                     world, NULL);
             continue;
         }
         else if (win->frame.size.y == y + 1
                  && 0 < world->keyswindata->max
                         - (win->frame.size.y + offset - 1))
         {
-            draw_scroll_hint(&win->frame, y,
-                             world->keyswindata->max
-                             - (offset + win->frame.size.y) + 2, 'v');
+            exit_err(draw_scroll_hint(&win->frame, y,
+                                      world->keyswindata->max
+                                       - (offset + win->frame.size.y) + 2, 'v'),
+                     world, NULL);
             continue;
         }
         attri = 0;

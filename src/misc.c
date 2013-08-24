@@ -185,15 +185,15 @@ extern void save_game(struct World * world)
 
 
 
-extern void toggle_window(struct WinMeta * win_meta, struct Win * win)
+extern uint8_t toggle_window(struct WinMeta * win_meta, struct Win * win)
 {
     if (0 != win->frame.curses_win)
     {
-        suspend_win(win_meta, win);
+        return suspend_win(win_meta, win);
     }
     else
     {
-        append_win(win_meta, win);
+        return append_win(win_meta, win);
     }
 }
 
@@ -213,7 +213,7 @@ extern void scroll_pad(struct WinMeta * win_meta, char dir)
 
 
 
-extern void growshrink_active_window(struct WinMeta * win_meta, char change)
+extern uint8_t growshrink_active_window(struct WinMeta * win_meta, char change)
 {
     if (0 != win_meta->active)
     {
@@ -234,8 +234,9 @@ extern void growshrink_active_window(struct WinMeta * win_meta, char change)
         {
             size.x++;
         }
-        resize_active_win (win_meta, size);
+        return resize_active_win (win_meta, size);
     }
+    return 0;
 }
 
 
@@ -272,19 +273,19 @@ extern uint8_t meta_keys(int key, struct World * world,
     }
     else if (key == get_action_key(world->keybindings, "toggle keys window"))
     {
-        toggle_window(win_meta, win_keys);
+        exit_err(toggle_window(win_meta, win_keys), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "toggle map window"))
     {
-        toggle_window(win_meta, win_map);
+        exit_err(toggle_window(win_meta, win_map), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "toggle info window"))
     {
-        toggle_window(win_meta, win_info);
+        exit_err(toggle_window(win_meta, win_info), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "toggle log window"))
     {
-        toggle_window(win_meta, win_log);
+        exit_err(toggle_window(win_meta, win_log), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "cycle forwards"))
     {
@@ -296,27 +297,27 @@ extern uint8_t meta_keys(int key, struct World * world,
     }
     else if (key == get_action_key(world->keybindings, "shift forwards"))
     {
-        shift_active_win(win_meta, 'f');
+        exit_err(shift_active_win(win_meta, 'f'), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "shift backwards"))
     {
-        shift_active_win(win_meta, 'b');
+        exit_err(shift_active_win(win_meta, 'b'), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "grow horizontally"))
     {
-        growshrink_active_window(win_meta, '*');
+        exit_err(growshrink_active_window(win_meta, '*'), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "shrink horizontally"))
     {
-        growshrink_active_window(win_meta, '_');
+        exit_err(growshrink_active_window(win_meta, '_'), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "grow vertically"))
     {
-        growshrink_active_window(win_meta, '+');
+        exit_err(growshrink_active_window(win_meta, '+'), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "shrink vertically"))
     {
-        growshrink_active_window(win_meta, '-');
+        exit_err(growshrink_active_window(win_meta, '-'), world, NULL);
     }
     else if (key == get_action_key(world->keybindings, "save keys"))
     {
