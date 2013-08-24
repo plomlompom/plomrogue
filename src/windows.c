@@ -58,6 +58,12 @@ static void draw_wins_bordercorners(struct Win * w, WINDOW * pad);
 
 
 
+/* Shift active window forwards / backwards in window chain. */
+static void shift_win_forward(struct WinMeta * wmeta);
+static void shift_win_backward(struct WinMeta * wmeta);
+
+
+
 static uint8_t refit_pad(struct WinMeta * wmeta)
 {
     /* Determine rightmost window column. */
@@ -269,6 +275,88 @@ static void draw_wins_bordercorners(struct Win * w, WINDOW * pad)
 
 
 
+static void shift_win_forward(struct WinMeta * wmeta)
+{
+    if (wmeta->active == wmeta->chain_end)
+    {
+        wmeta->chain_end = wmeta->active->prev;
+        wmeta->chain_end->next = 0;
+        wmeta->active->next = wmeta->chain_start;
+        wmeta->active->next->prev = wmeta->active;
+        wmeta->chain_start = wmeta->active;
+        wmeta->chain_start->prev = 0;
+    }
+    else
+    {
+        struct Win * old_prev = wmeta->active->prev;
+        struct Win * old_next = wmeta->active->next;
+        if (wmeta->chain_end == wmeta->active->next)
+        {
+            wmeta->chain_end = wmeta->active;
+            wmeta->active->next = 0;
+        }
+        else
+        {
+            wmeta->active->next = old_next->next;
+            wmeta->active->next->prev = wmeta->active;
+        }
+        if (wmeta->chain_start == wmeta->active)
+        {
+            wmeta->chain_start = old_next;
+        }
+        else
+        {
+            old_prev->next = old_next;
+        }
+        old_next->prev = old_prev;
+        old_next->next = wmeta->active;
+        wmeta->active->prev = old_next;
+    }
+}
+
+
+
+static void shift_win_backward(struct WinMeta * wmeta)
+{
+    if (wmeta->active == wmeta->chain_start)
+    {
+        wmeta->chain_start = wmeta->active->next;
+        wmeta->chain_start->prev = 0;
+        wmeta->active->prev = wmeta->chain_end;
+        wmeta->active->prev->next = wmeta->active;
+        wmeta->chain_end = wmeta->active;
+        wmeta->chain_end->next = 0;
+    }
+    else
+    {
+        struct Win * old_prev = wmeta->active->prev;
+        struct Win * old_next = wmeta->active->next;
+        if (wmeta->chain_start == wmeta->active->prev)
+        {
+            wmeta->chain_start = wmeta->active;
+            wmeta->active->prev = 0;
+        }
+        else
+        {
+            wmeta->active->prev = old_prev->prev;
+            wmeta->active->prev->next = wmeta->active;
+        }
+        if (wmeta->chain_end == wmeta->active)
+        {
+            wmeta->chain_end = old_prev;
+        }
+        else
+        {
+            old_next->prev = old_prev;
+        }
+        old_prev->next = old_next;
+        old_prev->prev = wmeta->active;
+        wmeta->active->next = old_prev;
+    }
+}
+
+
+
 extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta)
 {
     wmeta->screen              = screen;
@@ -445,7 +533,7 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir)
 
 
 
-extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir)
+extern uint8_t shift_active_win_old(struct WinMeta * wmeta, char dir)
 {
     if (0 != wmeta->active                         /* No shifting with less   */
         && wmeta->chain_start != wmeta->chain_end  /* than 2 windows visible. */
@@ -544,6 +632,27 @@ extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir)
         wmeta->active = w_shift;  /* Otherwise lastly appended win is active. */
     }
     return 0;
+}
+
+
+
+extern void shift_active_win(struct WinMeta * wmeta, char dir)
+{
+    if (   0 == wmeta->active
+        || wmeta->chain_start == wmeta->chain_end
+        || (dir != 'f' && dir != 'b'))
+    {
+        return;
+    }
+    if ('f' == dir)
+    {
+        shift_win_forward(wmeta);
+    }
+    else
+    {
+        shift_win_backward(wmeta);
+    }
+    update_wins(wmeta, wmeta->chain_start);
 }
 
 
