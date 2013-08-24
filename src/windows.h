@@ -148,8 +148,11 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir);
 
 
 /* Move active window forwards (set dir="f") or backwards (set dir="b"). Wrap
- * around in the window chain if start / end of it is met. */
-extern void shift_active_win(struct WinMeta * wmeta, char dir);
+ * around in the window chain if start / end of it is met.
+ *
+ * Returns 0 on success, 1 on (ncurses window/pad memory allocation) error.
+ */
+extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir);
 
 
 
