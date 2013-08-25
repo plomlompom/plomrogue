@@ -2,13 +2,14 @@
 
 #include "rexit.h"
 #include <stdlib.h> /* for exit(), free(), defines EXIT_SUCESS, EXIT_FAILURE */
-#include <stdio.h> /* for printf() */
+#include <stdio.h> /* for printf(), perror() */
 #include <stdint.h> /* for uint8_t */
 #include <ncurses.h> /* for endwin() */
 #include "main.h" /* for World struct */
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
 
+#include "errno.h"
 
 
 /* The clean-up routine and the flag resource by which it decides what to do. */
@@ -72,5 +73,7 @@ extern void exit_err(uint8_t err, struct World * world, char * msg)
         msg = "Some error encountered. Aborted.";
     }
     printf("%s\n", msg);
+    errno = 0;
+    perror("errno states");
     exit(EXIT_FAILURE);
 }
