@@ -7,6 +7,7 @@
 #include <time.h> /* for time() */
 #include <unistd.h> /* for unlink(), getopt(), optarg */
 #include <stdint.h> /* for uint8_t */
+#include <errno.h> /* for errno */
 #include "windows.h" /* for structs WinMeta, Win, init_win(), init_win_meta(),
                       * draw_all_wins()
                       */
@@ -31,9 +32,28 @@
 int main(int argc, char *argv[])
 {
     struct World world;
+    char * recordfile = "record";
+    char * savefile = "savefile";
+    char * err_x = "A file 'record' exists, but no 'savefile'. If everything "
+                   "was in order, both or none would exist. I won't start "
+                   "until this is corrected.";
+    if (!access(recordfile, F_OK) && access(savefile, F_OK))
+    {
+        errno = 0;
+        exit_err(1, &world, err_x);
+    }
+    err_x        = "A 'savefile' exists, but no file 'record'. If everything "
+                   "was in order, both or none would exist. I won't start "
+                   "until this is corrected.";
+
+    if (!access(savefile, F_OK) && access(recordfile, F_OK))
+    {
+        errno = 0;
+        exit_err(1, &world, err_x);
+    }
     char * recordfile_tmp = "record_tmp";
     char * savefile_tmp   = "savefile_tmp";
-    char * err_x = "A file 'recordfile_tmp' exists, probably from a corrupted "
+    err_x        = "A file 'recordfile_tmp' exists, probably from a corrupted "
                    "previous record saving process. To avoid game record "
                    "corruption, I won't start until it is removed or renamed.";
     exit_err(!access(recordfile_tmp, F_OK), &world, err_x);
@@ -79,7 +99,6 @@ int main(int argc, char *argv[])
                    "reading from opened 'savefile'.";
     char * err_c = "Trouble loading game (fclose() in main()) / "
                    "closing opened 'savefile'.";
-    char * savefile = "savefile";
     FILE * file;
     if (1 == world.interactive && 0 == access(savefile, F_OK))
     {
@@ -107,7 +126,6 @@ int main(int argc, char *argv[])
                 "opening file 'record' for reading.";
         err_r = "Trouble loading record file (read_uint32_bigendian() in "
                 "main()) / reading from opened file 'record'.";
-        char * recordfile = "record";
         world.turn = 1;
         if (0 == world.interactive)
         {
@@ -123,8 +141,6 @@ int main(int argc, char *argv[])
         {
             world.seed = time(NULL);
 
-            err_x        = "Trouble recording new seed: "
-                           "A file 'record' already exists, when it shouldn't.";
             err_o        = "Trouble recording new seed (fopen() in main()) / "
                            "opening 'record_tmp' file for writing.";
             char * err_w = "Trouble recording new seed "
@@ -134,7 +150,6 @@ int main(int argc, char *argv[])
                            "closing opened file 'record_tmp'.";
             char * err_m = "Trouble recording new seed (rename() in main()) : "
                            "renaming file 'record_tmp' to 'record'.";
-            exit_err(!access(recordfile, F_OK), &world, err_x);
             file = fopen(recordfile_tmp, "w");
             exit_err(0 == file, &world, err_o);
             exit_err(write_uint32_bigendian(world.seed, file), &world, err_w);
