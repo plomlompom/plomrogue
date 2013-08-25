@@ -31,7 +31,7 @@
 
 
 
-#include <stdint.h>    /* for uint16_t, uint32_t */
+#include <stdint.h>    /* for uint8_t, uint16_t, uint32_t */
 #include <ncurses.h>   /* for the WINDOW typedef */
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
 
@@ -52,13 +52,13 @@ struct Frame
 
 struct Win
 {
-    struct Win * prev;            /* prev=next=0 if Win is outside the chain */
-    struct Win * next;
-    struct yx_uint16 start;       /* upper left corner (of WINDOW or border?) */
+    struct Win * _prev;            /* INTERNAL */ /* _prev == _next == 0 if   */
+    struct Win * _next;            /* INTERNAL */ /* Win is outside the chain */
+    struct yx_uint16 _start;       /* INTERNAL: upper left corner of WINDOW */
     struct Frame frame;
-    char * title;                 /* title to be shown on window border top */
-    void (* draw) (struct Win *); /* function to draw window content ("data") */
-    void * data;                  /* content to be drawn; draw() knows how */
+    char * _title;                 /* INTERNAL: title for window title bar */
+    void (* _draw) (struct Win *); /* INTERNAL: how to draw window content */
+    void * data;                   /* window content to be drawn by _draw() */
 };
 
 
@@ -69,12 +69,12 @@ struct Win
  */
 struct WinMeta
 {
-    WINDOW * screen;          /* terminal screen */
-    uint16_t pad_offset;      /* number of cells view is moved to the right */
-    struct Frame padframe;    /* virtual screen fitted into terminal screen */
-    struct Win * chain_start; /* first Win, whose .prev shall point to 0 */
-    struct Win * chain_end;   /* last Win, whose .next shall point to 0 */
-    struct Win * active;      /* window highlighted/selected for manipulation */
+    WINDOW * _screen;          /* INTERNAL: terminal screen */
+    uint16_t pad_offset;       /* number of cells view is moved to the right */
+    struct Frame padframe;     /* virtual screen fitted into terminal screen */
+    struct Win * _chain_start; /* INTERNAL: first Win, ._prev to point to 0 */
+    struct Win * _chain_end;   /* INTERNAL: last Win, ._next to point to 0 */
+    struct Win * active;       /* Win highlighted/selected for manipulation */
 };
 
 
