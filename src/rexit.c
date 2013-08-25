@@ -68,9 +68,9 @@ extern void exit_err(uint8_t err, struct World * world, char * msg)
     cleanup(world);
     if (NULL == msg)
     {
-        msg = "Some error encountered. Aborted.";
+        msg = "Details unknown.";
     }
-    printf("%s\n", msg);
+    printf("Aborted PlomRogue due to error. %s\n", msg);
     perror("errno states");
     exit(EXIT_FAILURE);
 }

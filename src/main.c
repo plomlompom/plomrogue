@@ -73,12 +73,12 @@ int main(int argc, char *argv[])
     init_map_object_defs(&world, "defs");
 
     /* For interactive mode, try to load world state from savefile. */
-    char * err_o = "Error loading game: "
-                   "Unable to open 'savefile' for reading.";
-    char * err_r = "Error loading game: "
-                   "Trouble reading from opened 'savefile'.";
-    char * err_c = "Error loading game: "
-                   "Unable to close opened 'savefile'.";
+    char * err_o = "Trouble loading game (fopen() in main()) / "
+                   "opening 'savefile' for reading.";
+    char * err_r = "Trouble loading game (in main()) / "
+                   "reading from opened 'savefile'.";
+    char * err_c = "Trouble loading game (fclose() in main()) / "
+                   "closing opened 'savefile'.";
     char * savefile = "savefile";
     FILE * file;
     if (1 == world.interactive && 0 == access(savefile, F_OK))
@@ -103,10 +103,10 @@ int main(int argc, char *argv[])
     /* For non-interactive mode, try to load world state from record file. */
     else
     {
-        err_o = "Error loading record file: "
-                "Unable to open file 'record' for reading.";
-        err_r = "Error loading record file: "
-                "Trouble reading from opened file 'record'.";
+        err_o = "Trouble loading record file (fopen() in main()) / "
+                "opening file 'record' for reading.";
+        err_r = "Trouble loading record file (read_uint32_bigendian() in "
+                "main()) / reading from opened file 'record'.";
         char * recordfile = "record";
         world.turn = 1;
         if (0 == world.interactive)
@@ -123,16 +123,17 @@ int main(int argc, char *argv[])
         {
             world.seed = time(NULL);
 
-            err_x        = "Error recording new seed: "
+            err_x        = "Trouble recording new seed: "
                            "A file 'record' already exists, when it shouldn't.";
-            err_o        = "Error recording new seed: "
-                           "Unable to open 'record_tmp' file for writing.";
-            char * err_w = "Error recording new seed: "
-                           "Trouble writing to opened file 'record_tmp'.";
-            err_c        = "Error recording new seed: "
-                           "Unable to close opened file 'record_tmp'.";
-            char * err_m = "Error recording new seed: "
-                           "Unable to rename file 'record_tmp' to 'record'.";
+            err_o        = "Trouble recording new seed (fopen() in main()) / "
+                           "opening'record_tmp' file for writing.";
+            char * err_w = "Trouble recording new seed "
+                           "(write_uint32_bigendian() in main()) / writing to "
+                           "opened file 'record_tmp'.";
+            err_c        = "Trouble recording new seed (fclose() in main()) / "
+                           "closing opened file 'record_tmp'.";
+            char * err_m = "Trouble recording new seed (rename() in main()) : "
+                           "renaming file 'record_tmp' to 'record'.";
             exit_err(!access(recordfile, F_OK), &world, err_x);
             file = fopen(recordfile_tmp, "w");
             exit_err(0 == file, &world, err_o);
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
     init_keybindings(&world);
     set_cleanup_flag(CLEANUP_KEYBINDINGS);
     struct WinMeta win_meta;
-    char * err_winmem = "Error: Window drawing memory allocation failed.";
+    char * err_winmem = "Trouble with init_win() or draw_all_wins() in main().";
     exit_err(init_win_meta(screen, &win_meta), &world, err_winmem);
     struct Win win_keys = init_win(&win_meta, "Keys",
                                    0, 29, &world, draw_keys_win);
@@ -246,7 +247,8 @@ int main(int argc, char *argv[])
                                              &win_map, &win_info, &win_log);
                 if (1 == quit_called)
                 {
-                    err_c = "Error closing read 'record' file.";
+                    err_c = "Trouble closing 'record' file (fclose() in "
+                            "main()).";
                     exit_err(fclose(file), &world, err_c);
                     exit_game(&world);
                 }

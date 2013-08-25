@@ -170,7 +170,8 @@ extern char * get_keyname(uint16_t keycode)
 extern void keyswin_mod_key(struct World * world, struct WinMeta * win_meta)
 {
     world->keyswindata->edit = 1;
-    exit_err(draw_all_wins(win_meta), world, "Window drawing error.");
+    exit_err(draw_all_wins(win_meta), world, "Trouble with draw_all_wins() in "
+                                             "keyswin_mod_key().");
     int key = getch();
     if (key < 1000)
     {

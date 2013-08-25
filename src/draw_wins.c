@@ -223,7 +223,7 @@ extern void draw_keys_win(struct Win * win)
                            win->frame.size.y - 1);
     uint8_t keydescwidth = 9 + 1; /* max length assured by get_keyname() + \0 */
     char * keydesc = malloc(keydescwidth), * keyname;
-    char * err_hint = "Trouble drawing scroll hint in Keybindings Window.";
+    char * err_hint = "Trouble with draw_scroll_hint() in draw_keys_win().";
     attr_t attri;
     for (y = 0; y <= world->keyswindata->max && y < win->frame.size.y; y++)
     {

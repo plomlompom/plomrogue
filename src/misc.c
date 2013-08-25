@@ -114,16 +114,16 @@ extern uint16_t center_offset(uint16_t pos, uint16_t mapsize,
 
 extern void turn_over(struct World * world, char action)
 {
-    char * err_open  = "Error recording move: "
-                       "Unable to open file 'record_tmp' for appending.";
-    char * err_write = "Error recording move: "
-                       "Trouble writing to opened file 'record_tmp'.";
-    char * err_close = "Error recording move: "
-                       "Unable to close opened file 'record_tmp'.";
-    char * err_unl   = "Error recording move: "
-                       "Unable to unlink old file 'record'.";
-    char * err_move  = "Error recording move: "
-                        "Unable to rename file 'record_tmp' to 'record'.";
+    char * err_open  = "Trouble in turn_over() with fopen() "
+                       "opening file 'record_tmp' for appending.";
+    char * err_write = "Trouble in turn_over() with write_uint8() "
+                       "writing to opened file 'record_tmp'.";
+    char * err_close = "Trouble in turn_over() with fclose() "
+                       "closing opened file 'record_tmp'.";
+    char * err_unl   = "Trouble in turn_over() with unlink() "
+                       "unlinking old file 'record'.";
+    char * err_move  = "Trouble in turn_over() with rename() "
+                       "renaming file 'record_tmp' to 'record'.";
     char * recordfile_tmp = "record_tmp";
     char * recordfile     = "record";
     if (1 == world->interactive)
@@ -151,16 +151,16 @@ extern void turn_over(struct World * world, char action)
 
 extern void save_game(struct World * world)
 {
-    char * err_open  = "Error saving game: "
-                       "Unable to open file 'savefile_tmp' for writing.";
-    char * err_write = "Error saving game: "
-                       "Trouble writing to opened file 'savefile_tmp'.";
-    char * err_close = "Error saving game: "
-                       "Unable to close opened file 'savefile_tmp'.";
-    char * err_unl   = "Error saving game: "
-                       "Unable to unlink old 'savefile' file.";
-    char * err_move  = "Error saving game: "
-                        "Unable to rename 'file savefile_tmp' to 'savefile'.";
+    char * err_open  = "Trouble in save_game() with fopen() "
+                       "opening file 'savefile_tmp' for writing.";
+    char * err_write = "Trouble in save_game() "
+                       "writing to opened file 'savefile_tmp'.";
+    char * err_close = "Trouble in save_game() with fclose() "
+                       "closing opened file 'savefile_tmp'.";
+    char * err_unl   = "Trouble in save_game() with unlink() "
+                       "unlinking old 'savefile' file.";
+    char * err_move  = "Trouble in save_game() with rename() "
+                       "renaming 'file savefile_tmp' to 'savefile'.";
     char * savefile_tmp = "savefile_tmp";
     char * savefile     = "savefile";
     FILE * file = fopen(savefile_tmp, "w");
@@ -259,9 +259,10 @@ extern uint8_t meta_keys(int key, struct World * world,
                          struct Win * win_map, struct Win * win_info,
                          struct Win * win_log)
 {
-    char * err_toggle = "Trouble toggling window.";
-    char * err_shift  = "Trouble shifting window.";
-    char * err_resize = "Trouble resizing window.";
+    char * err_toggle = "Trouble with toggle_window() in meta_keys().";
+    char * err_shift  = "Trouble with shift_active_win() in meta_keys().";
+    char * err_resize = "Trouble with growshrink_active_window() in "
+                        "meta_keys().";
     if (key == get_action_key(world->keybindings, "quit"))
     {
         return 1;
