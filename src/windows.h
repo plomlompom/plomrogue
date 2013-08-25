@@ -55,9 +55,9 @@ struct Win
     struct Win * _prev;            /* INTERNAL */ /* _prev == _next == 0 if   */
     struct Win * _next;            /* INTERNAL */ /* Win is outside the chain */
     struct yx_uint16 _start;       /* INTERNAL: upper left corner of WINDOW */
-    struct Frame frame;
     char * _title;                 /* INTERNAL: title for window title bar */
     void (* _draw) (struct Win *); /* INTERNAL: how to draw window content */
+    struct Frame frame;
     void * data;                   /* window content to be drawn by _draw() */
 };
 
@@ -70,10 +70,10 @@ struct Win
 struct WinMeta
 {
     WINDOW * _screen;          /* INTERNAL: terminal screen */
-    uint16_t pad_offset;       /* number of cells view is moved to the right */
-    struct Frame padframe;     /* virtual screen fitted into terminal screen */
     struct Win * _chain_start; /* INTERNAL: first Win, ._prev to point to 0 */
     struct Win * _chain_end;   /* INTERNAL: last Win, ._next to point to 0 */
+    uint16_t pad_offset;       /* number of cells view is moved to the right */
+    struct Frame padframe;     /* virtual screen fitted into terminal screen */
     struct Win * active;       /* Win highlighted/selected for manipulation */
 };
 
