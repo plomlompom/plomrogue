@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
             err_x        = "Trouble recording new seed: "
                            "A file 'record' already exists, when it shouldn't.";
             err_o        = "Trouble recording new seed (fopen() in main()) / "
-                           "opening'record_tmp' file for writing.";
+                           "opening 'record_tmp' file for writing.";
             char * err_w = "Trouble recording new seed "
                            "(write_uint32_bigendian() in main()) / writing to "
                            "opened file 'record_tmp'.";

@@ -5,9 +5,11 @@
 #include <stdio.h> /* for printf(), perror() */
 #include <stdint.h> /* for uint8_t */
 #include <ncurses.h> /* for endwin() */
+#include <errno.h> /* for errno */
 #include "main.h" /* for World struct */
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
+
 
 
 /* The clean-up routine and the flag resource by which it decides what to do. */
@@ -71,6 +73,9 @@ extern void exit_err(uint8_t err, struct World * world, char * msg)
         msg = "Details unknown.";
     }
     printf("Aborted PlomRogue due to error. %s\n", msg);
-    perror("errno states");
+    if (0 != errno)
+    {
+        perror("errno states");
+    }
     exit(EXIT_FAILURE);
 }
