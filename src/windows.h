@@ -47,6 +47,11 @@
  * content is to be drawn inside the window, and by use of what method.
  */
 
+struct Frame               /* If Frame is Win's "frame", "size" is the        */
+{                          /* designated size of curses_win's ncurses WINDOW. */
+    WINDOW * curses_win;   /* If Frame is WinMeta's "padframe", curses_win is */
+    struct yx_uint16 size; /* the ncurses pad representing the virtual screen,*/
+};                         /* and "size" desribes the terminal screen size.   */
 struct Frame
 {
     WINDOW * curses_win;
@@ -55,11 +60,14 @@ struct Frame
 
 struct Win
 {
-    struct Win * _prev;            /* INTERNAL */ /* _prev == _next == 0 if   */
-    struct Win * _next;            /* INTERNAL */ /* Win is outside the chain */
-    struct yx_uint16 _start;       /* INTERNAL: upper left corner of WINDOW */
-    char * _title;                 /* INTERNAL: title for window title bar */
-    void (* _draw) (struct Win *); /* INTERNAL: how to draw window content */
+    /* members supposed to be used ONLY INTERNALLY */
+    struct Win * _prev;  /* chain pointers; if 0, they mark the start or end  */
+    struct Win * _next;  /* of the chain; if both are 0, Win is outside chain */
+    struct yx_uint16 _start;       /* upper left corner of WINDOW in "frame" */
+    char * _title;                 /* title to be used in window title bar */
+    void (* _draw) (struct Win *); /* how to draw window content ("data") */
+
+    /* members to be available EXTERNALLY */
     struct Frame frame;
     void * data;                   /* window content to be drawn by _draw() */
 };
@@ -72,9 +80,12 @@ struct Win
  */
 struct WinMeta
 {
-    WINDOW * _screen;          /* INTERNAL: terminal screen */
-    struct Win * _chain_start; /* INTERNAL: first Win, ._prev to point to 0 */
-    struct Win * _chain_end;   /* INTERNAL: last Win, ._next to point to 0 */
+    /* members supposed to be used ONLY INTERNALLY */
+    WINDOW * _screen;          /* terminal screen */
+    struct Win * _chain_start; /* if first Win, ._prev to point to 0 */
+    struct Win * _chain_end;   /* if last Win, ._next to point to 0 */
+
+    /* members to be available EXTERNALLY */
     uint16_t pad_offset;       /* number of cells view is moved to the right */
     struct Frame padframe;     /* virtual screen fitted into terminal screen */
     struct Win * active;       /* Win highlighted/selected for manipulation */
