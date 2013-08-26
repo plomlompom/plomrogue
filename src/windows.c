@@ -546,7 +546,7 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir)
 
 extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir)
 {
-    if (   0 == wmeta->active                        /* No shifting with <2   */
+    if (   0 == wmeta->active                        /* No shifting with < 2  */
         || wmeta->_chain_start == wmeta->_chain_end  /* windows visible or    */
         || (dir != 'f' && dir != 'b'))               /* wrong direction char. */
     {

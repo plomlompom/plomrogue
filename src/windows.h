@@ -143,7 +143,7 @@ extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size);
 
 
 
-/* Cycle active window selection forwards (set "dir"="n") or backwards (any
+/* Cycle active window selection forwards ("dir" == "n") or backwards (any
  * other "dir"). Wrap around in the windows chain if start / end of it is met.
  * Does nothing if no window is active.
  */
@@ -151,9 +151,9 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir);
 
 
 
-/* Move active window forwards (set dir="f") or backwards (set dir="b"). Wrap
- * around in the window chain if start / end of it is met. Does nothing if no
- * window is active.
+/* Move active window forwards ("dir" == "f") or backwards ("dir" == "b").
+ * Wrap around in the window chain if start / end of it is met. Does nothing if
+ * no window is active.
  */
 extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir);
 
