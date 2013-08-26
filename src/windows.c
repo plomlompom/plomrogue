@@ -506,11 +506,11 @@ extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size)
         && size.y < wmeta->padframe.size.y)
     {
         wmeta->active->frame.size = size;
-        return update_wins(wmeta, wmeta->_chain_start); /* Following windows' */
-    }                                                   /* positioning may be */
-    return 0;                                           /* affected.          */
-}                                                       /* TODO: Why start at */
-                                                        /* chain_start then?  */
+        return update_wins(wmeta, wmeta->active); /* Positioning of following */
+    }                                             /* windows may be affected. */
+    return 0;
+}
+
 
 
 extern void cycle_active_win(struct WinMeta * wmeta, char dir)
