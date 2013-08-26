@@ -143,7 +143,7 @@ extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size);
 
 
 
-/* Cycle active window selection forwards ("dir" == "n") or backwards (any
+/* Cycle active window selection forwards ("dir" == "f") or backwards (any
  * other "dir"). Wrap around in the windows chain if start / end of it is met.
  * Does nothing if no window is active.
  */
