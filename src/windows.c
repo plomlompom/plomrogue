@@ -1,7 +1,7 @@
 /* windows.c */
 
 #include "windows.h"
-#include <stdint.h>    /* for uint8_t, uint16_t, uint32_t */
+#include <stdint.h>    /* for uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <ncurses.h>   /* for typedefs WINDOW, chtype, wresize(), getmaxx(), */
                        /* getmaxy(), supbad(), delwin(), mvwaddch(),         */
                        /* mvwaddstr(), newpad(), wnoutrefres(), erase(),     */
@@ -13,7 +13,7 @@
 
 
 /* Fit virtual screen's width to minimum width demanded by current windows'
- * geometries. Returns 0 on success, 1 on (pad memory allocation) error.
+ * geometries.
  */
 static uint8_t refit_pad(struct WinMeta * wmeta);
 
@@ -21,8 +21,6 @@ static uint8_t refit_pad(struct WinMeta * wmeta);
 
 /* Update geometry (sizes, positions) of window "w" and its successors in the
  * window chain. For the positioning algorithm place_win() is used.
- *
- * update_wins() returns 0 on success, 1 on (pad/window memory alloc.) error.
  */
 static uint8_t update_wins(struct WinMeta * wmeta, struct Win * w);
 static void place_win(struct WinMeta * wmeta, struct Win * w);
@@ -67,13 +65,15 @@ static void shift_win_backward(struct WinMeta * wmeta);
 static uint8_t refit_pad(struct WinMeta * wmeta)
 {
     /* Determine rightmost window column. */
-    uint16_t lastwincol = 0;
+    uint32_t lastwincol = 0;
     struct Win * w_p = wmeta->_chain_start;
     while (w_p != 0)
     {
-        if (w_p->_start.x + w_p->frame.size.x > lastwincol + 1)
+        if ((uint32_t) w_p->_start.x + (uint32_t) w_p->frame.size.x
+            > lastwincol + 1)
         {
-            lastwincol = w_p->_start.x + w_p->frame.size.x - 1;
+            lastwincol = (uint32_t) w_p->_start.x
+                         + (uint32_t) w_p->frame.size.x - 1;
         }
         w_p = w_p->_next;
     }
@@ -81,6 +81,10 @@ static uint8_t refit_pad(struct WinMeta * wmeta)
     /* Only resize the pad if the rightmost window column has changed. */
     if (getmaxx(wmeta->padframe.curses_win) != lastwincol)
     {
+        if (lastwincol + 2 > UINT16_MAX) /* Abort if pad would grow beyond */
+        {                                /* yx_uint16 confines. */
+            return 2;
+        }
         return (ERR == wresize(wmeta->padframe.curses_win,
                                getmaxy(wmeta->padframe.curses_win),
                                lastwincol + 2));
@@ -97,18 +101,19 @@ static uint8_t update_wins(struct WinMeta * wmeta, struct Win * w)
         destroy_win(w);
     }
     place_win(wmeta, w);
-    if (0 != refit_pad(wmeta))
+    uint8_t test_refit = refit_pad(wmeta);
+    if (0 != test_refit)
+    {
+        return test_refit;
+    }
+    WINDOW * subpad_test = subpad(wmeta->padframe.curses_win,
+                                  w->frame.size.y, w->frame.size.x,
+                                  w->_start.y, w->_start.x);
+    if (NULL == subpad_test)
     {
         return 1;
     }
-    WINDOW * test = subpad(wmeta->padframe.curses_win,
-                           w->frame.size.y, w->frame.size.x,
-                           w->_start.y, w->_start.x);
-    if (NULL == test)
-    {
-        return 1;
-    }
-    w->frame.curses_win = test;
+    w->frame.curses_win = subpad_test;
     if (0 != w->_next)
     {
         return update_wins(wmeta, w->_next);
@@ -362,6 +367,11 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta)
     wmeta->_screen             = screen;
     wmeta->padframe.size.y     = getmaxy(screen);
     wmeta->padframe.size.x     = getmaxx(screen);
+    if (   wmeta->padframe.size.y > UINT16_MAX
+        || wmeta->padframe.size.x > UINT16_MAX)
+    {
+        return 2;
+    }
     wmeta->_chain_start        = 0;
     wmeta->_chain_end          = 0;
     wmeta->pad_offset          = 0;
@@ -448,12 +458,13 @@ extern uint8_t suspend_win(struct WinMeta * wmeta, struct Win * w)
         {
             wmeta->active = w->_next;
         }
-        if (0 != update_wins(wmeta, w->_next))  /* Positioning of successor   */
-        {                                       /* windows may be affected /  */
-            return 1;                           /* need correction. Note that */
-        }                                       /* update_wins() already      */
-        pad_refitted = 1;                       /* refits the pad, voiding    */
-    }                                           /* later need for that.       */
+        uint8_t test = update_wins(wmeta, w->_next);/* Positioning of         */
+        if (0 != test)                              /* successor windows may  */
+        {                                           /* be affected / need     */
+            return test;                            /* correction. Note that  */
+        }                                           /* update_wins() already  */
+        pad_refitted = 1;                           /* refits the pad, voiding*/
+    }                                               /* later need for that.   */
     else
     {
         wmeta->_chain_end = w->_prev;
