@@ -96,16 +96,16 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
 
 
 
-/* Create a window below inside "wmeta" titled "title" of "height" and "width"
+/* Create a window as child of "wmeta" titled "title" of "height" and "width"
  * and appointing "func"() to interpret and draw the content stored at "data"
  * if the window is visible.
  *
- * A value for "width" <1 will trigger a fallback to width=1. A "height" <1 or
+ * A value for "width" <1 will trigger a fallback to width=1. A "height" < 1 or
  * larger than the maximum window height possible within the virtual screen will
  * trigger a fallback to the maximum height possible (i.e. pass a "height" of 0
  * to initialize the window to its largest possible height).
  *
- * Other values of the Win struct will be initialized to 0. The window will stay
+ * Other members of the Win struct are initialized to 0. The window will stay
  * invisible until appended to the chain of visible windows via append_win().
  */
 extern struct Win init_win(struct WinMeta * wmeta, char * title,
