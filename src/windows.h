@@ -151,7 +151,7 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir);
 
 
 
-/* Move active window forwards ("dir" == "f") or backwards ("dir" == "b").
+/* Move active window forwards ("dir" == "f") or backwards (any other "dir").
  * Wrap around in the window chain if start / end of it is met. Does nothing if
  * no window is active.
  */
