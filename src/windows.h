@@ -38,12 +38,13 @@
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
 
 
-/* Individual windows consist of potential (real if window is visible) ncurses
- * WINDOWs wrapped inside Frame structs (that keep a window's designated size
- * even when it is invisible) wrapped inside metadata-rich Win structs. Win
- * structs are chained into a linked list of all the windows visible on the
- * virtual screen and also contain pointers to what content is to be drawn
- * inside the window, and by use of what method.
+
+/* Individual windows consist of potential (real only if window is visible
+ * inside the virtual screen) ncurses WINDOWs wrapped inside Frame structs (that
+ * keep a window's designated size even when it is invisible) wrapped inside
+ * metadata-rich Win structs. Win structs are chained into a linked list of all
+ * the windows visible on the virtual screen and also contain pointers to what
+ * content is to be drawn inside the window, and by use of what method.
  */
 
 struct Frame
