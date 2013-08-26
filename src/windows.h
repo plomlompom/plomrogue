@@ -50,13 +50,8 @@
 struct Frame               /* If Frame is Win's "frame", "size" is the        */
 {                          /* designated size of curses_win's ncurses WINDOW. */
     WINDOW * curses_win;   /* If Frame is WinMeta's "padframe", curses_win is */
-    struct yx_uint16 size; /* the ncurses pad representing the virtual screen,*/
+    struct yx_uint16 size; /* the ncurses pad representing the virtual screen */
 };                         /* and "size" desribes the terminal screen size.   */
-struct Frame
-{
-    WINDOW * curses_win;
-    struct yx_uint16 size;  /* the size curses_win fits into; for the virtual */
-};                          /* screen padframe: the terminal screen size      */
 
 struct Win
 {
