@@ -36,9 +36,8 @@ extern void exit_game(struct World * world);
 
 
 /* If "err" != 0, exit with an error message "msg" and clean up. If "msg" is a
- * NULL pointer, return generic error message. (For "err", pass the result of
- * functions that return non-zero as an error status and thereby avoid bloating
- * up the code with if-error-conditionals.)
+ * NULL pointer, return generic "Details unknown". In any case, also print "err"
+ * as the "internal error code". Also print errno if it is non-zero.
  */
 extern void exit_err(uint8_t err, struct World * world, char * msg);
 

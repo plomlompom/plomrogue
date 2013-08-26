@@ -72,7 +72,8 @@ extern void exit_err(uint8_t err, struct World * world, char * msg)
     {
         msg = "Details unknown.";
     }
-    printf("Aborted PlomRogue due to error. %s\n", msg);
+    printf("Aborted PlomRogue due to error. %s\nInternal error code: %d\n",
+           msg, err);
     if (0 != errno)
     {
         perror("errno states");
