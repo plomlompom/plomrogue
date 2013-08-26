@@ -58,7 +58,7 @@ struct Win
     /* members supposed to be used ONLY INTERNALLY */
     struct Win * _prev;  /* chain pointers; if 0, they mark the start or end  */
     struct Win * _next;  /* of the chain; if both are 0, Win is outside chain */
-    struct yx_uint16 _start;       /* upper left corner of WINDOW in "frame" */
+    struct yx_uint16 _start;       /* upper left corner of "frame" WINDOW */
     char * _title;                 /* title to be used in window title bar */
     void (* _draw) (struct Win *); /* how to draw window content ("data") */
 
@@ -69,16 +69,15 @@ struct Win
 
 
 
-/* The window manager's parent struct WinMeta provides the virtual screen and a
- * representation of the terminal screen. It also anchors start and end of the
- * windows chain.
+/* The window manager's parent struct WinMeta contains the virtual screen,
+ * relates it to the terminal screen and anchors the chain of visible windows.
  */
 struct WinMeta
 {
     /* members supposed to be used ONLY INTERNALLY */
-    WINDOW * _screen;          /* terminal screen */
-    struct Win * _chain_start; /* if first Win, ._prev to point to 0 */
-    struct Win * _chain_end;   /* if last Win, ._next to point to 0 */
+    WINDOW * _screen;          /* ncurses' pointer to the terminal screen */
+    struct Win * _chain_start; /* first Win in chain; its _prev == 0 */
+    struct Win * _chain_end;   /* last Win in chain; its _next == 0 */
 
     /* members to be available EXTERNALLY */
     uint16_t pad_offset;       /* number of cells view is moved to the right */
