@@ -9,7 +9,8 @@
  *
  * Windows can be almost any width (number has to fit into 16 bits); the virtual
  * screen grows with them as needed -- but only horizontally and only up to 2^16
- * cells. Their height is limited by the height of the terminal screen.
+ * cells. Their height is limited by the height of the terminal screen, which
+ * must also fit into 2^16 cells.
  *
  * Positioning of windows can only indirectly be influenced: by resizing them,
  * and by shifting their relative position inside the (currently invisible)
@@ -22,7 +23,7 @@
  * Functions that return uint8_t return these error codes:
  * 0 - success
  * 1 - memory allocation error (of ncurses' pads/windows, or scroll hint texts)
- * 2 - activity forces virtual screen to grow beyond width of 2^16 cells
+ * 2 - would force virtual screen to grow beyond width or height of 2^16 cells
  *
  * TODO: Expose less internals to the API.
  *
