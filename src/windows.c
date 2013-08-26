@@ -27,7 +27,7 @@ static void place_win(struct WinMeta * wmeta, struct Win * w);
 
 
 
-/* Destroy window "w"'s ncurses window (and set w.Frame.curses_win to 0). */
+/* Destroy window "w"'s ncurses WINDOW (and set w.Frame.curses_win to 0). */
 static void destroy_win(struct Win * w);
 
 
@@ -40,13 +40,13 @@ static void draw_wins(struct Win * w);
 /* draw_win_borderlines() draws the vertical and horizontal borders of window
  * "w" sans corners into the virtual screen "pad", and draws the top border
  * line as the windows' title bar (highlighted if the window is described
- * active by "active" being set). draw_wins_borderlines().
+ * active by "active" being == 1).
  *
  * draw_wins_borderlines() calls draw_win_borderlines() recursively on all
  * windows from "w" on. "w_active" is a pointer to the one window that
  * draw_win_borderlines() is supposed to handle as the active window.
  *
- * Finally, draw_wins_bordercorners draws into "pad" the borders of window "w"
+ * Finally, draw_wins_bordercorners() draws into "pad" the borders of window "w"
  * and all its successors.
  */
 static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad);
