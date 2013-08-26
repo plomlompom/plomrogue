@@ -114,7 +114,7 @@ extern struct Win init_win(struct WinMeta * wmeta, char * title,
 
 
 
-/* Append/suspend window "w" to/from chain of visible windows in "wmeta".
+/* Append/suspend window "w" to/from chain of visible windows below "wmeta".
  * Appended windows will become active. Suspended active windows will move the
  * active window selection to their successor in the window chain or, failing
  * that, their predecessor; if no window remains, none will be active.
@@ -136,21 +136,24 @@ extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset);
 
 /* Apply new size "size" to the active window, but only if it provides for at
  * least one cell width/height and is in height at least one cell smaller than
- * the screen's vertical height (to provide space for the title bar).
+ * the screen's vertical height (to provide space for the title bar). Does
+ * nothing if no window is active.
  */
 extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size);
 
 
 
-/* Cycle active window selection forwards (set dir="n") or backwards. Wrap
- * around in the windows chain if start / end of it is met.
+/* Cycle active window selection forwards (set "dir"="n") or backwards (any
+ * other "dir"). Wrap around in the windows chain if start / end of it is met.
+ * Does nothing if no window is active.
  */
 extern void cycle_active_win(struct WinMeta * wmeta, char dir);
 
 
 
 /* Move active window forwards (set dir="f") or backwards (set dir="b"). Wrap
- * around in the window chain if start / end of it is met.
+ * around in the window chain if start / end of it is met. Does nothing if no
+ * window is active.
  */
 extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir);
 
