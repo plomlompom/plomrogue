@@ -24,6 +24,8 @@
  * 1 - memory allocation error (of ncurses' pads/windows, or scroll hint texts)
  * 2 - activity forces virtual screen to grow beyond width of 2^16 cells
  *
+ * TODO: Expose less internals to the API.
+ *
  * TODO: Think up a more intuitive window positioning algorithm or at least make
  * the chain that windows are positioned by visible.
  */
