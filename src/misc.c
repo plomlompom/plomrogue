@@ -293,7 +293,7 @@ extern uint8_t meta_keys(int key, struct World * world,
     }
     else if (key == get_action_key(world->keybindings, "cycle forwards"))
     {
-        cycle_active_win(win_meta, 'n');
+        cycle_active_win(win_meta, 'f');
     }
     else if (key == get_action_key(world->keybindings, "cycle backwards"))
     {

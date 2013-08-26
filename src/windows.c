@@ -517,7 +517,7 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir)
 {
     if (0 != wmeta->active)
     {
-        if ('n' == dir)
+        if ('f' == dir)
         {
             if (wmeta->active->_next != 0)
             {
