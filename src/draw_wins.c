@@ -209,7 +209,8 @@ extern void draw_info_win(struct Win * win)
     struct World * world = (struct World *) win->data;
     char text[100];
     snprintf(text, 100,
-             "Turn: %d\nHitpoints: %d", world->turn, world->player->hitpoints);
+             "Turn: %d\nHitpoints: %d\nScore: %d",
+             world->turn, world->player->hitpoints, world->score);
     draw_with_linebreaks(win, text, 0);
 }
 

@@ -167,6 +167,7 @@ extern void save_game(struct World * world)
     exit_err(0 == file, world, err_open);
     if (   write_uint32_bigendian(world->seed, file)
         || write_uint32_bigendian(world->turn, file)
+        || write_uint16_bigendian(world->score, file)
         || write_uint16_bigendian(world->player->pos.y + 1, file)
         || write_uint16_bigendian(world->player->pos.x + 1, file)
         || write_uint8(world->player->hitpoints, file)

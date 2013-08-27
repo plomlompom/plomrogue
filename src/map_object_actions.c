@@ -101,6 +101,8 @@ static void player_hits_monster(struct World * world, struct Monster * monster)
                 m_prev->map_obj.next = monster->map_obj.next;
             }
         }
+        uint8_t score = md->hitpoints_start;
+        world->score = world->score + score;
         free(monster);
     }
 }

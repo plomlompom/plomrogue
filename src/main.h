@@ -26,6 +26,7 @@ struct World
     struct KeysWinData * keyswindata; /* Pointer to key edit window metadata. */
     uint32_t seed;                    /* Randomness seed. */
     uint32_t turn;                    /* Current game turn. */
+    uint16_t score;                   /* Player's score. */
     char * log;                       /* Pointer to the game log string. */
     struct Map * map;                 /* Pointer to the game map cells. */
     struct ItemDef * item_def;        /* Pointer to the item definitions. */

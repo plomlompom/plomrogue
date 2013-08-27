@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
         exit_err(0 == file, &world, err_o);
         if (   read_uint32_bigendian(file, &world.seed)
             || read_uint32_bigendian(file, &world.turn)
+            || read_uint16_bigendian(file, &world.score)
             || read_uint16_bigendian(file, &player.pos.y)
             || read_uint16_bigendian(file, &player.pos.x)
             || read_uint8(file, &player.hitpoints)
@@ -140,6 +141,7 @@ int main(int argc, char *argv[])
         else
         {
             world.seed = time(NULL);
+            world.score = 0;
 
             err_o        = "Trouble recording new seed (fopen() in main()) / "
                            "opening 'record_tmp' file for writing.";
@@ -192,7 +194,7 @@ int main(int argc, char *argv[])
     struct Win win_keys = init_win(&win_meta, "Keys",
                                    0, 29, &world, draw_keys_win);
     struct Win win_info = init_win(&win_meta, "Info",
-                                   2, 20, &world, draw_info_win);
+                                   3, 20, &world, draw_info_win);
     uint16_t height_logwin = win_meta.padframe.size.y
                              - (2 + win_info.frame.size.y);
     struct Win win_log = init_win(&win_meta, "Log",
