@@ -12,14 +12,25 @@
 
 
 
-/* Log monster bumping into monster. */
+/* Log monster (described by "desc_monster1") bumping into "monster2". */
 static void monster_bumps_monster(struct World * world, char * desc_monster1,
                                   struct Monster * monster2);
 
-/* Decrement player HPs due to attack of monster, kill him if necessary and log
- * the whole action.
+/* Decrement player HPs due to attack of monster described by "desc_monster",
+ * kill player if his HP hit zero; log the whole action.
  */
 static void monster_hits_player(struct World * world, char * desc_monster);
+
+/* Decrement HP of "monster" hit by player, kill it if its HP hit zero; log the
+ * whole action.
+ */
+static void player_hits_monster(struct World * world, struct Monster * monster)
+
+/* Try moving the player in direction "d" towards coordinate "target"; log
+ * success or failure of the whole action.
+ */
+static void try_player_move(struct World * world,
+                            enum dir d, struct yx_uint16 target)
 
 
 
@@ -39,9 +50,9 @@ static void monster_bumps_monster(struct World * world, char * desc_monster1,
 
 static void monster_hits_player(struct World * world, char * desc_monster)
 {
-    char * hitdesc = " hits you.";
-    char * msg = malloc(strlen(desc_monster) + strlen(hitdesc) + 2);
-    sprintf(msg, "\n%s%s", desc_monster, hitdesc);
+    char * hitdesc = " hits you";
+    char * msg = malloc(strlen(desc_monster) + strlen(hitdesc) + 3);
+    sprintf(msg, "\n%s%s.", desc_monster, hitdesc);
     update_log(world, msg);
     free(msg);
     world->player->hitpoints--;
@@ -49,6 +60,78 @@ static void monster_hits_player(struct World * world, char * desc_monster)
     {
         update_log(world, "\nYou are dead.");
     }
+}
+
+
+
+static void player_hits_monster(struct World * world, struct Monster * monster)
+{
+    struct MapObjDef * mod = get_map_obj_def(world, monster->map_obj.type);
+    char * hit_desc = "You hit the ";
+    char * monster_desc = mod->desc;
+    char * msg = malloc(strlen(hit_desc) + strlen(monster_desc) + 3);
+    sprintf(msg, "\n%s%s.", hit_desc, monster_desc);
+    update_log(world, msg);
+    free(msg);
+    monster->hitpoints--;
+
+    if (0 == monster->hitpoints)
+    {
+        hit_desc = "You kill the ";
+        msg = malloc(strlen(hit_desc) + strlen(monster_desc) + 3);
+        sprintf(msg, "\n%s%s.", hit_desc, monster_desc);
+        update_log(world, msg);
+        free(msg);
+        if (world->monster == monster)
+        {
+            world->monster = world->monster->map_obj.next;
+        }
+        else
+        {
+            struct Monster * m_prev;
+            for (m_prev = world->monster;
+                 m_prev->map_obj.next != monster;
+                 m_prev = m_prev->map_obj.next);
+            {
+                m_prev->map_obj.next = monster->map_obj.next;
+            }
+        }
+        free(monster);
+    }
+}
+
+
+
+static void try_player_move(struct World * world,
+                            enum dir d, struct yx_uint16 target)
+{
+    char * dsc_dir;
+    if      (NORTH == d)
+    {
+        dsc_dir = "north";
+    }
+    else if (EAST  == d)
+    {
+        dsc_dir = "east" ;
+    }
+    else if (SOUTH == d)
+    {
+        dsc_dir = "south";
+    }
+    else if (WEST  == d)
+    {
+        dsc_dir = "west" ;
+    }
+    char * dsc_move = "You fail to move ";
+    if (is_passable(world->map, target))
+    {
+        dsc_move = "You move ";
+        world->player->pos = target;
+    }
+    char * msg = malloc(strlen(dsc_move) + strlen (dsc_dir) + 3);
+    sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
+    update_log(world, msg);
+    free(msg);
 }
 
 
@@ -91,69 +174,19 @@ extern void move_player (struct World * world, enum dir d)
 {
     struct yx_uint16 t = mv_yx_in_dir(d, world->player->pos);
     struct Monster * monster;
-    struct MapObjDef * mod;
-    char * msg = calloc(100, sizeof(char));
-    char * desc;
     for (monster = world->monster;
          monster != 0;
          monster = monster->map_obj.next)
     {
         if (yx_uint16_cmp(&t, &monster->map_obj.pos))
         {
-            mod = get_map_obj_def(world, monster->map_obj.type);
-            desc = mod->desc;
-            sprintf(msg, "\nYou hit the %s.", desc);
-            update_log(world, msg);
-            monster->hitpoints--;
-            if (0 == monster->hitpoints)
-            {
-                sprintf(msg, "\nYou kill the %s.", desc);
-                update_log(world, msg);
-                if (world->monster == monster)
-                {
-                    world->monster = world->monster->map_obj.next;
-                }
-                else
-                {
-                    struct Monster * m_prev;
-                    for (m_prev = world->monster;
-                         m_prev->map_obj.next != monster;
-                         m_prev = m_prev->map_obj.next);
-                    m_prev->map_obj.next = monster->map_obj.next;
-                }
-                free(monster);
-            }
+            player_hits_monster(world, monster);
             turn_over(world, d);
             return;
           }
-      }
-      char * msg_content = "You fail to move";
-      char * dir;
-      if      (NORTH == d)
-      {
-          dir = "north";
-      }
-      else if (EAST  == d)
-      {
-          dir = "east" ;
-      }
-      else if (SOUTH == d)
-      {
-          dir = "south";
-      }
-      else if (WEST  == d)
-      {
-          dir = "west" ;
-      }
-      if (is_passable(world->map, t))
-      {
-          msg_content = "You move";
-          world->player->pos = t;
-      }
-      sprintf(msg, "\n%s %s.", msg_content, dir);
-      update_log(world, msg);
-      free(msg);
-      turn_over(world, d);
+    }
+    try_player_move(world, d, t);
+    turn_over(world, d);
 }
 
 
