@@ -68,6 +68,7 @@ struct ItemDef
 struct MonsterDef
 {
     struct MapObjDef map_obj_def;
+    uint8_t corpse_id;       /* ID of object type killed monster changes to. */
     uint8_t hitpoints_start; /* Hitpoints each monster starts with. */
 };
 

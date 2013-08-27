@@ -74,7 +74,6 @@ static void player_hits_monster(struct World * world, struct Monster * monster)
     update_log(world, msg);
     free(msg);
     monster->hitpoints--;
-
     if (0 == monster->hitpoints)
     {
         hit_dsc = "You kill the ";
@@ -82,6 +81,12 @@ static void player_hits_monster(struct World * world, struct Monster * monster)
         sprintf(msg, "\n%s%s.", hit_dsc, monster_dsc);
         update_log(world, msg);
         free(msg);
+        struct MonsterDef * md = (struct MonsterDef * ) mod;
+        struct Item * corpse = malloc(sizeof(struct Item));
+        corpse->map_obj.type = md->corpse_id;
+        corpse->map_obj.pos = monster->map_obj.pos;
+        corpse->map_obj.next = world->item;
+        world->item = corpse;
         if (world->monster == monster)
         {
             world->monster = world->monster->map_obj.next;
@@ -211,4 +216,3 @@ extern char is_passable (struct Map * map, struct yx_uint16 pos)
     }
     return passable;
 }
-

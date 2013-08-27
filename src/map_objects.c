@@ -112,8 +112,9 @@ extern void init_map_object_defs(struct World * world, char * filename)
         }
         else
         {
-            md.hitpoints_start = atoi   (line_p + 4);
-            line_p             = strchr (line_p + 4, ' ') + 1;
+            md.corpse_id       = atoi   (line_p + 4);
+            md.hitpoints_start = atoi   (line_p + 6);
+            line_p             = strchr (line_p + 6, ' ') + 1;
         }
         mod.desc = calloc (strlen (line_p), sizeof(char));
         memcpy (mod.desc, line_p, strlen(line_p) - 1);

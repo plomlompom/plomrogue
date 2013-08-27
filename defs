@@ -1,5 +1,5 @@
-1 m a 1 ANT
-2 m z 3 ZOMBIE
-3 m S 9 SHOGGOTH
-4 i # THING
+1 m a 4 1 ANT
+2 m z 5 3 ZOMBIE
+3 m S 5 9 SHOGGOTH
+4 i # DIRT
 5 i % SKELETON
