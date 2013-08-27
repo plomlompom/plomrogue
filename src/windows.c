@@ -365,23 +365,23 @@ static void shift_win_backward(struct WinMeta * wmeta)
 extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta)
 {
     wmeta->_screen             = screen;
-    wmeta->padframe.size.y     = getmaxy(screen);
-    wmeta->padframe.size.x     = getmaxx(screen);
-    if (   wmeta->padframe.size.y > UINT16_MAX
-        || wmeta->padframe.size.x > UINT16_MAX)
+    uint32_t maxy_test         = getmaxy(screen);
+    uint32_t maxx_test         = getmaxx(screen);
+    if (maxy_test > UINT16_MAX || maxx_test > UINT16_MAX)
     {
         return 2;
     }
+    wmeta->padframe.size.y     = maxy_test;
+    wmeta->padframe.size.x     = maxx_test;
     wmeta->_chain_start        = 0;
     wmeta->_chain_end          = 0;
     wmeta->pad_offset          = 0;
-    WINDOW * test;
-    test = newpad(wmeta->padframe.size.y, 1);
-    if (NULL == test)
+    WINDOW * pad_test          = newpad(wmeta->padframe.size.y, 1);
+    if (NULL == pad_test)
     {
         return 1;
     }
-    wmeta->padframe.curses_win = test;
+    wmeta->padframe.curses_win = pad_test;
     wmeta->active              = 0;
     return 0;
 }
