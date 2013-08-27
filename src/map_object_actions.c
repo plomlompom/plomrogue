@@ -2,6 +2,7 @@
 
 #include "map_object_actions.h"
 #include <stdlib.h> /* for malloc(), calloc(), free() */
+#include <string.h> /* for strlen() */
 #include "yx_uint16.h" /* for yx_uint16 struct, mv_yx_in_dir(), yx_uint16_cmp */
 #include "misc.h" /* for update_log(), turn_over()*/
 #include "map.h" /* for Map struct */
@@ -11,23 +12,56 @@
 
 
 
+/* Log monster bumping into monster. */
+static void monster_bumps_monster(struct World * world, char * desc_monster1,
+                                  struct Monster * monster2);
+
+/* Decrement player HPs due to attack of monster, kill him if necessary and log
+ * the whole action.
+ */
+static void monster_hits_player(struct World * world, char * desc_monster);
+
+
+
+static void monster_bumps_monster(struct World * world, char * desc_monster1,
+                                  struct Monster * monster2)
+{
+    char * bumpdesc = " bumps into ";
+    struct MapObjDef * mod = get_map_obj_def(world, monster2->map_obj.type);
+    char * msg = malloc(strlen(desc_monster1) + strlen(bumpdesc)
+                        + strlen(mod->desc) + 3);
+    sprintf(msg, "\n%s%s%s.", desc_monster1, bumpdesc, mod->desc);
+    update_log(world, msg);
+    free(msg);
+}
+
+
+
+static void monster_hits_player(struct World * world, char * desc_monster)
+{
+    char * hitdesc = " hits you.";
+    char * msg = malloc(strlen(desc_monster) + strlen(hitdesc) + 2);
+    sprintf(msg, "\n%s%s", desc_monster, hitdesc);
+    update_log(world, msg);
+    free(msg);
+    world->player->hitpoints--;
+    if (0 == world->player->hitpoints)
+    {
+        update_log(world, "\nYou are dead.");
+    }
+}
+
+
+
 extern void move_monster(struct World * world, struct Monster * monster)
 {
     char d = rrand() % 5;
     struct yx_uint16 t = mv_yx_in_dir(d, monster->map_obj.pos);
-    char * msg = malloc(100);
     struct MapObjDef * mod = get_map_obj_def(world, monster->map_obj.type);
     char * desc = mod->desc;
-    char * desc_other;
     if (yx_uint16_cmp(&t, &world->player->pos))
     {
-        sprintf(msg, "\nThe %s hits you.", desc);
-        update_log(world, msg);
-        world->player->hitpoints--;
-        if (0 == world->player->hitpoints)
-        {
-            update_log(world, "\nYou are dead.");
-        }
+        monster_hits_player(world, desc);
         return;
     }
     struct Monster * other_monster;
@@ -41,14 +75,10 @@ extern void move_monster(struct World * world, struct Monster * monster)
         }
         if (yx_uint16_cmp(&t, &other_monster->map_obj.pos))
         {
-            mod = get_map_obj_def(world, other_monster->map_obj.type);
-            desc_other = mod->desc;
-            sprintf(msg, "\n%s bumps into %s.", desc, desc_other);
-            update_log(world, msg);
+            monster_bumps_monster(world, desc, other_monster);
             return;
         }
     }
-    free(msg);
     if (is_passable(world->map, t))
     {
         monster->map_obj.pos = t;
