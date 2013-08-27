@@ -207,11 +207,18 @@ extern void draw_map_win(struct Win * win)
 extern void draw_info_win(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
-    char text[100];
-    snprintf(text, 100,
-             "Turn: %d\nHitpoints: %d\nScore: %d",
-             world->turn, world->player->hitpoints, world->score);
+    char * dsc_turn      = "Turn: ";
+    char * dsc_hitpoints = "\nHitpoints: ";
+    char * dsc_score     = "\nScore: ";
+    uint16_t maxl = strlen(dsc_turn) + strlen(dsc_hitpoints) + strlen(dsc_score)
+                    + 10 + 5 + 10; /* max strlens of numbers to be used */
+    char * text = malloc(maxl + 1);
+    sprintf(text, "%s%d%s%d%s%d",
+            dsc_turn, world->turn,
+            dsc_hitpoints, world->player->hitpoints,
+            dsc_score, world->score);
     draw_with_linebreaks(win, text, 0);
+    free(text);
 }
 
 
