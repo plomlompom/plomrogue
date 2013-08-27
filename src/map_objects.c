@@ -99,25 +99,25 @@ extern void init_map_object_defs(struct World * world, char * filename)
     struct MonsterDef * * p_p_md  = &world->monster_def;
     char * defline = malloc(linemax);
     char * line_p;
+    char * delim = " ";
     while (fgets(defline, linemax, file))
     {
         mod.next    = 0;
-        mod.id      = atoi(defline);
-        line_p      = strchr(defline, ' ') + 1;
-        mod.m_or_i  = * line_p;
-        mod.mapchar = * (line_p + 2);
+        mod.id      = atoi(strtok(defline, delim));
+        mod.m_or_i  = * strtok(NULL, delim);
+        mod.mapchar = * strtok(NULL, delim);
         if ('i' == mod.m_or_i)
         {
-            line_p = line_p + 5;
+            line_p = strtok(NULL, delim);
         }
         else
         {
-            md.corpse_id       = atoi   (line_p + 4);
-            md.hitpoints_start = atoi   (line_p + 6);
-            line_p             = strchr (line_p + 6, ' ') + 1;
+            md.corpse_id       = atoi(strtok(NULL, delim));
+            md.hitpoints_start = atoi(strtok(NULL, delim));
+            line_p             = strtok(NULL, delim);
         }
-        mod.desc = calloc (strlen (line_p), sizeof(char));
-        memcpy (mod.desc, line_p, strlen(line_p) - 1);
+        mod.desc = calloc(strlen(line_p), sizeof(char));
+        memcpy(mod.desc, line_p, strlen(line_p) - 1);
         if ('i' == mod.m_or_i)
         {
             id.map_obj_def = mod;
@@ -135,7 +135,7 @@ extern void init_map_object_defs(struct World * world, char * filename)
     }
     free(defline);
     fclose(file);
-};
+}
 
 
 
