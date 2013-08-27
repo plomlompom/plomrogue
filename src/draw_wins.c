@@ -211,7 +211,7 @@ extern void draw_info_win(struct Win * win)
     char * dsc_hitpoints = "\nHitpoints: ";
     char * dsc_score     = "\nScore: ";
     uint16_t maxl = strlen(dsc_turn) + strlen(dsc_hitpoints) + strlen(dsc_score)
-                    + 10 + 5 + 10; /* max strlens of numbers to be used */
+                    + 10 + 5 + 10;       /* max strlens of numbers to be used */
     char * text = malloc(maxl + 1);
     sprintf(text, "%s%d%s%d%s%d",
             dsc_turn, world->turn,

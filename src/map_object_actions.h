@@ -25,8 +25,10 @@ extern void move_monster(struct World * world, struct Monster * monster);
 
 
 /* Try to move player in direction "d". On contact with monster, fight / reduce
- * monster's hitpoints, and thereby potentially trigger the monster's death.
- * Update the log on whatever the player did and turn control over to the enemy.
+ * monster's hitpoints, and thereby potentially trigger the monster's death,
+ * create a corpse and increment the player's score by the amount of hitpoints
+ * the monster started with. Update the log on whatever the player did and turn
+ * control over to the enemy.
  */
 extern void move_player (struct World * world, enum dir d);
 

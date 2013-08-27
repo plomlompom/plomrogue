@@ -21,8 +21,9 @@ static void monster_bumps_monster(struct World * world, char * dsc_monster1,
  */
 static void monster_hits_player(struct World * world, char * dsc_monster);
 
-/* Decrement HP of "monster" hit by player, kill it if its HP hit zero; log the
- * whole action.
+/* Decrement HP of "monster" hit by player, kill it if its HP hit zero, create a
+ * corpse and increment player's score by the amount of hitpoints the monster
+ * started with; log the whole action.
  */
 static void player_hits_monster(struct World * world, struct Monster * monster);
 
