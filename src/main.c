@@ -5,8 +5,8 @@
 #include <stdio.h> /* for FILE typedef, F_OK, rename() */
 #include <ncurses.h> /* for initscr(), noecho(), curs_set(), keypad(), raw() */
 #include <time.h> /* for time() */
-#include <unistd.h> /* for unlink(), getopt(), optarg */
-#include <stdint.h> /* for uint8_t */
+#include <unistd.h> /* for getopt(), optarg */
+#include <stdint.h> /* for uint16_t, uint32_t */
 #include <errno.h> /* for errno */
 #include "windows.h" /* for structs WinMeta, Win, init_win(), init_win_meta(),
                       * draw_all_wins()
@@ -14,21 +14,20 @@
 #include "draw_wins.h" /* for draw_keys_win(), draw_map_win(), draw_info_win(),
                         * draw_log_win()
                         */
-#include "keybindings.h" /* for initkeybindings(), get_action_key() */
+#include "keybindings.h" /* for init_keybindings(), get_action_key() */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian]() */
 #include "map_objects.h" /* for structs Monster, Item, Player,
                           * init_map_object_defs(), read_map_objects(),
                           * build_map_objects()
                           */
-#include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "map.h" /* for struct Map, init_map() */
 #include "misc.h" /* for update_log(), toggle_window(), find_passable_pos(),
                    * save_game()
                    */
-#include "yx_uint16.h" /* for dir enum */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game() */
 #include "control.h" /* for meta_control() */
+
 
 
 int main(int argc, char *argv[])
