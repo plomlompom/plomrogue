@@ -14,10 +14,68 @@
 #include "misc.h" /* for scroll_pad(), toggle_window(),
                    * growshrink_active_window()
                    */
+#include "map_object_actions.h" /* for player_wait(), move_player() */
 
 
 
-extern uint8_t meta_keys(int key, struct World * world)
+extern void record_control(int action, struct World * world)
+{
+    if (0 == action)
+    {
+        player_wait(world);
+    }
+    else if (NORTH == action)
+    {
+        move_player(world, NORTH);
+    }
+    else if (EAST  == action)
+    {
+        move_player(world, EAST);
+    }
+    else if (SOUTH == action)
+    {
+        move_player(world, SOUTH);
+    }
+    else if (WEST == action)
+    {
+        move_player(world, WEST);
+    }
+}
+
+
+
+extern uint8_t player_control(int key, struct World * world)
+{
+    if      (key == get_action_key(world->keybindings, "player up"))
+    {
+        move_player(world, NORTH);
+    }
+    else if (key == get_action_key(world->keybindings, "player right"))
+    {
+        move_player(world, EAST);
+    }
+    else if (key == get_action_key(world->keybindings, "player down"))
+    {
+        move_player(world, SOUTH);
+    }
+    else if (key == get_action_key(world->keybindings, "player left"))
+    {
+        move_player(world, WEST);
+    }
+    else if (key == get_action_key(world->keybindings, "wait / next turn"))
+    {
+        player_wait(world);
+    }
+    else
+    {
+        return 1;
+    }
+    return 0;
+}
+
+
+
+extern uint8_t meta_control(int key, struct World * world)
 {
     struct WinMeta * win_meta = world->wins.meta;
     struct Win * win_keys     = world->wins.keys;

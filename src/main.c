@@ -23,19 +23,23 @@
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "map.h" /* for struct Map, init_map() */
 #include "misc.h" /* for update_log(), toggle_window(), find_passable_pos(),
-                   * meta_keys(), save_game()
+                   * save_game()
                    */
 #include "yx_uint16.h" /* for dir enum */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game() */
-#include "control.h" /* for meta_keys() */
+#include "control.h" /* for meta_control() */
 
 
 int main(int argc, char *argv[])
 {
     struct World world;
+
+    /* Check for corrupted savefile / recordfile savings. */
     char * recordfile = "record";
     char * savefile = "savefile";
+    char * recordfile_tmp = "record_tmp";
+    char * savefile_tmp   = "savefile_tmp";
     char * err_x = "A file 'record' exists, but no 'savefile'. If everything "
                    "was in order, both or none would exist. I won't start "
                    "until this is corrected.";
@@ -47,14 +51,11 @@ int main(int argc, char *argv[])
     err_x        = "A 'savefile' exists, but no file 'record'. If everything "
                    "was in order, both or none would exist. I won't start "
                    "until this is corrected.";
-
     if (!access(savefile, F_OK) && access(recordfile, F_OK))
     {
         errno = 0;
         exit_err(1, &world, err_x);
     }
-    char * recordfile_tmp = "record_tmp";
-    char * savefile_tmp   = "savefile_tmp";
     err_x        = "A file 'recordfile_tmp' exists, probably from a corrupted "
                    "previous record saving process. To avoid game record "
                    "corruption, I won't start until it is removed or renamed.";
@@ -73,17 +74,24 @@ int main(int argc, char *argv[])
         switch (opt)
         {
             case 's':
+            {
                 world.interactive = 0;
                 start_turn = 0;
                 if (optarg)
+                {
                     start_turn = atoi(optarg);
-                 break;
+                }
+                break;
+            }
             default:
+            {
                 exit(EXIT_FAILURE);
+            }
         }
     }
 
     /* Initialize log, player, monster/item definitions and monsters/items. */
+    world.score = 0;
     world.log = calloc(1, sizeof(char));
     set_cleanup_flag(CLEANUP_LOG);
     update_log (&world, " ");
@@ -143,7 +151,6 @@ int main(int argc, char *argv[])
         else
         {
             world.seed = time(NULL);
-            world.score = 0;
 
             err_o        = "Trouble recording new seed (fopen() in main()) / "
                            "opening 'record_tmp' file for writing.";
@@ -218,64 +225,39 @@ int main(int argc, char *argv[])
 
     /* Replay mode. */
     int key;
-    uint8_t quit_called = 0;
-    uint8_t await_actions = 1;
     if (0 == world.interactive)
     {
-        int action;
-        while (1)
+        int action = 0;
+        if (0 != start_turn)
         {
-            if (start_turn == world.turn)
-            {
-                start_turn = 0;
-            }
-            if (0 == start_turn)
-            {
-                exit_err(draw_all_wins(&win_meta), &world, err_winmem);
-                key = getch();
-            }
-            if (1 == await_actions
-                && (world.turn < start_turn
-                    || key == get_action_key(world.keybindings,
-                                             "wait / next turn")) )
+            while (world.turn != start_turn)
             {
                 action = getc(file);
                 if (EOF == action)
                 {
-                    start_turn = 0;
-                    await_actions = 0;
+                    break;
                 }
-                else if (0 == action)
+                record_control(action, &world);
+            }
+        }
+        while (1)
+        {
+            draw_all_wins(&win_meta);
+            key = getch();
+            if (   EOF != action
+                && key == get_action_key(world.keybindings, "wait / next turn"))
+            {
+                action = getc(file);
+                if (EOF != action)
                 {
-                    player_wait (&world);
-                }
-                else if (NORTH == action)
-                {
-                    move_player(&world, NORTH);
-                }
-                else if (EAST  == action)
-                {
-                    move_player(&world, EAST);
-                }
-                else if (SOUTH == action)
-                {
-                    move_player(&world, SOUTH);
-                }
-                else if (WEST == action)
-                {
-                    move_player(&world, WEST);
+                    record_control(action, &world);
                 }
             }
-            else
+            else if (meta_control(key, &world))
             {
-                quit_called = meta_keys(key, &world);
-                if (1 == quit_called)
-                {
-                    err_c = "Trouble closing 'record' file (fclose() in "
-                            "main()).";
-                    exit_err(fclose(file), &world, err_c);
-                    exit_game(&world);
-                }
+                err_c = "Trouble closing 'record' file (fclose() in main()).";
+                exit_err(fclose(file), &world, err_c);
+                exit_game(&world);
             }
         }
     }
@@ -283,57 +265,18 @@ int main(int argc, char *argv[])
     /* Interactive mode. */
     else
     {
-        uint32_t last_turn = 0;
         while (1)
         {
-            if (last_turn != world.turn)
-            {
-                save_game(&world);
-                last_turn = world.turn;
-            }
-            if (1 == await_actions && 0 == player.hitpoints)
-            {
-                await_actions = 0;
-            }
-            draw_all_wins (&win_meta);
+            save_game(&world);
+            draw_all_wins(&win_meta);
             key = getch();
-            if      (1 == await_actions
-                     && key == get_action_key(world.keybindings,
-                                              "player up"))
+            if (0 != player.hitpoints && 0 == player_control(key, &world))
             {
-                move_player(&world, NORTH);
+                continue;
             }
-            else if (1 == await_actions
-                     && key == get_action_key(world.keybindings,
-                                              "player right"))
+            if (meta_control(key, &world))
             {
-                move_player(&world, EAST);
-            }
-            else if (1 == await_actions
-                     && key == get_action_key(world.keybindings,
-                                              "player down"))
-            {
-                move_player(&world, SOUTH);
-            }
-            else if (1 == await_actions
-                     && key == get_action_key(world.keybindings,
-                                              "player left"))
-            {
-                move_player(&world, WEST);
-            }
-            else if (1 == await_actions
-                     && key == get_action_key(world.keybindings,
-                                              "wait / next turn"))
-            {
-                player_wait (&world);
-            }
-            else
-            {
-                quit_called = meta_keys(key, &world);
-                if (1 == quit_called)
-                {
-                    exit_game(&world);
-                }
+                exit_game(&world);
             }
         }
     }
