@@ -1,4 +1,6 @@
 /* control.h
+ *
+ * Routines for handling user's key press input.
  */
 
 #ifndef CONTROL_H
@@ -6,8 +8,7 @@
 
 
 
-#include <stdint.h>    /* for uint8_t */
-#include "yx_uint16.h" /* for yx_uint16 coordinates */
+#include <stdint.h> /* for uint8_t */
 struct World;
 
 

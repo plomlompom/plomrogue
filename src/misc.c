@@ -7,16 +7,12 @@
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
 #include <stdint.h> /* for uint8_t */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
-                      * resize_active_win(), cycle_active_win(),
-                      * shift_active_win(), struct Win, struct WinMeta
+                      * resize_active_win(), struct Win, struct WinMeta
                       */
-#include "keybindings.h" /* for get_action_key(), save_keybindings(),
-                          * keyswin_move_selection(), keyswin_mod_key()
-                          */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian]() */
 #include "map_objects.h" /* for struct Monster, write_map_objects(), */
 #include "map_object_actions.h" /* for is_passable(), move_monster() */
-#include "map.h" /* for map_scroll(),map_center_player(), Map struct,dir enum */
+#include "map.h" /* for Map struct */
 #include "main.h" /* for World struct */
 #include "yx_uint16.h" /* for yx_uint16 */
 #include "rrand.h" /* for rrand(), rrand_seed() */
