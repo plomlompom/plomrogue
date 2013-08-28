@@ -28,6 +28,8 @@
 #include "yx_uint16.h" /* for dir enum */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game() */
+#include "control.h" /* for meta_keys() */
+
 
 int main(int argc, char *argv[])
 {

@@ -87,11 +87,4 @@ extern struct yx_uint16 find_passable_pos(struct Map * map);
 
 
 
-/* Call some meta game / window management actions dependent on key. If the
- * "quit" action is called, return 1 only instead of doing anything directly.
- */
-extern uint8_t meta_keys(int key, struct World * world);
-
-
-
 #endif
