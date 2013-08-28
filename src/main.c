@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
         if (0 == world.interactive)
         {
             file = fopen(recordfile, "r");
-            exit_err(0 == file, &world, err_o);
+            exit_err(NULL == file, &world, err_o);
             exit_err(read_uint32_bigendian(file, &world.seed), &world, err_r);
         }
 

@@ -119,7 +119,7 @@ extern void turn_over(struct World * world, char action)
     char * err_write = "Trouble in turn_over() with write_uint8() "
                        "writing to opened file 'record_tmp'.";
     char * err_close = "Trouble in turn_over() with fclose() "
-                       "closing opened file 'record_tmp'.";
+                       "closing opened file 'record'.";
     char * err_unl   = "Trouble in turn_over() with unlink() "
                        "unlinking old file 'record'.";
     char * err_move  = "Trouble in turn_over() with rename() "
@@ -128,14 +128,23 @@ extern void turn_over(struct World * world, char action)
     char * recordfile     = "record";
     if (1 == world->interactive)
     {
-        FILE * file = fopen(recordfile_tmp, "a");
-        exit_err(0 == file, world, err_open);
-        exit_err(write_uint8(action, file), world, err_write);
-        exit_err(fclose(file), world, err_close);
+        FILE * file_old = fopen(recordfile, "r");
+        FILE * file_new = fopen(recordfile_tmp, "w");
+        exit_err(0 == file_old, world, err_open);
+        char c = fgetc(file_old);
+        while (EOF != c)
+        {
+            exit_err(write_uint8(c, file_new), world, err_write);
+            c = fgetc(file_old);
+        }
+        exit_err(fclose(file_old), world, err_close);
+        exit_err(write_uint8(action, file_new), world, err_write);
+        err_close = "Trouble in turn_over() with fclose() "
+                    "closing opened file 'record_tmp'.";
+        exit_err(fclose(file_new), world, err_close);
         exit_err(unlink(recordfile), world, err_unl);
         exit_err(rename(recordfile_tmp, recordfile), world, err_move);
     }
-
     world->turn++;
     rrand_seed(world->seed * world->turn);
     struct Monster * monster;
