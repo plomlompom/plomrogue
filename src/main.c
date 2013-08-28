@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     world.player = &player;
     world.monster = 0;
     world.item = 0;
-    init_map_object_defs(&world, "defs");
+    init_map_object_defs(&world, "config/defs");
 
     /* For interactive mode, try to load world state from savefile. */
     char * err_o = "Trouble loading game (fopen() in main()) / "

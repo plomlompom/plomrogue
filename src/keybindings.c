@@ -16,7 +16,7 @@
 
 extern void init_keybindings(struct World * world)
 {
-    FILE * file = fopen("keybindings", "r");
+    FILE * file = fopen("config/keybindings", "r");
     uint16_t lines, linemax;
     textfile_sizes(file, &linemax, &lines);
     struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
@@ -49,7 +49,7 @@ extern void save_keybindings(struct World * world)
     struct KeysWinData * keyswindata = (struct KeysWinData *)
                                        world->keyswindata;
     struct KeyBinding * keybindings = world->keybindings;
-    FILE * file = fopen("keybindings", "w");
+    FILE * file = fopen("config/keybindings", "w");
     uint16_t linemax = 0;
     uint16_t i;
     for (i = 0; i <= keyswindata->max; i++)
