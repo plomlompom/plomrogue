@@ -19,6 +19,17 @@ struct MonsterDef;
 
 
 
+struct Wins
+{
+    struct WinMeta * meta;
+    struct Win * keys;
+    struct Win * info;
+    struct Win * log;
+    struct Win * map;
+};
+
+
+
 struct World
 {
     char interactive;                 /* 1: playing; 0: record playback. */
@@ -34,6 +45,7 @@ struct World
     struct MonsterDef * monster_def;  /* Pointer to the monster definitions. */
     struct Monster * monster;         /* Pointer to the monsters' data. */
     struct Player * player;           /* Pointer to the player data. */
+    struct Wins wins;                 /* Pointers to WinMeta, individual Wins.*/
 };
 
 

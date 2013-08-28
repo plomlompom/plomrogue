@@ -264,11 +264,13 @@ extern struct yx_uint16 find_passable_pos(struct Map * map)
 
 
 
-extern uint8_t meta_keys(int key, struct World * world,
-                         struct WinMeta * win_meta, struct Win * win_keys,
-                         struct Win * win_map, struct Win * win_info,
-                         struct Win * win_log)
+extern uint8_t meta_keys(int key, struct World * world)
 {
+    struct WinMeta * win_meta = world->wins.meta;
+    struct Win * win_keys     = world->wins.keys;
+    struct Win * win_map      = world->wins.map;
+    struct Win * win_info     = world->wins.info;
+    struct Win * win_log      = world->wins.log;
     char * err_toggle = "Trouble with toggle_window() in meta_keys().";
     char * err_shift  = "Trouble with shift_active_win() in meta_keys().";
     char * err_resize = "Trouble with growshrink_active_window() in "
