@@ -95,6 +95,7 @@ extern void init_command_db(struct World * world)
         copy_tokenized_string(world, &cmds[i].dsc_long, "\n", err);
         i++;
     }
+    free(line);
     world->cmd_db = malloc(sizeof(struct CommandDB));
     world->cmd_db->cmds = cmds;
     world->cmd_db->n = lines;
