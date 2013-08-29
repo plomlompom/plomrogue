@@ -9,6 +9,7 @@
 #include "main.h" /* for World struct */
 #include "map_objects.h" /* for map object (definition) structs */
 #include "rrand.h" /* for rrand() */
+#include "command_db.h" /* for get_command_id() */
 
 
 
@@ -180,6 +181,28 @@ extern void move_monster(struct World * world, struct Monster * monster)
 
 extern void move_player(struct World * world, enum dir d)
 {
+    char * action_dsc_prototype = "player_";
+    uint8_t len = strlen(action_dsc_prototype);
+    char * action_dsc = malloc(len + 2);
+    memcpy(action_dsc, action_dsc_prototype, len);
+    if      (NORTH == d)
+    {
+        action_dsc[len] = 'u';
+    }
+    else if (SOUTH == d)
+    {
+        action_dsc[len] = 'd';
+    }
+    else if (WEST  == d)
+    {
+        action_dsc[len] = 'l';
+    }
+    else if (EAST  == d)
+    {
+        action_dsc[len] = 'r';
+    }
+    action_dsc[len + 1] = '\0';
+    uint8_t action_id = get_command_id(world, action_dsc);
     struct yx_uint16 t = mv_yx_in_dir(d, world->player->pos);
     struct Monster * monster;
     for (monster = world->monster;
@@ -189,12 +212,12 @@ extern void move_player(struct World * world, enum dir d)
         if (yx_uint16_cmp(&t, &monster->map_obj.pos))
         {
             player_hits_monster(world, monster);
-            turn_over(world, d);
+            turn_over(world, action_id);
             return;
           }
     }
     try_player_move(world, d, t);
-    turn_over(world, d);
+    turn_over(world, action_id);
 }
 
 
@@ -202,7 +225,7 @@ extern void move_player(struct World * world, enum dir d)
 extern void player_wait (struct World * world)
 {
     update_log(world, "\nYou wait.");
-    turn_over(world, 0);
+    turn_over(world, get_command_id(world, "wait"));
 }
 
 

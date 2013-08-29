@@ -25,6 +25,41 @@ static void copy_tokenized_string(struct World * world,
 
 
 
+extern uint8_t is_command_id_shortdsc(struct World * world,
+                                      uint8_t id, char * shortdsc)
+{
+    struct Command * cmd_ptr = world->cmd_db->cmds;
+    while (1)
+    {
+        if (id == cmd_ptr->id)
+        {
+            if (strcmp(shortdsc, cmd_ptr->dsc_short))
+            {
+                return 0;
+            }
+            return 1;
+        }
+        cmd_ptr = &cmd_ptr[1];
+    }
+}
+
+
+
+extern uint8_t get_command_id(struct World * world, char * dsc_short)
+{
+    struct Command * cmd_ptr = world->cmd_db->cmds;
+    while (1)
+    {
+        if (0 == strcmp(dsc_short, cmd_ptr->dsc_short))
+        {
+            return cmd_ptr->id;
+        }
+        cmd_ptr = &cmd_ptr[1];
+    }
+}
+
+
+
 extern char * get_command_longdsc(struct World * world, char * dsc_short)
 {
     struct Command * cmd_ptr = world->cmd_db->cmds;

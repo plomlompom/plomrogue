@@ -30,15 +30,20 @@ struct CommandDB
 
 
 
-/* Give short description of command ("dsc_short"), get long descrption. */
+/* Is "id" the ID of command whose dsc_short is "shortdsc"? Answer in binary. */
+extern uint8_t is_command_id_shortdsc(struct World * world,
+                                      uint8_t id, char * shortdsc);
+
+/* Give short description of command ("dsc_short"), get its ID. */
+extern uint8_t get_command_id(struct World * world, char * dsc_short);
+
+/* Give short description of command ("dsc_short"), get long description. */
 extern char * get_command_longdsc(struct World * world, char * dsc_short);
 
 
 
 /* Read in CommandDB from file "config/commands" to world.cmd_db. */
 extern void init_command_db(struct World * world);
-
-
 
 /* Free all memory allocated with init_command_db. */
 extern void free_command_db(struct World * world);

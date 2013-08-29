@@ -15,28 +15,29 @@
                    * growshrink_active_window()
                    */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
+#include "command_db.h" /* for is_command_id_shortdsc() */
 
 
 
 extern void record_control(int action, struct World * world)
 {
-    if (0 == action)
+    if      (is_command_id_shortdsc(world, action, "wait"))
     {
         player_wait(world);
     }
-    else if (NORTH == action)
+    else if (is_command_id_shortdsc(world, action, "player_u"))
     {
         move_player(world, NORTH);
     }
-    else if (EAST  == action)
+    else if (is_command_id_shortdsc(world, action, "player_r"))
     {
         move_player(world, EAST);
     }
-    else if (SOUTH == action)
+    else if (is_command_id_shortdsc(world, action, "player_d"))
     {
         move_player(world, SOUTH);
     }
-    else if (WEST == action)
+    else if (is_command_id_shortdsc(world, action, "player_l"))
     {
         move_player(world, WEST);
     }
