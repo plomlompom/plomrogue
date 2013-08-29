@@ -19,7 +19,7 @@ extern struct Win init_win_from_file(struct World * world, char * w_name,
                                      void (* f) (struct Win *))
 {
     char * err = "Trouble in init_win_from_file() with malloc().";
-    char * prefix = "config/Win_";
+    char * prefix = "config/windows/";
     uint8_t size = strlen(prefix) + strlen(w_name) + 1;
     char * path = malloc(size);
     exit_err(NULL == path, world, err);
@@ -51,7 +51,7 @@ extern void sorted_wintoggle(struct World * world)
 {
     char * err = "Trouble in sorted_wintoggle() with fopen() on file "
                  "'config/toggle_win_order'.";
-    FILE * file = fopen("config/toggle_win_order", "r");
+    FILE * file = fopen("config/windows/toggle_order", "r");
     exit_err(NULL == file, world, err);
     uint16_t linemax;
     textfile_sizes(file, &linemax, NULL);

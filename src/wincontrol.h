@@ -17,7 +17,7 @@ struct World;
 
 
 /* Wrapper around init_win() that reads the desired window size from a file
- * at the path prefixing the provided win name "w_name" with "config/Win_".
+ * at the path prefixing the provided win name "w_name" with "config/windows/".
  * "f" is the window drawing function (Win._draw()).
  */
 extern struct Win init_win_from_file(struct World * world, char * w_name,
@@ -27,8 +27,8 @@ extern struct Win init_win_from_file(struct World * world, char * w_name,
 
 
 /* Toggle windows in world->wins in the order desribed by the first line of
- * config/toggled_win_order, wherein each character may correspond to one
- * hardcoded window.
+ * config/windows/toggled_win_order, wherein each character may correspond to
+ * one hardcoded window.
  */
 extern void sorted_wintoggle(struct World * world);
 
