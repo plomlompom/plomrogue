@@ -21,9 +21,8 @@
                           * build_map_objects()
                           */
 #include "map.h" /* for struct Map, init_map() */
-#include "misc.h" /* for update_log(), toggle_window(), find_passable_pos(),
-                   * save_game()
-                   */
+#include "misc.h" /* for update_log(), find_passable_pos(), save_game() */
+#include "wincontrol.h" /* for toggle_window() */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game() */
 #include "control.h" /* for meta_control() */

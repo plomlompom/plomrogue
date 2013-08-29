@@ -11,9 +11,9 @@
 #include "map.h" /* for map_scroll(), map_center_player(), dir enum */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
-#include "misc.h" /* for scroll_pad(), toggle_window(),
-                   * growshrink_active_window()
-                   */
+#include "wincontrol.h" /* for scroll_pad(), toggle_window(),
+                         * growshrink_active_window()
+                         */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "command_db.h" /* for is_command_id_shortdsc() */
 
