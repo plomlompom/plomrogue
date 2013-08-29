@@ -10,11 +10,12 @@
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
 #include "command_db.h" /* for free_command_db() */
+#include "windows.h" /* for Win struct */
 
 
 
 /* The clean-up routine and the flag resource by which it decides what to do. */
-static uint8_t cleanup_flags = 0x00;
+static uint32_t cleanup_flags = 0x0000;
 static void cleanup(struct World * world);
 
 
@@ -46,6 +47,22 @@ static void cleanup(struct World * world)
     if (cleanup_flags & CLEANUP_COMMAND_DB)
     {
         free_command_db(world);
+    }
+    if (cleanup_flags & CLEANUP_WIN_INFO)
+    {
+        free(world->wins.info->_title);
+    }
+    if (cleanup_flags & CLEANUP_WIN_MAP)
+    {
+        free(world->wins.map->_title);
+    }
+    if (cleanup_flags & CLEANUP_WIN_LOG)
+    {
+        free(world->wins.log->_title);
+    }
+    if (cleanup_flags & CLEANUP_WIN_KEYS)
+    {
+        free(world->wins.keys->_title);
     }
 }
 

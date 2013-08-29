@@ -21,11 +21,15 @@ struct Map;
  */
 enum cleanup_flag
 {
-    CLEANUP_NCURSES     = 0x01,
-    CLEANUP_MAP         = 0x02,
-    CLEANUP_KEYBINDINGS = 0x04,
-    CLEANUP_LOG         = 0x08,
-    CLEANUP_COMMAND_DB  = 0x10
+    CLEANUP_NCURSES     = 0x0001,
+    CLEANUP_MAP         = 0x0002,
+    CLEANUP_KEYBINDINGS = 0x0004,
+    CLEANUP_LOG         = 0x0008,
+    CLEANUP_COMMAND_DB  = 0x0010,
+    CLEANUP_WIN_INFO    = 0x0020,
+    CLEANUP_WIN_LOG     = 0x0040,
+    CLEANUP_WIN_MAP     = 0x0080,
+    CLEANUP_WIN_KEYS    = 0x0100
 };
 extern void set_cleanup_flag(enum cleanup_flag flag);
 

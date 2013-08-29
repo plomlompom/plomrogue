@@ -205,13 +205,18 @@ int main(int argc, char *argv[])
     exit_err(init_win_meta(screen, &win_meta), &world, err_winmem);
     world.wins.meta = &win_meta;
     struct Win win_keys = init_win_from_file(&world, "Keys", draw_keys_win);
-    struct Win win_info = init_win_from_file(&world, "Info", draw_info_win);
-    struct Win win_log  = init_win_from_file(&world, "Log",  draw_log_win);
-    struct Win win_map  = init_win_from_file(&world, "Map",  draw_map_win);
     world.wins.keys = &win_keys;
-    world.wins.log  = &win_log;
+    set_cleanup_flag(CLEANUP_WIN_KEYS);
+    struct Win win_info = init_win_from_file(&world, "Info", draw_info_win);
     world.wins.info = &win_info;
+    set_cleanup_flag(CLEANUP_WIN_INFO);
+    struct Win win_log  = init_win_from_file(&world, "Log",  draw_log_win);
+    world.wins.log  = &win_log;
+    set_cleanup_flag(CLEANUP_WIN_LOG);
+    struct Win win_map  = init_win_from_file(&world, "Map",  draw_map_win);
     world.wins.map  = &win_map;
+    set_cleanup_flag(CLEANUP_WIN_MAP);
+
     sorted_wintoggle(&world);
 
     /* Replay mode. */
