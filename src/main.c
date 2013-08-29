@@ -220,10 +220,7 @@ int main(int argc, char *argv[])
     struct Win win_map = init_win(&win_meta, "Map",
                                   0, width_mapwin, &world, draw_map_win);
     world.wins.map = &win_map;
-    toggle_window(&win_meta, world.wins.keys);
-    toggle_window(&win_meta, world.wins.map);
-    toggle_window(&win_meta, world.wins.info);
-    toggle_window(&win_meta, world.wins.log);
+    sorted_wintoggle(&world);
 
     /* Replay mode. */
     int key;

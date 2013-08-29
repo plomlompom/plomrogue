@@ -1,11 +1,61 @@
 /* wincontrol.c */
 
 #include "wincontrol.h"
-#include <stdint.h> /* for uint8_t */
+#include <string.h> /* for strlen() */
+#include <stdint.h> /* for uint8_t, uint16_t */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
                       * resize_active_win(), struct Win, struct WinMeta
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
+#include "main.h" /* for Wins struct */
+#include "misc.h" /* for textfile_sizes() */
+#include "rexit.h" /* for exit_err() */
+#include "main.h" /* for World, Wins structs */
+
+
+
+
+extern void sorted_wintoggle(struct World * world)
+{
+    char * err = "Trouble in sorted_wintoggle() with fopen() on file "
+                 "'config/toggle_win_order'.";
+    FILE * file = fopen("config/toggle_win_order", "r");
+    exit_err(NULL == file, world, err);
+    uint16_t linemax;
+    textfile_sizes(file, &linemax, NULL);
+    char win_order[linemax];
+    err = "Trouble in sorted_wintoggle() with fgets() on file "
+          "'config/toggle_win_order'.";
+    exit_err(NULL == fgets(win_order, linemax, file), world, err);
+    err = "Trouble in sorted_wintoggle() with fclose() on file "
+          "'toggle_win_order'.";
+    exit_err(fclose(file), world, err);
+
+    char c;
+    uint8_t i = 0;
+    for (; i < linemax; i++)
+    {
+        c = win_order[i];
+        if      ('k' == c)
+        {
+            toggle_window(world->wins.meta, world->wins.keys);
+        }
+        else if ('m' == c)
+        {
+            toggle_window(world->wins.meta, world->wins.map);
+        }
+        else if ('i' == c)
+        {
+            toggle_window(world->wins.meta, world->wins.info);
+        }
+        else if ('l' == c)
+        {
+            toggle_window(world->wins.meta, world->wins.log);
+        }
+    }
+}
+
+
 
 
 extern uint8_t toggle_window(struct WinMeta * win_meta, struct Win * win)

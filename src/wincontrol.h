@@ -12,6 +12,15 @@
 #include <stdint.h> /* for uint8_t */
 struct Win;
 struct WinMeta;
+struct World;
+
+
+
+/* Toggle windows in world->wins in the order desribed by the first line of
+ * config/toggled_win_order, wherein each character may correspond to one
+ * hardcoded window.
+ */
+extern void sorted_wintoggle(struct World * world);
 
 
 
