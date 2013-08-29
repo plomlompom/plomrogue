@@ -16,9 +16,9 @@ struct World;
 
 
 
-/* Wrapper around init_win() that reads the desired window size from a file
- * at the path prefixing the provided win name "w_name" with "config/windows/".
- * "f" is the window drawing function (Win._draw()).
+/* Wrapper around init_win() that reads the desired window size and title from a
+ * file at the path prefixing the provided win name "w_name" with
+ * "config/windows/". "f"() is the window drawing function (Win._draw()).
  */
 extern struct Win init_win_from_file(struct World * world, char * w_name,
                                      void (* f) (struct Win *));

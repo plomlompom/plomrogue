@@ -22,7 +22,7 @@
  *
  * Functions that return uint8_t return these error codes:
  * 0 - success
- * 1 - memory allocation error (of ncurses' pads/windows, or scroll hint texts)
+ * 1 - memory allocation error
  * 2 - would force virtual screen to grow beyond width or height of 2^16 cells
  *
  * TODO: Expose less internals to the API.
@@ -99,9 +99,9 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
 
 
 
-/* Create a window as child of "wmeta" titled "title" of "height" and "width"
- * and appointing "func"() to interpret and draw the content stored at "data"
- * if the window is visible.
+/* Initialize a window child of "wmeta" to "title", "height" and "width" and
+ * appointing "func"() to interpret and draw the content stored at "data" when
+ * the window is visible.
  *
  * Pass 0 for "width" to make the window as wide as the terminal screen. Pass
  * negative values for "width" to make the size so many cells smaller than the
@@ -111,12 +111,11 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
  * allowed height is also applied for positive values that exceed it or negative
  * values that would reduce the window height < 1 cell.
  *
- * Other members of the Win struct are initialized to 0. The window will stay
- * invisible until appended to the chain of visible windows via append_win().
+ * Other members of the Win struct are initialized to 0.
  */
-extern struct Win init_win(struct WinMeta * wmeta, char * title,
-                           int16_t height, int16_t width,
-                           void * data, void * func);
+extern uint8_t init_win(struct WinMeta * wmeta, struct Win * w, char * title,
+                        int16_t height, int16_t width,
+                        void * data, void * func);
 
 
 

@@ -388,42 +388,46 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta)
 
 
 
-extern struct Win init_win(struct WinMeta * wmeta, char * title,
-                           int16_t height, int16_t width,
-                           void * data, void * func)
+extern uint8_t init_win(struct WinMeta * wmeta, struct Win * w, char * title,
+                        int16_t height, int16_t width,
+                        void * data, void * func)
 {
-    struct Win w;
-    w._prev             = 0;
-    w._next             = 0;
-    w.frame.curses_win  = 0;
-    w._title            = title;
-    w.data              = data;
-    w._draw             = func;
+    w->_prev             = 0;
+    w->_next             = 0;
+    w->frame.curses_win  = 0;
+    w->_title             = malloc(strlen(title) + 1);
+    if (NULL == w->_title)
+    {
+        return 1;
+    }
+    sprintf(w->_title, title, strlen(title));
+    w->data              = data;
+    w->_draw             = func;
     if      (0 < width)
     {
-        w.frame.size.x = width;
+        w->frame.size.x = width;
     }
     else if (0 > width)
     {
-        w.frame.size.x = wmeta->padframe.size.x + width;
+        w->frame.size.x = wmeta->padframe.size.x + width;
     }
     else
     {
-        w.frame.size.x = wmeta->padframe.size.x;
+        w->frame.size.x = wmeta->padframe.size.x;
     }
     if      (0 < height && height <= wmeta->padframe.size.y - 1)
     {
-        w.frame.size.y = height;
+        w->frame.size.y = height;
     }
     else if (0 > height && wmeta->padframe.size.y + (height - 1) > 0)
     {
-        w.frame.size.y = wmeta->padframe.size.y + (height - 1);
+        w->frame.size.y = wmeta->padframe.size.y + (height - 1);
     }
     else
     {
-        w.frame.size.y = wmeta->padframe.size.y - 1;
+        w->frame.size.y = wmeta->padframe.size.y - 1;
     }
-    return w;
+    return 0;
 }
 
 

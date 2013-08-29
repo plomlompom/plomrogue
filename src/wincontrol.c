@@ -34,6 +34,9 @@ extern struct Win init_win_from_file(struct World * world, char * w_name,
     char * line = malloc(linemax);
     err = "Trouble in init_win_from_file() with fgets().";
     exit_err(NULL == fgets(line, linemax, file), world, err);
+    char * title = malloc(strlen(line));
+    memcpy(title, line, strlen(line) - 1);
+    exit_err(NULL == fgets(line, linemax, file), world, err);
     int16_t height = atoi(line);
     exit_err(NULL == fgets(line, linemax, file), world, err);
     int16_t width = atoi(line);
@@ -42,7 +45,10 @@ extern struct Win init_win_from_file(struct World * world, char * w_name,
     exit_err(fclose(file), world, err);
 
     struct WinMeta * wmeta = world->wins.meta;
-    return init_win(wmeta, w_name, height, width, world, f);
+    struct Win w;
+    init_win(wmeta, &w, title, height, width, world, f);
+    free(title);
+    return w;
 }
 
 
