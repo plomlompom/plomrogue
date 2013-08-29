@@ -12,6 +12,7 @@
 #include "map.h"         /* for Map struct */
 #include "main.h"        /* for World struct */
 #include "rexit.h"       /* for err_exit() */
+#include "command_db.h"  /* for get_command_longdesc() */
 
 
 
@@ -233,6 +234,7 @@ extern void draw_keys_win(struct Win * win)
     char * keydesc = malloc(keydescwidth), * keyname;
     char * err_hint = "Trouble with draw_scroll_hint() in draw_keys_win().";
     attr_t attri;
+    char * cmd_dsc;
     for (y = 0; y <= world->keyswindata->max && y < win->frame.size.y; y++)
     {
         if (0 == y && offset > 0)
@@ -263,19 +265,19 @@ extern void draw_keys_win(struct Win * win)
         keyname = get_keyname(world->keybindings[y + offset].key);
         snprintf(keydesc, keydescwidth, "%-9s", keyname);
         free(keyname);
+        cmd_dsc = get_command_longdsc(world,
+                                      world->keybindings[y + offset].name);
         for (x = 0; x < win->frame.size.x; x++)
         {
             if (x < strlen(keydesc))
             {
                 mvwaddch(win->frame.curses_win, y, x, keydesc[x] | attri);
             }
-            else if (strlen(keydesc) < x
-                     && x < strlen(world->keybindings[y + offset].name)
-                            + strlen(keydesc) + 1)
+            else if (   strlen(keydesc) < x
+                     && x < strlen(cmd_dsc) + strlen(keydesc) + 1)
             {
                 mvwaddch(win->frame.curses_win, y, x,
-                         world->keybindings[y + offset]
-                         .name[x - strlen(keydesc) - 1] | attri);
+                         cmd_dsc[x - strlen(keydesc) - 1] | attri);
             }
             else
             {

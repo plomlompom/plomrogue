@@ -24,7 +24,8 @@ enum cleanup_flag
     CLEANUP_NCURSES     = 0x01,
     CLEANUP_MAP         = 0x02,
     CLEANUP_KEYBINDINGS = 0x04,
-    CLEANUP_LOG         = 0x08
+    CLEANUP_LOG         = 0x08,
+    CLEANUP_COMMAND_DB  = 0x10
 };
 extern void set_cleanup_flag(enum cleanup_flag flag);
 

@@ -1,29 +1,29 @@
-81 quit
-75 save keys
-260 scroll pad left
-261 scroll pad right
-258 keys nav down
-259 keys nav up
-10 keys mod
-265 toggle keys window
-266 toggle map window
-267 toggle info window
-268 toggle log window
-62 cycle forwards
-60 cycle backwards
-121 shift forwards
-89 shift backwards
-42 grow horizontally
-95 shrink horizontally
-43 grow vertically
-45 shrink vertically
-119 map up
-120 map down
-97 map left
-100 map right
-115 map center player
-87 player up
-88 player down
-65 player left
-68 player right
-83 wait / next turn
+90 quit
+75 save_keys
+260 scrl_l
+261 scrl_r
+258 keys_d
+259 keys_u
+10 keys_m
+265 to_keywin
+266 to_mapwin
+267 to_infowin
+268 to_logwin
+62 cyc_win_f
+60 cyc_win_b
+121 shift_f
+89 shift_b
+42 grow_h
+95 shri_h
+43 grow_v
+45 shri_v
+119 map_u
+120 map_d
+97 map_l
+100 map_r
+115 map_c
+87 player_u
+88 player_d
+65 player_l
+68 player_r
+83 wait

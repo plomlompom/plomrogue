@@ -45,6 +45,7 @@ struct World
     struct MonsterDef * monster_def;  /* Pointer to the monster definitions. */
     struct Monster * monster;         /* Pointer to the monsters' data. */
     struct Player * player;           /* Pointer to the player data. */
+    struct CommandDB * cmd_db;        /* Pointer to the command database. */
     struct Wins wins;                 /* Pointers to WinMeta, individual Wins.*/
 };
 

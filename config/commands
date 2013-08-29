@@ -1,0 +1,29 @@
+1 quit quit
+2 save_keys save keys
+3 scrl_l scroll pad left
+4 scrl_r scroll pad right
+5 keys_d keys nav down
+6 keys_u keys nav up
+7 keys_m keys mod
+8 to_keywin toggle keys window
+9 to_mapwin toggle map window
+10 to_infowin toggle info window
+11 to_logwin toggle log window
+12 cyc_win_f cycle forwards
+13 cyc_win_b cycle backwards
+14 shift_f shift forwards
+15 shift_b shift backwards
+16 grow_h grow horizontally
+17 shri_h shrink horizontally
+18 grow_v grow vertically
+19 shri_v shrink vertically
+20 map_u map up
+21 map_d map down
+22 map_l map left
+23 map_r map right
+24 map_c map center player
+25 player_u player up
+26 player_d player down
+27 player_l player left
+28 player_r player right
+29 wait wait / next turn

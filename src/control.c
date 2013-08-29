@@ -46,23 +46,23 @@ extern void record_control(int action, struct World * world)
 
 extern uint8_t player_control(int key, struct World * world)
 {
-    if      (key == get_action_key(world->keybindings, "player up"))
+    if      (key == get_action_key(world->keybindings, "player_u"))
     {
         move_player(world, NORTH);
     }
-    else if (key == get_action_key(world->keybindings, "player right"))
+    else if (key == get_action_key(world->keybindings, "player_r"))
     {
         move_player(world, EAST);
     }
-    else if (key == get_action_key(world->keybindings, "player down"))
+    else if (key == get_action_key(world->keybindings, "player_d"))
     {
         move_player(world, SOUTH);
     }
-    else if (key == get_action_key(world->keybindings, "player left"))
+    else if (key == get_action_key(world->keybindings, "player_l"))
     {
         move_player(world, WEST);
     }
-    else if (key == get_action_key(world->keybindings, "wait / next turn"))
+    else if (key == get_action_key(world->keybindings, "wait"))
     {
         player_wait(world);
     }
@@ -90,95 +90,95 @@ extern uint8_t meta_control(int key, struct World * world)
     {
         return 1;
     }
-    else if (key == get_action_key(world->keybindings, "scroll pad right"))
+    else if (key == get_action_key(world->keybindings, "scrl_r"))
     {
         scroll_pad(win_meta, '+');
     }
-    else if (key == get_action_key(world->keybindings, "scroll pad left"))
+    else if (key == get_action_key(world->keybindings, "scrl_l"))
     {
         scroll_pad(win_meta, '-');
     }
-    else if (key == get_action_key(world->keybindings, "toggle keys window"))
+    else if (key == get_action_key(world->keybindings, "to_keywin"))
     {
         exit_err(toggle_window(win_meta, win_keys), world, err_toggle);
     }
-    else if (key == get_action_key(world->keybindings, "toggle map window"))
+    else if (key == get_action_key(world->keybindings, "to_mapwin"))
     {
         exit_err(toggle_window(win_meta, win_map), world, err_toggle);
     }
-    else if (key == get_action_key(world->keybindings, "toggle info window"))
+    else if (key == get_action_key(world->keybindings, "to_infowin"))
     {
         exit_err(toggle_window(win_meta, win_info), world, err_toggle);
     }
-    else if (key == get_action_key(world->keybindings, "toggle log window"))
+    else if (key == get_action_key(world->keybindings, "to_logwin"))
     {
         exit_err(toggle_window(win_meta, win_log), world, err_toggle);
     }
-    else if (key == get_action_key(world->keybindings, "cycle forwards"))
+    else if (key == get_action_key(world->keybindings, "cyc_win_f"))
     {
         cycle_active_win(win_meta, 'f');
     }
-    else if (key == get_action_key(world->keybindings, "cycle backwards"))
+    else if (key == get_action_key(world->keybindings, "cyc_win_b"))
     {
         cycle_active_win(win_meta, 'b');
     }
-    else if (key == get_action_key(world->keybindings, "shift forwards"))
+    else if (key == get_action_key(world->keybindings, "shift_f"))
     {
         exit_err(shift_active_win(win_meta, 'f'), world, err_shift);
     }
-    else if (key == get_action_key(world->keybindings, "shift backwards"))
+    else if (key == get_action_key(world->keybindings, "shift_b"))
     {
         exit_err(shift_active_win(win_meta, 'b'), world, err_shift);
     }
-    else if (key == get_action_key(world->keybindings, "grow horizontally"))
+    else if (key == get_action_key(world->keybindings, "grow_h"))
     {
         exit_err(growshrink_active_window(win_meta, '*'), world, err_resize);
     }
-    else if (key == get_action_key(world->keybindings, "shrink horizontally"))
+    else if (key == get_action_key(world->keybindings, "shri_h"))
     {
         exit_err(growshrink_active_window(win_meta, '_'), world, err_resize);
     }
-    else if (key == get_action_key(world->keybindings, "grow vertically"))
+    else if (key == get_action_key(world->keybindings, "grow_v"))
     {
         exit_err(growshrink_active_window(win_meta, '+'), world, err_resize);
     }
-    else if (key == get_action_key(world->keybindings, "shrink vertically"))
+    else if (key == get_action_key(world->keybindings, "shri_v"))
     {
         exit_err(growshrink_active_window(win_meta, '-'), world, err_resize);
     }
-    else if (key == get_action_key(world->keybindings, "save keys"))
+    else if (key == get_action_key(world->keybindings, "save_keys"))
     {
         save_keybindings(world);
     }
-    else if (key == get_action_key(world->keybindings, "keys nav up"))
+    else if (key == get_action_key(world->keybindings, "keys_u"))
     {
-        keyswin_move_selection (world, 'u');
+        keyswin_move_selection(world, 'u');
     }
-    else if (key == get_action_key(world->keybindings, "keys nav down"))
+    else if (key == get_action_key(world->keybindings, "keys_d"))
     {
-        keyswin_move_selection (world, 'd');
+        keyswin_move_selection(world, 'd');
     }
-    else if (key == get_action_key(world->keybindings, "keys mod"))
+    else if (key == get_action_key(world->keybindings, "keys_m"))
     {
-        keyswin_mod_key (world, win_meta);
+        keyswin_mod_key(world, win_meta);
     }
-    else if (key == get_action_key(world->keybindings, "map up"))
+    else if (key == get_action_key(world->keybindings, "map_u"))
     {
         map_scroll(world->map, NORTH, win_map->frame.size);
      }
-    else if (key == get_action_key(world->keybindings, "map down"))
+    else if (key == get_action_key(world->keybindings, "map_d"))
     {
         map_scroll(world->map, SOUTH, win_map->frame.size);
     }
-    else if (key == get_action_key(world->keybindings, "map right"))
+    else if (key == get_action_key(world->keybindings, "map_r"))
     {
         map_scroll(world->map, EAST, win_map->frame.size);
     }
-    else if (key == get_action_key(world->keybindings, "map left"))
+    else if (key == get_action_key(world->keybindings, "map_l"))
     {
         map_scroll(world->map, WEST, win_map->frame.size);
     }
-    else if (key == get_action_key(world->keybindings, "map center player"))
+    else if (key == get_action_key(world->keybindings, "map_c"))
     {
         map_center_player (world->map, world->player, win_map->frame.size);
     }

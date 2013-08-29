@@ -27,12 +27,16 @@
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game() */
 #include "control.h" /* for meta_control() */
+#include "command_db.h" /* for init_command_db() */
 
 
 
 int main(int argc, char *argv[])
 {
     struct World world;
+
+    init_command_db(&world);
+    set_cleanup_flag(CLEANUP_COMMAND_DB);
 
     /* Check for corrupted savefile / recordfile savings. */
     char * recordfile = "record";
@@ -244,7 +248,7 @@ int main(int argc, char *argv[])
             draw_all_wins(&win_meta);
             key = getch();
             if (   EOF != action
-                && key == get_action_key(world.keybindings, "wait / next turn"))
+                && key == get_action_key(world.keybindings, "wait"))
             {
                 action = getc(file);
                 if (EOF != action)

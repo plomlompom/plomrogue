@@ -9,6 +9,7 @@
 #include "main.h" /* for World struct */
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
+#include "command_db.h" /* for free_command_db() */
 
 
 
@@ -41,6 +42,10 @@ static void cleanup(struct World * world)
     if (cleanup_flags & CLEANUP_LOG)
     {
         free(world->log);
+    }
+    if (cleanup_flags & CLEANUP_COMMAND_DB)
+    {
+        free_command_db(world);
     }
 }
 
