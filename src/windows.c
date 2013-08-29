@@ -405,7 +405,7 @@ extern struct Win init_win(struct WinMeta * wmeta, char * title,
     }
     else
     {
-        w.frame.size.x = 1;
+        w.frame.size.x = wmeta->padframe.size.x;
     }
     if (height > 0 && height <= wmeta->padframe.size.y - 1)
     {

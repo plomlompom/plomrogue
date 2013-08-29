@@ -103,10 +103,9 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
  * and appointing "func"() to interpret and draw the content stored at "data"
  * if the window is visible.
  *
- * A value for "width" <1 will trigger a fallback to width=1. A "height" < 1 or
- * larger than the maximum window height possible within the virtual screen will
- * trigger a fallback to the maximum height possible (i.e. pass a "height" of 0
- * to initialize the window to its largest possible height).
+ * Pass 0 for "width" to make the window as wide as the terminal screen. Pass
+ * for "height" 0 or a value larger than the maximum window height possible
+ * within the virtual screen to attain that maximum window height.
  *
  * Other members of the Win struct are initialized to 0. The window will stay
  * invisible until appended to the chain of visible windows via append_win().
