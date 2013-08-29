@@ -204,18 +204,14 @@ int main(int argc, char *argv[])
                         "main().";
     exit_err(init_win_meta(screen, &win_meta), &world, err_winmem);
     world.wins.meta = &win_meta;
-    struct Win win_keys = init_win(&win_meta, "Keys",
-                                     0, 29, &world, draw_keys_win);
-    struct Win win_info = init_win(&win_meta, "Info",
-                                   3, 20, &world, draw_info_win);
-    uint16_t height_logwin = win_meta.padframe.size.y
-                             - (2 + win_info.frame.size.y);
-    struct Win win_log = init_win(&win_meta, "Log",
-                                  height_logwin, 20, &world, draw_log_win);
-    uint16_t width_mapwin = win_meta.padframe.size.x - win_keys.frame.size.x
-                            - win_log.frame.size.x - 2;
-    struct Win win_map = init_win(&win_meta, "Map",
-                                  0, width_mapwin, &world, draw_map_win);
+    struct Win win_keys = init_win(&win_meta,
+                                   "Keys", 0,  29, &world, draw_keys_win);
+    struct Win win_info = init_win(&win_meta,
+                                   "Info", 3,  20, &world, draw_info_win);
+    struct Win win_log  = init_win(&win_meta,
+                                  "Log",  -4,  20, &world, draw_log_win);
+    struct Win win_map  = init_win(&win_meta,
+                                  "Map",   0, -51, &world, draw_map_win);
     world.wins.keys = &win_keys;
     world.wins.log = &win_log;
     world.wins.info = &win_info;

@@ -104,14 +104,18 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
  * if the window is visible.
  *
  * Pass 0 for "width" to make the window as wide as the terminal screen. Pass
- * for "height" 0 or a value larger than the maximum window height possible
- * within the virtual screen to attain that maximum window height.
+ * negative values for "width" to make the size so many cells smaller than the
+ * terminal screen. Pass 0 for "height" to give the window the maximum allowed
+ * height: one cell smaller than the terminal screen. Pass negative values to
+ * make the window so many smalls smaller than the terminal screen. The maximum
+ * allowed height is also applied for positive values that exceed it or negative
+ * values that would reduce the window height < 1 cell.
  *
  * Other members of the Win struct are initialized to 0. The window will stay
  * invisible until appended to the chain of visible windows via append_win().
  */
 extern struct Win init_win(struct WinMeta * wmeta, char * title,
-                           uint16_t height, uint16_t width,
+                           int16_t height, int16_t width,
                            void * data, void * func);
 
 
