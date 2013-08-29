@@ -57,7 +57,7 @@ A       move player left
 D       move player right
 S       next turn / wait
 
-S       save current keybindings
+K       save current keybindings
 UP      navigate selection upwards in keybinding editing window
 DOWN    navigate selection downwards in keybinding editing window
 RETURN  modify keybinding selected in keybinding editing window
