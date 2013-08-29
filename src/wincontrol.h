@@ -16,6 +16,16 @@ struct World;
 
 
 
+/* Wrapper around init_win() that reads the desired window size from a file
+ * at the path prefixing the provided win name "w_name" with "config/Win_".
+ * "f" is the window drawing function (Win._draw()).
+ */
+extern struct Win init_win_from_file(struct World * world, char * w_name,
+                                     void (* f) (struct Win *));
+
+
+
+
 /* Toggle windows in world->wins in the order desribed by the first line of
  * config/toggled_win_order, wherein each character may correspond to one
  * hardcoded window.

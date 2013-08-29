@@ -1,10 +1,11 @@
 /* wincontrol.c */
 
 #include "wincontrol.h"
+#include <stdlib.h> /* for malloc(), free() */
 #include <string.h> /* for strlen() */
 #include <stdint.h> /* for uint8_t, uint16_t */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
-                      * resize_active_win(), struct Win, struct WinMeta
+                      * resize_active_win(), init_win(), structs Win, WinMeta
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "main.h" /* for Wins struct */
@@ -12,6 +13,37 @@
 #include "rexit.h" /* for exit_err() */
 #include "main.h" /* for World, Wins structs */
 
+
+
+extern struct Win init_win_from_file(struct World * world, char * w_name,
+                                     void (* f) (struct Win *))
+{
+    char * err = "Trouble in init_win_from_file() with malloc().";
+    char * prefix = "config/Win_";
+    uint8_t size = strlen(prefix) + strlen(w_name) + 1;
+    char * path = malloc(size);
+    exit_err(NULL == path, world, err);
+    sprintf(path, "%s%s", prefix, w_name);
+
+    err = "Trouble in init_win_from_file() with fopen().";
+    FILE * file = fopen(path, "r");
+    free(path);
+    exit_err(NULL == file, world, err);
+    uint16_t linemax;
+    textfile_sizes(file, &linemax, NULL);
+    char * line = malloc(linemax);
+    err = "Trouble in init_win_from_file() with fgets().";
+    exit_err(NULL == fgets(line, linemax, file), world, err);
+    int16_t height = atoi(line);
+    exit_err(NULL == fgets(line, linemax, file), world, err);
+    int16_t width = atoi(line);
+    free(line);
+    err = "Trouble in init_win_from_file() with fclose().";
+    exit_err(fclose(file), world, err);
+
+    struct WinMeta * wmeta = world->wins.meta;
+    return init_win(wmeta, w_name, height, width, world, f);
+}
 
 
 
