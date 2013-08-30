@@ -16,12 +16,6 @@ struct World;
 
 
 
-/* Free allocated memory for an initialized Win struct. */
-extern void free_win(struct Win * win);
-
-
-
-
 /* Wrapper around init_win() that reads the desired window size and title from a
  * file at the path prefixing the provided win name "w_name" with
  * "config/windows/". "f"() is the window drawing function (Win._draw()).

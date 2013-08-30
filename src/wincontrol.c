@@ -15,14 +15,6 @@
 
 
 
-extern void free_win(struct Win * win)
-{
-    free(win->_title);
-    free(win);
-}
-
-
-
 extern struct Win * init_win_from_file(struct World * world, char * w_name,
                                        void (* f) (struct Win *))
 {
@@ -54,10 +46,10 @@ extern struct Win * init_win_from_file(struct World * world, char * w_name,
     exit_err(fclose(file), world, err);
 
     struct WinMeta * wmeta = world->wins.meta;
-    struct Win * w = malloc(sizeof(struct Win));
-    init_win(wmeta, w, title, height, width, world, f);
+    struct Win * wp; // = malloc(sizeof(struct Win));
+    init_win(wmeta, &wp, title, height, width, world, f);
     free(title);
-    return w;
+    return wp;
 }
 
 

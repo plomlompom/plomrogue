@@ -388,10 +388,15 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta)
 
 
 
-extern uint8_t init_win(struct WinMeta * wmeta, struct Win * w, char * title,
+extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
                         int16_t height, int16_t width,
                         void * data, void * func)
 {
+    struct Win * w = malloc(sizeof(struct Win));
+    if (NULL == w)
+    {
+        return 1;
+    }
     w->_prev             = 0;
     w->_next             = 0;
     w->frame.curses_win  = 0;
@@ -427,7 +432,16 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win * w, char * title,
     {
         w->frame.size.y = wmeta->padframe.size.y - 1;
     }
+    *wp = w;
     return 0;
+}
+
+
+
+extern void free_win(struct Win * win)
+{
+    free(win->_title);
+    free(win);
 }
 
 

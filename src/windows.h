@@ -113,9 +113,14 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
  *
  * Other members of the Win struct are initialized to 0.
  */
-extern uint8_t init_win(struct WinMeta * wmeta, struct Win * w, char * title,
+extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** w, char * title,
                         int16_t height, int16_t width,
                         void * data, void * func);
+
+
+
+/* Free allocated memory for an initialized Win struct. */
+extern void free_win(struct Win * win);
 
 
 

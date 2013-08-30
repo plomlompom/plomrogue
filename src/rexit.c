@@ -10,8 +10,7 @@
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
 #include "command_db.h" /* for free_command_db() */
-#include "windows.h" /* for Win struct */
-#include "wincontrol.h" /* for free_win() */
+#include "windows.h" /* for Win struct, free_win() */
 
 
 
