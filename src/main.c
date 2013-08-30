@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     world.score = 0;
     world.log = calloc(1, sizeof(char));
     set_cleanup_flag(CLEANUP_LOG);
-    update_log (&world, " ");
+    update_log(&world, " ");
     struct Player player;
     player.hitpoints = 5;
     world.player = &player;

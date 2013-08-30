@@ -43,7 +43,8 @@ extern struct Win * init_win_from_file(struct World * world, char * w_name,
     err = "Trouble in init_win_from_file() with fgets().";
     exit_err(NULL == fgets(line, linemax, file), world, err);
     char * title = malloc(strlen(line));
-    memcpy(title, line, strlen(line) - 1);
+    memcpy(title, line, strlen(line) - 1);   /* Eliminate newline char at end */
+    title[strlen(line) - 1] = '\0';          /* of string.                    */
     exit_err(NULL == fgets(line, linemax, file), world, err);
     int16_t height = atoi(line);
     exit_err(NULL == fgets(line, linemax, file), world, err);

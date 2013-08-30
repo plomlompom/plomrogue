@@ -400,7 +400,7 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win * w, char * title,
     {
         return 1;
     }
-    sprintf(w->_title, title, strlen(title));
+    sprintf(w->_title, "%s", title);
     w->data              = data;
     w->_draw             = func;
     if      (0 < width)
