@@ -53,10 +53,10 @@ extern void textfile_sizes(FILE * file, uint16_t * linemax_p,
 
 extern void update_log(struct World * world, char * text)
 {
-    static char * last_msg;
-    if (0 == last_msg)
-    {
-        last_msg = calloc(1, sizeof(char));
+    static char * last_msg;                 /* TODO: valgrind is dissatisfied */
+    if (0 == last_msg)                      /* with this calloc'd pointer     */
+    {                                       /* never being freed.             */
+        last_msg = calloc(1, sizeof(char)); /* Rectify this ?                 */
     }
     char * new_text;
     uint16_t len_old = strlen(world->log);
