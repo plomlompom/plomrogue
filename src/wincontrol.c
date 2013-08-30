@@ -15,8 +15,16 @@
 
 
 
-extern struct Win init_win_from_file(struct World * world, char * w_name,
-                                     void (* f) (struct Win *))
+extern void free_win(struct Win * win)
+{
+    free(win->_title);
+    free(win);
+}
+
+
+
+extern struct Win * init_win_from_file(struct World * world, char * w_name,
+                                       void (* f) (struct Win *))
 {
     char * err = "Trouble in init_win_from_file() with malloc().";
     char * prefix = "config/windows/";
@@ -45,8 +53,8 @@ extern struct Win init_win_from_file(struct World * world, char * w_name,
     exit_err(fclose(file), world, err);
 
     struct WinMeta * wmeta = world->wins.meta;
-    struct Win w;
-    init_win(wmeta, &w, title, height, width, world, f);
+    struct Win * w = malloc(sizeof(struct Win));
+    init_win(wmeta, w, title, height, width, world, f);
     free(title);
     return w;
 }

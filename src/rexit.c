@@ -11,6 +11,7 @@
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
 #include "command_db.h" /* for free_command_db() */
 #include "windows.h" /* for Win struct */
+#include "wincontrol.h" /* for free_win() */
 
 
 
@@ -50,19 +51,19 @@ static void cleanup(struct World * world)
     }
     if (cleanup_flags & CLEANUP_WIN_INFO)
     {
-        free(world->wins.info->_title);
+        free_win(world->wins.info);
     }
     if (cleanup_flags & CLEANUP_WIN_MAP)
     {
-        free(world->wins.map->_title);
+        free_win(world->wins.map);
     }
     if (cleanup_flags & CLEANUP_WIN_LOG)
     {
-        free(world->wins.log->_title);
+        free_win(world->wins.log);
     }
     if (cleanup_flags & CLEANUP_WIN_KEYS)
     {
-        free(world->wins.keys->_title);
+        free_win(world->wins.keys);
     }
 }
 
