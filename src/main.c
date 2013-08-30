@@ -103,6 +103,8 @@ int main(int argc, char *argv[])
     world.monster = 0;
     world.item = 0;
     init_map_object_defs(&world, "config/defs");
+    set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
+    exit_err(1, &world, NULL);
 
     /* For interactive mode, try to load world state from savefile. */
     char * err_o = "Trouble loading game (fopen() in main()) / "

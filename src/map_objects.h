@@ -79,6 +79,14 @@ extern void init_map_object_defs(struct World * world, char * filename);
 
 
 
+/* Free item / monster definitions in map object chain starting at "md_start" /
+ * "id_start".
+ */
+extern void free_item_defs(struct ItemDef * id_start);
+extern void free_monster_defs(struct MonsterDef * md_start);
+
+
+
 /* Build into memory starting at "start" chain of "n" map objects of type
  * "def_id".
  */

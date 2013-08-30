@@ -11,6 +11,7 @@
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
 #include "command_db.h" /* for free_command_db() */
 #include "windows.h" /* for Win struct, free_win() */
+#include "map_objects.h" /* for free_item_defs(), free_monster_defs() */
 
 
 
@@ -63,6 +64,11 @@ static void cleanup(struct World * world)
     if (cleanup_flags & CLEANUP_WIN_KEYS)
     {
         free_win(world->wins.keys);
+    }
+    if (cleanup_flags & CLEANUP_MAP_OBJECT_DEFS)
+    {
+        free_item_defs(world->item_def);
+        free_monster_defs(world->monster_def);
     }
 }
 

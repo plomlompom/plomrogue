@@ -139,6 +139,31 @@ extern void init_map_object_defs(struct World * world, char * filename)
 
 
 
+extern void free_item_defs(struct ItemDef * id_start)
+{
+    if (0 != id_start->map_obj_def.next)
+    {
+        free_item_defs((struct ItemDef *) id_start->map_obj_def.next);
+    }
+    free(id_start->map_obj_def.desc);
+    free(id_start);
+}
+
+
+
+
+extern void free_monster_defs(struct MonsterDef * md_start)
+{
+    if (0 != md_start->map_obj_def.next)
+    {
+        free_monster_defs((struct MonsterDef *) md_start->map_obj_def.next);
+    }
+    free(md_start->map_obj_def.desc);
+    free(md_start);
+}
+
+
+
 extern uint8_t write_map_objects(struct World * world, void * start,
                                  FILE * file)
 {
