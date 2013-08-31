@@ -290,7 +290,29 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
 
 
 
-extern struct MapObjDef * get_map_obj_def (struct World * world, char def_id)
+extern void free_items(struct Item * item)
+{
+    if (0 != item->map_obj.next)
+    {
+        free_items((struct Item *) item->map_obj.next);
+    }
+    free(item);
+}
+
+
+
+extern void free_monsters(struct Monster * monster)
+{
+    if (0 != monster->map_obj.next)
+    {
+        free_monsters((struct Monster *) monster->map_obj.next);
+    }
+    free(monster);
+}
+
+
+
+extern struct MapObjDef * get_map_obj_def(struct World * world, char def_id)
 {
     struct MapObjDef * d = NULL;
     for (d = (struct MapObjDef *) world->monster_def;

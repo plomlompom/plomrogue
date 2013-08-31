@@ -70,6 +70,11 @@ static void cleanup(struct World * world)
         free_item_defs(world->item_def);
         free_monster_defs(world->monster_def);
     }
+    if (cleanup_flags & CLEANUP_MAP_OBJECTS)
+    {
+        free_items(world->item);
+        free_monsters(world->monster);
+    }
 }
 
 

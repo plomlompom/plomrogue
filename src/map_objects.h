@@ -104,6 +104,9 @@ extern uint8_t read_map_objects(struct World * world, void * start,
                                 FILE * file);
 
 
+/* Free items / monsters in map object chain starting at "item" / "monster". */
+extern void free_items(struct Item * item);
+extern void free_monsters(struct Monster * monster);
 
 /* Get pointer to the map object definition of identifier "def_id". */
 extern struct MapObjDef * get_map_obj_def(struct World * world, char def_id);

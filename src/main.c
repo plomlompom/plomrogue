@@ -33,6 +33,7 @@
 int main(int argc, char *argv[])
 {
     struct World world;
+    world.turn = 0;        /* Turns to 1 when map and objects are initalized. */
 
     init_command_db(&world);
     set_cleanup_flag(CLEANUP_COMMAND_DB);
@@ -128,9 +129,11 @@ int main(int argc, char *argv[])
         {
             exit_err(1, &world, err_r);
         }
+        set_cleanup_flag(CLEANUP_MAP_OBJECTS);
         exit_err(fclose(file), &world, err_c);
         player.pos.y--;
         player.pos.x--;
+        world.turn = 1;
     }
 
     /* For non-interactive mode, try to load world state from record file. */
@@ -140,7 +143,6 @@ int main(int argc, char *argv[])
                 "opening file 'record' for reading.";
         err_r = "Trouble loading record file (read_uint32_bigendian() in "
                 "main()) / reading from opened file 'record'.";
-        world.turn = 1;
         if (0 == world.interactive)
         {
             file = fopen(recordfile, "r");
@@ -172,7 +174,6 @@ int main(int argc, char *argv[])
         }
     }
 
-
     /* Generate map from seed and, if newly generated world, start positions of
      * actors.
      */
@@ -180,7 +181,7 @@ int main(int argc, char *argv[])
     struct Map map = init_map();
     world.map = &map;
     set_cleanup_flag(CLEANUP_MAP);
-    if (1 == world.turn)
+    if (0 == world.turn)
     {
         player.pos = find_passable_pos(world.map);
         void * foo;
@@ -189,6 +190,8 @@ int main(int argc, char *argv[])
         build_map_objects(&world, foo, 3, 1 + rrand() % 3);
         foo = build_map_objects(&world, &world.item, 4, 1 + rrand() % 3);
         build_map_objects(&world, foo, 5, 1 + rrand() % 3);
+        set_cleanup_flag(CLEANUP_MAP_OBJECTS);
+        world.turn = 1;
     }
 
     /* Initialize window system and windows. */
