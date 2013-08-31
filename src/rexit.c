@@ -10,7 +10,7 @@
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for KeysWinData, KeyBinding structs */
 #include "command_db.h" /* for free_command_db() */
-#include "windows.h" /* for Win struct, free_win() */
+#include "windows.h" /* for Win struct, free_win(), free_winmeta() */
 #include "map_objects.h" /* for free_item_defs(), free_monster_defs() */
 
 
@@ -67,8 +67,7 @@ static void cleanup(struct World * world)
     }
     if (cleanup_flags & CLEANUP_WIN_META)
     {
-        delwin(world->wins.meta->padframe.curses_win);
-        free(world->wins.meta);
+        free_winmeta(world->wins.meta);
     }
     if (cleanup_flags & CLEANUP_MAP_OBJECT_DEFS)
     {

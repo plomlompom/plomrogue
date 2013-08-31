@@ -440,6 +440,14 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
 
 
 
+extern void free_winmeta(struct WinMeta * wmeta)
+{
+    delwin(wmeta->padframe.curses_win);
+    free(wmeta);
+}
+
+
+
 extern void free_win(struct Win * win)
 {
     if (0 != win->frame.curses_win)

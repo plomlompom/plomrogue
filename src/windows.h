@@ -119,7 +119,8 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** w, char * title,
 
 
 
-/* Free allocated memory for an initialized Win struct. */
+/* Free allocated memory for an initialized Win / WinMeta struct. */
+extern void free_winmeta(struct WinMeta * wmeta);
 extern void free_win(struct Win * win);
 
 
