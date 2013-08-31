@@ -203,11 +203,10 @@ int main(int argc, char *argv[])
     raw();
     init_keybindings(&world);
     set_cleanup_flag(CLEANUP_KEYBINDINGS);
-    struct WinMeta win_meta;
     char * err_winmem = "Trouble with init_win_meta() or draw_all_wins() in "
                         "main().";
-    exit_err(init_win_meta(screen, &win_meta), &world, err_winmem);
-    world.wins.meta = &win_meta;
+    exit_err(init_win_meta(screen, &world.wins.meta), &world, err_winmem);
+    set_cleanup_flag(CLEANUP_WIN_META);
     world.wins.keys = init_win_from_file(&world, "Keys", draw_keys_win);
     set_cleanup_flag(CLEANUP_WIN_KEYS);
     world.wins.info = init_win_from_file(&world, "Info", draw_info_win);
@@ -238,7 +237,7 @@ int main(int argc, char *argv[])
         }
         while (1)
         {
-            draw_all_wins(&win_meta);
+            draw_all_wins(world.wins.meta);
             key = getch();
             if (   EOF != action
                 && key == get_action_key(world.keybindings, "wait"))
@@ -264,7 +263,7 @@ int main(int argc, char *argv[])
         while (1)
         {
             save_game(&world);
-            draw_all_wins(&win_meta);
+            draw_all_wins(world.wins.meta);
             key = getch();
             if (0 != player.hitpoints && 0 == player_control(key, &world))
             {

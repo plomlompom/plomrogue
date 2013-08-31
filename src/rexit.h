@@ -31,7 +31,8 @@ enum cleanup_flag
     CLEANUP_WIN_INFO        = 0x0080,
     CLEANUP_WIN_LOG         = 0x0100,
     CLEANUP_WIN_MAP         = 0x0200,
-    CLEANUP_WIN_KEYS        = 0x0400
+    CLEANUP_WIN_KEYS        = 0x0400,
+    CLEANUP_WIN_META        = 0x0800
 };
 extern void set_cleanup_flag(enum cleanup_flag flag);
 

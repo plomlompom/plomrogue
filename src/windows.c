@@ -362,8 +362,9 @@ static void shift_win_backward(struct WinMeta * wmeta)
 
 
 
-extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta)
+extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmp)
 {
+    struct WinMeta * wmeta = malloc(sizeof(struct WinMeta));
     wmeta->_screen             = screen;
     uint32_t maxy_test         = getmaxy(screen);
     uint32_t maxx_test         = getmaxx(screen);
@@ -383,6 +384,7 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta)
     }
     wmeta->padframe.curses_win = pad_test;
     wmeta->active              = 0;
+    *wmp = wmeta;
     return 0;
 }
 
@@ -440,6 +442,10 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
 
 extern void free_win(struct Win * win)
 {
+    if (0 != win->frame.curses_win)
+    {
+        delwin(win->frame.curses_win);
+    }
     free(win->_title);
     free(win);
 }

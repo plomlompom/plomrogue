@@ -95,7 +95,7 @@ struct WinMeta
  * initialized 0, except for the virtual screen (height = that of the terminal
  * screen; width = 1) amd its frame sized to the size of the terminal screen.
  */
-extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta * wmeta);
+extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
 
 
 

@@ -65,6 +65,11 @@ static void cleanup(struct World * world)
     {
         free_win(world->wins.keys);
     }
+    if (cleanup_flags & CLEANUP_WIN_META)
+    {
+        delwin(world->wins.meta->padframe.curses_win);
+        free(world->wins.meta);
+    }
     if (cleanup_flags & CLEANUP_MAP_OBJECT_DEFS)
     {
         free_item_defs(world->item_def);
