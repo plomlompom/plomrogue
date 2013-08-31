@@ -308,10 +308,11 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
 
 extern void free_items(struct Item * item)
 {
-    if (0 != item->map_obj.next)
+    if (0 == item)
     {
-        free_items((struct Item *) item->map_obj.next);
+        return;
     }
+    free_items((struct Item *) item->map_obj.next);
     free(item);
 }
 
@@ -319,10 +320,11 @@ extern void free_items(struct Item * item)
 
 extern void free_monsters(struct Monster * monster)
 {
-    if (0 != monster->map_obj.next)
+    if (0 == monster)
     {
-        free_monsters((struct Monster *) monster->map_obj.next);
+        return;
     }
+    free_monsters((struct Monster *) monster->map_obj.next);
     free(monster);
 }
 
