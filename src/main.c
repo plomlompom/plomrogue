@@ -133,7 +133,6 @@ int main(int argc, char *argv[])
         exit_err(fclose(file), &world, err_c);
         player.pos.y--;
         player.pos.x--;
-        world.turn = 1;
     }
 
     /* For non-interactive mode, try to load world state from record file. */
