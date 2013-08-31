@@ -45,7 +45,7 @@ Y       shift window backwards
 _       shrink window horizontally
 +       grow window vertically
 -       shrink window vertically
-Z       reload window configuration
+r       reload window configuration
 
 w       scroll map up
 x       scroll map down

@@ -17,6 +17,7 @@
 95 shri_h
 43 grow_v
 45 shri_v
+114 reload_wins
 119 map_u
 120 map_d
 97 map_l
@@ -27,4 +28,3 @@
 65 player_l
 68 player_r
 83 wait
-90 reload_wins

@@ -24,7 +24,7 @@ extern void init_keybindings(struct World * world)
     char * command = malloc(linemax);
     uint16_t commcount = 0;
     char * cmdptr;
-    while (fgets(command, linemax, file))
+    while (fgets(command, linemax + 1, file))
     {
         keybindings[commcount].key = atoi(command);
         cmdptr = strchr(command, ' ') + 1;
