@@ -5,27 +5,49 @@
 #include <string.h> /* for strlen() */
 #include <stdint.h> /* for uint8_t, uint16_t */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
-                      * resize_active_win(), init_win(), structs Win, WinMeta
+                      * resize_active_win(), init_win(), free_win(),
+                      * structs Win, WinMeta
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "main.h" /* for Wins struct */
 #include "misc.h" /* for textfile_sizes() */
 #include "rexit.h" /* for exit_err() */
 #include "main.h" /* for World, Wins structs */
+#include "draw_wins.h" /* for draw_keys_win(), draw_info_win(), draw_log_win(),
+                        * draw_map_win
+                        */
+
+
+
+extern void reload_win_config(struct World * world)
+{
+    while (0 != world->wins.meta->active)
+    {
+        suspend_win(world->wins.meta, world->wins.meta->active);
+    }
+    free_win(world->wins.info);
+    free_win(world->wins.keys);
+    free_win(world->wins.map);
+    free_win(world->wins.log);
+    world->wins.keys = init_win_from_file(world, "Keys", draw_keys_win);
+    world->wins.info = init_win_from_file(world, "Info", draw_info_win);
+    world->wins.log  = init_win_from_file(world, "Log", draw_log_win);
+    world->wins.map  = init_win_from_file(world, "Map", draw_map_win);
+    sorted_wintoggle(world);
+}
 
 
 
 extern struct Win * init_win_from_file(struct World * world, char * w_name,
                                        void (* f) (struct Win *))
 {
-    char * err = "Trouble in init_win_from_file() with malloc().";
+    char * err_m = "Trouble in init_win_from_file() with malloc().";
     char * prefix = "config/windows/";
     uint8_t size = strlen(prefix) + strlen(w_name) + 1;
     char * path = malloc(size);
-    exit_err(NULL == path, world, err);
+    exit_err(NULL == path, world, err_m);
     sprintf(path, "%s%s", prefix, w_name);
-
-    err = "Trouble in init_win_from_file() with fopen().";
+    char * err = "Trouble in init_win_from_file() with fopen().";
     FILE * file = fopen(path, "r");
     free(path);
     exit_err(NULL == file, world, err);
@@ -33,9 +55,11 @@ extern struct Win * init_win_from_file(struct World * world, char * w_name,
     err = "Trouble in init_win_from_file() with textfile_sizes().";
     exit_err(textfile_sizes(file, &linemax, NULL), world, err);
     char * line = malloc(linemax);
+    exit_err(NULL == line, world, err_m);
     err = "Trouble in init_win_from_file() with fgets().";
     exit_err(NULL == fgets(line, linemax, file), world, err);
     char * title = malloc(strlen(line));
+    exit_err(NULL == title, world, err_m);
     memcpy(title, line, strlen(line) - 1);   /* Eliminate newline char at end */
     title[strlen(line) - 1] = '\0';          /* of string.                    */
     exit_err(NULL == fgets(line, linemax, file), world, err);
@@ -45,7 +69,6 @@ extern struct Win * init_win_from_file(struct World * world, char * w_name,
     free(line);
     err = "Trouble in init_win_from_file() with fclose().";
     exit_err(fclose(file), world, err);
-
     struct WinMeta * wmeta = world->wins.meta;
     struct Win * wp;
     err = "Trouble in init_win_from_file() with init_win().";
@@ -150,4 +173,3 @@ extern uint8_t growshrink_active_window(struct WinMeta * win_meta, char change)
     }
     return 0;
 }
-

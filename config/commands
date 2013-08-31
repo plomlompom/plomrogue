@@ -27,3 +27,4 @@
 27 player_l player left
 28 player_r player right
 29 wait wait / next turn
+30 reload_wins reload windows configuration

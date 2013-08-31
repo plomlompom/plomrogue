@@ -16,6 +16,11 @@ struct World;
 
 
 
+/* Reload windows in order and sizes defined in win config. */
+extern void reload_win_config(struct World * world);
+
+
+
 /* Wrapper around init_win() that reads the desired window size and title from a
  * file at the path prefixing the provided win name "w_name" with
  * "config/windows/". "f"() is the window drawing function (Win._draw()).

@@ -12,7 +12,7 @@
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
 #include "wincontrol.h" /* for scroll_pad(), toggle_window(),
-                         * growshrink_active_window()
+                         * growshrink_active_window(), reload_win_config()
                          */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "command_db.h" /* for is_command_id_shortdsc() */
@@ -181,7 +181,11 @@ extern uint8_t meta_control(int key, struct World * world)
     }
     else if (key == get_action_key(world->keybindings, "map_c"))
     {
-        map_center_player (world->map, world->player, win_map->frame.size);
+        map_center_player(world->map, world->player, win_map->frame.size);
+    }
+    else if (key == get_action_key(world->keybindings, "reload_wins"))
+    {
+        reload_win_config(world);
     }
     return 0;
 }
