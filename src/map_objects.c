@@ -8,11 +8,14 @@
 #include "readwrite.h" /* for [read/write]_uint[8/16/23][_bigendian]() */
 #include "misc.h" /* for textfile_sizes(), find_passable_pos() */
 #include "main.h" /* for World struct */
+#include "rexit.h" /* for err_exit() */
 
 
 
 /* Return pointer to newly allocated map object struct of size "size". If first
  * in map object chain ("first" pointing to !0), point "start" to it.
+ *
+ * Returns NULL instead of MapObj pointer if malloc() failed.
  */
 static struct MapObj * get_next_map_obj(void * start, char * first,
                                         size_t size, struct MapObj * map_obj);
@@ -89,15 +92,20 @@ extern void init_map_object_defs(struct World * world, char * filename)
 {
     world->item_def    = 0;
     world->monster_def = 0;
+    char * err = "Trouble in init_map_object_defs() with fopen().";
     FILE * file = fopen(filename, "r");
+    exit_err(NULL == file, world, err);
     uint16_t linemax;
-    textfile_sizes (file, &linemax, NULL);
+    err = "Trouble in init_map_object_defs() with textfile_sizes().";
+    exit_err(textfile_sizes(file, &linemax, NULL), world, err);
     struct MapObjDef  mod;
     struct ItemDef    id;
     struct MonsterDef md;
     struct ItemDef    * * p_p_id  = &world->item_def;
     struct MonsterDef * * p_p_md  = &world->monster_def;
+    err = "Trouble in init_map_object_defs() with malloc() or calloc().";
     char * defline = malloc(linemax);
+    exit_err(NULL == defline, world, err);
     char * line_p;
     char * delim = " ";
     while (fgets(defline, linemax, file))
@@ -117,11 +125,13 @@ extern void init_map_object_defs(struct World * world, char * filename)
             line_p             = strtok(NULL, delim);
         }
         mod.desc = calloc(strlen(line_p), sizeof(char));
+        exit_err(NULL == mod.desc, world, err);
         memcpy(mod.desc, line_p, strlen(line_p) - 1);
         if ('i' == mod.m_or_i)
         {
             id.map_obj_def = mod;
             * p_p_id       = malloc(sizeof(struct ItemDef));
+            exit_err(NULL == p_p_id, world, err);
             * * p_p_id     = id;
             p_p_id         = (struct ItemDef    * *) * p_p_id;
         }
@@ -129,12 +139,14 @@ extern void init_map_object_defs(struct World * world, char * filename)
         {
             md.map_obj_def = mod;
             * p_p_md       = malloc(sizeof(struct MonsterDef));
+            exit_err(NULL == p_p_md, world, err);
             * * p_p_md     = md;
             p_p_md         = (struct MonsterDef * *) * p_p_md;
         }
     }
     free(defline);
-    fclose(file);
+    err = "Trouble in init_map_object_defs() with fclose().";
+    exit_err(fclose(file), world, err);
 }
 
 
@@ -200,6 +212,7 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
     char first = 1;
     long pos;
     uint16_t read_uint16 = 0;
+    char * err = "Trouble in read_map_objects() with get_next_map_obj().";
     while (1)
     {
         pos = ftell(file);
@@ -226,6 +239,7 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
             size = sizeof(struct Item);
         }
         map_obj = get_next_map_obj(start, &first, size, map_obj);
+        exit_err(NULL == map_obj, world, err);
         map_obj->type = type;
         if (   read_uint16_bigendian(file, &map_obj->pos.y)
             || read_uint16_bigendian(file, &map_obj->pos.x))
@@ -259,6 +273,7 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
     char first = 1;
     struct MapObjDef * mod = get_map_obj_def(world, def_id);
     size_t size = 0;
+    char * err = "Trouble in build_map_objects() with get_next_map_obj().";
     if ('i' == mod->m_or_i)
     {
         size = sizeof(struct Item);
@@ -270,6 +285,7 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
     for (i = 0; i < n; i++)
     {
         mo = get_next_map_obj(start, &first, size, mo);
+        exit_err(NULL == mo, world, err);
         mo->pos = find_passable_pos(world->map);
         if ('i' == mod->m_or_i)
         {

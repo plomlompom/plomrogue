@@ -5,7 +5,7 @@
 #include <unistd.h> /* for unlink(), acess() */
 #include <stdlib.h> /* for calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
-#include <stdint.h> /* for uint16_t */
+#include <stdint.h> /* for uint8_t, uint16_t */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian]() */
 #include "map_objects.h" /* for struct Monster, write_map_objects(), */
 #include "map_object_actions.h" /* for is_passable(), move_monster() */
@@ -17,8 +17,8 @@
 
 
 
-extern void textfile_sizes(FILE * file, uint16_t * linemax_p,
-                           uint16_t * n_lines_p)
+extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
+                              uint16_t * n_lines_p)
 {
     uint16_t n_lines = 0;
     int c = 0;
@@ -41,12 +41,16 @@ extern void textfile_sizes(FILE * file, uint16_t * linemax_p,
             }
         }
     }
-    fseek(file, 0, SEEK_SET);
+    if (-1 == fseek(file, 0, SEEK_SET))
+    {
+        return 1;
+    }
     * linemax_p = linemax;
     if (n_lines_p)
     {
         * n_lines_p = n_lines;
     }
+    return 0;
 }
 
 

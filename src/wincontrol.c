@@ -30,7 +30,8 @@ extern struct Win * init_win_from_file(struct World * world, char * w_name,
     free(path);
     exit_err(NULL == file, world, err);
     uint16_t linemax;
-    textfile_sizes(file, &linemax, NULL);
+    err = "Trouble in init_win_from_file() with textfile_sizes().";
+    exit_err(textfile_sizes(file, &linemax, NULL), world, err);
     char * line = malloc(linemax);
     err = "Trouble in init_win_from_file() with fgets().";
     exit_err(NULL == fgets(line, linemax, file), world, err);
@@ -46,8 +47,9 @@ extern struct Win * init_win_from_file(struct World * world, char * w_name,
     exit_err(fclose(file), world, err);
 
     struct WinMeta * wmeta = world->wins.meta;
-    struct Win * wp; // = malloc(sizeof(struct Win));
-    init_win(wmeta, &wp, title, height, width, world, f);
+    struct Win * wp;
+    err = "Trouble in init_win_from_file() with init_win().";
+    exit_err(init_win(wmeta, &wp, title, height, width, world, f), world, err);
     free(title);
     return wp;
 }
@@ -56,18 +58,16 @@ extern struct Win * init_win_from_file(struct World * world, char * w_name,
 
 extern void sorted_wintoggle(struct World * world)
 {
-    char * err = "Trouble in sorted_wintoggle() with fopen() on file "
-                 "'config/toggle_win_order'.";
+    char * err = "Trouble in sorted_wintoggle() with fopen().";
     FILE * file = fopen("config/windows/toggle_order", "r");
     exit_err(NULL == file, world, err);
     uint16_t linemax;
-    textfile_sizes(file, &linemax, NULL);
+    err = "Trouble in sorted_wintoggle() with textfile_sizes().";
+    exit_err(textfile_sizes(file, &linemax, NULL), world, err);
     char win_order[linemax];
-    err = "Trouble in sorted_wintoggle() with fgets() on file "
-          "'config/toggle_win_order'.";
+    err = "Trouble in sorted_wintoggle() with fgets().";
     exit_err(NULL == fgets(win_order, linemax, file), world, err);
-    err = "Trouble in sorted_wintoggle() with fclose() on file "
-          "'toggle_win_order'.";
+    err = "Trouble in sorted_wintoggle() with fclose().";
     exit_err(fclose(file), world, err);
 
     char c;

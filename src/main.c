@@ -203,8 +203,7 @@ int main(int argc, char *argv[])
     raw();
     init_keybindings(&world);
     set_cleanup_flag(CLEANUP_KEYBINDINGS);
-    char * err_winmem = "Trouble with init_win_meta() or draw_all_wins() in "
-                        "main().";
+    char * err_winmem = "Trouble with init_win_meta() in main ().";
     exit_err(init_win_meta(screen, &world.wins.meta), &world, err_winmem);
     set_cleanup_flag(CLEANUP_WIN_META);
     world.wins.keys = init_win_from_file(&world, "Keys", draw_keys_win);
@@ -215,8 +214,8 @@ int main(int argc, char *argv[])
     set_cleanup_flag(CLEANUP_WIN_LOG);
     world.wins.map = init_win_from_file(&world, "Map", draw_map_win);
     set_cleanup_flag(CLEANUP_WIN_MAP);
-
     sorted_wintoggle(&world);
+    err_winmem = "Trouble with draw_all_wins() in main().";
 
     /* Replay mode. */
     int key;

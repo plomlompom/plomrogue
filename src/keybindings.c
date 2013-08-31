@@ -18,7 +18,8 @@ extern void init_keybindings(struct World * world)
 {
     FILE * file = fopen("config/keybindings", "r");
     uint16_t lines, linemax;
-    textfile_sizes(file, &linemax, &lines);
+    char * err = "textfile_sizes() in init_keybindings() returns error.";
+    exit_err(textfile_sizes(file, &linemax, &lines), world, err);
     struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
     char * command = malloc(linemax);
     uint16_t commcount = 0;

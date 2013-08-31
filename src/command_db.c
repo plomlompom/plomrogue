@@ -81,7 +81,8 @@ extern void init_command_db(struct World * world)
     FILE * file = fopen("config/commands", "r");
     exit_err(NULL == file, world, err);
     uint16_t lines, linemax;
-    textfile_sizes(file, &linemax, &lines);
+    err = "Trouble in init_cmds() with textfile_sizes().";
+    exit_err(textfile_sizes(file, &linemax, &lines), world, err);
     err = "Trouble in init_cmds() with malloc().";
     char * line = malloc(linemax);
     exit_err(NULL == line, world, err);
