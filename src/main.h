@@ -10,23 +10,13 @@
 
 #include <stdint.h> /* for uint32_t*/
 struct WinMeta;
+struct WinConf;
 struct Win;
 struct KeyBinding;
 struct KeysWinData;
 struct Map;
 struct ItemDef;
 struct MonsterDef;
-
-
-
-struct Wins
-{
-    struct WinMeta * meta;
-    struct Win * keys;
-    struct Win * info;
-    struct Win * log;
-    struct Win * map;
-};
 
 
 
@@ -46,7 +36,8 @@ struct World
     struct Monster * monster;         /* Pointer to the monsters' data. */
     struct Player * player;           /* Pointer to the player data. */
     struct CommandDB * cmd_db;        /* Pointer to the command database. */
-    struct Wins wins;                 /* Pointers to WinMeta, individual Wins.*/
+    struct WinMeta * wmeta;           /* Pointer to window manager's WinMeta. */
+    struct WinConf * winconfs;        /* Pointer to windows' configurations. */
 };
 
 

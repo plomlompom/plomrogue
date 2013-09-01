@@ -12,7 +12,7 @@
 #include "command_db.h" /* for free_command_db() */
 #include "windows.h" /* for Win struct, free_win(), free_winmeta() */
 #include "map_objects.h" /* for free_item_defs(), free_monster_defs() */
-
+#include "wincontrol.h" /* for get_win_by_id(), free_winconfs(), free_wins() */
 
 
 /* The clean-up routine and the flag resource by which it decides what to do. */
@@ -49,35 +49,27 @@ static void cleanup(struct World * world)
     {
         free_command_db(world);
     }
-    if (cleanup_flags & CLEANUP_WIN_INFO)
+    if (cleanup_flags & CLEANUP_MAP_OBJECTS)
     {
-        free_win(world->wins.info);
-    }
-    if (cleanup_flags & CLEANUP_WIN_MAP)
-    {
-        free_win(world->wins.map);
-    }
-    if (cleanup_flags & CLEANUP_WIN_LOG)
-    {
-        free_win(world->wins.log);
-    }
-    if (cleanup_flags & CLEANUP_WIN_KEYS)
-    {
-        free_win(world->wins.keys);
-    }
-    if (cleanup_flags & CLEANUP_WIN_META)
-    {
-        free_winmeta(world->wins.meta);
+        free_items(world->item);
+        free_monsters(world->monster);
     }
     if (cleanup_flags & CLEANUP_MAP_OBJECT_DEFS)
     {
         free_item_defs(world->item_def);
         free_monster_defs(world->monster_def);
     }
-    if (cleanup_flags & CLEANUP_MAP_OBJECTS)
+    if (cleanup_flags & CLEANUP_WINS)
     {
-        free_items(world->item);
-        free_monsters(world->monster);
+        free_wins(world);
+    }
+    if (cleanup_flags & CLEANUP_WINCONFS)
+    {
+        free_winconfs(world);
+    }
+    if (cleanup_flags & CLEANUP_WIN_META)
+    {
+        free_winmeta(world->wmeta);
     }
 }
 

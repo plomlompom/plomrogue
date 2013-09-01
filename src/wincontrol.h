@@ -16,18 +16,36 @@ struct World;
 
 
 
+/* Puts an identifier on each window, interfaces to its config file data. */
+struct WinConf
+{
+    char id;
+    struct Win * win;
+    char * title;
+    int16_t height;
+    int16_t width;
+    void (* draw) (struct Win *);
+};
+
+
+
+/* Create/initialize (from config files)/free Winconf / Win structs. */
+extern void create_winconfs(struct World * world);
+extern void init_winconfs(struct World * world);
+extern void free_winconfs(struct World * world);
+extern void init_wins(struct World * world);
+extern void free_wins(struct World * world);
+
+
+
 /* Reload windows in order and sizes defined in win config. */
 extern void reload_win_config(struct World * world);
 
 
 
-/* Wrapper around init_win() that reads the desired window size and title from a
- * file at the path prefixing the provided win name "w_name" with
- * "config/windows/". "f"() is the window drawing function (Win._draw()).
- */
-extern struct Win * init_win_from_file(struct World * world, char * w_name,
-                                       void (* f) (struct Win *));
-
+/* Get WinConf identified by winconf->id == "id", or that winconf's ->win. */
+extern struct WinConf * get_winconf_by_id(struct World * world, char id);
+extern struct Win * get_win_by_id(struct World * world, char id);
 
 
 

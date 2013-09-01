@@ -11,7 +11,7 @@
 #include "map.h" /* for map_scroll(), map_center_player(), dir enum */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
-#include "wincontrol.h" /* for scroll_pad(), toggle_window(),
+#include "wincontrol.h" /* for scroll_pad(), toggle_window(), get_win_by_id(),
                          * growshrink_active_window(), reload_win_config()
                          */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
@@ -78,11 +78,11 @@ extern uint8_t player_control(int key, struct World * world)
 
 extern uint8_t meta_control(int key, struct World * world)
 {
-    struct WinMeta * win_meta = world->wins.meta;
-    struct Win * win_keys     = world->wins.keys;
-    struct Win * win_map      = world->wins.map;
-    struct Win * win_info     = world->wins.info;
-    struct Win * win_log      = world->wins.log;
+    struct WinMeta * win_meta = world->wmeta;
+    struct Win * win_keys     = get_win_by_id(world, 'k');
+    struct Win * win_map      = get_win_by_id(world, 'm');
+    struct Win * win_info     = get_win_by_id(world, 'i');
+    struct Win * win_log      = get_win_by_id(world, 'l');
     char * err_toggle = "Trouble with toggle_window() in meta_keys().";
     char * err_shift  = "Trouble with shift_active_win() in meta_keys().";
     char * err_resize = "Trouble with growshrink_active_window() in "

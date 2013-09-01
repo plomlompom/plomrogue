@@ -22,7 +22,9 @@
                           */
 #include "map.h" /* for struct Map, init_map() */
 #include "misc.h" /* for update_log(), find_passable_pos(), save_game() */
-#include "wincontrol.h" /* for toggle_window() */
+#include "wincontrol.h" /* for create_winconfs(), init_winconfs(), init_wins(),
+                         * sorted_wintoggle()
+                         */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game() */
 #include "control.h" /* for meta_control() */
@@ -203,16 +205,13 @@ int main(int argc, char *argv[])
     init_keybindings(&world);
     set_cleanup_flag(CLEANUP_KEYBINDINGS);
     char * err_winmem = "Trouble with init_win_meta() in main ().";
-    exit_err(init_win_meta(screen, &world.wins.meta), &world, err_winmem);
+    exit_err(init_win_meta(screen, &world.wmeta), &world, err_winmem);
     set_cleanup_flag(CLEANUP_WIN_META);
-    world.wins.keys = init_win_from_file(&world, "Keys", draw_keys_win);
-    set_cleanup_flag(CLEANUP_WIN_KEYS);
-    world.wins.info = init_win_from_file(&world, "Info", draw_info_win);
-    set_cleanup_flag(CLEANUP_WIN_INFO);
-    world.wins.log = init_win_from_file(&world, "Log", draw_log_win);
-    set_cleanup_flag(CLEANUP_WIN_LOG);
-    world.wins.map = init_win_from_file(&world, "Map", draw_map_win);
-    set_cleanup_flag(CLEANUP_WIN_MAP);
+    create_winconfs(&world);
+    init_winconfs(&world);
+    set_cleanup_flag(CLEANUP_WINCONFS);
+    init_wins(&world);
+    set_cleanup_flag(CLEANUP_WINS);
     sorted_wintoggle(&world);
     err_winmem = "Trouble with draw_all_wins() in main().";
 
@@ -235,7 +234,7 @@ int main(int argc, char *argv[])
         }
         while (1)
         {
-            draw_all_wins(world.wins.meta);
+            draw_all_wins(world.wmeta);
             key = getch();
             if (   EOF != action
                 && key == get_action_key(world.keybindings, "wait"))
@@ -261,7 +260,7 @@ int main(int argc, char *argv[])
         while (1)
         {
             save_game(&world);
-            draw_all_wins(world.wins.meta);
+            draw_all_wins(world.wmeta);
             key = getch();
             if (0 != player.hitpoints && 0 == player_control(key, &world))
             {
