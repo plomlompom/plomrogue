@@ -11,8 +11,10 @@
 #include "map.h" /* for map_scroll(), map_center_player(), dir enum */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
-#include "wincontrol.h" /* for scroll_pad(), toggle_window(), get_win_by_id(),
+#include "wincontrol.h" /* for scroll_pad(), toggle_window(),
                          * growshrink_active_window(), reload_win_config()
+                         * toggle_winconfig(), save_win_configs(),
+                         * toggle_win_height_type(), toggle_win_width_type()
                          */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "command_db.h" /* for is_command_id_shortdsc() */
@@ -133,19 +135,19 @@ extern uint8_t meta_control(int key, struct World * world)
     }
     else if (key == get_action_key(world->keybindings, "grow_h"))
     {
-        exit_err(growshrink_active_window(win_meta, '*'), world, err_resize);
+        exit_err(growshrink_active_window(world, '*'), world, err_resize);
     }
     else if (key == get_action_key(world->keybindings, "shri_h"))
     {
-        exit_err(growshrink_active_window(win_meta, '_'), world, err_resize);
+        exit_err(growshrink_active_window(world, '_'), world, err_resize);
     }
     else if (key == get_action_key(world->keybindings, "grow_v"))
     {
-        exit_err(growshrink_active_window(win_meta, '+'), world, err_resize);
+        exit_err(growshrink_active_window(world, '+'), world, err_resize);
     }
     else if (key == get_action_key(world->keybindings, "shri_v"))
     {
-        exit_err(growshrink_active_window(win_meta, '-'), world, err_resize);
+        exit_err(growshrink_active_window(world, '-'), world, err_resize);
     }
     else if (key == get_action_key(world->keybindings, "save_keys"))
     {
@@ -186,6 +188,22 @@ extern uint8_t meta_control(int key, struct World * world)
     else if (key == get_action_key(world->keybindings, "reload_wins"))
     {
         reload_win_config(world);
+    }
+    else if (key == get_action_key(world->keybindings, "winconf"))
+    {
+        toggle_winconfig(world, world->wmeta->active);
+    }
+    else if (key == get_action_key(world->keybindings, "to_height_t"))
+    {
+        toggle_win_height_type(world, world->wmeta->active);
+    }
+    else if (key == get_action_key(world->keybindings, "to_width_t"))
+    {
+        toggle_win_width_type(world, world->wmeta->active);
+    }
+    else if (key == get_action_key(world->keybindings, "save_winconf"))
+    {
+        save_win_configs(world);
     }
     return 0;
 }

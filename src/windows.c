@@ -414,25 +414,17 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
     {
         w->frame.size.x = width;
     }
-    else if (0 > width)
+    else if (0 >= width)
     {
         w->frame.size.x = wmeta->padframe.size.x + width;
-    }
-    else
-    {
-        w->frame.size.x = wmeta->padframe.size.x;
     }
     if      (0 < height && height <= wmeta->padframe.size.y - 1)
     {
         w->frame.size.y = height;
     }
-    else if (0 > height && wmeta->padframe.size.y + (height - 1) > 0)
+    else if (0 >= height && wmeta->padframe.size.y + (height - 1) > 0)
     {
         w->frame.size.y = wmeta->padframe.size.y + (height - 1);
-    }
-    else
-    {
-        w->frame.size.y = wmeta->padframe.size.y - 1;
     }
     *wp = w;
     return 0;

@@ -13,6 +13,7 @@
 #include "main.h"        /* for World struct */
 #include "rexit.h"       /* for err_exit() */
 #include "command_db.h"  /* for get_command_longdesc() */
+#include "wincontrol.h"  /* for WinConf struct, get_winconf_by_win() */
 
 
 
@@ -286,4 +287,39 @@ extern void draw_keys_win(struct Win * win)
         }
     }
     free(keydesc);
+}
+
+
+
+extern void draw_winconf(struct Win * win)
+{
+    struct World * world = (struct World *) win->data;
+    struct WinConf * wcp = get_winconf_by_win(world, win);
+    char * title = "Window configuration:\n";
+    char * h_t_d = "\nWill save height as: ";
+    char * h_pos = "height in positive cells";
+    char * h_neg = "negative diff to maximum height";
+    char * h_d   = "\nHeight to be saved: ";
+    char * w_t_d = "\n\nWill save width as: ";
+    char * w_pos = "width in positive cells";
+    char * w_neg = "negative diff to maximum width";
+    char * w_d   = "\nWidth to be saved: ";
+    char * h_t = h_pos;
+    char * w_t = w_pos;
+    if      (1 == wcp->height_type)
+    {
+        h_t = h_neg;
+    }
+    if     (1 == wcp->width_type)
+    {
+        w_t = w_neg;
+    }
+    uint16_t maxl = strlen(title)
+                    + strlen(h_t_d) + strlen(h_t) + strlen(h_d) + 6
+                    + strlen(w_t_d) + strlen(w_t) + strlen(w_d) + 6 + 1;
+    char * text = malloc(maxl + 1);
+    sprintf(text, "%s%s%s%s%d%s%s%s%d", title, h_t_d, h_t, h_d, wcp->height,
+                                               w_t_d, w_t, w_d, wcp->width);
+    draw_with_linebreaks(win, text, 0);
+    free(text);
 }

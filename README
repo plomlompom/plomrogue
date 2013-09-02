@@ -46,6 +46,10 @@ _       shrink window horizontally
 +       grow window vertically
 -       shrink window vertically
 r       reload window configuration
+z       toggle window configuration view
+h       toggle whether window height is saved as positive or negative
+n       toggle whether window width is saved as positive or negative
+m       save window configuration
 
 w       scroll map up
 x       scroll map down

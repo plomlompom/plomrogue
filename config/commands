@@ -28,3 +28,7 @@
 28 player_r player right
 29 wait wait / next turn
 30 reload_wins reload windows configuration
+31 winconf toggle window configuration view
+32 to_height_t toggle window height type
+33 to_width_t toggle window width type
+34 save_winconf save window configuration

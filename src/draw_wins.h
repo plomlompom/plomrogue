@@ -25,6 +25,9 @@ extern void draw_info_win(struct Win * win);
 /* Draw keybindings selection/manipulation menu. */
 extern void draw_keys_win(struct Win * win);
 
+/* Draw window configuration info. */
+extern void draw_winconf(struct Win * win);
+
 
 
 #endif

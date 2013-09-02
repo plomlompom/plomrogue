@@ -104,12 +104,13 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
  * the window is visible.
  *
  * Pass 0 for "width" to make the window as wide as the terminal screen. Pass
- * negative values for "width" to make the size so many cells smaller than the
- * terminal screen. Pass 0 for "height" to give the window the maximum allowed
- * height: one cell smaller than the terminal screen. Pass negative values to
- * make the window so many smalls smaller than the terminal screen. The maximum
- * allowed height is also applied for positive values that exceed it or negative
- * values that would reduce the window height < 1 cell.
+ * negative values for "width" to make the width so many cells smaller than that
+ * of the terminal screen. Pass 0 for "height" to give the window the maximum
+ * allowed height: one cell smaller than that of the terminal screen. Pass
+ * negative values to make the window width so many cells smaller than that of
+ * the terminal screen. The maximum allowed height is also applied for positive
+ * values that exceed it or negative values that would reduce the window height
+ * < 1 cell.
  *
  * Other members of the Win struct are initialized to 0.
  */
