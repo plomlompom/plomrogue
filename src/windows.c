@@ -79,7 +79,7 @@ static uint8_t refit_pad(struct WinMeta * wmeta)
     }
 
     /* Only resize the pad if the rightmost window column has changed. */
-    if (getmaxx(wmeta->padframe.curses_win) != lastwincol)
+    if (getmaxx(wmeta->padframe.curses_win) + 1 != lastwincol)
     {
         if (lastwincol + 2 > UINT16_MAX)
         {
