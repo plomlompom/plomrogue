@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
     char * err_winmem = "Trouble with init_win_meta() in main ().";
     exit_err(init_win_meta(screen, &world.wmeta), &world, err_winmem);
     set_cleanup_flag(CLEANUP_WIN_META);
-    create_winconfs(&world);
+    // create_winconfs(&world);
     init_winconfs(&world);
     set_cleanup_flag(CLEANUP_WINCONFS);
     init_wins(&world);

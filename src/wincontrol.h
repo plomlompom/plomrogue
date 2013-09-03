@@ -43,7 +43,6 @@ extern struct Win * get_win_by_id(struct World * world, char id);
 
 
 /* Create/initialize (from config files)/free Winconf / Win structs. */
-extern void create_winconfs(struct World * world);
 extern void init_winconfs(struct World * world);
 extern void free_winconfs(struct World * world);
 extern void init_wins(struct World * world);

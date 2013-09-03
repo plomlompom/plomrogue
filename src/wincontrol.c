@@ -244,7 +244,7 @@ extern struct Win * get_win_by_id(struct World * world, char id)
 
 
 
-extern void create_winconfs(struct World * world)
+extern void init_winconfs(struct World * world)
 {
     char * err = "Trouble with malloc() in init_winconfs().";
     struct WinConf * winconfs = malloc(4 * sizeof(struct WinConf));
@@ -254,12 +254,6 @@ extern void create_winconfs(struct World * world)
     create_winconf('l', &winconfs[2], draw_log_win);
     create_winconf('m', &winconfs[3], draw_map_win);
     world->winconfs = winconfs;
-}
-
-
-
-extern void init_winconfs(struct World * world)
-{
     init_winconf_from_file(world, 'i');
     init_winconf_from_file(world, 'k');
     init_winconf_from_file(world, 'l');
@@ -337,7 +331,6 @@ extern void reload_win_config(struct World * world)
     }
     free_wins(world);
     free_winconfs(world);
-    create_winconfs(world);
     init_winconfs(world);
     init_wins(world);
     sorted_wintoggle(world);
