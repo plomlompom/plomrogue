@@ -83,49 +83,50 @@ static void create_winconf(char id, struct WinConf * wcp,
 
 static void init_winconf_from_file(struct World * world, char id)
 {
+    char * err_o = "Trouble in init_win_from_file() with fopen().";
     char * err_m = "Trouble in init_win_from_file() with malloc().";
+    char * err_s = "Trouble in init_win_from_file() with textfile_sizes().";
+    char * err_g = "Trouble in init_win_from_file() with fgets().";
+    char * err_c = "Trouble in init_win_from_file() with fclose().";
+
     char * path = string_prefixed_id(world, "config/windows/Win_", id);
-    char * err = "Trouble in init_win_from_file() with fopen().";
     FILE * file = fopen(path, "r");
-    exit_err(NULL == file, world, err);
+    exit_err(NULL == file, world, err_o);
     free(path);
 
-    err = "Trouble in init_win_from_file() with textfile_sizes().";
-    struct WinConf * winconf = get_winconf_by_id(world, id);
     uint16_t linemax;
-    exit_err(textfile_sizes(file, &linemax, NULL), world, err);
+    exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
     char * line = malloc(linemax);
     exit_err(NULL == line, world, err_m);
 
-    err = "Trouble in init_win_from_file() with fgets().";
-    exit_err(NULL == fgets(line, linemax, file), world, err);
-    winconf->title = malloc(strlen(line));
-    exit_err(NULL == winconf->title, world, err_m);
+    struct WinConf * winconf = get_winconf_by_id(world, id);
+    exit_err(NULL == fgets(line, linemax, file), world, err_g);
+    exit_err(NULL == (winconf->title = malloc(strlen(line))), world, err_m);
     memcpy(winconf->title, line, strlen(line) - 1); /* Eliminate newline char */
     winconf->title[strlen(line) - 1] = '\0';        /* char at end of string. */
-    exit_err(NULL == fgets(line, linemax, file), world, err);
+    exit_err(NULL == fgets(line, linemax, file), world, err_g);
     winconf->height = atoi(line);
     if (0 >= winconf->height)
     {
         winconf->height_type = 1;
     }
-    exit_err(NULL == fgets(line, linemax, file), world, err);
+    exit_err(NULL == fgets(line, linemax, file), world, err_g);
     winconf->width = atoi(line);
     if (0 >= winconf->width)
     {
         winconf->width_type = 1;
     }
+
     free(line);
-    err = "Trouble in init_win_from_file() with fclose().";
-    exit_err(fclose(file), world, err);
+    exit_err(fclose(file), world, err_c);
 }
 
 
 
 static void init_win_from_winconf(struct World * world, char id)
 {
-    struct WinConf * winconf = get_winconf_by_id(world, id);
     char * err = "Trouble in init_win_from_file() with init_win().";
+    struct WinConf * winconf = get_winconf_by_id(world, id);
     exit_err(init_win(world->wmeta, &winconf->win, winconf->title,
                       winconf->height, winconf->width, world, winconf->draw),
              world, err);
@@ -303,17 +304,22 @@ extern void free_wins(struct World * world)
 
 extern void sorted_wintoggle(struct World * world)
 {
-    char * err = "Trouble in sorted_wintoggle() with fopen().";
-    FILE * file = fopen("config/windows/toggle_order", "r");
-    exit_err(NULL == file, world, err);
+    char * err_o = "Trouble in sorted_wintoggle() with fopen().";
+    char * err_s = "Trouble in sorted_wintoggle() with textfile_sizes().";
+    char * err_g = "Trouble in sorted_wintoggle() with fgets().";
+    char * err_c = "Trouble in sorted_wintoggle() with fclose().";
+
+    char * path = "config/windows/toggle_order";
+    FILE * file = fopen(path, "r");
+    exit_err(NULL == file, world, err_o);
+
     uint16_t linemax;
-    err = "Trouble in sorted_wintoggle() with textfile_sizes().";
-    exit_err(textfile_sizes(file, &linemax, NULL), world, err);
+    exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
+
     char win_order[linemax];
-    err = "Trouble in sorted_wintoggle() with fgets().";
-    exit_err(NULL == fgets(win_order, linemax, file), world, err);
-    err = "Trouble in sorted_wintoggle() with fclose().";
-    exit_err(fclose(file), world, err);
+    exit_err(NULL == fgets(win_order, linemax, file), world, err_g);
+    exit_err(fclose(file), world, err_c);
+
     uint8_t i = 0;
     for (; i < linemax - 2; i++)
     {

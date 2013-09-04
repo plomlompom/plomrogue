@@ -77,31 +77,35 @@ extern char * get_command_longdsc(struct World * world, char * dsc_short)
 
 extern void init_command_db(struct World * world)
 {
-    char * err = "Trouble in init_cmds() with fopen() on file 'commands'.";
-    FILE * file = fopen("config/commands", "r");
-    exit_err(NULL == file, world, err);
+    char * err_o = "Trouble in init_cmds() with fopen() on file 'commands'.";
+    char * err_s = "Trouble in init_cmds() with textfile_sizes().";
+    char * err_m = "Trouble in init_cmds() with malloc().";
+    char * err_c = "Trouble in init_cmds() with fclose() on file 'commands'.";
+
+    char * path = "config/commands";
+    FILE * file = fopen(path, "r");
+    exit_err(NULL == file, world, err_o);
     uint16_t lines, linemax;
-    err = "Trouble in init_cmds() with textfile_sizes().";
-    exit_err(textfile_sizes(file, &linemax, &lines), world, err);
-    err = "Trouble in init_cmds() with malloc().";
+    exit_err(textfile_sizes(file, &linemax, &lines), world, err_s);
+
     char * line = malloc(linemax);
-    exit_err(NULL == line, world, err);
+    exit_err(NULL == line, world, err_m);
     struct Command * cmds = malloc(lines * sizeof(struct Command));
-    exit_err(NULL == line, world, err);
+    exit_err(NULL == line, world, err_m);
     uint8_t i = 0;
     while (fgets(line, linemax, file))
     {
         cmds[i].id = atoi(strtok(line, " "));
-        copy_tokenized_string(world, &cmds[i].dsc_short, " ", err);
-        copy_tokenized_string(world, &cmds[i].dsc_long, "\n", err);
+        copy_tokenized_string(world, &cmds[i].dsc_short, " ", err_m);
+        copy_tokenized_string(world, &cmds[i].dsc_long, "\n", err_m);
         i++;
     }
     free(line);
+    exit_err(fclose(file), world, err_c);
+
     world->cmd_db = malloc(sizeof(struct CommandDB));
     world->cmd_db->cmds = cmds;
     world->cmd_db->n = lines;
-    err = "Trouble in init_cmds() with fclose() on file 'commands'.";
-    exit_err(fclose(file), world, err);
 }
 
 

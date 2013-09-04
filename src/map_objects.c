@@ -90,22 +90,25 @@ static uint8_t read_map_objects_monsterdata (void * start, FILE * file)
 
 extern void init_map_object_defs(struct World * world, char * filename)
 {
-    world->item_def    = 0;
-    world->monster_def = 0;
-    char * err = "Trouble in init_map_object_defs() with fopen().";
+    char * err_o = "Trouble in init_map_object_defs() with fopen().";
+    char * err_s = "Trouble in init_map_object_defs() with textfile_sizes().";
+    char * err_m = "Trouble in init_map_object_defs() with malloc()/calloc().";
+    char * err_c = "Trouble in init_map_object_defs() with fclose().";
+
     FILE * file = fopen(filename, "r");
-    exit_err(NULL == file, world, err);
+    exit_err(NULL == file, world, err_o);
     uint16_t linemax;
-    err = "Trouble in init_map_object_defs() with textfile_sizes().";
-    exit_err(textfile_sizes(file, &linemax, NULL), world, err);
+    exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
+
     struct MapObjDef  mod;
     struct ItemDef    id;
     struct MonsterDef md;
+    world->item_def    = 0;
+    world->monster_def = 0;
     struct ItemDef    * * p_p_id  = &world->item_def;
     struct MonsterDef * * p_p_md  = &world->monster_def;
-    err = "Trouble in init_map_object_defs() with malloc() or calloc().";
     char * defline = malloc(linemax);
-    exit_err(NULL == defline, world, err);
+    exit_err(NULL == defline, world, err_m);
     char * line_p;
     char * delim = " ";
     while (fgets(defline, linemax, file))
@@ -125,13 +128,13 @@ extern void init_map_object_defs(struct World * world, char * filename)
             line_p             = strtok(NULL, delim);
         }
         mod.desc = calloc(strlen(line_p), sizeof(char));
-        exit_err(NULL == mod.desc, world, err);
+        exit_err(NULL == mod.desc, world, err_m);
         memcpy(mod.desc, line_p, strlen(line_p) - 1);
         if ('i' == mod.m_or_i)
         {
             id.map_obj_def = mod;
             * p_p_id       = malloc(sizeof(struct ItemDef));
-            exit_err(NULL == p_p_id, world, err);
+            exit_err(NULL == p_p_id, world, err_m);
             * * p_p_id     = id;
             p_p_id         = (struct ItemDef    * *) * p_p_id;
         }
@@ -139,14 +142,14 @@ extern void init_map_object_defs(struct World * world, char * filename)
         {
             md.map_obj_def = mod;
             * p_p_md       = malloc(sizeof(struct MonsterDef));
-            exit_err(NULL == p_p_md, world, err);
+            exit_err(NULL == p_p_md, world, err_m);
             * * p_p_md     = md;
             p_p_md         = (struct MonsterDef * *) * p_p_md;
         }
     }
+
     free(defline);
-    err = "Trouble in init_map_object_defs() with fclose().";
-    exit_err(fclose(file), world, err);
+    exit_err(fclose(file), world, err_c);
 }
 
 
@@ -205,6 +208,7 @@ extern uint8_t write_map_objects(struct World * world, void * start,
 
 extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
 {
+    char * err = "Trouble in read_map_objects() with get_next_map_obj().";
     struct MapObj * map_obj;
     struct MapObjDef * mod;
     size_t size;
@@ -212,7 +216,6 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
     char first = 1;
     long pos;
     uint16_t read_uint16 = 0;
-    char * err = "Trouble in read_map_objects() with get_next_map_obj().";
     while (1)
     {
         pos = ftell(file);
@@ -268,12 +271,12 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
 extern void * build_map_objects(struct World * world, void * start, char def_id,
                                 uint8_t n)
 {
+    char * err = "Trouble in build_map_objects() with get_next_map_obj().";
     uint8_t i;
     struct MapObj * mo;
     char first = 1;
     struct MapObjDef * mod = get_map_obj_def(world, def_id);
     size_t size = 0;
-    char * err = "Trouble in build_map_objects() with get_next_map_obj().";
     if ('i' == mod->m_or_i)
     {
         size = sizeof(struct Item);
