@@ -107,10 +107,10 @@ extern void init_map_object_defs(struct World * world, char * filename)
     world->monster_def = 0;
     struct ItemDef    * * p_p_id  = &world->item_def;
     struct MonsterDef * * p_p_md  = &world->monster_def;
-    char defline[linemax];
+    char defline[linemax + 1];
     char * line_p;
     char * delim = " ";
-    while (fgets(defline, linemax, file))
+    while (fgets(defline, linemax + 1, file))
     {
         mod.next    = 0;
         mod.id      = atoi(strtok(defline, delim));

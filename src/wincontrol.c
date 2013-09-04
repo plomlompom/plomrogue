@@ -93,23 +93,22 @@ static void init_winconf_from_file(struct World * world, char id)
     FILE * file = fopen(path, "r");
     exit_err(NULL == file, world, err_o);
     free(path);
-
     uint16_t linemax;
     exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
-    char line[linemax];
+    char line[linemax + 1];
 
     struct WinConf * winconf = get_winconf_by_id(world, id);
-    exit_err(NULL == fgets(line, linemax, file), world, err_g);
+    exit_err(NULL == fgets(line, linemax + 1, file), world, err_g);
     exit_err(NULL == (winconf->title = malloc(strlen(line))), world, err_m);
     memcpy(winconf->title, line, strlen(line) - 1); /* Eliminate newline char */
     winconf->title[strlen(line) - 1] = '\0';        /* char at end of string. */
-    exit_err(NULL == fgets(line, linemax, file), world, err_g);
+    exit_err(NULL == fgets(line, linemax + 1, file), world, err_g);
     winconf->height = atoi(line);
     if (0 >= winconf->height)
     {
         winconf->height_type = 1;
     }
-    exit_err(NULL == fgets(line, linemax, file), world, err_g);
+    exit_err(NULL == fgets(line, linemax + 1, file), world, err_g);
     winconf->width = atoi(line);
     if (0 >= winconf->width)
     {
@@ -308,16 +307,15 @@ extern void sorted_wintoggle(struct World * world)
     char * path = "config/windows/toggle_order";
     FILE * file = fopen(path, "r");
     exit_err(NULL == file, world, err_o);
-
     uint16_t linemax;
     exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
+    char win_order[linemax + 1];
 
-    char win_order[linemax];
-    exit_err(NULL == fgets(win_order, linemax, file), world, err_g);
+    exit_err(NULL == fgets(win_order, linemax + 1, file), world, err_g);
     exit_err(fclose(file), world, err_c);
 
     uint8_t i = 0;
-    for (; i < linemax - 2; i++)
+    for (; i < linemax - 1; i++)
     {
         toggle_window(world->wmeta, get_win_by_id(world, win_order[i]));
     }

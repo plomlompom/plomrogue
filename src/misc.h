@@ -17,10 +17,12 @@ struct Map;
 
 
 
-/* Learn from "file" the largest line length (pointed to by "linemax_p") and
- * (pointed to by "n_lines_p" if it is not set to NULL) the number of lines.
+/* Learn from "file" the largest line length (pointed to by "linemax_p"; length
+ * includes newline chars) and (pointed to by "n_lines_p" if it is not set to
+ * NULL) the number of lines (= number of newline chars).
  *
- * Returns 0 on success, 1 on fseek() error.
+ * Returns 0 on success, 1 on error of fseek() (called to return to initial file
+ * reading position).
  */
 extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
                               uint16_t * n_lines_p);

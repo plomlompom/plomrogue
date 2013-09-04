@@ -87,12 +87,12 @@ extern void init_command_db(struct World * world)
     exit_err(NULL == file, world, err_o);
     uint16_t lines, linemax;
     exit_err(textfile_sizes(file, &linemax, &lines), world, err_s);
+    char line[linemax + 1];
 
-    char line[linemax];
     struct Command * cmds = malloc(lines * sizeof(struct Command));
     exit_err(NULL == line, world, err_m);
     uint8_t i = 0;
-    while (fgets(line, linemax, file))
+    while (fgets(line, linemax + 1, file))
     {
         cmds[i].id = atoi(strtok(line, " "));
         copy_tokenized_string(world, &cmds[i].dsc_short, " ", err_m);

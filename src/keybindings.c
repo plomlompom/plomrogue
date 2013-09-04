@@ -21,7 +21,7 @@ extern void init_keybindings(struct World * world)
     char * err = "textfile_sizes() in init_keybindings() returns error.";
     exit_err(textfile_sizes(file, &linemax, &lines), world, err);
     struct KeyBinding * keybindings = malloc(lines * sizeof(struct KeyBinding));
-    char * command = malloc(linemax);
+    char * command = malloc(linemax + 1);
     uint16_t commcount = 0;
     char * cmdptr;
     while (fgets(command, linemax + 1, file))

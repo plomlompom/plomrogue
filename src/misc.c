@@ -20,19 +20,23 @@
 extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
                               uint16_t * n_lines_p)
 {
-    uint16_t n_lines = 0;
     int c = 0;
-    uint16_t linemax = 0;
     uint16_t c_count = 0;
-    while (EOF != c)
+    uint16_t n_lines = 0;
+    uint16_t linemax = 0;
+    while (1)
     {
-        c_count++;
         c = getc(file);
+        if (EOF == c)
+        {
+            break;
+        }
+        c_count++;
         if ('\n' == c)
         {
             if (c_count > linemax)
             {
-                linemax = c_count + 1;
+                linemax = c_count;
             }
             c_count = 0;
             if (n_lines_p)
@@ -41,6 +45,11 @@ extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
             }
         }
     }
+    if (0 == linemax && 0 < c_count) /* Handle files that consist of only one */
+    {                                /* line / lack newline chars.            */
+        linemax = c_count;
+    }
+
     if (-1 == fseek(file, 0, SEEK_SET))
     {
         return 1;
