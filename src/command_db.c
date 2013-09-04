@@ -7,7 +7,7 @@
 #include <string.h> /* for strlen(), strtok() */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
-#include "misc.h" /* for textfile_sizes() */
+#include "readwrite.h" /* for textfile_sizes() */
 
 
 

@@ -12,7 +12,7 @@
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "main.h" /* for Wins struct */
-#include "misc.h" /* for textfile_sizes() */
+#include "readwrite.h" /* for textfile_sizes() */
 #include "rexit.h" /* for exit_err() */
 #include "main.h" /* for World, Wins structs */
 #include "draw_wins.h" /* for draw_keys_win(), draw_info_win(), draw_log_win(),

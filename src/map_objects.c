@@ -5,8 +5,10 @@
 #include <stdint.h> /* for uint8_t */
 #include <stdio.h> /* for FILE typedef */
 #include <string.h> /* for strchr(), strlen(), memcpy(), strtok() */
-#include "readwrite.h" /* for [read/write]_uint[8/16/23][_bigendian]() */
-#include "misc.h" /* for textfile_sizes(), find_passable_pos() */
+#include "readwrite.h" /* for textfile_sizes(),
+                        * [read/write]_uint[8/16/23][_bigendian]()
+                        */
+#include "misc.h" /* for find_passable_pos() */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for err_exit() */
 

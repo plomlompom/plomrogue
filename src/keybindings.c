@@ -3,14 +3,14 @@
 
 
 #include "keybindings.h"
-#include <stdlib.h>  /* for malloc(), free(), atoi() */
-#include <stdint.h>  /* for uint16_t */
-#include <ncurses.h> /* for keycode defines in get_keyname() */
-#include <string.h>  /* for strchr(), strlen(), strcmp(), memcpy()*/
-#include "windows.h" /* for draw_all_wins() and WinMeta struct */
-#include "misc.h"    /* for texfile_sizes() */
-#include "main.h"    /* for World struct */
-#include "rexit.h"   /* for err_exit() */
+#include <stdlib.h>    /* for malloc(), free(), atoi() */
+#include <stdint.h>    /* for uint16_t */
+#include <ncurses.h>   /* for keycode defines in get_keyname() */
+#include <string.h>    /* for strchr(), strlen(), strcmp(), memcpy()*/
+#include "windows.h"   /* for draw_all_wins() and WinMeta struct */
+#include "readwrite.h" /* for texfile_sizes() */
+#include "main.h"      /* for World struct */
+#include "rexit.h"     /* for err_exit() */
 
 
 

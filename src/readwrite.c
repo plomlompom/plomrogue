@@ -1,7 +1,7 @@
 /* readwrite.c */
 
 #include "readwrite.h"
-#include <stdio.h> /* for FILE typedef*/
+#include <stdio.h> /* for FILE typedef, fgetc(), fputc(), fseek() */
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
 
 
@@ -23,6 +23,54 @@
  */
 static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size);
 static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size);
+
+
+
+extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
+                              uint16_t * n_lines_p)
+{
+    int c = 0;
+    uint16_t c_count = 0;
+    uint16_t n_lines = 0;
+    uint16_t linemax = 0;
+    while (1)
+    {
+        c = fgetc(file);
+        if (EOF == c)
+        {
+            break;
+        }
+        c_count++;
+        if ('\n' == c)
+        {
+            if (c_count > linemax)
+            {
+                linemax = c_count;
+            }
+            c_count = 0;
+            if (n_lines_p)
+            {
+                n_lines++;
+            }
+        }
+    }
+    if (0 == linemax && 0 < c_count) /* Handle files that consist of only one */
+    {                                /* line / lack newline chars.            */
+        linemax = c_count;
+    }
+
+    if (-1 == fseek(file, 0, SEEK_SET))
+    {
+        return 1;
+    }
+    * linemax_p = linemax;
+    if (n_lines_p)
+    {
+        * n_lines_p = n_lines;
+    }
+    return 0;
+}
+
 
 
 static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size)
