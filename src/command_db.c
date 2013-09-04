@@ -88,8 +88,7 @@ extern void init_command_db(struct World * world)
     uint16_t lines, linemax;
     exit_err(textfile_sizes(file, &linemax, &lines), world, err_s);
 
-    char * line = malloc(linemax);
-    exit_err(NULL == line, world, err_m);
+    char line[linemax];
     struct Command * cmds = malloc(lines * sizeof(struct Command));
     exit_err(NULL == line, world, err_m);
     uint8_t i = 0;
@@ -100,7 +99,6 @@ extern void init_command_db(struct World * world)
         copy_tokenized_string(world, &cmds[i].dsc_long, "\n", err_m);
         i++;
     }
-    free(line);
     exit_err(fclose(file), world, err_c);
 
     world->cmd_db = malloc(sizeof(struct CommandDB));

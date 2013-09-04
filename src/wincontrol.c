@@ -96,8 +96,7 @@ static void init_winconf_from_file(struct World * world, char id)
 
     uint16_t linemax;
     exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
-    char * line = malloc(linemax);
-    exit_err(NULL == line, world, err_m);
+    char line[linemax];
 
     struct WinConf * winconf = get_winconf_by_id(world, id);
     exit_err(NULL == fgets(line, linemax, file), world, err_g);
@@ -117,7 +116,6 @@ static void init_winconf_from_file(struct World * world, char id)
         winconf->width_type = 1;
     }
 
-    free(line);
     exit_err(fclose(file), world, err_c);
 }
 
@@ -137,7 +135,6 @@ static void init_win_from_winconf(struct World * world, char id)
 extern void save_win_config(struct World * world, char id)
 {
     char * err_o = "Trouble in save_win_config() with fopen().";
-    char * err_m = "Trouble in save_win_config() with malloc().";
     char * err_c = "Trouble in save_win_config() with fclose().";
     char * err_u = "Trouble in save_win_config() with unlink().";
     char * err_r = "Trouble in save_win_config() with rename().";
@@ -152,8 +149,7 @@ extern void save_win_config(struct World * world, char id)
     {
         size = 7;
     }
-    char * line = malloc(size);
-    exit_err(NULL == line, world, err_m);
+    char line[size];
     sprintf(line, "%s\n", wc->title);
     fwrite(line, sizeof(char), strlen(line), file);
     sprintf(line, "%d\n", wc->height);
@@ -352,7 +348,6 @@ extern void save_win_configs(struct World * world)
     save_win_config(world, 'm');
 
     char * err_o = "Trouble in save_win_configs() with fopen().";
-    char * err_m = "Trouble in save_win_configs() with calloc().";
     char * err_c = "Trouble in save_win_configs() with fclose().";
     char * err_u = "Trouble in save_win_configs() with unlink().";
     char * err_r = "Trouble in save_win_configs() with rename().";
@@ -362,8 +357,7 @@ extern void save_win_configs(struct World * world)
     FILE * file = fopen(path_tmp, "w");
     exit_err(NULL == file, world, err_o);
 
-    char * line = calloc(6, sizeof(char));
-    exit_err(NULL == line, world, err_m);
+    char line[6];
     struct Win * w_p = world->wmeta->_chain_start;
     uint8_t i = 0;
     while (0 != w_p)

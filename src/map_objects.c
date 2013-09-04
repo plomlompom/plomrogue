@@ -107,8 +107,7 @@ extern void init_map_object_defs(struct World * world, char * filename)
     world->monster_def = 0;
     struct ItemDef    * * p_p_id  = &world->item_def;
     struct MonsterDef * * p_p_md  = &world->monster_def;
-    char * defline = malloc(linemax);
-    exit_err(NULL == defline, world, err_m);
+    char defline[linemax];
     char * line_p;
     char * delim = " ";
     while (fgets(defline, linemax, file))
@@ -148,7 +147,6 @@ extern void init_map_object_defs(struct World * world, char * filename)
         }
     }
 
-    free(defline);
     exit_err(fclose(file), world, err_c);
 }
 
