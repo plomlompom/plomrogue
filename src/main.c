@@ -1,13 +1,12 @@
 /* main.c */
 
 #include "main.h"
-#include <stdlib.h> /* for atoi(), exit(), EXIT_FAILURE, calloc() */
-#include <stdio.h> /* for FILE typedef, F_OK, rename() */
+#include <stdlib.h> /* for atoi(), exit(), EXIT_FAILURE */
+#include <stdio.h> /* for FILE typedef, F_OK */
 #include <ncurses.h> /* for initscr(), noecho(), curs_set(), keypad(), raw() */
 #include <time.h> /* for time() */
 #include <unistd.h> /* for getopt(), optarg */
 #include <stdint.h> /* for uint16_t, uint32_t */
-#include <errno.h> /* for errno */
 #include "windows.h" /* for structs WinMeta, Win, init_win(), init_win_meta(),
                       * draw_all_wins()
                       */
@@ -15,18 +14,22 @@
                         * draw_log_win()
                         */
 #include "keybindings.h" /* for init_keybindings(), get_action_key() */
-#include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian]() */
+#include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
+                        * try_fopen(), try_fclose(), try_fclose_unlink_renmae()
+                        */
 #include "map_objects.h" /* for structs Monster, Item, Player,
                           * init_map_object_defs(), read_map_objects(),
                           * build_map_objects()
                           */
 #include "map.h" /* for struct Map, init_map() */
-#include "misc.h" /* for update_log(), find_passable_pos(), save_game() */
+#include "misc.h" /* for update_log(), find_passable_pos(), save_game(),
+                   * try_calloc(), check_tempfile(), check_xor_files()
+                   */
 #include "wincontrol.h" /* for create_winconfs(), init_winconfs(), init_wins(),
                          * sorted_wintoggle()
                          */
 #include "rrand.h" /* for rrand(), rrand_seed() */
-#include "rexit.h" /* for exit_game() */
+#include "rexit.h" /* for exit_game(), exit_err() */
 #include "control.h" /* for meta_control() */
 #include "command_db.h" /* for init_command_db() */
 
@@ -34,6 +37,7 @@
 
 int main(int argc, char *argv[])
 {
+    char * f_name = "main()";
     struct World world;
     world.turn = 0;        /* Turns to 1 when map and objects are initalized. */
 
@@ -45,30 +49,14 @@ int main(int argc, char *argv[])
     char * savefile = "savefile";
     char * recordfile_tmp = "record_tmp";
     char * savefile_tmp   = "savefile_tmp";
-    char * err_x = "A file 'record' exists, but no 'savefile'. If everything "
-                   "was in order, both or none would exist. I won't start "
-                   "until this is corrected.";
-    if (!access(recordfile, F_OK) && access(savefile, F_OK))
-    {
-        errno = 0;
-        exit_err(1, &world, err_x);
-    }
-    err_x        = "A 'savefile' exists, but no file 'record'. If everything "
-                   "was in order, both or none would exist. I won't start "
-                   "until this is corrected.";
-    if (!access(savefile, F_OK) && access(recordfile, F_OK))
-    {
-        errno = 0;
-        exit_err(1, &world, err_x);
-    }
-    err_x        = "A file 'recordfile_tmp' exists, probably from a corrupted "
-                   "previous record saving process. To avoid game record "
-                   "corruption, I won't start until it is removed or renamed.";
-    exit_err(!access(recordfile_tmp, F_OK), &world, err_x);
-    err_x        = "A file 'savefile_tmp' exists, probably from a corrupted "
-                   "previous game saving process. To avoid savegame "
-                   "corruption, I won't start until it is removed or renamed.";
-    exit_err(!access(savefile_tmp,   F_OK), &world, err_x);
+    check_files_xor(savefile, recordfile, &world);
+    check_tempfile(recordfile_tmp, &world);
+    check_tempfile(savefile_tmp, &world);
+    check_tempfile("config/windows/Win_tmp_k", &world);
+    check_tempfile("config/windows/Win_tmp_m", &world);
+    check_tempfile("config/windows/Win_tmp_i", &world);
+    check_tempfile("config/windows/Win_tmp_l", &world);
+    check_tempfile("config/windows/toggle_order_tmp", &world);
 
     /* Read in startup options (i.e. replay option and replay start turn). */
     int opt;
@@ -97,7 +85,7 @@ int main(int argc, char *argv[])
 
     /* Initialize log, player, monster/item definitions and monsters/items. */
     world.score = 0;
-    world.log = calloc(1, sizeof(char));
+    world.log = try_calloc(1, sizeof(char), &world, f_name);
     set_cleanup_flag(CLEANUP_LOG);
     update_log(&world, " ");
     struct Player player;
@@ -109,17 +97,12 @@ int main(int argc, char *argv[])
     set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
 
     /* For interactive mode, try to load world state from savefile. */
-    char * err_o = "Trouble loading game (fopen() in main()) / "
-                   "opening 'savefile' for reading.";
     char * err_r = "Trouble loading game (in main()) / "
                    "reading from opened 'savefile'.";
-    char * err_c = "Trouble loading game (fclose() in main()) / "
-                   "closing opened 'savefile'.";
     FILE * file;
     if (1 == world.interactive && 0 == access(savefile, F_OK))
     {
-        file = fopen(savefile, "r");
-        exit_err(0 == file, &world, err_o);
+        file = try_fopen(savefile, "r", &world, f_name);
         if (   read_uint32_bigendian(file, &world.seed)
             || read_uint32_bigendian(file, &world.turn)
             || read_uint16_bigendian(file, &world.score)
@@ -132,7 +115,7 @@ int main(int argc, char *argv[])
             exit_err(1, &world, err_r);
         }
         set_cleanup_flag(CLEANUP_MAP_OBJECTS);
-        exit_err(fclose(file), &world, err_c);
+        try_fclose(file, &world, f_name);
         player.pos.y--;
         player.pos.x--;
     }
@@ -140,14 +123,11 @@ int main(int argc, char *argv[])
     /* For non-interactive mode, try to load world state from record file. */
     else
     {
-        err_o = "Trouble loading record file (fopen() in main()) / "
-                "opening file 'record' for reading.";
-        err_r = "Trouble loading record file (read_uint32_bigendian() in "
-                "main()) / reading from opened file 'record'.";
+        err_r = "Trouble reading from 'record' file (read_uint32_bigendian() in "
+                "main()).";
         if (0 == world.interactive)
         {
-            file = fopen(recordfile, "r");
-            exit_err(NULL == file, &world, err_o);
+            file = try_fopen(recordfile, "r", &world, f_name);
             exit_err(read_uint32_bigendian(file, &world.seed), &world, err_r);
         }
 
@@ -158,20 +138,13 @@ int main(int argc, char *argv[])
         {
             world.seed = time(NULL);
 
-            err_o        = "Trouble recording new seed (fopen() in main()) / "
-                           "opening 'record_tmp' file for writing.";
             char * err_w = "Trouble recording new seed "
                            "(write_uint32_bigendian() in main()) / writing to "
-                           "opened file 'record_tmp'.";
-            err_c        = "Trouble recording new seed (fclose() in main()) / "
-                           "closing opened file 'record_tmp'.";
-            char * err_m = "Trouble recording new seed (rename() in main()) : "
-                           "renaming file 'record_tmp' to 'record'.";
-            file = fopen(recordfile_tmp, "w");
-            exit_err(0 == file, &world, err_o);
+                           "file 'record_tmp'.";
+            file = try_fopen(recordfile_tmp, "w", &world, f_name);
             exit_err(write_uint32_bigendian(world.seed, file), &world, err_w);
-            exit_err(fclose(file), &world, err_c);
-            exit_err(rename(recordfile_tmp, recordfile), &world, err_m);
+            try_fclose_unlink_rename(file, recordfile_tmp, recordfile,
+                                    &world, f_name);
         }
     }
 
@@ -207,7 +180,6 @@ int main(int argc, char *argv[])
     char * err_winmem = "Trouble with init_win_meta() in main ().";
     exit_err(init_win_meta(screen, &world.wmeta), &world, err_winmem);
     set_cleanup_flag(CLEANUP_WIN_META);
-    // create_winconfs(&world);
     init_winconfs(&world);
     set_cleanup_flag(CLEANUP_WINCONFS);
     init_wins(&world);
@@ -247,8 +219,7 @@ int main(int argc, char *argv[])
             }
             else if (meta_control(key, &world))
             {
-                err_c = "Trouble closing 'record' file (fclose() in main()).";
-                exit_err(fclose(file), &world, err_c);
+                try_fclose(file, &world, f_name);
                 exit_game(&world);
             }
         }

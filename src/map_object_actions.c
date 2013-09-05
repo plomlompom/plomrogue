@@ -1,10 +1,10 @@
 /* map_object_actions.c */
 
 #include "map_object_actions.h"
-#include <stdlib.h> /* for malloc(), calloc(), free() */
+#include <stdlib.h> /* for free() */
 #include <string.h> /* for strlen() */
 #include "yx_uint16.h" /* for yx_uint16 struct, mv_yx_in_dir(), yx_uint16_cmp */
-#include "misc.h" /* for update_log(), turn_over()*/
+#include "misc.h" /* for update_log(), turn_over(), try_malloc() */
 #include "map.h" /* for Map struct */
 #include "main.h" /* for World struct */
 #include "map_objects.h" /* for map object (definition) structs */
@@ -41,11 +41,9 @@ static void monster_bumps_monster(struct World * world, char * dsc_monster1,
 {
     char * bump_dsc = " bumps into ";
     struct MapObjDef * mod = get_map_obj_def(world, monster2->map_obj.type);
-    char * msg = malloc(strlen(dsc_monster1) + strlen(bump_dsc)
-                        + strlen(mod->desc) + 3);
+    char msg[strlen(dsc_monster1) + strlen(bump_dsc) + strlen(mod->desc) + 3];
     sprintf(msg, "\n%s%s%s.", dsc_monster1, bump_dsc, mod->desc);
     update_log(world, msg);
-    free(msg);
 }
 
 
@@ -53,10 +51,9 @@ static void monster_bumps_monster(struct World * world, char * dsc_monster1,
 static void monster_hits_player(struct World * world, char * dsc_monster)
 {
     char * hit_dsc = " hits you";
-    char * msg = malloc(strlen(dsc_monster) + strlen(hit_dsc) + 3);
+    char msg[strlen(dsc_monster) + strlen(hit_dsc) + 3];
     sprintf(msg, "\n%s%s.", dsc_monster, hit_dsc);
     update_log(world, msg);
-    free(msg);
     world->player->hitpoints--;
     if (0 == world->player->hitpoints)
     {
@@ -68,23 +65,22 @@ static void monster_hits_player(struct World * world, char * dsc_monster)
 
 static void player_hits_monster(struct World * world, struct Monster * monster)
 {
+    char * f_name = "player_hits_monster()";
     struct MapObjDef * mod = get_map_obj_def(world, monster->map_obj.type);
     char * hit_dsc = "You hit the ";
     char * monster_dsc = mod->desc;
-    char * msg = malloc(strlen(hit_dsc) + strlen(monster_dsc) + 3);
-    sprintf(msg, "\n%s%s.", hit_dsc, monster_dsc);
-    update_log(world, msg);
-    free(msg);
+    char hitmsg[strlen(hit_dsc) + strlen(monster_dsc) + 3];
+    sprintf(hitmsg, "\n%s%s.", hit_dsc, monster_dsc);
+    update_log(world, hitmsg);
     monster->hitpoints--;
     if (0 == monster->hitpoints)
     {
         hit_dsc = "You kill the ";
-        msg = malloc(strlen(hit_dsc) + strlen(monster_dsc) + 3);
-        sprintf(msg, "\n%s%s.", hit_dsc, monster_dsc);
-        update_log(world, msg);
-        free(msg);
+        char kill_msg[strlen(hit_dsc) + strlen(monster_dsc) + 3];
+        sprintf(kill_msg, "\n%s%s.", hit_dsc, monster_dsc);
+        update_log(world, kill_msg);
         struct MonsterDef * md = (struct MonsterDef * ) mod;
-        struct Item * corpse = malloc(sizeof(struct Item));
+        struct Item * corpse = try_malloc(sizeof(struct Item), world, f_name);
         corpse->map_obj.type = md->corpse_id;
         corpse->map_obj.pos = monster->map_obj.pos;
         corpse->map_obj.next = world->item;
@@ -137,10 +133,9 @@ static void try_player_move(struct World * world,
         dsc_move = "You move ";
         world->player->pos = target;
     }
-    char * msg = malloc(strlen(dsc_move) + strlen (dsc_dir) + 3);
+    char msg[strlen(dsc_move) + strlen (dsc_dir) + 3];
     sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
     update_log(world, msg);
-    free(msg);
 }
 
 
@@ -183,7 +178,7 @@ extern void move_player(struct World * world, enum dir d)
 {
     char * action_dsc_prototype = "player_";
     uint8_t len = strlen(action_dsc_prototype);
-    char * action_dsc = malloc(len + 2);
+    char action_dsc[len + 2];
     memcpy(action_dsc, action_dsc_prototype, len);
     if      (NORTH == d)
     {

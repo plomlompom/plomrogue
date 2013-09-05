@@ -10,6 +10,34 @@
 
 #include <stdio.h> /* for FILE typedef */
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
+struct World;
+
+
+
+/* Wrappers to calling from function called "f" of fopen(), fclose() and fgets()
+ * and calling exit_err() with appropriate error messages.
+ */
+extern FILE * try_fopen(char * path, char * mode, struct World * w, char * f);
+extern void try_fclose(FILE * file, struct World * w, char * f);
+extern void try_fgets(char * line, int size, FILE * file,
+                      struct World * w, char * f);
+
+
+
+/* Wrapper to successive call of fclose() from function called "f" on "file",
+ * then unlink() on file at "p2" if it exists, then rename() on "p1" to "p2".
+ * Used for handling atomic saving of files via temp files.
+ */
+extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
+                                     struct World * w, char * f);
+
+
+
+/* Wrapper: Call textfile_sizes() from function called "f" to get max line
+ * length of "file", exit via exit_err() with trouble_msg()-generated error
+ * message on failure.
+ */
+extern uint16_t get_linemax(FILE * file, struct World * w, char * f);
 
 
 

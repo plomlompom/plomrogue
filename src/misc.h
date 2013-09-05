@@ -9,10 +9,31 @@
 
 
 
+#include <stdlib.h>    /* for size_t */
 #include <stdint.h>    /* for uint16_t */
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
 struct World;
 struct Map;
+
+
+
+/* Returns message: "Trouble in ".parent." with ".child."." (try_*() helper) */
+extern char * trouble_msg(struct World * w, char * parent, char * child);
+
+/* Wrappers to malloc(), calloc() from function called "f" calling exit_err()
+ * with trouble_msg() error message if necessary.
+ */
+extern void * try_malloc(size_t size, struct World * w, char * f);
+extern void * try_calloc(size_t nmemb, size_t size,
+                         struct World * w, char * f);
+
+
+
+/* Check if tempfile "path" exists, and if so, exit with explanation that. */
+extern void check_tempfile(char * path, struct World * f);
+
+/* If one and only one of files at "p1", "p2" exists, fail with explanation. */
+extern void check_files_xor(char * p1, char * p2, struct World * w);
 
 
 

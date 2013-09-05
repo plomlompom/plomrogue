@@ -1,8 +1,15 @@
 /* readwrite.c */
 
 #include "readwrite.h"
-#include <stdio.h> /* for FILE typedef, fgetc(), fputc(), fseek() */
+#include <stdio.h>  /* for FILE typedef, fopen(), fgetc(), fputc(), fseek(),
+                     * sprintf()
+                     */
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
+#include <string.h> /* for strlen()*/
+#include <unistd.h> /* for unlink() */
+#include "rexit.h"  /* for exit_err() */
+#include "misc.h"   /* for trouble_msg() */
+struct World;
 
 
 
@@ -23,6 +30,79 @@
  */
 static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size);
 static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size);
+
+
+
+extern FILE * try_fopen(char * path, char * mode, struct World * w, char * f)
+{
+    char * msg1 = "Trouble in ";
+    char * msg2 = " with fopen() (mode '";
+    char * msg3 = "') on path '";
+    char * msg4 = "'.";
+    uint16_t size = strlen(msg1) + strlen(msg2) + strlen(msg3) + strlen(msg4)
+                    + strlen(f) + strlen(path) + strlen(mode) + 1;
+    char msg[size];
+    sprintf(msg, "%s%s%s%s%s%s%s", msg1, f, msg2, mode, msg3, path, msg4);
+    FILE * file_p = fopen(path, mode);
+    exit_err(NULL == file_p, w, msg);
+    return file_p;
+}
+
+
+
+extern void try_fclose(FILE * file, struct World * w, char * f)
+{
+    char * msg = trouble_msg(w, f, "fclose()");
+    exit_err(fclose(file), w, msg);
+    free(msg);
+}
+
+
+
+extern void try_fgets(char * line, int linemax, FILE * file,
+                      struct World * w, char * f)
+{
+    char * msg = trouble_msg(w, f, "fgets()");
+    exit_err(NULL == fgets(line, linemax, file), w, msg);
+    free(msg);
+}
+
+
+
+extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
+                                     struct World * w, char * f)
+{
+    try_fclose(file, w, f);
+    char * msg1 = "Trouble in ";
+    char * msg4 = "'.";
+    if (!access(p2, F_OK))
+    {
+        char * msg2 = " with unlink() on path '";
+        uint16_t size = strlen(msg1) + strlen(msg2) + strlen(msg4)
+                        + strlen(f) + strlen(p2) + 1;
+        char msg[size];
+        sprintf(msg, "%s%s%s%s%s", msg1, f, msg2, p2, msg4);
+        exit_err(unlink(p2), w, msg);
+    }
+    char * msg2 = " with rename() from '";
+    char * msg3 = "' to '";
+    uint16_t size = strlen(msg1) + strlen(f) + strlen(msg2) + strlen(p1)
+                    + strlen(msg3) + strlen(p2) + strlen(msg4) + 1;
+    char msg[size];
+    sprintf(msg, "%s%s%s%s%s%s%s", msg1, f, msg2, p1, msg3, p2, msg4);
+    exit_err(rename(p1, p2), w, msg);
+}
+
+
+
+extern uint16_t get_linemax(FILE * file, struct World * w, char * f)
+{
+    char * msg = trouble_msg(w, f, "textfile_sizes()");
+    uint16_t linemax;
+    exit_err(textfile_sizes(file, &linemax, NULL), w, msg);
+    free(msg);
+    return linemax;
+}
 
 
 

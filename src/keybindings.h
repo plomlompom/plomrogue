@@ -45,7 +45,7 @@ extern uint16_t get_action_key(struct KeyBinding * keybindings, char * name);
 
 
 /* Translate keycode to readable names of max 9 chars where possible. */
-extern char * get_keyname(uint16_t keycode);
+extern char * get_keyname(struct World * world, uint16_t keycode);
 
 
 

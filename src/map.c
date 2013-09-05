@@ -1,22 +1,23 @@
 #include "map.h"
-#include <stdlib.h>      /* for malloc() */
 #include <stdint.h>      /* for uint16_t, uint32_t */
-#include "misc.h"        /* for center_offset() */
+#include "misc.h"        /* for try_malloc(), center_offset() */
 #include "map_objects.h" /* for Player struct */
 #include "yx_uint16.h"   /* for yx_uint16 and dir enums */
 #include "rrand.h"       /* for rrand() */
+struct World;
 
 
 
-struct Map init_map ()
+struct Map init_map(struct World * world)
 {
+    char * f_name = "init_map()";
     struct Map map;
     map.size.x = 64;
     map.size.y = 64;
     map.offset.x = 0;
     map.offset.y = 0;
     uint32_t size = map.size.x * map.size.y;
-    map.cells = malloc(size);
+    map.cells = try_malloc(size, world, f_name);
     uint16_t y, x;
     for (y = 0; y < map.size.y; y++)
     {

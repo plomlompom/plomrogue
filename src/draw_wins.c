@@ -1,7 +1,7 @@
 /* draw_wins.c */
 
 #include "draw_wins.h"
-#include <stdlib.h>      /* for malloc(), free() */
+#include <stdlib.h>      /* for free() */
 #include <stdint.h>      /* for uint16_t */
 #include <string.h>      /* for strlen() */
 #include <ncurses.h>     /* for mvwaddch() */
@@ -214,13 +214,12 @@ extern void draw_info_win(struct Win * win)
     char * dsc_score     = "\nScore: ";
     uint16_t maxl = strlen(dsc_turn) + strlen(dsc_hitpoints) + strlen(dsc_score)
                     + 10 + 5 + 10;       /* max strlens of numbers to be used */
-    char * text = malloc(maxl + 1);
+    char text[maxl + 1];
     sprintf(text, "%s%d%s%d%s%d",
             dsc_turn, world->turn,
             dsc_hitpoints, world->player->hitpoints,
             dsc_score, world->score);
     draw_with_linebreaks(win, text, 0);
-    free(text);
 }
 
 
@@ -232,7 +231,8 @@ extern void draw_keys_win(struct Win * win)
     offset = center_offset(world->keyswindata->select, world->keyswindata->max,
                            win->frame.size.y - 1);
     uint8_t keydescwidth = 9 + 1; /* max length assured by get_keyname() + \0 */
-    char * keydesc = malloc(keydescwidth), * keyname;
+    char keydesc[keydescwidth];
+    char * keyname;
     char * err_hint = "Trouble with draw_scroll_hint() in draw_keys_win().";
     attr_t attri;
     char * cmd_dsc;
@@ -263,7 +263,7 @@ extern void draw_keys_win(struct Win * win)
                 attri = attri | A_BLINK;
             }
         }
-        keyname = get_keyname(world->keybindings[y + offset].key);
+        keyname = get_keyname(world, world->keybindings[y + offset].key);
         snprintf(keydesc, keydescwidth, "%-9s", keyname);
         free(keyname);
         cmd_dsc = get_command_longdsc(world,
@@ -286,7 +286,6 @@ extern void draw_keys_win(struct Win * win)
             }
         }
     }
-    free(keydesc);
 }
 
 
@@ -317,9 +316,8 @@ extern void draw_winconf(struct Win * win)
     uint16_t maxl = strlen(title)
                     + strlen(h_t_d) + strlen(h_t) + strlen(h_d) + 6
                     + strlen(w_t_d) + strlen(w_t) + strlen(w_d) + 6 + 1;
-    char * text = malloc(maxl + 1);
+    char text[maxl + 1];
     sprintf(text, "%s%s%s%s%d%s%s%s%d", title, h_t_d, h_t, h_d, wcp->height,
                                                w_t_d, w_t, w_d, wcp->width);
     draw_with_linebreaks(win, text, 0);
-    free(text);
 }

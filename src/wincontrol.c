@@ -1,10 +1,10 @@
 /* wincontrol.c */
 
 #include "wincontrol.h"
-#include <stdlib.h> /* for malloc(), free() */
+#include <stdlib.h> /* for free() */
 #include <string.h> /* for strlen() */
 #include <stdint.h> /* for uint8_t, uint16_t */
-#include <stdio.h> /* for fopen(), fclose(), fwrite() */
+#include <stdio.h> /* for fwrite() */
 #include <unistd.h> /* for access(), unlink() */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
                       * resize_active_win(), init_win(), free_win(),
@@ -12,13 +12,15 @@
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "main.h" /* for Wins struct */
-#include "readwrite.h" /* for textfile_sizes() */
+#include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose(),
+                        * try_fgets(), try_fclose_unlink_rename()
+                        */
 #include "rexit.h" /* for exit_err() */
 #include "main.h" /* for World, Wins structs */
 #include "draw_wins.h" /* for draw_keys_win(), draw_info_win(), draw_log_win(),
                         * draw_map_win
                         */
-
+#include "misc.h" /* for try_malloc() */
 
 
 /* Return string "prefix" + "id"; malloc()'s string, remember to call free()! */
@@ -26,7 +28,7 @@ static char * string_prefixed_id(struct World * world, char * prefix, char id);
 
 
 
-/* Create Winconf, initialize ->iew/height_type/width_type to 0, ->id to "id"
+/* Create Winconf, initialize ->view/height_type/width_type to 0, ->id to "id"
  * and ->draw to f.
  */
 static void create_winconf(char id, struct WinConf * wcp,
@@ -58,10 +60,8 @@ static char get_id_by_win(struct World * world, struct Win * win);
 
 static char * string_prefixed_id(struct World * world, char * prefix, char id)
 {
-    char * err = "Trouble in string_prefixed_id() with malloc().";
     uint8_t size = strlen(prefix) + 2;
-    char * path = malloc(size);
-    exit_err(NULL == path, world, err);
+    char * path = try_malloc(size, world, "string_prefixed_id()");
     sprintf(path, "%s_", prefix);
     path[size - 2] = id;
     return path;
@@ -83,39 +83,33 @@ static void create_winconf(char id, struct WinConf * wcp,
 
 static void init_winconf_from_file(struct World * world, char id)
 {
-    char * err_o = "Trouble in init_win_from_file() with fopen().";
-    char * err_m = "Trouble in init_win_from_file() with malloc().";
-    char * err_s = "Trouble in init_win_from_file() with textfile_sizes().";
-    char * err_g = "Trouble in init_win_from_file() with fgets().";
-    char * err_c = "Trouble in init_win_from_file() with fclose().";
+    char * f_name = "init_winconf_from_file()";
 
     char * path = string_prefixed_id(world, "config/windows/Win_", id);
-    FILE * file = fopen(path, "r");
-    exit_err(NULL == file, world, err_o);
+    FILE * file = try_fopen(path, "r", world, f_name);
     free(path);
-    uint16_t linemax;
-    exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
+    uint16_t linemax = get_linemax(file, world, f_name);
     char line[linemax + 1];
 
     struct WinConf * winconf = get_winconf_by_id(world, id);
-    exit_err(NULL == fgets(line, linemax + 1, file), world, err_g);
-    exit_err(NULL == (winconf->title = malloc(strlen(line))), world, err_m);
+    try_fgets(line, linemax + 1, file, world, f_name);
+    winconf->title = try_malloc(strlen(line), world, f_name);
     memcpy(winconf->title, line, strlen(line) - 1); /* Eliminate newline char */
     winconf->title[strlen(line) - 1] = '\0';        /* char at end of string. */
-    exit_err(NULL == fgets(line, linemax + 1, file), world, err_g);
+    try_fgets(line, linemax + 1, file, world, f_name);
     winconf->height = atoi(line);
     if (0 >= winconf->height)
     {
         winconf->height_type = 1;
     }
-    exit_err(NULL == fgets(line, linemax + 1, file), world, err_g);
+    try_fgets(line, linemax + 1, file, world, f_name);
     winconf->width = atoi(line);
     if (0 >= winconf->width)
     {
         winconf->width_type = 1;
     }
 
-    exit_err(fclose(file), world, err_c);
+    try_fclose(file, world, f_name);
 }
 
 
@@ -133,14 +127,10 @@ static void init_win_from_winconf(struct World * world, char id)
 
 extern void save_win_config(struct World * world, char id)
 {
-    char * err_o = "Trouble in save_win_config() with fopen().";
-    char * err_c = "Trouble in save_win_config() with fclose().";
-    char * err_u = "Trouble in save_win_config() with unlink().";
-    char * err_r = "Trouble in save_win_config() with rename().";
+    char * f_name = "save_win_config()";
 
     char * path_tmp = string_prefixed_id(world, "config/windows/Win_tmp_", id);
-    FILE * file = fopen(path_tmp, "w");
-    exit_err(NULL == file, world, err_o);
+    FILE * file = try_fopen(path_tmp, "w", world, f_name);
 
     struct WinConf * wc = get_winconf_by_id(world, id);
     uint8_t size = strlen(wc->title) + 2;
@@ -156,13 +146,8 @@ extern void save_win_config(struct World * world, char id)
     sprintf(line, "%d\n", wc->width);
     fwrite(line, sizeof(char), strlen(line), file);
 
-    exit_err(fclose(file), world, err_c);
     char * path = string_prefixed_id(world, "config/windows/Win_", id);
-    if (!access(path, F_OK))
-    {
-        exit_err(unlink(path), world, err_u);
-    }
-    exit_err(rename(path_tmp, path), world, err_r);
+    try_fclose_unlink_rename(file, path_tmp, path, world, f_name);
     free(path);
     free(path_tmp);
 }
@@ -242,9 +227,9 @@ extern struct Win * get_win_by_id(struct World * world, char id)
 
 extern void init_winconfs(struct World * world)
 {
-    char * err = "Trouble with malloc() in init_winconfs().";
-    struct WinConf * winconfs = malloc(4 * sizeof(struct WinConf));
-    exit_err(NULL == winconfs, world, err);
+    char * f_name = "init_winconfs()";
+    struct WinConf * winconfs = try_malloc(4 * sizeof(struct WinConf),
+                                           world, f_name);
     create_winconf('i', &winconfs[0], draw_info_win);
     create_winconf('k', &winconfs[1], draw_keys_win);
     create_winconf('l', &winconfs[2], draw_log_win);
@@ -299,21 +284,13 @@ extern void free_wins(struct World * world)
 
 extern void sorted_wintoggle(struct World * world)
 {
-    char * err_o = "Trouble in sorted_wintoggle() with fopen().";
-    char * err_s = "Trouble in sorted_wintoggle() with textfile_sizes().";
-    char * err_g = "Trouble in sorted_wintoggle() with fgets().";
-    char * err_c = "Trouble in sorted_wintoggle() with fclose().";
-
+    char * f_name = "sorted_wintoggle()";
     char * path = "config/windows/toggle_order";
-    FILE * file = fopen(path, "r");
-    exit_err(NULL == file, world, err_o);
-    uint16_t linemax;
-    exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
+    FILE * file = try_fopen(path, "r", world, f_name);
+    uint16_t linemax = get_linemax(file, world, f_name);
     char win_order[linemax + 1];
-
-    exit_err(NULL == fgets(win_order, linemax + 1, file), world, err_g);
-    exit_err(fclose(file), world, err_c);
-
+    try_fgets(win_order, linemax + 1, file, world, f_name);
+    try_fclose(file, world, f_name);
     uint8_t i = 0;
     for (; i < linemax - 1; i++)
     {
@@ -340,20 +317,16 @@ extern void reload_win_config(struct World * world)
 
 extern void save_win_configs(struct World * world)
 {
+    char * f_name = "save_win_configs()";
+
     save_win_config(world, 'i');
     save_win_config(world, 'k');
     save_win_config(world, 'l');
     save_win_config(world, 'm');
 
-    char * err_o = "Trouble in save_win_configs() with fopen().";
-    char * err_c = "Trouble in save_win_configs() with fclose().";
-    char * err_u = "Trouble in save_win_configs() with unlink().";
-    char * err_r = "Trouble in save_win_configs() with rename().";
-
     char * path     = "config/windows/toggle_order";
     char * path_tmp = "config/windows/toggle_order_tmp";
-    FILE * file = fopen(path_tmp, "w");
-    exit_err(NULL == file, world, err_o);
+    FILE * file = try_fopen(path_tmp, "w", world, f_name);
 
     char line[6];
     struct Win * w_p = world->wmeta->_chain_start;
@@ -367,12 +340,7 @@ extern void save_win_configs(struct World * world)
     line[i] = '\n';
     fwrite(line, sizeof(char), strlen(line), file);
 
-    exit_err(fclose(file), world, err_c);
-    if (!access(path, F_OK))
-    {
-        exit_err(unlink(path), world, err_u);
-    }
-    exit_err(rename(path_tmp, path), world, err_r);
+    try_fclose_unlink_rename(file, path_tmp, path, world, f_name);
 }
 
 

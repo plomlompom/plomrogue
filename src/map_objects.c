@@ -1,14 +1,14 @@
 /* map_objects.c */
 
 #include "map_objects.h"
-#include <stdlib.h> /* for malloc(), calloc(), free(), atoi() */
+#include <stdlib.h> /* for free(), atoi() */
 #include <stdint.h> /* for uint8_t */
 #include <stdio.h> /* for FILE typedef */
 #include <string.h> /* for strchr(), strlen(), memcpy(), strtok() */
-#include "readwrite.h" /* for textfile_sizes(),
+#include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose()
                         * [read/write]_uint[8/16/23][_bigendian]()
                         */
-#include "misc.h" /* for find_passable_pos() */
+#include "misc.h" /* for try_malloc(), try_calloc(), find_passable_pos() */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for err_exit() */
 
@@ -16,10 +16,9 @@
 
 /* Return pointer to newly allocated map object struct of size "size". If first
  * in map object chain ("first" pointing to !0), point "start" to it.
- *
- * Returns NULL instead of MapObj pointer if malloc() failed.
  */
-static struct MapObj * get_next_map_obj(void * start, char * first,
+static struct MapObj * get_next_map_obj(struct World * world,
+                                        void * start, char * first,
                                         size_t size, struct MapObj * map_obj);
 
 
@@ -34,19 +33,21 @@ static uint8_t read_map_objects_monsterdata( void * start, FILE * file);
 
 
 
-static struct MapObj * get_next_map_obj(void * start, char * first,
+static struct MapObj * get_next_map_obj(struct World * world,
+                                        void * start, char * first,
                                         size_t size, struct MapObj * map_obj)
 {
+    char * f_name = "get_next_map_obj()";
     if (* first)
     {
         struct MapObj * * z = start;
-        map_obj = malloc(size);
+        map_obj = try_malloc(size, world, f_name);
         * z = map_obj;
         * first = 0;
     }
     else
     {
-        map_obj->next = malloc(size);
+        map_obj->next = try_malloc(size, world, f_name);
         map_obj = map_obj->next;
     }
     return map_obj;
@@ -92,16 +93,9 @@ static uint8_t read_map_objects_monsterdata (void * start, FILE * file)
 
 extern void init_map_object_defs(struct World * world, char * filename)
 {
-    char * err_o = "Trouble in init_map_object_defs() with fopen().";
-    char * err_s = "Trouble in init_map_object_defs() with textfile_sizes().";
-    char * err_m = "Trouble in init_map_object_defs() with malloc()/calloc().";
-    char * err_c = "Trouble in init_map_object_defs() with fclose().";
-
-    FILE * file = fopen(filename, "r");
-    exit_err(NULL == file, world, err_o);
-    uint16_t linemax;
-    exit_err(textfile_sizes(file, &linemax, NULL), world, err_s);
-
+    char * f_name = "init_map_object_defs()";
+    FILE * file = try_fopen(filename, "r", world, f_name);
+    uint16_t linemax = get_linemax(file, world, f_name);
     struct MapObjDef  mod;
     struct ItemDef    id;
     struct MonsterDef md;
@@ -128,28 +122,24 @@ extern void init_map_object_defs(struct World * world, char * filename)
             md.hitpoints_start = atoi(strtok(NULL, delim));
             line_p             = strtok(NULL, delim);
         }
-        mod.desc = calloc(strlen(line_p), sizeof(char));
-        exit_err(NULL == mod.desc, world, err_m);
+        mod.desc = try_calloc(strlen(line_p), sizeof(char), world, f_name);
         memcpy(mod.desc, line_p, strlen(line_p) - 1);
         if ('i' == mod.m_or_i)
         {
             id.map_obj_def = mod;
-            * p_p_id       = malloc(sizeof(struct ItemDef));
-            exit_err(NULL == p_p_id, world, err_m);
+            * p_p_id       = try_malloc(sizeof(struct ItemDef), world, f_name);
             * * p_p_id     = id;
             p_p_id         = (struct ItemDef    * *) * p_p_id;
         }
         else
         {
             md.map_obj_def = mod;
-            * p_p_md       = malloc(sizeof(struct MonsterDef));
-            exit_err(NULL == p_p_md, world, err_m);
+            * p_p_md     = try_malloc(sizeof(struct MonsterDef), world, f_name);
             * * p_p_md     = md;
             p_p_md         = (struct MonsterDef * *) * p_p_md;
         }
     }
-
-    exit_err(fclose(file), world, err_c);
+    try_fclose(file, world, f_name);
 }
 
 
@@ -241,7 +231,7 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
         {
             size = sizeof(struct Item);
         }
-        map_obj = get_next_map_obj(start, &first, size, map_obj);
+        map_obj = get_next_map_obj(world, start, &first, size, map_obj);
         exit_err(NULL == map_obj, world, err);
         map_obj->type = type;
         if (   read_uint16_bigendian(file, &map_obj->pos.y)
@@ -287,7 +277,7 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
     }
     for (i = 0; i < n; i++)
     {
-        mo = get_next_map_obj(start, &first, size, mo);
+        mo = get_next_map_obj(world, start, &first, size, mo);
         exit_err(NULL == mo, world, err);
         mo->pos = find_passable_pos(world->map);
         if ('i' == mod->m_or_i)
