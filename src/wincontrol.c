@@ -55,11 +55,11 @@ static void set_winconf(struct World * world, char id);
 /* Get WinConf by "id"; get id of WinConf mothering "win". */
 static struct WinConf * get_winconf_by_id(struct World * world, char id);
 
-/* Get window draw functin (Win->_draw) identified by "c". */
-static void * get_drawfunc_by_char(char c)
+/* Get (Win->_draw) function identified by "c"; NULL if c not mapped to one. */
+static void * get_drawfunc_by_char(char c);
 
 /* Iterate over bytes of world->winconf_ids array. Re-start after null byte. */
-static char get_next_winconf_id(struct World * world)
+static char get_next_winconf_id(struct World * world);
 
 
 
@@ -123,12 +123,17 @@ static void init_winconf_from_file(struct World * world, char id)
 
 static void init_win_from_winconf(struct World * world, char id)
 {
-    char * err = "Trouble in init_win_from_file() with init_win().";
+    char * tmp = "Trouble in init_win_from_file() with init_win() (win id: _).";
+    char * err = try_malloc(strlen(tmp) + 1, world, "init_win_from_file()");
+    memcpy(err, tmp, strlen(tmp) + 1);
+    err[strlen(tmp) - 3] = id;
     struct WinConf * winconf = get_winconf_by_id(world, id);
+    void * f = get_drawfunc_by_char(winconf->draw);
+    exit_err(NULL == f, world, err);
     exit_err(init_win(world->wmeta, &winconf->win, winconf->title,
-                      winconf->height, winconf->width, world,
-                      get_drawfunc_by_char(winconf->draw)),
+                      winconf->height, winconf->width, world, f),
              world, err);
+    free(err);
 }
 
 
@@ -449,7 +454,7 @@ extern void toggle_winconfig(struct World * world, struct Win * win)
     }
     else
     {
-        win->_draw = get_drawfunc_by_char(wcp->draw); // wcp->draw;
+        win->_draw = get_drawfunc_by_char(wcp->draw);
         wcp->view = 0;
     }
 }
