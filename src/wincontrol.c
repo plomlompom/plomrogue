@@ -304,7 +304,7 @@ extern void init_winconfs(struct World * world)
     winconf_ids[i] = '\0';
     exit_err(errno, world, err_r);
     exit_err(closedir(dp), world, err_c);
-    world->winconf_ids = try_malloc(strlen(winconf_ids + 1), world, f_name);
+    world->winconf_ids = try_malloc(strlen(winconf_ids) + 1, world, f_name);
     memcpy(world->winconf_ids, winconf_ids, strlen(winconf_ids) + 1);
     free(winconf_ids);
 
