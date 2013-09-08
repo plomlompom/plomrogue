@@ -19,7 +19,7 @@ struct Command
 {
     uint8_t id;       /* unique identifier of command */
     char * dsc_short; /* short string name of command to be used internally */
-    char * dsc_long;  /* long string description of command for the  user */
+    char * dsc_long;  /* long string description of command for the user */
 };
 
 struct CommandDB

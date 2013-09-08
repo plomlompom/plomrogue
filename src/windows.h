@@ -58,16 +58,13 @@ struct Frame               /* If Frame is Win's "frame", "size" is the        */
 
 struct Win
 {
-    /* members supposed to be used ONLY INTERNALLY */
-    struct Win * _prev;  /* chain pointers; if 0, they mark the start or end  */
-    struct Win * _next;  /* of the chain; if both are 0, Win is outside chain */
-    struct yx_uint16 _start;       /* upper left corner of "frame" WINDOW */
-    char * _title;                 /* title to be used in window title bar */
-    void (* _draw) (struct Win *); /* how to draw window content ("data") */
-
-    /* members to be available EXTERNALLY */
+    struct Win * prev;  /* chain pointers; if 0, they mark the start or end  */
+    struct Win * next;  /* of the chain; if both are 0, Win is outside chain */
+    struct yx_uint16 start;       /* upper left corner of "frame" WINDOW */
+    char * title;                 /* title to be used in window title bar */
+    void (* draw) (struct Win *); /* how to draw window content ("data") */
     struct Frame frame;
-    void * data;                   /* window content to be drawn by _draw() */
+    void * data;                  /* window content to be drawn by _draw() */
 };
 
 
@@ -77,15 +74,12 @@ struct Win
  */
 struct WinMeta
 {
-    /* members supposed to be used ONLY INTERNALLY */
-    WINDOW * _screen;          /* ncurses' pointer to the terminal screen */
-    struct Win * _chain_start; /* first Win in chain; its _prev == 0 */
-    struct Win * _chain_end;   /* last Win in chain; its _next == 0 */
-
-    /* members to be available EXTERNALLY */
-    uint16_t pad_offset;       /* number of cells view is moved to the right */
-    struct Frame padframe;     /* virtual screen fitted into terminal screen */
-    struct Win * active;       /* Win highlighted/selected for manipulation */
+    WINDOW * screen;          /* ncurses' pointer to the terminal screen */
+    struct Win * chain_start; /* first Win in chain; its _prev == 0 */
+    struct Win * chain_end;   /* last Win in chain; its _next == 0 */
+    uint16_t pad_offset;      /* number of cells view is moved to the right */
+    struct Frame padframe;    /* virtual screen fitted into terminal screen */
+    struct Win * active;      /* Win highlighted/selected for manipulation */
 };
 
 

@@ -55,7 +55,7 @@ static void set_winconf(struct World * world, char id);
 /* Get WinConf by "id"; get id of WinConf mothering "win". */
 static struct WinConf * get_winconf_by_id(struct World * world, char id);
 
-/* Get (Win->_draw) function identified by "c"; NULL if c not mapped to one. */
+/* Get (Win->draw) function identified by "c"; NULL if c not mapped to one. */
 static void * get_drawfunc_by_char(char c);
 
 /* Iterate over bytes of world->winconf_ids array. Re-start after null byte. */
@@ -422,13 +422,13 @@ extern void save_win_configs(struct World * world)
     FILE * file = try_fopen(path_tmp, "w", world, f_name);
 
     char line[6];
-    struct Win * w_p = world->wmeta->_chain_start;
+    struct Win * w_p = world->wmeta->chain_start;
     uint8_t i = 0;
     while (0 != w_p)
     {
         struct WinConf * wc = get_winconf_by_win(world, w_p);
         line[i] = wc->id;
-        w_p = w_p->_next;
+        w_p = w_p->next;
         i++;
     }
     line[i] = '\n';
@@ -458,12 +458,12 @@ extern void toggle_winconfig(struct World * world, struct Win * win)
     struct WinConf * wcp = get_winconf_by_win(world, win);
     if (0 == wcp->view)
     {
-        win->_draw = draw_winconf;
+        win->draw = draw_winconf;
         wcp->view = 1;
     }
     else
     {
-        win->_draw = get_drawfunc_by_char(wcp->draw);
+        win->draw = get_drawfunc_by_char(wcp->draw);
         wcp->view = 0;
     }
 }
