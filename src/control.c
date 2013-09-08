@@ -81,10 +81,10 @@ extern uint8_t player_control(int key, struct World * world)
 extern uint8_t meta_control(int key, struct World * world)
 {
     struct WinMeta * win_meta = world->wmeta;
-    struct Win * win_keys     = get_win_by_id(world, 'k');
-    struct Win * win_map      = get_win_by_id(world, 'm');
-    struct Win * win_info     = get_win_by_id(world, 'i');
-    struct Win * win_log      = get_win_by_id(world, 'l');
+    struct Win * win_keys     = get_win_by_id(world, 'k'); /* Bad hardcoding. */
+    struct Win * win_map      = get_win_by_id(world, 'm'); /* TODO: Replace.  */
+    struct Win * win_info     = get_win_by_id(world, 'i'); /*                 */
+    struct Win * win_log      = get_win_by_id(world, 'l'); /*                 */
     char * err_toggle = "Trouble with toggle_window() in meta_keys().";
     char * err_shift  = "Trouble with shift_active_win() in meta_keys().";
     char * err_resize = "Trouble with growshrink_active_window() in "
