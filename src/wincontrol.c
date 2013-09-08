@@ -23,6 +23,7 @@
 #include "misc.h" /* for try_malloc() */
 
 
+
 /* Return string "prefix" + "id"; malloc()'s string, remember to call free()! */
 static char * string_prefixed_id(struct World * world, char * prefix, char id);
 

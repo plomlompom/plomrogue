@@ -295,14 +295,12 @@ extern void draw_winconf(struct Win * win)
     struct World * world = (struct World *) win->data;
     struct WinConf * wcp = get_winconf_by_win(world, win);
     char * title = "Window configuration:\n";
-    char * h_t_d = "\nWill save height as: ";
-    char * h_pos = "height in positive cells";
-    char * h_neg = "negative diff to maximum height";
-    char * h_d   = "\nHeight to be saved: ";
-    char * w_t_d = "\n\nWill save width as: ";
-    char * w_pos = "width in positive cells";
-    char * w_neg = "negative diff to maximum width";
-    char * w_d   = "\nWidth to be saved: ";
+    char * h_d   = "\nWidth to save: ";
+    char * h_pos = " (height in cells)";
+    char * h_neg = " (negative diff: cells to maximum height)";
+    char * w_d   = "\n\nHeight to save: ";
+    char * w_pos = " (width in cells)";
+    char * w_neg = " (negative diff: cells to maximum width)";
     char * h_t = h_pos;
     char * w_t = w_pos;
     if      (1 == wcp->height_type)
@@ -314,10 +312,10 @@ extern void draw_winconf(struct Win * win)
         w_t = w_neg;
     }
     uint16_t maxl = strlen(title)
-                    + strlen(h_t_d) + strlen(h_t) + strlen(h_d) + 6
-                    + strlen(w_t_d) + strlen(w_t) + strlen(w_d) + 6 + 1;
+                    + strlen(h_t) + strlen(h_d) + 6
+                    + strlen(w_t) + strlen(w_d) + 6 + 1;
     char text[maxl + 1];
-    sprintf(text, "%s%s%s%s%d%s%s%s%d", title, h_t_d, h_t, h_d, wcp->height,
-                                               w_t_d, w_t, w_d, wcp->width);
+    sprintf(text, "%s%s%d%s%s%d%s", title, h_d, wcp->height, h_t,
+                                                w_d, wcp->width, w_t);
     draw_with_linebreaks(win, text, 0);
 }
