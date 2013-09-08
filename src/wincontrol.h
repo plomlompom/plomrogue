@@ -9,7 +9,7 @@
 
 
 
-#include <stdint.h> /* for uint8_t */
+#include <stdint.h> /* for uint8_t, int16_t */
 struct Win;
 struct WinMeta;
 struct World;

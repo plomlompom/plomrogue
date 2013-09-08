@@ -30,7 +30,7 @@ static char * string_prefixed_id(struct World * world, char * prefix, char id);
 
 
 /* Create Winconf, initialize ->view/height_type/width_type to 0, ->id to "id"
- * and ->draw to f.
+ * and ->draw to "f".
  */
 static void create_winconf(char id, struct WinConf * wcp,
                            void (* f) (struct Win *));
@@ -55,7 +55,6 @@ static void set_winconf(struct World * world, char id);
 
 /* Get WinConf by "id"; get id of WinConf mothering "win". */
 static struct WinConf * get_winconf_by_id(struct World * world, char id);
-static char get_id_by_win(struct World * world, struct Win * win);
 
 
 
@@ -194,14 +193,6 @@ static struct WinConf * get_winconf_by_id(struct World * world, char id)
 
 
 
-static char get_id_by_win(struct World * world, struct Win * win)
-{
-    struct WinConf * wc = get_winconf_by_win(world, win);
-    return wc->id;
-}
-
-
-
 extern struct WinConf * get_winconf_by_win(struct World * world,
                                            struct Win * win)
 {
@@ -334,7 +325,8 @@ extern void save_win_configs(struct World * world)
     uint8_t i = 0;
     while (0 != w_p)
     {
-        line[i] = get_id_by_win(world, w_p);
+        struct WinConf * wc = get_winconf_by_win(world, w_p);
+        line[i] = wc->id;
         w_p = w_p->_next;
         i++;
     }
