@@ -38,6 +38,7 @@ struct World
     struct CommandDB * cmd_db;        /* Pointer to the command database. */
     struct WinMeta * wmeta;           /* Pointer to window manager's WinMeta. */
     struct WinConf * winconfs;        /* Pointer to windows' configurations. */
+    char * winconf_ids;               /* Pointer to string of Winconfs' ids. */
 };
 
 

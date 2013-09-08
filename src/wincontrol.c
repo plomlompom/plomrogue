@@ -21,6 +21,8 @@
                         * draw_map_win
                         */
 #include "misc.h" /* for try_malloc() */
+#include "dirent.h" /* for opendir(), closedir(), readdir() */
+#include "errno.h" /* for errno */
 
 
 
@@ -29,11 +31,8 @@ static char * string_prefixed_id(struct World * world, char * prefix, char id);
 
 
 
-/* Create Winconf, initialize ->view/height_type/width_type to 0, ->id to "id"
- * and ->draw to "f".
- */
-static void create_winconf(char id, struct WinConf * wcp,
-                           void (* f) (struct Win *));
+/* Create Winconf, init ->view/height_type/width_type to 0, ->id to "id". */
+static void create_winconf(char id, struct WinConf * wcp);
 
 /* Initialize Winconf of "id" from appropriate config file.*/
 static void init_winconf_from_file(struct World * world, char id);
@@ -41,7 +40,7 @@ static void init_winconf_from_file(struct World * world, char id);
 /* Wrapper around init_win() called with values from Winconf of "id". */
 static void init_win_from_winconf(struct World * world, char id);
 
-/* Save title, size of window identified by "id" to its configuration file. */
+/* Save title, draw function, size of window identified by "id" to conffile. */
 static void save_win_config(struct World * world, char id);
 
 
@@ -56,6 +55,12 @@ static void set_winconf(struct World * world, char id);
 /* Get WinConf by "id"; get id of WinConf mothering "win". */
 static struct WinConf * get_winconf_by_id(struct World * world, char id);
 
+/* Get window draw functin (Win->_draw) identified by "c". */
+static void * get_drawfunc_by_char(char c)
+
+/* Iterate over bytes of world->winconf_ids array. Re-start after null byte. */
+static char get_next_winconf_id(struct World * world)
+
 
 
 static char * string_prefixed_id(struct World * world, char * prefix, char id)
@@ -69,11 +74,9 @@ static char * string_prefixed_id(struct World * world, char * prefix, char id)
 
 
 
-static void create_winconf(char id, struct WinConf * wcp,
-                           void (* f) (struct Win *))
+static void create_winconf(char id, struct WinConf * wcp)
 {
     wcp->id = id;
-    wcp->draw = f;
     wcp->view = 0;
     wcp->height_type = 0;
     wcp->width_type = 0;
@@ -96,6 +99,10 @@ static void init_winconf_from_file(struct World * world, char id)
     winconf->title = try_malloc(strlen(line), world, f_name);
     memcpy(winconf->title, line, strlen(line) - 1); /* Eliminate newline char */
     winconf->title[strlen(line) - 1] = '\0';        /* char at end of string. */
+
+    try_fgets(line, linemax + 1, file, world, f_name);
+    winconf->draw = line[0];
+
     try_fgets(line, linemax + 1, file, world, f_name);
     winconf->height = atoi(line);
     if (0 >= winconf->height)
@@ -119,7 +126,8 @@ static void init_win_from_winconf(struct World * world, char id)
     char * err = "Trouble in init_win_from_file() with init_win().";
     struct WinConf * winconf = get_winconf_by_id(world, id);
     exit_err(init_win(world->wmeta, &winconf->win, winconf->title,
-                      winconf->height, winconf->width, world, winconf->draw),
+                      winconf->height, winconf->width, world,
+                      get_drawfunc_by_char(winconf->draw)),
              world, err);
 }
 
@@ -140,6 +148,8 @@ extern void save_win_config(struct World * world, char id)
     }
     char line[size];
     sprintf(line, "%s\n", wc->title);
+    fwrite(line, sizeof(char), strlen(line), file);
+    sprintf(line, "%c\n", wc->draw);
     fwrite(line, sizeof(char), strlen(line), file);
     sprintf(line, "%d\n", wc->height);
     fwrite(line, sizeof(char), strlen(line), file);
@@ -193,6 +203,46 @@ static struct WinConf * get_winconf_by_id(struct World * world, char id)
 
 
 
+static void * get_drawfunc_by_char(char c)
+{
+    if      ('i' == c)
+    {
+        return draw_info_win;
+    }
+    else if ('k' == c)
+    {
+        return draw_keys_win;
+    }
+    else if ('l' == c)
+    {
+        return draw_log_win;
+    }
+    else if ('m' == c)
+    {
+        return draw_map_win;
+    }
+    return NULL;
+}
+
+
+
+static char get_next_winconf_id(struct World * world)
+{
+    static uint8_t i = 0;
+    char c = world->winconf_ids[i];
+    if (0 == c)
+    {
+        i = 0;
+    }
+    else
+    {
+        i++;
+    }
+    return c;
+}
+
+
+
 extern struct WinConf * get_winconf_by_win(struct World * world,
                                            struct Win * win)
 {
@@ -220,17 +270,49 @@ extern struct Win * get_win_by_id(struct World * world, char id)
 extern void init_winconfs(struct World * world)
 {
     char * f_name = "init_winconfs()";
-    struct WinConf * winconfs = try_malloc(4 * sizeof(struct WinConf),
-                                           world, f_name);
-    create_winconf('i', &winconfs[0], draw_info_win);
-    create_winconf('k', &winconfs[1], draw_keys_win);
-    create_winconf('l', &winconfs[2], draw_log_win);
-    create_winconf('m', &winconfs[3], draw_map_win);
+    char * err_o = "Trouble in init_winconfs() with opendir().";
+    char * err_r = "Trouble in init_winconfs() with readdir().";
+    char * err_c = "Trouble in init_winconfs() with closedir().";
+
+    DIR * dp = opendir("config/windows");
+    exit_err(NULL == dp, world, err_o);
+    struct dirent * fn;
+    errno = 0;
+    char * winconf_ids = try_malloc(256, world, f_name);
+    uint8_t i = 0;
+    char id;
+    while (NULL != (fn = readdir(dp)))
+    {
+        if (   5 == strlen(fn->d_name)
+            && fn->d_name == strstr(fn->d_name, "Win_"))
+        {
+            id = fn->d_name[4];
+            winconf_ids[i] = id;
+            i++;
+        }
+    }
+    winconf_ids[i] = '\0';
+    exit_err(errno, world, err_r);
+    exit_err(closedir(dp), world, err_c);
+    world->winconf_ids = try_malloc(strlen(winconf_ids + 1), world, f_name);
+    memcpy(world->winconf_ids, winconf_ids, strlen(winconf_ids) + 1);
+    free(winconf_ids);
+
+    struct WinConf * winconfs;
+    winconfs = try_malloc(strlen(world->winconf_ids) * sizeof(struct WinConf),
+                                 world, f_name);
+    i = 0;
+    while (0 != (id = get_next_winconf_id(world)))
+    {
+        create_winconf(id, &winconfs[i]);
+        i++;
+    }
     world->winconfs = winconfs;
-    init_winconf_from_file(world, 'i');
-    init_winconf_from_file(world, 'k');
-    init_winconf_from_file(world, 'l');
-    init_winconf_from_file(world, 'm');
+    while (0 != (id = get_next_winconf_id(world)))
+    {
+        init_winconf_from_file(world, id);
+        i++;
+    }
 }
 
 
@@ -245,10 +327,12 @@ extern void free_winconf(struct World * world, char id)
 
 extern void free_winconfs(struct World * world)
 {
-    free_winconf(world, 'i');
-    free_winconf(world, 'k');
-    free_winconf(world, 'l');
-    free_winconf(world, 'm');
+    char id;
+    while (0 != (id = get_next_winconf_id(world)))
+    {
+        free_winconf(world, id);
+    }
+    free(world->winconf_ids);
     free(world->winconfs);
 }
 
@@ -256,20 +340,22 @@ extern void free_winconfs(struct World * world)
 
 extern void init_wins(struct World * world)
 {
-    init_win_from_winconf(world, 'i');
-    init_win_from_winconf(world, 'k');
-    init_win_from_winconf(world, 'l');
-    init_win_from_winconf(world, 'm');
+    char id;
+    while (0 != (id = get_next_winconf_id(world)))
+    {
+        init_win_from_winconf(world, id);
+    }
 }
 
 
 
 extern void free_wins(struct World * world)
 {
-    free_win(get_win_by_id(world, 'i'));
-    free_win(get_win_by_id(world, 'k'));
-    free_win(get_win_by_id(world, 'l'));
-    free_win(get_win_by_id(world, 'm'));
+    char id;
+    while (0 != (id = get_next_winconf_id(world)))
+    {
+        free_win(get_win_by_id(world, id));
+    }
 }
 
 
@@ -311,10 +397,11 @@ extern void save_win_configs(struct World * world)
 {
     char * f_name = "save_win_configs()";
 
-    save_win_config(world, 'i');
-    save_win_config(world, 'k');
-    save_win_config(world, 'l');
-    save_win_config(world, 'm');
+    char id;
+    while (0 != (id = get_next_winconf_id(world)))
+    {
+        save_win_config(world, id);
+    }
 
     char * path     = "config/windows/toggle_order";
     char * path_tmp = "config/windows/toggle_order_tmp";
@@ -362,7 +449,7 @@ extern void toggle_winconfig(struct World * world, struct Win * win)
     }
     else
     {
-        win->_draw = wcp->draw;
+        win->_draw = get_drawfunc_by_char(wcp->draw); // wcp->draw;
         wcp->view = 0;
     }
 }

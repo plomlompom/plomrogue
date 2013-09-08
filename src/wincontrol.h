@@ -21,13 +21,14 @@ struct World;
  */
 struct WinConf
 {
-    char id; /* unique identifier of WinConf, abused as ID for ->win, too */
+    char id; /* unique identifier of WinConf, abused as ID for ->win and  */
+             /* equivalent to the char following its "Win_" conffile name */
     struct Win * win; /* window configured by this WinConf */
     char * title; /* designated title as passed to init_win() */
     int16_t height; /* designated height as interpreted by init_win()*/
     int16_t width; /* designated width as interpreted by init_win() */
-    void (* draw) (struct Win *); /* designated Win->_draw; to be returned to */
-                                  /* after toggling window configuration view */
+    char draw; /* identifier of designated Win->_draw; to be returned to */
+               /* after toggling window configuration view */
     uint8_t view; /* 0: use ->draw as Win->_draw; 1: use draw_winconf()*/
     uint8_t height_type; /* both: 0: interpret ->height/->width as size in   */
     uint8_t width_type;  /* positive cells; 1: as negative diff to max width */
