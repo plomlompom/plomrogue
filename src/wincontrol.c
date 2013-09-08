@@ -86,37 +86,42 @@ static void create_winconf(char id, struct WinConf * wcp)
 
 static void init_winconf_from_file(struct World * world, char id)
 {
-    char * f_name = "init_winconf_from_file()";
+    char * tmp = "init_winconf_from_file() on window id '_'";
+    char * context = try_malloc(strlen(tmp) + 1, world,
+                               "init_winconf_from_file()");
+    memcpy(context, tmp, strlen(tmp) + 1);
+    context[strlen(tmp) - 2] = id;
 
     char * path = string_prefixed_id(world, "config/windows/Win_", id);
-    FILE * file = try_fopen(path, "r", world, f_name);
+    FILE * file = try_fopen(path, "r", world, context);
     free(path);
-    uint16_t linemax = get_linemax(file, world, f_name);
+    uint16_t linemax = get_linemax(file, world, context);
     char line[linemax + 1];
 
     struct WinConf * winconf = get_winconf_by_id(world, id);
-    try_fgets(line, linemax + 1, file, world, f_name);
-    winconf->title = try_malloc(strlen(line), world, f_name);
+    try_fgets(line, linemax + 1, file, world, context);
+    winconf->title = try_malloc(strlen(line), world, context);
     memcpy(winconf->title, line, strlen(line) - 1); /* Eliminate newline char */
     winconf->title[strlen(line) - 1] = '\0';        /* char at end of string. */
 
-    try_fgets(line, linemax + 1, file, world, f_name);
+    try_fgets(line, linemax + 1, file, world, context);
     winconf->draw = line[0];
 
-    try_fgets(line, linemax + 1, file, world, f_name);
+    try_fgets(line, linemax + 1, file, world, context);
     winconf->height = atoi(line);
     if (0 >= winconf->height)
     {
         winconf->height_type = 1;
     }
-    try_fgets(line, linemax + 1, file, world, f_name);
+    try_fgets(line, linemax + 1, file, world, context);
     winconf->width = atoi(line);
     if (0 >= winconf->width)
     {
         winconf->width_type = 1;
     }
 
-    try_fclose(file, world, f_name);
+    try_fclose(file, world, context);
+    free(context);
 }
 
 
