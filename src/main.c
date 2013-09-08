@@ -15,7 +15,7 @@
                         */
 #include "keybindings.h" /* for init_keybindings(), get_action_key() */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
-                        * try_fopen(), try_fclose(), try_fclose_unlink_renmae()
+                        * try_fopen(), try_fclose(), try_fclose_unlink_rename()
                         */
 #include "map_objects.h" /* for structs Monster, Item, Player,
                           * init_map_object_defs(), read_map_objects(),
@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
     /* For non-interactive mode, try to load world state from record file. */
     else
     {
-        err_r = "Trouble reading from 'record' file (read_uint32_bigendian() in "
-                "main()).";
+        err_r = "Trouble reading from 'record' file (read_uint32_bigendian() "
+                "in main()).";
         if (0 == world.interactive)
         {
             file = try_fopen(recordfile, "r", &world, f_name);

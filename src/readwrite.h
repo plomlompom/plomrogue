@@ -53,8 +53,8 @@ extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
 
 
 
-/* These routines for reading values "x" from / writing values to "file" ensure a
- * defined endianness and consistent error codes: return 0 on success and 1 on
+/* These routines for reading values "x" from / writing values to "file" ensure
+ * a defined endianness and consistent error codes: return 0 on success and 1 on
  * fgetc()/fputc() failure.
  */
 extern uint8_t read_uint8(FILE * file, uint8_t * x);
