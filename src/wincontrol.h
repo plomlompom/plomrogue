@@ -52,8 +52,9 @@ extern void free_wins(struct World * world);
 
 
 /* Toggle windows in world->wins in the order desribed by the first line of
- * config/windows/toggled_win_order, wherein each character may correspond to
- * one hardcoded window.
+ * config/windows/toggled_win_order, wherein each character should correspond to
+ * one window the ID of which is found in world->winconf_ids. Unknown characters
+ * are silently ignored.
  */
 extern void sorted_wintoggle(struct World * world);
 

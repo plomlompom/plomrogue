@@ -2,7 +2,7 @@
 
 #include "wincontrol.h"
 #include <stdlib.h> /* for free() */
-#include <string.h> /* for strlen() */
+#include <string.h> /* for strlen(), strchr(), strstr() */
 #include <stdint.h> /* for uint8_t, uint16_t */
 #include <stdio.h> /* for fwrite() */
 #include <unistd.h> /* for access(), unlink() */
@@ -382,6 +382,10 @@ extern void sorted_wintoggle(struct World * world)
     uint8_t i = 0;
     for (; i < linemax - 1; i++)
     {
+        if (NULL == strchr(world->winconf_ids, win_order[i]))
+        {
+            continue;
+        }
         toggle_window(world->wmeta, get_win_by_id(world, win_order[i]));
     }
 }
