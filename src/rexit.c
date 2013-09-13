@@ -33,12 +33,17 @@ static void cleanup(struct World * world)
     }
     if (cleanup_flags & CLEANUP_KEYBINDINGS)
     {
-        uint16_t key;
-        for (key = 0; key <= world->keyswindata->max; key++)
+/*
+        uint16_t i = 0;
+        struct KeyBinding * kb_p = world->keybindings;
+        while (1)
         {
+            free(kb_p);
             free(world->keybindings[key].name);
         }
         free(world->keybindings);
+*/
+        free_keybindings(world->keybindings);
         free(world->keyswindata);
     }
     if (cleanup_flags & CLEANUP_LOG)

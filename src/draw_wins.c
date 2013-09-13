@@ -7,7 +7,7 @@
 #include <ncurses.h>     /* for mvwaddch() */
 #include "windows.h"     /* for structs Win, Frame, for draw_scroll_hint() */
 #include "misc.h"        /* for center_offset() */
-#include "keybindings.h" /* for struct KeyBinding, for get_keyname() */
+#include "keybindings.h" /* for struct KeyBinding, for get_name_to_keycode() */
 #include "map_objects.h" /* for structs MapObj, Player */
 #include "map.h"         /* for Map struct */
 #include "main.h"        /* for World struct */
@@ -226,18 +226,19 @@ extern void draw_info_win(struct Win * win)
 
 extern void draw_keys_win(struct Win * win)
 {
-    struct World * world = (struct World *) win->data;
-    uint16_t offset, y, x;
-    offset = center_offset(world->keyswindata->select, world->keyswindata->max,
-                           win->frame.size.y - 1);
-    uint8_t keydescwidth = 9 + 1; /* max length assured by get_keyname() + \0 */
-    char keydesc[keydescwidth];
-    char * keyname;
     char * err_hint = "Trouble with draw_scroll_hint() in draw_keys_win().";
-    attr_t attri;
-    char * cmd_dsc;
-    for (y = 0; y <= world->keyswindata->max && y < win->frame.size.y; y++)
+    struct World * world = (struct World *) win->data;
+    uint16_t n_keybs = get_n_of_keybs(world);
+    uint16_t offset = center_offset(world->keyswindata->select, n_keybs - 1,
+                                    win->frame.size.y - 1);
+
+    uint8_t keydescwidth = 9 + 1;  /* get_name_to_keycode()'s max length + \0 */
+    char keydesc[keydescwidth];
+
+    uint16_t y, x;
+    for (y = 0; y <= n_keybs - 1 && y < win->frame.size.y; y++)
     {
+
         if (0 == y && offset > 0)
         {
             exit_err(draw_scroll_hint(&win->frame, y, offset + 1, '^'),
@@ -245,16 +246,18 @@ extern void draw_keys_win(struct Win * win)
             continue;
         }
         else if (win->frame.size.y == y + 1
-                 && 0 < world->keyswindata->max
+                 && 0 < (n_keybs - 1)
                         - (win->frame.size.y + offset - 1))
         {
             exit_err(draw_scroll_hint(&win->frame, y,
-                                      world->keyswindata->max
-                                       - (offset + win->frame.size.y) + 2, 'v'),
+                                      (n_keybs - 1)
+                                      - (offset + win->frame.size.y) + 2,
+                                      'v'),
                      world, err_hint);
             continue;
         }
-        attri = 0;
+
+        attr_t attri = 0;
         if (y == world->keyswindata->select - offset)
         {
             attri = A_REVERSE;
@@ -263,11 +266,12 @@ extern void draw_keys_win(struct Win * win)
                 attri = attri | A_BLINK;
             }
         }
-        keyname = get_keyname(world, world->keybindings[y + offset].key);
+
+        struct KeyBinding * kb_p = get_keyb_of_n(world, y + offset);
+        char * keyname = get_name_to_keycode(world, kb_p->key);
         snprintf(keydesc, keydescwidth, "%-9s", keyname);
         free(keyname);
-        cmd_dsc = get_command_longdsc(world,
-                                      world->keybindings[y + offset].name);
+        char * cmd_dsc = get_command_longdsc(world, kb_p->name);
         for (x = 0; x < win->frame.size.x; x++)
         {
             if (x < strlen(keydesc))

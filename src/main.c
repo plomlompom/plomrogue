@@ -13,7 +13,7 @@
 #include "draw_wins.h" /* for draw_keys_win(), draw_map_win(), draw_info_win(),
                         * draw_log_win()
                         */
-#include "keybindings.h" /* for init_keybindings(), get_action_key() */
+#include "keybindings.h" /* for init_keybindings(), get_keycode_to_action() */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
                         * try_fopen(), try_fclose(), try_fclose_unlink_rename()
                         */
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
             draw_all_wins(world.wmeta);
             key = getch();
             if (   EOF != action
-                && key == get_action_key(world.keybindings, "wait"))
+                && key == get_keycode_to_action(world.keybindings, "wait"))
             {
                 action = getc(file);
                 if (EOF != action)

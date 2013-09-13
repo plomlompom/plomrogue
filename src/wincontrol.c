@@ -4,7 +4,6 @@
 #include <stdlib.h> /* for free() */
 #include <string.h> /* for strlen(), strchr(), strstr() */
 #include <stdint.h> /* for uint8_t, uint16_t */
-#include <stdio.h> /* for fwrite() */
 #include <unistd.h> /* for access(), unlink() */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
                       * resize_active_win(), init_win(), free_win(),
@@ -13,7 +12,7 @@
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "main.h" /* for Wins struct */
 #include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose(),
-                        * try_fgets(), try_fclose_unlink_rename()
+                        * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
                         */
 #include "rexit.h" /* for exit_err() */
 #include "main.h" /* for World, Wins structs */
@@ -158,13 +157,13 @@ extern void save_win_config(struct World * world, char id)
     }
     char line[size];
     sprintf(line, "%s\n", wc->title);
-    fwrite(line, sizeof(char), strlen(line), file);
+    try_fwrite(line, sizeof(char), strlen(line), file, world, f_name);
     sprintf(line, "%c\n", wc->draw);
-    fwrite(line, sizeof(char), strlen(line), file);
+    try_fwrite(line, sizeof(char), strlen(line), file, world, f_name);
     sprintf(line, "%d\n", wc->height);
-    fwrite(line, sizeof(char), strlen(line), file);
+    try_fwrite(line, sizeof(char), strlen(line), file, world, f_name);
     sprintf(line, "%d\n", wc->width);
-    fwrite(line, sizeof(char), strlen(line), file);
+    try_fwrite(line, sizeof(char), strlen(line), file, world, f_name);
 
     char * path = string_prefixed_id(world, "config/windows/Win_", id);
     try_fclose_unlink_rename(file, path_tmp, path, world, f_name);
@@ -432,7 +431,7 @@ extern void save_win_configs(struct World * world)
         i++;
     }
     line[i] = '\n';
-    fwrite(line, sizeof(char), strlen(line), file);
+    try_fwrite(line, sizeof(char), strlen(line), file, world, f_name);
 
     try_fclose_unlink_rename(file, path_tmp, path, world, f_name);
 }

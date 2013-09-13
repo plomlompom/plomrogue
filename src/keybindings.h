@@ -17,8 +17,9 @@ struct WinMeta;
 /* Individual keybinding. */
 struct KeyBinding
 {
-  char * name;  /* name of functionality bound to keycode */
+  struct KeyBinding * next;
   uint16_t key; /* keycode */
+  char * name;  /* name of functionality bound to keycode */
 };
 
 
@@ -26,26 +27,33 @@ struct KeyBinding
 /* Metadata used by the keybinding editing window. */
 struct KeysWinData
 {
-  uint16_t max;    /* index of last keybinding (= n of keybindings - 1) */
   char edit;       /* 1 if currently editing a keybinding, else 0 */
-  uint16_t select; /* index of keybinding selected for editing */
+  uint16_t select; /* list index of keybinding selected for editing */
 };
 
 
 
-/* Read keybindings data from / write them to the file "keybindings". */
+/* Return keycode matched by keybinding to command of "name". */
+extern uint16_t get_keycode_to_action(struct KeyBinding * keybindings, char * name);
+
+/* Return human-readable name (of maximum 9 chars) for "keycode" as matched by
+ * ncurses.h; if none is found, return "UNKNOWN". */
+extern char * get_name_to_keycode(struct World * world, uint16_t keycode);
+
+/* Return number of keybindings in keybindings chain. */
+extern uint16_t get_n_of_keybs(struct World * world);
+
+/* Return "n"-th keybinding in keybindings chain. */
+extern struct KeyBinding * get_keyb_of_n(struct World * world, uint16_t n);
+
+
+
+/* Initialize keybindings data (by reading from file "keybindings"), save it (by
+ * writing to the same file) and free it.
+ */
 extern void init_keybindings(struct World * world);
 extern void save_keybindings(struct World * world);
-
-
-
-/* Return keycode matching a key (functionality) name. */
-extern uint16_t get_action_key(struct KeyBinding * keybindings, char * name);
-
-
-
-/* Translate keycode to readable names of max 9 chars where possible. */
-extern char * get_keyname(struct World * world, uint16_t keycode);
+extern void free_keybindings(struct KeyBinding * kb_start);
 
 
 
@@ -54,12 +62,10 @@ extern char * get_keyname(struct World * world, uint16_t keycode);
  */
 extern void keyswin_mod_key(struct World * world, struct WinMeta * win_meta);
 
-
-
 /* Move selection in keybinding window upwards ("dir" = "u") or downwards ("dir"
  * = "d") within the limits of the keybindings list length.
  */
-extern void keyswin_move_selection(struct World * world, char dir);
+extern void move_keys_mod_selection(struct World * world, char dir);
 
 
 

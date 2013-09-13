@@ -14,13 +14,15 @@ struct World;
 
 
 
-/* Wrappers to calling from function called "f" of fopen(), fclose() and fgets()
- * and calling exit_err() with appropriate error messages.
+/* Wrappers to calling from function called "f" of fopen(), fclose(), fgets()
+ * and fwrite() and calling exit_err() with appropriate error messages.
  */
 extern FILE * try_fopen(char * path, char * mode, struct World * w, char * f);
 extern void try_fclose(FILE * file, struct World * w, char * f);
 extern void try_fgets(char * line, int size, FILE * file,
                       struct World * w, char * f);
+extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
+                       struct World * w, char * f);
 
 
 

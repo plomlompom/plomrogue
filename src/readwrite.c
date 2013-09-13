@@ -2,7 +2,7 @@
 
 #include "readwrite.h"
 #include <stdio.h>  /* for FILE typedef, fopen(), fgetc(), fputc(), fseek(),
-                     * sprintf()
+                     * sprintf(), fwrite()
                      */
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
 #include <string.h> /* for strlen()*/
@@ -64,6 +64,16 @@ extern void try_fgets(char * line, int linemax, FILE * file,
 {
     char * msg = trouble_msg(w, f, "fgets()");
     exit_err(NULL == fgets(line, linemax, file), w, msg);
+    free(msg);
+}
+
+
+
+extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
+                       struct World * w, char * f)
+{
+    char * msg = trouble_msg(w, f, "fwrite()");
+    exit_err(0 == fwrite(ptr, size, nmemb, stream), w, msg);
     free(msg);
 }
 
