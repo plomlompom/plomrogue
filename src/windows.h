@@ -177,7 +177,8 @@ extern uint8_t draw_all_wins(struct WinMeta * wmeta);
  * further into a certain direction) into "frame" at position "pos" (describing
  * a column or a row dependent on "dir" being *either* "<"/">" *or* something
  * else). It will consist of a line of "dir" symbols bracketing a descriptive
- * text stating the number of rows/columns further available beyond the hint.
+ * text stating "dist" as the number of rows/columns further available beyond
+ * the hint.
  */
 extern uint8_t draw_scroll_hint(struct Frame * frame, uint16_t pos,
                                 uint32_t dist, char dir);

@@ -1,20 +1,19 @@
 plomrogue
 =========
 
-plomlompom tries to build his own roguelike. Currently, it doesn't do
-much interesting, apart from managing some ncurses windows in a bizarre
-fashion.
+plomlompom tries to build his own roguelike. Currently, it doesn't do much
+interesting, apart from managing keybindings and some ncurses windows in a
+bizarre fashion.
 
-You can move around a player and meet a number of different enemies.
-They move randomly and will only accidentally hit you. You have 5
-hitpoints to lose before death; they have either 1, 3 or 9. Your score
-grows by killing enemies, to the amount of hitpoints each killed enemy
-started with.
+You can move around a player and meet a number of different enemies. They move
+randomly and will only accidentally hit you. You have 5 hitpoints to lose before
+death; they have either 1, 3 or 9. Your score grows by killing enemies, to the
+amount of hitpoints each killed enemy started with.
 
 The map get generated randomly, too.
 
-There is only one save file (named "savefile"), and it gets overwritten
-each new turn. To start over with a new world, delete it.
+There is only one save file (named "savefile"), and it gets overwritten each new
+turn. To start over with a new world, delete it.
 
 Install/run
 -----------
@@ -26,46 +25,27 @@ cd plomrogue
 make
 ./roguelike
 
-Default keybindings
--------------------
+Keybindings and window configuration
+------------------------------------
 
-Q       quit
-F1      toggle keybinding editing window
-F2      toggle map window
-F3      toggle info window
-F4      toggle log window
+In the default window configuration, globally available keybinings are shown at
+game start in the three windows on the left of the screen. The lower two windows
+describe keybindings / actions only available in a window's window configuration
+views -- hit "w" (per default keybindings) to switch the selected / "active"
+window to a view that allows changing its geometry. One further hit on "w"
+switches the window to a view that lists keybindings available specifically for
+that window -- such as for map scrolling actions in the "map" window. All
+keybindings can be changed.
 
-LEFT    scroll windows pad left
-RIGHT   scroll windows pad right
->       cycle window selection forwards
-<       cycle window selection backwards
-y       shift window forwards
-Y       shift window backwards
-*       grow window horizontally
-_       shrink window horizontally
-+       grow window vertically
--       shrink window vertically
-r       reload window configuration
-z       toggle window configuration view
-h       toggle whether window height is saved as positive or negative
-n       toggle whether window width is saved as positive or negative
-m       save window configuration
-
-w       scroll map up
-x       scroll map down
-a       scroll map left
-d       scroll map right
-s       center map on player
-W       move player up
-X       move player down
-A       move player left
-D       move player right
-S       next turn / wait
-
-K       save current keybindings
-UP      navigate selection upwards in keybinding editing window
-DOWN    navigate selection downwards in keybinding editing window
-RETURN  modify keybinding selected in keybinding editing window
+What actions are available globally or only in specific windows can be further
+manipulated by editing the files config/keybindings_global and
+config/windows/Win_* that map keycodes to commands to the respective keybinding
+repositories. While keybindings_global contains merely a list of keycode command
+mappings, the Win_* files start with the name of the windows to be configured,
+followed by a one-character line for internal use (mapping the window to one of
+several internally available window content drawing functions), followed by two
+lines describing the window's designated height and width, and only then an
+optional list of keybindings specific to that window.
 
 Replay game recording
 ---------------------

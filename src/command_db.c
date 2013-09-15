@@ -90,6 +90,10 @@ extern void init_command_db(struct World * world)
     uint8_t i = 0;
     while (fgets(line, linemax + 1, file))
     {
+        if ('\n' == line[0] || 0 == line[0])
+        {
+            break;
+        }
         cmds[i].id = atoi(strtok(line, " "));
         copy_tokenized_string(world, &cmds[i].dsc_short, " ");
         copy_tokenized_string(world, &cmds[i].dsc_long, "\n");

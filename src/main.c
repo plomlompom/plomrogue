@@ -10,10 +10,6 @@
 #include "windows.h" /* for structs WinMeta, Win, init_win(), init_win_meta(),
                       * draw_all_wins()
                       */
-#include "draw_wins.h" /* for draw_keys_win(), draw_map_win(), draw_info_win(),
-                        * draw_log_win()
-                        */
-#include "keybindings.h" /* for init_keybindings(), get_keycode_to_action() */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
                         * try_fopen(), try_fclose(), try_fclose_unlink_rename()
                         */
@@ -30,8 +26,11 @@
                          */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game(), exit_err() */
-#include "control.h" /* for meta_control() */
 #include "command_db.h" /* for init_command_db() */
+#include "control.h" /* for *_control() */
+#include "keybindings.h" /* for init_keybindings(),
+                          * get_available_keycode_to_action()
+                          */
 
 
 
@@ -175,20 +174,22 @@ int main(int argc, char *argv[])
     curs_set(0);
     keypad(screen, TRUE);
     raw();
-    init_keybindings(&world);
+    init_keybindings(&world, "config/keybindings_global",  &world.kb_global);
+    init_keybindings(&world, "config/keybindings_wingeom", &world.kb_wingeom);
+    init_keybindings(&world, "config/keybindings_winkeys", &world.kb_winkeys);
     set_cleanup_flag(CLEANUP_KEYBINDINGS);
     char * err_winmem = "Trouble with init_win_meta() in main ().";
     exit_err(init_win_meta(screen, &world.wmeta), &world, err_winmem);
     set_cleanup_flag(CLEANUP_WIN_META);
     init_winconfs(&world);
-    set_cleanup_flag(CLEANUP_WINCONFS);
     init_wins(&world);
-    set_cleanup_flag(CLEANUP_WINS);
+    set_cleanup_flag(CLEANUP_WINCONFS);
     sorted_wintoggle(&world);
     err_winmem = "Trouble with draw_all_wins() in main().";
 
     /* Replay mode. */
     int key;
+    struct WinConf * wc;
     if (0 == world.interactive)
     {
         int action = 0;
@@ -208,8 +209,14 @@ int main(int argc, char *argv[])
         {
             draw_all_wins(world.wmeta);
             key = getch();
+            wc = get_winconf_by_win(&world, world.wmeta->active);
+            if  (   (1 == wc->view && wingeom_control(key, &world))
+                 || (2 == wc->view && winkeyb_control(key, &world)))
+            {
+                continue;
+            }
             if (   EOF != action
-                && key == get_keycode_to_action(world.keybindings, "wait"))
+                && key == get_available_keycode_to_action(&world, "wait"))
             {
                 action = getc(file);
                 if (EOF != action)
@@ -233,10 +240,23 @@ int main(int argc, char *argv[])
             save_game(&world);
             draw_all_wins(world.wmeta);
             key = getch();
-            if (0 != player.hitpoints && 0 == player_control(key, &world))
+            wc = get_winconf_by_win(&world, world.wmeta->active);
+            if      (1 == wc->view && wingeom_control(key, &world))
             {
                 continue;
             }
+            else if (2 == wc->view && winkeyb_control(key, &world))
+            {
+                continue;
+            }
+
+            if  (   (1 == wc->view && wingeom_control(key, &world))
+                 || (2 == wc->view && winkeyb_control(key, &world))
+                 || (0 != player.hitpoints && player_control(key, &world)))
+            {
+                continue;
+            }
+
             if (meta_control(key, &world))
             {
                 exit_game(&world);

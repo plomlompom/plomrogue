@@ -9,6 +9,7 @@
 
 
 #include <stdint.h> /* for uint32_t*/
+#include "keybindings.h"
 struct WinMeta;
 struct WinConf;
 struct Win;
@@ -23,8 +24,9 @@ struct MonsterDef;
 struct World
 {
     char interactive;                 /* 1: playing; 0: record playback. */
-    struct KeyBinding * keybindings;  /* Pointer to the keybindings. */
-    struct KeysWinData * keyswindata; /* Pointer to key edit window metadata. */
+    struct KeyBiData kb_global;       /* Global keybindings. */
+    struct KeyBiData kb_wingeom;      /* Window geometry config keybindings. */
+    struct KeyBiData kb_winkeys;      /* Window keybinding config keybindings.*/
     uint32_t seed;                    /* Randomness seed. */
     uint32_t turn;                    /* Current game turn. */
     uint16_t score;                   /* Player's score. */

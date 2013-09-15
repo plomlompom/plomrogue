@@ -15,13 +15,17 @@
                         * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
                         */
 #include "rexit.h" /* for exit_err() */
-#include "main.h" /* for World, Wins structs */
-#include "draw_wins.h" /* for draw_keys_win(), draw_info_win(), draw_log_win(),
-                        * draw_map_win
+#include "main.h" /* for World struct */
+#include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_og(),
+                        * draw_win_keybindings_global(),
+                        * draw_win_keybindings_winconf_geometry(),
+                        * draw_win_keybindings_winconf_keybindings(),
+                        * draw_winconf_geometry(), draw_winconf_keybindings()
                         */
 #include "misc.h" /* for try_malloc() */
 #include "dirent.h" /* for opendir(), closedir(), readdir() */
 #include "errno.h" /* for errno */
+#include "keybindings.h" /* for KeyBinding struct, free_keybindings() */
 
 
 
@@ -31,7 +35,7 @@ static char * string_prefixed_id(struct World * world, char * prefix, char id);
 
 
 /* Create Winconf, init ->view/height_type/width_type to 0, ->id to "id". */
-static void create_winconf(char id, struct WinConf * wcp);
+static void create_winconf(struct World * world, char id, struct WinConf * wcp);
 
 /* Initialize Winconf of "id" from appropriate config file.*/
 static void init_winconf_from_file(struct World * world, char id);
@@ -42,12 +46,15 @@ static void init_win_from_winconf(struct World * world, char id);
 /* Save title, draw function, size of window identified by "id" to conffile. */
 static void save_win_config(struct World * world, char id);
 
+/* Free data pointed to inside WinConf struct. */
+static void free_winconf_data(struct World * world, char id);
 
 
-/* Write size of a window to its WinConf, as positive or negative values
+
+/* Write geometry of a window to its WinConf, as positive or negative values
  * (dependent on state ofWinConf->height_type / WinConf->width_type).
  */
-static void set_winconf(struct World * world, char id);
+static void set_winconf_geometry(struct World * world, char id);
 
 
 
@@ -73,12 +80,14 @@ static char * string_prefixed_id(struct World * world, char * prefix, char id)
 
 
 
-static void create_winconf(char id, struct WinConf * wcp)
+static void create_winconf(struct World * world, char id, struct WinConf * wcp)
 {
     wcp->id = id;
     wcp->view = 0;
     wcp->height_type = 0;
     wcp->width_type = 0;
+    wcp->kb.edit = 0;
+    wcp->kb.select = 0;
 }
 
 
@@ -117,6 +126,27 @@ static void init_winconf_from_file(struct World * world, char id)
     if (0 >= winconf->width)
     {
         winconf->width_type = 1;
+    }
+
+    char command[linemax + 1];
+    char * cmdptr;
+    struct KeyBinding ** loc_last_ptr = &winconf->kb.kbs;
+    * loc_last_ptr = 0;
+    while (fgets(command, linemax + 1, file))
+    {
+        if ('\n' == command[0] || 0 == command[0])
+        {
+            break;
+        }
+        * loc_last_ptr = try_malloc(sizeof(struct KeyBinding), world, context);
+        struct KeyBinding * kb_p = * loc_last_ptr;
+        kb_p->next = 0;
+        kb_p->key = atoi(command);
+        cmdptr = strchr(command, ' ') + 1;
+        kb_p->name = try_malloc(strlen(cmdptr), world, context);
+        memcpy(kb_p->name, cmdptr, strlen(cmdptr) - 1);
+        kb_p->name[strlen(cmdptr) - 1] = '\0';
+        loc_last_ptr = & kb_p->next;
     }
 
     try_fclose(file, world, context);
@@ -165,6 +195,27 @@ extern void save_win_config(struct World * world, char id)
     sprintf(line, "%d\n", wc->width);
     try_fwrite(line, sizeof(char), strlen(line), file, world, f_name);
 
+    uint16_t linemax = 0;
+    struct KeyBinding * kb_p = wc->kb.kbs;
+    while (0 != kb_p)
+    {
+        if (strlen(kb_p->name) > linemax)
+        {
+            linemax = strlen(kb_p->name);
+        }
+        kb_p = kb_p->next;
+    }
+    linemax = linemax + 6;         /* + 6 = + 3 digits + whitespace + \n + \0 */
+
+    char keyb_line[linemax];
+    kb_p = wc->kb.kbs;
+    while (0 != kb_p)
+    {
+        snprintf(keyb_line, linemax, "%d %s\n", kb_p->key, kb_p->name);
+        try_fwrite(keyb_line, sizeof(char), strlen(keyb_line), file, world, f_name);
+        kb_p = kb_p->next;
+    }
+
     char * path = string_prefixed_id(world, "config/windows/Win_", id);
     try_fclose_unlink_rename(file, path_tmp, path, world, f_name);
     free(path);
@@ -173,7 +224,17 @@ extern void save_win_config(struct World * world, char id)
 
 
 
-static void set_winconf(struct World * world, char id)
+static void free_winconf_data(struct World * world, char id)
+{
+    struct WinConf * wc = get_winconf_by_id(world, id);
+    free(wc->title);
+    free_keybindings(wc->kb.kbs);
+    free_win(wc->win);
+}
+
+
+
+static void set_winconf_geometry(struct World * world, char id)
 {
     struct WinConf * wcp = get_winconf_by_id(world, id);
     if      (0 == wcp->height_type)
@@ -216,19 +277,27 @@ static void * get_drawfunc_by_char(char c)
 {
     if      ('i' == c)
     {
-        return draw_info_win;
-    }
-    else if ('k' == c)
-    {
-        return draw_keys_win;
+        return draw_win_info;
     }
     else if ('l' == c)
     {
-        return draw_log_win;
+        return draw_win_log;
     }
     else if ('m' == c)
     {
-        return draw_map_win;
+        return draw_win_map;
+    }
+    else if ('0' == c)
+    {
+        return draw_win_keybindings_global;
+    }
+    else if ('1' == c)
+    {
+        return draw_win_keybindings_winconf_geometry;
+    }
+    else if ('2' == c)
+    {
+        return draw_win_keybindings_winconf_keybindings;
     }
     return NULL;
 }
@@ -313,7 +382,7 @@ extern void init_winconfs(struct World * world)
     i = 0;
     while (0 != (id = get_next_winconf_id(world)))
     {
-        create_winconf(id, &winconfs[i]);
+        create_winconf(world, id, &winconfs[i]);
         i++;
     }
     world->winconfs = winconfs;
@@ -326,20 +395,12 @@ extern void init_winconfs(struct World * world)
 
 
 
-extern void free_winconf(struct World * world, char id)
-{
-    struct WinConf * wc = get_winconf_by_id(world, id);
-    free(wc->title);
-}
-
-
-
 extern void free_winconfs(struct World * world)
 {
     char id;
     while (0 != (id = get_next_winconf_id(world)))
     {
-        free_winconf(world, id);
+        free_winconf_data(world, id);
     }
     free(world->winconf_ids);
     free(world->winconfs);
@@ -353,17 +414,6 @@ extern void init_wins(struct World * world)
     while (0 != (id = get_next_winconf_id(world)))
     {
         init_win_from_winconf(world, id);
-    }
-}
-
-
-
-extern void free_wins(struct World * world)
-{
-    char id;
-    while (0 != (id = get_next_winconf_id(world)))
-    {
-        free_win(get_win_by_id(world, id));
     }
 }
 
@@ -397,7 +447,6 @@ extern void reload_win_config(struct World * world)
     {
         suspend_win(world->wmeta, world->wmeta->active);
     }
-    free_wins(world);
     free_winconfs(world);
     init_winconfs(world);
     init_wins(world);
@@ -455,10 +504,15 @@ extern uint8_t toggle_window(struct WinMeta * win_meta, struct Win * win)
 extern void toggle_winconfig(struct World * world, struct Win * win)
 {
     struct WinConf * wcp = get_winconf_by_win(world, win);
-    if (0 == wcp->view)
+    if      (0 == wcp->view)
     {
-        win->draw = draw_winconf;
+        win->draw = draw_winconf_geometry;
         wcp->view = 1;
+    }
+    else if (1 == wcp->view)
+    {
+        win->draw = draw_winconf_keybindings;
+        wcp->view = 2;
     }
     else
     {
@@ -480,7 +534,7 @@ extern void toggle_win_height_type(struct World * world, struct Win * win)
     {
         wcp->height_type = 0;
     }
-    set_winconf(world, wcp->id);
+    set_winconf_geometry(world, wcp->id);
 }
 
 
@@ -497,7 +551,7 @@ extern void toggle_win_width_type(struct World * world, struct Win * win)
     {
         wcp->width_type = 0;
     }
-    set_winconf(world, wcp->id);
+    set_winconf_geometry(world, wcp->id);
 }
 
 
@@ -545,7 +599,7 @@ extern uint8_t growshrink_active_window(struct World * world, char change)
         {
             wcp->width_type = 0;
         }
-        set_winconf(world, wcp->id);
+        set_winconf_geometry(world, wcp->id);
         return x;
     }
     return 0;

@@ -13,20 +13,17 @@ struct Win;
 
 
 
-/* Write game log text into "win" from bottom to top. */
-extern void draw_log_win(struct Win * win);
+/* Default routines to draw the various windows' contents. */
+extern void draw_win_log(struct Win * win);
+extern void draw_win_map(struct Win * win);
+extern void draw_win_info(struct Win * win);
+extern void draw_win_keybindings_global(struct Win * win);
+extern void draw_win_keybindings_winconf_geometry(struct Win * win);
+extern void draw_win_keybindings_winconf_keybindings(struct Win * win);
 
-/* Draw game map and actors/objects on it into "win". Respect scroll offset. */
-extern void draw_map_win(struct Win * win);
-
-/* Draw into "win" the game / player status infos. */
-extern void draw_info_win(struct Win * win);
-
-/* Draw keybindings selection/manipulation menu. */
-extern void draw_keys_win(struct Win * win);
-
-/* Draw window configuration info. */
-extern void draw_winconf(struct Win * win);
+/* Routines to draw windows' configuration views. */
+extern void draw_winconf_keybindings(struct Win * win);
+extern void draw_winconf_geometry(struct Win * win);
 
 
 

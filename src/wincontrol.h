@@ -10,14 +10,15 @@
 
 
 #include <stdint.h> /* for uint8_t, int16_t */
+#include "keybindings.h" /* for KeyBiData struct */
 struct Win;
 struct WinMeta;
 struct World;
 
 
 
-/* Stores designated configuration of a window pointed to in it, and data used
- * to manipulate said window in the "window configuration" view of it.
+/* Stores a window's configuration (like geometry, keybindings) and a pointer to
+ * the respective Win struct itself.
  */
 struct WinConf
 {
@@ -32,6 +33,7 @@ struct WinConf
     uint8_t view; /* 0: use ->draw as Win->_draw; 1: use draw_winconf()*/
     uint8_t height_type; /* both: 0: interpret ->height/->width as size in   */
     uint8_t width_type;  /* positive cells; 1: as negative diff to max width */
+    struct KeyBiData kb; /* the window's specific keybindings */
 };
 
 
@@ -43,11 +45,10 @@ extern struct Win * get_win_by_id(struct World * world, char id);
 
 
 
-/* Create/initialize (from config files)/free Winconf / Win structs. */
+/* Create/initialize (from config files)/free Winconf structs. */
 extern void init_winconfs(struct World * world);
 extern void free_winconfs(struct World * world);
 extern void init_wins(struct World * world);
-extern void free_wins(struct World * world);
 
 
 

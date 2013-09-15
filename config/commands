@@ -1,34 +1,45 @@
 1 quit quit
-2 save_keys save keys
-3 scrl_l scroll pad left
-4 scrl_r scroll pad right
-5 keys_d keys nav down
-6 keys_u keys nav up
-7 keys_m keys mod
-8 to_keywin toggle keys window
-9 to_mapwin toggle map window
-10 to_infowin toggle info window
-11 to_logwin toggle log window
-12 cyc_win_f cycle forwards
-13 cyc_win_b cycle backwards
-14 shift_f shift forwards
-15 shift_b shift backwards
-16 grow_h grow horizontally
-17 shri_h shrink horizontally
-18 grow_v grow vertically
-19 shri_v shrink vertically
-20 map_u map up
-21 map_d map down
-22 map_l map left
-23 map_r map right
-24 map_c map center player
-25 player_u player up
-26 player_d player down
-27 player_l player left
-28 player_r player right
-29 wait wait / next turn
-30 reload_wins reload windows configuration
-31 winconf toggle window configuration view
-32 to_height_t toggle window height type
-33 to_width_t toggle window width type
-34 save_winconf save window configuration
+2 wait wait / next turn
+3 player_u player up
+4 player_d player down
+5 player_l player left
+6 player_r player right
+7 to_g_keywin toggle global keys window
+8 to_mapwin toggle map window
+9 to_infowin toggle info window
+10 to_logwin toggle log window
+11 to_wg_keywin toggle window geometry keys window
+12 to_wk_keywin toggle window keybinding keys window
+13 cyc_win_f cycle window selection forwards
+14 winconf toggle window configuration view
+15 cyc_win_b cycle window selection backwards
+16 scrl_l scroll pad left
+17 scrl_r scroll pad right
+18 g_keys_d global keybindings nav down
+19 g_keys_u global keybindings nav up
+20 g_keys_m global keybindings modify
+21 shift_f shift window forwards
+22 shift_b shift window backwards
+23 grow_h grow window horizontally
+24 shri_h shrink window horizontally
+25 grow_v grow window vertically
+26 shri_v shrink window vertically
+27 to_height_t toggle window height type
+28 to_width_t toggle window width type
+29 w_keys_d win keys nav down
+30 w_keys_u win keys nav up
+31 w_keys_m win keys mod
+32 wg_keys_d win geometry config keybindings nav down
+33 wg_keys_u win geometry config keybindings nav up
+34 wg_keys_m win geometry config keybindings modify
+35 wk_keys_d win keybindings config keybindings nav down
+36 wk_keys_u win keybindings config keybindings nav up
+37 wk_keys_m win keybindings config keybindings modify
+38 reload_wins reload windows configuration
+39 save_winconf save windows' configuration
+40 save_keys save global keybindings
+41 map_u map up
+42 map_d map down
+43 map_l map left
+44 map_r map right
+45 map_c map center player

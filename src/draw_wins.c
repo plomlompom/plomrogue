@@ -28,6 +28,10 @@ static void draw_text_from_bottom(struct Win * win, char * text);
 static void draw_map_objects(struct World * world, struct MapObj * start,
                              struct Map * map, struct Win * win);
 
+/* Draw from line "start" on config view for keybindings defined at "kb". */
+static void draw_kb_view(struct World * world, struct Win * win,
+                         char * f_name, struct KeyBiData * kb, uint8_t start);
+
 
 
 static void draw_with_linebreaks(struct Win * win, char * text,
@@ -162,7 +166,74 @@ static void draw_map_objects(struct World * world, struct MapObj * start,
 
 
 
-extern void draw_log_win(struct Win * win)
+static void draw_kb_view(struct World * world, struct Win * win,
+                         char * f_name, struct KeyBiData * kb, uint8_t start)
+{
+    char * err_hint = trouble_msg(world, f_name, "draw_scroll_hint()");
+    uint16_t kb_max = get_n_of_keybs(kb->kbs) - 1;
+    uint16_t y, x, offset;
+    offset = center_offset(kb->select, kb_max, win->frame.size.y - 1 - start);
+    uint8_t keydescwidth = 9 + 1;  /* get_name_to_keycode()'s max length + \0 */
+    char keydesc[keydescwidth];
+    uint16_t nav_max = kb_max + start;
+    uint16_t y_border = win->frame.size.y + offset - 1 - start;
+    for (y = start; y <= nav_max && y < win->frame.size.y; y++)
+    {
+
+        if (start == y && offset > 0)
+        {
+            uint8_t test = draw_scroll_hint(&win->frame, y, offset + 1, '^');
+            exit_err(test, world, err_hint);
+            continue;
+        }
+        else if (win->frame.size.y == y + 1 && kb_max > y_border)
+        {
+            uint16_t pos = kb_max - (offset + win->frame.size.y) + 2 + start;
+            uint8_t test = draw_scroll_hint(&win->frame, y, pos, 'v');
+            exit_err(test, world, err_hint);
+            continue;
+        }
+
+        attr_t attri = 0;
+        if (y - start == kb->select - offset)
+        {
+            attri = A_REVERSE;
+            if (1 == kb->edit)
+            {
+                attri = attri | A_BLINK;
+            }
+        }
+
+        struct KeyBinding * kb_p;
+        kb_p = get_keyb_of_n(kb->kbs, (y - start) + offset);
+        char * keyname = get_name_to_keycode(world, kb_p->key);
+        snprintf(keydesc, keydescwidth, "%-9s", keyname);
+        free(keyname);
+        char * cmd_dsc = get_command_longdsc(world, kb_p->name);
+        uint8_t dsclen = strlen(keydesc);
+        for (x = 0; x < win->frame.size.x; x++)
+        {
+            if (x < dsclen)
+            {
+                mvwaddch(win->frame.curses_win, y, x, keydesc[x] | attri);
+                continue;
+            }
+            else if (dsclen < x && x < strlen(cmd_dsc) + strlen(keydesc) + 1)
+            {
+                chtype ch = cmd_dsc[x - strlen(keydesc) - 1] | attri;
+                mvwaddch(win->frame.curses_win, y, x, ch);
+                continue;
+            }
+            mvwaddch(win->frame.curses_win, y, x, ' ' | attri);
+        }
+
+    }
+    free(err_hint);
+}
+
+
+
+extern void draw_win_log(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
     draw_text_from_bottom(win, world->log);
@@ -170,7 +241,7 @@ extern void draw_log_win(struct Win * win)
 
 
 
-extern void draw_map_win(struct Win * win)
+extern void draw_win_map(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
     struct Map * map = world->map;
@@ -206,7 +277,7 @@ extern void draw_map_win(struct Win * win)
 
 
 
-extern void draw_info_win(struct Win * win)
+extern void draw_win_info(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
     char * dsc_turn      = "Turn: ";
@@ -224,81 +295,51 @@ extern void draw_info_win(struct Win * win)
 
 
 
-extern void draw_keys_win(struct Win * win)
+extern void draw_win_keybindings_global(struct Win * win)
 {
-    char * err_hint = "Trouble with draw_scroll_hint() in draw_keys_win().";
+    char * f_name = "draw_win_keybindings_global()";
     struct World * world = (struct World *) win->data;
-    uint16_t n_keybs = get_n_of_keybs(world);
-    uint16_t offset = center_offset(world->keyswindata->select, n_keybs - 1,
-                                    win->frame.size.y - 1);
-
-    uint8_t keydescwidth = 9 + 1;  /* get_name_to_keycode()'s max length + \0 */
-    char keydesc[keydescwidth];
-
-    uint16_t y, x;
-    for (y = 0; y <= n_keybs - 1 && y < win->frame.size.y; y++)
-    {
-
-        if (0 == y && offset > 0)
-        {
-            exit_err(draw_scroll_hint(&win->frame, y, offset + 1, '^'),
-                     world, err_hint);
-            continue;
-        }
-        else if (win->frame.size.y == y + 1
-                 && 0 < (n_keybs - 1)
-                        - (win->frame.size.y + offset - 1))
-        {
-            exit_err(draw_scroll_hint(&win->frame, y,
-                                      (n_keybs - 1)
-                                      - (offset + win->frame.size.y) + 2,
-                                      'v'),
-                     world, err_hint);
-            continue;
-        }
-
-        attr_t attri = 0;
-        if (y == world->keyswindata->select - offset)
-        {
-            attri = A_REVERSE;
-            if (1 == world->keyswindata->edit)
-            {
-                attri = attri | A_BLINK;
-            }
-        }
-
-        struct KeyBinding * kb_p = get_keyb_of_n(world, y + offset);
-        char * keyname = get_name_to_keycode(world, kb_p->key);
-        snprintf(keydesc, keydescwidth, "%-9s", keyname);
-        free(keyname);
-        char * cmd_dsc = get_command_longdsc(world, kb_p->name);
-        for (x = 0; x < win->frame.size.x; x++)
-        {
-            if (x < strlen(keydesc))
-            {
-                mvwaddch(win->frame.curses_win, y, x, keydesc[x] | attri);
-            }
-            else if (   strlen(keydesc) < x
-                     && x < strlen(cmd_dsc) + strlen(keydesc) + 1)
-            {
-                mvwaddch(win->frame.curses_win, y, x,
-                         cmd_dsc[x - strlen(keydesc) - 1] | attri);
-            }
-            else
-            {
-                mvwaddch(win->frame.curses_win, y, x, ' ' | attri);
-            }
-        }
-    }
+    draw_kb_view(world, win, f_name, &world->kb_global, 0);
 }
 
 
 
-extern void draw_winconf(struct Win * win)
+extern void draw_win_keybindings_winconf_geometry(struct Win * win)
+{
+    char * f_name = "draw_win_keybindings_winconf_geometry()";
+    struct World * world = (struct World *) win->data;
+    draw_kb_view(world, win, f_name, &world->kb_wingeom, 0);
+}
+
+
+
+extern void draw_win_keybindings_winconf_keybindings(struct Win * win)
+{
+    char * f_name = "draw_win_keybindings_winconf_keybindings()";
+    struct World * world = (struct World *) win->data;
+    draw_kb_view(world, win, f_name, &world->kb_winkeys, 0);
+}
+
+
+
+extern void draw_winconf_keybindings(struct Win * win)
+{
+    char * f_name = "draw_winconf_keybindings()";
+    struct World * world = (struct World *) win->data;
+    struct WinConf * wc = get_winconf_by_win(world, win);
+    char * title = "Window's keybindings:";
+    uint8_t title_space = strlen(title) / win->frame.size.x + 2;
+    mvwaddstr(win->frame.curses_win, 0, 0, "Window's keybindings:");
+    draw_kb_view(world, win, f_name, &wc->kb, title_space);
+}
+
+
+
+extern void draw_winconf_geometry(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
     struct WinConf * wcp = get_winconf_by_win(world, win);
-    char * title = "Window configuration:\n";
+    char * title = "Window's geometry:\n";
     char * h_d   = "\nWidth to save: ";
     char * h_pos = " (height in cells)";
     char * h_neg = " (negative diff: cells to maximum height)";

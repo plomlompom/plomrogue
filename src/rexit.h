@@ -11,7 +11,6 @@
 
 #include <stdint.h> /* for uint8_t */
 struct World;
-struct Map;
 
 
 
@@ -29,8 +28,7 @@ enum cleanup_flag
     CLEANUP_MAP_OBJECTS     = 0x0020,
     CLEANUP_MAP_OBJECT_DEFS = 0x0040,
     CLEANUP_WIN_META        = 0x0080,
-    CLEANUP_WINCONFS        = 0x0100,
-    CLEANUP_WINS            = 0x0200
+    CLEANUP_WINCONFS        = 0x0100
 };
 extern void set_cleanup_flag(enum cleanup_flag flag);
 

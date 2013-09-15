@@ -8,11 +8,11 @@
 #include <errno.h> /* for errno */
 #include "main.h" /* for World struct */
 #include "map.h" /* for Map struct */
-#include "keybindings.h" /* for KeysWinData, KeyBinding structs */
+#include "keybindings.h" /* for free_keybindings() */
 #include "command_db.h" /* for free_command_db() */
 #include "windows.h" /* for Win struct, free_win(), free_winmeta() */
 #include "map_objects.h" /* for free_item_defs(), free_monster_defs() */
-#include "wincontrol.h" /* for get_win_by_id(), free_winconfs(), free_wins() */
+#include "wincontrol.h" /* for free_winconfs() */
 
 
 /* The clean-up routine and the flag resource by which it decides what to do. */
@@ -27,33 +27,6 @@ static void cleanup(struct World * world)
     {
         endwin();
     }
-    if (cleanup_flags & CLEANUP_MAP)
-    {
-        free(world->map->cells);
-    }
-    if (cleanup_flags & CLEANUP_KEYBINDINGS)
-    {
-/*
-        uint16_t i = 0;
-        struct KeyBinding * kb_p = world->keybindings;
-        while (1)
-        {
-            free(kb_p);
-            free(world->keybindings[key].name);
-        }
-        free(world->keybindings);
-*/
-        free_keybindings(world->keybindings);
-        free(world->keyswindata);
-    }
-    if (cleanup_flags & CLEANUP_LOG)
-    {
-        free(world->log);
-    }
-    if (cleanup_flags & CLEANUP_COMMAND_DB)
-    {
-        free_command_db(world);
-    }
     if (cleanup_flags & CLEANUP_MAP_OBJECTS)
     {
         free_items(world->item);
@@ -64,17 +37,31 @@ static void cleanup(struct World * world)
         free_item_defs(world->item_def);
         free_monster_defs(world->monster_def);
     }
-    if (cleanup_flags & CLEANUP_WINS)
+    if (cleanup_flags & CLEANUP_LOG)
     {
-        free_wins(world);
+        free(world->log);
     }
-    if (cleanup_flags & CLEANUP_WINCONFS)
+    if (cleanup_flags & CLEANUP_COMMAND_DB)
     {
-        free_winconfs(world);
+        free_command_db(world);
+    }
+    if (cleanup_flags & CLEANUP_MAP)
+    {
+        free(world->map->cells);
+    }
+    if (cleanup_flags & CLEANUP_KEYBINDINGS)
+    {
+        free_keybindings(world->kb_global.kbs);
+        free_keybindings(world->kb_wingeom.kbs);
+        free_keybindings(world->kb_winkeys.kbs);
     }
     if (cleanup_flags & CLEANUP_WIN_META)
     {
         free_winmeta(world->wmeta);
+    }
+    if (cleanup_flags & CLEANUP_WINCONFS)
+    {
+        free_winconfs(world);
     }
 }
 

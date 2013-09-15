@@ -44,11 +44,11 @@ extern void update_log(struct World * world, char * text);
 
 
 
-/* Return the offset necessary to center "map" on position "pos" in a frame of
- * "framesize.
+/* Return the offset necessary to center a map of "mapsize" on position "pos" in
+ * a frame of "framesize.
  */
-extern uint16_t center_offset(uint16_t pos, uint16_t mapsize,
-                              uint16_t framesize);
+extern uint16_t center_offset(uint16_t pos,
+                              uint16_t mapsize, uint16_t framesize);
 
 
 

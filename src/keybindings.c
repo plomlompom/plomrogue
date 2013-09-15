@@ -113,10 +113,9 @@ extern char * get_name_to_keycode(struct World * world, uint16_t keycode)
 
 
 
-extern uint16_t get_n_of_keybs(struct World * world)
+extern uint16_t get_n_of_keybs(struct KeyBinding * kb_p)
 {
     uint16_t i = 0;
-    struct KeyBinding * kb_p = world->keybindings;
     while (1)
     {
         if (0 == kb_p)
@@ -131,10 +130,9 @@ extern uint16_t get_n_of_keybs(struct World * world)
 
 
 
-extern struct KeyBinding * get_keyb_of_n(struct World * world, uint16_t n)
+extern struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n)
 {
     uint16_t i = 0;
-    struct KeyBinding * kb_p = world->keybindings;
     while (1)
     {
         if (n == i)
@@ -149,11 +147,11 @@ extern struct KeyBinding * get_keyb_of_n(struct World * world, uint16_t n)
 
 
 
-extern void init_keybindings(struct World * world)
+extern void init_keybindings(struct World * world, char * path,
+                             struct KeyBiData * kbd)
 {
     char * f_name = "init_keybindings()";
 
-    char * path = "config/keybindings";
     FILE * file = try_fopen(path, "r", world, f_name);
     uint16_t lines, linemax;
     char * err = "textfile_sizes() in init_keybindings() returns error.";
@@ -161,9 +159,14 @@ extern void init_keybindings(struct World * world)
 
     char command[linemax + 1];
     char * cmdptr;
-    struct KeyBinding ** loc_last_ptr = &world->keybindings;
+    struct KeyBinding ** loc_last_ptr = &kbd->kbs;
+    * loc_last_ptr = 0;
     while (fgets(command, linemax + 1, file))
     {
+        if ('\n' == command[0] || 0 == command[0])
+        {
+            break;
+        }
         * loc_last_ptr = try_malloc(sizeof(struct KeyBinding), world, f_name);
         struct KeyBinding * kb_p = * loc_last_ptr;
         kb_p->next = 0;
@@ -177,25 +180,23 @@ extern void init_keybindings(struct World * world)
 
     try_fclose(file, world, f_name);
 
-    struct KeysWinData * keyswindata;
-    keyswindata = try_malloc(sizeof(struct KeysWinData), world, f_name);
-    keyswindata->select = 0;
-    keyswindata->edit = 0;
-    world->keyswindata = keyswindata;
+    kbd->edit = 0;
+    kbd->select = 0;
 }
 
 
 
-extern void save_keybindings(struct World * world)
+extern void save_keybindings(struct World * world, char * path,
+                             struct KeyBiData * kbd)
 {
     char * f_name = "save_keybindings()";
 
-    char * path     = "config/keybindings";
-    char * path_tmp = "config/keybindings_tmp";
+    char path_tmp[strlen(path) + 4 + 1];
+    sprintf(path_tmp, "%s_tmp", path);
     FILE * file = try_fopen(path_tmp, "w", world, f_name);
 
     uint16_t linemax = 0;
-    struct KeyBinding * kb_p = world->keybindings;
+    struct KeyBinding * kb_p = kbd->kbs;
     while (0 != kb_p)
     {
         if (strlen(kb_p->name) > linemax)
@@ -207,7 +208,7 @@ extern void save_keybindings(struct World * world)
     linemax = linemax + 6;         /* + 6 = + 3 digits + whitespace + \n + \0 */
 
     char line[linemax];
-    kb_p = world->keybindings;
+    kb_p = kbd->kbs;
     while (0 != kb_p)
     {
         snprintf(line, linemax, "%d %s\n", kb_p->key, kb_p->name);
@@ -222,43 +223,45 @@ extern void save_keybindings(struct World * world)
 
 extern void free_keybindings(struct KeyBinding * kb_start)
 {
+    if (0 == kb_start)
+    {
+        return;
+    }
     struct KeyBinding * kb_p = kb_start->next;
     if (0 != kb_p)
     {
         free_keybindings(kb_p);
     }
+    free(kb_start->name);
     free(kb_start);
 }
 
 
 
-extern void keyswin_mod_key(struct World * world, struct WinMeta * win_meta)
+extern void mod_selected_keyb(struct World * world, struct KeyBiData * kbd)
 {
-    world->keyswindata->edit = 1;
-    exit_err(draw_all_wins(win_meta), world, "Trouble with draw_all_wins() in "
-                                             "keyswin_mod_key().");
+    kbd->edit = 1;
+    exit_err(draw_all_wins(world->wmeta), world,
+             "Trouble with draw_all_wins() in mod_selected_keyb().");
     int key = getch();
     if (key < 1000)
     {
-        struct KeyBinding * kb_p = get_keyb_of_n(world,
-                                                 world->keyswindata->select);
+        struct KeyBinding * kb_p = get_keyb_of_n(kbd->kbs, kbd->select);
         kb_p->key = key;
     }
-    world->keyswindata->edit = 0;
+    kbd->edit = 0;
 }
 
 
 
-extern void move_keys_mod_selection(struct World * world, char dir)
+extern void move_keyb_mod_selection(struct KeyBiData * kbd, char dir)
 {
-    if      (   'u' == dir
-             && world->keyswindata->select > 0)
+    if      ('u' == dir && kbd->select > 0)
     {
-        world->keyswindata->select--;
+        kbd->select--;
     }
-    else if (   'd' == dir
-             && world->keyswindata->select < get_n_of_keybs(world) - 1)
+    else if ('d' == dir && kbd->select < get_n_of_keybs(kbd->kbs) - 1)
     {
-        world->keyswindata->select++;
+        kbd->select++;
     }
 }
