@@ -1,9 +1,4 @@
 81 quit
-58 wait
-107 player_u
-106 player_d
-104 player_l
-108 player_r
 265 to_a_keywin
 266 to_mapwin
 267 to_infowin
