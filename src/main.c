@@ -187,6 +187,10 @@ int main(int argc, char *argv[])
     sorted_wintoggle_and_activate(&world);
     err_winmem = "Trouble with draw_all_wins() in main().";
 
+    /* Focus map on player. */
+    struct Win * win_map = get_win_by_id(&world, 'm');
+    map_center_player(&map, &player, win_map->frame.size);
+
     /* Replay mode. */
     int key;
     struct WinConf * wc;
