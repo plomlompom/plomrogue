@@ -17,9 +17,14 @@
 
 
 
-/* Write "text" into window "win" as far as possible. Start on row "start_y". */
+/* Write "text" into window "win" as far as possible. Start on row "start_y".
+ * Break lines at newlines.
+ */
 static void draw_with_linebreaks(struct Win * win, char * text,
                                  uint16_t start_y);
+
+/* Write "line" into window "win" at line "y" as far as it fits into it. */
+static void draw_line(struct Win * win, uint16_t y, char * line);
 
 /* Write "text" not starting from the top but from the bottom of "win". */
 static void draw_text_from_bottom(struct Win * win, char * text);
@@ -31,6 +36,17 @@ static void draw_map_objects(struct World * world, struct MapObj * start,
 /* Draw from line "start" on config view for keybindings defined at "kb". */
 static void draw_kb_view(struct World * world, struct Win * win,
                          char * f_name, struct KeyBiData * kb, uint8_t start);
+
+/* Draw into window "win" from line "start" on a "title" followed by an empty
+ * line followed by a list of all keybindings starting at kb_p.
+ */
+static uint16_t draw_titled_keybinding_list(struct World * world,
+                                            struct Win * win, uint16_t start,
+                                            char * title,
+                                            struct KeyBinding * kb_p);
+
+
+
 
 
 
@@ -73,6 +89,17 @@ static void draw_with_linebreaks(struct Win * win, char * text,
                 }
             }
         }
+    }
+}
+
+
+
+static void draw_line(struct Win * win, uint16_t y, char * line)
+{
+    uint16_t x = 0;
+    for (; x < win->frame.size.x && x < strlen(line); x++)
+    {
+        mvwaddch(win->frame.curses_win, y, x, line[x]);
     }
 }
 
@@ -233,6 +260,51 @@ static void draw_kb_view(struct World * world, struct Win * win,
 
 
 
+static uint16_t draw_titled_keybinding_list(struct World * world,
+                                            struct Win * win, uint16_t start,
+                                            char * title,
+                                            struct KeyBinding * kb_p)
+{
+    uint16_t x, y;
+    uint16_t i = 0;
+    uint8_t state = 0;
+    for (y = start; y < win->frame.size.y && (0 == state || 0 != kb_p); y++)
+    {
+        if (0 == state)
+        {
+            for (x = 0; x < win->frame.size.x; x++)
+            {
+                if (i == strlen(title))
+                {
+                    y++;
+                    state = 1 + (0 == kb_p);
+                    i = 0;
+                    break;
+                }
+                mvwaddch(win->frame.curses_win, y, x, title[i]);
+                i++;
+            }
+            continue;
+        }
+        char * keyname = get_name_to_keycode(world, kb_p->key);
+        char * cmd_dsc = get_command_longdsc(world, kb_p->name);
+        char line[9 + 1 + strlen(cmd_dsc) + 1];
+        sprintf(line, "%-9s %s", keyname, cmd_dsc);
+        free(keyname);
+        kb_p = kb_p->next;
+        draw_line(win, y, line);
+    }
+    if (2 == state)
+    {
+        char * line = "(none)";
+        draw_line(win, y, line);
+        y++;
+    }
+    return y;
+}
+
+
+
 extern void draw_win_log(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
@@ -295,6 +367,31 @@ extern void draw_win_info(struct Win * win)
 
 
 
+extern void draw_win_available_keybindings(struct Win * win)
+{
+    struct World * world = (struct World *) win->data;
+    char * title = "Active window's keybindings:";
+    struct KeyBinding * kb_p;
+    struct WinConf * wc = get_winconf_by_win(world, world->wmeta->active);
+    if     (0 == wc->view)
+    {
+        kb_p = wc->kb.kbs;
+    }
+    else if (1 == wc->view)
+    {
+        kb_p = world->kb_wingeom.kbs;
+    }
+    else if (2 == wc->view)
+    {
+        kb_p = world->kb_winkeys.kbs;
+    }
+    uint16_t offset = draw_titled_keybinding_list(world, win, 0, title, kb_p);
+    draw_titled_keybinding_list(world, win, offset + 1, "Global keybindings:",
+                                world->kb_global.kbs);
+}
+
+
+
 extern void draw_win_keybindings_global(struct Win * win)
 {
     char * f_name = "draw_win_keybindings_global()";
@@ -329,7 +426,7 @@ extern void draw_winconf_keybindings(struct Win * win)
     struct WinConf * wc = get_winconf_by_win(world, win);
     char * title = "Window's keybindings:";
     uint8_t title_space = strlen(title) / win->frame.size.x + 2;
-    mvwaddstr(win->frame.curses_win, 0, 0, "Window's keybindings:");
+    mvwaddstr(win->frame.curses_win, 0, 0, title);
     draw_kb_view(world, win, f_name, &wc->kb, title_space);
 }
 

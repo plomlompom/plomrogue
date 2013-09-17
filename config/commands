@@ -43,3 +43,4 @@
 43 map_l map left
 44 map_r map right
 45 map_c map center player
+46 to_a_keywin toggle view of available keybindings

@@ -17,6 +17,7 @@
 #include "rexit.h" /* for exit_err() */
 #include "main.h" /* for World struct */
 #include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_og(),
+                        * draw_win_available_keybindings(),
                         * draw_win_keybindings_global(),
                         * draw_win_keybindings_winconf_geometry(),
                         * draw_win_keybindings_winconf_keybindings(),
@@ -286,6 +287,10 @@ static void * get_drawfunc_by_char(char c)
     else if ('m' == c)
     {
         return draw_win_map;
+    }
+    else if ('k' == c)
+    {
+        return draw_win_available_keybindings;
     }
     else if ('0' == c)
     {

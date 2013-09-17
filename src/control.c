@@ -206,6 +206,11 @@ extern uint8_t meta_control(int key, struct World * world)
     {
         scroll_pad(win_meta, '-');
     }
+    else if (key == get_available_keycode_to_action(world, "to_a_keywin"))
+    {
+        uint8_t test = toggle_window(win_meta, get_win_by_id(world, 'k'));
+        exit_err(test, world, err_toggle);
+    }
     else if (key == get_available_keycode_to_action(world, "to_g_keywin"))
     {
         exit_err(toggle_window(win_meta, win_keys), world, err_toggle);

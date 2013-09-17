@@ -28,14 +28,18 @@ make
 Keybindings and window configuration
 ------------------------------------
 
-In the default window configuration, globally available keybinings are shown at
-game start in the three windows on the left of the screen. The lower two windows
-describe keybindings / actions only available in a window's window configuration
-views -- hit "w" (per default keybindings) to switch the selected / "active"
-window to a view that allows changing its geometry. One further hit on "w"
-switches the window to a view that lists keybindings available specifically for
-that window -- such as for map scrolling actions in the "map" window. All
-keybindings can be changed.
+In the default window configuration, the window appearing on the left sports a
+list of keybindings available globally and additionally via the window currently
+selected as active.
+
+Hit "w" (per default keybindings) to switch the "active" window to a view that
+allows changing its geometry. One further hit on "w" switches the window to a
+view that allows changing its window-specific keybindings. The global
+keybindings may be changed in the "Global keys" window, those of the window
+geometry configuration in the "Window geometry keys" window" and those of the
+window-specific keybindings configuration in the "Window keybinding keys"
+window; by default, these three windows are not visible, but may be turned on by
+hitting the "F5", "F6" and "F7" keys.
 
 What actions are available globally or only in specific windows can be further
 manipulated by editing the files config/keybindings_global and
