@@ -22,7 +22,7 @@
                    * try_calloc(), check_tempfile(), check_xor_files()
                    */
 #include "wincontrol.h" /* for create_winconfs(), init_winconfs(), init_wins(),
-                         * sorted_wintoggle()
+                         * sorted_wintoggle_and_activate()
                          */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game(), exit_err() */
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
     init_winconfs(&world);
     init_wins(&world);
     set_cleanup_flag(CLEANUP_WINCONFS);
-    sorted_wintoggle(&world);
+    sorted_wintoggle_and_activate(&world);
     err_winmem = "Trouble with draw_all_wins() in main().";
 
     /* Replay mode. */

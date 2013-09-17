@@ -53,11 +53,13 @@ extern void init_wins(struct World * world);
 
 
 /* Toggle windows in world->wins in the order desribed by the first line of
- * config/windows/toggled_win_order, wherein each character should correspond to
- * one window the ID of which is found in world->winconf_ids. Unknown characters
- * are silently ignored.
+ * config/windows/toggle_order_and_active, wherein each character should
+ * correspond to one window whose ID is found in world->winconf_ids. Unknown
+ * characters are silently ignored. The first character of the second line of
+ * the file is also read to determine which window to focus as active (but only
+ * if it fits the ID of a window thus toggled visible).
  */
-extern void sorted_wintoggle(struct World * world);
+extern void sorted_wintoggle_and_activate(struct World * world);
 
 /* Reload windows in order and sizes defined in win config. */
 extern void reload_win_config(struct World * world);

@@ -23,7 +23,7 @@
                         * draw_win_keybindings_winconf_keybindings(),
                         * draw_winconf_geometry(), draw_winconf_keybindings()
                         */
-#include "misc.h" /* for try_malloc() */
+#include "misc.h" /* for try_malloc(), trouble_msg() */
 #include "dirent.h" /* for opendir(), closedir(), readdir() */
 #include "errno.h" /* for errno */
 #include "keybindings.h" /* for KeyBinding struct, free_keybindings() */
@@ -173,7 +173,7 @@ static void init_win_from_winconf(struct World * world, char id)
 
 
 
-extern void save_win_config(struct World * world, char id)
+static void save_win_config(struct World * world, char id)
 {
     char * f_name = "save_win_config()";
 
@@ -424,15 +424,24 @@ extern void init_wins(struct World * world)
 
 
 
-extern void sorted_wintoggle(struct World * world)
+extern void sorted_wintoggle_and_activate(struct World * world)
 {
-    char * f_name = "sorted_wintoggle()";
-    char * path = "config/windows/toggle_order";
+    char * f_name = "sorted_wintoggle_and_activate()";
+
+    char * path = "config/windows/toggle_order_and_active";
     FILE * file = try_fopen(path, "r", world, f_name);
     uint16_t linemax = get_linemax(file, world, f_name);
+
     char win_order[linemax + 1];
     try_fgets(win_order, linemax + 1, file, world, f_name);
+
+    uint8_t a = 0;
+    char * err = trouble_msg(world, f_name, "read_uint8()");
+    exit_err(read_uint8(file, &a), world, err);
+    free(err);
+
     try_fclose(file, world, f_name);
+
     uint8_t i = 0;
     for (; i < linemax - 1; i++)
     {
@@ -440,7 +449,13 @@ extern void sorted_wintoggle(struct World * world)
         {
             continue;
         }
-        toggle_window(world->wmeta, get_win_by_id(world, win_order[i]));
+        struct Win * win = get_win_by_id(world, win_order[i]);
+        toggle_window(world->wmeta, win);
+
+        if (a == (uint8_t) win_order[i])
+        {
+            world->wmeta->active = win;
+        }
     }
 }
 
@@ -455,7 +470,7 @@ extern void reload_win_config(struct World * world)
     free_winconfs(world);
     init_winconfs(world);
     init_wins(world);
-    sorted_wintoggle(world);
+    sorted_wintoggle_and_activate(world);
 }
 
 
@@ -470,8 +485,8 @@ extern void save_win_configs(struct World * world)
         save_win_config(world, id);
     }
 
-    char * path     = "config/windows/toggle_order";
-    char * path_tmp = "config/windows/toggle_order_tmp";
+    char * path     = "config/windows/toggle_order_and_active";
+    char * path_tmp = "config/windows/toggle_order_and_active_tmp";
     FILE * file = try_fopen(path_tmp, "w", world, f_name);
 
     char line[6];
@@ -486,6 +501,11 @@ extern void save_win_configs(struct World * world)
     }
     line[i] = '\n';
     try_fwrite(line, sizeof(char), strlen(line), file, world, f_name);
+    if (0 != world->wmeta->active)
+    {
+        struct WinConf * wc = get_winconf_by_win(world, world->wmeta->active);
+        write_uint8(wc->id, file);
+    }
 
     try_fclose_unlink_rename(file, path_tmp, path, world, f_name);
 }
