@@ -17,6 +17,7 @@ struct Win;
 extern void draw_win_log(struct Win * win);
 extern void draw_win_map(struct Win * win);
 extern void draw_win_info(struct Win * win);
+extern void draw_win_inventory(struct Win * win);
 extern void draw_win_available_keybindings(struct Win * win);
 extern void draw_win_keybindings_global(struct Win * win);
 extern void draw_win_keybindings_winconf_geometry(struct Win * win);

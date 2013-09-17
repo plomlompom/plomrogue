@@ -374,6 +374,13 @@ extern void draw_win_info(struct Win * win)
 
 
 
+extern void draw_win_inventory(struct Win * win)
+{
+    mvwaddstr(win->frame.curses_win, 0, 0, "(empty)");
+}
+
+
+
 extern void draw_win_available_keybindings(struct Win * win)
 {
     struct World * world = (struct World *) win->data;

@@ -18,7 +18,7 @@
 #include "main.h" /* for World struct */
 #include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_og(),
                         * draw_win_available_keybindings(),
-                        * draw_win_keybindings_global(),
+                        * draw_win_keybindings_global(), draw_win_inventory(),
                         * draw_win_keybindings_winconf_geometry(),
                         * draw_win_keybindings_winconf_keybindings(),
                         * draw_winconf_geometry(), draw_winconf_keybindings()
@@ -276,6 +276,10 @@ static struct WinConf * get_winconf_by_id(struct World * world, char id)
 
 static void * get_drawfunc_by_char(char c)
 {
+    if      ('c' == c)
+    {
+        return draw_win_inventory;
+    }
     if      ('i' == c)
     {
         return draw_win_info;
@@ -284,13 +288,13 @@ static void * get_drawfunc_by_char(char c)
     {
         return draw_win_log;
     }
-    else if ('m' == c)
-    {
-        return draw_win_map;
-    }
     else if ('k' == c)
     {
         return draw_win_available_keybindings;
+    }
+    else if ('m' == c)
+    {
+        return draw_win_map;
     }
     else if ('0' == c)
     {
