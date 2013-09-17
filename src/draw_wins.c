@@ -6,7 +6,7 @@
 #include <string.h>      /* for strlen() */
 #include <ncurses.h>     /* for mvwaddch() */
 #include "windows.h"     /* for structs Win, Frame, for draw_scroll_hint() */
-#include "misc.h"        /* for center_offset() */
+#include "misc.h"        /* for center_offset(), try_malloc() */
 #include "keybindings.h" /* for struct KeyBinding, for get_name_to_keycode() */
 #include "map_objects.h" /* for structs MapObj, Player */
 #include "map.h"         /* for Map struct */
@@ -23,8 +23,12 @@
 static void draw_with_linebreaks(struct Win * win, char * text,
                                  uint16_t start_y);
 
-/* Write "line" into window "win" at line "y" as far as it fits into it. */
-static void draw_line(struct Win * win, uint16_t y, char * line);
+/* Write "line" into window "win" at line "y" as far as it fits into it; apply
+ * ncurses attribute "attri" to all characters drawn; if "fill" is non-zero,
+ * fill the entire line with empty characters ("attri" also applied on these).
+ */
+static void draw_line(struct Win * win, uint16_t y, char * line, attr_t attri,
+                      uint8_t fill);
 
 /* Write "text" not starting from the top but from the bottom of "win". */
 static void draw_text_from_bottom(struct Win * win, char * text);
@@ -32,6 +36,10 @@ static void draw_text_from_bottom(struct Win * win, char * text);
 /* Draw onto "map" in "win" the objects in the chain at "start". */
 static void draw_map_objects(struct World * world, struct MapObj * start,
                              struct Map * map, struct Win * win);
+
+/* Return keybinding list line via "kb_pp", iterate pointer pointed to by it. */
+static char * get_kb_line_and_iterate(struct World * world,
+                                      struct KeyBinding ** kb_pp);
 
 /* Draw from line "start" on config view for keybindings defined at "kb". */
 static void draw_kb_view(struct World * world, struct Win * win,
@@ -94,12 +102,20 @@ static void draw_with_linebreaks(struct Win * win, char * text,
 
 
 
-static void draw_line(struct Win * win, uint16_t y, char * line)
+static void draw_line(struct Win * win, uint16_t y, char * line, attr_t attri,
+                      uint8_t fill)
 {
     uint16_t x = 0;
     for (; x < win->frame.size.x && x < strlen(line); x++)
     {
-        mvwaddch(win->frame.curses_win, y, x, line[x]);
+        mvwaddch(win->frame.curses_win, y, x, line[x] | attri);
+    }
+    if (0 != fill)
+    {
+        for (; x < win->frame.size.x; x++)
+        {
+            mvwaddch(win->frame.curses_win, y, x, ' ' | attri);
+        }
     }
 }
 
@@ -193,20 +209,38 @@ static void draw_map_objects(struct World * world, struct MapObj * start,
 
 
 
+static char * get_kb_line_and_iterate(struct World * world,
+                                      struct KeyBinding ** kb_pp)
+{
+    char * f_name = "get_kb_line_and_iterate()";
+    struct KeyBinding * kb_p = * kb_pp;
+    char * keyname = get_name_to_keycode(world, kb_p->key);
+    char * cmd_dsc = get_command_longdsc(world, kb_p->name);
+    uint16_t size = 9 + 1 + strlen(cmd_dsc) + 1;
+    char * line = try_malloc(size, world, f_name);
+    sprintf(line, "%-9s %s", keyname, cmd_dsc);
+    free(keyname);
+    * kb_pp = kb_p->next;
+    return line;
+}
+
+
+
 static void draw_kb_view(struct World * world, struct Win * win,
                          char * f_name, struct KeyBiData * kb, uint8_t start)
 {
+    if (0 == kb->kbs)
+    {
+        draw_line(win, start, "(none)", 0, 0);
+    }
     char * err_hint = trouble_msg(world, f_name, "draw_scroll_hint()");
     uint16_t kb_max = get_n_of_keybs(kb->kbs) - 1;
-    uint16_t y, x, offset;
+    uint16_t y, offset;
     offset = center_offset(kb->select, kb_max, win->frame.size.y - 1 - start);
-    uint8_t keydescwidth = 9 + 1;  /* get_name_to_keycode()'s max length + \0 */
-    char keydesc[keydescwidth];
-    uint16_t nav_max = kb_max + start;
     uint16_t y_border = win->frame.size.y + offset - 1 - start;
-    for (y = start; y <= nav_max && y < win->frame.size.y; y++)
+    struct KeyBinding * kb_p = get_keyb_of_n(kb->kbs, offset + (offset > 0));
+    for (y = start; 0 != kb_p && y < win->frame.size.y; y++)
     {
-
         if (start == y && offset > 0)
         {
             uint8_t test = draw_scroll_hint(&win->frame, y, offset + 1, '^');
@@ -220,7 +254,6 @@ static void draw_kb_view(struct World * world, struct Win * win,
             exit_err(test, world, err_hint);
             continue;
         }
-
         attr_t attri = 0;
         if (y - start == kb->select - offset)
         {
@@ -230,30 +263,9 @@ static void draw_kb_view(struct World * world, struct Win * win,
                 attri = attri | A_BLINK;
             }
         }
-
-        struct KeyBinding * kb_p;
-        kb_p = get_keyb_of_n(kb->kbs, (y - start) + offset);
-        char * keyname = get_name_to_keycode(world, kb_p->key);
-        snprintf(keydesc, keydescwidth, "%-9s", keyname);
-        free(keyname);
-        char * cmd_dsc = get_command_longdsc(world, kb_p->name);
-        uint8_t dsclen = strlen(keydesc);
-        for (x = 0; x < win->frame.size.x; x++)
-        {
-            if (x < dsclen)
-            {
-                mvwaddch(win->frame.curses_win, y, x, keydesc[x] | attri);
-                continue;
-            }
-            else if (dsclen < x && x < strlen(cmd_dsc) + strlen(keydesc) + 1)
-            {
-                chtype ch = cmd_dsc[x - strlen(keydesc) - 1] | attri;
-                mvwaddch(win->frame.curses_win, y, x, ch);
-                continue;
-            }
-            mvwaddch(win->frame.curses_win, y, x, ' ' | attri);
-        }
-
+        char * kb_line = get_kb_line_and_iterate(world, &kb_p);
+        draw_line(win, y, kb_line, attri, 1);
+        free(kb_line);
     }
     free(err_hint);
 }
@@ -286,18 +298,13 @@ static uint16_t draw_titled_keybinding_list(struct World * world,
             }
             continue;
         }
-        char * keyname = get_name_to_keycode(world, kb_p->key);
-        char * cmd_dsc = get_command_longdsc(world, kb_p->name);
-        char line[9 + 1 + strlen(cmd_dsc) + 1];
-        sprintf(line, "%-9s %s", keyname, cmd_dsc);
-        free(keyname);
-        kb_p = kb_p->next;
-        draw_line(win, y, line);
+        char * kb_line = get_kb_line_and_iterate(world, &kb_p);
+        draw_line(win, y, kb_line, 0, 0);
+        free(kb_line);
     }
     if (2 == state)
     {
-        char * line = "(none)";
-        draw_line(win, y, line);
+        draw_line(win, y, "(none)", 0, 0);
         y++;
     }
     return y;
