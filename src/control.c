@@ -179,10 +179,7 @@ extern uint8_t winkeyb_control(int key, struct World * world)
 extern uint8_t meta_control(int key, struct World * world)
 {
     struct WinMeta * win_meta = world->wmeta;
-    struct Win * win_keys     = get_win_by_id(world, '0'); /* Bad hardcoding. */
-    struct Win * win_map      = get_win_by_id(world, 'm'); /* TODO: Replace.  */
-    struct Win * win_info     = get_win_by_id(world, 'i'); /*                 */
-    struct Win * win_log      = get_win_by_id(world, 'l'); /*                 */
+    struct Win * win_map      = get_win_by_id(world, 'm');
     char * err_toggle = "Trouble with toggle_window() in meta_control().";
     if      (key == get_available_keycode_to_action(world, "quit"))
     {
@@ -215,7 +212,8 @@ extern uint8_t meta_control(int key, struct World * world)
     }
     else if (key == get_available_keycode_to_action(world, "to_g_keywin"))
     {
-        exit_err(toggle_window(win_meta, win_keys), world, err_toggle);
+        uint8_t test = toggle_window(win_meta, get_win_by_id(world, '0'));
+        exit_err(test, world, err_toggle);
     }
     else if (key == get_available_keycode_to_action(world, "to_wg_keywin"))
     {
@@ -233,7 +231,8 @@ extern uint8_t meta_control(int key, struct World * world)
     }
     else if (key == get_available_keycode_to_action(world, "to_infowin"))
     {
-        exit_err(toggle_window(win_meta, win_info), world, err_toggle);
+        uint8_t test = toggle_window(win_meta, get_win_by_id(world, 'i'));
+        exit_err(test, world, err_toggle);
     }
     else if (key == get_available_keycode_to_action(world, "to_inv"))
     {
@@ -242,7 +241,8 @@ extern uint8_t meta_control(int key, struct World * world)
     }
     else if (key == get_available_keycode_to_action(world, "to_logwin"))
     {
-        exit_err(toggle_window(win_meta, win_log), world, err_toggle);
+        uint8_t test = toggle_window(win_meta, get_win_by_id(world, 'l'));
+        exit_err(test, world, err_toggle);
     }
     else if (key == get_available_keycode_to_action(world, "save_conf"))
     {
