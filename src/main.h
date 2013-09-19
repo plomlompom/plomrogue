@@ -41,6 +41,7 @@ struct World
     struct WinMeta * wmeta;           /* Pointer to window manager's WinMeta. */
     struct WinConf * winconfs;        /* Pointer to windows' configurations. */
     char * winconf_ids;               /* Pointer to string of Winconfs' ids. */
+    uint8_t map_object_count;         /* Counts loaded/generated map objects. */
 };
 
 

@@ -30,6 +30,7 @@ struct Player
 struct MapObj
 {
     void * next;
+    uint8_t id;           /* Unique identifier of individual map object. */
     char type;            /* Map object type identifier (see MapObjDef.id). */
     struct yx_uint16 pos; /* Coordinate of object on map. */
 };

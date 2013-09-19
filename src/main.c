@@ -94,6 +94,7 @@ int main(int argc, char *argv[])
     world.item = 0;
     init_map_object_defs(&world, "config/defs");
     set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
+    world.map_object_count = 1;
 
     /* For interactive mode, try to load world state from savefile. */
     char * err_r = "Trouble loading game (in main()) / "

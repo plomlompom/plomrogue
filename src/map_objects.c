@@ -18,7 +18,7 @@
  * in map object chain ("first" pointing to !0), point "start" to it.
  */
 static struct MapObj * get_next_map_obj(struct World * world,
-                                        void * start, char * first,
+                                        void * start, uint8_t * first,
                                         size_t size, struct MapObj * map_obj);
 
 
@@ -34,7 +34,7 @@ static uint8_t read_map_objects_monsterdata( void * start, FILE * file);
 
 
 static struct MapObj * get_next_map_obj(struct World * world,
-                                        void * start, char * first,
+                                        void * start, uint8_t * first,
                                         size_t size, struct MapObj * map_obj)
 {
     char * f_name = "get_next_map_obj()";
@@ -177,6 +177,7 @@ extern uint8_t write_map_objects(struct World * world, void * start,
     for (map_obj = start; map_obj != 0; map_obj = map_obj->next)
     {
         if (   write_uint8(map_obj->type, file)
+            || write_uint8(map_obj->id, file)
             || write_uint16_bigendian(map_obj->pos.y + 1, file)
             || write_uint16_bigendian(map_obj->pos.x + 1, file))
         {
@@ -203,7 +204,7 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
     struct MapObjDef * mod;
     size_t size;
     uint8_t type;
-    char first = 1;
+    uint8_t first = 1;
     long pos;
     uint16_t read_uint16 = 0;
     while (1)
@@ -234,7 +235,8 @@ extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
         map_obj = get_next_map_obj(world, start, &first, size, map_obj);
         exit_err(NULL == map_obj, world, err);
         map_obj->type = type;
-        if (   read_uint16_bigendian(file, &map_obj->pos.y)
+        if (   read_uint8(file, &map_obj->id)
+            || read_uint16_bigendian(file, &map_obj->pos.y)
             || read_uint16_bigendian(file, &map_obj->pos.x))
         {
             return 1;
@@ -264,7 +266,7 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
     char * err = "Trouble in build_map_objects() with get_next_map_obj().";
     uint8_t i;
     struct MapObj * mo;
-    char first = 1;
+    uint8_t first = 1;
     struct MapObjDef * mod = get_map_obj_def(world, def_id);
     size_t size = 0;
     if ('i' == mod->m_or_i)
@@ -280,6 +282,8 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
         mo = get_next_map_obj(world, start, &first, size, mo);
         exit_err(NULL == mo, world, err);
         mo->pos = find_passable_pos(world->map);
+        mo->id = world->map_object_count;
+        world->map_object_count++;
         if ('i' == mod->m_or_i)
         {
             build_map_objects_itemdata(mod, mo);
@@ -288,7 +292,6 @@ extern void * build_map_objects(struct World * world, void * start, char def_id,
         {
             build_map_objects_monsterdata(mod, mo);
         }
-
     }
     if (!first)
     {
