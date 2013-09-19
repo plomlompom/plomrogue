@@ -37,6 +37,13 @@ extern void check_files_xor(char * p1, char * p2, struct World * w);
 
 
 
+/* Save / load / unload (free) interface configuration data. */
+extern void save_interface_conf(struct World * world);
+extern void load_interface_conf(struct World * world);
+extern void unload_interface_conf(struct World * world);
+
+
+
 /* Update game log by appending "text", or by appending a "." if "text" is the
  * same as the last one passed.
  */

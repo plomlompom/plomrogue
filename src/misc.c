@@ -16,7 +16,10 @@
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_err() */
-
+#include "wincontrol.h" /* for init_winconfs(), init_wins(), free_winconfs(),
+                         * sorted_wintoggle_and_activate()
+                         */
+#include "windows.h" /* for suspend_win() */
 
 
 extern char * trouble_msg(struct World * w, char * parent, char * child)
@@ -91,6 +94,42 @@ extern void check_tempfile(char * path, struct World * w)
     char msg[size];
     sprintf(msg, "%s%s%s", msg1, path, msg2);
     exit_err(!access(path, F_OK), w, msg);
+}
+
+
+
+extern void save_interface_conf(struct World * world)
+{
+    save_keybindings(world, "config/keybindings_global", &world->kb_global);
+    save_keybindings(world, "config/keybindings_wingeom", &world->kb_wingeom);
+    save_keybindings(world, "config/keybindings_winkeys", &world->kb_winkeys);
+    save_win_configs(world);
+}
+
+
+
+extern void load_interface_conf(struct World * world)
+{
+    init_keybindings(world, "config/keybindings_global",  &world->kb_global);
+    init_keybindings(world, "config/keybindings_wingeom", &world->kb_wingeom);
+    init_keybindings(world, "config/keybindings_winkeys", &world->kb_winkeys);
+    init_winconfs(world);
+    init_wins(world);
+    sorted_wintoggle_and_activate(world);
+}
+
+
+
+extern void unload_interface_conf(struct World * world)
+{
+    free_keybindings(world->kb_global.kbs);
+    free_keybindings(world->kb_wingeom.kbs);
+    free_keybindings(world->kb_winkeys.kbs);
+    while (0 != world->wmeta->active)
+    {
+        suspend_win(world->wmeta, world->wmeta->active);
+    }
+    free_winconfs(world);
 }
 
 

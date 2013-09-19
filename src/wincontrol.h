@@ -61,8 +61,7 @@ extern void init_wins(struct World * world);
  */
 extern void sorted_wintoggle_and_activate(struct World * world);
 
-/* Reload windows in order and sizes defined in win config. */
-extern void reload_win_config(struct World * world);
+
 
 /* Save all window's configurations to their configuration files. */
 extern void save_win_configs(struct World * world);

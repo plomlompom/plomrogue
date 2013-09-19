@@ -5,19 +5,21 @@
 #include "windows.h" /* for cycle_active_win(), shift_active_win(), struct Win,
                       *  struct WinMeta
                       */
-#include "keybindings.h" /* for get_keycode_to_action(), save_keybindings(),
-                          * move_keyb_mod_selection(), mod_selected_keyb()
+#include "keybindings.h" /* for get_keycode_to_action(), mod_selected_keyb(),
+                          * move_keyb_mod_selection()
                           */
 #include "map.h" /* for map_scroll(), map_center_player(), dir enum */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
 #include "wincontrol.h" /* for scroll_pad(), toggle_window(),
-                         * growshrink_active_window(), reload_win_config()
-                         * toggle_winconfig(), save_win_configs(),
+                         * growshrink_active_window(), toggle_winconfig(),
                          * toggle_win_height_type(), toggle_win_width_type()
                          */
 #include "map_object_actions.h" /* for player_wait(), move_player() */
 #include "command_db.h" /* for is_command_id_shortdsc() */
+#include "misc.h" /* for load_interface_conf(), unload_interface_conf(),
+                   * save_interface_conf()
+                   */
 
 
 
@@ -242,14 +244,9 @@ extern uint8_t meta_control(int key, struct World * world)
     {
         exit_err(toggle_window(win_meta, win_log), world, err_toggle);
     }
-    else if (key == get_available_keycode_to_action(world, "save_keys"))
+    else if (key == get_available_keycode_to_action(world, "save_conf"))
     {
-        save_keybindings(world, "config/keybindings_global",
-                         &world->kb_global);
-        save_keybindings(world, "config/keybindings_wingeom",
-                         &world->kb_wingeom);
-        save_keybindings(world, "config/keybindings_winkeys",
-                         &world->kb_winkeys);
+        save_interface_conf(world);
     }
     else if (key == get_available_keycode_to_action(world, "g_keys_u"))
     {
@@ -307,17 +304,14 @@ extern uint8_t meta_control(int key, struct World * world)
     {
         map_center_player(world->map, world->player, win_map->frame.size);
     }
-    else if (key == get_available_keycode_to_action(world, "reload_wins"))
+    else if (key == get_available_keycode_to_action(world, "reload_conf"))
     {
-        reload_win_config(world);
+        unload_interface_conf(world);
+        load_interface_conf(world);
     }
     else if (key == get_available_keycode_to_action(world, "winconf"))
     {
         toggle_winconfig(world, world->wmeta->active);
-    }
-    else if (key == get_available_keycode_to_action(world, "save_winconf"))
-    {
-        save_win_configs(world);
     }
     return 0;
 }

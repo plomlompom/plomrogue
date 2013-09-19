@@ -465,20 +465,6 @@ extern void sorted_wintoggle_and_activate(struct World * world)
 
 
 
-extern void reload_win_config(struct World * world)
-{
-    while (0 != world->wmeta->active)
-    {
-        suspend_win(world->wmeta, world->wmeta->active);
-    }
-    free_winconfs(world);
-    init_winconfs(world);
-    init_wins(world);
-    sorted_wintoggle_and_activate(world);
-}
-
-
-
 extern void save_win_configs(struct World * world)
 {
     char * f_name = "save_win_configs()";

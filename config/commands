@@ -35,9 +35,8 @@
 35 wk_keys_d win keybindings config keybindings nav down
 36 wk_keys_u win keybindings config keybindings nav up
 37 wk_keys_m win keybindings config keybindings modify
-38 reload_wins reload windows configuration
-39 save_winconf save windows' configuration
-40 save_keys save global keybindings
+38 reload_conf reload windows and keybindings configuration
+39 save_conf save windows and keybindings
 41 map_u map up
 42 map_d map down
 43 map_l map left

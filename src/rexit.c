@@ -13,6 +13,8 @@
 #include "windows.h" /* for Win struct, free_win(), free_winmeta() */
 #include "map_objects.h" /* for free_item_defs(), free_monster_defs() */
 #include "wincontrol.h" /* for free_winconfs() */
+#include "misc.h" /* for unload_interface_conf() */
+
 
 
 /* The clean-up routine and the flag resource by which it decides what to do. */
@@ -49,20 +51,26 @@ static void cleanup(struct World * world)
     {
         free(world->map->cells);
     }
+    if (cleanup_flags & CLEANUP_INTERFACE_CONF)
+    {
+        unload_interface_conf(world);
+    }
+    if (cleanup_flags & CLEANUP_WIN_META)
+    {
+        free_winmeta(world->wmeta);
+    }
+/*
     if (cleanup_flags & CLEANUP_KEYBINDINGS)
     {
         free_keybindings(world->kb_global.kbs);
         free_keybindings(world->kb_wingeom.kbs);
         free_keybindings(world->kb_winkeys.kbs);
     }
-    if (cleanup_flags & CLEANUP_WIN_META)
-    {
-        free_winmeta(world->wmeta);
-    }
     if (cleanup_flags & CLEANUP_WINCONFS)
     {
         free_winconfs(world);
     }
+*/
 }
 
 

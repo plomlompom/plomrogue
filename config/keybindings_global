@@ -12,6 +12,5 @@
 60 cyc_win_b
 262 scrl_l
 360 scrl_r
-114 reload_wins
-75 save_keys
-87 save_winconf
+114 reload_conf
+67 save_conf

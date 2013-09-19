@@ -7,8 +7,7 @@
 #include <time.h> /* for time() */
 #include <unistd.h> /* for getopt(), optarg */
 #include <stdint.h> /* for uint16_t, uint32_t */
-#include "windows.h" /* for structs WinMeta, Win, init_win(), init_win_meta(),
-                      * draw_all_wins()
+#include "windows.h" /* for structs WinMeta, Win, init_win_meta(), draw_all_wins()
                       */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
                         * try_fopen(), try_fclose(), try_fclose_unlink_rename()
@@ -19,18 +18,14 @@
                           */
 #include "map.h" /* for struct Map, init_map() */
 #include "misc.h" /* for update_log(), find_passable_pos(), save_game(),
-                   * try_calloc(), check_tempfile(), check_xor_files()
+                   * try_calloc(), check_tempfile(), check_xor_files(),
+                   * load_interface_conf()
                    */
-#include "wincontrol.h" /* for create_winconfs(), init_winconfs(), init_wins(),
-                         * sorted_wintoggle_and_activate()
-                         */
+#include "wincontrol.h" /* get_win_by_id(), get_winconf_by_win() */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game(), exit_err() */
 #include "command_db.h" /* for init_command_db() */
-#include "control.h" /* for *_control() */
-#include "keybindings.h" /* for init_keybindings(),
-                          * get_available_keycode_to_action()
-                          */
+#include "control.h" /* for *_control(), get_available_keycode_to_action() */
 
 
 
@@ -175,17 +170,11 @@ int main(int argc, char *argv[])
     curs_set(0);
     keypad(screen, TRUE);
     raw();
-    init_keybindings(&world, "config/keybindings_global",  &world.kb_global);
-    init_keybindings(&world, "config/keybindings_wingeom", &world.kb_wingeom);
-    init_keybindings(&world, "config/keybindings_winkeys", &world.kb_winkeys);
-    set_cleanup_flag(CLEANUP_KEYBINDINGS);
     char * err_winmem = "Trouble with init_win_meta() in main ().";
     exit_err(init_win_meta(screen, &world.wmeta), &world, err_winmem);
     set_cleanup_flag(CLEANUP_WIN_META);
-    init_winconfs(&world);
-    init_wins(&world);
-    set_cleanup_flag(CLEANUP_WINCONFS);
-    sorted_wintoggle_and_activate(&world);
+    load_interface_conf(&world);
+    set_cleanup_flag(CLEANUP_INTERFACE_CONF);
     err_winmem = "Trouble with draw_all_wins() in main().";
 
     /* Focus map on player. */
