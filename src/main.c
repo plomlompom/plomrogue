@@ -7,10 +7,12 @@
 #include <time.h> /* for time() */
 #include <unistd.h> /* for getopt(), optarg */
 #include <stdint.h> /* for uint32_t */
-#include "windows.h" /* for structs WinMeta, Win, init_win_meta(), draw_all_wins()
+#include "windows.h" /* for structs WinMeta, Win, init_win_meta(),
+                      * draw_all_wins()
                       */
-#include "readwrite.h" /* for read_uint32_bigendian](), write_uint32_bigendian(),
-                        * try_fopen(), try_fclose(), try_fclose_unlink_rename()
+#include "readwrite.h" /* for read_uint32_bigendian](),
+                        * write_uint32_bigendian(), try_fopen(), try_fclose(),
+                        * try_fclose_unlink_rename()
                         */
 #include "map_objects.h" /* for structs MapObj Player, init_map_object_defs(),
                           * build_map_objects()

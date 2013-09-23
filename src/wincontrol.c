@@ -208,12 +208,12 @@ static void save_win_config(struct World * world, char id)
     }
     linemax = linemax + 6;         /* + 6 = + 3 digits + whitespace + \n + \0 */
 
-    char keyb_line[linemax];
+    char kb_line[linemax];
     kb_p = wc->kb.kbs;
     while (0 != kb_p)
     {
-        snprintf(keyb_line, linemax, "%d %s\n", kb_p->key, kb_p->name);
-        try_fwrite(keyb_line, sizeof(char), strlen(keyb_line), file, world, f_name);
+        snprintf(kb_line, linemax, "%d %s\n", kb_p->key, kb_p->name);
+        try_fwrite(kb_line, sizeof(char), strlen(kb_line), file, world, f_name);
         kb_p = kb_p->next;
     }
 
