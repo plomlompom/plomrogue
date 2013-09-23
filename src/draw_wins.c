@@ -8,7 +8,7 @@
 #include "windows.h"     /* for structs Win, Frame, for draw_scroll_hint() */
 #include "misc.h"        /* for center_offset(), try_malloc() */
 #include "keybindings.h" /* for struct KeyBinding, for get_name_to_keycode() */
-#include "map_objects.h" /* for structs MapObj, Player */
+#include "map_objects.h" /* for structs MapObj, Player, get_map_object_def() */
 #include "map.h"         /* for Map struct */
 #include "main.h"        /* for World struct */
 #include "rexit.h"       /* for err_exit() */
@@ -195,12 +195,12 @@ static void draw_map_objects(struct World * world, struct MapObj * start,
     for (o = start; o != 0; o = o->next)
     {
         if (   o->pos.y >= map->offset.y
-            && o->pos.y < map->offset.y + win->frame.size.y
+            && o->pos.y <  map->offset.y + win->frame.size.y
             && o->pos.x >= map->offset.x
-            && o->pos.x < map->offset.x + win->frame.size.x)
+            && o->pos.x <  map->offset.x + win->frame.size.x)
         {
-            d = get_map_obj_def (world, o->type);
-            c = d->mapchar;
+            d = get_map_object_def(world, o->type);
+            c = d->char_on_map;
             mvwaddch(win->frame.curses_win,
                      o->pos.y - map->offset.y, o->pos.x - map->offset.x, c);
         }
@@ -341,12 +341,11 @@ extern void draw_win_map(struct Win * win)
             }
         }
     }
-    draw_map_objects (world, (struct MapObj *) world->item, map, win);
-    draw_map_objects (world, (struct MapObj *) world->monster, map, win);
+    draw_map_objects(world, world->map_objs, map, win);
     if (   player->pos.y >= map->offset.y
-        && player->pos.y < map->offset.y + win->frame.size.y
+        && player->pos.y <  map->offset.y + win->frame.size.y
         && player->pos.x >= map->offset.x
-        && player->pos.x < map->offset.x + win->frame.size.x)
+        && player->pos.x <  map->offset.x + win->frame.size.x)
     {
         mvwaddch(win->frame.curses_win,
                  player->pos.y - map->offset.y, player->pos.x - map->offset.x,

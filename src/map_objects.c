@@ -14,329 +14,133 @@
 
 
 
-/* Return pointer to newly allocated map object struct of size "size". If first
- * in map object chain ("first" pointing to !0), point "start" to it.
- */
-static struct MapObj * get_next_map_obj(struct World * world,
-                                        void * start, uint8_t * first,
-                                        size_t size, struct MapObj * map_obj);
-
-
-
-/* Map-object-type-specific helpers to (build|write|read)_map_objects(). */
-static void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
-                                       void * start);
-static void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
-                                          void * start);
-static uint8_t write_map_objects_monsterdata(void * start, FILE * file);
-static uint8_t read_map_objects_monsterdata( void * start, FILE * file);
-
-
-
-static struct MapObj * get_next_map_obj(struct World * world,
-                                        void * start, uint8_t * first,
-                                        size_t size, struct MapObj * map_obj)
-{
-    char * f_name = "get_next_map_obj()";
-    if (* first)
-    {
-        struct MapObj * * z = start;
-        map_obj = try_malloc(size, world, f_name);
-        * z = map_obj;
-        * first = 0;
-    }
-    else
-    {
-        map_obj->next = try_malloc(size, world, f_name);
-        map_obj = map_obj->next;
-    }
-    return map_obj;
-}
-
-
-
-static void build_map_objects_itemdata(struct MapObjDef * map_obj_def,
-                                       void * start)
-{
-  struct Item * i = (struct Item *) start;
-  i->map_obj.type = map_obj_def->id;
-}
-
-
-
-static void build_map_objects_monsterdata(struct MapObjDef * map_obj_def,
-                                          void * start)
-{
-    struct Monster * m = (struct Monster *) start;
-    m->map_obj.type = map_obj_def->id;
-    struct MonsterDef * md = (struct MonsterDef *) map_obj_def;
-    m->hitpoints = md->hitpoints_start;
-}
-
-
-
-static uint8_t write_map_objects_monsterdata(void * start, FILE * file)
-{
-    struct Monster * m = (struct Monster *) start;
-    return write_uint8(m->hitpoints, file);
-}
-
-
-
-static uint8_t read_map_objects_monsterdata (void * start, FILE * file)
-{
-    struct Monster * m = (struct Monster *) start;
-    return read_uint8(file, &m->hitpoints);
-}
-
-
-
 extern void init_map_object_defs(struct World * world, char * filename)
 {
     char * f_name = "init_map_object_defs()";
     FILE * file = try_fopen(filename, "r", world, f_name);
     uint16_t linemax = get_linemax(file, world, f_name);
-    struct MapObjDef  mod;
-    struct ItemDef    id;
-    struct MonsterDef md;
-    world->item_def    = 0;
-    world->monster_def = 0;
-    struct ItemDef    * * p_p_id  = &world->item_def;
-    struct MonsterDef * * p_p_md  = &world->monster_def;
-    char defline[linemax + 1];
-    char * line_p;
+    struct MapObjDef ** last_mod_ptr_ptr = &world->map_obj_defs;
     char * delim = " ";
-    while (fgets(defline, linemax + 1, file))
+    char line[linemax + 1];
+    while (try_fgets(line, linemax + 1, file, world, f_name))
     {
-        mod.next    = 0;
-        mod.id      = atoi(strtok(defline, delim));
-        mod.m_or_i  = * strtok(NULL, delim);
-        mod.mapchar = * strtok(NULL, delim);
-        if ('i' == mod.m_or_i)
-        {
-            line_p = strtok(NULL, delim);
-        }
-        else
-        {
-            md.corpse_id       = atoi(strtok(NULL, delim));
-            md.hitpoints_start = atoi(strtok(NULL, delim));
-            line_p             = strtok(NULL, delim);
-        }
-        mod.desc = try_calloc(strlen(line_p), sizeof(char), world, f_name);
-        memcpy(mod.desc, line_p, strlen(line_p) - 1);
-        if ('i' == mod.m_or_i)
-        {
-            id.map_obj_def = mod;
-            * p_p_id       = try_malloc(sizeof(struct ItemDef), world, f_name);
-            * * p_p_id     = id;
-            p_p_id         = (struct ItemDef    * *) * p_p_id;
-        }
-        else
-        {
-            md.map_obj_def = mod;
-            * p_p_md     = try_malloc(sizeof(struct MonsterDef), world, f_name);
-            * * p_p_md     = md;
-            p_p_md         = (struct MonsterDef * *) * p_p_md;
-        }
+        struct MapObjDef * mod;
+        mod = try_malloc(sizeof(struct MapObjDef), world, f_name);
+        mod->next = NULL;
+        mod->id = atoi(strtok(line, delim));
+        mod->corpse_id = atoi(strtok(NULL, delim));
+        mod->char_on_map = * strtok(NULL, delim);
+        mod->lifepoints = atoi(strtok(NULL, delim));
+        char * name = strtok(NULL, "\n");
+        mod->name = try_malloc(strlen(name) + 1, world, f_name);
+        memcpy(mod->name, name, strlen(name) + 1);
+        * last_mod_ptr_ptr = mod;
+        last_mod_ptr_ptr = &mod->next;
     }
     try_fclose(file, world, f_name);
 }
 
 
 
-extern void free_item_defs(struct ItemDef * id_start)
+extern void free_map_object_defs(struct MapObjDef * mod_start)
 {
-    if (0 != id_start->map_obj_def.next)
-    {
-        free_item_defs((struct ItemDef *) id_start->map_obj_def.next);
-    }
-    free(id_start->map_obj_def.desc);
-    free(id_start);
-}
-
-
-
-
-extern void free_monster_defs(struct MonsterDef * md_start)
-{
-    if (0 != md_start->map_obj_def.next)
-    {
-        free_monster_defs((struct MonsterDef *) md_start->map_obj_def.next);
-    }
-    free(md_start->map_obj_def.desc);
-    free(md_start);
-}
-
-
-
-extern uint8_t write_map_objects(struct World * world, void * start,
-                                 FILE * file)
-{
-    struct MapObj * map_obj;
-    struct MapObjDef * mod;
-    for (map_obj = start; map_obj != 0; map_obj = map_obj->next)
-    {
-        if (   write_uint8(map_obj->type, file)
-            || write_uint8(map_obj->id, file)
-            || write_uint16_bigendian(map_obj->pos.y + 1, file)
-            || write_uint16_bigendian(map_obj->pos.x + 1, file))
-        {
-            return 1;
-        }
-        mod = get_map_obj_def(world, map_obj->type);
-        if ('m' == mod->m_or_i)
-        {
-            if (write_map_objects_monsterdata(map_obj, file))
-            {
-                return 1;
-            }
-        }
-    }
-    return write_uint16_bigendian(0, file);
-}
-
-
-
-extern uint8_t read_map_objects(struct World * world, void * start, FILE * file)
-{
-    char * err = "Trouble in read_map_objects() with get_next_map_obj().";
-    struct MapObj * map_obj;
-    struct MapObjDef * mod;
-    size_t size;
-    uint8_t type;
-    uint8_t first = 1;
-    long pos;
-    uint16_t read_uint16 = 0;
-    while (1)
-    {
-        pos = ftell(file);
-        if (read_uint16_bigendian(file, &read_uint16))
-        {
-            return 1;
-        }
-        if (0 == read_uint16)
-        {
-            break;
-        }
-        fseek(file, pos, SEEK_SET);
-        if (read_uint8(file, &type))
-        {
-            return 1;
-        }
-        mod = get_map_obj_def(world, type);
-        if ('m' == mod->m_or_i)
-        {
-            size = sizeof(struct Monster);
-        }
-        else
-        {
-            size = sizeof(struct Item);
-        }
-        map_obj = get_next_map_obj(world, start, &first, size, map_obj);
-        exit_err(NULL == map_obj, world, err);
-        map_obj->type = type;
-        if (   read_uint8(file, &map_obj->id)
-            || read_uint16_bigendian(file, &map_obj->pos.y)
-            || read_uint16_bigendian(file, &map_obj->pos.x))
-        {
-            return 1;
-        }
-        map_obj->pos.y--;
-        map_obj->pos.x--;
-        if ('m' == mod->m_or_i)
-        {
-            if (read_map_objects_monsterdata(map_obj, file))
-            {
-                return 1;
-            }
-        }
-    }
-    if (!first)
-    {
-        map_obj->next = 0;
-    }
-    return 0;
-}
-
-
-
-extern void * build_map_objects(struct World * world, void * start, char def_id,
-                                uint8_t n)
-{
-    char * err = "Trouble in build_map_objects() with get_next_map_obj().";
-    uint8_t i;
-    struct MapObj * mo;
-    uint8_t first = 1;
-    struct MapObjDef * mod = get_map_obj_def(world, def_id);
-    size_t size = 0;
-    if ('i' == mod->m_or_i)
-    {
-        size = sizeof(struct Item);
-    }
-    else
-    {
-        size = sizeof(struct Monster);
-    }
-    for (i = 0; i < n; i++)
-    {
-        mo = get_next_map_obj(world, start, &first, size, mo);
-        exit_err(NULL == mo, world, err);
-        mo->pos = find_passable_pos(world->map);
-        mo->id = world->map_object_count;
-        world->map_object_count++;
-        if ('i' == mod->m_or_i)
-        {
-            build_map_objects_itemdata(mod, mo);
-        }
-        else
-        {
-            build_map_objects_monsterdata(mod, mo);
-        }
-    }
-    if (!first)
-    {
-        mo->next = 0;
-    }
-    return &mo->next;
-}
-
-
-
-extern void free_items(struct Item * item)
-{
-    if (0 == item)
+    if (NULL == mod_start)
     {
         return;
     }
-    free_items((struct Item *) item->map_obj.next);
-    free(item);
+    free_map_object_defs(mod_start->next);
+    free(mod_start->name);
+    free(mod_start);
 }
 
 
 
-extern void free_monsters(struct Monster * monster)
+extern void write_map_objects(struct World * world, FILE * file)
 {
-    if (0 == monster)
+    char * f_name = "write_map_objects()";
+    struct MapObj * mo = world->map_objs;
+    uint8_t size = 3 + 1 + 3 + 1 + 3 + 1 + 5 + 1 + 5 + 1;
+    char line[size];
+    while (NULL != mo)
+    {
+        sprintf(line, "%d %d %d %d %d\n",
+                mo->id, mo->type, mo->lifepoints, mo->pos.y, mo->pos.x);
+        try_fwrite(line, strlen(line), 1, file, world, f_name);
+        mo = mo->next;
+    }
+}
+
+
+
+extern void read_map_objects(struct World * world, FILE * file, char * line,
+                              int linemax)
+{
+    char * f_name = "read_map_objects()";
+    struct MapObj ** mo_ptr_ptr = &world->map_objs;
+    char * delim = " ";
+    while (try_fgets(line, linemax + 1, file, world, f_name))
+    {
+        struct MapObj * mo = malloc(sizeof(struct MapObj));
+        mo->next = NULL;
+        mo->id = atoi(strtok(line, delim));
+        if (mo->id > world->map_obj_count)
+        {
+            world->map_obj_count = mo->id;
+        }
+        mo->type = atoi(strtok(NULL, delim));
+        mo->lifepoints = atoi(strtok(NULL, delim));
+        mo->pos.y = atoi(strtok(NULL, delim));
+        mo->pos.x = atoi(strtok(NULL, delim));
+        * mo_ptr_ptr = mo;
+        mo_ptr_ptr = &mo->next;
+    }
+}
+
+
+
+extern struct MapObj ** build_map_objects(struct World * w,
+                                           struct MapObj ** mo_ptr_ptr,
+                                           uint8_t type, uint8_t n)
+{
+    char * f_name = "build_map_objects()";
+    uint8_t i = 0;
+    struct MapObjDef * mod = get_map_object_def(w, type);
+    while (i < n)
+    {
+        struct MapObj * mo = try_malloc(sizeof(struct MapObj), w, f_name);
+        mo->id = w->map_obj_count;
+        w->map_obj_count++;
+        mo->type = mod->id;
+        mo->next = NULL;
+        mo->lifepoints = mod->lifepoints;
+        mo->pos = find_passable_pos(w->map);
+        i++;
+        * mo_ptr_ptr = mo;
+        mo_ptr_ptr = &mo->next;
+    }
+    return mo_ptr_ptr;
+}
+
+
+
+extern void free_map_objects(struct MapObj * mo_start)
+{
+    if (NULL == mo_start)
     {
         return;
     }
-    free_monsters((struct Monster *) monster->map_obj.next);
-    free(monster);
+    free_map_objects(mo_start->next);
+    free(mo_start);
 }
 
 
 
-extern struct MapObjDef * get_map_obj_def(struct World * world, char def_id)
+extern struct MapObjDef * get_map_object_def(struct World * w, uint8_t id)
 {
-    struct MapObjDef * d = NULL;
-    for (d = (struct MapObjDef *) world->monster_def;
-         d->id != def_id && 0 != d->next;
-         d = d->next);
-    if (d->id != def_id)
+    struct MapObjDef * mod = w->map_obj_defs;
+    while (id != mod->id)
     {
-        for (d = (struct MapObjDef *) world->item_def;
-             d->id != def_id && 0 != d->next;
-             d = d->next);
+        mod = mod->next;
     }
-    return d;
+    return mod;
 }

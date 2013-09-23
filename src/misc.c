@@ -9,7 +9,9 @@
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
                         * try_fopen(), try_fclose()
                         */
-#include "map_objects.h" /* for struct Monster, write_map_objects(), */
+#include "map_objects.h" /* for struct Monster, read_map_objects(),
+                          * write_map_objects()
+                          */
 #include "map_object_actions.h" /* for is_passable(), move_monster() */
 #include "map.h" /* for Map struct */
 #include "main.h" /* for World struct */
@@ -215,12 +217,15 @@ extern void turn_over(struct World * world, char action)
     }
     world->turn++;
     rrand_seed(world->seed * world->turn);
-    struct Monster * monster;
-    for (monster = world->monster;
+    struct MapObj * monster;
+    for (monster = world->map_objs;
          monster != 0;
-         monster = monster->map_obj.next)
+         monster = monster->next)
     {
-        move_monster(world, monster);
+        if (0 < monster->lifepoints)
+        {
+            move_monster(world, monster);
+        }
     }
 }
 
@@ -229,24 +234,52 @@ extern void turn_over(struct World * world, char action)
 extern void save_game(struct World * world)
 {
     char * f_name = "save_game()";
-    char * err_write = "Trouble in save_game() "
-                       "writing to opened file 'savefile_tmp'.";
 
     char * savefile_tmp = "savefile_tmp";
     char * savefile     = "savefile";
     FILE * file = try_fopen(savefile_tmp, "w", world, f_name);
-    if (   write_uint32_bigendian(world->seed, file)
-        || write_uint32_bigendian(world->turn, file)
-        || write_uint16_bigendian(world->score, file)
-        || write_uint16_bigendian(world->player->pos.y + 1, file)
-        || write_uint16_bigendian(world->player->pos.x + 1, file)
-        || write_uint8(world->player->hitpoints, file)
-        || write_map_objects(world, world->monster, file)
-        || write_map_objects(world, world->item, file))
-    {
-        exit_err(1, world, err_write);
-    }
+
+    char line[12];
+    sprintf(line, "%d\n", world->seed);
+    try_fwrite(line, strlen(line), 1, file, world, f_name);
+    sprintf(line, "%d\n", world->turn);
+    try_fwrite(line, strlen(line), 1, file, world, f_name);
+    sprintf(line, "%d\n", world->score);
+    try_fwrite(line, strlen(line), 1, file, world, f_name);
+    sprintf(line, "%d\n", world->player->hitpoints);
+    try_fwrite(line, strlen(line), 1, file, world, f_name);
+    sprintf(line, "%d\n", world->player->pos.y);
+    try_fwrite(line, strlen(line), 1, file, world, f_name);
+    sprintf(line, "%d\n", world->player->pos.x);
+    try_fwrite(line, strlen(line), 1, file, world, f_name);
+    write_map_objects(world, file);
+
     try_fclose_unlink_rename(file, savefile_tmp, savefile, world, f_name);
+}
+
+
+
+extern void load_game(struct World * world)
+{
+    char * f_name = "load_game2()";
+    char * filename = "savefile";
+    FILE * file = try_fopen(filename, "r", world, f_name);
+    uint16_t linemax = get_linemax(file, world, f_name);
+    char line[linemax + 1];
+    try_fgets(line, linemax + 1, file, world, f_name);
+    world->seed = atoi(line);
+    try_fgets(line, linemax + 1, file, world, f_name);
+    world->turn = atoi(line);
+    try_fgets(line, linemax + 1, file, world, f_name);
+    world->score = atoi(line);
+    try_fgets(line, linemax + 1, file, world, f_name);
+    world->player->hitpoints = atoi(line);
+    try_fgets(line, linemax + 1, file, world, f_name);
+    world->player->pos.y = atoi(line);
+    try_fgets(line, linemax + 1, file, world, f_name);
+    world->player->pos.x = atoi(line);
+    read_map_objects(world, file, line, linemax);
+    try_fclose(file, world, f_name);
 }
 
 

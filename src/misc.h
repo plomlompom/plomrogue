@@ -66,8 +66,9 @@ extern void turn_over(struct World * world, char action);
 
 
 
-/* Save current game data to file "savefile". */
+/* Save or load current game data to / from file "savefile". */
 extern void save_game(struct World * world);
+extern void load_game(struct World * world);
 
 
 

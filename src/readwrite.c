@@ -2,7 +2,7 @@
 
 #include "readwrite.h"
 #include <stdio.h>  /* for FILE typedef, fopen(), fgetc(), fputc(), fseek(),
-                     * sprintf(), fwrite()
+                     * sprintf(), fwrite(), ferror()
                      */
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
 #include <string.h> /* for strlen()*/
@@ -59,12 +59,14 @@ extern void try_fclose(FILE * file, struct World * w, char * f)
 
 
 
-extern void try_fgets(char * line, int linemax, FILE * file,
-                      struct World * w, char * f)
+extern char * try_fgets(char * line, int linemax, FILE * file,
+                        struct World * w, char * f)
 {
     char * msg = trouble_msg(w, f, "fgets()");
-    exit_err(NULL == fgets(line, linemax, file), w, msg);
+    char * test = fgets(line, linemax, file);
+    exit_err(NULL == test && ferror(file), w, msg);
     free(msg);
+    return test;
 }
 
 

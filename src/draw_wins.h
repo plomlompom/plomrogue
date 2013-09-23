@@ -23,6 +23,8 @@ extern void draw_win_keybindings_global(struct Win * win);
 extern void draw_win_keybindings_winconf_geometry(struct Win * win);
 extern void draw_win_keybindings_winconf_keybindings(struct Win * win);
 
+
+
 /* Routines to draw windows' configuration views. */
 extern void draw_winconf_keybindings(struct Win * win);
 extern void draw_winconf_geometry(struct Win * win);

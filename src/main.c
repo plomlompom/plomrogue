@@ -6,20 +6,19 @@
 #include <ncurses.h> /* for initscr(), noecho(), curs_set(), keypad(), raw() */
 #include <time.h> /* for time() */
 #include <unistd.h> /* for getopt(), optarg */
-#include <stdint.h> /* for uint16_t, uint32_t */
+#include <stdint.h> /* for uint32_t */
 #include "windows.h" /* for structs WinMeta, Win, init_win_meta(), draw_all_wins()
                       */
-#include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
+#include "readwrite.h" /* for read_uint32_bigendian](), write_uint32_bigendian(),
                         * try_fopen(), try_fclose(), try_fclose_unlink_rename()
                         */
-#include "map_objects.h" /* for structs Monster, Item, Player,
-                          * init_map_object_defs(), read_map_objects(),
+#include "map_objects.h" /* for structs MapObj Player, init_map_object_defs(),
                           * build_map_objects()
                           */
 #include "map.h" /* for struct Map, init_map() */
 #include "misc.h" /* for update_log(), find_passable_pos(), save_game(),
                    * try_calloc(), check_tempfile(), check_xor_files(),
-                   * load_interface_conf()
+                   * load_interface_conf(), load_game()
                    */
 #include "wincontrol.h" /* get_win_by_id(), get_winconf_by_win() */
 #include "rrand.h" /* for rrand(), rrand_seed() */
@@ -85,11 +84,9 @@ int main(int argc, char *argv[])
     struct Player player;
     player.hitpoints = 5;
     world.player = &player;
-    world.monster = 0;
-    world.item = 0;
-    init_map_object_defs(&world, "config/defs");
+    init_map_object_defs(&world, "config/defs2");
     set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
-    world.map_object_count = 1;
+    world.map_obj_count = 1;
 
     /* For interactive mode, try to load world state from savefile. */
     char * err_r = "Trouble loading game (in main()) / "
@@ -97,22 +94,8 @@ int main(int argc, char *argv[])
     FILE * file;
     if (1 == world.interactive && 0 == access(savefile, F_OK))
     {
-        file = try_fopen(savefile, "r", &world, f_name);
-        if (   read_uint32_bigendian(file, &world.seed)
-            || read_uint32_bigendian(file, &world.turn)
-            || read_uint16_bigendian(file, &world.score)
-            || read_uint16_bigendian(file, &player.pos.y)
-            || read_uint16_bigendian(file, &player.pos.x)
-            || read_uint8(file, &player.hitpoints)
-            || read_map_objects(&world, &world.monster, file)
-            || read_map_objects(&world, &world.item,    file))
-        {
-            exit_err(1, &world, err_r);
-        }
+        load_game(&world);
         set_cleanup_flag(CLEANUP_MAP_OBJECTS);
-        try_fclose(file, &world, f_name);
-        player.pos.y--;
-        player.pos.x--;
     }
 
     /* For non-interactive mode, try to load world state from record file. */
@@ -153,12 +136,12 @@ int main(int argc, char *argv[])
     if (0 == world.turn)
     {
         player.pos = find_passable_pos(world.map);
-        void * foo;
-        foo = build_map_objects(&world, &world.monster, 1, 1 + rrand() % 27);
-        foo = build_map_objects(&world, foo, 2, 1 + rrand() % 9);
-        build_map_objects(&world, foo, 3, 1 + rrand() % 3);
-        foo = build_map_objects(&world, &world.item, 4, 1 + rrand() % 3);
-        build_map_objects(&world, foo, 5, 1 + rrand() % 3);
+        struct MapObj ** ptr;
+        ptr = build_map_objects(&world, &world.map_objs, 1, 1 + rrand() % 27);
+        ptr = build_map_objects(&world, ptr, 2, 1 + rrand() % 9);
+        ptr = build_map_objects(&world, ptr, 3, 1 + rrand() % 3);
+        ptr = build_map_objects(&world, ptr, 4, 1 + rrand() % 3);
+        ptr = build_map_objects(&world, ptr, 5, 1 + rrand() % 3);
         set_cleanup_flag(CLEANUP_MAP_OBJECTS);
         world.turn = 1;
     }

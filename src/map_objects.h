@@ -25,92 +25,62 @@ struct Player
 
 
 
-/* Structs for standard map objects. */
-
 struct MapObj
 {
-    void * next;
-    uint8_t id;           /* Unique identifier of individual map object. */
-    char type;            /* Map object type identifier (see MapObjDef.id). */
-    struct yx_uint16 pos; /* Coordinate of object on map. */
-};
-
-struct Item
-{
-    struct MapObj map_obj;
-};
-
-struct Monster
-{
-    struct MapObj map_obj;
-    uint8_t hitpoints;
+    struct MapObj * next;        /* pointer to next one in map object chain */
+    uint8_t id;                  /* individual map object's unique identifier */
+    uint8_t type;                /* ID of appropriate map object definition */
+    uint8_t lifepoints;          /* 0: object is inanimate; >0: hitpoints */
+    struct yx_uint16 pos;        /* coordinate on map */
 };
 
 
-
-/* Structs for map object *type* definitions. Values common to all members of
- * a single monster or item type are harvested from these.
- */
 
 struct MapObjDef
 {
     struct MapObjDef * next;
-    char m_or_i;  /* Is it item or monster? "i" for items, "m" for monsters. */
-    char id;      /* Unique identifier of the map object type to describe. */
-    char mapchar; /* Map object symbol to appear on map.*/
-    char * desc;  /* String describing map object in the game log. */
-};
-
-struct ItemDef
-{
-    struct MapObjDef map_obj_def;
-};
-
-struct MonsterDef
-{
-    struct MapObjDef map_obj_def;
-    uint8_t corpse_id;       /* ID of object type killed monster changes to. */
-    uint8_t hitpoints_start; /* Hitpoints each monster starts with. */
+    uint8_t id;         /* unique identifier of map object type */
+    uint8_t corpse_id;  /* id of type to change into upon destruction */
+    char char_on_map;   /* map object symbol to appear on map */
+    char * name;        /* string to describe object in game log*/
+    uint8_t lifepoints; /* default value for map object lifepoints member */
 };
 
 
 
-/* Initialize map object type definitions from file at path "filename". */
+/* Initialize map object defnitions chain from file at path "filename". */
 extern void init_map_object_defs(struct World * world, char * filename);
 
 
 
-/* Free item / monster definitions in map object chain starting at "md_start" /
- * "id_start".
+/* Free map object definitions chain starting at "mod_start". */
+extern void free_map_object_defs(struct MapObjDef * mod_start);
+
+
+/* Build chain of "n" map objects of "tpye" to start at "mo_ptr_ptr". */
+extern struct MapObj ** build_map_objects(struct World * w,
+                                          struct MapObj ** mo_ptr_ptr,
+                                          uint8_t type, uint8_t n);
+
+
+/* Write map objects chain to "file". */
+extern void write_map_objects(struct World * world, FILE * file);
+
+/* Read from "file" map objects chain; use "line" as char array for fgets() and
+ * expect strings of max. "linemax" length.
  */
-extern void free_item_defs(struct ItemDef * id_start);
-extern void free_monster_defs(struct MonsterDef * md_start);
+extern void read_map_objects(struct World * world, FILE * file,
+                             char * line, int linemax);
 
 
 
-/* Build into memory starting at "start" chain of "n" map objects of type
- * "def_id".
- */
-extern void * build_map_objects(struct World * world, void * start, char def_id,
-                                uint8_t n);
+/* Free map objects in map object chain starting at "mo_start. */
+extern void free_map_objects(struct MapObj * mo_start);
 
 
-
-/* Write to/read from file chain of map objects starting/to start in memory at
- * "start".
- */
-extern uint8_t write_map_objects(struct World * world, void * start,
-                                 FILE * file);
-extern uint8_t read_map_objects(struct World * world, void * start,
-                                FILE * file);
-
-
-/* Free items / monsters in map object chain starting at "item" / "monster". */
-extern void free_items(struct Item * item);
-extern void free_monsters(struct Monster * monster);
 
 /* Get pointer to the map object definition of identifier "def_id". */
-extern struct MapObjDef * get_map_obj_def(struct World * world, char def_id);
+extern struct MapObjDef * get_map_object_def(struct World * w, uint8_t id);
 
 
 

@@ -11,7 +11,7 @@
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
 struct World;
 struct Map;
-struct Monster;
+struct MapObj;
 
 
 
@@ -20,7 +20,7 @@ struct Monster;
  * and thereby potentially trigger the player's death. Update the log for any
  * contact action.
  */
-extern void move_monster(struct World * world, struct Monster * monster);
+extern void move_monster(struct World * world, struct MapObj * monster);
 
 
 

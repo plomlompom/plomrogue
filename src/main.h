@@ -13,11 +13,9 @@
 struct WinMeta;
 struct WinConf;
 struct Win;
-struct KeyBinding;
-struct KeysWinData;
 struct Map;
-struct ItemDef;
-struct MonsterDef;
+struct MapObjDef;
+struct MapObj;
 
 
 
@@ -32,16 +30,14 @@ struct World
     uint16_t score;                   /* Player's score. */
     char * log;                       /* Pointer to the game log string. */
     struct Map * map;                 /* Pointer to the game map cells. */
-    struct ItemDef * item_def;        /* Pointer to the item definitions. */
-    struct Item * item;               /* Pointer to the items' data. */
-    struct MonsterDef * monster_def;  /* Pointer to the monster definitions. */
-    struct Monster * monster;         /* Pointer to the monsters' data. */
-    struct Player * player;           /* Pointer to the player data. */
     struct CommandDB * cmd_db;        /* Pointer to the command database. */
     struct WinMeta * wmeta;           /* Pointer to window manager's WinMeta. */
     struct WinConf * winconfs;        /* Pointer to windows' configurations. */
     char * winconf_ids;               /* Pointer to string of Winconfs' ids. */
-    uint8_t map_object_count;         /* Counts loaded/generated map objects. */
+    struct Player * player;           /* Pointer to the player data. */
+    uint8_t map_obj_count;            /* Counts map objects generated so far. */
+    struct MapObjDef * map_obj_defs;  /* Map object type definitions chain. */
+    struct MapObj * map_objs;         /* Map objects chain. */
 };
 
 

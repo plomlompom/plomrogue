@@ -11,7 +11,7 @@
 #include "keybindings.h" /* for free_keybindings() */
 #include "command_db.h" /* for free_command_db() */
 #include "windows.h" /* for Win struct, free_win(), free_winmeta() */
-#include "map_objects.h" /* for free_item_defs(), free_monster_defs() */
+#include "map_objects.h" /* for free_map_objects, free_map_object_defs() */
 #include "wincontrol.h" /* for free_winconfs() */
 #include "misc.h" /* for unload_interface_conf() */
 
@@ -31,13 +31,11 @@ static void cleanup(struct World * world)
     }
     if (cleanup_flags & CLEANUP_MAP_OBJECTS)
     {
-        free_items(world->item);
-        free_monsters(world->monster);
+        free_map_objects(world->map_objs);
     }
     if (cleanup_flags & CLEANUP_MAP_OBJECT_DEFS)
     {
-        free_item_defs(world->item_def);
-        free_monster_defs(world->monster_def);
+        free_map_object_defs(world->map_obj_defs);
     }
     if (cleanup_flags & CLEANUP_LOG)
     {
@@ -59,18 +57,6 @@ static void cleanup(struct World * world)
     {
         free_winmeta(world->wmeta);
     }
-/*
-    if (cleanup_flags & CLEANUP_KEYBINDINGS)
-    {
-        free_keybindings(world->kb_global.kbs);
-        free_keybindings(world->kb_wingeom.kbs);
-        free_keybindings(world->kb_winkeys.kbs);
-    }
-    if (cleanup_flags & CLEANUP_WINCONFS)
-    {
-        free_winconfs(world);
-    }
-*/
 }
 
 

@@ -19,10 +19,17 @@ struct World;
  */
 extern FILE * try_fopen(char * path, char * mode, struct World * w, char * f);
 extern void try_fclose(FILE * file, struct World * w, char * f);
-extern void try_fgets(char * line, int size, FILE * file,
-                      struct World * w, char * f);
 extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
                        struct World * w, char * f);
+
+
+
+/* Wrapper to calling fgets() from function called "f". The return code of
+ * fgets() is returned unless it is NULL *and* ferror() indicates that an error
+ * occured; otherwise end of file is assumed and NULL is returned properly.
+ */
+extern char * try_fgets(char * line, int size, FILE * file,
+                        struct World * w, char * f);
 
 
 
