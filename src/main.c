@@ -138,12 +138,12 @@ int main(int argc, char *argv[])
     if (0 == world.turn)
     {
         player.pos = find_passable_pos(world.map);
-        struct MapObj ** ptr;
-        ptr = build_map_objects(&world, &world.map_objs, 1, 1 + rrand() % 27);
-        ptr = build_map_objects(&world, ptr, 2, 1 + rrand() % 9);
-        ptr = build_map_objects(&world, ptr, 3, 1 + rrand() % 3);
-        ptr = build_map_objects(&world, ptr, 4, 1 + rrand() % 3);
-        ptr = build_map_objects(&world, ptr, 5, 1 + rrand() % 3);
+        world.map_objs = NULL;
+        add_map_objects(&world, 1, 1 + rrand() % 27);
+        add_map_objects(&world, 2, 1 + rrand() % 9);
+        add_map_objects(&world, 3, 1 + rrand() % 3);
+        add_map_objects(&world, 4, 1 + rrand() % 3);
+        add_map_objects(&world, 5, 1 + rrand() % 3);
         set_cleanup_flag(CLEANUP_MAP_OBJECTS);
         world.turn = 1;
     }

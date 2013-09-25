@@ -98,27 +98,29 @@ extern void read_map_objects(struct World * world, FILE * file, char * line,
 
 
 
-extern struct MapObj ** build_map_objects(struct World * w,
-                                           struct MapObj ** mo_ptr_ptr,
-                                           uint8_t type, uint8_t n)
+extern void add_map_object(struct World * world, uint8_t type)
 {
-    char * f_name = "build_map_objects()";
-    uint8_t i = 0;
-    struct MapObjDef * mod = get_map_object_def(w, type);
-    while (i < n)
+    char * f_name = "add_map_object";
+    struct MapObjDef * mod = get_map_object_def(world, type);
+    struct MapObj * mo = try_malloc(sizeof(struct MapObj), world, f_name);
+    mo->id = world->map_obj_count;
+    world->map_obj_count++;
+    mo->type = mod->id;
+    mo->lifepoints = mod->lifepoints;
+    mo->pos = find_passable_pos(world->map);
+    mo->next = world->map_objs;
+    world->map_objs = mo;
+}
+
+
+
+extern void add_map_objects(struct World * world, uint8_t type, uint8_t n)
+{
+    uint8_t i;
+    for (i = 0; i < n; i++)
     {
-        struct MapObj * mo = try_malloc(sizeof(struct MapObj), w, f_name);
-        mo->id = w->map_obj_count;
-        w->map_obj_count++;
-        mo->type = mod->id;
-        mo->next = NULL;
-        mo->lifepoints = mod->lifepoints;
-        mo->pos = find_passable_pos(w->map);
-        i++;
-        * mo_ptr_ptr = mo;
-        mo_ptr_ptr = &mo->next;
+        add_map_object(world, type);
     }
-    return mo_ptr_ptr;
 }
 
 

@@ -57,10 +57,11 @@ extern void init_map_object_defs(struct World * world, char * filename);
 extern void free_map_object_defs(struct MapObjDef * mod_start);
 
 
-/* Build chain of "n" map objects of "tpye" to start at "mo_ptr_ptr". */
-extern struct MapObj ** build_map_objects(struct World * w,
-                                          struct MapObj ** mo_ptr_ptr,
-                                          uint8_t type, uint8_t n);
+
+/* Add new object(s) ("n": how many?) of "type" to map on random position(s). */
+extern void add_map_object(struct World * world, uint8_t type);
+extern void add_map_objects(struct World * world, uint8_t type, uint8_t n);
+
 
 
 /* Write map objects chain to "file". */
