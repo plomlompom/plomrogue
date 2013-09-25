@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     struct Player player;
     player.hitpoints = 5;
     world.player = &player;
-    init_map_object_defs(&world, "config/defs2");
+    init_map_object_defs(&world, "config/defs");
     set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
     world.map_obj_count = 1;
 
