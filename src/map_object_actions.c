@@ -3,203 +3,140 @@
 #include "map_object_actions.h"
 #include <string.h> /* for strlen() */
 #include "yx_uint16.h" /* for yx_uint16 struct, mv_yx_in_dir(), yx_uint16_cmp */
+#include "map_objects.h" /* for MapObj, MapObjDef structs, get_player() */
 #include "misc.h" /* for update_log(), turn_over() */
 #include "map.h" /* for Map struct */
 #include "main.h" /* for World struct */
-#include "map_objects.h" /* for structs MapObj, MapObjDef,
-                          * get_map_object_def()
-                          */
-#include "rrand.h" /* for rrand() */
 #include "command_db.h" /* for get_command_id() */
 
 
 
-/* Log monster (described by "dsc_monster1") bumping into "monster2". */
-static void monster_bumps_monster(struct World * world, char * dsc_monster1,
-                                  struct MapObj * monster2);
-
-/* Decrement player HPs due to attack of monster described by "dsc_monster",
- * kill player if his HP hit zero; log the whole action.
+/* One actor "wounds" another actor, decrementing his lifepoints and, if they
+ * reach zero in the process, killing it. Generates appropriate log message.
  */
-static void monster_hits_player(struct World * world, char * dsc_monster);
-
-/* Decrement HP of "monster" hit by player, kill it if its HP hit zero, create a
- * corpse and increment player's score by the amount of hitpoints the monster
- * started with; log the whole action.
- */
-static void player_hits_monster(struct World * world, struct MapObj * monster);
-
-/* Try moving the player in direction "d" towards coordinate "target"; log
- * success or failure of the whole action.
- */
-static void try_player_move(struct World * world,
-                            enum dir d, struct yx_uint16 target);
+static void actor_hits_actor(struct World * world, struct MapObj * hitter,
+                             struct MapObj * hitted)
 
 
 
-static void monster_bumps_monster(struct World * world, char * dsc_monster1,
-                                  struct MapObj * monster2)
+static void actor_hits_actor(struct World * world, struct MapObj * hitter,
+                             struct MapObj * hitted)
 {
-    char * bump_dsc = " bumps into ";
-    struct MapObjDef * mod = get_map_object_def(world, monster2->type);
-    char msg[strlen(dsc_monster1) + strlen(bump_dsc) + strlen(mod->name) + 3];
-    sprintf(msg, "\n%s%s%s.", dsc_monster1, bump_dsc, mod->name);
+    struct MapObjDef * mod_hitter = get_map_object_def(world, hitter->type);
+    struct MapObjDef * mod_hitted = get_map_object_def(world, hitted->type);
+    struct MapObj * player = get_player(world);
+    char * msg1 = "You";
+    char * msg2 = "wound";
+    char * msg3 = "you";
+    if      (player != hitter)
+    {
+        msg1 = mod_hitter->name;
+        msg2 = "wounds";
+    }
+    if (player != hitted)
+    {
+        msg3 = mod_hitted->name;
+    }
+    uint8_t len = 1 + strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
+    char msg[len];
+    sprintf(msg, "\n%s %s %s.", msg1, msg2, msg3);
     update_log(world, msg);
-}
-
-
-
-static void monster_hits_player(struct World * world, char * dsc_monster)
-{
-    char * hit_dsc = " hits you";
-    char msg[strlen(dsc_monster) + strlen(hit_dsc) + 3];
-    sprintf(msg, "\n%s%s.", dsc_monster, hit_dsc);
-    update_log(world, msg);
-    world->player->hitpoints--;
-
-    if (0 == world->player->hitpoints)
+    hitted->lifepoints--;
+    if (0 == hitted->lifepoints)
     {
-        update_log(world, "\nYou are dead.");
+        hitted->type = mod_hitted->corpse_id;
+        if (player == hitted)
+        {
+            update_log(world, " You die.");
+        }
+        else
+        {
+            update_log(world, " It dies.");
+            if (player == hitter)
+            {
+                world->score = world->score + mod_hitted->lifepoints;
+            }
+        }
     }
 }
 
 
 
-static void player_hits_monster(struct World * world, struct MapObj * monster)
+extern uint8_t move_actor(struct World * world, struct MapObj * actor,
+                          enum dir d)
 {
-    struct MapObjDef * mod = get_map_object_def(world, monster->type);
-    char * hit_dsc = "You hit the ";
-    char * monster_dsc = mod->name;
-    char hitmsg[strlen(hit_dsc) + strlen(monster_dsc) + 3];
-    sprintf(hitmsg, "\n%s%s.", hit_dsc, monster_dsc);
-    update_log(world, hitmsg);
-    monster->lifepoints--;
-    if (0 == monster->lifepoints)
+    struct yx_uint16 target = mv_yx_in_dir(d, actor->pos);
+    struct MapObj * other_actor;
+    for (other_actor = world->map_objs;
+         other_actor != 0;
+         other_actor = other_actor->next)
     {
-        hit_dsc = "You kill the ";
-        char kill_msg[strlen(hit_dsc) + strlen(monster_dsc) + 3];
-        sprintf(kill_msg, "\n%s%s.", hit_dsc, monster_dsc);
-        update_log(world, kill_msg);
-        struct MapObjDef * md = mod;
-        monster->type = md->corpse_id;
-        uint8_t score = md->lifepoints;
-        world->score = world->score + score;
-    }
-}
-
-
-
-static void try_player_move(struct World * world,
-                            enum dir d, struct yx_uint16 target)
-{
-    char * dsc_dir;
-    if      (NORTH == d)
-    {
-        dsc_dir = "north";
-    }
-    else if (EAST  == d)
-    {
-        dsc_dir = "east" ;
-    }
-    else if (SOUTH == d)
-    {
-        dsc_dir = "south";
-    }
-    else if (WEST  == d)
-    {
-        dsc_dir = "west" ;
-    }
-    char * dsc_move = "You fail to move ";
-    if (is_passable(world->map, target))
-    {
-        dsc_move = "You move ";
-        world->player->pos = target;
-    }
-    char msg[strlen(dsc_move) + strlen (dsc_dir) + 3];
-    sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
-    update_log(world, msg);
-}
-
-
-
-extern void move_monster(struct World * world, struct MapObj * monster)
-{
-    char d = rrand() % 5;
-    struct yx_uint16 t = mv_yx_in_dir(d, monster->pos);
-    struct MapObjDef * mod = get_map_object_def(world, monster->type);
-    char * dsc = mod->name;
-    if (yx_uint16_cmp(&t, &world->player->pos))
-    {
-        monster_hits_player(world, dsc);
-        return;
-    }
-    struct MapObj * other_monster;
-    for (other_monster = world->map_objs;
-         other_monster != 0;
-         other_monster = other_monster->next)
-    {
-        if (0 == other_monster->lifepoints || other_monster == monster)
+        if (0 == other_actor->lifepoints || other_actor == actor)
         {
             continue;
         }
-        if (yx_uint16_cmp(&t, &other_monster->pos))
+        if (yx_uint16_cmp(&target, &other_actor->pos))
         {
-            monster_bumps_monster(world, dsc, other_monster);
-            return;
+            actor_hits_actor(world, actor, other_actor);
+            return 2;
         }
     }
-    if (is_passable(world->map, t))
+    if (is_passable(world->map, target))
     {
-        monster->pos = t;
+        actor->pos = target;
+        return 0;
     }
+    return 1;
 }
 
 
 
 extern void move_player(struct World * world, enum dir d)
 {
+    char * dsc_dir;
     char * action_dsc_prototype = "player_";
-    uint8_t len = strlen(action_dsc_prototype);
-    char action_dsc[len + 2];
-    memcpy(action_dsc, action_dsc_prototype, len);
+    uint8_t len_action_dsc_prototype = strlen(action_dsc_prototype);
+    char action_dsc[len_action_dsc_prototype + 2];
+    memcpy(action_dsc, action_dsc_prototype, len_action_dsc_prototype);
     if      (NORTH == d)
     {
-        action_dsc[len] = 'u';
-    }
-    else if (SOUTH == d)
-    {
-        action_dsc[len] = 'd';
-    }
-    else if (WEST  == d)
-    {
-        action_dsc[len] = 'l';
+        dsc_dir = "north";
+        action_dsc[len_action_dsc_prototype] = 'u';
     }
     else if (EAST  == d)
     {
-        action_dsc[len] = 'r';
+        dsc_dir = "east" ;
+        action_dsc[len_action_dsc_prototype] = 'r';
     }
-    action_dsc[len + 1] = '\0';
-    uint8_t action_id = get_command_id(world, action_dsc);
-    struct yx_uint16 t = mv_yx_in_dir(d, world->player->pos);
-    struct MapObj * monster;
-    for (monster = world->map_objs;
-         monster != 0;
-         monster = monster->next)
+    else if (SOUTH == d)
     {
-        if (0 < monster->lifepoints && yx_uint16_cmp(&t, &monster->pos))
-        {
-            player_hits_monster(world, monster);
-            turn_over(world, action_id);
-            return;
-          }
+        dsc_dir = "south";
+        action_dsc[len_action_dsc_prototype] = 'd';
     }
-    try_player_move(world, d, t);
-    turn_over(world, action_id);
+    else if (WEST  == d)
+    {
+        dsc_dir = "west" ;
+        action_dsc[len_action_dsc_prototype] = 'l';
+    }
+    action_dsc[len_action_dsc_prototype + 1] = '\0';
+    uint8_t res = move_actor(world, get_player(world), d);
+    if (1 >= res)
+    {
+        char * dsc_move = "You fail to move ";
+        if   (0 == res)
+        {
+            dsc_move = "You move ";
+        }
+        char msg[strlen(dsc_move) + strlen (dsc_dir) + 3];
+        sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
+        update_log(world, msg);
+    }
+    turn_over(world, get_command_id(world, action_dsc));
 }
 
 
 
-extern void player_wait (struct World * world)
+extern void player_wait(struct World * world)
 {
     update_log(world, "\nYou wait.");
     turn_over(world, get_command_id(world, "wait"));
@@ -207,7 +144,7 @@ extern void player_wait (struct World * world)
 
 
 
-extern char is_passable (struct Map * map, struct yx_uint16 pos)
+extern char is_passable(struct Map * map, struct yx_uint16 pos)
 {
     char passable = 0;
     if (0 <= pos.x && pos.x < map->size.x && 0 <= pos.y && pos.y < map->size.y)

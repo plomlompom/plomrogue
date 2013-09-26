@@ -78,9 +78,10 @@ extern void read_map_objects(struct World * world, FILE * file, char * line,
     char * f_name = "read_map_objects()";
     struct MapObj ** mo_ptr_ptr = &world->map_objs;
     char * delim = " ";
+    struct MapObj * mo;
     while (try_fgets(line, linemax + 1, file, world, f_name))
     {
-        struct MapObj * mo = malloc(sizeof(struct MapObj));
+        mo = malloc(sizeof(struct MapObj));
         mo->next = NULL;
         mo->id = atoi(strtok(line, delim));
         if (mo->id > world->map_obj_count)
@@ -94,6 +95,7 @@ extern void read_map_objects(struct World * world, FILE * file, char * line,
         * mo_ptr_ptr = mo;
         mo_ptr_ptr = &mo->next;
     }
+    world->last_map_obj = mo;
 }
 
 
@@ -108,8 +110,16 @@ extern void add_map_object(struct World * world, uint8_t type)
     mo->type = mod->id;
     mo->lifepoints = mod->lifepoints;
     mo->pos = find_passable_pos(world->map);
-    mo->next = world->map_objs;
-    world->map_objs = mo;
+    mo->next = NULL;
+    if (NULL == world->last_map_obj)
+    {
+        world->map_objs = mo;
+    }
+    else
+    {
+        world->last_map_obj->next = mo;
+    }
+    world->last_map_obj = mo;
 }
 
 
@@ -133,6 +143,25 @@ extern void free_map_objects(struct MapObj * mo_start)
     }
     free_map_objects(mo_start->next);
     free(mo_start);
+}
+
+
+
+extern struct MapObj * get_player(struct World * world)
+{
+    struct MapObj * ptr = world->map_objs;
+    while (1)
+    {
+        if (NULL == ptr)
+        {
+            return ptr;
+        }
+        if (0 == ptr->id)
+        {
+            return ptr;
+        }
+        ptr = ptr->next;
+    }
 }
 
 

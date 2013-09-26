@@ -9,10 +9,10 @@
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
                         * try_fopen(), try_fclose()
                         */
-#include "map_objects.h" /* for struct Monster, read_map_objects(),
+#include "map_objects.h" /* for struct MapObj, read_map_objects(),
                           * write_map_objects()
                           */
-#include "map_object_actions.h" /* for is_passable(), move_monster() */
+#include "map_object_actions.h" /* for is_passable(), move_actor() */
 #include "map.h" /* for Map struct */
 #include "main.h" /* for World struct */
 #include "yx_uint16.h" /* for yx_uint16 struct */
@@ -222,9 +222,9 @@ extern void turn_over(struct World * world, char action)
          monster != 0;
          monster = monster->next)
     {
-        if (0 < monster->lifepoints)
+        if (0 < monster->lifepoints && 0 != monster->id)
         {
-            move_monster(world, monster);
+            move_actor(world, monster, rrand() % 5);
         }
     }
 }
@@ -246,12 +246,6 @@ extern void save_game(struct World * world)
     try_fwrite(line, strlen(line), 1, file, world, f_name);
     sprintf(line, "%d\n", world->score);
     try_fwrite(line, strlen(line), 1, file, world, f_name);
-    sprintf(line, "%d\n", world->player->hitpoints);
-    try_fwrite(line, strlen(line), 1, file, world, f_name);
-    sprintf(line, "%d\n", world->player->pos.y);
-    try_fwrite(line, strlen(line), 1, file, world, f_name);
-    sprintf(line, "%d\n", world->player->pos.x);
-    try_fwrite(line, strlen(line), 1, file, world, f_name);
     write_map_objects(world, file);
 
     try_fclose_unlink_rename(file, savefile_tmp, savefile, world, f_name);
@@ -272,12 +266,6 @@ extern void load_game(struct World * world)
     world->turn = atoi(line);
     try_fgets(line, linemax + 1, file, world, f_name);
     world->score = atoi(line);
-    try_fgets(line, linemax + 1, file, world, f_name);
-    world->player->hitpoints = atoi(line);
-    try_fgets(line, linemax + 1, file, world, f_name);
-    world->player->pos.y = atoi(line);
-    try_fgets(line, linemax + 1, file, world, f_name);
-    world->player->pos.x = atoi(line);
     read_map_objects(world, file, line, linemax);
     try_fclose(file, world, f_name);
 }

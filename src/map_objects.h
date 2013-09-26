@@ -16,15 +16,6 @@ struct World;
 
 
 
-/* Player is non-standard: single and of a hard-coded type. */
-struct Player
-{
-    struct yx_uint16 pos;
-    uint8_t hitpoints;
-};
-
-
-
 struct MapObj
 {
     struct MapObj * next;        /* pointer to next one in map object chain */
@@ -77,6 +68,11 @@ extern void read_map_objects(struct World * world, FILE * file,
 
 /* Free map objects in map object chain starting at "mo_start. */
 extern void free_map_objects(struct MapObj * mo_start);
+
+
+
+/* Get pointer to the MapObj struct that represents the player. */
+extern struct MapObj * get_player(struct World * world);
 
 
 

@@ -14,10 +14,10 @@
                         * write_uint32_bigendian(), try_fopen(), try_fclose(),
                         * try_fclose_unlink_rename()
                         */
-#include "map_objects.h" /* for structs MapObj Player, init_map_object_defs(),
-                          * build_map_objects()
+#include "map_objects.h" /* for structs MapObj, init_map_object_defs(),
+                          * build_map_objects(), get_player()
                           */
-#include "map.h" /* for struct Map, init_map() */
+#include "map.h" /* for struct Map, init_map(), map_center_object() */
 #include "misc.h" /* for update_log(), find_passable_pos(), save_game(),
                    * try_calloc(), check_tempfile(), check_xor_files(),
                    * load_interface_conf(), load_game()
@@ -78,17 +78,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* Initialize log, player, monster/item definitions and monsters/items. */
+    /* Initialize log and map object definitions. */
     world.score = 0;
     world.log = try_calloc(1, sizeof(char), &world, f_name);
     set_cleanup_flag(CLEANUP_LOG);
     update_log(&world, " ");
-    struct Player player;
-    player.hitpoints = 5;
-    world.player = &player;
     init_map_object_defs(&world, "config/defs");
     set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
-    world.map_obj_count = 1;
+    world.map_obj_count = 0;
 
     /* For interactive mode, try to load world state from savefile. */
     char * err_r = "Trouble loading game (in main()) / "
@@ -137,8 +134,9 @@ int main(int argc, char *argv[])
     set_cleanup_flag(CLEANUP_MAP);
     if (0 == world.turn)
     {
-        player.pos = find_passable_pos(world.map);
         world.map_objs = NULL;
+        world.last_map_obj = NULL;
+        add_map_objects(&world, 0, 1);
         add_map_objects(&world, 1, 1 + rrand() % 27);
         add_map_objects(&world, 2, 1 + rrand() % 9);
         add_map_objects(&world, 3, 1 + rrand() % 3);
@@ -163,8 +161,9 @@ int main(int argc, char *argv[])
     err_winmem = "Trouble with draw_all_wins() in main().";
 
     /* Focus map on player. */
+    struct MapObj * player = get_player(&world);
     struct Win * win_map = get_win_by_id(&world, 'm');
-    map_center_player(&map, &player, win_map->frame.size);
+    map_center_object(&map, player, win_map->frame.size);
 
     /* Replay mode. */
     int key;
@@ -231,7 +230,7 @@ int main(int argc, char *argv[])
 
             if  (   (1 == wc->view && wingeom_control(key, &world))
                  || (2 == wc->view && winkeyb_control(key, &world))
-                 || (0 != player.hitpoints && player_control(key, &world)))
+                 || (0 != player->lifepoints && player_control(key, &world)))
             {
                 continue;
             }

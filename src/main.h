@@ -34,10 +34,10 @@ struct World
     struct WinMeta * wmeta;           /* Pointer to window manager's WinMeta. */
     struct WinConf * winconfs;        /* Pointer to windows' configurations. */
     char * winconf_ids;               /* Pointer to string of Winconfs' ids. */
-    struct Player * player;           /* Pointer to the player data. */
     uint8_t map_obj_count;            /* Counts map objects generated so far. */
     struct MapObjDef * map_obj_defs;  /* Map object type definitions chain. */
-    struct MapObj * map_objs;         /* Map objects chain. */
+    struct MapObj * map_objs;         /* Pointer to map objects chain start. */
+    struct MapObj * last_map_obj;     /* Pointer to map objects chain end. */
 };
 
 

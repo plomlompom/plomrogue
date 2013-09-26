@@ -8,7 +8,7 @@
 #include "keybindings.h" /* for get_keycode_to_action(), mod_selected_keyb(),
                           * move_keyb_mod_selection()
                           */
-#include "map.h" /* for map_scroll(), map_center_player(), dir enum */
+#include "map.h" /* for map_scroll(), map_center_object() */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
 #include "wincontrol.h" /* for scroll_pad(), toggle_window(),
@@ -20,6 +20,8 @@
 #include "misc.h" /* for load_interface_conf(), unload_interface_conf(),
                    * save_interface_conf()
                    */
+#include "yx_uint16.h" /* for dir enum */
+#include "map_objects.h" /* for get_player() */
 
 
 
@@ -302,7 +304,7 @@ extern uint8_t meta_control(int key, struct World * world)
     }
     else if (key == get_available_keycode_to_action(world, "map_c"))
     {
-        map_center_player(world->map, world->player, win_map->frame.size);
+        map_center_object(world->map, get_player(world), win_map->frame.size);
     }
     else if (key == get_available_keycode_to_action(world, "reload_conf"))
     {

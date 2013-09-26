@@ -15,22 +15,21 @@ struct MapObj;
 
 
 
-/* Try to move "monster" in random direction. On contact with other monster,
- * only bump. On contact with player, fight / reduce player's hitpoints,
- * and thereby potentially trigger the player's death. Update the log for any
- * contact action.
+/* Try to move "actor" one step in direction "d" and handle the consequences:
+ * either the move succeeds, or another actor is encountered and hit (which leads
+ * to its lifepoint decreasing by one and potentially its death), or the target
+ * square is not passable and the move fails.
  */
-extern void move_monster(struct World * world, struct MapObj * monster);
+extern uint8_t move_actor(struct World * world, struct MapObj * actor,
+                          enum dir d);
 
 
 
-/* Try to move player in direction "d". On contact with monster, fight / reduce
- * monster's hitpoints, and thereby potentially trigger the monster's death,
- * create a corpse and increment the player's score by the amount of hitpoints
- * the monster started with. Update the log on whatever the player did and turn
- * control over to the enemy.
+/* Wrapper for using move_actor() on the MapObj representing the player; updates
+ * the game log with appropriate messages on the move attempt and its results;
+ * turns over to turn_over() when finished.
  */
-extern void move_player (struct World * world, enum dir d);
+extern void move_player(struct World * world, enum dir d);
 
 
 
@@ -44,7 +43,7 @@ extern void player_wait(struct World * world);
 /* Check if coordinate pos on (or beyond) map is accessible to map object
  * movement.
  */
-extern char is_passable (struct Map * map, struct yx_uint16 pos);
+extern char is_passable(struct Map * map, struct yx_uint16 pos);
 
 
 

@@ -77,9 +77,9 @@ void map_scroll (struct Map * map, enum dir d, struct yx_uint16 win_size)
 
 
 
-void map_center_player(struct Map * map, struct Player * player,
+void map_center_object(struct Map * map, struct MapObj * object,
                        struct yx_uint16 win_size)
 {
-    map->offset.y = center_offset (player->pos.y, map->size.y, win_size.y);
-    map->offset.x = center_offset (player->pos.x, map->size.x, win_size.x);
+    map->offset.y = center_offset(object->pos.y, map->size.y, win_size.y);
+    map->offset.x = center_offset(object->pos.x, map->size.x, win_size.x);
 }

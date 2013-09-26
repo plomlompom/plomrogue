@@ -8,7 +8,9 @@
 #include "windows.h"     /* for structs Win, Frame, for draw_scroll_hint() */
 #include "misc.h"        /* for center_offset(), try_malloc() */
 #include "keybindings.h" /* for struct KeyBinding, for get_name_to_keycode() */
-#include "map_objects.h" /* for structs MapObj, Player, get_map_object_def() */
+#include "map_objects.h" /* for structs MapObj, get_map_object_def(),
+                          * get_player()
+                          */
 #include "map.h"         /* for Map struct */
 #include "main.h"        /* for World struct */
 #include "rexit.h"       /* for err_exit() */
@@ -192,17 +194,23 @@ static void draw_map_objects(struct World * world, struct MapObj * start,
     struct MapObj * o;
     struct MapObjDef * d;
     char c;
-    for (o = start; o != 0; o = o->next)
+    uint8_t i;
+    for (i = 0; i < 2; i++)
     {
-        if (   o->pos.y >= map->offset.y
-            && o->pos.y <  map->offset.y + win->frame.size.y
-            && o->pos.x >= map->offset.x
-            && o->pos.x <  map->offset.x + win->frame.size.x)
+        for (o = start; o != 0; o = o->next)
         {
-            d = get_map_object_def(world, o->type);
-            c = d->char_on_map;
-            mvwaddch(win->frame.curses_win,
-                     o->pos.y - map->offset.y, o->pos.x - map->offset.x, c);
+            if (   (   (0 == i && 0 == o->lifepoints)      /* Draw in-animate */
+                    || (1 == i && 0 < o->lifepoints))      /* objects first.  */
+                && o->pos.y >= map->offset.y
+                && o->pos.y <  map->offset.y + win->frame.size.y
+                && o->pos.x >= map->offset.x
+                && o->pos.x <  map->offset.x + win->frame.size.x)
+            {
+                d = get_map_object_def(world, o->type);
+                c = d->char_on_map;
+                mvwaddch(win->frame.curses_win,
+                         o->pos.y - map->offset.y, o->pos.x - map->offset.x, c);
+            }
         }
     }
 }
@@ -324,7 +332,6 @@ extern void draw_win_map(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
     struct Map * map = world->map;
-    struct Player * player = world->player;
     char * cells = map->cells;
     uint16_t width_map_av  = map->size.x  - map->offset.x;
     uint16_t height_map_av = map->size.y - map->offset.y;
@@ -342,15 +349,6 @@ extern void draw_win_map(struct Win * win)
         }
     }
     draw_map_objects(world, world->map_objs, map, win);
-    if (   player->pos.y >= map->offset.y
-        && player->pos.y <  map->offset.y + win->frame.size.y
-        && player->pos.x >= map->offset.x
-        && player->pos.x <  map->offset.x + win->frame.size.x)
-    {
-        mvwaddch(win->frame.curses_win,
-                 player->pos.y - map->offset.y, player->pos.x - map->offset.x,
-                 '@');
-    }
 }
 
 
@@ -364,9 +362,10 @@ extern void draw_win_info(struct Win * win)
     uint16_t maxl = strlen(dsc_turn) + strlen(dsc_hitpoints) + strlen(dsc_score)
                     + 10 + 5 + 10;       /* max strlens of numbers to be used */
     char text[maxl + 1];
+    struct MapObj * player = get_player(world);
     sprintf(text, "%s%d%s%d%s%d",
             dsc_turn, world->turn,
-            dsc_hitpoints, world->player->hitpoints,
+            dsc_hitpoints, player->lifepoints,
             dsc_score, world->score);
     draw_with_linebreaks(win, text, 0);
 }
