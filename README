@@ -10,7 +10,7 @@ randomly and will only accidentally hit you. You have 5 hitpoints to lose before
 death; they have either 1, 3 or 9. Your score grows by killing enemies, to the
 amount of hitpoints each killed enemy started with.
 
-The map get generated randomly, too.
+The map gets generated randomly, too.
 
 There is only one save file (named "savefile"), and it gets overwritten each new
 turn. To start over with a new world, delete it.
