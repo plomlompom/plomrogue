@@ -15,7 +15,7 @@
  * reach zero in the process, killing it. Generates appropriate log message.
  */
 static void actor_hits_actor(struct World * world, struct MapObj * hitter,
-                             struct MapObj * hitted)
+                             struct MapObj * hitted);
 
 
 

@@ -11,6 +11,7 @@
 #include "misc.h" /* for try_malloc(), try_calloc(), find_passable_pos() */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for err_exit() */
+#include "yx_uint16.h" /* for yx_uint16 struct, yx_uint16_cmp() */
 
 
 
@@ -109,7 +110,27 @@ extern void add_map_object(struct World * world, uint8_t type)
     world->map_obj_count++;
     mo->type = mod->id;
     mo->lifepoints = mod->lifepoints;
-    mo->pos = find_passable_pos(world->map);
+    while (1)
+    {
+        struct yx_uint16 pos = find_passable_pos(world->map);
+        struct MapObj * mo_ptr;
+        uint8_t clear = 1;
+        for (mo_ptr = world->map_objs;
+             mo_ptr != NULL;
+             mo_ptr = mo_ptr->next)
+        {
+            if (yx_uint16_cmp(&pos, &mo_ptr->pos) && 0 != mo_ptr->lifepoints)
+            {
+                clear = 0;
+                break;
+            }
+        }
+        if (1 == clear)
+        {
+            mo->pos = pos;
+            break;
+        }
+    }
     mo->next = NULL;
     if (NULL == world->last_map_obj)
     {

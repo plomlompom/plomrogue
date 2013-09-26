@@ -49,7 +49,10 @@ extern void free_map_object_defs(struct MapObjDef * mod_start);
 
 
 
-/* Add new object(s) ("n": how many?) of "type" to map on random position(s). */
+/* Add new object(s) ("n": how many?) of "type" to map on random position(s).
+ * New animate objects are never placed in the same square with other animated
+ * ones.
+ */
 extern void add_map_object(struct World * world, uint8_t type);
 extern void add_map_objects(struct World * world, uint8_t type, uint8_t n);
 
