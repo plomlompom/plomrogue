@@ -96,7 +96,6 @@ extern void read_map_objects(struct World * world, FILE * file, char * line,
         * mo_ptr_ptr = mo;
         mo_ptr_ptr = &mo->next;
     }
-    world->last_map_obj = mo;
 }
 
 
@@ -132,15 +131,14 @@ extern void add_map_object(struct World * world, uint8_t type)
         }
     }
     mo->next = NULL;
-    if (NULL == world->last_map_obj)
+    struct MapObj ** last_ptr_ptr = &world->map_objs;
+    struct MapObj * mo_ptr;
+    while (NULL != * last_ptr_ptr)
     {
-        world->map_objs = mo;
+        mo_ptr = * last_ptr_ptr;
+        last_ptr_ptr = & mo_ptr->next;
     }
-    else
-    {
-        world->last_map_obj->next = mo;
-    }
-    world->last_map_obj = mo;
+    * last_ptr_ptr = mo;
 }
 
 

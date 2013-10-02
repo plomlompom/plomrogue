@@ -135,7 +135,6 @@ int main(int argc, char *argv[])
     if (0 == world.turn)
     {
         world.map_objs = NULL;
-        world.last_map_obj = NULL;
         add_map_objects(&world, 0, 1);
         add_map_objects(&world, 1, 1 + rrand() % 27);
         add_map_objects(&world, 2, 1 + rrand() % 9);

@@ -37,7 +37,6 @@ struct World
     uint8_t map_obj_count;            /* Counts map objects generated so far. */
     struct MapObjDef * map_obj_defs;  /* Map object type definitions chain. */
     struct MapObj * map_objs;         /* Pointer to map objects chain start. */
-    struct MapObj * last_map_obj;     /* Pointer to map objects chain end. */
 };
 
 
