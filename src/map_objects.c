@@ -15,6 +15,60 @@
 
 
 
+/* Write representation of "mo" and all of the map objects it owns to "file". */
+static void write_map_object(struct World * w, FILE * file, struct MapObj * mo);
+
+
+
+/* Return pointer to map object of "id" in chain starting at "ptr". */
+static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id);
+
+
+
+static void write_map_object(struct World * w, FILE * file, struct MapObj * mo)
+{
+    char * f_name = "write_map_object()";
+    struct MapObj * mo_ptr = mo->owns;
+    uint8_t i = 0;
+    for (; NULL != mo_ptr; mo_ptr = mo_ptr->next, i++);
+    uint8_t size = 3+1 + 3+1 + 3+1 + 5+1 + 5 + ((1+3)*i) + 1 + 1;
+    char line[size];
+    sprintf(line, "%d %d %d %d %d",
+                  mo->id, mo->type, mo->lifepoints, mo->pos.y, mo->pos.x);
+    for (mo_ptr = mo->owns; NULL != mo_ptr; mo_ptr = mo_ptr->next)
+    {
+        sprintf(line + strlen(line), " %d", mo_ptr->id);
+    }
+    line[strlen(line) + 1] = '\0';
+    line[strlen(line)] = '\n';
+    try_fwrite(line, strlen(line), 1, file, w, f_name);
+    for (mo_ptr = mo->owns; NULL != mo_ptr; mo_ptr = mo_ptr->next)
+    {
+        write_map_object(w, file, mo_ptr);
+    }
+}
+
+
+
+static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id)
+{
+    while (1)
+    {
+        if (NULL == ptr || id == ptr->id)
+        {
+            return ptr;
+        }
+        struct MapObj * owned_object = get_map_object(ptr->owns, id);
+        if (NULL != owned_object)
+        {
+            return ptr;
+        }
+        ptr = ptr->next;
+    }
+}
+
+
+
 extern void init_map_object_defs(struct World * world, char * filename)
 {
     char * f_name = "init_map_object_defs()";
@@ -58,15 +112,10 @@ extern void free_map_object_defs(struct MapObjDef * mod_start)
 
 extern void write_map_objects(struct World * world, FILE * file)
 {
-    char * f_name = "write_map_objects()";
     struct MapObj * mo = world->map_objs;
-    uint8_t size = 3 + 1 + 3 + 1 + 3 + 1 + 5 + 1 + 5 + 1;
-    char line[size];
     while (NULL != mo)
     {
-        sprintf(line, "%d %d %d %d %d\n",
-                mo->id, mo->type, mo->lifepoints, mo->pos.y, mo->pos.x);
-        try_fwrite(line, strlen(line), 1, file, world, f_name);
+        write_map_object(world, file, mo);
         mo = mo->next;
     }
 }
@@ -80,21 +129,46 @@ extern void read_map_objects(struct World * world, FILE * file, char * line,
     struct MapObj ** mo_ptr_ptr = &world->map_objs;
     char * delim = " ";
     struct MapObj * mo;
+    fpos_t pos;
+    exit_err(-1 == fgetpos(file, &pos), world, f_name);
     while (try_fgets(line, linemax + 1, file, world, f_name))
     {
         mo = malloc(sizeof(struct MapObj));
-        mo->next = NULL;
-        mo->id = atoi(strtok(line, delim));
+        mo->next       = NULL;
+        mo->id         = atoi(strtok(line, delim));
+        mo->type       = atoi(strtok(NULL, delim));
+        mo->lifepoints = atoi(strtok(NULL, delim));
+        mo->pos.y      = atoi(strtok(NULL, delim));
+        mo->pos.x      = atoi(strtok(NULL, delim));
+        mo->owns       = NULL;
         if (mo->id > world->map_obj_count)
         {
             world->map_obj_count = mo->id;
         }
-        mo->type = atoi(strtok(NULL, delim));
-        mo->lifepoints = atoi(strtok(NULL, delim));
-        mo->pos.y = atoi(strtok(NULL, delim));
-        mo->pos.x = atoi(strtok(NULL, delim));
         * mo_ptr_ptr = mo;
         mo_ptr_ptr = &mo->next;
+    }
+    exit_err(-1 == fsetpos(file, &pos), world, f_name);
+    while (try_fgets(line, linemax + 1, file, world, f_name))
+    {
+        uint8_t id = atoi(strtok(line, delim));
+        strtok(NULL, delim);
+        strtok(NULL, delim);
+        strtok(NULL, delim);
+        strtok(NULL, delim);
+        char * owned = strtok(NULL, "\n");
+        if (NULL != owned)
+        {
+            mo = get_map_object(world->map_objs, id);
+            char * owned_id = "";
+            owned_id = strtok(owned, delim);
+            while (NULL != owned_id)
+            {
+                own_map_object(&mo->owns, &world->map_objs,
+                               (uint8_t) atoi(owned_id));
+                owned_id = strtok(NULL, delim);
+            }
+        }
     }
 }
 
@@ -102,7 +176,7 @@ extern void read_map_objects(struct World * world, FILE * file, char * line,
 
 extern void add_map_object(struct World * world, uint8_t type)
 {
-    char * f_name = "add_map_object";
+    char * f_name = "add_map_object()";
     struct MapObjDef * mod = get_map_object_def(world, type);
     struct MapObj * mo = try_malloc(sizeof(struct MapObj), world, f_name);
     mo->id = world->map_obj_count;
@@ -130,6 +204,7 @@ extern void add_map_object(struct World * world, uint8_t type)
             break;
         }
     }
+    mo->owns = NULL;
     mo->next = NULL;
     struct MapObj ** last_ptr_ptr = &world->map_objs;
     struct MapObj * mo_ptr;
@@ -160,27 +235,52 @@ extern void free_map_objects(struct MapObj * mo_start)
     {
         return;
     }
+    free_map_objects(mo_start->owns);
     free_map_objects(mo_start->next);
     free(mo_start);
 }
 
 
 
+extern void own_map_object(struct MapObj ** target, struct MapObj ** source,
+                           uint8_t id)
+{
+    struct MapObj * mo;
+    if (id == (*source)->id)
+    {
+        mo = * source;
+        * source = mo->next;
+    }
+    else
+    {
+        struct MapObj * penult = * source;
+        while (1)
+        {
+            if (id == penult->next->id)
+            {
+                break;
+            }
+            penult = penult->next;
+        }
+        mo = penult->next;
+        penult->next = mo->next;
+    }
+    struct MapObj ** last_ptr_ptr = target;
+    struct MapObj * mo_ptr;
+    while (NULL != * last_ptr_ptr)
+    {
+        mo_ptr = * last_ptr_ptr;
+        last_ptr_ptr = & mo_ptr->next;
+    }
+    * last_ptr_ptr = mo;
+    mo->next = NULL;
+}
+
+
+
 extern struct MapObj * get_player(struct World * world)
 {
-    struct MapObj * ptr = world->map_objs;
-    while (1)
-    {
-        if (NULL == ptr)
-        {
-            return ptr;
-        }
-        if (0 == ptr->id)
-        {
-            return ptr;
-        }
-        ptr = ptr->next;
-    }
+    return get_map_object(world->map_objs, 0);
 }
 
 
@@ -193,4 +293,16 @@ extern struct MapObjDef * get_map_object_def(struct World * w, uint8_t id)
         mod = mod->next;
     }
     return mod;
+}
+
+
+
+extern void set_object_position(struct MapObj * mo, struct yx_uint16 pos)
+{
+    mo->pos = pos;
+    struct MapObj * owned = mo->owns;
+    for (; owned != NULL; owned = owned->next)
+    {
+        set_object_position(owned, pos);
+    }
 }

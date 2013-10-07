@@ -164,6 +164,9 @@ int main(int argc, char *argv[])
     struct Win * win_map = get_win_by_id(&world, 'm');
     map_center_object(&map, player, win_map->frame.size);
 
+    /* Initialize player's inventory selection index to start position. */
+    world.inventory_select = 0;
+
     /* Replay mode. */
     int key;
     struct WinConf * wc;

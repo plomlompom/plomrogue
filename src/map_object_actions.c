@@ -2,8 +2,12 @@
 
 #include "map_object_actions.h"
 #include <string.h> /* for strlen() */
-#include "yx_uint16.h" /* for yx_uint16 struct, mv_yx_in_dir(), yx_uint16_cmp */
-#include "map_objects.h" /* for MapObj, MapObjDef structs, get_player() */
+#include "yx_uint16.h" /* for yx_uint16 struct, mv_yx_in_dir(),
+                        * yx_uint16_cmp()
+                        */
+#include "map_objects.h" /* for MapObj, MapObjDef structs, get_player(),
+                          * set_object_position(), own_map_object()
+                          */
 #include "misc.h" /* for update_log(), turn_over() */
 #include "map.h" /* for Map struct */
 #include "main.h" /* for World struct */
@@ -83,7 +87,7 @@ extern uint8_t move_actor(struct World * world, struct MapObj * actor,
     }
     if (is_passable(world->map, target))
     {
-        actor->pos = target;
+        set_object_position(actor, target);
         return 0;
     }
     return 1;
@@ -155,4 +159,54 @@ extern char is_passable(struct Map * map, struct yx_uint16 pos)
         }
     }
     return passable;
+}
+
+
+
+extern void player_drop(struct World * world)
+{
+    struct MapObj * player = get_player(world);
+    if (NULL == player->owns)
+    {
+        update_log(world, "\nYou try to drop an object, but you own none.");
+    }
+    else
+    {
+        struct MapObj * owned = player->owns;
+        uint8_t i = 0;
+        for (; i != world->inventory_select; i++, owned = owned->next);
+        if (0 < world->inventory_select)
+        {
+            world->inventory_select--;
+        }
+        own_map_object(&world->map_objs, &player->owns, owned->id);
+        update_log(world, "\nYou drop an object.");
+    }
+    turn_over(world, get_command_id(world, "drop"));
+}
+
+
+
+extern void player_pick(struct World * world)
+{
+    struct MapObj * player = get_player(world);
+    struct MapObj * picked;
+    for (picked = world->map_objs; NULL != picked; picked = picked->next)
+    {
+        if (picked != player && yx_uint16_cmp(&picked->pos, &player->pos))
+        {
+            break;
+        }
+    }
+    if (NULL == picked)
+    {
+        update_log(world, "\nYou try to pick up an object, but there is none.");
+    }
+    else
+    {
+        own_map_object(&player->owns, &world->map_objs, picked->id);
+        set_object_position(picked, player->pos);
+        update_log(world, "\nYou pick up an object.");
+    }
+    turn_over(world, get_command_id(world, "pick"));
 }

@@ -47,4 +47,12 @@ extern char is_passable(struct Map * map, struct yx_uint16 pos);
 
 
 
+/* Make player drop to ground map ojbect indexed by world.inventory_select. */
+extern void player_drop(struct World * world);
+
+/* Make player pick up map object from ground. */
+extern void player_pick(struct World * world);
+
+
+
 #endif

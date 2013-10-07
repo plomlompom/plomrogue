@@ -9,7 +9,7 @@
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
                         * try_fopen(), try_fclose()
                         */
-#include "map_objects.h" /* for struct MapObj, read_map_objects(),
+#include "map_objects.h" /* for struct MapObj, get_player(), read_map_objects(),
                           * write_map_objects()
                           */
 #include "map_object_actions.h" /* for is_passable(), move_actor() */
@@ -234,11 +234,9 @@ extern void turn_over(struct World * world, char action)
 extern void save_game(struct World * world)
 {
     char * f_name = "save_game()";
-
     char * savefile_tmp = "savefile_tmp";
     char * savefile     = "savefile";
     FILE * file = try_fopen(savefile_tmp, "w", world, f_name);
-
     char line[12];
     sprintf(line, "%d\n", world->seed);
     try_fwrite(line, strlen(line), 1, file, world, f_name);
@@ -247,7 +245,6 @@ extern void save_game(struct World * world)
     sprintf(line, "%d\n", world->score);
     try_fwrite(line, strlen(line), 1, file, world, f_name);
     write_map_objects(world, file);
-
     try_fclose_unlink_rename(file, savefile_tmp, savefile, world, f_name);
 }
 
@@ -281,4 +278,30 @@ extern struct yx_uint16 find_passable_pos(struct Map * map)
         pos.x = rrand() % map->size.x;
     }
     return pos;
+}
+
+
+
+extern void nav_inventory(struct World * world, char dir)
+{
+    if ('u' == dir)
+    {
+        if (world->inventory_select > 0)
+        {
+            world->inventory_select--;
+        }
+        return;
+    }
+    struct MapObj * player = get_player(world);
+    struct MapObj * owned = player->owns;
+    if (NULL == owned)
+    {
+        return;
+    }
+    uint8_t n_owned = 0;
+    for (; NULL != owned->next; owned = owned->next, n_owned++);
+    if (world->inventory_select < n_owned)
+    {
+        world->inventory_select++;
+    }
 }

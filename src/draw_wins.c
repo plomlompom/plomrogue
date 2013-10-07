@@ -43,6 +43,16 @@ static void draw_map_objects(struct World * world, struct MapObj * start,
 static char * get_kb_line_and_iterate(struct World * world,
                                       struct KeyBinding ** kb_pp);
 
+/* Draw horizontal scroll hints in "frame" at the end line or a start line of y
+ * value "start" if the current "y" fits one of these lines and the number of
+ * lines "n_owned" and the "offset" make it appropriate.
+ *
+ * Return 1 if a scroll hint was drawn, else 0.
+ */
+static uint8_t scroll_hint_helper(struct World * world, uint16_t start,
+                                  uint16_t y, uint16_t offset, uint16_t n_owned,
+                                  struct Frame * frame, char * f_name);
+
 /* Draw from line "start" on config view for keybindings defined at "kb". */
 static void draw_kb_view(struct World * world, struct Win * win,
                          char * f_name, struct KeyBiData * kb, uint8_t start);
@@ -234,32 +244,50 @@ static char * get_kb_line_and_iterate(struct World * world,
 
 
 
+static uint8_t scroll_hint_helper(struct World * world, uint16_t start,
+                                  uint16_t y, uint16_t offset, uint16_t n_owned,
+                                  struct Frame * frame, char * f_name)
+{
+    uint8_t ret = 0;
+    char * err_hint = trouble_msg(world, f_name, "draw_scroll_hint()");
+    if (start == y && offset > 0)
+    {
+        uint8_t test = draw_scroll_hint(frame, y, offset + 1, '^');
+        exit_err(test, world, err_hint);
+        ret = 1;
+    }
+    else if (   frame->size.y == y + 1
+             && n_owned > frame->size.y + offset - 1 - start)
+    {
+        uint8_t pos = n_owned - (offset + frame->size.y) + 2 + start;
+        uint8_t test = draw_scroll_hint(frame, y, pos, 'v');
+        exit_err(test, world, err_hint);
+        ret = 1;
+    }
+    free(err_hint);
+    return ret;
+}
+
+
+
 static void draw_kb_view(struct World * world, struct Win * win,
                          char * f_name, struct KeyBiData * kb, uint8_t start)
 {
     if (0 == kb->kbs)
     {
         draw_line(win, start, "(none)", 0, 0);
+        return;
     }
-    char * err_hint = trouble_msg(world, f_name, "draw_scroll_hint()");
     uint16_t kb_max = get_n_of_keybs(kb->kbs) - 1;
-    uint16_t y, offset;
+    uint16_t offset;
     offset = center_offset(kb->select, kb_max, win->frame.size.y - 1 - start);
-    uint16_t y_border = win->frame.size.y + offset - 1 - start;
     struct KeyBinding * kb_p = get_keyb_of_n(kb->kbs, offset + (offset > 0));
+    uint16_t y;
     for (y = start; 0 != kb_p && y < win->frame.size.y; y++)
     {
-        if (start == y && offset > 0)
+        if (scroll_hint_helper(world, start, y, offset, kb_max, &win->frame,
+                               f_name))
         {
-            uint8_t test = draw_scroll_hint(&win->frame, y, offset + 1, '^');
-            exit_err(test, world, err_hint);
-            continue;
-        }
-        else if (win->frame.size.y == y + 1 && kb_max > y_border)
-        {
-            uint16_t pos = kb_max - (offset + win->frame.size.y) + 2 + start;
-            uint8_t test = draw_scroll_hint(&win->frame, y, pos, 'v');
-            exit_err(test, world, err_hint);
             continue;
         }
         attr_t attri = 0;
@@ -273,9 +301,9 @@ static void draw_kb_view(struct World * world, struct Win * win,
         }
         char * kb_line = get_kb_line_and_iterate(world, &kb_p);
         draw_line(win, y, kb_line, attri, 1);
+
         free(kb_line);
     }
-    free(err_hint);
 }
 
 
@@ -374,7 +402,39 @@ extern void draw_win_info(struct Win * win)
 
 extern void draw_win_inventory(struct Win * win)
 {
-    mvwaddstr(win->frame.curses_win, 0, 0, "(empty)");
+    struct World * world = (struct World *) win->data;
+    struct MapObj * player = get_player(world);
+    if (NULL == player->owns)
+    {
+        mvwaddstr(win->frame.curses_win, 0, 0, "(empty)");
+        return;
+    }
+    char * f_name = "draw_win_inventory()";
+    struct MapObj * owned = player->owns;
+    uint8_t n_owned;
+    for (n_owned = 0; NULL != owned->next; owned = owned->next, n_owned++);
+    uint8_t offset = center_offset(world->inventory_select, n_owned,
+                                   win->frame.size.y - 1);
+    uint8_t i;
+    for (i = 0, owned = player->owns; i < offset + (offset > 0);
+         i++, owned = owned->next);
+    uint8_t y;
+    for (y = 0; NULL != owned && y < win->frame.size.y; y++)
+    {
+        if (scroll_hint_helper(world, 0, y, offset, n_owned, &win->frame,
+                               f_name))
+        {
+            continue;
+        }
+        attr_t attri = 0;
+        if (y == world->inventory_select - offset)
+        {
+            attri = A_REVERSE;
+        }
+        struct MapObjDef * mod = get_map_object_def(world, owned->type);
+        draw_line(win, y, mod->name, attri, 0);
+        owned = owned->next;
+    }
 }
 
 

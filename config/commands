@@ -44,3 +44,7 @@
 45 map_c map center player
 46 to_a_keywin toggle view of available keybindings
 46 to_inv toggle inventory window
+47 drop drop object from inventory
+48 pick pick up object from ground
+49 inv_d inventory selection down
+50 inv_u inventory selection up

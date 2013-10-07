@@ -15,10 +15,12 @@
                          * growshrink_active_window(), toggle_winconfig(),
                          * toggle_win_height_type(), toggle_win_width_type()
                          */
-#include "map_object_actions.h" /* for player_wait(), move_player() */
+#include "map_object_actions.h" /* for player_wait(), move_player(),
+                                 * player_drop(), player_pick()
+                                 */
 #include "command_db.h" /* for is_command_id_shortdsc() */
 #include "misc.h" /* for load_interface_conf(), unload_interface_conf(),
-                   * save_interface_conf()
+                   * save_interface_conf(), nav_inventory()
                    */
 #include "yx_uint16.h" /* for dir enum */
 #include "map_objects.h" /* for get_player() */
@@ -73,13 +75,25 @@ extern void record_control(int action, struct World * world)
     {
         move_player(world, WEST);
     }
+    else if (is_command_id_shortdsc(world, action, "drop"))
+    {
+        player_drop(world);
+    }
+    else if (is_command_id_shortdsc(world, action, "pick"))
+    {
+        player_pick(world);
+    }
 }
 
 
 
 extern uint8_t player_control(int key, struct World * world)
 {
-    if      (key == get_available_keycode_to_action(world, "player_u"))
+    if      (key == get_available_keycode_to_action(world, "wait"))
+    {
+        player_wait(world);
+    }
+    else if (key == get_available_keycode_to_action(world, "player_u"))
     {
         move_player(world, NORTH);
     }
@@ -95,9 +109,13 @@ extern uint8_t player_control(int key, struct World * world)
     {
         move_player(world, WEST);
     }
-    else if (key == get_available_keycode_to_action(world, "wait"))
+    else if (key == get_available_keycode_to_action(world, "drop"))
     {
-        player_wait(world);
+        player_drop(world);
+    }
+    else if (key == get_available_keycode_to_action(world, "pick"))
+    {
+        player_pick(world);
     }
     else
     {
@@ -305,6 +323,14 @@ extern uint8_t meta_control(int key, struct World * world)
     else if (key == get_available_keycode_to_action(world, "map_c"))
     {
         map_center_object(world->map, get_player(world), win_map->frame.size);
+    }
+    else if (key == get_available_keycode_to_action(world, "inv_u"))
+    {
+        nav_inventory(world, 'u');
+    }
+    else if (key == get_available_keycode_to_action(world, "inv_d"))
+    {
+        nav_inventory(world, 'd');
     }
     else if (key == get_available_keycode_to_action(world, "reload_conf"))
     {

@@ -19,6 +19,7 @@ struct World;
 struct MapObj
 {
     struct MapObj * next;        /* pointer to next one in map object chain */
+    struct MapObj * owns;        /* chain of map objects owned / in inventory */
     uint8_t id;                  /* individual map object's unique identifier */
     uint8_t type;                /* ID of appropriate map object definition */
     uint8_t lifepoints;          /* 0: object is inanimate; >0: hitpoints */
@@ -74,6 +75,12 @@ extern void free_map_objects(struct MapObj * mo_start);
 
 
 
+/* Move object of "id" from "source" inventory to "target" inventory. */
+extern void own_map_object(struct MapObj ** target, struct MapObj ** source,
+                           uint8_t id);
+
+
+
 /* Get pointer to the MapObj struct that represents the player. */
 extern struct MapObj * get_player(struct World * world);
 
@@ -81,6 +88,11 @@ extern struct MapObj * get_player(struct World * world);
 
 /* Get pointer to the map object definition of identifier "def_id". */
 extern struct MapObjDef * get_map_object_def(struct World * w, uint8_t id);
+
+
+
+/* Move not only "mo" to "pos", but also all map objects owned by it. */
+extern void set_object_position(struct MapObj * mo, struct yx_uint16 pos);
 
 
 

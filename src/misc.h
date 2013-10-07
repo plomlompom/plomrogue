@@ -79,4 +79,11 @@ extern struct yx_uint16 find_passable_pos(struct Map * map);
 
 
 
+/* Navigate (as far as possible) up (dir=='u') or (else) down in player's
+ * inventory selection.
+ */
+extern void nav_inventory(struct World * world, char dir);
+
+
+
 #endif
