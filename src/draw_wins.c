@@ -509,12 +509,12 @@ extern void draw_winconf_geometry(struct Win * win)
     struct World * world = (struct World *) win->data;
     struct WinConf * wcp = get_winconf_by_win(world, win);
     char * title = "Window's geometry:\n";
-    char * h_d   = "\nWidth to save: ";
-    char * h_pos = " (height in cells)";
-    char * h_neg = " (negative diff: cells to maximum height)";
-    char * w_d   = "\n\nHeight to save: ";
-    char * w_pos = " (width in cells)";
-    char * w_neg = " (negative diff: cells to maximum width)";
+    char * h_d   = "\nHeight to save: ";
+    char * h_pos = " (width in cells)";
+    char * h_neg = " (negative diff: cells to maximum width)";
+    char * w_d   = "\n\nWidth to save: ";
+    char * w_pos = " (height in cells)";
+    char * w_neg = " (negative diff: cells to maximum height)";
     char * h_t = h_pos;
     char * w_t = w_pos;
     if      (1 == wcp->height_type)
@@ -530,6 +530,6 @@ extern void draw_winconf_geometry(struct Win * win)
                     + strlen(w_t) + strlen(w_d) + 6 + 1;
     char text[maxl + 1];
     sprintf(text, "%s%s%d%s%s%d%s", title, h_d, wcp->height, h_t,
-                                                w_d, wcp->width, w_t);
+                                           w_d, wcp->width,  w_t);
     draw_with_linebreaks(win, text, 0);
 }
