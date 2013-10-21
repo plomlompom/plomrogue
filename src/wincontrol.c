@@ -504,13 +504,13 @@ extern void save_win_configs(struct World * world)
 
 extern uint8_t toggle_window(struct WinMeta * win_meta, struct Win * win)
 {
-    if (0 != win->frame.curses_win)
+    if (0 == win->prev && win_meta->chain_start != win) /* Win outside chain. */
     {
-        return suspend_win(win_meta, win);
+        return append_win(win_meta, win);
     }
     else
     {
-        return append_win(win_meta, win);
+        return suspend_win(win_meta, win);
     }
 }
 
@@ -523,15 +523,20 @@ extern void toggle_winconfig(struct World * world, struct Win * win)
     {
         win->draw = draw_winconf_geometry;
         wcp->view = 1;
+        wcp->center = win->center;
+        win->center.y = 0;
+        win->center.x = 0;
     }
     else if (1 == wcp->view)
     {
         win->draw = draw_winconf_keybindings;
         wcp->view = 2;
+        win->center.x = 0;
     }
     else
     {
         win->draw = get_drawfunc_by_char(wcp->draw);
+        win->center = wcp->center;
         wcp->view = 0;
     }
 }

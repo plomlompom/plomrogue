@@ -4,6 +4,7 @@
 #include "map_objects.h" /* for Player struct */
 #include "yx_uint16.h"   /* for yx_uint16 and dir enums */
 #include "rrand.h"       /* for rrand() */
+#include "windows.h"     /* for struct Win */
 struct World;
 
 
@@ -14,8 +15,6 @@ struct Map init_map(struct World * world)
     struct Map map;
     map.size.x = 64;
     map.size.y = 64;
-    map.offset.x = 0;
-    map.offset.y = 0;
     uint32_t size = map.size.x * map.size.y;
     map.cells = try_malloc(size, world, f_name);
     uint16_t y, x;
@@ -55,31 +54,33 @@ struct Map init_map(struct World * world)
 
 
 
-void map_scroll (struct Map * map, enum dir d, struct yx_uint16 win_size)
+void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d)
 {
-    if      (NORTH == d && map->offset.y > 0)
+    uint16_t offset;
+    if ((NORTH == d || SOUTH == d) && map_size.y > win->frame.size.y)
     {
-        map->offset.y--;
+        offset = center_offset(win->center.y, map_size.y, win->frame.size.y);
+        win->center.y = offset + (win->frame.size.y / 2);
+        if      (NORTH == d && win->center.y > 0)
+        {
+            win->center.y--;
+        }
+        else if (SOUTH == d && win->center.y < map_size.y - 1)
+        {
+            win->center.y++;
+        }
     }
-    else if (WEST  == d && map->offset.x > 0)
+    else if ((WEST == d || EAST == d) && map_size.x > win->frame.size.x)
     {
-        map->offset.x--;
+        offset = center_offset(win->center.x, map_size.x, win->frame.size.x);
+        win->center.x = offset + (win->frame.size.x / 2);
+        if      (WEST == d && win->center.x > 0)
+        {
+            win->center.x--;
+        }
+        else if (EAST == d && win->center.x < map_size.x - 1)
+        {
+            win->center.x++;
+        }
     }
-    else if (SOUTH == d && map->offset.y + win_size.y < map->size.y)
-    {
-        map->offset.y++;
-    }
-    else if (EAST  == d && map->offset.x + win_size.x < map->size.x)
-    {
-        map->offset.x++;
-    }
-}
-
-
-
-void map_center_object(struct Map * map, struct MapObj * object,
-                       struct yx_uint16 win_size)
-{
-    map->offset.y = center_offset(object->pos.y, map->size.y, win_size.y);
-    map->offset.x = center_offset(object->pos.x, map->size.x, win_size.x);
 }

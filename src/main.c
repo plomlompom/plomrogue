@@ -17,7 +17,7 @@
 #include "map_objects.h" /* for structs MapObj, init_map_object_defs(),
                           * build_map_objects(), get_player()
                           */
-#include "map.h" /* for struct Map, init_map(), map_center_object() */
+#include "map.h" /* for struct Map, init_map() */
 #include "misc.h" /* for update_log(), find_passable_pos(), save_game(),
                    * try_calloc(), check_tempfile(), check_xor_files(),
                    * load_interface_conf(), load_game()
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
     /* Focus map on player. */
     struct MapObj * player = get_player(&world);
     struct Win * win_map = get_win_by_id(&world, 'm');
-    map_center_object(&map, player, win_map->frame.size);
+    win_map->center = player->pos;
 
     /* Initialize player's inventory selection index to start position. */
     world.inventory_select = 0;

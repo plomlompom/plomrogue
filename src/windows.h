@@ -61,6 +61,7 @@ struct Win
     struct Win * prev;  /* chain pointers; if 0, they mark the start or end  */
     struct Win * next;  /* of the chain; if both are 0, Win is outside chain */
     struct yx_uint16 start;       /* upper left corner of "frame" WINDOW */
+    struct yx_uint16 center;      /* window content center to focus window on */
     char * title;                 /* title to be used in window title bar */
     void (* draw) (struct Win *); /* how to draw window content ("data") */
     struct Frame frame;
@@ -106,6 +107,7 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
  * values that exceed it or negative values that would reduce the window height
  * < 1 cell.
  *
+ * The Win frame's curses window is initialized to a pad of size 1x1 cells.
  * Other members of the Win struct are initialized to 0.
  */
 extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** w, char * title,
@@ -114,7 +116,7 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** w, char * title,
 
 
 
-/* Free allocated memory for an initialized Win / WinMeta struct. */
+/* Free allocated memory for an initialized Win / WinMeta structs. */
 extern void free_winmeta(struct WinMeta * wmeta);
 extern void free_win(struct Win * win);
 
@@ -165,23 +167,11 @@ extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir);
 
 
 
-/* Draw virtual screen including all windows. Also add scroll hints (see comment
- * on draw_scroll_hint()) for where the edges of the terminal screen hit
- * non-edges of and inside the virtual screen. Then update the terminal screen.
+/* Draw virtual screen including all windows. Also add scroll hints for where
+ * the edges of the terminal screen hit non-edges of and inside the virtual
+ * screen. Then update the terminal screen.
  */
-extern uint8_t draw_all_wins(struct WinMeta * wmeta);
-
-
-
-/* Draw scroll hint (a line stating that there is more to see on scrolling
- * further into a certain direction) into "frame" at position "pos" (describing
- * a column or a row dependent on "dir" being *either* "<"/">" *or* something
- * else). It will consist of a line of "dir" symbols bracketing a descriptive
- * text stating "dist" as the number of rows/columns further available beyond
- * the hint.
- */
-extern uint8_t draw_scroll_hint(struct Frame * frame, uint16_t pos,
-                                uint32_t dist, char dir);
+extern uint8_t draw_all_wins(struct WinMeta * wm);
 
 
 

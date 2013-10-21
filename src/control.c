@@ -8,7 +8,7 @@
 #include "keybindings.h" /* for get_keycode_to_action(), mod_selected_keyb(),
                           * move_keyb_mod_selection()
                           */
-#include "map.h" /* for map_scroll(), map_center_object() */
+#include "map.h" /* for map_scroll() */
 #include "main.h" /* for World struct */
 #include "rexit.h" /* for exit_err() */
 #include "wincontrol.h" /* for scroll_pad(), toggle_window(),
@@ -306,23 +306,24 @@ extern uint8_t meta_control(int key, struct World * world)
     }
     else if (key == get_available_keycode_to_action(world, "map_u"))
     {
-        map_scroll(world->map, NORTH, win_map->frame.size);
-     }
+        map_scroll(win_map, world->map->size, NORTH);
+    }
     else if (key == get_available_keycode_to_action(world, "map_d"))
     {
-        map_scroll(world->map, SOUTH, win_map->frame.size);
+        map_scroll(win_map, world->map->size, SOUTH);
     }
     else if (key == get_available_keycode_to_action(world, "map_r"))
     {
-        map_scroll(world->map, EAST, win_map->frame.size);
+        map_scroll(win_map, world->map->size, EAST);
     }
     else if (key == get_available_keycode_to_action(world, "map_l"))
     {
-        map_scroll(world->map, WEST, win_map->frame.size);
+        map_scroll(win_map, world->map->size, WEST);
     }
     else if (key == get_available_keycode_to_action(world, "map_c"))
     {
-        map_center_object(world->map, get_player(world), win_map->frame.size);
+        struct MapObj * player = get_player(world);
+        win_map->center = player->pos;
     }
     else if (key == get_available_keycode_to_action(world, "inv_u"))
     {

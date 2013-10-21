@@ -16,9 +16,9 @@ struct MapObj;
 
 
 /* Try to move "actor" one step in direction "d" and handle the consequences:
- * either the move succeeds, or another actor is encountered and hit (which leads
- * to its lifepoint decreasing by one and potentially its death), or the target
- * square is not passable and the move fails.
+ * either the move succeeds, or another actor is encountered and hit (which
+ * leads to its lifepoint decreasing by one and potentially its death), or the
+ * target square is not passable and the move fails.
  */
 extern uint8_t move_actor(struct World * world, struct MapObj * actor,
                           enum dir d);

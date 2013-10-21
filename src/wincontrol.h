@@ -11,6 +11,7 @@
 
 #include <stdint.h> /* for uint8_t, int16_t */
 #include "keybindings.h" /* for KeyBiData struct */
+#include "yx_uint16.h" /* for yx_uint16 struct */
 struct Win;
 struct WinMeta;
 struct World;
@@ -28,9 +29,11 @@ struct WinConf
     char * title; /* designated title as passed to init_win() */
     int16_t height; /* designated height as interpreted by init_win()*/
     int16_t width; /* designated width as interpreted by init_win() */
-    char draw; /* identifier of designated Win->_draw; to be returned to */
+    char draw; /* identifier of designated Win->draw; to be returned to */
                /* after toggling window configuration view */
-    uint8_t view; /* 0: use ->draw as Win->_draw; 1: use draw_winconf()*/
+    struct yx_uint16 center; /* designated center for Win->draw view; to be */
+                             /* returned to after toggling winconf view */
+    uint8_t view; /* 0: use ->draw as Win->_draw; 1, 2: use draw_winconf()_* */
     uint8_t height_type; /* both: 0: interpret ->height/->width as size in   */
     uint8_t width_type;  /* positive cells; 1: as negative diff to max width */
     struct KeyBiData kb; /* the window's specific keybindings */
@@ -68,8 +71,13 @@ extern void save_win_configs(struct World * world);
 
 
 
-/* Toggle "window configuration" view for "win". */
+/* Toggle "window configuration" view for "win". This also sets sensible values
+ * for win->center for the various configuration views (y=0, x=0 for
+ * winconf_geometry and x= for winconf_keys).
+ */
 extern void toggle_winconfig(struct World * world, struct Win * win);
+
+
 
 /* Toggle interpretation type for Win's width/height of Win in WinConf. Width
  * only toggles to 1 if terminal window is at least as wide as WinConf->width.

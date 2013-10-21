@@ -10,12 +10,13 @@
 
 #include "yx_uint16.h" /* for yx_uint16 and dir enums */
 struct MapObj;
+struct Win;
+
 
 
 struct Map
 {
     struct yx_uint16 size;   /* map's height/width in number of cells */
-    struct yx_uint16 offset; /* the map scroll offset */
     char * cells;            /* sequence of bytes encoding map cells */
 };
 
@@ -27,21 +28,14 @@ struct Map
  * into a cycle of repeatedly selecting a random cell on the map and
  * transforming it into a land cell if it is horizontally or vertically neighbor
  * to one; the cycle ends when a land cell is due to be created right at the
- * border of the map. The map scroll offset is initialized to 0,0.
+ * border of the map.
  */
 extern struct Map init_map();
 
-/* Scroll map into direction "dir" by changing the scroll offset if that does
- * not push the map view beyond the size of the map window as described by
- * "win_size".
- */
-extern void map_scroll(struct Map * map, enum dir d, struct yx_uint16 win_size);
 
-/* Scroll map to center on the "object" by changing the scroll offset following
- * (and constrained by) the window size as described by "win_size".
- */
-extern void map_center_object(struct Map * map, struct MapObj * object,
-                              struct yx_uint16 win_size);
+
+/* Try to change the view center of map "win" of "map_size" into dir "d". */
+void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d);
 
 
 
