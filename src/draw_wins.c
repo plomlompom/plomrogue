@@ -35,8 +35,8 @@ static void draw_with_linebreaks(struct Win * win, char * text,
 static void draw_line(struct Win * w, uint16_t y, char * line, attr_t attri,
                       uint8_t fill);
 
-/* Write "text" with draw_with_linebreaks() as not starting from the top
- * but from the bottom of "win".
+/* Write "text" with draw_with_linebreaks() as not starting from the top but
+ * from bottom of "win". Draw only what fits in window (avoid scroll hints).
  */
 static void draw_text_from_bottom(struct Win * win, char * text);
 
