@@ -57,10 +57,10 @@ struct Map init_map(struct World * world)
 void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d)
 {
     uint16_t offset;
-    if ((NORTH == d || SOUTH == d) && map_size.y > win->frame.size.y)
+    if ((NORTH == d || SOUTH == d) && map_size.y > win->framesize.y)
     {
-        offset = center_offset(win->center.y, map_size.y, win->frame.size.y);
-        win->center.y = offset + (win->frame.size.y / 2);
+        offset = center_offset(win->center.y, map_size.y, win->framesize.y);
+        win->center.y = offset + (win->framesize.y / 2);
         if      (NORTH == d && win->center.y > 0)
         {
             win->center.y--;
@@ -70,10 +70,10 @@ void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d)
             win->center.y++;
         }
     }
-    else if ((WEST == d || EAST == d) && map_size.x > win->frame.size.x)
+    else if ((WEST == d || EAST == d) && map_size.x > win->framesize.x)
     {
-        offset = center_offset(win->center.x, map_size.x, win->frame.size.x);
-        win->center.x = offset + (win->frame.size.x / 2);
+        offset = center_offset(win->center.x, map_size.x, win->framesize.x);
+        win->center.x = offset + (win->framesize.x / 2);
         if      (WEST == d && win->center.x > 0)
         {
             win->center.x--;

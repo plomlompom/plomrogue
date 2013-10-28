@@ -240,20 +240,19 @@ static void set_winconf_geometry(struct World * world, char id)
     struct WinConf * wcp = get_winconf_by_id(world, id);
     if      (0 == wcp->height_type)
     {
-        wcp->height = wcp->win->frame.size.y;
+        wcp->height = wcp->win->framesize.y;
     }
     else if (1 == wcp->height_type)
     {
-        wcp->height = wcp->win->frame.size.y - world->wmeta->padframe.size.y
-                      + 1;
+        wcp->height = wcp->win->framesize.y - world->wmeta->padsize.y + 1;
     }
     if      (0 == wcp->width_type)
     {
-        wcp->width = wcp->win->frame.size.x;
+        wcp->width = wcp->win->framesize.x;
     }
     else if (1 == wcp->width_type)
     {
-        wcp->width = wcp->win->frame.size.x - world->wmeta->padframe.size.x;
+        wcp->width = wcp->win->framesize.x - world->wmeta->padsize.x;
     }
 }
 
@@ -562,8 +561,7 @@ extern void toggle_win_height_type(struct World * world, struct Win * win)
 extern void toggle_win_width_type(struct World * world, struct Win * win)
 {
     struct WinConf * wcp = get_winconf_by_win(world, win);
-    if (   0 == wcp->width_type
-        && win->frame.size.x <= world->wmeta->padframe.size.x)
+    if (0 == wcp->width_type && win->framesize.x <= world->wmeta->padsize.x)
     {
         wcp->width_type = 1;
     }
@@ -594,7 +592,7 @@ extern uint8_t growshrink_active_window(struct World * world, char change)
 {
     if (0 != world->wmeta->active)
     {
-        struct yx_uint16 size = world->wmeta->active->frame.size;
+        struct yx_uint16 size = world->wmeta->active->framesize;
         if      (change == '-')
         {
             size.y--;
@@ -614,8 +612,7 @@ extern uint8_t growshrink_active_window(struct World * world, char change)
         uint8_t x = resize_active_win(world->wmeta, size);
         struct WinConf * wcp = get_winconf_by_win(world, world->wmeta->active);
         if (   1 == wcp->width_type
-            && world->wmeta->active->frame.size.x
-               > world->wmeta->padframe.size.x)
+            && world->wmeta->active->framesize.x > world->wmeta->padsize.x)
         {
             wcp->width_type = 0;
         }

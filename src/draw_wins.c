@@ -4,7 +4,7 @@
 #include <stdlib.h>      /* for free() */
 #include <stdint.h>      /* for uint16_t */
 #include <string.h>      /* for strlen() */
-#include <ncurses.h>     /* for attri_t, chtype, mvwaddch(), wresize() */
+#include <ncurses.h>     /* for attri_t, chtype */
 #include "windows.h"     /* for struct Win */
 #include "misc.h"        /* for try_malloc() */
 #include "keybindings.h" /* for struct KeyBinding, for get_name_to_keycode() */
@@ -18,27 +18,33 @@
 
 
 
-/* Widen the ncurses window below "win" to "minx" if it is below that. */
-static void rewiden_if_less_than(struct Win * win, uint16_t minx);
-
-/* Write "text" into window "win". Start on row "start_y". Break text at
- * right window edge. Also break at newlines.
+/* Apply to the winmap of Win "w" the new sizes "new_size_y" and "new_size_x"
+ * to the degree that they extend it. Re-shape the window content accordingly.
  */
-static void draw_with_linebreaks(struct Win * win, char * text,
-                                 uint16_t start_y);
+static void try_resize_winmap(struct World * world, struct Win * w,
+                              int new_size_y, int new_size_x);
 
-/* Write "line" into window "w" at line "y"; apply ncurses attribute
- * "attri" to all characters drawn; if "fill" is non-zero, fill the
- * entire line until the right window edge with empty characters
- * ("attri" also applied on these).
+/* In Win "w", write "ch" to coordinate "y"/"x". */
+static void set_ch_on_yx(struct Win * w, int y, int x, chtype ch);
+
+/* Add "text" into window "win". Break text at right window edge. Also break at
+ * newlines.
  */
-static void draw_line(struct Win * w, uint16_t y, char * line, attr_t attri,
-                      uint8_t fill);
+static void add_text_with_linebreaks(struct World * world, struct Win * win,
+                                     char * text);
 
-/* Write "text" with draw_with_linebreaks() as not starting from the top but
+/* Add "line" into window "w". Apply ncurses attribute "attri" to all
+ * characters drawn. If "fill" is non-zero, fill the entire line until the
+ * right window edge with empty characters ("attri" also applied on these).
+ */
+static void add_line(struct World * world, struct Win * w, char * line,
+                     attr_t attri, uint8_t fill);
+
+/* Write "text" with add_text_with_linebreaks() as not starting from the top but
  * from bottom of "win". Draw only what fits in window (avoid scroll hints).
  */
-static void draw_text_from_bottom(struct Win * win, char * text);
+static void draw_text_from_bottom(struct World * world, struct Win * win,
+                                  char * text);
 
 /* Draw onto "map" in "win" the objects in the chain at "start". */
 static void draw_map_objects(struct World * world, struct MapObj * start,
@@ -61,26 +67,61 @@ static uint16_t draw_titled_keybinding_list(struct World * world, char * title,
 
 
 
-static void rewiden_if_less_than(struct Win * win, uint16_t minx)
+static void try_resize_winmap(struct World * world, struct Win * w,
+                              int new_size_y, int new_size_x)
 {
-    if (minx > getmaxx(win->frame.curses_win))
+    char * f_name = "try_resize_winmap()";
+    if (w->winmapsize.y >= new_size_y && w->winmapsize.x >= new_size_x)
     {
-        wresize(win->frame.curses_win, getmaxy(win->frame.curses_win), minx);
+        return;
     }
+    if      (w->winmapsize.y > new_size_y)
+    {
+        new_size_y = w->winmapsize.y;
+    }
+    else if (w->winmapsize.x > new_size_x)
+    {
+        new_size_x = w->winmapsize.x;
+    }
+    chtype * old_winmap = w->winmap;
+    uint32_t new_size = sizeof(chtype) * new_size_y * new_size_x;
+    w->winmap = try_malloc(new_size, world, f_name);
+    uint16_t y, x;
+    for (y = 0; y < new_size_y; y++)
+    {
+        for (x = 0; y < w->winmapsize.y && x < w->winmapsize.x; x++)
+        {
+            chtype ch = old_winmap[(y * w->winmapsize.x) + x];
+            w->winmap[(y * new_size_x) + x] = ch;
+        }
+        for (; x < new_size_x; x++)
+        {
+            w->winmap[(y * new_size_x) + x] = ' ';
+        }
+    }
+    free(old_winmap);
+    w->winmapsize.y = new_size_y;
+    w->winmapsize.x = new_size_x;
 }
 
 
 
-static void draw_with_linebreaks(struct Win * win, char * text,
-                                 uint16_t start_y)
+static void set_ch_on_yx(struct Win * w, int y, int x, chtype ch)
+{
+    w->winmap[(y * w->winmapsize.x) + x] = ch;
+}
+
+
+
+static void add_text_with_linebreaks(struct World * world, struct Win * win,
+                                     char * text)
 {
     uint16_t x, y;
     int16_t z = -1;
-    rewiden_if_less_than(win, win->frame.size.x);
-    for (y = start_y; ; y++)
+    for (y = win->winmapsize.y; ; y++)
     {
-        wresize(win->frame.curses_win, y + 1, getmaxx(win->frame.curses_win));
-        for (x = 0; x < win->frame.size.x; x++)
+        try_resize_winmap(world, win, y + 1, win->framesize.x);
+        for (x = 0; x < win->framesize.x; x++)
         {
             z++;
             if ('\n' == text[z])
@@ -89,7 +130,7 @@ static void draw_with_linebreaks(struct Win * win, char * text,
             }
             else
             {
-                mvwaddch(win->frame.curses_win, y, x, text[z]);
+                set_ch_on_yx(win, y, x, text[z]);
             }
             if ('\n' == text[z+1])
             {
@@ -106,39 +147,49 @@ static void draw_with_linebreaks(struct Win * win, char * text,
 
 
 
-static void draw_line(struct Win * w, uint16_t y, char * line, attr_t attri,
-                      uint8_t fill)
+static void add_line(struct World * world, struct Win * w, char * line,
+                     attr_t attri, uint8_t fill)
 {
-    uint16_t x = 0;
-    for (; x < strlen(line); x++)
+    uint16_t y = w->winmapsize.y;
+    uint16_t len_line = strlen(line);
+    if (0 != fill
+        && w->winmapsize.x < w->framesize.x && w->framesize.x > len_line)
     {
-        rewiden_if_less_than(w, x + 1);
-        mvwaddch(w->frame.curses_win, y, x, line[x] | attri);
+        try_resize_winmap(world, w, y + 1, w->framesize.x);
+    }
+    else
+    {
+        try_resize_winmap(world, w, y + 1, strlen(line));
+    }
+    uint16_t x = 0;
+    for (; x < len_line; x++)
+    {
+        set_ch_on_yx(w, y, x, line[x] | attri);
     }
     if (0 != fill)
     {
-        for (; x < w->frame.size.x; x++)
+        for (; x < w->framesize.x; x++)
         {
-            rewiden_if_less_than(w, x + 1);
-            mvwaddch(w->frame.curses_win, y, x, ' ' | attri);
+            set_ch_on_yx(w, y, x, ' ' | attri);
         }
     }
 }
 
 
 
-static void draw_text_from_bottom(struct Win * win, char * text)
+static void draw_text_from_bottom(struct World * world, struct Win * win,
+                                  char * text)
 {
     /* Determine number of lines text would have in a window of win's width,
      * but infinite height. Treat \n and \0 as control chars for incrementing
      * y and stopping the loop. Make sure +they* don't count as cell space.
      */
     char toggle = 0;
-    uint16_t x, y, offset;
+    uint16_t x, y;
     int16_t z = -1;
     for (y = 0; 0 == toggle; y++)
     {
-        for (x = 0; x < win->frame.size.x; x++)
+        for (x = 0; x < win->framesize.x; x++)
         {
             z++;
             if ('\n' == text[z])
@@ -161,16 +212,16 @@ static void draw_text_from_bottom(struct Win * win, char * text)
 
     /* Depending on what's bigger, determine start point in window or text. */
     uint16_t start_y = 0;
-    if (y < win->frame.size.y)
+    if (y < win->framesize.y)
     {
-        start_y = win->frame.size.y - y;
+        start_y = win->framesize.y - y;
     }
-    else if (y > win->frame.size.y)
+    else if (y > win->framesize.y)
     {
-        offset = y - win->frame.size.y;
+        uint16_t offset = y - win->framesize.y;
         for (y = 0; y < offset; y++)
         {
-            for (x = 0; x < win->frame.size.x; x++)
+            for (x = 0; x < win->framesize.x; x++)
             {
                 z++;
                 if ('\n' == text[z])
@@ -187,7 +238,8 @@ static void draw_text_from_bottom(struct Win * win, char * text)
         text = text + (sizeof(char) * (z + 1));
     }
 
-    draw_with_linebreaks(win, text, start_y);
+    try_resize_winmap(world, win, start_y, 1);
+    add_text_with_linebreaks(world, win, text);
 }
 
 
@@ -208,7 +260,7 @@ static void draw_map_objects(struct World * world, struct MapObj * start,
             {
                 d = get_map_object_def(world, o->type);
                 c = d->char_on_map;
-                mvwaddch(win->frame.curses_win, o->pos.y, o->pos.x, c);
+                set_ch_on_yx(win, o->pos.y, o->pos.x, c);
             }
         }
     }
@@ -238,15 +290,13 @@ static void draw_kb_view(struct World * world, struct Win * w,
 {
     if (0 == kb->kbs)
     {
-        wresize(w->frame.curses_win, start + 1, getmaxx(w->frame.curses_win));
-        draw_line(w, start, "(none)", 0, 0);
+        add_line(world, w, "(none)", 0, 0);
         return;
     }
     struct KeyBinding * kb_p = kb->kbs;
     uint16_t y;
     for (y = start; 0 != kb_p; y++)
     {
-        wresize(w->frame.curses_win, y + 1, getmaxx(w->frame.curses_win));
         attr_t attri = 0;
         if (y - start == kb->select)
         {
@@ -257,7 +307,7 @@ static void draw_kb_view(struct World * world, struct Win * w,
             }
         }
         char * kb_line = get_kb_line_and_iterate(world, &kb_p);
-        draw_line(w, y, kb_line, attri, 1);
+        add_line(world, w, kb_line, attri, 1);
         free(kb_line);
     }
 }
@@ -268,49 +318,26 @@ static uint16_t draw_titled_keybinding_list(struct World * world, char * title,
                                             struct Win * w, uint16_t start,
                                             struct KeyBinding * kb_p)
 {
-    uint16_t x, y;
-    uint16_t i = 0;
+    uint16_t y;
     uint8_t state = 0;
     for (y = start; (0 == state || 0 != kb_p); y++)
     {
-        wresize(w->frame.curses_win, y + 1, getmaxx(w->frame.curses_win));
         if (0 == state)
         {
-            for (x = 0; ; x++)
-            {
-                if (i == strlen(title))
-                {
-                    y++;
-                    state = 1 + (0 == kb_p);
-                    i = 0;
-                    break;
-                }
-                rewiden_if_less_than(w, x + 1);
-                mvwaddch(w->frame.curses_win, y, x, title[i]);
-                i++;
-            }
+            add_line(world, w, title, 0, 0);
+            y++;
+            add_line(world, w, " ", 0, 0);
+            state = 1 + (0 == kb_p);
             continue;
         }
         char * kb_line = get_kb_line_and_iterate(world, &kb_p);
-        if (strlen(kb_line) > getmaxx(w->frame.curses_win))
-        {
-            wresize(w->frame.curses_win, y + 1, strlen(kb_line));
-        }
-        draw_line(w, y, kb_line, 0, 0);
+        add_line(world, w, kb_line, 0, 0);
         free(kb_line);
     }
     if (2 == state)
     {
         char * none = "(none)";
-        if (strlen(none) > getmaxx(w->frame.curses_win))
-        {
-            wresize(w->frame.curses_win, y + 1, strlen(none));
-        }
-        else
-        {
-            wresize(w->frame.curses_win, y + 1, getmaxx(w->frame.curses_win));
-        }
-        draw_line(w, y, none, 0, 0);
+        add_line(world, w, none, 0, 0);
         y++;
     }
     return y;
@@ -321,7 +348,7 @@ static uint16_t draw_titled_keybinding_list(struct World * world, char * title,
 extern void draw_win_log(struct Win * win)
 {
     struct World * world = (struct World *) win->data;
-    draw_text_from_bottom(win, world->log);
+    draw_text_from_bottom(world, win, world->log);
 }
 
 
@@ -331,13 +358,14 @@ extern void draw_win_map(struct Win * win)
     struct World * world = (struct World *) win->data;
     struct Map * map = world->map;
     char * cells = map->cells;
-    wresize(win->frame.curses_win, map->size.y, map->size.x);
-    uint16_t x, y, z;
+    try_resize_winmap(world, win, map->size.y, map->size.x);
+    uint16_t z = 0;
+    uint16_t x, y;
     for (y = 0; y < map->size.y; y++)
     {
         for (x = 0; x < map->size.x; x++)
         {
-            mvwaddch(win->frame.curses_win, y, x, cells[z]);
+            set_ch_on_yx(win, y, x, cells[z]);
             z++;
         }
     }
@@ -360,7 +388,7 @@ extern void draw_win_info(struct Win * win)
             dsc_turn, world->turn,
             dsc_hitpoints, player->lifepoints,
             dsc_score, world->score);
-    draw_with_linebreaks(win, text, 0);
+    add_text_with_linebreaks(world, win, text);
 }
 
 
@@ -371,7 +399,7 @@ extern void draw_win_inventory(struct Win * win)
     struct MapObj * player = get_player(world);
     if (NULL == player->owns)
     {
-        draw_line(win, 0, "(none)", 0, 0);
+        add_line(world, win, "(none)", 0, 0);
         return;
     }
     win->center.y = world->inventory_select;
@@ -379,14 +407,13 @@ extern void draw_win_inventory(struct Win * win)
     uint8_t y;
     for (y = 0; NULL != owned; y++)
     {
-        wresize(win->frame.curses_win, y + 1, getmaxx(win->frame.curses_win));
         attr_t attri = 0;
         if (y == world->inventory_select)
         {
             attri = A_REVERSE;
         }
         struct MapObjDef * mod = get_map_object_def(world, owned->type);
-        draw_line(win, y, mod->name, attri, 0);
+        add_line(world, win, mod->name, attri, 0);
         owned = owned->next;
     }
 }
@@ -412,6 +439,7 @@ extern void draw_win_available_keybindings(struct Win * win)
         kb_p = world->kb_winkeys.kbs;
     }
     uint16_t offset = draw_titled_keybinding_list(world, title, win, 0, kb_p);
+    add_line(world, win, " ", 0, 0);
     draw_titled_keybinding_list(world, "Global keybindings", win, offset + 1,
                                 world->kb_global.kbs);
 }
@@ -450,7 +478,8 @@ extern void draw_winconf_keybindings(struct Win * win)
     struct World * world = (struct World *) win->data;
     struct WinConf * wc = get_winconf_by_win(world, win);
     char * title = "Window's keybindings:";
-    draw_line(win, 0, title, 0, 0);
+    add_line(world, win, title, 0, 0);
+    add_line(world, win, " ", 0, 0);
     draw_kb_view(world, win, &wc->kb, 2);
     win->center.y = wc->kb.select + 2;
 }
@@ -484,5 +513,5 @@ extern void draw_winconf_geometry(struct Win * win)
     char text[maxl + 1];
     sprintf(text, "%s%s%d%s%s%d%s", title, h_d, wcp->height, h_t,
                                            w_d, wcp->width,  w_t);
-    draw_with_linebreaks(win, text, 0);
+    add_text_with_linebreaks(world, win, text);
 }

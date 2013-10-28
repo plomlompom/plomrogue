@@ -28,15 +28,15 @@ static void place_win(struct WinMeta * wmeta, struct Win * w);
 
 
 
-/* Draw scroll hint (a line stating that there are "dist" more elements of
+/* Draw scroll hint (a line saying that there are "dist" more elements of
  * "unit" further into the direction symbolized by the "dir" char) into virtual
- * screen pad, onto an appropriate edge of "frame": the left or right edge if
- * "dir" is "<" or ">", or the upper or lower edge if it is "^" or "v". "start"
- * should be either the start coordinate of "frame" if it describes a window or
- * .y=, .x=wm->pad_offset if it describes the virtual screen. winscroll_hint()
- * and padscroll_hint() are wrappers to simplify the use of scroll_hint().
+ * screen pad, onto an appropriate edge of either a window or the screen; the
+ * left or right edge if "dir" is "<" or ">", or the upper or lower edge if it
+ * is "^" or "v". "start" should be either the start coordinate of a window's
+ * frame or .y=0, .x=wm->pad_offset if it describes the virtual screen pad.
+ * winscroll_hint() and padscroll_hint() are wrappers to simplify these uses.
  */
-static void scroll_hint(struct WinMeta * wm, struct Frame * frame, char dir,
+static void scroll_hint(struct WinMeta * wm, struct yx_uint16 fsize, char dir,
                         uint16_t dist, char * unit, struct yx_uint16 start);
 static void winscroll_hint(struct WinMeta * wm, struct Win * w, char dir,
                            uint16_t dist);
@@ -77,29 +77,25 @@ static void shift_win_backward(struct WinMeta * wmeta);
 static uint8_t refit_pad(struct WinMeta * wmeta)
 {
     /* Determine rightmost window column. */
-    uint32_t lastwincol = 0;
-    struct Win * w_p = wmeta->chain_start;
-    while (w_p != 0)
+    uint32_t lastwcol = 0;
+    struct Win * wp = wmeta->chain_start;
+    while (wp != 0)
     {
-        if ((uint32_t) w_p->start.x + (uint32_t) w_p->frame.size.x
-            > lastwincol + 1)
+        if ((uint32_t) wp->start.x + (uint32_t) wp->framesize.x > lastwcol + 1)
         {
-            lastwincol = (uint32_t) w_p->start.x
-                         + (uint32_t) w_p->frame.size.x - 1;
+            lastwcol = (uint32_t) wp->start.x + (uint32_t) wp->framesize.x - 1;
         }
-        w_p = w_p->next;
+        wp = wp->next;
     }
 
     /* Only resize the pad if the rightmost window column has changed. */
-    if (getmaxx(wmeta->padframe.curses_win) + 1 != lastwincol)
+    if (getmaxx(wmeta->pad) + 1 != lastwcol)
     {
-        if (lastwincol + 2 > UINT16_MAX)
+        if (lastwcol + 2 > UINT16_MAX)
         {
             return 2;
         }
-        return (ERR == wresize(wmeta->padframe.curses_win,
-                               getmaxy(wmeta->padframe.curses_win),
-                               lastwincol + 2));
+        return (ERR == wresize(wmeta->pad, getmaxy(wmeta->pad), lastwcol + 2));
     }
     return 0;
 }
@@ -137,14 +133,14 @@ static void place_win(struct WinMeta * wmeta, struct Win * w)
         {
             w_top = w_top->prev;
         }
-        w->start.x = w_top->start.x + w_top->frame.size.x + 1;
+        w->start.x = w_top->start.x + w_top->framesize.x + 1;
 
         /* Fit window below its predecessor if that one directly thrones over
          * empty space wide and high enough.
          */
-        uint16_t w_prev_maxy = w->prev->start.y + w->prev->frame.size.y;
-        if (   w->frame.size.x <= w->prev->frame.size.x
-            && w->frame.size.y <  wmeta->padframe.size.y - w_prev_maxy)
+        uint16_t w_prev_maxy = w->prev->start.y + w->prev->framesize.y;
+        if (   w->framesize.x <= w->prev->framesize.x
+            && w->framesize.y <  wmeta->padsize.y - w_prev_maxy)
         {
             w->start.x = w->prev->start.x;
             w->start.y = w_prev_maxy + 1;
@@ -169,13 +165,13 @@ static void place_win(struct WinMeta * wmeta, struct Win * w)
                     }
                     w_upup = w_upup->prev;
                 }
-                w_prev_maxy = w_upup->start.y + w_upup->frame.size.y;
-                widthdiff = (w_upup->start.x + w_upup->frame.size.x)
-                            - (w_up->start.x + w_up->frame.size.x);
-                if (   w->frame.size.y < wmeta->padframe.size.y - w_prev_maxy
-                    && w->frame.size.x < widthdiff)
+                w_prev_maxy = w_upup->start.y + w_upup->framesize.y;
+                widthdiff = (w_upup->start.x + w_upup->framesize.x)
+                            - (w_up->start.x + w_up->framesize.x);
+                if (   w->framesize.y < wmeta->padsize.y - w_prev_maxy
+                    && w->framesize.x < widthdiff)
                 {
-                    w->start.x = w_up->start.x + w_up->frame.size.x + 1 ;
+                    w->start.x = w_up->start.x + w_up->framesize.x + 1 ;
                     w->start.y = w_prev_maxy + 1;
                     break;
                 }
@@ -187,15 +183,15 @@ static void place_win(struct WinMeta * wmeta, struct Win * w)
 
 
 
-static void scroll_hint(struct WinMeta * wm, struct Frame * frame, char dir,
+static void scroll_hint(struct WinMeta * wm, struct yx_uint16 fsize, char dir,
                         uint16_t dist, char * unit, struct yx_uint16 start)
 {
     /* Decide on alignment (vertical/horizontal?), thereby hint text space. */
     char * more = "more";
-    uint16_t dsc_space = frame->size.x;
+    uint16_t dsc_space = fsize.x;
     if ('<' == dir || '>' == dir)
     {
-        dsc_space = frame->size.y;
+        dsc_space = fsize.y;
     }                                  /* vv-- 10 = max strlen for uint16_t */
     char scrolldsc[1 + strlen(more) + 1 + 10 + 1 + strlen(unit) + 1 + 1];
     sprintf(scrolldsc, " %d %s %s ", dist, more, unit);
@@ -211,11 +207,11 @@ static void scroll_hint(struct WinMeta * wm, struct Frame * frame, char dir,
     uint16_t draw_offset = 0;
     if      ('>' == dir)
     {
-        draw_offset = frame->size.x - 1;
+        draw_offset = fsize.x - 1;
     }
     else if ('v' == dir)
     {
-        draw_offset = frame->size.y - 1;
+        draw_offset = fsize.y - 1;
     }
     uint16_t q = 0;
     for (; q < dsc_space; q++)
@@ -227,13 +223,11 @@ static void scroll_hint(struct WinMeta * wm, struct Frame * frame, char dir,
         }
         if ('<' == dir || '>' == dir)
         {
-            mvwaddch(wm->padframe.curses_win,
-                     start.y + q, start.x + draw_offset, symbol);
+            mvwaddch(wm->pad, start.y + q, start.x + draw_offset, symbol);
         }
         else
         {
-            mvwaddch(wm->padframe.curses_win,
-                     start.y + draw_offset, start.x + q, symbol);
+            mvwaddch(wm->pad, start.y + draw_offset, start.x + q, symbol);
         }
     }
 }
@@ -244,7 +238,7 @@ static void padscroll_hint(struct WinMeta * wm, char dir, uint16_t dist)
     struct yx_uint16 start;
     start.y = 0;
     start.x = wm->pad_offset;
-    scroll_hint(wm, &wm->padframe, dir, dist, "columns", start);
+    scroll_hint(wm, wm->padsize, dir, dist, "columns", start);
 }
 
 
@@ -258,46 +252,47 @@ static void winscroll_hint(struct WinMeta * wm, struct Win * w, char dir,
         unit = "columns";
     }
     struct yx_uint16 start = w->start;
-    scroll_hint(wm, &w->frame, dir, dist, unit, start);
+    scroll_hint(wm, w->framesize, dir, dist, unit, start);
 }
 
 
 
 static uint8_t draw_wins(struct WinMeta * wm, struct Win * w)
 {
-    if (ERR == wresize(w->frame.curses_win, 1, 1))
-    {
-        return 1;
-    }
     w->draw(w);
     uint16_t y, x, size_y, size_x;
-    getmaxyx(w->frame.curses_win, size_y, size_x);
-    uint16_t offset_y = center_offset(w->center.y, size_y, w->frame.size.y);
-    uint16_t offset_x = center_offset(w->center.x, size_x, w->frame.size.x);
-    for (y = offset_y; y < w->frame.size.y + offset_y && y < size_y; y++)
+    size_y = w->winmapsize.y;
+    size_x = w->winmapsize.x;
+    uint16_t offset_y = center_offset(w->center.y, size_y, w->framesize.y);
+    uint16_t offset_x = center_offset(w->center.x, size_x, w->framesize.x);
+    for (y = offset_y; y < w->framesize.y + offset_y && y < size_y; y++)
     {
-        for (x = offset_x; x < w->frame.size.x + offset_x && x < size_x; x++)
+        for (x = offset_x; x < w->framesize.x + offset_x && x < size_x; x++)
         {
-            chtype ch = mvwinch(w->frame.curses_win, y, x);
-            mvwaddch(wm->padframe.curses_win, w->start.y + (y - offset_y),
-                                              w->start.x + (x - offset_x), ch);
+            chtype ch = w->winmap[(y * w->winmapsize.x) + x];
+            mvwaddch(wm->pad, w->start.y + (y - offset_y),
+                              w->start.x + (x - offset_x), ch);
         }
     }
+    free(w->winmap);
+    w->winmap = NULL;
+    w->winmapsize.y = 0;
+    w->winmapsize.x = 0;
     if (offset_y > 0)
     {
         winscroll_hint(wm, w, '^', offset_y + 1);
     }
-    if (size_y > offset_y + w->frame.size.y)
+    if (size_y > offset_y + w->framesize.y)
     {
-        winscroll_hint(wm, w, 'v', size_y - ((offset_y + w->frame.size.y) - 1));
+        winscroll_hint(wm, w, 'v', size_y - ((offset_y + w->framesize.y) - 1));
     }
     if (offset_x > 0)
     {
         winscroll_hint(wm, w, '<', offset_x + 1);
     }
-    if (size_x > offset_x + w->frame.size.x)
+    if (size_x > offset_x + w->framesize.x)
     {
-        winscroll_hint(wm, w, '>', size_x - ((offset_x + w->frame.size.x) - 1));
+        winscroll_hint(wm, w, '>', size_x - ((offset_x + w->framesize.x) - 1));
     }
     if (0 != w->next)
     {
@@ -312,27 +307,27 @@ static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad)
 {
     /* Draw vertical and horizontal border lines. */
     uint16_t y, x;
-    for (y = w->start.y; y <= w->start.y + w->frame.size.y; y++)
+    for (y = w->start.y; y <= w->start.y + w->framesize.y; y++)
     {
-        mvwaddch(pad, y, w->start.x - 1,               '|');
-        mvwaddch(pad, y, w->start.x + w->frame.size.x, '|');
+        mvwaddch(pad, y, w->start.x - 1,              '|');
+        mvwaddch(pad, y, w->start.x + w->framesize.x, '|');
     }
-    for (x = w->start.x; x <= w->start.x + w->frame.size.x; x++)
+    for (x = w->start.x; x <= w->start.x + w->framesize.x; x++)
     {
-        mvwaddch(pad, w->start.y - 1,               x, '-');
-        mvwaddch(pad, w->start.y + w->frame.size.y, x, '-');
+        mvwaddch(pad, w->start.y - 1,              x, '-');
+        mvwaddch(pad, w->start.y + w->framesize.y, x, '-');
     }
 
     /* Draw as much as possible of the title into center of top border line. */
     char min_title_length_visible = 3;  /* min. 1 char + 2 padding/decoration */
-    if (w->frame.size.x >= min_title_length_visible)
+    if (w->framesize.x >= min_title_length_visible)
     {
         uint16_t title_offset = 0;
-        if (w->frame.size.x > strlen(w->title) + 2)
+        if (w->framesize.x > strlen(w->title) + 2)
         {
-            title_offset = (w->frame.size.x - (strlen(w->title) + 2)) / 2;
+            title_offset = (w->framesize.x - (strlen(w->title) + 2)) / 2;
         }                                    /* +2 is for padding/decoration */
-        uint16_t length_visible = strnlen(w->title, w->frame.size.x - 2);
+        uint16_t length_visible = strnlen(w->title, w->framesize.x - 2);
         char title[length_visible + 3];
         char decoration = ' ';
         if (1 == active)
@@ -368,10 +363,9 @@ static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
 static void draw_wins_bordercorners(struct Win * w, WINDOW * pad)
 {
     mvwaddch(pad, w->start.y - 1, w->start.x - 1, '+');
-    mvwaddch(pad, w->start.y - 1, w->start.x + w->frame.size.x, '+');
-    mvwaddch(pad, w->start.y + w->frame.size.y, w->start.x - 1, '+');
-    mvwaddch(pad,
-             w->start.y + w->frame.size.y, w->start.x + w->frame.size.x, '+');
+    mvwaddch(pad, w->start.y - 1, w->start.x + w->framesize.x, '+');
+    mvwaddch(pad, w->start.y + w->framesize.y, w->start.x - 1, '+');
+    mvwaddch(pad, w->start.y + w->framesize.y, w->start.x + w->framesize.x,'+');
     if (0 != w->next)
     {
         draw_wins_bordercorners(w->next, pad);
@@ -472,17 +466,17 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmp)
     {
         return 2;
     }
-    wmeta->padframe.size.y     = maxy_test;
-    wmeta->padframe.size.x     = maxx_test;
+    wmeta->padsize.y           = maxy_test;
+    wmeta->padsize.x           = maxx_test;
     wmeta->chain_start         = 0;
     wmeta->chain_end           = 0;
     wmeta->pad_offset          = 0;
-    WINDOW * pad_test          = newpad(wmeta->padframe.size.y, 1);
+    WINDOW * pad_test          = newpad(wmeta->padsize.y, 1);
     if (NULL == pad_test)
     {
         return 1;
     }
-    wmeta->padframe.curses_win = pad_test;
+    wmeta->pad = pad_test;
     wmeta->active              = 0;
     *wmp = wmeta;
     return 0;
@@ -499,38 +493,36 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
     {
         return 1;
     }
-    w->prev             = 0;
-    w->next             = 0;
-    w->frame.curses_win = newpad(1, 1);
-    if (NULL == w->frame.curses_win)
-    {
-        return 1;
-    }
-    w->title            = malloc(strlen(title) + 1);
+    w->prev         = 0;
+    w->next         = 0;
+    w->winmapsize.y = 0;
+    w->winmapsize.x = 0;
+    w->winmap = NULL;
+    w->title        = malloc(strlen(title) + 1);
     if (NULL == w->title)
     {
         return 1;
     }
     sprintf(w->title, "%s", title);
-    w->data             = data;
-    w->draw             = func;
-    w->center.y         = 0;
-    w->center.x         = 0;
+    w->data         = data;
+    w->draw         = func;
+    w->center.y     = 0;
+    w->center.x     = 0;
     if      (0 < width)
     {
-        w->frame.size.x = width;
+        w->framesize.x = width;
     }
     else if (0 >= width)
     {
-        w->frame.size.x = wmeta->padframe.size.x + width;
+        w->framesize.x = wmeta->padsize.x + width;
     }
-    if      (0 < height && height <= wmeta->padframe.size.y - 1)
+    if      (0 < height && height <= wmeta->padsize.y - 1)
     {
-        w->frame.size.y = height;
+        w->framesize.y = height;
     }
-    else if (0 >= height && wmeta->padframe.size.y + (height - 1) > 0)
+    else if (0 >= height && wmeta->padsize.y + (height - 1) > 0)
     {
-        w->frame.size.y = wmeta->padframe.size.y + (height - 1);
+        w->framesize.y = wmeta->padsize.y + (height - 1);
     }
     *wp = w;
     return 0;
@@ -540,7 +532,7 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
 
 extern void free_winmeta(struct WinMeta * wmeta)
 {
-    delwin(wmeta->padframe.curses_win);
+    delwin(wmeta->pad);
     free(wmeta);
 }
 
@@ -548,7 +540,6 @@ extern void free_winmeta(struct WinMeta * wmeta)
 
 extern void free_win(struct Win * win)
 {
-    delwin(win->frame.curses_win);
     free(win->title);
     free(win);
 }
@@ -623,8 +614,7 @@ extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset)
 {
     if (new_offset >= 0
         && (new_offset < wmeta->pad_offset
-            || new_offset + wmeta->padframe.size.x
-               < getmaxx(wmeta->padframe.curses_win)))
+            || new_offset + wmeta->padsize.x < getmaxx(wmeta->pad)))
     {
         wmeta->pad_offset = new_offset;
     }
@@ -635,10 +625,9 @@ extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset)
 extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size)
 {
     if (0 != wmeta->active
-        && size.x > 0 && size.y > 0
-        && size.y < wmeta->padframe.size.y)
+        && size.x > 0 && size.y > 0 && size.y < wmeta->padsize.y)
     {
-        wmeta->active->frame.size = size;
+        wmeta->active->framesize = size;
         return update_wins(wmeta, wmeta->active); /* Positioning of following */
     }                                             /* windows may be affected. */
     return 0;
@@ -702,15 +691,13 @@ extern uint8_t draw_all_wins(struct WinMeta * wm)
     /* Empty everything before filling it a-new. */
     erase();
     wnoutrefresh(wm->screen);
-    werase(wm->padframe.curses_win);
+    werase(wm->pad);
     if (wm->chain_start)
     {
 
         /* Draw windows' borders first, then windows. */
-        draw_wins_borderlines(wm->chain_start, wm->active,
-                              wm->padframe.curses_win);
-        draw_wins_bordercorners(wm->chain_start, wm->padframe.curses_win);
-
+        draw_wins_borderlines(wm->chain_start, wm->active, wm->pad);
+        draw_wins_bordercorners(wm->chain_start, wm->pad);
         if (1 == draw_wins(wm, wm->chain_start))
         {
             return 1;
@@ -721,16 +708,16 @@ extern uint8_t draw_all_wins(struct WinMeta * wm)
         {
             padscroll_hint(wm, '<', wm->pad_offset + 1);
         }
-        uint16_t size_x = getmaxx(wm->padframe.curses_win);
-        uint16_t right_edge = wm->pad_offset + wm->padframe.size.x;
+        uint16_t size_x = getmaxx(wm->pad);
+        uint16_t right_edge = wm->pad_offset + wm->padsize.x;
         if (right_edge < size_x - 1)
         {
             padscroll_hint(wm, '>', size_x - right_edge);
         }
 
         /* Write pad segment to be shown on physical screen to screen buffer. */
-        pnoutrefresh(wm->padframe.curses_win, 0, wm->pad_offset, 0, 0,
-                     wm->padframe.size.y, wm->padframe.size.x - 1);
+        pnoutrefresh(wm->pad, 0, wm->pad_offset, 0, 0,
+                     wm->padsize.y, wm->padsize.x - 1);
     }
 
     /* Only at the end write accumulated changes to the physical screen. */

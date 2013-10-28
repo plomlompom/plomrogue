@@ -33,7 +33,7 @@ struct WinConf
                /* after toggling window configuration view */
     struct yx_uint16 center; /* designated center for Win->draw view; to be */
                              /* returned to after toggling winconf view */
-    uint8_t view; /* 0: use ->draw as Win->_draw; 1, 2: use draw_winconf()_* */
+    uint8_t view; /* 0: use ->draw as Win->draw; 1, 2: use draw_winconf()_* */
     uint8_t height_type; /* both: 0: interpret ->height/->width as size in   */
     uint8_t width_type;  /* positive cells; 1: as negative diff to max width */
     struct KeyBiData kb; /* the window's specific keybindings */

@@ -37,35 +37,30 @@
 
 
 #include <stdint.h>    /* for uint8_t, uint16_t, uint32_t */
-#include <ncurses.h>   /* for the WINDOW typedef */
-#include "yx_uint16.h" /* for yx_uint16 coordinates */
+#include <ncurses.h>   /* for the WINDOW and chtype typedefs */
+#include "yx_uint16.h" /* for yx_uint16 struct */
 
 
 
-/* Individual windows consist of potential (real only if window is visible
- * inside the virtual screen) ncurses WINDOWs wrapped inside Frame structs (that
- * keep a window's designated size even when it is invisible) wrapped inside
- * metadata-rich Win structs. Win structs are chained into a linked list of all
- * the windows visible on the virtual screen and also contain pointers to what
- * content is to be drawn inside the window, and by use of what method.
+/* Individual windows are represented by "Win" structs. They describe frames
+ * located inside the virtual screen pad through which "winmaps" are visible,
+ * 2-dimensional maps of ncurses chtypes. Win structs are chained into a linked
+ * list of all the windows visible on the virtual screen and also contain
+ * pointers to what content is to be drawn inside the window, and by use of what
+ * method.
  */
-
-struct Frame               /* If Frame is Win's "frame", "size" is the        */
-{                          /* designated size of curses_win's ncurses WINDOW. */
-    WINDOW * curses_win;   /* If Frame is WinMeta's "padframe", curses_win is */
-    struct yx_uint16 size; /* the ncurses pad representing the virtual screen */
-};                         /* and "size" desribes the terminal screen size.   */
-
 struct Win
 {
     struct Win * prev;  /* chain pointers; if 0, they mark the start or end  */
     struct Win * next;  /* of the chain; if both are 0, Win is outside chain */
-    struct yx_uint16 start;       /* upper left corner of "frame" WINDOW */
+    struct yx_uint16 framesize;   /* window frame size to see winmap through */
+    struct yx_uint16 start;       /* upper left corner of window in pad */
     struct yx_uint16 center;      /* window content center to focus window on */
     char * title;                 /* title to be used in window title bar */
     void (* draw) (struct Win *); /* how to draw window content ("data") */
-    struct Frame frame;
     void * data;                  /* window content to be drawn by _draw() */
+    chtype * winmap;              /* sequence of cells, sorted into lines ... */
+    struct yx_uint16 winmapsize;  /* ... with these geometry infos  */
 };
 
 
@@ -76,10 +71,11 @@ struct Win
 struct WinMeta
 {
     WINDOW * screen;          /* ncurses' pointer to the terminal screen */
+    WINDOW * pad;             /* ncurses pad of virtual screen */
+    uint16_t pad_offset;      /* number of cells view is moved to the right */
+    struct yx_uint16 padsize; /* virtual screen size */
     struct Win * chain_start; /* first Win in chain; its _prev == 0 */
     struct Win * chain_end;   /* last Win in chain; its _next == 0 */
-    uint16_t pad_offset;      /* number of cells view is moved to the right */
-    struct Frame padframe;    /* virtual screen fitted into terminal screen */
     struct Win * active;      /* Win highlighted/selected for manipulation */
 };
 
