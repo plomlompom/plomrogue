@@ -84,7 +84,7 @@ struct WinMeta
 /* Initialize empty WinMeta "wmeta" on the terminal "screen". (Note that
  * emptiness is marked by WinMeta.chain_start=0.) Other struct members are also
  * initialized 0, except for the virtual screen (height = that of the terminal
- * screen; width = 1) amd its frame sized to the size of the terminal screen.
+ * screen; width = 1) sized to the size of the terminal screen.
  */
 extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
 
@@ -103,7 +103,6 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
  * values that exceed it or negative values that would reduce the window height
  * < 1 cell.
  *
- * The Win frame's curses window is initialized to a pad of size 1x1 cells.
  * Other members of the Win struct are initialized to 0.
  */
 extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** w, char * title,
