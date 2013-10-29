@@ -25,7 +25,7 @@
 #include "wincontrol.h" /* get_win_by_id(), get_winconf_by_win() */
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game(), exit_err() */
-#include "command_db.h" /* for init_command_db() */
+#include "command_db.h" /* for init_command_db(), is_command_id_shortdsc() */
 #include "control.h" /* for *_control(), get_available_keycode_to_action() */
 
 
@@ -182,6 +182,10 @@ int main(int argc, char *argv[])
                 {
                     break;
                 }
+                if (is_command_id_shortdsc(&world, action, "drop"))
+                {
+                    world.inventory_select = getc(file);
+                }
                 record_control(action, &world);
             }
         }
@@ -201,6 +205,10 @@ int main(int argc, char *argv[])
                 action = getc(file);
                 if (EOF != action)
                 {
+                    if (is_command_id_shortdsc(&world, action, "drop"))
+                    {
+                        world.inventory_select = getc(file);
+                    }
                     record_control(action, &world);
                 }
             }

@@ -169,9 +169,11 @@ extern void player_drop(struct World * world)
     if (NULL == player->owns)
     {
         update_log(world, "\nYou try to drop an object, but you own none.");
+        world->old_inventory_select = 0;
     }
     else
     {
+        world->old_inventory_select = world->inventory_select;
         struct MapObj * owned = player->owns;
         uint8_t i = 0;
         for (; i != world->inventory_select; i++, owned = owned->next);

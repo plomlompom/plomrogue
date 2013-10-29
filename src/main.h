@@ -38,7 +38,8 @@ struct World
     struct MapObjDef * map_obj_defs;  /* Map object type definitions chain. */
     struct MapObj * map_objs;         /* Pointer to map objects chain start. */
     uint8_t inventory_select;         /* Player's inventory selection index. */
-};
+    uint8_t old_inventory_select;     /* Temporarily stores for recordfile */
+};                                    /* writing inventory selection index. */
 
 
 

@@ -22,6 +22,8 @@
                          * sorted_wintoggle_and_activate()
                          */
 #include "windows.h" /* for suspend_win() */
+#include "command_db.h" /* for is_command_id_shortdsc() */
+
 
 
 extern char * trouble_msg(struct World * w, char * parent, char * child)
@@ -212,6 +214,11 @@ extern void turn_over(struct World * world, char action)
         }
         try_fclose(file_old, world, f_name);
         exit_err(write_uint8(action, file_new), world, err_write);
+        if (is_command_id_shortdsc(world, action, "drop"))
+        {
+            uint8_t inventory_select = world->old_inventory_select;
+            exit_err(write_uint8(inventory_select, file_new), world, err_write);
+        }
         try_fclose_unlink_rename(file_new, recordfile_tmp, recordfile,
                                  world, f_name);
     }
