@@ -6,10 +6,7 @@
 #ifndef MAP_OBJECT_ACTIONS_H
 #define MAP_OBJECT_ACTIONS_H
 
-
-
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
-struct World;
 struct Map;
 struct MapObj;
 
@@ -20,8 +17,7 @@ struct MapObj;
  * leads to its lifepoint decreasing by one and potentially its death), or the
  * target square is not passable and the move fails.
  */
-extern uint8_t move_actor(struct World * world, struct MapObj * actor,
-                          enum dir d);
+extern uint8_t move_actor(struct MapObj * actor, enum dir d);
 
 
 
@@ -29,14 +25,14 @@ extern uint8_t move_actor(struct World * world, struct MapObj * actor,
  * the game log with appropriate messages on the move attempt and its results;
  * turns over to turn_over() when finished.
  */
-extern void move_player(struct World * world, enum dir d);
+extern void move_player(enum dir d);
 
 
 
 /* Make player wait one turn, i.e. only update_log with a "you wait" message
  * and turn control over to the enemy.
  */
-extern void player_wait(struct World * world);
+extern void player_wait();
 
 
 
@@ -48,10 +44,10 @@ extern char is_passable(struct Map * map, struct yx_uint16 pos);
 
 
 /* Make player drop to ground map ojbect indexed by world.inventory_select. */
-extern void player_drop(struct World * world);
+extern void player_drop();
 
 /* Make player pick up map object from ground. */
-extern void player_pick(struct World * world);
+extern void player_pick();
 
 
 

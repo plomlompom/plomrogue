@@ -25,16 +25,12 @@
  * 1 - memory allocation error
  * 2 - would force virtual screen to grow beyond width or height of 2^16 cells
  *
- * TODO: Expose less internals to the API.
- *
  * TODO: Think up a more intuitive window positioning algorithm or at least make
  * the chain that windows are positioned by visible.
  */
 
 #ifndef WINDOWS_H
 #define WINDOWS_H
-
-
 
 #include <stdint.h>    /* for uint8_t, uint16_t, uint32_t */
 #include <ncurses.h>   /* for the WINDOW and chtype typedefs */
@@ -58,7 +54,6 @@ struct Win
     struct yx_uint16 center;      /* window content center to focus window on */
     char * title;                 /* title to be used in window title bar */
     void (* draw) (struct Win *); /* how to draw window content ("data") */
-    void * data;                  /* window content to be drawn by _draw() */
     chtype * winmap;              /* sequence of cells, sorted into lines ... */
     struct yx_uint16 winmapsize;  /* ... with these geometry infos  */
 };
@@ -91,8 +86,7 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
 
 
 /* Initialize a window child of "wmeta" to "title", "height" and "width" and
- * appointing "func"() to interpret and draw the content stored at "data" when
- * the window is visible.
+ * appointing "func"() to interpret and draw the window when it's visible.
  *
  * Pass 0 for "width" to make the window as wide as the terminal screen. Pass
  * negative values for "width" to make the width so many cells smaller than that
@@ -106,8 +100,7 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
  * Other members of the Win struct are initialized to 0.
  */
 extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** w, char * title,
-                        int16_t height, int16_t width,
-                        void * data, void * func);
+                        int16_t height, int16_t width, void * func);
 
 
 

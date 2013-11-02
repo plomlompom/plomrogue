@@ -7,14 +7,11 @@
 #ifndef WINCONTROL_H
 #define WINCONTROL_H
 
-
-
 #include <stdint.h> /* for uint8_t, int16_t */
 #include "keybindings.h" /* for KeyBiData struct */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 struct Win;
 struct WinMeta;
-struct World;
 
 
 
@@ -42,32 +39,31 @@ struct WinConf
 
 
 /* Get WinConf fathering "win"; get Win of WinConf of "id". */
-extern struct WinConf * get_winconf_by_win(struct World * world,
-                                           struct Win * win);
-extern struct Win * get_win_by_id(struct World * world, char id);
+extern struct WinConf * get_winconf_by_win(struct Win * win);
+extern struct Win * get_win_by_id(char id);
 
 
 
 /* Create/initialize (from config files)/free Winconf structs. */
-extern void init_winconfs(struct World * world);
-extern void free_winconfs(struct World * world);
-extern void init_wins(struct World * world);
+extern void init_winconfs();
+extern void free_winconfs();
+extern void init_wins();
 
 
 
-/* Toggle windows in world->wins in the order desribed by the first line of
+/* Toggle windows in world.wins in the order desribed by the first line of
  * config/windows/toggle_order_and_active, wherein each character should
- * correspond to one window whose ID is found in world->winconf_ids. Unknown
+ * correspond to one window whose ID is found in world.winconf_ids. Unknown
  * characters are silently ignored. The first character of the second line of
  * the file is also read to determine which window to focus as active (but only
  * if it fits the ID of a window thus toggled visible).
  */
-extern void sorted_wintoggle_and_activate(struct World * world);
+extern void sorted_wintoggle_and_activate();
 
 
 
 /* Save all window's configurations to their configuration files. */
-extern void save_win_configs(struct World * world);
+extern void save_win_configs();
 
 
 
@@ -75,15 +71,15 @@ extern void save_win_configs(struct World * world);
  * for win->center for the various configuration views (y=0, x=0 for
  * winconf_geometry and x= for winconf_keys).
  */
-extern void toggle_winconfig(struct World * world, struct Win * win);
+extern void toggle_winconfig(struct Win * win);
 
 
 
 /* Toggle interpretation type for Win's width/height of Win in WinConf. Width
  * only toggles to 1 if terminal window is at least as wide as WinConf->width.
  */
-extern void toggle_win_height_type(struct World * world, struct Win * win);
-extern void toggle_win_width_type(struct World * world, struct Win * win);
+extern void toggle_win_height_type(struct Win * win);
+extern void toggle_win_width_type(struct Win * win);
 
 
 
@@ -111,7 +107,7 @@ extern void scroll_pad(struct WinMeta * win_meta, char dir);
  *
  * Return 0 on success, 1 on (ncurses pad/window memory allocation) error.
  */
-extern uint8_t growshrink_active_window(struct World * world, char change);
+extern uint8_t growshrink_active_window(char change);
 
 
 

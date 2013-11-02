@@ -10,7 +10,7 @@
                           */
 #include "misc.h" /* for update_log(), turn_over() */
 #include "map.h" /* for Map struct */
-#include "main.h" /* for World struct */
+#include "main.h" /* for world global */
 #include "command_db.h" /* for get_command_id() */
 
 
@@ -18,17 +18,15 @@
 /* One actor "wounds" another actor, decrementing his lifepoints and, if they
  * reach zero in the process, killing it. Generates appropriate log message.
  */
-static void actor_hits_actor(struct World * world, struct MapObj * hitter,
-                             struct MapObj * hitted);
+static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted);
 
 
 
-static void actor_hits_actor(struct World * world, struct MapObj * hitter,
-                             struct MapObj * hitted)
+static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted)
 {
-    struct MapObjDef * mod_hitter = get_map_object_def(world, hitter->type);
-    struct MapObjDef * mod_hitted = get_map_object_def(world, hitted->type);
-    struct MapObj * player = get_player(world);
+    struct MapObjDef * mod_hitter = get_map_object_def(hitter->type);
+    struct MapObjDef * mod_hitted = get_map_object_def(hitted->type);
+    struct MapObj * player = get_player();
     char * msg1 = "You";
     char * msg2 = "wound";
     char * msg3 = "you";
@@ -44,21 +42,21 @@ static void actor_hits_actor(struct World * world, struct MapObj * hitter,
     uint8_t len = 1 + strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
     char msg[len];
     sprintf(msg, "\n%s %s %s.", msg1, msg2, msg3);
-    update_log(world, msg);
+    update_log(msg);
     hitted->lifepoints--;
     if (0 == hitted->lifepoints)
     {
         hitted->type = mod_hitted->corpse_id;
         if (player == hitted)
         {
-            update_log(world, " You die.");
+            update_log(" You die.");
         }
         else
         {
-            update_log(world, " It dies.");
+            update_log(" It dies.");
             if (player == hitter)
             {
-                world->score = world->score + mod_hitted->lifepoints;
+                world.score = world.score + mod_hitted->lifepoints;
             }
         }
     }
@@ -66,12 +64,11 @@ static void actor_hits_actor(struct World * world, struct MapObj * hitter,
 
 
 
-extern uint8_t move_actor(struct World * world, struct MapObj * actor,
-                          enum dir d)
+extern uint8_t move_actor(struct MapObj * actor, enum dir d)
 {
     struct yx_uint16 target = mv_yx_in_dir(d, actor->pos);
     struct MapObj * other_actor;
-    for (other_actor = world->map_objs;
+    for (other_actor = world.map_objs;
          other_actor != 0;
          other_actor = other_actor->next)
     {
@@ -81,11 +78,11 @@ extern uint8_t move_actor(struct World * world, struct MapObj * actor,
         }
         if (yx_uint16_cmp(&target, &other_actor->pos))
         {
-            actor_hits_actor(world, actor, other_actor);
+            actor_hits_actor(actor, other_actor);
             return 2;
         }
     }
-    if (is_passable(world->map, target))
+    if (is_passable(world.map, target))
     {
         set_object_position(actor, target);
         return 0;
@@ -95,7 +92,7 @@ extern uint8_t move_actor(struct World * world, struct MapObj * actor,
 
 
 
-extern void move_player(struct World * world, enum dir d)
+extern void move_player(enum dir d)
 {
     char * dsc_dir;
     char * action_dsc_prototype = "player_";
@@ -123,7 +120,7 @@ extern void move_player(struct World * world, enum dir d)
         action_dsc[len_action_dsc_prototype] = 'l';
     }
     action_dsc[len_action_dsc_prototype + 1] = '\0';
-    uint8_t res = move_actor(world, get_player(world), d);
+    uint8_t res = move_actor(get_player(), d);
     if (1 >= res)
     {
         char * dsc_move = "You fail to move ";
@@ -133,67 +130,64 @@ extern void move_player(struct World * world, enum dir d)
         }
         char msg[strlen(dsc_move) + strlen (dsc_dir) + 3];
         sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
-        update_log(world, msg);
+        update_log(msg);
     }
-    turn_over(world, get_command_id(world, action_dsc));
+    turn_over(get_command_id(action_dsc));
 }
 
 
 
-extern void player_wait(struct World * world)
+extern void player_wait()
 {
-    update_log(world, "\nYou wait.");
-    turn_over(world, get_command_id(world, "wait"));
+    update_log("\nYou wait.");
+    turn_over(get_command_id("wait"));
 }
 
 
 
 extern char is_passable(struct Map * map, struct yx_uint16 pos)
 {
-    char passable = 0;
+    uint8_t passable = 0;
     if (0 <= pos.x && pos.x < map->size.x && 0 <= pos.y && pos.y < map->size.y)
     {
-        if ('.' == map->cells[pos.y * map->size.x + pos.x])
-        {
-            passable = 1;
-        }
+        passable = (('.' == map->cells[pos.y * map->size.x + pos.x]));
     }
     return passable;
 }
 
 
 
-extern void player_drop(struct World * world)
+extern void player_drop()
 {
-    struct MapObj * player = get_player(world);
+    struct MapObj * player = get_player();
     if (NULL == player->owns)
     {
-        update_log(world, "\nYou try to drop an object, but you own none.");
-        world->old_inventory_select = 0;
+        update_log("\nYou try to drop an object, but you own none.");
+        world.old_inventory_select = 0;
     }
     else
     {
-        world->old_inventory_select = world->inventory_select;
+        world.old_inventory_select = world.inventory_select;
         struct MapObj * owned = player->owns;
         uint8_t i = 0;
-        for (; i != world->inventory_select; i++, owned = owned->next);
-        if (0 < world->inventory_select)
+        for (; i != world.inventory_select; i++, owned = owned->next);
+        if (0 < world.inventory_select)
         {
-            world->inventory_select--;
+            world.inventory_select--;
         }
-        own_map_object(&world->map_objs, &player->owns, owned->id);
-        update_log(world, "\nYou drop an object.");
+        own_map_object(&world.map_objs, &player->owns, owned->id);
+        update_log("\nYou drop an object.");
     }
-    turn_over(world, get_command_id(world, "drop"));
+    turn_over(get_command_id("drop"));
 }
 
 
 
-extern void player_pick(struct World * world)
+extern void player_pick()
 {
-    struct MapObj * player = get_player(world);
+    struct MapObj * player = get_player();
     struct MapObj * picked;
-    for (picked = world->map_objs; NULL != picked; picked = picked->next)
+    for (picked = world.map_objs; NULL != picked; picked = picked->next)
     {
         if (picked != player && yx_uint16_cmp(&picked->pos, &player->pos))
         {
@@ -202,13 +196,13 @@ extern void player_pick(struct World * world)
     }
     if (NULL == picked)
     {
-        update_log(world, "\nYou try to pick up an object, but there is none.");
+        update_log("\nYou try to pick up an object, but there is none.");
     }
     else
     {
-        own_map_object(&player->owns, &world->map_objs, picked->id);
+        own_map_object(&player->owns, &world.map_objs, picked->id);
         set_object_position(picked, player->pos);
-        update_log(world, "\nYou pick up an object.");
+        update_log("\nYou pick up an object.");
     }
-    turn_over(world, get_command_id(world, "pick"));
+    turn_over(get_command_id("pick"));
 }

@@ -6,10 +6,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-
-
 #include <stdint.h> /* for uint32_t*/
-#include "keybindings.h"
+#include "keybindings.h" /* for KeyBiData struct */
 struct WinMeta;
 struct WinConf;
 struct Win;
@@ -39,7 +37,7 @@ struct World
     struct MapObj * map_objs;         /* Pointer to map objects chain start. */
     uint8_t inventory_select;         /* Player's inventory selection index. */
     uint8_t old_inventory_select;     /* Temporarily stores for recordfile */
-};                                    /* writing inventory selection index. */
+} world;                              /* writing inventory selection index. */
 
 
 

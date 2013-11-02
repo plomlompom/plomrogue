@@ -10,7 +10,6 @@
 
 
 #include <stdint.h> /* for uint8_t */
-struct World;
 
 
 
@@ -34,7 +33,7 @@ extern void set_cleanup_flag(enum cleanup_flag flag);
 
 
 /* Exit orderly, clean up. */
-extern void exit_game(struct World * world);
+extern void exit_game();
 
 
 
@@ -43,7 +42,7 @@ extern void exit_game(struct World * world);
  * unknown", secondly of "err" as the "internal error code", and thirdly of
  * errno if it is non-zero.
  */
-extern void exit_err(uint8_t err, struct World * world, char * msg);
+extern void exit_err(uint8_t err, char * msg);
 
 
 

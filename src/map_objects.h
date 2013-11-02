@@ -7,12 +7,9 @@
 #ifndef MAP_OBJECTS_H
 #define MAP_OBJECTS_H
 
-
-
 #include <stdio.h> /* for FILE typedef */
 #include <stdint.h> /* for uint8_t */
 #include "yx_uint16.h" /* for yx_uint16 coordinates */
-struct World;
 
 
 
@@ -41,7 +38,7 @@ struct MapObjDef
 
 
 /* Initialize map object defnitions chain from file at path "filename". */
-extern void init_map_object_defs(struct World * world, char * filename);
+extern void init_map_object_defs(char * filename);
 
 
 
@@ -54,19 +51,18 @@ extern void free_map_object_defs(struct MapObjDef * mod_start);
  * New animate objects are never placed in the same square with other animated
  * ones.
  */
-extern void add_map_object(struct World * world, uint8_t type);
-extern void add_map_objects(struct World * world, uint8_t type, uint8_t n);
+extern void add_map_object(uint8_t type);
+extern void add_map_objects(uint8_t type, uint8_t n);
 
 
 
 /* Write map objects chain to "file". */
-extern void write_map_objects(struct World * world, FILE * file);
+extern void write_map_objects(FILE * file);
 
 /* Read from "file" map objects chain; use "line" as char array for fgets() and
  * expect strings of max. "linemax" length.
  */
-extern void read_map_objects(struct World * world, FILE * file,
-                             char * line, int linemax);
+extern void read_map_objects(FILE * file, char * line, int linemax);
 
 
 
@@ -82,12 +78,12 @@ extern void own_map_object(struct MapObj ** target, struct MapObj ** source,
 
 
 /* Get pointer to the MapObj struct that represents the player. */
-extern struct MapObj * get_player(struct World * world);
+extern struct MapObj * get_player();
 
 
 
 /* Get pointer to the map object definition of identifier "def_id". */
-extern struct MapObjDef * get_map_object_def(struct World * w, uint8_t id);
+extern struct MapObjDef * get_map_object_def(uint8_t id);
 
 
 

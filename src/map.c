@@ -5,18 +5,17 @@
 #include "yx_uint16.h"   /* for yx_uint16 and dir enums */
 #include "rrand.h"       /* for rrand() */
 #include "windows.h"     /* for struct Win */
-struct World;
 
 
 
-struct Map init_map(struct World * world)
+extern struct Map init_map()
 {
     char * f_name = "init_map()";
     struct Map map;
     map.size.x = 64;
     map.size.y = 64;
     uint32_t size = map.size.x * map.size.y;
-    map.cells = try_malloc(size, world, f_name);
+    map.cells = try_malloc(size, f_name);
     uint16_t y, x;
     for (y = 0; y < map.size.y; y++)
     {
@@ -54,7 +53,7 @@ struct Map init_map(struct World * world)
 
 
 
-void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d)
+extern void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d)
 {
     uint16_t offset;
     if ((NORTH == d || SOUTH == d) && map_size.y > win->framesize.y)

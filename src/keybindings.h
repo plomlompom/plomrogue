@@ -6,10 +6,7 @@
 #ifndef KEYBINDINGS_H
 #define KEYBINDINGS_H
 
-
-
 #include <stdint.h> /* for uint16_t */
-struct World;
 
 
 
@@ -40,7 +37,7 @@ extern uint16_t get_keycode_to_action(struct KeyBinding * keybindings,
 /* Return human-readable name (of maximum 9 chars) for "keycode" as matched by
  * ncurses.h; if none is found, return "UNKNOWN".
  */
-extern char * get_name_to_keycode(struct World * world, uint16_t keycode);
+extern char * get_name_to_keycode(uint16_t keycode);
 
 /* Return number of keybindings in keybindings chain from "kb_p" on. */
 extern uint16_t get_n_of_keybs(struct KeyBinding * kb_p);
@@ -53,10 +50,8 @@ extern struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n);
 /* Initialize/save keybindings data from/to file at "path" to/from keybindings
  * data pointer "kbd".
  */
-extern void init_keybindings(struct World * world, char * path,
-                             struct KeyBiData * kbd);
-extern void save_keybindings(struct World * world, char * path,
-                             struct KeyBiData * kbd);
+extern void init_keybindings(char * path, struct KeyBiData * kbd);
+extern void save_keybindings(char * path, struct KeyBiData * kbd);
 
 /* Free keybinding chain starting at "kb_start". */
 extern void free_keybindings(struct KeyBinding * kb_start);
@@ -67,7 +62,7 @@ extern void free_keybindings(struct KeyBinding * kb_start);
  * modify it, then unmark it again. Ensure there are max. three digits in the
  * keycode ASCII representation.
  */
-extern void mod_selected_keyb(struct World * world, struct KeyBiData * kbd);
+extern void mod_selected_keyb(struct KeyBiData * kbd);
 
 /* Move keybinding modification selection upwards ("dir"=="u") or downwards
  * ("dir"=="d") within the limits of the keybindings chain length.

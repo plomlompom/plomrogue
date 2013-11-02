@@ -1,6 +1,6 @@
 /* main.c */
 
-#include "main.h"
+#include "main.h" /* for world global */
 #include <stdlib.h> /* for atoi(), exit(), EXIT_FAILURE */
 #include <stdio.h> /* for FILE typedef, F_OK */
 #include <ncurses.h> /* for initscr(), noecho(), curs_set(), keypad(), raw() */
@@ -33,10 +33,9 @@
 int main(int argc, char *argv[])
 {
     char * f_name = "main()";
-    struct World world;
     world.turn = 0;        /* Turns to 1 when map and objects are initalized. */
 
-    init_command_db(&world);
+    init_command_db();
     set_cleanup_flag(CLEANUP_COMMAND_DB);
 
     /* Check for corrupted savefile / recordfile savings. */
@@ -44,14 +43,14 @@ int main(int argc, char *argv[])
     char * savefile = "savefile";
     char * recordfile_tmp = "record_tmp";
     char * savefile_tmp   = "savefile_tmp";
-    check_files_xor(savefile, recordfile, &world);
-    check_tempfile(recordfile_tmp, &world);
-    check_tempfile(savefile_tmp, &world);
-    check_tempfile("config/windows/Win_tmp_k", &world);
-    check_tempfile("config/windows/Win_tmp_m", &world);
-    check_tempfile("config/windows/Win_tmp_i", &world);
-    check_tempfile("config/windows/Win_tmp_l", &world);
-    check_tempfile("config/windows/toggle_order_tmp", &world);
+    check_files_xor(savefile, recordfile);
+    check_tempfile(recordfile_tmp);
+    check_tempfile(savefile_tmp);
+    check_tempfile("config/windows/Win_tmp_k");
+    check_tempfile("config/windows/Win_tmp_m");
+    check_tempfile("config/windows/Win_tmp_i");
+    check_tempfile("config/windows/Win_tmp_l");
+    check_tempfile("config/windows/toggle_order_tmp");
 
     /* Read in startup options (i.e. replay option and replay start turn). */
     int opt;
@@ -80,10 +79,10 @@ int main(int argc, char *argv[])
 
     /* Initialize log and map object definitions. */
     world.score = 0;
-    world.log = try_calloc(1, sizeof(char), &world, f_name);
+    world.log = try_calloc(1, sizeof(char), f_name);
     set_cleanup_flag(CLEANUP_LOG);
-    update_log(&world, " ");
-    init_map_object_defs(&world, "config/defs");
+    update_log(" ");
+    init_map_object_defs("config/defs");
     set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
     world.map_obj_count = 0;
 
@@ -93,7 +92,7 @@ int main(int argc, char *argv[])
     FILE * file;
     if (1 == world.interactive && 0 == access(savefile, F_OK))
     {
-        load_game(&world);
+        load_game();
         set_cleanup_flag(CLEANUP_MAP_OBJECTS);
     }
 
@@ -104,8 +103,8 @@ int main(int argc, char *argv[])
                 "in main()).";
         if (0 == world.interactive)
         {
-            file = try_fopen(recordfile, "r", &world, f_name);
-            exit_err(read_uint32_bigendian(file, &world.seed), &world, err_r);
+            file = try_fopen(recordfile, "r", f_name);
+            exit_err(read_uint32_bigendian(file, &world.seed), err_r);
         }
 
         /* For interactive-mode in newly started world, generate a start seed
@@ -118,10 +117,9 @@ int main(int argc, char *argv[])
             char * err_w = "Trouble recording new seed "
                            "(write_uint32_bigendian() in main()) / writing to "
                            "file 'record_tmp'.";
-            file = try_fopen(recordfile_tmp, "w", &world, f_name);
-            exit_err(write_uint32_bigendian(world.seed, file), &world, err_w);
-            try_fclose_unlink_rename(file, recordfile_tmp, recordfile,
-                                    &world, f_name);
+            file = try_fopen(recordfile_tmp, "w", f_name);
+            exit_err(write_uint32_bigendian(world.seed, file), err_w);
+            try_fclose_unlink_rename(file, recordfile_tmp, recordfile, f_name);
         }
     }
 
@@ -135,12 +133,12 @@ int main(int argc, char *argv[])
     if (0 == world.turn)
     {
         world.map_objs = NULL;
-        add_map_objects(&world, 0, 1);
-        add_map_objects(&world, 1, 1 + rrand() % 27);
-        add_map_objects(&world, 2, 1 + rrand() % 9);
-        add_map_objects(&world, 3, 1 + rrand() % 3);
-        add_map_objects(&world, 4, 1 + rrand() % 3);
-        add_map_objects(&world, 5, 1 + rrand() % 3);
+        add_map_objects(0, 1);
+        add_map_objects(1, 1 + rrand() % 27);
+        add_map_objects(2, 1 + rrand() % 9);
+        add_map_objects(3, 1 + rrand() % 3);
+        add_map_objects(4, 1 + rrand() % 3);
+        add_map_objects(5, 1 + rrand() % 3);
         set_cleanup_flag(CLEANUP_MAP_OBJECTS);
         world.turn = 1;
     }
@@ -153,15 +151,15 @@ int main(int argc, char *argv[])
     keypad(screen, TRUE);
     raw();
     char * err_winmem = "Trouble with init_win_meta() in main ().";
-    exit_err(init_win_meta(screen, &world.wmeta), &world, err_winmem);
+    exit_err(init_win_meta(screen, &world.wmeta), err_winmem);
     set_cleanup_flag(CLEANUP_WIN_META);
-    load_interface_conf(&world);
+    load_interface_conf(/*&world*/);
     set_cleanup_flag(CLEANUP_INTERFACE_CONF);
     err_winmem = "Trouble with draw_all_wins() in main().";
 
     /* Focus map on player. */
-    struct MapObj * player = get_player(&world);
-    struct Win * win_map = get_win_by_id(&world, 'm');
+    struct MapObj * player = get_player();
+    struct Win * win_map = get_win_by_id('m');
     win_map->center = player->pos;
 
     /* Initialize player's inventory selection index to start position. */
@@ -182,40 +180,40 @@ int main(int argc, char *argv[])
                 {
                     break;
                 }
-                if (is_command_id_shortdsc(&world, action, "drop"))
+                if (is_command_id_shortdsc(action, "drop"))
                 {
                     world.inventory_select = getc(file);
                 }
-                record_control(action, &world);
+                record_control(action);
             }
         }
         while (1)
         {
             draw_all_wins(world.wmeta);
             key = getch();
-            wc = get_winconf_by_win(&world, world.wmeta->active);
-            if  (   (1 == wc->view && wingeom_control(key, &world))
-                 || (2 == wc->view && winkeyb_control(key, &world)))
+            wc = get_winconf_by_win(world.wmeta->active);
+            if  (   (1 == wc->view && wingeom_control(key))
+                 || (2 == wc->view && winkeyb_control(key)))
             {
                 continue;
             }
             if (   EOF != action
-                && key == get_available_keycode_to_action(&world, "wait"))
+                && key == get_available_keycode_to_action("wait"))
             {
                 action = getc(file);
                 if (EOF != action)
                 {
-                    if (is_command_id_shortdsc(&world, action, "drop"))
+                    if (is_command_id_shortdsc(action, "drop"))
                     {
                         world.inventory_select = getc(file);
                     }
-                    record_control(action, &world);
+                    record_control(action);
                 }
             }
-            else if (meta_control(key, &world))
+            else if (meta_control(key))
             {
-                try_fclose(file, &world, f_name);
-                exit_game(&world);
+                try_fclose(file, f_name);
+                exit_game();
             }
         }
     }
@@ -225,29 +223,29 @@ int main(int argc, char *argv[])
     {
         while (1)
         {
-            save_game(&world);
+            save_game();
             draw_all_wins(world.wmeta);
             key = getch();
-            wc = get_winconf_by_win(&world, world.wmeta->active);
-            if      (1 == wc->view && wingeom_control(key, &world))
+            wc = get_winconf_by_win(world.wmeta->active);
+            if      (1 == wc->view && wingeom_control(key))
             {
                 continue;
             }
-            else if (2 == wc->view && winkeyb_control(key, &world))
-            {
-                continue;
-            }
-
-            if  (   (1 == wc->view && wingeom_control(key, &world))
-                 || (2 == wc->view && winkeyb_control(key, &world))
-                 || (0 != player->lifepoints && player_control(key, &world)))
+            else if (2 == wc->view && winkeyb_control(key))
             {
                 continue;
             }
 
-            if (meta_control(key, &world))
+            if  (   (1 == wc->view && wingeom_control(key))
+                 || (2 == wc->view && winkeyb_control(key))
+                 || (0 != player->lifepoints && player_control(key)))
             {
-                exit_game(&world);
+                continue;
+            }
+
+            if (meta_control(key))
+            {
+                exit_game();
             }
         }
     }

@@ -6,10 +6,7 @@
 #ifndef MAP_H
 #define MAP_H
 
-
-
 #include "yx_uint16.h" /* for yx_uint16 and dir enums */
-struct MapObj;
 struct Win;
 
 
@@ -35,7 +32,7 @@ extern struct Map init_map();
 
 
 /* Try to change the view center of map "win" of "map_size" into dir "d". */
-void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d);
+extern void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d);
 
 
 

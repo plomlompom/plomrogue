@@ -5,8 +5,6 @@
  * srand() to ensure portable pseudo-randomness portability.
  */
 
-
-
 #ifndef RRAND_H
 #define RRAND_H
 

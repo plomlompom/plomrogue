@@ -485,8 +485,7 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmp)
 
 
 extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
-                        int16_t height, int16_t width,
-                        void * data, void * func)
+                        int16_t height, int16_t width, void * func)
 {
     struct Win * w = malloc(sizeof(struct Win));
     if (NULL == w)
@@ -504,7 +503,6 @@ extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** wp, char * title,
         return 1;
     }
     sprintf(w->title, "%s", title);
-    w->data         = data;
     w->draw         = func;
     w->center.y     = 0;
     w->center.x     = 0;

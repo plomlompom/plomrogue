@@ -7,8 +7,6 @@
 #ifndef YX_UINT16_H
 #define YX_UINT16_H
 
-
-
 #include <stdint.h> /* for uint8_t, uint16_t */
 
 

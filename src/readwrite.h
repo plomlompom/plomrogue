@@ -6,21 +6,18 @@
 #ifndef READWRITE_H
 #define READWRITE_H
 
-
-
 #include <stdio.h> /* for FILE typedef */
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
-struct World;
 
 
 
 /* Wrappers to calling from function called "f" of fopen(), fclose(), fgets()
  * and fwrite() and calling exit_err() with appropriate error messages.
  */
-extern FILE * try_fopen(char * path, char * mode, struct World * w, char * f);
-extern void try_fclose(FILE * file, struct World * w, char * f);
+extern FILE * try_fopen(char * path, char * mode, char * f);
+extern void try_fclose(FILE * file, char * f);
 extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
-                       struct World * w, char * f);
+                       char * f);
 
 
 
@@ -28,8 +25,7 @@ extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
  * fgets() is returned unless it is NULL *and* ferror() indicates that an error
  * occured; otherwise end of file is assumed and NULL is returned properly.
  */
-extern char * try_fgets(char * line, int size, FILE * file,
-                        struct World * w, char * f);
+extern char * try_fgets(char * line, int size, FILE * file, char * f);
 
 
 
@@ -38,7 +34,7 @@ extern char * try_fgets(char * line, int size, FILE * file,
  * Used for handling atomic saving of files via temp files.
  */
 extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
-                                     struct World * w, char * f);
+                                     char * f);
 
 
 
@@ -46,7 +42,7 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
  * length of "file", exit via exit_err() with trouble_msg()-generated error
  * message on failure.
  */
-extern uint16_t get_linemax(FILE * file, struct World * w, char * f);
+extern uint16_t get_linemax(FILE * file, char * f);
 
 
 
@@ -72,5 +68,7 @@ extern uint8_t read_uint32_bigendian(FILE * file, uint32_t * x);
 extern uint8_t write_uint8(uint8_t x, FILE * file);
 extern uint8_t write_uint16_bigendian(uint16_t x, FILE * file);
 extern uint8_t write_uint32_bigendian(uint32_t x, FILE * file);
+
+
 
 #endif

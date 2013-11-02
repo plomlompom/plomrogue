@@ -6,8 +6,6 @@
 #ifndef DRAW_WINS_H
 #define DRAW_WINS_H
 
-
-
 #include <stdint.h> /* for uint16_t */
 struct Win;
 
