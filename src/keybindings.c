@@ -16,6 +16,27 @@
 
 
 
+/* If "keycode_given" equals "keycode_match", copy "keyname_match" to "keyname"
+ * and return 1; otherwise return 0.
+ */
+static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
+                           uint16_t keycode_match, char * keyname_match);
+
+
+
+static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
+                           uint16_t keycode_match, char * keyname_match)
+{
+    if (keycode_given == keycode_match)
+    {
+        sprintf(keyname, keyname_match);
+        return 1;
+    }
+    return 0;
+}
+
+
+
 extern uint16_t get_keycode_to_action(struct KeyBinding * kb_p, char * name)
 {
     while (0 != kb_p)
@@ -39,70 +60,28 @@ extern char * get_name_to_keycode(uint16_t keycode)
     {
         sprintf(keyname, "%c", keycode);
     }
-    else if (keycode == 9)              /* TODO: Find a way more elegant than */
-    {                                   /*       hardcoding all of this?      */
-        sprintf(keyname, "TAB");
-    }
-    else if (keycode == 10)
-    {
-        sprintf(keyname, "RETURN");
-    }
-    else if (keycode == 27)
-    {
-        sprintf(keyname, "ESCAPE");
-    }
-    else if (keycode == 32)
-    {
-        sprintf(keyname, "SPACE");
-    }
-    else if (keycode == KEY_UP)
-    {
-        sprintf(keyname, "UP");
-    }
-    else if (keycode == KEY_DOWN)
-    {
-        sprintf(keyname, "DOWN");
-    }
-    else if (keycode == KEY_LEFT)
-    {
-        sprintf(keyname, "LEFT");
-    }
-    else if (keycode == KEY_RIGHT)
-    {
-        sprintf(keyname, "RIGHT");
-    }
-    else if (keycode == KEY_HOME)
-    {
-        sprintf(keyname, "HOME");
-    }
-    else if (keycode == KEY_BACKSPACE)
-    {
-        sprintf(keyname, "BACKSPACE");
-    }
     else if (keycode >= KEY_F0 && keycode <= KEY_F(63))
     {
         uint16_t f = keycode - KEY_F0;
         sprintf(keyname, "F%d", f);
     }
-    else if (keycode == KEY_DC)
+    else if (   try_keycode(keycode, keyname, 9, "TAB")
+             || try_keycode(keycode, keyname, 10, "RETURN")
+             || try_keycode(keycode, keyname, 27, "ESCAPE")
+             || try_keycode(keycode, keyname, 32, "SPACE")
+             || try_keycode(keycode, keyname, KEY_UP, "UP")
+             || try_keycode(keycode, keyname, KEY_DOWN, "DOWN")
+             || try_keycode(keycode, keyname, KEY_LEFT, "LEFT")
+             || try_keycode(keycode, keyname, KEY_RIGHT, "RIGHT")
+             || try_keycode(keycode, keyname, KEY_HOME, "HOME")
+             || try_keycode(keycode, keyname, KEY_BACKSPACE, "BACKSPACE")
+             || try_keycode(keycode, keyname, KEY_DC, "DELETE")
+             || try_keycode(keycode, keyname, KEY_IC, "INSERT")
+             || try_keycode(keycode, keyname, KEY_NPAGE, "NEXT PAGE")
+             || try_keycode(keycode, keyname, KEY_PPAGE, "PREV PAGE")
+             || try_keycode(keycode, keyname, KEY_END, "END"))
     {
-        sprintf(keyname, "DELETE");
-    }
-    else if (keycode == KEY_IC)
-    {
-        sprintf(keyname, "INSERT");
-    }
-    else if (keycode == KEY_NPAGE)
-    {
-        sprintf(keyname, "NEXT PAGE");
-    }
-    else if (keycode == KEY_PPAGE)
-    {
-        sprintf(keyname, "PREV PAGE");
-    }
-    else if (keycode == KEY_END)
-    {
-        sprintf(keyname, "END");
+        ;
     }
     else
     {
