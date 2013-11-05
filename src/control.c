@@ -52,7 +52,7 @@ extern uint16_t get_available_keycode_to_action(char * name)
 
 
 
-extern void record_control(int action)
+extern uint8_t player_control_by_id(int action)
 {
     if      (is_command_id_shortdsc(action, "wait"))
     {
@@ -82,45 +82,29 @@ extern void record_control(int action)
     {
         player_pick();
     }
-}
-
-
-
-extern uint8_t player_control(int key)
-{
-    if      (key == get_available_keycode_to_action("wait"))
-    {
-        player_wait();
-    }
-    else if (key == get_available_keycode_to_action("player_u"))
-    {
-        move_player(NORTH);
-    }
-    else if (key == get_available_keycode_to_action("player_r"))
-    {
-        move_player(EAST);
-    }
-    else if (key == get_available_keycode_to_action("player_d"))
-    {
-        move_player(SOUTH);
-    }
-    else if (key == get_available_keycode_to_action("player_l"))
-    {
-        move_player(WEST);
-    }
-    else if (key == get_available_keycode_to_action("drop"))
-    {
-        player_drop();
-    }
-    else if (key == get_available_keycode_to_action("pick"))
-    {
-        player_pick();
-    }
     else
     {
         return 0;
     }
     return 1;
+}
+
+
+
+extern uint8_t player_control_by_key(int key)
+{
+    char * action_name = get_func_to_keycode(world.kb_global.kbs, key);
+    if (NULL == action_name && 0 != world.wmeta->active)
+    {
+        struct WinConf * wc = get_winconf_by_win(world.wmeta->active);
+        action_name = get_func_to_keycode(wc->kb.kbs, key);
+    }
+    if (NULL != action_name)
+    {
+        uint8_t action_id = get_command_id(action_name);
+        return player_control_by_id(action_id);
+    }
+    return 0;
 }
 
 

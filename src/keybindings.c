@@ -37,6 +37,21 @@ static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
 
 
 
+extern char * get_func_to_keycode(struct KeyBinding * kb_p, uint16_t key)
+{
+    while (0 != kb_p)
+    {
+        if (key == kb_p->key)
+        {
+            return kb_p->name;
+        }
+        kb_p = kb_p->next;
+    }
+    return NULL;
+}
+
+
+
 extern uint16_t get_keycode_to_action(struct KeyBinding * kb_p, char * name)
 {
     while (0 != kb_p)

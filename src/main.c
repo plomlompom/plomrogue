@@ -26,7 +26,9 @@
 #include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game(), exit_err() */
 #include "command_db.h" /* for init_command_db(), is_command_id_shortdsc() */
-#include "control.h" /* for *_control(), get_available_keycode_to_action() */
+#include "control.h" /* for control_by_id(), player_control(),
+                      * get_available_keycode_to_action()
+                      */
 
 
 
@@ -184,7 +186,7 @@ int main(int argc, char *argv[])
                 {
                     world.inventory_select = getc(file);
                 }
-                record_control(action);
+                player_control_by_id(action);
             }
         }
         while (1)
@@ -207,7 +209,7 @@ int main(int argc, char *argv[])
                     {
                         world.inventory_select = getc(file);
                     }
-                    record_control(action);
+                    player_control_by_id(action);
                 }
             }
             else if (meta_control(key))
@@ -227,22 +229,12 @@ int main(int argc, char *argv[])
             draw_all_wins(world.wmeta);
             key = getch();
             wc = get_winconf_by_win(world.wmeta->active);
-            if      (1 == wc->view && wingeom_control(key))
-            {
-                continue;
-            }
-            else if (2 == wc->view && winkeyb_control(key))
-            {
-                continue;
-            }
-
             if  (   (1 == wc->view && wingeom_control(key))
                  || (2 == wc->view && winkeyb_control(key))
-                 || (0 != player->lifepoints && player_control(key)))
+                 || (0 != player->lifepoints && player_control_by_key(key)))
             {
                 continue;
             }
-
             if (meta_control(key))
             {
                 exit_game();

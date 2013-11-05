@@ -30,6 +30,9 @@ struct KeyBiData
 
 
 
+/* Return name of action / functionality coupled to keycode; NULL on failure. */
+extern char * get_func_to_keycode(struct KeyBinding * kb_p, uint16_t key);
+
 /* Return keycode matched by keybinding to command of "name". */
 extern uint16_t get_keycode_to_action(struct KeyBinding * keybindings,
                                       char * name);
