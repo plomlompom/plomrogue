@@ -138,6 +138,14 @@ extern void unload_interface_conf()
 
 
 
+extern void reload_interface_conf()
+{
+    unload_interface_conf();
+    load_interface_conf();
+}
+
+
+
 extern void update_log(char * text)
 {
     char * f_name = "update_log()";
@@ -228,7 +236,8 @@ extern void turn_over(char action)
     {
         if (0 < monster->lifepoints && 0 != monster->id)
         {
-            move_actor(monster, rrand() % 5);
+            char * sel = "\0NSEW";
+            move_actor(monster, sel[rrand() % 5]);
         }
     }
 }

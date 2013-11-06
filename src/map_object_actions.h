@@ -12,12 +12,12 @@ struct MapObj;
 
 
 
-/* Try to move "actor" one step in direction "d" and handle the consequences:
- * either the move succeeds, or another actor is encountered and hit (which
- * leads to its lifepoint decreasing by one and potentially its death), or the
- * target square is not passable and the move fails.
+/* Try to move "actor" one step in direction "d" (where east is 'E', north 'N'
+ * etc.) and handle the consequences: either the move succeeds, or another actor
+ * is encountered and hit (which leads to its lifepoint decreasing by one and
+ * potentially its death), or the target square is not passable, the move fails.
  */
-extern uint8_t move_actor(struct MapObj * actor, enum dir d);
+extern uint8_t move_actor(struct MapObj * actor, char d);
 
 
 
@@ -25,7 +25,7 @@ extern uint8_t move_actor(struct MapObj * actor, enum dir d);
  * the game log with appropriate messages on the move attempt and its results;
  * turns over to turn_over() when finished.
  */
-extern void move_player(enum dir d);
+extern void move_player(char d);
 
 
 

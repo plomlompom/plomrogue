@@ -20,21 +20,21 @@ extern uint8_t yx_uint16_cmp(struct yx_uint16 * a, struct yx_uint16 * b)
 
 
 
-extern struct yx_uint16 mv_yx_in_dir(enum dir d, struct yx_uint16 yx)
+extern struct yx_uint16 mv_yx_in_dir(char d, struct yx_uint16 yx)
 {
-    if      (d == NORTH)
+    if      (d == 'N')
     {
         yx.y--;
     }
-    else if (d == EAST)
+    else if (d == 'E')
     {
         yx.x++;
     }
-    else if (d == SOUTH)
+    else if (d == 'S')
     {
         yx.y++;
     }
-    else if (d == WEST)
+    else if (d == 'W')
     {
         yx.x--;
     }

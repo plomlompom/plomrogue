@@ -18,8 +18,8 @@ extern uint16_t get_available_keycode_to_action(char * name);
 /* Control the player character, either via action id "action" or pressed "key".
  * Return 1 on success, 0 if no appropriate action to trigger was found.
  */
-extern uint8_t player_control_by_id(int action);
 extern uint8_t player_control_by_key(int key);
+extern uint8_t player_control_by_id(int action);
 
 
 

@@ -6,24 +6,137 @@
                       *  struct WinMeta
                       */
 #include "keybindings.h" /* for get_keycode_to_action(), mod_selected_keyb(),
-                          * move_keyb_mod_selection()
+                          * move_keyb_mod_selection(), get_func_to_keycode()
                           */
-#include "map.h" /* for map_scroll() */
+#include "map.h" /* for map_scroll(), map_center() */
 #include "main.h" /* for world global */
 #include "rexit.h" /* for exit_err() */
-#include "wincontrol.h" /* for scroll_pad(), toggle_window(),
-                         * growshrink_active_window(), toggle_winconfig(),
+#include "wincontrol.h" /* for struct WinConf, scroll_pad(), toggle_window(),
+                         * growshrink_active_window(),toggle_winconfig(),
                          * toggle_win_height_type(), toggle_win_width_type()
                          */
 #include "map_object_actions.h" /* for player_wait(), move_player(),
                                  * player_drop(), player_pick()
                                  */
 #include "command_db.h" /* for is_command_id_shortdsc() */
-#include "misc.h" /* for load_interface_conf(), unload_interface_conf(),
-                   * save_interface_conf(), nav_inventory()
+#include "misc.h" /* for reload_interface_conf(), save_interface_conf(),
+                   * nav_inventory()
                    */
-#include "yx_uint16.h" /* for dir enum */
-#include "map_objects.h" /* for get_player() */
+
+
+
+/* If "cmd" (either (type = "i") command or (type = "k") keybinding identifier)
+ * matches "match" in is_cmd_id_shortdsc() or get_available_keycode_to_action(),
+ * execute "f" with provided char arguments and return 1; else only return 0.
+ */
+static uint8_t try_cmd_0args(char type, int cmd, char * match, void (* f) ());
+static uint8_t try_cmd_1args(char type, int cmd, char * match,
+                             void (* f) (char), char c);
+static uint8_t try_cmd_2args(char type, int cmd, char * match,
+                             void (* f) (char, char), char c1, char c2);
+
+/* Return pointer to global keybindings or to keybindings for wingeometry config
+ * (c = "g") or winkeys config (c = "k") or active window's keybindings ("w").
+ */
+static struct KeyBiData * select_keybidata_pointer(char c);
+
+/* Wrappers to make some functions compatible to try_cmd_* single char args. */
+static void wrap_mod_selected_keyb(char c);
+static void wrap_mv_kb_mod(char c1, char c2);
+static void wrap_cycle_active_win(char c);
+static void wrap_shift_active_win(char c);
+
+
+
+static uint8_t try_cmd_0args(char type, int cmd, char * match, void (* f) ())
+{
+    if (   ('k' == type && cmd == get_available_keycode_to_action(match))
+        || ('i' == type && is_command_id_shortdsc(cmd, match)))
+    {
+        f();
+        return 1;
+    }
+    return 0;
+}
+
+
+
+static uint8_t try_cmd_1args(char type, int cmd, char * match,
+                             void (* f) (char), char c)
+{
+    if (   ('k' == type && cmd == get_available_keycode_to_action(match))
+        || ('i' == type && is_command_id_shortdsc(cmd, match)))
+    {
+        f(c);
+        return 1;
+    }
+    return 0;
+}
+
+
+
+static uint8_t try_cmd_2args(char type, int cmd, char * match,
+                             void (* f) (char, char), char c1, char c2)
+{
+    if (   ('k' == type && cmd == get_available_keycode_to_action(match))
+        || ('i' == type && is_command_id_shortdsc(cmd, match)))
+    {
+        f(c1, c2);
+        return 1;
+    }
+    return 0;
+}
+
+
+
+static struct KeyBiData * select_keybidata_pointer(char c)
+{
+    struct KeyBiData * kbd;
+    kbd = &world.kb_global;
+    if      ('g' == c)
+    {
+        kbd = &world.kb_wingeom;
+    }
+    else if ('k' == c)
+    {
+        kbd = &world.kb_winkeys;
+    }
+    else if ('w' == c)
+    {
+        struct WinConf * wc = get_winconf_by_win(world.wmeta->active);
+        kbd = &wc->kb;
+    }
+    return kbd;
+}
+
+
+
+static void wrap_mod_selected_keyb(char c)
+{
+        mod_selected_keyb(select_keybidata_pointer(c));
+}
+
+
+
+static void wrap_mv_kb_mod(char c1, char c2)
+{
+        move_keyb_mod_selection(select_keybidata_pointer(c1), c2);
+}
+
+
+
+static void wrap_cycle_active_win(char c)
+{
+        cycle_active_win(world.wmeta, c);
+}
+
+
+
+static void wrap_shift_active_win(char c)
+{
+    char * err  = "Trouble with shift_active_win() in wingeom_control().";
+    exit_err(shift_active_win(world.wmeta, c), err);
+}
 
 
 
@@ -52,45 +165,6 @@ extern uint16_t get_available_keycode_to_action(char * name)
 
 
 
-extern uint8_t player_control_by_id(int action)
-{
-    if      (is_command_id_shortdsc(action, "wait"))
-    {
-        player_wait();
-    }
-    else if (is_command_id_shortdsc(action, "player_u"))
-    {
-        move_player(NORTH);
-    }
-    else if (is_command_id_shortdsc(action, "player_r"))
-    {
-        move_player(EAST);
-    }
-    else if (is_command_id_shortdsc(action, "player_d"))
-    {
-        move_player(SOUTH);
-    }
-    else if (is_command_id_shortdsc(action, "player_l"))
-    {
-        move_player(WEST);
-    }
-    else if (is_command_id_shortdsc(action, "drop"))
-    {
-        player_drop();
-    }
-    else if (is_command_id_shortdsc(action, "pick"))
-    {
-        player_pick();
-    }
-    else
-    {
-        return 0;
-    }
-    return 1;
-}
-
-
-
 extern uint8_t player_control_by_key(int key)
 {
     char * action_name = get_func_to_keycode(world.kb_global.kbs, key);
@@ -109,214 +183,91 @@ extern uint8_t player_control_by_key(int key)
 
 
 
+extern uint8_t player_control_by_id(int action)
+{
+    if (   try_cmd_0args('i', action, "wait", player_wait)
+        || try_cmd_0args('i', action, "drop", player_drop)
+        || try_cmd_0args('i', action, "pick", player_pick)
+        || try_cmd_1args('i', action, "player_u", move_player, 'N')
+        || try_cmd_1args('i', action, "player_d", move_player, 'S')
+        || try_cmd_1args('i', action, "player_r", move_player, 'E')
+        || try_cmd_1args('i', action, "player_l", move_player, 'W'))
+    {
+        return 1;
+    }
+    return 0;
+}
+
+
+
 extern uint8_t wingeom_control(int key)
 {
-    char * err_shift  = "Trouble with shift_active_win() in wingeom_control().";
-    char * err_resize = "Trouble with growshrink_active_window() in "
-                        "wingeom_control().";
-    if      (key == get_available_keycode_to_action("to_height_t"))
+    if (   try_cmd_0args('k', key, "to_height_t", toggle_win_height_type)
+        || try_cmd_0args('k', key, "to_width_t", toggle_win_width_type)
+        || try_cmd_1args('k', key, "grow_h", growshrink_active_window, '*')
+        || try_cmd_1args('k', key, "shri_h", growshrink_active_window, '_')
+        || try_cmd_1args('k', key, "grow_v", growshrink_active_window, '+')
+        || try_cmd_1args('k', key, "shri_v", growshrink_active_window, '-')
+        || try_cmd_1args('k', key, "shift_f", wrap_shift_active_win, 'f')
+        || try_cmd_1args('k', key, "shift_b", wrap_shift_active_win, 'b'))
     {
-        toggle_win_height_type(world.wmeta->active);
+        return 1;
     }
-    else if (key == get_available_keycode_to_action("to_width_t"))
-    {
-        toggle_win_width_type(world.wmeta->active);
-    }
-    else if (key == get_available_keycode_to_action("grow_h"))
-    {
-        exit_err(growshrink_active_window('*'), err_resize);
-    }
-    else if (key == get_available_keycode_to_action("shri_h"))
-    {
-        exit_err(growshrink_active_window('_'), err_resize);
-    }
-    else if (key == get_available_keycode_to_action("grow_v"))
-    {
-        exit_err(growshrink_active_window('+'), err_resize);
-    }
-    else if (key == get_available_keycode_to_action("shri_v"))
-    {
-        exit_err(growshrink_active_window('-'), err_resize);
-    }
-    else if (key == get_available_keycode_to_action("shift_f"))
-    {
-        exit_err(shift_active_win(world.wmeta, 'f'), err_shift);
-    }
-    else if (key == get_available_keycode_to_action("shift_b"))
-    {
-        exit_err(shift_active_win(world.wmeta, 'b'), err_shift);
-    }
-    else
-    {
-        return 0;
-    }
-    return 1;
+    return 0;
 }
 
 
 
 extern uint8_t winkeyb_control(int key)
 {
-    struct WinConf * wc = get_winconf_by_win(world.wmeta->active);
-    if      (key == get_available_keycode_to_action("w_keys_u"))
+    if (   try_cmd_1args('k', key, "w_keys_m", wrap_mod_selected_keyb, 'w')
+        || try_cmd_2args('k', key, "w_keys_u", wrap_mv_kb_mod, 'w', 'u')
+        || try_cmd_2args('k', key, "w_keys_d", wrap_mv_kb_mod, 'w', 'd'))
     {
-        move_keyb_mod_selection(&wc->kb, 'u');
+        return 1;
     }
-    else if (key == get_available_keycode_to_action("w_keys_d"))
-    {
-        move_keyb_mod_selection(&wc->kb, 'd');
-    }
-    else if (key == get_available_keycode_to_action("w_keys_m"))
-    {
-        mod_selected_keyb(&wc->kb);
-    }
-    else
-    {
-        return 0;
-    }
-    return 1;
+    return 0;
 }
 
 
 
 extern uint8_t meta_control(int key)
 {
-    struct WinMeta * win_meta = world.wmeta;
-    struct Win * win_map      = get_win_by_id('m');
-    char * err_toggle = "Trouble with toggle_window() in meta_control().";
-    if      (key == get_available_keycode_to_action("quit"))
+    uint8_t ret = (key == get_available_keycode_to_action("quit"));
+    if (   (0 == ret)
+        && (   try_cmd_0args('k', key, "winconf", toggle_winconfig)
+            || try_cmd_0args('k', key, "reload_conf", reload_interface_conf)
+            || try_cmd_0args('k', key, "save_conf", save_interface_conf)
+            || try_cmd_0args('k', key, "map_c", map_center)
+            || try_cmd_1args('k', key, "scrl_r", scroll_pad, '+')
+            || try_cmd_1args('k', key, "scrl_l", scroll_pad, '-')
+            || try_cmd_1args('k', key, "to_a_keywin", toggle_window, 'k')
+            || try_cmd_1args('k', key, "to_g_keywin", toggle_window, '0')
+            || try_cmd_1args('k', key, "to_wg_keywin", toggle_window, '1')
+            || try_cmd_1args('k', key, "to_wk_keywin", toggle_window, '2')
+            || try_cmd_1args('k', key, "to_mapwin", toggle_window, 'm')
+            || try_cmd_1args('k', key, "to_infowin", toggle_window, 'i')
+            || try_cmd_1args('k', key, "to_inv", toggle_window, 'c')
+            || try_cmd_1args('k', key, "to_logwin", toggle_window, 'l')
+            || try_cmd_1args('k', key, "cyc_win_f", wrap_cycle_active_win, 'f')
+            || try_cmd_1args('k', key, "cyc_win_b", wrap_cycle_active_win, 'b')
+            || try_cmd_1args('k', key, "g_keys_m", wrap_mod_selected_keyb, 'G')
+            || try_cmd_1args('k', key, "wg_keys_m", wrap_mod_selected_keyb, 'g')
+            || try_cmd_1args('k', key, "wk_keys_m", wrap_mod_selected_keyb, 'k')
+            || try_cmd_1args('k', key, "inv_u", nav_inventory, 'u')
+            || try_cmd_1args('k', key, "inv_d", nav_inventory, 'd')
+            || try_cmd_1args('k', key, "map_u", map_scroll, 'N')
+            || try_cmd_1args('k', key, "map_d", map_scroll, 'S')
+            || try_cmd_1args('k', key, "map_r", map_scroll, 'E')
+            || try_cmd_1args('k', key, "map_l", map_scroll, 'W')
+            || try_cmd_2args('k', key, "g_keys_u", wrap_mv_kb_mod, 'G', 'u')
+            || try_cmd_2args('k', key, "g_keys_d", wrap_mv_kb_mod, 'G', 'd')
+            || try_cmd_2args('k', key, "wg_keys_u", wrap_mv_kb_mod, 'g', 'u')
+            || try_cmd_2args('k', key, "wg_keys_d", wrap_mv_kb_mod, 'g', 'd')
+            || try_cmd_2args('k', key, "wk_keys_u", wrap_mv_kb_mod, 'k', 'u')
+            || try_cmd_2args('k', key, "wk_keys_d", wrap_mv_kb_mod, 'k', 'd')))
     {
-        return 1;
+        ;
     }
-    else if (key == get_available_keycode_to_action("winconf"))
-    {
-        toggle_winconfig(world.wmeta->active);
-    }
-    else if (key == get_available_keycode_to_action("cyc_win_f"))
-    {
-        cycle_active_win(world.wmeta, 'f');
-    }
-    else if (key == get_available_keycode_to_action("cyc_win_b"))
-    {
-        cycle_active_win(world.wmeta, 'b');
-    }
-    else if (key == get_available_keycode_to_action("scrl_r"))
-    {
-        scroll_pad(win_meta, '+');
-    }
-    else if (key == get_available_keycode_to_action("scrl_l"))
-    {
-        scroll_pad(win_meta, '-');
-    }
-    else if (key == get_available_keycode_to_action("to_a_keywin"))
-    {
-       exit_err(toggle_window(win_meta, get_win_by_id('k')), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("to_g_keywin"))
-    {
-        exit_err(toggle_window(win_meta, get_win_by_id('0')), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("to_wg_keywin"))
-    {
-        exit_err(toggle_window(win_meta, get_win_by_id('1')), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("to_wk_keywin"))
-    {
-        exit_err(toggle_window(win_meta, get_win_by_id('2')), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("to_mapwin"))
-    {
-        exit_err(toggle_window(win_meta, win_map), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("to_infowin"))
-    {
-        exit_err(toggle_window(win_meta, get_win_by_id('i')), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("to_inv"))
-    {
-        exit_err(toggle_window(win_meta, get_win_by_id('c')), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("to_logwin"))
-    {
-        exit_err(toggle_window(win_meta, get_win_by_id('l')), err_toggle);
-    }
-    else if (key == get_available_keycode_to_action("save_conf"))
-    {
-        save_interface_conf();
-    }
-    else if (key == get_available_keycode_to_action("g_keys_u"))
-    {
-        move_keyb_mod_selection(&world.kb_global, 'u');
-    }
-    else if (key == get_available_keycode_to_action("g_keys_d"))
-    {
-        move_keyb_mod_selection(&world.kb_global, 'd');
-    }
-    else if (key == get_available_keycode_to_action("g_keys_m"))
-    {
-        mod_selected_keyb(&world.kb_global);
-    }
-    else if (key == get_available_keycode_to_action("wg_keys_u"))
-    {
-        move_keyb_mod_selection(&world.kb_wingeom, 'u');
-    }
-    else if (key == get_available_keycode_to_action("wg_keys_d"))
-    {
-        move_keyb_mod_selection(&world.kb_wingeom, 'd');
-    }
-    else if (key == get_available_keycode_to_action("wg_keys_m"))
-    {
-        mod_selected_keyb(&world.kb_wingeom);
-    }
-    else if (key == get_available_keycode_to_action("wk_keys_u"))
-    {
-        move_keyb_mod_selection(&world.kb_winkeys, 'u');
-    }
-    else if (key == get_available_keycode_to_action("wk_keys_d"))
-    {
-        move_keyb_mod_selection(&world.kb_winkeys, 'd');
-    }
-    else if (key == get_available_keycode_to_action("wk_keys_m"))
-    {
-        mod_selected_keyb(&world.kb_winkeys);
-    }
-    else if (key == get_available_keycode_to_action("map_u"))
-    {
-        map_scroll(win_map, world.map->size, NORTH);
-    }
-    else if (key == get_available_keycode_to_action("map_d"))
-    {
-        map_scroll(win_map, world.map->size, SOUTH);
-    }
-    else if (key == get_available_keycode_to_action("map_r"))
-    {
-        map_scroll(win_map, world.map->size, EAST);
-    }
-    else if (key == get_available_keycode_to_action("map_l"))
-    {
-        map_scroll(win_map, world.map->size, WEST);
-    }
-    else if (key == get_available_keycode_to_action("map_c"))
-    {
-        struct MapObj * player = get_player();
-        win_map->center = player->pos;
-    }
-    else if (key == get_available_keycode_to_action("inv_u"))
-    {
-        nav_inventory('u');
-    }
-    else if (key == get_available_keycode_to_action("inv_d"))
-    {
-        nav_inventory('d');
-    }
-    else if (key == get_available_keycode_to_action("reload_conf"))
-    {
-        unload_interface_conf();
-        load_interface_conf();
-    }
-    else if (key == get_available_keycode_to_action("winconf"))
-    {
-        toggle_winconfig(world.wmeta->active);
-    }
-    return 0;
+    return ret;
 }

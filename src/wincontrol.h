@@ -67,27 +67,24 @@ extern void save_win_configs();
 
 
 
-/* Toggle "window configuration" view for "win". This also sets sensible values
- * for win->center for the various configuration views (y=0, x=0 for
+/* Toggle "window configuration" view for active window. This also sets sensible
+ * values for Win->center for the various configuration views (y=0, x=0 for
  * winconf_geometry and x= for winconf_keys).
  */
-extern void toggle_winconfig(struct Win * win);
+extern void toggle_winconfig();
 
 
 
-/* Toggle interpretation type for Win's width/height of Win in WinConf. Width
+/* Toggle interpretation type for active Win's width/height in WinConf. Width
  * only toggles to 1 if terminal window is at least as wide as WinConf->width.
  */
-extern void toggle_win_height_type(struct Win * win);
-extern void toggle_win_width_type(struct Win * win);
+extern void toggle_win_height_type();
+extern void toggle_win_width_type();
 
 
 
-/* Toggle display of a window "win".
- *
- * Return 0 on success, 1 on (ncurses pad/window memory allocation) error.
- */
-extern uint8_t toggle_window(struct WinMeta * win_meta, struct Win * win);
+/* Toggle display of a window identified by "id". */
+extern void toggle_window(char id);
 
 
 
@@ -95,7 +92,7 @@ extern uint8_t toggle_window(struct WinMeta * win_meta, struct Win * win);
  * subject to the limitations provided by the window manager via
  * reset_pad_offset().
  */
-extern void scroll_pad(struct WinMeta * win_meta, char dir);
+extern void scroll_pad(char dir);
 
 
 
@@ -104,10 +101,8 @@ extern void scroll_pad(struct WinMeta * win_meta, char dir);
  * provided by the window manager via resize_active_win().
  *
  * Forces WinConf->width_type = 0 if new width surpasses that of terminal win.
- *
- * Return 0 on success, 1 on (ncurses pad/window memory allocation) error.
  */
-extern uint8_t growshrink_active_window(char change);
+extern void growshrink_active_window(char change);
 
 
 

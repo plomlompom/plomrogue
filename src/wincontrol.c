@@ -10,7 +10,7 @@
                       * structs Win, WinMeta
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
-#include "main.h" /* for Wins struct */
+#include "main.h" /* for world global */
 #include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose(),
                         * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
                         */
@@ -449,12 +449,11 @@ extern void sorted_wintoggle_and_activate()
         {
             continue;
         }
-        struct Win * win = get_win_by_id(win_order[i]);
-        toggle_window(world.wmeta, win);
+        toggle_window(win_order[i]);
 
         if (a == (uint8_t) win_order[i])
         {
-            world.wmeta->active = win;
+            world.wmeta->active = get_win_by_id(win_order[i]);
         }
     }
 }
@@ -498,23 +497,26 @@ extern void save_win_configs()
 
 
 
-extern uint8_t toggle_window(struct WinMeta * win_meta, struct Win * win)
+extern void toggle_window(char id)
 {
-    if (0 == win->prev && win_meta->chain_start != win) /* Win outside chain. */
+    char * err = "Trouble with toggle_window().";
+    struct Win * win = get_win_by_id(id);
+    if (0 == win->prev && world.wmeta->chain_start != win) /* Win outside chain. */
     {
-        return append_win(win_meta, win);
+        exit_err(append_win(world.wmeta, win), err);
     }
     else
     {
-        return suspend_win(win_meta, win);
+        exit_err(suspend_win(world.wmeta, win), err);
     }
 }
 
 
 
-extern void toggle_winconfig(struct Win * win)
+extern void toggle_winconfig()
 {
-    struct WinConf * wcp = get_winconf_by_win(win);
+   struct Win * win = world.wmeta->active;
+   struct WinConf * wcp = get_winconf_by_win(win);
     if      (0 == wcp->view)
     {
         win->draw = draw_winconf_geometry;
@@ -539,8 +541,9 @@ extern void toggle_winconfig(struct Win * win)
 
 
 
-extern void toggle_win_height_type(struct Win * win)
+extern void toggle_win_height_type()
 {
+    struct Win * win = world.wmeta->active;
     struct WinConf * wcp = get_winconf_by_win(win);
     if (0 == wcp->height_type)
     {
@@ -555,8 +558,9 @@ extern void toggle_win_height_type(struct Win * win)
 
 
 
-extern void toggle_win_width_type(struct Win * win)
+extern void toggle_win_width_type()
 {
+    struct Win * win = world.wmeta->active;
     struct WinConf * wcp = get_winconf_by_win(win);
     if (0 == wcp->width_type && win->framesize.x <= world.wmeta->padsize.x)
     {
@@ -571,22 +575,24 @@ extern void toggle_win_width_type(struct Win * win)
 
 
 
-extern void scroll_pad(struct WinMeta * win_meta, char dir)
+extern void scroll_pad(char dir)
 {
     if      ('+' == dir)
     {
-        reset_pad_offset(win_meta, win_meta->pad_offset + 1);
+        reset_pad_offset(world.wmeta, world.wmeta->pad_offset + 1);
     }
     else if ('-' == dir)
     {
-        reset_pad_offset(win_meta, win_meta->pad_offset - 1);
+        reset_pad_offset(world.wmeta, world.wmeta->pad_offset - 1);
     }
 }
 
 
 
-extern uint8_t growshrink_active_window(char change)
+extern void growshrink_active_window(char change)
 {
+    char * err = "Trouble with resize_active_win() in "
+                 "growshink_active_window().";
     if (0 != world.wmeta->active)
     {
         struct yx_uint16 size = world.wmeta->active->framesize;
@@ -606,7 +612,7 @@ extern uint8_t growshrink_active_window(char change)
         {
             size.x++;
         }
-        uint8_t x = resize_active_win(world.wmeta, size);
+        exit_err(resize_active_win(world.wmeta, size), err);
         struct WinConf * wcp = get_winconf_by_win(world.wmeta->active);
         if (   1 == wcp->width_type
             && world.wmeta->active->framesize.x > world.wmeta->padsize.x)
@@ -614,7 +620,5 @@ extern uint8_t growshrink_active_window(char change)
             wcp->width_type = 0;
         }
         set_winconf_geometry(wcp->id);
-        return x;
     }
-    return 0;
 }

@@ -1,6 +1,6 @@
 /* map.h
  *
- * Struct for the game map and routines to manipulate it.
+ * Struct for the game map and routines to create and scroll on it.
  */
 
 #ifndef MAP_H
@@ -31,8 +31,15 @@ extern struct Map init_map();
 
 
 
-/* Try to change the view center of map "win" of "map_size" into dir "d". */
-extern void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d);
+/* Try to change the view center of map into directino described by "d" (north
+ * = "N", east = "E" etc.).
+ */
+extern void map_scroll(char d);
+
+
+
+/* Center map on player. */
+extern void map_center();
 
 
 

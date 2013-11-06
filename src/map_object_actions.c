@@ -64,7 +64,7 @@ static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted)
 
 
 
-extern uint8_t move_actor(struct MapObj * actor, enum dir d)
+extern uint8_t move_actor(struct MapObj * actor, char d)
 {
     struct yx_uint16 target = mv_yx_in_dir(d, actor->pos);
     struct MapObj * other_actor;
@@ -92,29 +92,29 @@ extern uint8_t move_actor(struct MapObj * actor, enum dir d)
 
 
 
-extern void move_player(enum dir d)
+extern void move_player(char d)
 {
     char * dsc_dir;
     char * action_dsc_prototype = "player_";
     uint8_t len_action_dsc_prototype = strlen(action_dsc_prototype);
     char action_dsc[len_action_dsc_prototype + 2];
     memcpy(action_dsc, action_dsc_prototype, len_action_dsc_prototype);
-    if      (NORTH == d)
+    if      ('N' == d)
     {
         dsc_dir = "north";
         action_dsc[len_action_dsc_prototype] = 'u';
     }
-    else if (EAST  == d)
+    else if ('E' == d)
     {
         dsc_dir = "east" ;
         action_dsc[len_action_dsc_prototype] = 'r';
     }
-    else if (SOUTH == d)
+    else if ('S' == d)
     {
         dsc_dir = "south";
         action_dsc[len_action_dsc_prototype] = 'd';
     }
-    else if (WEST  == d)
+    else if ('W' == d)
     {
         dsc_dir = "west" ;
         action_dsc[len_action_dsc_prototype] = 'l';

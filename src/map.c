@@ -1,10 +1,12 @@
 #include "map.h"
 #include <stdint.h>      /* for uint16_t, uint32_t */
 #include "misc.h"        /* for try_malloc(), center_offset() */
-#include "map_objects.h" /* for Player struct */
+#include "map_objects.h" /* for get_player() */
 #include "yx_uint16.h"   /* for yx_uint16 and dir enums */
 #include "rrand.h"       /* for rrand() */
 #include "windows.h"     /* for struct Win */
+#include "main.h"        /* for world global */
+#include "wincontrol.h"  /* for get_win_by_id() */
 
 
 
@@ -53,33 +55,45 @@ extern struct Map init_map()
 
 
 
-extern void map_scroll(struct Win * win, struct yx_uint16 map_size, enum dir d)
+extern void map_scroll(char d)
 {
+    struct Win * win = get_win_by_id('m');
     uint16_t offset;
-    if ((NORTH == d || SOUTH == d) && map_size.y > win->framesize.y)
+    if (('N' == d || 'S' == d) && world.map->size.y > win->framesize.y)
     {
-        offset = center_offset(win->center.y, map_size.y, win->framesize.y);
+        offset = center_offset(win->center.y,
+                               world.map->size.y, win->framesize.y);
         win->center.y = offset + (win->framesize.y / 2);
-        if      (NORTH == d && win->center.y > 0)
+        if      ('N' == d && win->center.y > 0)
         {
             win->center.y--;
         }
-        else if (SOUTH == d && win->center.y < map_size.y - 1)
+        else if ('S' == d && win->center.y < world.map->size.y - 1)
         {
             win->center.y++;
         }
     }
-    else if ((WEST == d || EAST == d) && map_size.x > win->framesize.x)
+    else if (('W' == d || 'E' == d) && world.map->size.x > win->framesize.x)
     {
-        offset = center_offset(win->center.x, map_size.x, win->framesize.x);
+        offset = center_offset(win->center.x,
+                               world.map->size.x, win->framesize.x);
         win->center.x = offset + (win->framesize.x / 2);
-        if      (WEST == d && win->center.x > 0)
+        if      ('W' == d && win->center.x > 0)
         {
             win->center.x--;
         }
-        else if (EAST == d && win->center.x < map_size.x - 1)
+        else if ('E' == d && win->center.x < world.map->size.x - 1)
         {
             win->center.x++;
         }
     }
+}
+
+
+
+extern void map_center()
+{
+    struct MapObj * player = get_player();
+    struct Win * win_map   = get_win_by_id('m');
+    win_map->center = player->pos;
 }

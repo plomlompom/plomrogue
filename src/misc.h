@@ -33,10 +33,11 @@ extern void check_files_xor(char * p1, char * p2);
 
 
 
-/* Save / load / unload (free) interface configuration data. */
+/* Save / load / unload (free) / reload interface configuration data. */
 extern void save_interface_conf();
 extern void load_interface_conf();
 extern void unload_interface_conf();
+extern void reload_interface_conf();
 
 
 
