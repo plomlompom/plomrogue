@@ -266,7 +266,7 @@ static void * get_drawfunc_by_char(char c)
     {
         return draw_win_inventory;
     }
-    if      ('i' == c)
+    else if ('i' == c)
     {
         return draw_win_info;
     }
