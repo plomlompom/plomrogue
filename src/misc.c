@@ -222,7 +222,8 @@ extern void turn_over(char action)
         }
         try_fclose(file_old, f_name);
         exit_err(write_uint8(action, file_new), err_write);
-        if (is_command_id_shortdsc(action, "drop"))
+        if (   is_command_id_shortdsc(action, "drop")
+            || is_command_id_shortdsc(action, "use"))
         {
             uint8_t inventory_select = world.old_inventory_select;
             exit_err(write_uint8(inventory_select, file_new), err_write);

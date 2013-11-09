@@ -180,7 +180,8 @@ int main(int argc, char *argv[])
                 {
                     break;
                 }
-                if (is_command_id_shortdsc(action, "drop"))
+                if (   is_command_id_shortdsc(action, "drop")
+                    || is_command_id_shortdsc(action, "use"))
                 {
                     world.inventory_select = getc(file);
                 }
@@ -203,7 +204,8 @@ int main(int argc, char *argv[])
                 action = getc(file);
                 if (EOF != action)
                 {
-                    if (is_command_id_shortdsc(action, "drop"))
+                    if (   is_command_id_shortdsc(action, "drop")
+                        || is_command_id_shortdsc(action, "use"))
                     {
                         world.inventory_select = getc(file);
                     }

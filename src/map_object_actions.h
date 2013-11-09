@@ -41,6 +41,9 @@ extern void player_drop();
 /* Make player pick up map object from ground. */
 extern void player_pick();
 
+/* Make player use object indexed by world.inventory_select. */
+extern void player_use();
+
 
 
 #endif

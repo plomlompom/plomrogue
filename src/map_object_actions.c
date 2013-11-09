@@ -206,3 +206,47 @@ extern void player_pick()
     }
     turn_over(get_command_id("pick"));
 }
+
+
+
+extern void player_use()
+{
+    struct MapObj * player = get_player();
+    if (NULL == player->owns)
+    {
+        update_log("\nYou try to use an object, but you own none.");
+        world.old_inventory_select = 0;
+    }
+    else
+    {
+        uint8_t i = 0;
+        struct MapObj * selected = player->owns;
+        for (; i != world.inventory_select; i++, selected = selected->next);
+        struct MapObjDef * mod = get_map_object_def(selected->type);
+        if (!strcmp("MAGIC MEAT", mod->name))
+        {
+            struct MapObj * next = selected->next;
+            free(selected);
+            if (0 < world.inventory_select)
+            {
+                world.old_inventory_select = world.inventory_select;
+                world.inventory_select--;
+                for (i = 0, selected = player->owns;
+                     i != world.inventory_select;
+                     i++, selected = selected->next);
+                selected->next = next;
+            }
+            else
+            {
+                player->owns = next;
+            }
+            player->lifepoints++;
+            update_log("\nYou consume MAGIC MEAT.");
+            }
+        else
+        {
+            update_log("\nYou try to use this object, but fail.");
+        }
+    }
+    turn_over(get_command_id("use"));
+}

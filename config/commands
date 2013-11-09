@@ -48,3 +48,4 @@
 48 pick pick up object from ground
 49 inv_d inventory selection down
 50 inv_u inventory selection up
+51 use use selected inventory object
