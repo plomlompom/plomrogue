@@ -97,13 +97,9 @@ extern void init_win_meta(WINDOW * screen);
 extern void init_win(struct Win ** wp, char * title, int16_t height,
                      int16_t width, void * func);
 
-
-
 /* Free allocated memory for an initialized Win / WinMeta structs. */
 extern void free_winmeta();
 extern void free_win(struct Win * win);
-
-
 
 /* Append/suspend window "w" to/from chain of visible windows below "wmeta".
  * Appended windows will become active. Suspended active windows will move the
@@ -113,8 +109,6 @@ extern void free_win(struct Win * win);
 extern void append_win(struct Win * w);
 extern void suspend_win(struct Win * w);
 
-
-
 /* Apply scrolling offset "new_offset" to virtual screen if it is sane, i.e.
  * it's equal/greater zero and does not push the view (further) beyond the
  * virtual screen's border. If the view is already beyond the virtual screen's
@@ -123,8 +117,6 @@ extern void suspend_win(struct Win * w);
  */
 extern void reset_pad_offset(uint16_t new_offset);
 
-
-
 /* Apply new size "size" to the active window, but only if it provides for at
  * least one cell width/height and is in height at least one cell smaller than
  * the screen's vertical height (to provide space for the title bar). Does
@@ -132,23 +124,17 @@ extern void reset_pad_offset(uint16_t new_offset);
  */
 extern void resize_active_win(struct yx_uint16 size);
 
-
-
 /* Cycle active window selection forwards ("dir" == "f") or backwards (any
  * other "dir"). Wrap around in the windows chain if start / end of it is met.
  * Does nothing if no window is active.
  */
 extern void cycle_active_win(char dir);
 
-
-
 /* Move active window forwards ("dir" == "f") or backwards (any other "dir").
  * Wrap around in the window chain if start / end of it is met. Does nothing if
  * no window is active.
  */
 extern void shift_active_win(char dir);
-
-
 
 /* Draw virtual screen including all windows. Also add scroll hints for where
  * the edges of the terminal screen hit non-edges of and inside the virtual

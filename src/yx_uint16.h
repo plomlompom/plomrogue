@@ -23,8 +23,6 @@ struct yx_uint16
 /* Return 1 if two yx_uint16 coordinates at "a" and "b" are equal, else 0. */
 extern uint8_t yx_uint16_cmp(struct yx_uint16 * a, struct yx_uint16 * b);
 
-
-
 /* Return yx_uint16 coordinate one step from coordinate yx in direction "dir"
  * (east: 'E', west: 'W', north: 'N', south: 'S').
  *

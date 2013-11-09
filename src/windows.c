@@ -20,15 +20,11 @@
  */
 static void refit_pad();
 
-
-
 /* Update geometry (sizes, positions) of window "w" and its successors in the
  * window chain. For the positioning algorithm place_win() is used.
  */
 static void update_wins(struct Win * w);
 static void place_win(struct Win * w);
-
-
 
 /* Draw scroll hint (a line saying that there are "dist" more elements of
  * "unit" further into the direction symbolized by the "dir" char) into virtual
@@ -43,12 +39,8 @@ static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
 static void winscroll_hint(struct Win * w, char dir, uint16_t dist);
 static void padscroll_hint(char dir, uint16_t dist);
 
-
-
 /* Draw contents of all windows in window chain from window "w" onwards. */
 static void draw_wins(struct Win * w);
-
-
 
 /* draw_win_borderlines() draws the vertical and horizontal borders of window
  * "w" sans corners into the virtual screen "pad", and draws the top border
@@ -66,8 +58,6 @@ static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad);
 static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
                                   WINDOW * pad);
 static void draw_wins_bordercorners(struct Win * w, WINDOW * pad);
-
-
 
 /* Shift active window forwards / backwards in window chain. */
 static void shift_win_forward();

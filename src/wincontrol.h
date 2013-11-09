@@ -42,14 +42,10 @@ struct WinConf
 extern struct WinConf * get_winconf_by_win(struct Win * win);
 extern struct Win * get_win_by_id(char id);
 
-
-
 /* Create/initialize (from config files)/free Winconf structs. */
 extern void init_winconfs();
 extern void free_winconfs();
 extern void init_wins();
-
-
 
 /* Toggle windows in world.wins in the order desribed by the first line of
  * config/windows/toggle_order_and_active, wherein each character should
@@ -60,12 +56,8 @@ extern void init_wins();
  */
 extern void sorted_wintoggle_and_activate();
 
-
-
 /* Save all window's configurations to their configuration files. */
 extern void save_win_configs();
-
-
 
 /* Toggle "window configuration" view for active window. This also sets sensible
  * values for Win->center for the various configuration views (y=0, x=0 for
@@ -73,28 +65,20 @@ extern void save_win_configs();
  */
 extern void toggle_winconfig();
 
-
-
 /* Toggle interpretation type for active Win's width/height in WinConf. Width
  * only toggles to 1 if terminal window is at least as wide as WinConf->width.
  */
 extern void toggle_win_height_type();
 extern void toggle_win_width_type();
 
-
-
 /* Toggle display of a window identified by "id". */
 extern void toggle_window(char id);
-
-
 
 /* Try to scroll virtual screen left ("dir" = "-") or right ("dir" = "+"),
  * subject to the limitations provided by the window manager via
  * reset_pad_offset().
  */
 extern void scroll_pad(char dir);
-
-
 
 /* Try to grow or shrink the active window horizontally ("change" = "*"/"_") or
  * vertically ("change = "+"/"-") by one cell size, subject to the limitations

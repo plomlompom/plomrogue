@@ -33,8 +33,6 @@
 /* Return string "prefix" + "id"; malloc()'s string, remember to call free()! */
 static char * string_prefixed_id(char * prefix, char id);
 
-
-
 /* Create Winconf, init ->view/height_type/width_type to 0, ->id to "id". */
 static void create_winconf(char id, struct WinConf * wcp);
 
@@ -50,14 +48,10 @@ static void save_win_config(char id);
 /* Free data pointed to inside WinConf struct. */
 static void free_winconf_data(char id);
 
-
-
 /* Write geometry of a window to its WinConf, as positive or negative values
  * (dependent on state ofWinConf->height_type / WinConf->width_type).
  */
 static void set_winconf_geometry(char id);
-
-
 
 /* Get WinConf by "id"; get id of WinConf mothering "win". */
 static struct WinConf * get_winconf_by_id(char id);

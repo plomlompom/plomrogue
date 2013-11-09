@@ -15,8 +15,6 @@
 /* Return 16-bit number pseudo-randomly generated. */
 extern uint16_t rrand();
 
-
-
 /* Set seed that rrand() starts from. */
 extern void rrand_seed(uint32_t new_seed);
 

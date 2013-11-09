@@ -29,14 +29,10 @@ struct Map
  */
 extern struct Map init_map();
 
-
-
 /* Try to change the view center of map into directino described by "d" (north
  * = "N", east = "E" etc.).
  */
 extern void map_scroll(char d);
-
-
 
 /* Center map on player. */
 extern void map_center();

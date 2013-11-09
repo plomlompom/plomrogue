@@ -18,8 +18,6 @@ struct KeyBinding
   char * name;  /* name of functionality bound to keycode */
 };
 
-
-
 /* Wrapper to keybinding chain, contains some keybinding editing metadata. */
 struct KeyBiData
 {
@@ -48,8 +46,6 @@ extern uint16_t get_n_of_keybs(struct KeyBinding * kb_p);
 /* Return "n"-th keybinding in keybindings chain from "kb_p" on. */
 extern struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n);
 
-
-
 /* Initialize/save keybindings data from/to file at "path" to/from keybindings
  * data pointer "kbd".
  */
@@ -58,8 +54,6 @@ extern void save_keybindings(char * path, struct KeyBiData * kbd);
 
 /* Free keybinding chain starting at "kb_start". */
 extern void free_keybindings(struct KeyBinding * kb_start);
-
-
 
 /* Mark keybinding selected for modification as being edited, get user input to
  * modify it, then unmark it again. Ensure there are max. three digits in the

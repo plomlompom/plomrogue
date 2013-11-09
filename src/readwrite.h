@@ -19,15 +19,11 @@ extern void try_fclose(FILE * file, char * f);
 extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
                        char * f);
 
-
-
 /* Wrapper to calling fgets() from function called "f". The return code of
  * fgets() is returned unless it is NULL *and* ferror() indicates that an error
  * occured; otherwise end of file is assumed and NULL is returned properly.
  */
 extern char * try_fgets(char * line, int size, FILE * file, char * f);
-
-
 
 /* Wrapper to successive call of fclose() from function called "f" on "file",
  * then unlink() on file at "p2" if it exists, then rename() on "p1" to "p2".
@@ -36,15 +32,11 @@ extern char * try_fgets(char * line, int size, FILE * file, char * f);
 extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
                                      char * f);
 
-
-
 /* Wrapper: Call textfile_sizes() from function called "f" to get max line
  * length of "file", exit via exit_err() with trouble_msg()-generated error
  * message on failure.
  */
 extern uint16_t get_linemax(FILE * file, char * f);
-
-
 
 /* Learn from "file" the largest line length (pointed to by "linemax_p"; length
  * includes newline chars) and (pointed to by "n_lines_p" if it is not set to
@@ -55,8 +47,6 @@ extern uint16_t get_linemax(FILE * file, char * f);
  */
 extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
                               uint16_t * n_lines_p);
-
-
 
 /* These routines for reading values "x" from / writing values to "file" ensure
  * a defined endianness and consistent error codes: return 0 on success and 1 on

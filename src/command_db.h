@@ -36,8 +36,6 @@ extern uint8_t get_command_id(char * dsc_short);
 /* Give short description of command ("dsc_short"), get long description. */
 extern char * get_command_longdsc(char * dsc_short);
 
-
-
 /* Read in CommandDB from file "config/commands" to world.cmd_db. */
 extern void init_command_db();
 

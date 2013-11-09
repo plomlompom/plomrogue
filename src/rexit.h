@@ -35,8 +35,6 @@ extern void set_cleanup_flag(enum cleanup_flag flag);
 /* Exit orderly, clean up. */
 extern void exit_game();
 
-
-
 /* If "err" == 0, do nothing. Else, clean up and exit with an error message that
  * consists, first, of "msg" or (if "msg" is a NULL pointer) a generic "Details
  * unknown", secondly of "err" as the "internal error code", and thirdly of

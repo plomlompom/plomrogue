@@ -18,8 +18,6 @@
 /* Write representation of "mo" and all of the map objects it owns to "file". */
 static void write_map_object(FILE * file, struct MapObj * mo);
 
-
-
 /* Return pointer to map object of "id" in chain starting at "ptr". */
 static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id);
 

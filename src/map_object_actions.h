@@ -19,29 +19,21 @@ struct MapObj;
  */
 extern uint8_t move_actor(struct MapObj * actor, char d);
 
-
-
 /* Wrapper for using move_actor() on the MapObj representing the player; updates
  * the game log with appropriate messages on the move attempt and its results;
  * turns over to turn_over() when finished.
  */
 extern void move_player(char d);
 
-
-
 /* Make player wait one turn, i.e. only update_log with a "you wait" message
  * and turn control over to the enemy.
  */
 extern void player_wait();
 
-
-
 /* Check if coordinate pos on (or beyond) map is accessible to map object
  * movement.
  */
 extern char is_passable(struct Map * map, struct yx_uint16 pos);
-
-
 
 /* Make player drop to ground map ojbect indexed by world.inventory_select. */
 extern void player_drop();
