@@ -233,8 +233,7 @@ extern void free_keybindings(struct KeyBinding * kb_start)
 extern void mod_selected_keyb(struct KeyBiData * kbd)
 {
     kbd->edit = 1;
-    char * err = "Trouble with draw_all_wins() in mod_selected_keyb().";
-    exit_err(draw_all_wins(world.wmeta), err);
+    draw_all_wins();
     int key = getch();
     if (key < 1000)
     {

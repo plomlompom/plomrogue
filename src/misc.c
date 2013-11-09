@@ -131,7 +131,7 @@ extern void unload_interface_conf()
     free_keybindings(world.kb_winkeys.kbs);
     while (0 != world.wmeta->active)
     {
-        suspend_win(world.wmeta, world.wmeta->active);
+        suspend_win(world.wmeta->active);
     }
     free_winconfs();
 }

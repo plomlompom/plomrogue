@@ -54,7 +54,7 @@ static void cleanup()
     }
     if (cleanup_flags & CLEANUP_WIN_META)
     {
-        free_winmeta(world.wmeta);
+        free_winmeta();
     }
 }
 

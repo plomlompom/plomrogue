@@ -43,8 +43,6 @@ static struct KeyBiData * select_keybidata_pointer(char c);
 /* Wrappers to make some functions compatible to try_cmd_* single char args. */
 static void wrap_mod_selected_keyb(char c);
 static void wrap_mv_kb_mod(char c1, char c2);
-static void wrap_cycle_active_win(char c);
-static void wrap_shift_active_win(char c);
 
 
 
@@ -125,21 +123,6 @@ static void wrap_mv_kb_mod(char c1, char c2)
 
 
 
-static void wrap_cycle_active_win(char c)
-{
-        cycle_active_win(world.wmeta, c);
-}
-
-
-
-static void wrap_shift_active_win(char c)
-{
-    char * err  = "Trouble with shift_active_win() in wingeom_control().";
-    exit_err(shift_active_win(world.wmeta, c), err);
-}
-
-
-
 extern uint16_t get_available_keycode_to_action(char * name)
 {
     uint16_t keycode = get_keycode_to_action(world.kb_global.kbs, name);
@@ -208,8 +191,8 @@ extern uint8_t wingeom_control(int key)
         || try_cmd_1args('k', key, "shri_h", growshrink_active_window, '_')
         || try_cmd_1args('k', key, "grow_v", growshrink_active_window, '+')
         || try_cmd_1args('k', key, "shri_v", growshrink_active_window, '-')
-        || try_cmd_1args('k', key, "shift_f", wrap_shift_active_win, 'f')
-        || try_cmd_1args('k', key, "shift_b", wrap_shift_active_win, 'b'))
+        || try_cmd_1args('k', key, "shift_f", shift_active_win, 'f')
+        || try_cmd_1args('k', key, "shift_b", shift_active_win, 'b'))
     {
         return 1;
     }
@@ -249,8 +232,8 @@ extern uint8_t meta_control(int key)
             || try_cmd_1args('k', key, "to_infowin", toggle_window, 'i')
             || try_cmd_1args('k', key, "to_inv", toggle_window, 'c')
             || try_cmd_1args('k', key, "to_logwin", toggle_window, 'l')
-            || try_cmd_1args('k', key, "cyc_win_f", wrap_cycle_active_win, 'f')
-            || try_cmd_1args('k', key, "cyc_win_b", wrap_cycle_active_win, 'b')
+            || try_cmd_1args('k', key, "cyc_win_f", cycle_active_win, 'f')
+            || try_cmd_1args('k', key, "cyc_win_b", cycle_active_win, 'b')
             || try_cmd_1args('k', key, "g_keys_m", wrap_mod_selected_keyb, 'G')
             || try_cmd_1args('k', key, "wg_keys_m", wrap_mod_selected_keyb, 'g')
             || try_cmd_1args('k', key, "wk_keys_m", wrap_mod_selected_keyb, 'k')

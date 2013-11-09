@@ -157,17 +157,11 @@ static void init_winconf_from_file(char id)
 
 static void init_win_from_winconf(char id)
 {
-    char * tmp = "Trouble in init_win_from_file() with init_win() (win id: _).";
-    char * err = try_malloc(strlen(tmp) + 1, "init_win_from_file()");
-    memcpy(err, tmp, strlen(tmp) + 1);
-    err[strlen(tmp) - 3] = id;
+    char * err = "get_drawfunc_by_char() returns NULL to init_win_from_file().";
     struct WinConf * winconf = get_winconf_by_id(id);
     void * f = get_drawfunc_by_char(winconf->draw);
     exit_err(NULL == f, err);
-    uint8_t test = init_win(world.wmeta, &winconf->win, winconf->title,
-                            winconf->height, winconf->width, f);
-    exit_err(test, err);
-    free(err);
+    init_win(&winconf->win, winconf->title, winconf->height, winconf->width, f);
 }
 
 
@@ -499,15 +493,14 @@ extern void save_win_configs()
 
 extern void toggle_window(char id)
 {
-    char * err = "Trouble with toggle_window().";
     struct Win * win = get_win_by_id(id);
-    if (0 == win->prev && world.wmeta->chain_start != win) /* Win outside chain. */
-    {
-        exit_err(append_win(world.wmeta, win), err);
+    if (0 == win->prev && world.wmeta->chain_start != win)  /* Win struct is  */
+    {                                                       /* outside chain. */
+        append_win(win);
     }
     else
     {
-        exit_err(suspend_win(world.wmeta, win), err);
+        suspend_win(win);
     }
 }
 
@@ -579,11 +572,11 @@ extern void scroll_pad(char dir)
 {
     if      ('+' == dir)
     {
-        reset_pad_offset(world.wmeta, world.wmeta->pad_offset + 1);
+        reset_pad_offset(world.wmeta->pad_offset + 1);
     }
     else if ('-' == dir)
     {
-        reset_pad_offset(world.wmeta, world.wmeta->pad_offset - 1);
+        reset_pad_offset(world.wmeta->pad_offset - 1);
     }
 }
 
@@ -591,8 +584,6 @@ extern void scroll_pad(char dir)
 
 extern void growshrink_active_window(char change)
 {
-    char * err = "Trouble with resize_active_win() in "
-                 "growshink_active_window().";
     if (0 != world.wmeta->active)
     {
         struct yx_uint16 size = world.wmeta->active->framesize;
@@ -612,7 +603,7 @@ extern void growshrink_active_window(char change)
         {
             size.x++;
         }
-        exit_err(resize_active_win(world.wmeta, size), err);
+        resize_active_win(size);
         struct WinConf * wcp = get_winconf_by_win(world.wmeta->active);
         if (   1 == wcp->width_type
             && world.wmeta->active->framesize.x > world.wmeta->padsize.x)

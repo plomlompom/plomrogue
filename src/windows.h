@@ -20,11 +20,6 @@
  * that thrones over enough space to fit them in; failing that, they are placed
  * to the right of the window with the rightmost border.
  *
- * Functions that return uint8_t return these error codes:
- * 0 - success
- * 1 - memory allocation error
- * 2 - would force virtual screen to grow beyond width or height of 2^16 cells
- *
  * TODO: Think up a more intuitive window positioning algorithm or at least make
  * the chain that windows are positioned by visible.
  */
@@ -81,7 +76,7 @@ struct WinMeta
  * initialized 0, except for the virtual screen (height = that of the terminal
  * screen; width = 1) sized to the size of the terminal screen.
  */
-extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
+extern void init_win_meta(WINDOW * screen);
 
 
 
@@ -99,13 +94,13 @@ extern uint8_t init_win_meta(WINDOW * screen, struct WinMeta ** wmeta);
  *
  * Other members of the Win struct are initialized to 0.
  */
-extern uint8_t init_win(struct WinMeta * wmeta, struct Win ** w, char * title,
-                        int16_t height, int16_t width, void * func);
+extern void init_win(struct Win ** wp, char * title, int16_t height,
+                     int16_t width, void * func);
 
 
 
 /* Free allocated memory for an initialized Win / WinMeta structs. */
-extern void free_winmeta(struct WinMeta * wmeta);
+extern void free_winmeta();
 extern void free_win(struct Win * win);
 
 
@@ -115,8 +110,8 @@ extern void free_win(struct Win * win);
  * active window selection to their successor in the window chain or, failing
  * that, their predecessor; if no window remains, none will be active.
  */
-extern uint8_t append_win(struct WinMeta * wmeta, struct Win * w);
-extern uint8_t suspend_win(struct WinMeta * wmeta, struct Win * w);
+extern void append_win(struct Win * w);
+extern void suspend_win(struct Win * w);
 
 
 
@@ -126,7 +121,7 @@ extern uint8_t suspend_win(struct WinMeta * wmeta, struct Win * w);
  * border due to it having shrunk after suspension of windows, only allow view
  * movement leftwards.
  */
-extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset);
+extern void reset_pad_offset(uint16_t new_offset);
 
 
 
@@ -135,7 +130,7 @@ extern void reset_pad_offset(struct WinMeta * wmeta, uint16_t new_offset);
  * the screen's vertical height (to provide space for the title bar). Does
  * nothing if no window is active.
  */
-extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size);
+extern void resize_active_win(struct yx_uint16 size);
 
 
 
@@ -143,7 +138,7 @@ extern uint8_t resize_active_win(struct WinMeta * wmeta, struct yx_uint16 size);
  * other "dir"). Wrap around in the windows chain if start / end of it is met.
  * Does nothing if no window is active.
  */
-extern void cycle_active_win(struct WinMeta * wmeta, char dir);
+extern void cycle_active_win(char dir);
 
 
 
@@ -151,7 +146,7 @@ extern void cycle_active_win(struct WinMeta * wmeta, char dir);
  * Wrap around in the window chain if start / end of it is met. Does nothing if
  * no window is active.
  */
-extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir);
+extern void shift_active_win(char dir);
 
 
 
@@ -159,7 +154,7 @@ extern uint8_t shift_active_win(struct WinMeta * wmeta, char dir);
  * the edges of the terminal screen hit non-edges of and inside the virtual
  * screen. Then update the terminal screen.
  */
-extern uint8_t draw_all_wins(struct WinMeta * wm);
+extern void draw_all_wins();
 
 
 

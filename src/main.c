@@ -152,12 +152,10 @@ int main(int argc, char *argv[])
     curs_set(0);
     keypad(screen, TRUE);
     raw();
-    char * err_winmem = "Trouble with init_win_meta() in main ().";
-    exit_err(init_win_meta(screen, &world.wmeta), err_winmem);
+    init_win_meta(screen);
     set_cleanup_flag(CLEANUP_WIN_META);
-    load_interface_conf(/*&world*/);
+    load_interface_conf();
     set_cleanup_flag(CLEANUP_INTERFACE_CONF);
-    err_winmem = "Trouble with draw_all_wins() in main().";
 
     /* Focus map on player. */
     struct MapObj * player = get_player();
@@ -191,7 +189,7 @@ int main(int argc, char *argv[])
         }
         while (1)
         {
-            draw_all_wins(world.wmeta);
+            draw_all_wins();
             key = getch();
             wc = get_winconf_by_win(world.wmeta->active);
             if  (   (1 == wc->view && wingeom_control(key))
@@ -226,7 +224,7 @@ int main(int argc, char *argv[])
         while (1)
         {
             save_game();
-            draw_all_wins(world.wmeta);
+            draw_all_wins();
             key = getch();
             wc = get_winconf_by_win(world.wmeta->active);
             if  (   (1 == wc->view && wingeom_control(key))
