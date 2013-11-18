@@ -21,6 +21,9 @@ struct MapObj
     uint8_t type;                /* ID of appropriate map object definition */
     uint8_t lifepoints;          /* 0: object is inanimate; >0: hitpoints */
     struct yx_uint16 pos;        /* coordinate on map */
+    uint8_t command;             /* command map object tries to realize now*/
+    uint8_t arg;                 /* optional field for command argument */
+    uint8_t progress;            /* turns already passed to realize .command */
 };
 
 struct MapObjDef

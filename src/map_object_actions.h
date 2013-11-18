@@ -1,48 +1,55 @@
 /* map_object_actions.h
  *
- * Routines for the actions available to map objects.
+ * Actions that can be performed my map objects / "actors". Note that apart
+ * from the consequences described below, each action may also trigger log
+ * messages and other minor stuff if the actor is equal to the player.
  */
 
 #ifndef MAP_OBJECT_ACTIONS_H
 #define MAP_OBJECT_ACTIONS_H
 
-#include "yx_uint16.h" /* for yx_uint16 coordinates */
-struct Map;
+#include <stdint.h> /* for uint8_t */
 struct MapObj;
 
 
 
-/* Try to move "actor" one step in direction "d" (where east is 'E', north 'N'
- * etc.) and handle the consequences: either the move succeeds, or another actor
- * is encountered and hit (which leads to its lifepoint decreasing by one and
- * potentially its death), or the target square is not passable, the move fails.
+struct MapObjAct
+{
+    struct MapObjAct * next;
+    uint8_t id;                      /* unique id of map object action */
+    char * name;                     /* human-readable identifier */
+    uint8_t effort;                  /* how many turn the action takes */
+    void (* func) (struct MapObj *); /* function called after .effort turns */
+};
+
+
+
+/* Init MapObjAct chain at world.map_obj_acts from config/map_object_actions. */
+extern void init_map_object_actions();
+
+/* Free MapObjAct * chain starting at "moa". */
+extern void free_map_object_actions(struct MapObjAct * moa);
+
+/* Actor "mo" does nothing. */
+extern void actor_wait(struct MapObj * mo);
+
+/* Actor "mo" tries to move one step in direction described by char mo->arg
+ * (where east is 'E', north 'N') etc. Move either succeeds, or another actor is
+ * encountered and hit (which leads ot its lifepoint decreasing by one and
+ * eventually death), or the move fails due to an impassable target square.
  */
-extern uint8_t move_actor(struct MapObj * actor, char d);
+extern void actor_move(struct MapObj * mo);
 
-/* Wrapper for using move_actor() on the MapObj representing the player; updates
- * the game log with appropriate messages on the move attempt and its results;
- * turns over to turn_over() when finished.
+/* Actor "mo" tries to drop from inventory object indexed by number mo->args. */
+extern void actor_drop(struct MapObj * mo);
+
+/* Actor "mo" tries to pick up object from ground into its inventory. */
+extern void actor_pick(struct MapObj * mo);
+
+/* Actor "mo" tries to use inventory object indexed by number mo->args.
+ * (Currently the only valid use is consuming "MAGIC MEAT".
  */
-extern void move_player(char d);
-
-/* Make player wait one turn, i.e. only update_log with a "you wait" message
- * and turn control over to the enemy.
- */
-extern void player_wait();
-
-/* Check if coordinate pos on (or beyond) map is accessible to map object
- * movement.
- */
-extern char is_passable(struct Map * map, struct yx_uint16 pos);
-
-/* Make player drop to ground map ojbect indexed by world.inventory_select. */
-extern void player_drop();
-
-/* Make player pick up map object from ground. */
-extern void player_pick();
-
-/* Make player use object indexed by world.inventory_select. */
-extern void player_use();
+extern void actor_use(struct MapObj * mo);
 
 
 

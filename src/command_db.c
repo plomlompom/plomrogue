@@ -79,7 +79,7 @@ extern char * get_command_longdsc(char * dsc_short)
 extern void init_command_db()
 {
     char * f_name = "init_command_db()";
-    char * err_s = "Trouble in init_cmds() with textfile_sizes().";
+    char * err_s = "Trouble in init_command_db() with textfile_sizes().";
 
     char * path = "config/commands";
     FILE * file = try_fopen(path, "r", f_name);

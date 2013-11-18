@@ -97,3 +97,15 @@ extern void map_center()
     struct Win * win_map   = get_win_by_id('m');
     win_map->center = player->pos;
 }
+
+
+
+extern uint8_t is_passable(struct Map * map, struct yx_uint16 pos)
+{
+    uint8_t passable = 0;
+    if (0 <= pos.x && pos.x < map->size.x && 0 <= pos.y && pos.y < map->size.y)
+    {
+        passable = (('.' == map->cells[pos.y * map->size.x + pos.x]));
+    }
+    return passable;
+}

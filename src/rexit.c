@@ -13,6 +13,7 @@
 #include "windows.h" /* for Win struct, free_win(), free_winmeta() */
 #include "map_objects.h" /* for free_map_objects, free_map_object_defs() */
 #include "misc.h" /* for unload_interface_conf() */
+#include "map_object_actions.h" /* for free_map_object_actions() */
 
 
 
@@ -44,13 +45,17 @@ static void cleanup()
     {
         free_command_db();
     }
+    if (cleanup_flags & CLEANUP_MAPOBJACTS)
+    {
+        free_map_object_actions(world.map_obj_acts);
+    }
     if (cleanup_flags & CLEANUP_MAP)
     {
         free(world.map->cells);
     }
     if (cleanup_flags & CLEANUP_INTERFACE_CONF)
     {
-        unload_interface_conf(/*&world*/);
+        unload_interface_conf();
     }
     if (cleanup_flags & CLEANUP_WIN_META)
     {

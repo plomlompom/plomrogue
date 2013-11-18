@@ -37,6 +37,11 @@ extern void map_scroll(char d);
 /* Center map on player. */
 extern void map_center();
 
+/* Check if coordinate pos on (or beyond) map is accessible to map object
+ * movement.
+ */
+extern uint8_t is_passable(struct Map * map, struct yx_uint16 pos);
+
 
 
 #endif

@@ -1,0 +1,5 @@
+0 1 wait
+1 3 move
+2 10 pick_up
+3 3 drop
+4 30 use

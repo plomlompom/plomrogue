@@ -29,6 +29,7 @@
 #include "control.h" /* for control_by_id(), player_control(),
                       * get_available_keycode_to_action()
                       */
+#include "map_object_actions.h" /* for init_map_object_actions() */
 
 
 
@@ -37,8 +38,11 @@ int main(int argc, char *argv[])
     char * f_name = "main()";
     world.turn = 0;        /* Turns to 1 when map and objects are initalized. */
 
+    /* Initialize commands and map object actions. */
     init_command_db();
     set_cleanup_flag(CLEANUP_COMMAND_DB);
+    init_map_object_actions();
+    set_cleanup_flag(CLEANUP_MAPOBJACTS);
 
     /* Check for corrupted savefile / recordfile savings. */
     char * recordfile = "record";

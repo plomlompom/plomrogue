@@ -31,8 +31,9 @@ static void write_map_object(FILE * file, struct MapObj * mo)
     for (; NULL != mo_ptr; mo_ptr = mo_ptr->next, i++);
     uint8_t size = 3+1 + 3+1 + 3+1 + 5+1 + 5 + ((1+3)*i) + 1 + 1;
     char line[size];
-    sprintf(line, "%d %d %d %d %d",
-                  mo->id, mo->type, mo->lifepoints, mo->pos.y, mo->pos.x);
+    sprintf(line, "%d %d %d %d %d %d %d %d",
+                  mo->id, mo->type, mo->lifepoints, mo->pos.y, mo->pos.x,
+                  mo->progress, mo->command, mo->arg);
     for (mo_ptr = mo->owns; NULL != mo_ptr; mo_ptr = mo_ptr->next)
     {
         sprintf(line + strlen(line), " %d", mo_ptr->id);
@@ -130,13 +131,16 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
     exit_err(-1 == fgetpos(file, &pos), f_name);
     while (try_fgets(line, linemax + 1, file, f_name))
     {
-        mo = malloc(sizeof(struct MapObj));
+        mo = try_malloc(sizeof(struct MapObj), f_name);
         mo->next       = NULL;
         mo->id         = atoi(strtok(line, delim));
         mo->type       = atoi(strtok(NULL, delim));
         mo->lifepoints = atoi(strtok(NULL, delim));
         mo->pos.y      = atoi(strtok(NULL, delim));
         mo->pos.x      = atoi(strtok(NULL, delim));
+        mo->progress   = atoi(strtok(NULL, delim));;
+        mo->command    = atoi(strtok(NULL, delim));;
+        mo->arg        = atoi(strtok(NULL, delim));;
         mo->owns       = NULL;
         if (mo->id > world.map_obj_count)
         {
@@ -149,10 +153,11 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
     while (try_fgets(line, linemax + 1, file, f_name))
     {
         uint8_t id = atoi(strtok(line, delim));
-        strtok(NULL, delim);
-        strtok(NULL, delim);
-        strtok(NULL, delim);
-        strtok(NULL, delim);
+        uint8_t i;
+        for (i = 0; i < 7; i++)
+        {
+            strtok(NULL, delim);
+        }
         char * owned = strtok(NULL, "\n");
         if (NULL != owned)
         {
@@ -199,6 +204,9 @@ extern void add_map_object(uint8_t type)
             break;
         }
     }
+    mo->progress = 0;
+    mo->command = 0;
+    mo->arg = 0;
     mo->owns = NULL;
     mo->next = NULL;
     struct MapObj ** last_ptr_ptr = &world.map_objs;

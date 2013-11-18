@@ -12,8 +12,8 @@
 #include "map_objects.h" /* for struct MapObj, get_player(), read_map_objects(),
                           * write_map_objects()
                           */
-#include "map_object_actions.h" /* for is_passable(), move_actor() */
-#include "map.h" /* for Map struct */
+#include "map_object_actions.h" /* for struct MapObjAct */
+#include "map.h" /* for Map struct, is_passable() */
 #include "main.h" /* for world global */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "rrand.h" /* for rrand(), rrand_seed() */
@@ -225,21 +225,48 @@ extern void turn_over(char action)
         if (   is_command_id_shortdsc(action, "drop")
             || is_command_id_shortdsc(action, "use"))
         {
-            uint8_t inventory_select = world.old_inventory_select;
-            exit_err(write_uint8(inventory_select, file_new), err_write);
+            exit_err(write_uint8(world.inventory_select, file_new), err_write);
         }
         try_fclose_unlink_rename(file_new, recordfile_tmp, recordfile, f_name);
     }
-    world.turn++;
     rrand_seed(world.seed * world.turn);
-    struct MapObj * monster;
-    for (monster = world.map_objs; monster != 0; monster = monster->next)
+
+    struct MapObj * player = get_player();
+    struct MapObj * map_object = player;
+    uint8_t first_round = 1;
+    while (0 < player->lifepoints)
     {
-        if (0 < monster->lifepoints && 0 != monster->id)
+        if (NULL == map_object)
         {
-            char * sel = "\0NSEW";
-            move_actor(monster, sel[rrand() % 5]);
+            world.turn++;
+            map_object = world.map_objs;
         }
+        if (0 < map_object->lifepoints)             /* map_object is animate. */
+        {
+            if (0 == first_round && 0 == map_object->progress)
+            {
+                if (map_object == player)
+                {
+                    break;
+                }
+                char * sel = "NSEW";
+                map_object->command = 1;
+                map_object->arg = sel[rrand() % 4];
+            }
+            first_round = 0;
+            map_object->progress++;
+            struct MapObjAct * moa = world.map_obj_acts;
+            while (moa->id != map_object->command)
+            {
+                moa = moa->next;
+            }
+            if (map_object->progress == moa->effort)
+            {
+                moa->func(map_object);
+                map_object->progress = 0;
+            }
+        }
+        map_object = map_object->next;
     }
 }
 
