@@ -107,13 +107,15 @@ static void update_wins(struct Win * w)
 
 static void place_win(struct Win * w)
 {
-    /* First window goes into the upper-left corner. */
+    /* If w is first window, it goes into the upper-left corner. */
     w->start.x = 0;
     w->start.y = 1;                             /* Leave space for title bar. */
     if (0 != w->prev)
     {
 
-        /* Non-first window fallbacks to: fit rightwards of rightmost border. */
+        /* If w is not first winddow, fit its top left corner to the top right
+         * corner of w_top, the last predecessor window starting at the top.
+         */
         struct Win * w_top = w->prev;
         while (w_top->start.y != 1)
         {
@@ -121,8 +123,8 @@ static void place_win(struct Win * w)
         }
         w->start.x = w_top->start.x + w_top->framesize.x + 1;
 
-        /* Fit window below its predecessor if that one directly thrones over
-         * empty space wide and high enough.
+        /* Fit w's top left corner to bottom left corner of its immediate
+         * predecessor window if enough empty space is found there.
          */
         uint16_t w_prev_maxy = w->prev->start.y + w->prev->framesize.y;
         if (   w->framesize.x <= w->prev->framesize.x
@@ -132,36 +134,35 @@ static void place_win(struct Win * w)
             w->start.y = w_prev_maxy + 1;
         }
 
-        /* Failing that, try to open a new sub column below the nearest
-         * predecessor window that thrones over enough empty space.
+        /* Failing that, try to fit the top left corner to the top right corner
+         * of the last predecessor w_test 1) not followed by top windows or any
+         * other windows with a left corner further rightwards than its own left
+         * corner 2) with enough space rightwards for w until the bottom right
+         * corner of w_thro directly throning over it 3) and with this same
+         * space extending for enough to the bottom for fitting in w.
          */
         else
         {
-            struct Win * w_up = w->prev;
-            struct Win * w_upup = w_up;
-            uint16_t widthdiff;
-            while (w_up != w_top)
+            struct Win * w_test = w->prev;
+            struct Win * w_thro;
+            while (w_test != w_top)
             {
-                w_upup = w_up->prev;
-                while (1)
+                w_thro = w_test->prev;
+                while (w_test->start.y <= w_thro->start.y)
                 {
-                    if (w_up->start.y != w_upup->start.y)
-                    {
-                        break;
-                    }
-                    w_upup = w_upup->prev;
+                    w_thro = w_thro->prev;
                 }
-                w_prev_maxy = w_upup->start.y + w_upup->framesize.y;
-                widthdiff = (w_upup->start.x + w_upup->framesize.x)
-                            - (w_up->start.x + w_up->framesize.x);
-                if (   w->framesize.y < world.wmeta->padsize.y - w_prev_maxy
-                    && w->framesize.x < widthdiff)
+                uint16_t w_thro_bottom = w_thro->start.y + w_thro->framesize.y;
+                uint16_t free_width = (w_thro->start.x + w_thro->framesize.x)
+                                      - (w_test->start.x + w_test->framesize.x);
+                if (   w->framesize.y < world.wmeta->padsize.y - w_thro_bottom
+                    && w->framesize.x < free_width)
                 {
-                    w->start.x = w_up->start.x + w_up->framesize.x + 1 ;
-                    w->start.y = w_prev_maxy + 1;
+                    w->start.x = w_test->start.x + w_test->framesize.x + 1;
+                    w->start.y = w_thro_bottom + 1;
                     break;
                 }
-                w_up = w_upup;
+                w_test = w_thro;
             }
         }
     }
