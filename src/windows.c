@@ -107,15 +107,13 @@ static void update_wins(struct Win * w)
 
 static void place_win(struct Win * w)
 {
-    /* If w is first window, it goes into the upper-left corner. */
+    /* If w is first window, it goes into the top left corner. */
     w->start.x = 0;
     w->start.y = 1;                             /* Leave space for title bar. */
     if (0 != w->prev)
     {
 
-        /* If w is not first winddow, fit its top left corner to the top right
-         * corner of w_top, the last predecessor window starting at the top.
-         */
+        /* If not, fit w's top left to top right of last top predecessor. */
         struct Win * w_top = w->prev;
         while (w_top->start.y != 1)
         {
@@ -123,9 +121,7 @@ static void place_win(struct Win * w)
         }
         w->start.x = w_top->start.x + w_top->framesize.x + 1;
 
-        /* Fit w's top left corner to bottom left corner of its immediate
-         * predecessor window if enough empty space is found there.
-         */
+        /* Fit w's top left to bottom left of its ->prev if enough space. */
         uint16_t w_prev_maxy = w->prev->start.y + w->prev->framesize.y;
         if (   w->framesize.x <= w->prev->framesize.x
             && w->framesize.y <  world.wmeta->padsize.y - w_prev_maxy)
@@ -134,35 +130,31 @@ static void place_win(struct Win * w)
             w->start.y = w_prev_maxy + 1;
         }
 
-        /* Failing that, try to fit the top left corner to the top right corner
-         * of the last predecessor w_test 1) not followed by top windows or any
-         * other windows with a left corner further rightwards than its own left
-         * corner 2) with enough space rightwards for w until the bottom right
-         * corner of w_thro directly throning over it 3) and with this same
-         * space extending for enough to the bottom for fitting in w.
+        /* Failing that, try to fit w' top left to the top right of the last
+         * predecessor w_test 1) not followed by windows with a left corner
+         * further rightwards than its own 2) with enough space rightwards for w
+         * until the bottom right of w_thr directly throning over it 3) and with
+         * this same space extending far enough to the bottom for fitting in w.
          */
         else
         {
             struct Win * w_test = w->prev;
-            struct Win * w_thro;
+            struct Win * w_thr;
             while (w_test != w_top)
             {
-                w_thro = w_test->prev;
-                while (w_test->start.y <= w_thro->start.y)
-                {
-                    w_thro = w_thro->prev;
-                }
-                uint16_t w_thro_bottom = w_thro->start.y + w_thro->framesize.y;
-                uint16_t free_width = (w_thro->start.x + w_thro->framesize.x)
+                w_thr = w_test->prev;
+                for (; w_test->start.y <= w_thr->start.y; w_thr = w_thr->prev);
+                uint16_t w_thr_bottom = w_thr->start.y + w_thr->framesize.y;
+                uint16_t free_width = (w_thr->start.x + w_thr->framesize.x)
                                       - (w_test->start.x + w_test->framesize.x);
-                if (   w->framesize.y < world.wmeta->padsize.y - w_thro_bottom
+                if (   w->framesize.y < world.wmeta->padsize.y - w_thr_bottom
                     && w->framesize.x < free_width)
                 {
                     w->start.x = w_test->start.x + w_test->framesize.x + 1;
-                    w->start.y = w_thro_bottom + 1;
+                    w->start.y = w_thr_bottom + 1;
                     break;
                 }
-                w_test = w_thro;
+                w_test = w_thr;
             }
         }
     }
