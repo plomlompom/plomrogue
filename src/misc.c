@@ -250,7 +250,7 @@ extern void turn_over(char action)
                     break;
                 }
                 char * sel = "NSEW";
-                map_object->command = 1;
+                map_object->command = get_moa_id_by_name("move");
                 map_object->arg = sel[rrand() % 4];
             }
             first_round = 0;

@@ -233,6 +233,23 @@ extern void free_map_object_actions(struct MapObjAct * moa)
 
 
 
+extern uint8_t get_moa_id_by_name(char * name)
+{
+    struct MapObjAct * moa = world.map_obj_acts;
+    while (NULL != moa)
+    {
+        if (0 == strcmp(moa->name, name))
+        {
+            break;
+        }
+        moa = moa->next;
+    }
+    exit_err(NULL == moa, "get_moa_id_name() did not find map object action.");
+    return moa->id;
+}
+
+
+
 extern void actor_wait(struct MapObj * mo)
 {
     if (mo == get_player())

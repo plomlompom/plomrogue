@@ -11,14 +11,13 @@
                           */
 #include "map.h" /* for map_scroll(), map_center() */
 #include "main.h" /* for world global */
-#include "rexit.h" /* for exit_err() */
 #include "wincontrol.h" /* for struct WinConf, scroll_pad(), toggle_window(),
                          * growshrink_active_window(),toggle_winconfig(),
                          * toggle_win_height_type(), toggle_win_width_type()
                          */
 #include "map_object_actions.h" /* for struct MapObjAct, actor_wait(),
                                  * actor_move(), actor_drop(), actor_pick(),
-                                 * actor_pick()
+                                 * actor_pick(), get_moa_id_by_name()
                                  */
 #include "command_db.h" /* for is_command_id_shortdsc() */
 #include "misc.h" /* for reload_interface_conf(), save_interface_conf(),
@@ -35,9 +34,6 @@ static uint8_t try_cmd_0args(int cmd, char * match, void (* f) ());
 static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c);
 static uint8_t try_cmd_2args(int cmd, char * match,
                              void (* f) (char, char), char c1, char c2);
-
-/* try_player_cmd() helper, returns world.map_obj_acts action id for "name". */
-static uint8_t get_moa_id_by_name(char * name);
 
 /* If "action" is id of command named "match", set player->arg, ->command and
  * call turn_over().
@@ -89,23 +85,6 @@ static uint8_t try_cmd_2args(int cmd, char * match,
         return 1;
     }
     return 0;
-}
-
-
-
-static uint8_t get_moa_id_by_name(char * name)
-{
-    struct MapObjAct * moa = world.map_obj_acts;
-    while (NULL != moa)
-    {
-        if (0 == strcmp(moa->name, name))
-        {
-            break;
-        }
-        moa = moa->next;
-    }
-    exit_err(NULL == moa, "get_moa_id_name() did not find map object action.");
-    return moa->id;
 }
 
 

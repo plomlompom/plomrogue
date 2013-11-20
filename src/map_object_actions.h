@@ -30,6 +30,9 @@ extern void init_map_object_actions();
 /* Free MapObjAct * chain starting at "moa". */
 extern void free_map_object_actions(struct MapObjAct * moa);
 
+/* Return world.map_obj_acts MapObjAct.id for "name". */
+extern uint8_t get_moa_id_by_name(char * name);
+
 /* Actor "mo" does nothing. */
 extern void actor_wait(struct MapObj * mo);
 
