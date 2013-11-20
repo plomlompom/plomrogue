@@ -33,7 +33,7 @@ static void write_map_object(FILE * file, struct MapObj * mo)
     char line[size];
     sprintf(line, "%d %d %d %d %d %d %d %d",
                   mo->id, mo->type, mo->lifepoints, mo->pos.y, mo->pos.x,
-                  mo->progress, mo->command, mo->arg);
+                  mo->command, mo->arg, mo->progress);
     for (mo_ptr = mo->owns; NULL != mo_ptr; mo_ptr = mo_ptr->next)
     {
         sprintf(line + strlen(line), " %d", mo_ptr->id);
@@ -138,9 +138,9 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
         mo->lifepoints = atoi(strtok(NULL, delim));
         mo->pos.y      = atoi(strtok(NULL, delim));
         mo->pos.x      = atoi(strtok(NULL, delim));
-        mo->progress   = atoi(strtok(NULL, delim));;
         mo->command    = atoi(strtok(NULL, delim));;
         mo->arg        = atoi(strtok(NULL, delim));;
+        mo->progress   = atoi(strtok(NULL, delim));;
         mo->owns       = NULL;
         if (mo->id > world.map_obj_count)
         {
