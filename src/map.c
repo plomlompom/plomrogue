@@ -1,9 +1,8 @@
 #include "map.h"
 #include <stdint.h>      /* for uint16_t, uint32_t */
-#include "misc.h"        /* for try_malloc(), center_offset() */
+#include "misc.h"        /* for try_malloc(), center_offset(), rrand() */
 #include "map_objects.h" /* for get_player() */
 #include "yx_uint16.h"   /* for yx_uint16 and dir enums */
-#include "rrand.h"       /* for rrand() */
 #include "windows.h"     /* for struct Win */
 #include "main.h"        /* for world global */
 #include "wincontrol.h"  /* for get_win_by_id() */

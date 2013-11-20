@@ -5,7 +5,7 @@
 #include <unistd.h> /* for unlink(), acess() */
 #include <stdlib.h> /* for size_t, calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
-#include <stdint.h> /* for uint8_t, uint16_t */
+#include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
 #include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
                         * try_fopen(), try_fclose(), get_linemax()
                         */
@@ -16,13 +16,21 @@
 #include "map.h" /* for Map struct, is_passable() */
 #include "main.h" /* for world global */
 #include "yx_uint16.h" /* for yx_uint16 struct */
-#include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_err() */
 #include "wincontrol.h" /* for init_winconfs(), init_wins(), free_winconfs(),
                          * sorted_wintoggle_and_activate()
                          */
 #include "windows.h" /* for suspend_win() */
 #include "command_db.h" /* for is_command_id_shortdsc() */
+
+
+
+extern uint16_t rrand()
+{
+    /* Constants as recommended by POSIX.1-2001 (see man page rand(3)). */
+    world.seed = ((world.seed * 1103515245) + 12345) % 4294967296;
+    return (world.seed >> 16); /* Ignore less random least significant bits. */
+}
 
 
 
@@ -229,7 +237,6 @@ extern void turn_over(char action)
         }
         try_fclose_unlink_rename(file_new, recordfile_tmp, recordfile, f_name);
     }
-    rrand_seed(world.seed * world.turn);
 
     struct MapObj * player = get_player();
     struct MapObj * map_object = player;
@@ -279,11 +286,13 @@ extern void save_game()
     char * savefile     = "savefile";
     FILE * file = try_fopen(savefile_tmp, "w", f_name);
     char line[12];
-    sprintf(line, "%d\n", world.seed);
+    sprintf(line, "%u\n", world.mapseed);
     try_fwrite(line, strlen(line), 1, file, f_name);
-    sprintf(line, "%d\n", world.turn);
+    sprintf(line, "%u\n", world.seed);
     try_fwrite(line, strlen(line), 1, file, f_name);
-    sprintf(line, "%d\n", world.score);
+    sprintf(line, "%u\n", world.turn);
+    try_fwrite(line, strlen(line), 1, file, f_name);
+    sprintf(line, "%u\n", world.score);
     try_fwrite(line, strlen(line), 1, file, f_name);
     write_map_objects(file);
     try_fclose_unlink_rename(file, savefile_tmp, savefile, f_name);
@@ -298,6 +307,8 @@ extern void load_game()
     FILE * file = try_fopen(filename, "r", f_name);
     uint16_t linemax = get_linemax(file, f_name);
     char line[linemax + 1];
+    try_fgets(line, linemax + 1, file, f_name);
+    world.mapseed = atoi(line);
     try_fgets(line, linemax + 1, file, f_name);
     world.seed = atoi(line);
     try_fgets(line, linemax + 1, file, f_name);

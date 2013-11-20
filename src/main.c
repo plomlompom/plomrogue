@@ -20,10 +20,9 @@
 #include "map.h" /* for struct Map, init_map() */
 #include "misc.h" /* for update_log(), find_passable_pos(), save_game(),
                    * try_calloc(), check_tempfile(), check_xor_files(),
-                   * load_interface_conf(), load_game()
+                   * load_interface_conf(), load_game(), rrand()
                    */
 #include "wincontrol.h" /* get_win_by_id(), get_winconf_by_win() */
-#include "rrand.h" /* for rrand(), rrand_seed() */
 #include "rexit.h" /* for exit_game(), exit_err() */
 #include "command_db.h" /* for init_command_db(), is_command_id_shortdsc() */
 #include "control.h" /* for control_by_id(), player_control(),
@@ -127,12 +126,14 @@ int main(int argc, char *argv[])
             exit_err(write_uint32_bigendian(world.seed, file), err_w);
             try_fclose_unlink_rename(file, recordfile_tmp, recordfile, f_name);
         }
+        world.mapseed = world.seed;
     }
 
     /* Generate map from seed and, if newly generated world, start positions of
      * actors.
      */
-    rrand_seed(world.seed);
+    uint32_t restore_seed = world.seed;
+    world.seed = world.mapseed;
     struct Map map = init_map();
     world.map = &map;
     set_cleanup_flag(CLEANUP_MAP);
@@ -148,6 +149,7 @@ int main(int argc, char *argv[])
         set_cleanup_flag(CLEANUP_MAP_OBJECTS);
         world.turn = 1;
     }
+    world.seed = restore_seed;
 
     /* Initialize window system and windows. */
     WINDOW * screen = initscr();

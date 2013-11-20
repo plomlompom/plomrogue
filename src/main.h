@@ -25,6 +25,7 @@ struct World
     struct KeyBiData kb_wingeom;      /* Window geometry config keybindings. */
     struct KeyBiData kb_winkeys;      /* Window keybinding config keybindings.*/
     uint32_t seed;                    /* Randomness seed. */
+    uint32_t mapseed;                 /* Initial randomness seed used for map.*/
     uint32_t turn;                    /* Current game turn. */
     uint16_t score;                   /* Player's score. */
     char * log;                       /* Pointer to the game log string. */

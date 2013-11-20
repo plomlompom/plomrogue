@@ -14,6 +14,12 @@ struct Map;
 
 
 
+/* Return 16-bit number pseudo-randomly generated via Linear Congruential
+ * Generator algorithm with some proven constants. Use instead of rand() to
+ * ensure portability of the same pseudo-randomness across systems.
+ */
+extern uint16_t rrand();
+
 /* Returns message: "Trouble in ".parent." with ".child."." (try_*() helper) */
 extern char * trouble_msg(char * parent, char * child);
 
