@@ -1,8 +1,7 @@
 /* yx_uint16.c */
 
-
-
-#include "yx_uint16.h" /* for uint8_t, uint16_t */
+#include "yx_uint16.h"
+#include <stdint.h> /* for uint8_t, uint16_t */
 
 
 
@@ -12,10 +11,7 @@ extern uint8_t yx_uint16_cmp(struct yx_uint16 * a, struct yx_uint16 * b)
     {
         return 1;
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
 
 
