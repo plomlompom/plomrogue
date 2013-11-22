@@ -2,26 +2,23 @@
  *
  * A tiled window manager for the terminal.
  *
- * It provides a virtual screen that can be scrolled horizontally and may
- * contain any number of windows that can be appeared, disappeared, resized and
- * (somewhat) moved around. They have borders and a title bar and are positioned
- * (in a bizarre fashion, see below) automatically.
+ * It provides a virtual screen that can be scrolled horizontally and may carry
+ * any number of windows to be appeared, disappeared, resized and moved around.
+ * They have borders and a title bar and are positioned automtaically.
  *
- * Windows can be almost any width (number has to fit into 16 bits); the virtual
- * screen grows with them as needed -- but only horizontally and only up to 2^16
- * cells. Their height is limited by the height of the terminal screen, which
- * must also fit into 2^16 cells.
+ * Windows can be any width between 1 and 2^16 cells. The virtual screen grows
+ * with them as needed -- but only horizontally and only up to 2^16 cells. Their
+ * height is limited by the height of the terminal screen (maximum 2^16 cells).
  *
- * Positioning of windows can only indirectly be influenced: by resizing them,
- * and by shifting their relative position inside the (currently invisible)
- * chain that the window manager treats their plurality as. The first window
- * goes into the upper left corner of the virtual screen. Further visible
- * windows are fitted left-aligned below their (chain-wise) closest predecessor
- * that thrones over enough space to fit them in; failing that, they are placed
- * to the right of the window with the rightmost border.
+ * Windows' positioning can be influenced only indirectly: by resizing them, and
+ * by shifting their relative position inside the (currently invisible) chain
+ * that the window manager treats their plurality as. The first window goes into
+ * the top left corner of the virtual screen. Further windows are fitted as
+ * left-aligned as possible below their (chain-wise) closest predecessor that
+ * thrones over enough space to to contain them and is open to the right. If
+ * that fails, they're fitted up-right to the window with the rightmost border.
  *
- * TODO: Think up a more intuitive window positioning algorithm or at least make
- * the chain that windows are positioned by visible.
+ * TODO: Think up a more intuitive window positioning algorithm.
  */
 
 #ifndef WINDOWS_H
@@ -33,12 +30,12 @@
 
 
 
-/* Individual windows are represented by "Win" structs. They describe frames
- * located inside the virtual screen pad through which "winmaps" are visible,
- * 2-dimensional maps of ncurses chtypes. Win structs are chained into a linked
- * list of all the windows visible on the virtual screen and also contain
- * pointers to what content is to be drawn inside the window, and by use of what
- * method.
+/* "Win" structs describe windows as frames located inside the virtual screen
+ * pad through which "winmaps" are visible, 2-dimensional maps of ncurses
+ * chtypes. If a winmap is bigger than its frame, scrolling hints will appear at
+ * the proper edges. Win structs are chained into a linked list of all the
+ * windows visible on the virtual screen and also contain pointers to what
+ * content is to be drawn inside the window, and by use of what method.
  */
 struct Win
 {
@@ -46,14 +43,12 @@ struct Win
     struct Win * next;  /* of the chain; if both are 0, Win is outside chain */
     struct yx_uint16 framesize;   /* window frame size to see winmap through */
     struct yx_uint16 start;       /* upper left corner of window in pad */
-    struct yx_uint16 center;      /* window content center to focus window on */
+    struct yx_uint16 center;      /* winmap cell to center frame on if smaller*/
     char * title;                 /* title to be used in window title bar */
-    void (* draw) (struct Win *); /* how to draw window content ("data") */
+    void (* draw) (struct Win *); /* function that draws/updates the  winmap */
     chtype * winmap;              /* sequence of cells, sorted into lines ... */
     struct yx_uint16 winmapsize;  /* ... with these geometry infos  */
 };
-
-
 
 /* The window manager's parent struct WinMeta contains the virtual screen,
  * relates it to the terminal screen and anchors the chain of visible windows.
@@ -71,26 +66,22 @@ struct WinMeta
 
 
 
-/* Initialize empty WinMeta "wmeta" on the terminal "screen". (Note that
- * emptiness is marked by WinMeta.chain_start=0.) Other struct members are also
- * initialized 0, except for the virtual screen (height = that of the terminal
- * screen; width = 1) sized to the size of the terminal screen.
+/* Initialize empty "wmeta" on terminal "screen". All struct members are
+ * initialized to 0, except for the newly created virtual screen "pad" and its
+ * size (height: that of the terminal screen; width: 1).
  */
 extern void init_win_meta(WINDOW * screen);
 
-
-
 /* Initialize a window child of "wmeta" to "title", "height" and "width" and
- * appointing "func"() to interpret and draw the window when it's visible.
+ * appoint "func"() as its .draw to draw the winmap when it's visible. Other
+ * members of the Win struct pointed to by "wp" are initialized to 0.
  *
- * Pass 0 for "width" to make the window as wide as the terminal screen. Pass
- * negative values for "width" to make the width so many cells smaller than that
- * of the terminal screen. Pass 0 for "height" to give the window the maximum
- * allowed height: one cell smaller than that of the terminal screen. Pass
- * negative values to make the window width so many cells smaller than that of
- * the terminal screen. The maximum allowed height is also applied for positive
- * values that exceed it or negative values that would reduce the window height
- * < 1 cell.
+ * Pass 0 for "width" to make the window as wide as the terminal screen. Pass 0
+ * for "height" for the maximum allowed height: one cell smaller than that of
+ * the terminal screen. Pass negative values for either of them to make the
+ * window width/height so many cells smaller than what 0 would set. The maximum
+ * allowed height is also applied for positive height values that exceed it or
+ * negative values that would reduce the window height to less than 1 cell.
  *
  * Other members of the Win struct are initialized to 0.
  */
@@ -104,23 +95,21 @@ extern void free_win(struct Win * win);
 /* Append/suspend window "w" to/from chain of visible windows below "wmeta".
  * Appended windows will become active. Suspended active windows will move the
  * active window selection to their successor in the window chain or, failing
- * that, their predecessor; if no window remains, none will be active.
+ * that, their predecessor, or, failing that, to 0 (no window being active).
  */
 extern void append_win(struct Win * w);
 extern void suspend_win(struct Win * w);
 
-/* Apply scrolling offset "new_offset" to virtual screen if it is sane, i.e.
- * it's equal/greater zero and does not push the view (further) beyond the
- * virtual screen's border. If the view is already beyond the virtual screen's
- * border due to it having shrunk after suspension of windows, only allow view
- * movement leftwards.
+/* Apply scrolling offset "new_offset" to virtual screen if it is equal/greater
+ * 0 and does not push the view (further) beyond the virtual screen's border. If
+ * the view is already beyond the virtual screen's border due to it having
+ * shrunk after suspension of windows, only allow screen scrolling leftwards.
  */
 extern void reset_pad_offset(uint16_t new_offset);
 
-/* Apply new size "size" to the active window, but only if it provides for at
- * least one cell width/height and is in height at least one cell smaller than
- * the screen's vertical height (to provide space for the title bar). Does
- * nothing if no window is active.
+/* Apply "size" to the active window if it provides a minimum size of 1x1 cells
+ * and is in height at least one cell smaller than the screen's vertical height
+ * (to provide space for the title bar). Does nothing if no window is active.
  */
 extern void resize_active_win(struct yx_uint16 size);
 
@@ -130,9 +119,9 @@ extern void resize_active_win(struct yx_uint16 size);
  */
 extern void cycle_active_win(char dir);
 
-/* Move active window forwards ("dir" == "f") or backwards (any other "dir").
- * Wrap around in the window chain if start / end of it is met. Does nothing if
- * no window is active.
+/* Move active window forwards ("dir" == "f") or backwards (any other "dir") in
+ * the window chain. Wrap around in the window chain if start / end of it is
+ * met. Does nothing if no window is active.
  */
 extern void shift_active_win(char dir);
 
