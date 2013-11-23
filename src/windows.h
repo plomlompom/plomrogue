@@ -4,7 +4,7 @@
  *
  * It provides a virtual screen that can be scrolled horizontally and may carry
  * any number of windows to be appeared, disappeared, resized and moved around.
- * They have borders and a title bar and are positioned automtaically.
+ * They have borders and a title bar and are positioned automatically.
  *
  * Windows can be any width between 1 and 2^16 cells. The virtual screen grows
  * with them as needed -- but only horizontally and only up to 2^16 cells. Their
@@ -15,7 +15,7 @@
  * that the window manager treats their plurality as. The first window goes into
  * the top left corner of the virtual screen. Further windows are fitted as
  * left-aligned as possible below their (chain-wise) closest predecessor that
- * thrones over enough space to to contain them and is open to the right. If
+ * thrones over enough space to contain them and that is open to the right. If
  * that fails, they're fitted up-right to the window with the rightmost border.
  *
  * TODO: Think up a more intuitive window positioning algorithm.
@@ -68,13 +68,12 @@ struct WinMeta
 
 /* Initialize empty "wmeta" on terminal "screen". All struct members are
  * initialized to 0, except for the newly created virtual screen "pad" and its
- * size (height: that of the terminal screen; width: 1).
+ * size (height: that of the terminal screen; width: 1 cell).
  */
 extern void init_win_meta(WINDOW * screen);
 
-/* Initialize a window child of "wmeta" to "title", "height" and "width" and
- * appoint "func"() as its .draw to draw the winmap when it's visible. Other
- * members of the Win struct pointed to by "wp" are initialized to 0.
+/* Initialize a Win child "wp" of "wmeta" to "title", "height" and "width" and
+ * appoint "func"() as its .draw. Initialize other members to 0.
  *
  * Pass 0 for "width" to make the window as wide as the terminal screen. Pass 0
  * for "height" for the maximum allowed height: one cell smaller than that of
@@ -82,8 +81,6 @@ extern void init_win_meta(WINDOW * screen);
  * window width/height so many cells smaller than what 0 would set. The maximum
  * allowed height is also applied for positive height values that exceed it or
  * negative values that would reduce the window height to less than 1 cell.
- *
- * Other members of the Win struct are initialized to 0.
  */
 extern void init_win(struct Win ** wp, char * title, int16_t height,
                      int16_t width, void * func);
@@ -95,7 +92,7 @@ extern void free_win(struct Win * win);
 /* Append/suspend window "w" to/from chain of visible windows below "wmeta".
  * Appended windows will become active. Suspended active windows will move the
  * active window selection to their successor in the window chain or, failing
- * that, their predecessor, or, failing that, to 0 (no window being active).
+ * that, their predecessor, or, failing that, to 0 (no window active).
  */
 extern void append_win(struct Win * w);
 extern void suspend_win(struct Win * w);
@@ -125,9 +122,8 @@ extern void cycle_active_win(char dir);
  */
 extern void shift_active_win(char dir);
 
-/* Draw virtual screen including all windows. Also add scroll hints for where
- * the edges of the terminal screen hit non-edges of and inside the virtual
- * screen. Then update the terminal screen.
+/* Draw virtual screen and its windows. Add scroll hints where edges of terminal
+ * screen hit non-edges inside the virtual screen. Then update terminal screen.
  */
 extern void draw_all_wins();
 
