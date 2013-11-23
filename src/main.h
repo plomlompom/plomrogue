@@ -10,7 +10,6 @@
 #include "keybindings.h" /* for KeyBiData struct */
 struct WinMeta;
 struct WinConf;
-struct Win;
 struct Map;
 struct MapObjDef;
 struct MapObj;

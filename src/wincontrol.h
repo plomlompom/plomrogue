@@ -1,7 +1,7 @@
 /* wincontrol.h
  *
  * Routines that build on top of the windows library to provide a simple window
- * management API to the game.
+ * management API to the game. Also helps managing window-specific keybindings.
  */
 
 #ifndef WINCONTROL_H
@@ -11,7 +11,6 @@
 #include "keybindings.h" /* for KeyBiData struct */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 struct Win;
-struct WinMeta;
 
 
 
@@ -20,25 +19,24 @@ struct WinMeta;
  */
 struct WinConf
 {
-    char id; /* unique identifier of WinConf, abused as ID for ->win and  */
-             /* equivalent to the char following its "Win_" conffile name */
-    struct Win * win; /* window configured by this WinConf */
-    char * title; /* designated title as passed to init_win() */
-    int16_t height; /* designated height as interpreted by init_win()*/
-    int16_t width; /* designated width as interpreted by init_win() */
-    char draw; /* identifier of designated Win->draw; to be returned to */
-               /* after toggling window configuration view */
-    struct yx_uint16 center; /* designated center for Win->draw view; to be */
-                             /* returned to after toggling winconf view */
-    uint8_t view; /* 0: use ->draw as Win->draw; 1, 2: use draw_winconf()_* */
-    uint8_t height_type; /* both: 0: interpret ->height/->width as size in   */
-    uint8_t width_type;  /* positive cells; 1: as negative diff to max width */
-    struct KeyBiData kb; /* the window's specific keybindings */
-};
+    char id; /* Unique identifier of WinConf, doubles aas identifier for .win */
+             /* and the char following "Win_" in the respective conffile name.*/
+    struct Win * win;    /* Window / Win struct configured by this WinConf. */
+    struct KeyBiData kb; /* Window-specific keybindings. */
+    uint8_t view; /* 0: use .draw as Win.draw; 1/2: use draw_winconf()_(1/2). */
+    int16_t height;      /* Designated height to pass to init_win(). */
+    int16_t width;       /* Designated width to pass to init_win(). */
+    uint8_t height_type; /* 0: read .height/.width as size in positive cells; */
+    uint8_t width_type;  /* 1: as negative diff in cells to the screen size.  */
+    char * title; /* Designated title to pass to init_win(). */
+    char draw;    /* Identifier of designated Win.draw; passed to init_win() */
+                  /* and reset after toggling Win.draw via toggle_winconf(). */
+    struct yx_uint16 center; /* Designated Win.center; to be reset after  */
+};                           /* toggling Win.center via toggle_winconf(). */
 
 
 
-/* Get WinConf fathering "win"; get Win of WinConf of "id". */
+/* Get WinConf fathering "win" / get Win of WinConf of "id". */
 extern struct WinConf * get_winconf_by_win(struct Win * win);
 extern struct Win * get_win_by_id(char id);
 
@@ -47,26 +45,27 @@ extern void init_winconfs();
 extern void free_winconfs();
 extern void init_wins();
 
-/* Toggle windows in world.wins in the order desribed by the first line of
- * config/windows/toggle_order_and_active, wherein each character should
- * correspond to one window whose ID is found in world.winconf_ids. Unknown
- * characters are silently ignored. The first character of the second line of
- * the file is also read to determine which window to focus as active (but only
- * if it fits the ID of a window thus toggled visible).
+/* Toggle windows in the order desribed by the 1st line of
+ * config/windows/toggle_order_and_active, where each char may fit a Winconf.id
+ * in world.winconfs. Silently ignore id chars not found there. The 1st char of
+ * the 2nd line of the same file determines which window (by its .id) to focus
+ * as active (but only if this window belongs to the ones just toggled).
  */
 extern void sorted_wintoggle_and_activate();
 
-/* Save all window's configurations to their configuration files. */
+/* Save world.winconfs, visible window chain and active window selection to the
+ * respective configuration files in config/windows/.
+ */
 extern void save_win_configs();
 
-/* Toggle "window configuration" view for active window. This also sets sensible
- * values for Win->center for the various configuration views (y=0, x=0 for
- * winconf_geometry and x= for winconf_keys).
+/* Toggle "window configuration" view for active window. Sets sensible
+ * Win.center values for the various configuration views (for winconf_geometry:
+ * y=0, x=0; for winconf_keys: x=0, y=Winconf.kb.select).
  */
 extern void toggle_winconfig();
 
-/* Toggle interpretation type for active Win's width/height in WinConf. Width
- * only toggles to 1 if terminal window is at least as wide as WinConf->width.
+/* Toggle WinConf.(height/width)_type. To avoid a positive diff to screen width,
+ * width_type toggles to 1 only if world.wmeta->screen's width >= WinConf.width.
  */
 extern void toggle_win_height_type();
 extern void toggle_win_width_type();
@@ -74,17 +73,15 @@ extern void toggle_win_width_type();
 /* Toggle display of a window identified by "id". */
 extern void toggle_window(char id);
 
-/* Try to scroll virtual screen left ("dir" = "-") or right ("dir" = "+"),
- * subject to the limitations provided by the window manager via
- * reset_pad_offset().
+/* Try scrolling virtual screen left ("dir" = "-") or right ("dir" = "+") to the
+ * degree allowed by the window manager's reset_pad_offset().
  */
 extern void scroll_pad(char dir);
 
 /* Try to grow or shrink the active window horizontally ("change" = "*"/"_") or
- * vertically ("change = "+"/"-") by one cell size, subject to the limitations
- * provided by the window manager via resize_active_win().
- *
- * Forces WinConf->width_type = 0 if new width surpasses that of terminal win.
+ * vertically ("change = "+"/"-") by one cell size to the degree allowed by the
+ * window manager's resize_active_win(). If a new window width would surpass
+ * that of the terminal screen, set WinConf.width_type to 0.
  */
 extern void growshrink_active_window(char change);
 

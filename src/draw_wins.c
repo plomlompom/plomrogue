@@ -471,10 +471,10 @@ extern void draw_winconf_geometry(struct Win * win)
     char * title = "Window's geometry:\n";
     char * h_d   = "\nHeight to save: ";
     char * h_pos = " (width in cells)";
-    char * h_neg = " (negative diff: cells to maximum width)";
+    char * h_neg = " (negative diff: cells to screen width)";
     char * w_d   = "\n\nWidth to save: ";
     char * w_pos = " (height in cells)";
-    char * w_neg = " (negative diff: cells to maximum height)";
+    char * w_neg = " (negative diff: cells to screen height)";
     char * h_t = h_pos;
     char * w_t = w_pos;
     if      (1 == wcp->height_type)
