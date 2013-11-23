@@ -26,8 +26,7 @@ enum cleanup_flag
     CLEANUP_MAPOBJACTS      = 0x0010,
     CLEANUP_MAP_OBJECTS     = 0x0020,
     CLEANUP_MAP_OBJECT_DEFS = 0x0040,
-    CLEANUP_WIN_META        = 0x0080,
-    CLEANUP_INTERFACE_CONF  = 0x0100
+    CLEANUP_INTERFACE_CONF  = 0x0080
 };
 extern void set_cleanup_flag(enum cleanup_flag flag);
 

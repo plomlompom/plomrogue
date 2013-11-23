@@ -4,13 +4,12 @@
 #include <stdlib.h> /* for exit(), free(), defines EXIT_SUCESS, EXIT_FAILURE */
 #include <stdio.h> /* for printf(), perror() */
 #include <stdint.h> /* for uint8_t */
-#include <ncurses.h> /* for endwin() */
 #include <errno.h> /* for errno */
 #include "main.h" /* for world global */
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for free_keybindings() */
 #include "command_db.h" /* for free_command_db() */
-#include "windows.h" /* for Win struct, free_win(), free_winmeta() */
+#include "windows.h" /* for Win struct, free_win(), free_winmeta_and_endwin() */
 #include "map_objects.h" /* for free_map_objects, free_map_object_defs() */
 #include "misc.h" /* for unload_interface_conf() */
 #include "map_object_actions.h" /* for free_map_object_actions() */
@@ -25,10 +24,6 @@ static void cleanup();
 
 static void cleanup()
 {
-    if (cleanup_flags & CLEANUP_NCURSES)
-    {
-        endwin();
-    }
     if (cleanup_flags & CLEANUP_MAP_OBJECTS)
     {
         free_map_objects(world.map_objs);
@@ -57,9 +52,9 @@ static void cleanup()
     {
         unload_interface_conf();
     }
-    if (cleanup_flags & CLEANUP_WIN_META)
+    if (cleanup_flags & CLEANUP_NCURSES)
     {
-        free_winmeta();
+        free_winmeta_and_endwin();
     }
 }
 

@@ -152,14 +152,12 @@ int main(int argc, char *argv[])
     world.seed = restore_seed;
 
     /* Initialize window system and windows. */
-    WINDOW * screen = initscr();
+    init_win_meta();
     set_cleanup_flag(CLEANUP_NCURSES);
     noecho();
     curs_set(0);
-    keypad(screen, TRUE);
+    keypad(world.wmeta->screen, TRUE);
     raw();
-    init_win_meta(screen);
-    set_cleanup_flag(CLEANUP_WIN_META);
     load_interface_conf();
     set_cleanup_flag(CLEANUP_INTERFACE_CONF);
 

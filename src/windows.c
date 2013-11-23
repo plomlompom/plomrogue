@@ -2,11 +2,11 @@
 
 #include "windows.h"
 #include <stdint.h>    /* for uint8_t, uint16_t, uint32_t, UINT16_MAX */
-#include <ncurses.h>   /* for typedefs WINDOW, chtype, wresize(), getmaxx(), */
-                       /* getmaxy(), delwin(), mvwaddch(), mvwaddstr(),      */
-                       /* newpad(), wnoutrefres(), erase(), werase(),        */
-                       /* pnoutrefresh(), doupdate(), getmaxyx()   */
-#include <stdlib.h>    /* for malloc(), free() */
+#include <ncurses.h>   /* for typedefs chtype, wresize(), getmaxx(), getmaxy(),
+                        * delwin(), mvwaddch(), mvwaddstr(), newpad(), erase(),
+                        * wnoutrefresh(), werase(), pnoutrefresh(), doupdate()
+                        */
+#include <stdlib.h>    /* for free() */
 #include <string.h>    /* for strlen(), strnlen(), memcpy() */
 #include "yx_uint16.h" /* for struct yx_uint16 */
 #include "misc.h"      /* for center_offset(), try_malloc() */
@@ -15,24 +15,21 @@
 
 
 
-/* Fit virtual screen's width to minimum width demanded by current windows'
- * geometries.
- */
+/* Make virtual screen just wide enough to contain all visible windows. */
 static void refit_pad();
 
 /* Update geometry (sizes, positions) of window "w" and its successors in the
- * window chain. For the positioning algorithm place_win() is used.
+ * window chain. Use place_win() for the positioning algorithm.
  */
 static void update_wins(struct Win * w);
 static void place_win(struct Win * w);
 
-/* Draw scroll hint (a line saying that there are "dist" more elements of
- * "unit" further into the direction symbolized by the "dir" char) into virtual
- * screen pad, onto an appropriate edge of either a window or the screen; the
- * left or right edge if "dir" is "<" or ">", or the upper or lower edge if it
- * is "^" or "v". "start" should be either the start coordinate of a window's
- * frame or .y=0, .x=wm->pad_offset if it describes the virtual screen pad.
- * winscroll_hint() and padscroll_hint() are wrappers to simplify these uses.
+/* Draw scroll hint (a line saying that there are "dist" more elements of "unit"
+ * further into the direction symbolized by "dir") into virtual screen, onto an
+ * appropriate edge of a window or the screen; the left/right edge if "dir" is
+ * "<"/">", or the top/bottom edge if it is "^"/"v". "start" be either the start
+ * coordinate of a window's frame, or .y=0, .x=wm->pad_offset for the virtual
+ * screen. winscroll_hint() and padscroll_hint() are wrappers to both cases.
  */
 static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
                         char * unit, struct yx_uint16 start);
@@ -42,22 +39,15 @@ static void padscroll_hint(char dir, uint16_t dist);
 /* Draw contents of all windows in window chain from window "w" onwards. */
 static void draw_wins(struct Win * w);
 
-/* draw_win_borderlines() draws the vertical and horizontal borders of window
- * "w" sans corners into the virtual screen "pad", and draws the top border
- * line as the windows' title bar (highlighted if the window is described
- * active by "active" being == 1).
- *
- * draw_wins_borderlines() calls draw_win_borderlines() recursively on all
- * windows from "w" on. "w_active" is a pointer to the one window that
- * draw_win_borderlines() is supposed to handle as the active window.
- *
- * Finally, draw_wins_bordercorners() draws into "pad" the borders of window "w"
- * and all its successors.
+/* draw_win_borderlines() draws vertical/horizontal borders of window "w" sans
+ * corners into the virtual screen. It draws the top border line as the windows'
+ * title bar (highlighted if the window is selected as active). It is called
+ * recursively by draw_wins_borderlines() on all windows from "w" on.
+ * draw_wins_bordercorners() draws the border corners of "w" and its successors.
  */
-static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad);
-static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
-                                  WINDOW * pad);
-static void draw_wins_bordercorners(struct Win * w, WINDOW * pad);
+static void draw_win_borderlines(struct Win * w);
+static void draw_wins_borderlines(struct Win * w);
+static void draw_wins_bordercorners(struct Win * w);
 
 /* Shift active window forwards / backwards in window chain. */
 static void shift_win_forward();
@@ -203,11 +193,9 @@ static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
         if ('<' == dir || '>' == dir)
         {
             mvwaddch(world.wmeta->pad, start.y + q, start.x + draw_offset, c);
+            continue;
         }
-        else
-        {
-            mvwaddch(world.wmeta->pad, start.y + draw_offset, start.x + q, c);
-        }
+        mvwaddch(world.wmeta->pad, start.y + draw_offset, start.x + q, c);
     }
 }
 
@@ -238,11 +226,11 @@ static void winscroll_hint(struct Win * w, char dir, uint16_t dist)
 static void draw_wins(struct Win * w)
 {
     w->draw(w);
-    uint16_t y, x, size_y, size_x;
-    size_y = w->winmapsize.y;
-    size_x = w->winmapsize.x;
+    uint16_t size_y = w->winmapsize.y;
+    uint16_t size_x = w->winmapsize.x;
     uint16_t offset_y = center_offset(w->center.y, size_y, w->framesize.y);
     uint16_t offset_x = center_offset(w->center.x, size_x, w->framesize.x);
+    uint16_t y, x;
     for (y = offset_y; y < w->framesize.y + offset_y && y < size_y; y++)
     {
         for (x = offset_x; x < w->framesize.x + offset_x && x < size_x; x++)
@@ -280,19 +268,19 @@ static void draw_wins(struct Win * w)
 
 
 
-static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad)
+static void draw_win_borderlines(struct Win * w)
 {
     /* Draw vertical and horizontal border lines. */
     uint16_t y, x;
     for (y = w->start.y; y <= w->start.y + w->framesize.y; y++)
     {
-        mvwaddch(pad, y, w->start.x - 1,              '|');
-        mvwaddch(pad, y, w->start.x + w->framesize.x, '|');
+        mvwaddch(world.wmeta->pad, y, w->start.x - 1,              '|');
+        mvwaddch(world.wmeta->pad, y, w->start.x + w->framesize.x, '|');
     }
     for (x = w->start.x; x <= w->start.x + w->framesize.x; x++)
     {
-        mvwaddch(pad, w->start.y - 1,              x, '-');
-        mvwaddch(pad, w->start.y + w->framesize.y, x, '-');
+        mvwaddch(world.wmeta->pad, w->start.y - 1,              x, '-');
+        mvwaddch(world.wmeta->pad, w->start.y + w->framesize.y, x, '-');
     }
 
     /* Draw as much as possible of the title into center of top border line. */
@@ -307,45 +295,41 @@ static void draw_win_borderlines(struct Win * w, char active, WINDOW * pad)
         uint16_t length_visible = strnlen(w->title, w->framesize.x - 2);
         char title[length_visible + 3];
         char decoration = ' ';
-        if (1 == active)
+        if (w == world.wmeta->active)
         {
             decoration = '$';
         }
         memcpy(title + 1, w->title, length_visible);
         title[0] = title[length_visible + 1] = decoration;
         title[length_visible + 2] = '\0';
-        mvwaddstr(pad, w->start.y - 1, w->start.x + title_offset, title);
+        mvwaddstr(world.wmeta->pad,
+                  w->start.y - 1, w->start.x + title_offset, title);
     }
 }
 
 
 
-static void draw_wins_borderlines(struct Win * w, struct Win * w_active,
-                                  WINDOW * pad)
+static void draw_wins_borderlines(struct Win * w)
 {
-    char active = 0;
-    if (w == w_active)
-    {
-        active = 1;
-    }
-    draw_win_borderlines(w, active, pad);
+    draw_win_borderlines(w);
     if (0 != w->next)
     {
-        draw_wins_borderlines(w->next, w_active, pad);
+        draw_wins_borderlines(w->next);
     }
 }
 
 
 
-static void draw_wins_bordercorners(struct Win * w, WINDOW * pad)
+static void draw_wins_bordercorners(struct Win * w)
 {
-    mvwaddch(pad, w->start.y - 1, w->start.x - 1, '+');
-    mvwaddch(pad, w->start.y - 1, w->start.x + w->framesize.x, '+');
-    mvwaddch(pad, w->start.y + w->framesize.y, w->start.x - 1, '+');
-    mvwaddch(pad, w->start.y + w->framesize.y, w->start.x + w->framesize.x,'+');
+    mvwaddch(world.wmeta->pad, w->start.y - 1, w->start.x - 1, '+');
+    mvwaddch(world.wmeta->pad, w->start.y - 1, w->start.x + w->framesize.x, '+');
+    mvwaddch(world.wmeta->pad, w->start.y + w->framesize.y, w->start.x - 1, '+');
+    mvwaddch(world.wmeta->pad, w->start.y + w->framesize.y,
+             w->start.x + w->framesize.x,'+');
     if (0 != w->next)
     {
-        draw_wins_bordercorners(w->next, pad);
+        draw_wins_bordercorners(w->next);
     }
 }
 
@@ -433,17 +417,16 @@ static void shift_win_backward()
 
 
 
-extern void init_win_meta(WINDOW * screen)
+extern void init_win_meta()
 {
     char * f_name = "init_win_meta()";
     char * err_s = "init_win_meta() creates virtual screen beyond legal size.";
     char * err_m = "init_win_meta() triggers memory alloc error via newpad().";
     world.wmeta         = try_malloc(sizeof(struct WinMeta), f_name);
-    world.wmeta->screen = screen;
-    uint32_t maxy_test  = getmaxy(screen);
-    uint32_t maxx_test  = getmaxx(screen);
-    uint8_t test = (maxy_test > UINT16_MAX || maxx_test > UINT16_MAX);
-    exit_err(test, err_s);
+    world.wmeta->screen = initscr();
+    uint32_t maxy_test  = getmaxy(world.wmeta->screen);
+    uint32_t maxx_test  = getmaxx(world.wmeta->screen);
+    exit_err(maxy_test > UINT16_MAX || maxx_test > UINT16_MAX, err_s);
     world.wmeta->padsize.y   = maxy_test;
     world.wmeta->padsize.x   = maxx_test;
     world.wmeta->chain_start = 0;
@@ -465,7 +448,7 @@ extern void init_win(struct Win ** wp, char * title, int16_t height,
     w->next         = 0;
     w->winmapsize.y = 0;
     w->winmapsize.x = 0;
-    w->winmap = NULL;
+    w->winmap       = NULL;
     w->title        = try_malloc(strlen(title) + 1, f_name);
     sprintf(w->title, "%s", title);
     w->draw         = func;
@@ -492,10 +475,11 @@ extern void init_win(struct Win ** wp, char * title, int16_t height,
 
 
 
-extern void free_winmeta()
+extern void free_winmeta_and_endwin()
 {
     delwin(world.wmeta->pad);
     free(world.wmeta);
+    endwin();
 }
 
 
@@ -536,7 +520,7 @@ extern void suspend_win(struct Win * w)
     {
         world.wmeta->chain_start = w->next;
     }
-    char pad_refitted = 0;
+    uint8_t pad_refitted = 0;
     if (world.wmeta->chain_end != w)
     {
         w->next->prev = w->prev;
@@ -555,10 +539,8 @@ extern void suspend_win(struct Win * w)
             world.wmeta->active = w->prev;
         }
     }
-
     w->prev = 0;
     w->next = 0;
-
     if (0 == pad_refitted)
     {
         refit_pad();
@@ -632,11 +614,10 @@ extern void shift_active_win(char dir)
     if ('f' == dir)
     {
         shift_win_forward();
+        update_wins(world.wmeta->chain_start);
+        return;
     }
-    else
-    {
-        shift_win_backward();
-    }
+    shift_win_backward();
     update_wins(world.wmeta->chain_start);
 }
 
@@ -652,9 +633,8 @@ extern void draw_all_wins()
     {
 
         /* Draw windows' borders first, then windows. */
-        draw_wins_borderlines(world.wmeta->chain_start, world.wmeta->active,
-                              world.wmeta->pad);
-        draw_wins_bordercorners(world.wmeta->chain_start, world.wmeta->pad);
+        draw_wins_borderlines(world.wmeta->chain_start);
+        draw_wins_bordercorners(world.wmeta->chain_start);
         draw_wins(world.wmeta->chain_start);
 
         /* Draw virtual screen scroll hints. */
