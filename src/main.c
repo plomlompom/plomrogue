@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     keypad(world.wmeta->screen, TRUE);
     raw();
     load_interface_conf();
-    set_cleanup_flag(CLEANUP_INTERFACE_CONF);
+    set_cleanup_flag(CLEANUP_INTERFACE);
 
     /* Focus map on player. */
     struct MapObj * player = get_player();

@@ -4,10 +4,8 @@
 #include <stdlib.h> /* for free() */
 #include <string.h> /* for strlen(), strchr(), strstr() */
 #include <stdint.h> /* for uint8_t, uint16_t */
-#include <unistd.h> /* for access(), unlink() */
 #include "windows.h" /* for suspend_win(), append_win(), reset_pad_offset(),
-                      * resize_active_win(), init_win(), free_win(),
-                      * structs Win, WinMeta
+                      * resize_active_win(), init_win(), free_win(), struct Win
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "main.h" /* for world global */
@@ -15,10 +13,9 @@
                         * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
                         */
 #include "rexit.h" /* for exit_err() */
-#include "main.h" /* for world global */
-#include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_og(),
+#include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_log(),
                         * draw_win_available_keybindings(),
-                        * draw_win_keybindings_global(), draw_win_inventory(),
+                        * draw_win_inventory(), draw_win_keybindings_global(),
                         * draw_win_keybindings_winconf_geometry(),
                         * draw_win_keybindings_winconf_keybindings(),
                         * draw_winconf_geometry(), draw_winconf_keybindings()
@@ -33,7 +30,7 @@
 /* Return string "prefix" + "id"; malloc()'s string, remember to call free()! */
 static char * string_prefixed_id(char * prefix, char id);
 
-/* Create Winconf, init ->view/height_type/width_type to 0, ->id to "id". */
+/* Initializes Winconf: .view/.height_type/.width_type to 0, .id to "id". */
 static void create_winconf(char id, struct WinConf * wcp);
 
 /* Initialize Winconf of "id" from appropriate config file.*/
@@ -45,7 +42,7 @@ static void init_win_from_winconf(char id);
 /* Save title, draw function, size of window identified by "id" to conffile. */
 static void save_win_config(char id);
 
-/* Free data pointed to inside WinConf struct. */
+/* Free data pointed to inside individual WinConf struct of "id". */
 static void free_winconf_data(char id);
 
 /* Write geometry of a window to its WinConf, as positive or negative values
@@ -59,7 +56,7 @@ static struct WinConf * get_winconf_by_id(char id);
 /* Get (Win->draw) function identified by "c"; NULL if c not mapped to one. */
 static void * get_drawfunc_by_char(char c);
 
-/* Iterate over bytes of world.winconf_ids array. Re-start after null byte. */
+/* Iterate over chars of world.winconf_ids array. Re-start after null byte. */
 static char get_next_winconf_id();
 
 
@@ -306,11 +303,9 @@ static char get_next_winconf_id()
     if (0 == c)
     {
         i = 0;
+        return c;
     }
-    else
-    {
-        i++;
-    }
+    i++;
     return c;
 }
 
@@ -342,12 +337,13 @@ extern struct Win * get_win_by_id(char id)
 extern void init_winconfs()
 {
     char * f_name = "init_winconfs()";
-    char * err_o = "Trouble in init_winconfs() with opendir().";
-    char * err_r = "Trouble in init_winconfs() with readdir().";
-    char * err_c = "Trouble in init_winconfs() with closedir().";
+    char * err_o = trouble_msg(f_name, "opendir()");
+    char * err_r = trouble_msg(f_name, "readdir()");
+    char * err_c = trouble_msg(f_name, "closedir()");
 
     DIR * dp = opendir("config/windows");
     exit_err(NULL == dp, err_o);
+    free(err_o);
     struct dirent * fn;
     errno = 0;
     char * winconf_ids = try_malloc(256, f_name);
@@ -364,7 +360,9 @@ extern void init_winconfs()
     }
     winconf_ids[i] = '\0';
     exit_err(errno, err_r);
+    free(err_r);
     exit_err(closedir(dp), err_c);
+    free(err_c);
     world.winconf_ids = try_malloc(strlen(winconf_ids) + 1, f_name);
     memcpy(world.winconf_ids, winconf_ids, strlen(winconf_ids) + 1);
     free(winconf_ids);

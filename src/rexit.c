@@ -9,7 +9,7 @@
 #include "map.h" /* for Map struct */
 #include "keybindings.h" /* for free_keybindings() */
 #include "command_db.h" /* for free_command_db() */
-#include "windows.h" /* for Win struct, free_win(), free_winmeta_and_endwin() */
+#include "windows.h" /* for Win struct, free_winmeta_and_endwin() */
 #include "map_objects.h" /* for free_map_objects, free_map_object_defs() */
 #include "misc.h" /* for unload_interface_conf() */
 #include "map_object_actions.h" /* for free_map_object_actions() */
@@ -48,7 +48,7 @@ static void cleanup()
     {
         free(world.map->cells);
     }
-    if (cleanup_flags & CLEANUP_INTERFACE_CONF)
+    if (cleanup_flags & CLEANUP_INTERFACE)
     {
         unload_interface_conf();
     }

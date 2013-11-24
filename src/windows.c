@@ -323,10 +323,10 @@ static void draw_wins_borderlines(struct Win * w)
 static void draw_wins_bordercorners(struct Win * w)
 {
     mvwaddch(world.wmeta->pad, w->start.y - 1, w->start.x - 1, '+');
-    mvwaddch(world.wmeta->pad, w->start.y - 1, w->start.x + w->framesize.x, '+');
-    mvwaddch(world.wmeta->pad, w->start.y + w->framesize.y, w->start.x - 1, '+');
+    mvwaddch(world.wmeta->pad, w->start.y - 1, w->start.x + w->framesize.x,'+');
+    mvwaddch(world.wmeta->pad, w->start.y + w->framesize.y, w->start.x - 1,'+');
     mvwaddch(world.wmeta->pad, w->start.y + w->framesize.y,
-             w->start.x + w->framesize.x,'+');
+             w->start.x + w->framesize.x, '+');
     if (0 != w->next)
     {
         draw_wins_bordercorners(w->next);
