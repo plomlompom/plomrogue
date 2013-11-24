@@ -34,27 +34,25 @@ extern uint16_t rrand()
 
 
 
-extern char * trouble_msg(char * parent, char * child)
+extern void exit_trouble(uint8_t test, char * parent, char * child)
 {
     char * p1 = "Trouble in ";
     char * p2 = " with ";
     char * p3 = ".";
     uint16_t size = strlen(p1) + strlen(parent) + strlen(p2) + strlen(child)
                     + strlen(p3) + 1;
-    char * msg = malloc(size);
+    char msg[size];
     exit_err(NULL == msg, "malloc() in trouble_msg() failed.");
     sprintf(msg, "%s%s%s%s%s", p1, parent, p2, child, p3);
-    return msg;
+    exit_err(test, msg);
 }
 
 
 
 extern void * try_malloc(size_t size, char * f)
 {
-    char * msg = trouble_msg(f, "malloc()");
     void * p = malloc(size);
-    exit_err(NULL == p, msg);
-    free(msg);
+    exit_trouble(NULL == p, f, "malloc()");
     return p;
 }
 
@@ -62,10 +60,8 @@ extern void * try_malloc(size_t size, char * f)
 
 extern void * try_calloc(size_t size1, size_t size2, char * f)
 {
-    char * msg = trouble_msg(f, "calloc()");
     void * p = calloc(size1, size2);
-    exit_err(NULL == p, msg);
-    free(msg);
+    exit_trouble(NULL == p, f, "calloc()");
     return p;
 }
 

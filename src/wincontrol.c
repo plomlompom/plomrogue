@@ -20,7 +20,7 @@
                         * draw_win_keybindings_winconf_keybindings(),
                         * draw_winconf_geometry(), draw_winconf_keybindings()
                         */
-#include "misc.h" /* for try_malloc(), trouble_msg() */
+#include "misc.h" /* for try_malloc(), exit_trouble() */
 #include "dirent.h" /* for opendir(), closedir(), readdir() */
 #include "errno.h" /* for errno */
 #include "keybindings.h" /* for KeyBinding struct, free_keybindings() */
@@ -337,13 +337,9 @@ extern struct Win * get_win_by_id(char id)
 extern void init_winconfs()
 {
     char * f_name = "init_winconfs()";
-    char * err_o = trouble_msg(f_name, "opendir()");
-    char * err_r = trouble_msg(f_name, "readdir()");
-    char * err_c = trouble_msg(f_name, "closedir()");
 
     DIR * dp = opendir("config/windows");
-    exit_err(NULL == dp, err_o);
-    free(err_o);
+    exit_trouble(NULL == dp, f_name, "opendir()");
     struct dirent * fn;
     errno = 0;
     char * winconf_ids = try_malloc(256, f_name);
@@ -359,10 +355,8 @@ extern void init_winconfs()
         }
     }
     winconf_ids[i] = '\0';
-    exit_err(errno, err_r);
-    free(err_r);
-    exit_err(closedir(dp), err_c);
-    free(err_c);
+    exit_trouble(errno, f_name, "readdir()");
+    exit_trouble(closedir(dp), f_name, "closedir()");
     world.winconf_ids = try_malloc(strlen(winconf_ids) + 1, f_name);
     memcpy(world.winconf_ids, winconf_ids, strlen(winconf_ids) + 1);
     free(winconf_ids);
@@ -422,9 +416,7 @@ extern void sorted_wintoggle_and_activate()
     try_fgets(win_order, linemax + 1, file, f_name);
 
     uint8_t a = 0;
-    char * err = trouble_msg(f_name, "read_uint8()");
-    exit_err(read_uint8(file, &a), err);
-    free(err);
+    exit_trouble(read_uint8(file, &a), f_name, "read_uint8()");
 
     try_fclose(file, f_name);
 

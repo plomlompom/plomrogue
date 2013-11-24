@@ -20,8 +20,8 @@ struct Map;
  */
 extern uint16_t rrand();
 
-/* Returns message: "Trouble in ".parent." with ".child."." (try_*() helper) */
-extern char * trouble_msg(char * parent, char * child);
+/* Do exit_err() with message: "Trouble in ".parent." with ".child."." */
+extern void exit_trouble(uint8_t test, char * parent, char * child);
 
 /* Wrappers to malloc(), calloc() from function called "f" calling exit_err()
  * with trouble_msg() error message if necessary.

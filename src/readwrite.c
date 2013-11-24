@@ -8,7 +8,7 @@
 #include <string.h> /* for strlen()*/
 #include <unistd.h> /* for unlink() */
 #include "rexit.h"  /* for exit_err() */
-#include "misc.h"   /* for trouble_msg() */
+#include "misc.h"   /* for exit_trouble() */
 #include "main.h"   /* for world global */
 
 
@@ -52,19 +52,15 @@ extern FILE * try_fopen(char * path, char * mode, char * f)
 
 extern void try_fclose(FILE * file, char * f)
 {
-    char * msg = trouble_msg(f, "fclose()");
-    exit_err(fclose(file), msg);
-    free(msg);
+    exit_trouble(fclose(file), f, "fclose()");
 }
 
 
 
 extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 {
-    char * msg = trouble_msg(f, "fgets()");
     char * test = fgets(line, linemax, file);
-    exit_err(NULL == test && ferror(file), msg);
-    free(msg);
+    exit_trouble(NULL == test && ferror(file), f, "fgets()");
     return test;
 }
 
@@ -73,9 +69,7 @@ extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
                        char * f)
 {
-    char * msg = trouble_msg(f, "fwrite()");
-    exit_err(0 == fwrite(ptr, size, nmemb, stream), msg);
-    free(msg);
+    exit_trouble(0 == fwrite(ptr, size, nmemb, stream), f, "fwrite()");
 }
 
 
@@ -108,10 +102,8 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
 
 extern uint16_t get_linemax(FILE * file, char * f)
 {
-    char * msg = trouble_msg(f, "textfile_sizes()");
     uint16_t linemax;
-    exit_err(textfile_sizes(file, &linemax, NULL), msg);
-    free(msg);
+    exit_trouble(textfile_sizes(file, &linemax, NULL), f, "textfile_sizes()");
     return linemax;
 }
 

@@ -6,9 +6,8 @@
 #include <stdint.h> /* for uint8_t */
 #include <string.h> /* for strlen(), strtok() */
 #include "main.h" /* for world global */
-#include "rexit.h" /* for exit_err() */
 #include "readwrite.h" /* for textfile_sizes(), try_fopen(), try_fclose() */
-#include "misc.h" /* for try_malloc() */
+#include "misc.h" /* for try_malloc(), exit_trouble */
 
 
 
@@ -79,12 +78,12 @@ extern char * get_command_longdsc(char * dsc_short)
 extern void init_command_db()
 {
     char * f_name = "init_command_db()";
-    char * err_s = "Trouble in init_command_db() with textfile_sizes().";
 
     char * path = "config/commands";
     FILE * file = try_fopen(path, "r", f_name);
     uint16_t lines, linemax;
-    exit_err(textfile_sizes(file, &linemax, &lines), err_s);
+    uint8_t test = textfile_sizes(file, &linemax, &lines);
+    exit_trouble(test, f_name, "textfile_sizes()");
     char line[linemax + 1];
 
     struct Command * cmds = try_malloc(lines * sizeof(struct Command), f_name);
