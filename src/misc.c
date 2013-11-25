@@ -16,7 +16,7 @@
 #include "map.h" /* for Map struct, is_passable() */
 #include "main.h" /* for world global */
 #include "yx_uint16.h" /* for yx_uint16 struct */
-#include "rexit.h" /* for exit_err() */
+#include "rexit.h" /* for exit_err(), exit_trouble() */
 #include "wincontrol.h" /* for init_winconfs(), init_wins(), free_winconfs(),
                          * sorted_wintoggle_and_activate()
                          */
@@ -30,21 +30,6 @@ extern uint16_t rrand()
     /* Constants as recommended by POSIX.1-2001 (see man page rand(3)). */
     world.seed = ((world.seed * 1103515245) + 12345) % 4294967296;
     return (world.seed >> 16); /* Ignore less random least significant bits. */
-}
-
-
-
-extern void exit_trouble(uint8_t test, char * parent, char * child)
-{
-    char * p1 = "Trouble in ";
-    char * p2 = " with ";
-    char * p3 = ".";
-    uint16_t size = strlen(p1) + strlen(parent) + strlen(p2) + strlen(child)
-                    + strlen(p3) + 1;
-    char msg[size];
-    exit_err(NULL == msg, "malloc() in trouble_msg() failed.");
-    sprintf(msg, "%s%s%s%s%s", p1, parent, p2, child, p3);
-    exit_err(test, msg);
 }
 
 

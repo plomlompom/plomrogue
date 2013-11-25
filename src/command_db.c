@@ -7,7 +7,8 @@
 #include <string.h> /* for strlen(), strtok() */
 #include "main.h" /* for world global */
 #include "readwrite.h" /* for textfile_sizes(), try_fopen(), try_fclose() */
-#include "misc.h" /* for try_malloc(), exit_trouble */
+#include "misc.h" /* for try_malloc() */
+#include "rexit.h" /* exit_trouble() */
 
 
 

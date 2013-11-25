@@ -12,7 +12,7 @@
 #include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose(),
                         * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
                         */
-#include "rexit.h" /* for exit_err() */
+#include "rexit.h" /* for exit_err(), exit_trouble() */
 #include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_log(),
                         * draw_win_available_keybindings(),
                         * draw_win_inventory(), draw_win_keybindings_global(),
@@ -20,7 +20,7 @@
                         * draw_win_keybindings_winconf_keybindings(),
                         * draw_winconf_geometry(), draw_winconf_keybindings()
                         */
-#include "misc.h" /* for try_malloc(), exit_trouble() */
+#include "misc.h" /* for try_malloc() */
 #include "dirent.h" /* for opendir(), closedir(), readdir() */
 #include "errno.h" /* for errno */
 #include "keybindings.h" /* for KeyBinding struct, free_keybindings() */

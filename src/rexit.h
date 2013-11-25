@@ -7,8 +7,6 @@
 #ifndef REXIT_H
 #define REXIT_H
 
-
-
 #include <stdint.h> /* for uint8_t */
 
 
@@ -19,20 +17,20 @@
  */
 enum cleanup_flag
 {
-    CLEANUP_NCURSES         = 0x0001,
-    CLEANUP_MAP             = 0x0002,
-    CLEANUP_LOG             = 0x0004,
-    CLEANUP_COMMAND_DB      = 0x0008,
-    CLEANUP_MAPOBJACTS      = 0x0010,
-    CLEANUP_MAP_OBJECTS     = 0x0020,
-    CLEANUP_MAP_OBJECT_DEFS = 0x0040,
-    CLEANUP_INTERFACE       = 0x0080
+    CLEANUP_LOG             = 0x0001,
+    CLEANUP_COMMAND_DB      = 0x0002,
+    CLEANUP_MAP             = 0x0004,
+    CLEANUP_MAP_OBJECTS     = 0x0008,
+    CLEANUP_MAP_OBJECT_DEFS = 0x0010,
+    CLEANUP_MAP_OBJECT_ACTS = 0x0020,
+    CLEANUP_INTERFACE       = 0x0040,
+    CLEANUP_NCURSES         = 0x0080
 };
 extern void set_cleanup_flag(enum cleanup_flag flag);
 
 
 
-/* Exit orderly, clean up. */
+/* Exit orderly, clean up in an order respecting resource dependencies. */
 extern void exit_game();
 
 /* If "err" == 0, do nothing. Else, clean up and exit with an error message that
@@ -41,6 +39,9 @@ extern void exit_game();
  * errno if it is non-zero.
  */
 extern void exit_err(uint8_t err, char * msg);
+
+/* Do exit_err() with "msg" as: "Trouble in ".parent." with ".child."." */
+extern void exit_trouble(uint8_t err, char * parent, char * child);
 
 
 

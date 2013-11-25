@@ -7,8 +7,7 @@
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
 #include <string.h> /* for strlen()*/
 #include <unistd.h> /* for unlink() */
-#include "rexit.h"  /* for exit_err() */
-#include "misc.h"   /* for exit_trouble() */
+#include "rexit.h"  /* for exit_err(), exit_trouble() */
 #include "main.h"   /* for world global */
 
 

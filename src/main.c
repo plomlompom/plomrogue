@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     init_command_db();
     set_cleanup_flag(CLEANUP_COMMAND_DB);
     init_map_object_actions();
-    set_cleanup_flag(CLEANUP_MAPOBJACTS);
+    set_cleanup_flag(CLEANUP_MAP_OBJECT_ACTS);
 
     /* Check for corrupted savefile / recordfile savings. */
     char * recordfile = "record";
