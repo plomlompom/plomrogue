@@ -146,13 +146,15 @@ static void save_win_config(char id)
 {
     char * f_name = "save_win_config()";
 
+    /* Prepare atomic file saving. */
     char * path_tmp = string_prefixed_id("config/windows/Win_tmp_", id);
     FILE * file = try_fopen(path_tmp, "w", f_name);
 
+    /* Save, line by line, ->title, ->draw, ->height and ->width. */
     struct WinConf * wc = get_winconf_by_id(id);
     uint8_t size = strlen(wc->title) + 2;
-    if (size < 7)
-    {
+    if (size < 7)  /* Ensure that at least 5 + 2 char fit into line so that   */
+    {              /* the digit representation of any uint16_t may be stored. */
         size = 7;
     }
     char line[size];
@@ -165,6 +167,7 @@ static void save_win_config(char id)
     sprintf(line, "%d\n", wc->width);
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
 
+    /* Save window-specific keybindings (->kb.kbs). */
     uint16_t linemax = 0;
     struct KeyBinding * kb_p = wc->kb.kbs;
     while (0 != kb_p)
@@ -175,17 +178,17 @@ static void save_win_config(char id)
         }
         kb_p = kb_p->next;
     }
-    linemax = linemax + 6;         /* + 6 = + 3 digits + whitespace + \n + \0 */
-
+    linemax = linemax + 6;          /* + 6: + 3 digits + whitespace + \n + \0 */
     char kb_line[linemax];
     kb_p = wc->kb.kbs;
     while (0 != kb_p)
     {
-        snprintf(kb_line, linemax, "%d %s\n", kb_p->key, kb_p->name);
+        sprintf(kb_line, "%d %s\n", kb_p->key, kb_p->name);
         try_fwrite(kb_line, sizeof(char), strlen(kb_line), file, f_name);
         kb_p = kb_p->next;
     }
 
+    /* Finish atomic file saving and clean up. */
     char * path = string_prefixed_id("config/windows/Win_", id);
     try_fclose_unlink_rename(file, path_tmp, path, f_name);
     free(path);
