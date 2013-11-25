@@ -388,17 +388,17 @@ extern void sorted_wintoggle_and_activate()
 {
     char * f_name = "sorted_wintoggle_and_activate()";
 
+    /* Read from file order of windows to be toggled + active win selection. */
     char * path = "config/windows/toggle_order_and_active";
     FILE * file = try_fopen(path, "r", f_name);
     uint16_t linemax = get_linemax(file, f_name);
     char win_order[linemax + 1];
     try_fgets(win_order, linemax + 1, file, f_name);
-
-    uint8_t a = 0;
+    uint8_t a;
     exit_trouble(read_uint8(file, &a), f_name, "read_uint8()");
-
     try_fclose(file, f_name);
 
+    /* Toggle windows and set active window selection. */
     uint8_t i = 0;
     for (; i < strlen(win_order) - 1; i++)
     {
@@ -407,7 +407,6 @@ extern void sorted_wintoggle_and_activate()
             continue;
         }
         toggle_window(win_order[i]);
-
         if (a == (uint8_t) win_order[i])
         {
             world.wmeta->active = get_win_by_id(win_order[i]);
