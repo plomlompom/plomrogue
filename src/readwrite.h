@@ -33,8 +33,8 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
                                      char * f);
 
 /* Wrapper: Call textfile_sizes() from function called "f" to get max line
- * length of "file", exit via exit_err() with trouble_msg()-generated error
- * message on failure.
+ * length (includes newline char) of "file", exit via exit_err() with
+ * exit_trouble() on failure.
  */
 extern uint16_t get_linemax(FILE * file, char * f);
 

@@ -391,7 +391,6 @@ extern void sorted_wintoggle_and_activate()
     char * path = "config/windows/toggle_order_and_active";
     FILE * file = try_fopen(path, "r", f_name);
     uint16_t linemax = get_linemax(file, f_name);
-
     char win_order[linemax + 1];
     try_fgets(win_order, linemax + 1, file, f_name);
 
@@ -401,7 +400,7 @@ extern void sorted_wintoggle_and_activate()
     try_fclose(file, f_name);
 
     uint8_t i = 0;
-    for (; i < linemax - 1; i++)
+    for (; i < strlen(win_order) - 1; i++)
     {
         if (NULL == strchr(world.winconf_ids, win_order[i]))
         {
