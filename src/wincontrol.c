@@ -324,14 +324,15 @@ extern void init_winconfs()
     char * f_name = "init_winconfs()";
 
     /* Fill world.winconf_ids with config/windows/Win_* filenames' end chars. */
+    uint8_t max_wins = 255;         /* Maximum number of window ids to store. */
     DIR * dp = opendir("config/windows");
     exit_trouble(NULL == dp, f_name, "opendir()");
     struct dirent * fn;
     errno = 0;
-    char * winconf_ids = try_malloc(256, f_name);
+    char * winconf_ids = try_malloc(max_wins + 1, f_name);
     uint8_t i = 0;
     char id;
-    while (NULL != (fn = readdir(dp)))
+    while (NULL != (fn = readdir(dp)) && i < max_wins)
     {
         if (5 == strlen(fn->d_name) && fn->d_name == strstr(fn->d_name, "Win_"))
         {
@@ -420,20 +421,22 @@ extern void save_win_configs()
 {
     char * f_name = "save_win_configs()";
 
+    /* Save individual world.winconfs to their proper files. */
+    uint8_t max_wins = 255; /* So many winconf ids fit into world.winconf_ids.*/
     char id;
     while (0 != (id = get_next_winconf_id()))
     {
         save_win_config(id);
     }
 
+    /* Save order of windows to toggle on start / which to select as active. */
     char * path     = "config/windows/toggle_order_and_active";
     char * path_tmp = "config/windows/toggle_order_and_active_tmp";
     FILE * file = try_fopen(path_tmp, "w", f_name);
-
-    char line[6];
+    char line[max_wins + 2];
     struct Win * w_p = world.wmeta->chain_start;
     uint8_t i = 0;
-    while (0 != w_p)
+    while (0 != w_p && i < max_wins)
     {
         struct WinConf * wc = get_winconf_by_win(w_p);
         line[i] = wc->id;
@@ -441,13 +444,13 @@ extern void save_win_configs()
         i++;
     }
     line[i] = '\n';
+    line[i + 1] = '\0';
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
     if (0 != world.wmeta->active)
     {
         struct WinConf * wc = get_winconf_by_win(world.wmeta->active);
         write_uint8(wc->id, file);
     }
-
     try_fclose_unlink_rename(file, path_tmp, path, f_name);
 }
 
