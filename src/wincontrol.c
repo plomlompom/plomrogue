@@ -30,11 +30,8 @@
 /* Return string "prefix" + "id"; malloc()'s string, remember to call free()! */
 static char * string_prefixed_id(char * prefix, char id);
 
-/* Initializes Winconf: .view/.height_type/.width_type to 0, .id to "id". */
-static void create_winconf(char id, struct WinConf * wcp);
-
 /* Initialize Winconf of "id" from appropriate config file.*/
-static void init_winconf_from_file(char id);
+static void init_winconf_from_file(char id, struct WinConf * winconf);
 
 /* Wrapper around init_win() called with values from Winconf of "id". */
 static void init_win_from_winconf(char id);
@@ -72,53 +69,37 @@ static char * string_prefixed_id(char * prefix, char id)
 
 
 
-static void create_winconf(char id, struct WinConf * wcp)
+static void init_winconf_from_file(char id, struct WinConf * winconf)
 {
-    wcp->id = id;
-    wcp->view = 0;
-    wcp->height_type = 0;
-    wcp->width_type = 0;
-    wcp->kb.edit = 0;
-    wcp->kb.select = 0;
-}
-
-
-
-static void init_winconf_from_file(char id)
-{
+    /* Assign WinConf id to filename path, error message context, winconf->id.*/
     char * tmp = "init_winconf_from_file() on window id '_'";
     char * context = try_malloc(strlen(tmp) + 1, "init_winconf_from_file()");
     memcpy(context, tmp, strlen(tmp) + 1);
     context[strlen(tmp) - 2] = id;
-
     char * path = string_prefixed_id("config/windows/Win_", id);
+    winconf->id = id;
+
+    /* Prepare reading in file line by line into "line" array. */
     FILE * file = try_fopen(path, "r", context);
     free(path);
     uint16_t linemax = get_linemax(file, context);
     char line[linemax + 1];
 
-    struct WinConf * winconf = get_winconf_by_id(id);
+    /* Read/determine winconf->title, ->draw, ->height(_type),->width(_type). */
     try_fgets(line, linemax + 1, file, context);
     winconf->title = try_malloc(strlen(line), context);
     memcpy(winconf->title, line, strlen(line) - 1); /* Eliminate newline char */
     winconf->title[strlen(line) - 1] = '\0';        /* char at end of string. */
-
     try_fgets(line, linemax + 1, file, context);
     winconf->draw = line[0];
-
     try_fgets(line, linemax + 1, file, context);
     winconf->height = atoi(line);
-    if (0 >= winconf->height)
-    {
-        winconf->height_type = 1;
-    }
+    winconf->height_type = (0 >= winconf->height);
     try_fgets(line, linemax + 1, file, context);
     winconf->width = atoi(line);
-    if (0 >= winconf->width)
-    {
-        winconf->width_type = 1;
-    }
+    winconf->width_type = (0 >= winconf->width);
 
+    /* Read in window-specific keybindings (winconf->kb). */
     char command[linemax + 1];
     char * cmdptr;
     struct KeyBinding ** loc_last_ptr = &winconf->kb.kbs;
@@ -140,6 +121,10 @@ static void init_winconf_from_file(char id)
         loc_last_ptr = & kb_p->next;
     }
 
+    /* Init remaining values to zero and cleaning up. */
+    winconf->view = 0;
+    winconf->kb.edit = 0;
+    winconf->kb.select = 0;
     try_fclose(file, context);
     free(context);
 }
@@ -338,6 +323,7 @@ extern void init_winconfs()
 {
     char * f_name = "init_winconfs()";
 
+    /* Fill world.winconf_ids with config/windows/Win_* filenames' end chars. */
     DIR * dp = opendir("config/windows");
     exit_trouble(NULL == dp, f_name, "opendir()");
     struct dirent * fn;
@@ -361,19 +347,13 @@ extern void init_winconfs()
     memcpy(world.winconf_ids, winconf_ids, strlen(winconf_ids) + 1);
     free(winconf_ids);
 
-    struct WinConf * winconfs;
-    winconfs = try_malloc(strlen(world.winconf_ids) * sizeof(struct WinConf),
-                          f_name);
+    /* Initialize world.winconfs from Win_* files named in world.winconf_ids. */
+    size_t size = strlen(world.winconf_ids) * sizeof(struct WinConf);
+    world.winconfs = try_malloc(size, f_name);
     i = 0;
     while (0 != (id = get_next_winconf_id()))
     {
-        create_winconf(id, &winconfs[i]);
-        i++;
-    }
-    world.winconfs = winconfs;
-    while (0 != (id = get_next_winconf_id()))
-    {
-        init_winconf_from_file(id);
+        init_winconf_from_file(id, &world.winconfs[i]);
         i++;
     }
 }

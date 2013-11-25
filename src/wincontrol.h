@@ -40,7 +40,7 @@ struct WinConf
 extern struct WinConf * get_winconf_by_win(struct Win * win);
 extern struct Win * get_win_by_id(char id);
 
-/* Create/initialize (from config files)/free Winconf structs. */
+/* Create, initialize (from config files)/free world.winconfs and their Wins. */
 extern void init_winconfs();
 extern void free_winconfs();
 extern void init_wins();
