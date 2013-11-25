@@ -13,7 +13,7 @@
 #include "main.h" /* for world global */
 #include "wincontrol.h" /* for struct WinConf, scroll_pad(), toggle_window(),
                          * growshrink_active_window(),toggle_winconfig(),
-                         * toggle_win_height_type(), toggle_win_width_type()
+                         * toggle_size_type()
                          */
 #include "map_object_actions.h" /* for struct MapObjAct, actor_wait(),
                                  * actor_move(), actor_drop(), actor_pick(),
@@ -205,8 +205,8 @@ extern uint8_t player_control_by_id(int action)
 
 extern uint8_t wingeom_control(int key)
 {
-    if (   try_cmd_0args(key, "to_height_t", toggle_win_height_type)
-        || try_cmd_0args(key, "to_width_t", toggle_win_width_type)
+    if (   try_cmd_1args(key, "to_height_t", toggle_win_size_type, 'y')
+        || try_cmd_1args(key, "to_width_t", toggle_win_size_type, 'x')
         || try_cmd_1args(key, "grow_h", growshrink_active_window, '*')
         || try_cmd_1args(key, "shri_h", growshrink_active_window, '_')
         || try_cmd_1args(key, "grow_v", growshrink_active_window, '+')

@@ -60,15 +60,15 @@ extern void save_win_configs();
 
 /* Toggle "window configuration" view for active window. Sets sensible
  * Win.center values for the various configuration views (for winconf_geometry:
- * y=0, x=0; for winconf_keys: x=0, y=Winconf.kb.select).
+ * y=0, x=0; for winconf_keys: x=0 (y is set by draw_winconf_keybindings()).
  */
 extern void toggle_winconfig();
 
-/* Toggle WinConf.(height/width)_type. To avoid a positive diff to screen width,
+/* Toggle WinConf.(height/width)_type ("axis" = "y": height; else: width). Avoid
+ * positive diff to screen width (value would be wrongly read as a non-diff),
  * width_type toggles to 1 only if world.wmeta->screen's width >= WinConf.width.
  */
-extern void toggle_win_height_type();
-extern void toggle_win_width_type();
+extern void toggle_win_size_type(char axis);
 
 /* Toggle display of a window identified by "id". */
 extern void toggle_window(char id);

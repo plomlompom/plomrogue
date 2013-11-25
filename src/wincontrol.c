@@ -463,7 +463,7 @@ extern void toggle_window(char id)
 {
     struct Win * win = get_win_by_id(id);
     if (0 == win->prev && world.wmeta->chain_start != win)  /* Win struct is  */
-    {                                                       /* outside chain. */
+    {                                                       /* outside chain? */
         append_win(win);
     }
     else
@@ -480,57 +480,40 @@ extern void toggle_winconfig()
    struct WinConf * wcp = get_winconf_by_win(win);
     if      (0 == wcp->view)
     {
-        win->draw = draw_winconf_geometry;
-        wcp->view = 1;
-        wcp->center = win->center;
+        wcp->view     = 1;
+        win->draw     = draw_winconf_geometry;
+        wcp->center   = win->center;
         win->center.y = 0;
         win->center.x = 0;
     }
     else if (1 == wcp->view)
     {
-        win->draw = draw_winconf_keybindings;
-        wcp->view = 2;
+        wcp->view     = 2;
+        win->draw     = draw_winconf_keybindings;
         win->center.x = 0;
     }
     else
     {
-        win->draw = get_drawfunc_by_char(wcp->draw);
-        win->center = wcp->center;
-        wcp->view = 0;
+        wcp->view     = 0;
+        win->draw     = get_drawfunc_by_char(wcp->draw);
+        win->center   = wcp->center;
     }
 }
 
 
 
-extern void toggle_win_height_type()
+extern void toggle_win_size_type(char axis)
 {
     struct Win * win = world.wmeta->active;
     struct WinConf * wcp = get_winconf_by_win(win);
-    if (0 == wcp->height_type)
+    if ('y' == axis)
     {
-        wcp->height_type = 1;
+        wcp->height_type = (0 == wcp->height_type);
+        set_winconf_geometry(wcp->id);
+        return;
     }
-    else
-    {
-        wcp->height_type = 0;
-    }
-    set_winconf_geometry(wcp->id);
-}
-
-
-
-extern void toggle_win_width_type()
-{
-    struct Win * win = world.wmeta->active;
-    struct WinConf * wcp = get_winconf_by_win(win);
-    if (0 == wcp->width_type && win->framesize.x <= world.wmeta->padsize.x)
-    {
-        wcp->width_type = 1;
-    }
-    else
-    {
-        wcp->width_type = 0;
-    }
+    wcp->width_type = (   0 == wcp->width_type
+                       && win->framesize.x <= world.wmeta->padsize.x);
     set_winconf_geometry(wcp->id);
 }
 
