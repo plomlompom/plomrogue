@@ -18,19 +18,19 @@ extern uint8_t yx_uint16_cmp(struct yx_uint16 * a, struct yx_uint16 * b)
 
 extern struct yx_uint16 mv_yx_in_dir(char d, struct yx_uint16 yx)
 {
-    if      (d == 'N')
+    if      (d == 'N' && yx.y > 0)
     {
         yx.y--;
     }
-    else if (d == 'E')
+    else if (d == 'E' && yx.x < UINT16_MAX)
     {
         yx.x++;
     }
-    else if (d == 'S')
+    else if (d == 'S' && yx.y < UINT16_MAX)
     {
         yx.y++;
     }
-    else if (d == 'W')
+    else if (d == 'W' && yx.x > 0)
     {
         yx.x--;
     }

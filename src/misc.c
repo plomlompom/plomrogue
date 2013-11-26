@@ -13,6 +13,7 @@
                           * write_map_objects()
                           */
 #include "map_object_actions.h" /* for struct MapObjAct */
+#include "ai.h" /* for pretty_dumb_ai() */
 #include "map.h" /* for Map struct, is_passable() */
 #include "main.h" /* for world global */
 #include "yx_uint16.h" /* for yx_uint16 struct */
@@ -237,9 +238,7 @@ extern void turn_over(char action)
                 {
                     break;
                 }
-                char * sel = "NSEW";
-                map_object->command = get_moa_id_by_name("move");
-                map_object->arg = sel[rrand() % 4];
+                pretty_dumb_ai(map_object);
             }
             first_round = 0;
             map_object->progress++;
