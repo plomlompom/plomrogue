@@ -10,9 +10,9 @@
 #include "windows.h" /* for structs WinMeta, Win, init_win_meta(),
                       * draw_all_wins()
                       */
-#include "readwrite.h" /* for read_uint32_bigendian(),
+#include "readwrite.h" /* for try_fgetc(), read_uint32_bigendian(),
                         * write_uint32_bigendian(), try_fopen(), try_fclose(),
-                        * try_fclose_unlink_rename(), try_fgetc()
+                        * try_fclose_unlink_rename(), try_fgetc_noeof(),
                         */
 #include "map_objects.h" /* for structs MapObj, init_map_object_defs(),
                           * build_map_objects(), get_player()
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
         {
             while (world.turn != start_turn)
             {
-                action = fgetc(file);
+                action = try_fgetc(file, f_name);
                 if (EOF == action)
                 {
                     break;
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                 if (   is_command_id_shortdsc(action, "drop")
                     || is_command_id_shortdsc(action, "use"))
                 {
-                    world.inventory_select = try_fgetc(file, f_name);
+                    world.inventory_select = try_fgetc_noeof(file, f_name);
                 }
                 player_control_by_id(action);
             }
@@ -197,13 +197,13 @@ int main(int argc, char *argv[])
             if (   EOF != action
                 && key == get_available_keycode_to_action("wait"))
             {
-                action = fgetc(file);
+                action = try_fgetc(file, f_name);
                 if (EOF != action)
                 {
                     if (   is_command_id_shortdsc(action, "drop")
                         || is_command_id_shortdsc(action, "use"))
                     {
-                        world.inventory_select = try_fgetc(file, f_name);
+                        world.inventory_select = try_fgetc_noeof(file, f_name);
                     }
                     player_control_by_id(action);
                 }

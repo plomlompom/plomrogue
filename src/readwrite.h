@@ -18,6 +18,7 @@ extern FILE * try_fopen(char * path, char * mode, char * f);
 extern void try_fclose(FILE * file, char * f);
 extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
                        char * f);
+extern void try_fputc(uint8_t c, FILE * file, char * f);
 
 /* Wrapper to calling fgets() from function called "f". The return code of
  * fgets() is returned unless it is NULL *and* ferror() indicates that an error
@@ -25,9 +26,11 @@ extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
  */
 extern char * try_fgets(char * line, int size, FILE * file, char * f);
 
-/* fgetc()/fputc() wrappers to catch EOF returns/upon it call exit_trouble(). */
-extern uint8_t try_fgetc(FILE * file, char * f);
-extern void try_fputc(uint8_t c, FILE * file, char * f);
+/* Wrappers to calling fgetc() and (try_fgetc_noeof()) treating all EOFs returns
+ * as errors to call exit_trouble(), or (try_fgetc()) only if ferror() says so.
+ */
+extern int try_fgetc(FILE * file, char * f);
+extern uint8_t try_fgetc_noeof(FILE * file, char * f);
 
 /* Wrapper to successive call of fclose() from function called "f" on "file",
  * then unlink() on file at "p2" if it exists, then rename() on "p1" to "p2".

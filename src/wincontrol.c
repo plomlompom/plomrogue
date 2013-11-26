@@ -11,7 +11,7 @@
 #include "main.h" /* for world global */
 #include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose(),
                         * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
-                        * try_fgetc()
+                        * try_fgetc_noeof()
                         */
 #include "rexit.h" /* for exit_err(), exit_trouble() */
 #include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_log(),
@@ -399,7 +399,7 @@ extern void sorted_wintoggle_and_activate()
     uint16_t linemax = get_linemax(file, f_name);
     char win_order[linemax + 1];
     try_fgets(win_order, linemax + 1, file, f_name);
-    uint8_t a = try_fgetc(file, f_name);
+    uint8_t a = try_fgetc_noeof(file, f_name);
     try_fclose(file, f_name);
 
     /* Toggle windows and set active window selection. */

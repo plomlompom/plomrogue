@@ -44,6 +44,13 @@ extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
 
 
 
+extern void try_fputc(uint8_t c, FILE * file, char * f)
+{
+    exit_trouble(EOF == fputc(c, file), f, "fputc()");
+}
+
+
+
 extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 {
     char * test = fgets(line, linemax, file);
@@ -53,19 +60,21 @@ extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 
 
 
-extern uint8_t try_fgetc(FILE * file, char * f)
+extern int try_fgetc(FILE * file, char * f)
 {
     int test = fgetc(file);
-    exit_trouble(EOF == test, f, "fgetc() unexpectedly hitting EOF");
-    return (uint8_t) test;
+    exit_trouble(EOF == test && ferror(file), f, "fgetc()");
+    return test;
 }
 
 
 
-extern void try_fputc(uint8_t c, FILE * file, char * f)
+extern uint8_t try_fgetc_noeof(FILE * file, char * f)
 {
-    int test = fputc(c, file);
-    exit_trouble(EOF == test, f, "fputc() hitting EOF");
+    char * f_name = "try_fgetc_noeof()";
+    int test = try_fgetc(file, f_name);
+    exit_trouble(EOF == test, f, "fgetc() unexpectedly hitting EOF");
+    return (uint8_t) test;
 }
 
 
@@ -108,13 +117,14 @@ extern uint16_t get_linemax(FILE * file, char * f)
 extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
                               uint16_t * n_lines_p)
 {
+    char * f_name = "textfile_sizes()";
     int c = 0;
     uint16_t c_count = 0;
     uint16_t n_lines = 0;
     uint16_t linemax = 0;
     while (1)
     {
-        c = fgetc(file);
+        c = try_fgetc(file, f_name);
         if (EOF == c)
         {
             break;
@@ -156,10 +166,10 @@ extern uint32_t read_uint32_bigendian(FILE * file)
 {
     char * f_name = "read_uint32_bigendian()";
     uint32_t x;
-    x =       (uint32_t) try_fgetc(file, f_name) << 24;
-    x = x + ( (uint32_t) try_fgetc(file, f_name) << 16 );
-    x = x + ( (uint32_t) try_fgetc(file, f_name) <<  8 );
-    x = x +   (uint32_t) try_fgetc(file, f_name);
+    x =       (uint32_t) try_fgetc_noeof(file, f_name) << 24;
+    x = x + ( (uint32_t) try_fgetc_noeof(file, f_name) << 16 );
+    x = x + ( (uint32_t) try_fgetc_noeof(file, f_name) <<  8 );
+    x = x +   (uint32_t) try_fgetc_noeof(file, f_name);
     return x;
 }
 

@@ -7,7 +7,7 @@
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
 #include <stdint.h> /* for uint8_t, uint16_t */
 #include "readwrite.h" /* for try_fopen(), try_fclose(), get_linemax(),
-                        * try_fputc()
+                        * try_fputc(), try_fgetc()
                         */
 #include "map_objects.h" /* for struct MapObj, get_player(), read_map_objects(),
                           * write_map_objects()
@@ -202,11 +202,11 @@ extern void turn_over(char action)
     {
         FILE * file_old = try_fopen(recordfile,     "r", f_name);
         FILE * file_new = try_fopen(recordfile_tmp, "w", f_name);
-        char c = fgetc(file_old);
+        int c = try_fgetc(file_old, f_name);
         while (EOF != c)
         {
-            try_fputc(c, file_new, f_name);
-            c = fgetc(file_old);
+            try_fputc((uint8_t) c, file_new, f_name);
+            c = try_fgetc(file_old, f_name);
         }
         try_fclose(file_old, f_name);
         try_fputc(action, file_new, f_name);
