@@ -53,10 +53,8 @@ extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
  * fgetc()/fputc() failure.
  */
 extern uint8_t read_uint8(FILE * file, uint8_t * x);
-extern uint8_t read_uint16_bigendian(FILE * file, uint16_t * x);
 extern uint8_t read_uint32_bigendian(FILE * file, uint32_t * x);
 extern uint8_t write_uint8(uint8_t x, FILE * file);
-extern uint8_t write_uint16_bigendian(uint16_t x, FILE * file);
 extern uint8_t write_uint32_bigendian(uint32_t x, FILE * file);
 
 

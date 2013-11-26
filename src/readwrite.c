@@ -14,18 +14,8 @@
 
 /* Read/write "x" from/to "file" as bigendian representation of "size" bits. On
  * failure, return 1, else 0. (As of of now, all extern read/write functions
- * build on top of these.)
- *
- * Only use multiples of 8 greater or equal 32 for "size", so that storage
- * inside uint32_t is possible. Originally a bit number check prefaced the code
- * of both functions. It was removed as redundant due to all possible "size"
- * values being hardcoded into the library (i.e. in all extern functions calling
- * / wrapping around either function). If this ever changes, (re-)insert:
- *
- *    if (0 == size || size > 32 || 0 != size % 8)
- *    {
- *        return 1;
- *    }
+ * build on top of these.) Only use multiples of 8 greater or equal 32 for
+ * "size", so that storage inside uint32_t is possible.
  */
 static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size);
 static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size);
@@ -202,17 +192,6 @@ extern uint8_t read_uint8(FILE * file, uint8_t * x)
 
 
 
-extern uint8_t read_uint16_bigendian(FILE * file, uint16_t * x)
-{
-    /* See read_uint8() introductory code comment for rationale. */
-    uint32_t y = * x;
-    uint8_t err = read_uintX_bigendian(file, &y, 16);
-    * x = (uint16_t) y;
-    return err;
-}
-
-
-
 extern uint8_t read_uint32_bigendian(FILE * file, uint32_t * x)
 {
     return read_uintX_bigendian(file, x, 32);
@@ -223,13 +202,6 @@ extern uint8_t read_uint32_bigendian(FILE * file, uint32_t * x)
 extern uint8_t write_uint8(uint8_t x, FILE * file)
 {
     return write_uintX_bigendian(file, x, 8);
-}
-
-
-
-extern uint8_t write_uint16_bigendian(uint16_t x, FILE * file)
-{
-    return write_uintX_bigendian(file, x, 16);
 }
 
 
