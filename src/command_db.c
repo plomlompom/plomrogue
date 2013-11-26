@@ -82,9 +82,8 @@ extern void init_command_db()
 
     char * path = "config/commands";
     FILE * file = try_fopen(path, "r", f_name);
-    uint16_t lines, linemax;
-    uint8_t test = textfile_sizes(file, &linemax, &lines);
-    exit_trouble(test, f_name, "textfile_sizes()");
+    uint16_t lines;
+    uint16_t linemax = textfile_sizes(file, &lines);
     char line[linemax + 1];
 
     struct Command * cmds = try_malloc(lines * sizeof(struct Command), f_name);

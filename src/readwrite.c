@@ -105,17 +105,7 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
 
 
 
-extern uint16_t get_linemax(FILE * file, char * f)
-{
-    uint16_t linemax;
-    exit_trouble(textfile_sizes(file, &linemax, NULL), f, "textfile_sizes()");
-    return linemax;
-}
-
-
-
-extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
-                              uint16_t * n_lines_p)
+extern uint16_t textfile_sizes(FILE * file, uint16_t * n_lines_p)
 {
     char * f_name = "textfile_sizes()";
     int c = 0;
@@ -147,17 +137,12 @@ extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
     {                                /* line / lack newline chars.            */
         linemax = c_count;
     }
-
-    if (-1 == fseek(file, 0, SEEK_SET))
-    {
-        return 1;
-    }
-    * linemax_p = linemax;
+    exit_trouble(-1 == fseek(file, 0, SEEK_SET), f_name, "fseek()");
     if (n_lines_p)
     {
         * n_lines_p = n_lines;
     }
-    return 0;
+    return linemax;
 }
 
 

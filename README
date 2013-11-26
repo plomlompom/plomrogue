@@ -12,9 +12,8 @@ skeletons or "magic meat"--such objects can be collected, and "magic meat" can
 be consumed to gain hitpoints. Note that different kinds of moves take different
 numbers of turns to finish.
 
-Enemies' AI is very dumb so far: Each turn, they
-try to move in the (beeline) direction of the nearest enemy, so they often bump
-into obstacles.
+Enemies' AI is very dumb so far: Each turn, they try to move in the (beeline)
+direction of the nearest enemy, so they often bump into obstacles.
 
 There is only one save file (named "savefile"), and it gets overwritten each new
 turn. To start over with a new world, delete it.

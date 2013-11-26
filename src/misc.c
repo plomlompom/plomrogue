@@ -6,7 +6,7 @@
 #include <stdlib.h> /* for size_t, calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
 #include <stdint.h> /* for uint8_t, uint16_t */
-#include "readwrite.h" /* for try_fopen(), try_fclose(), get_linemax(),
+#include "readwrite.h" /* for try_fopen(), try_fclose(), textfile_sizes(),
                         * try_fputc(), try_fgetc()
                         */
 #include "map_objects.h" /* for struct MapObj, get_player(), read_map_objects(),
@@ -283,7 +283,7 @@ extern void load_game()
     char * f_name = "load_game2()";
     char * filename = "savefile";
     FILE * file = try_fopen(filename, "r", f_name);
-    uint16_t linemax = get_linemax(file, f_name);
+    uint16_t linemax = textfile_sizes(file, NULL);
     char line[linemax + 1];
     try_fgets(line, linemax + 1, file, f_name);
     world.mapseed = atoi(line);

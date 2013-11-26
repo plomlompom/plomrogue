@@ -9,7 +9,7 @@
                       */
 #include "yx_uint16.h" /* for yx_uint16 struct */
 #include "main.h" /* for world global */
-#include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose(),
+#include "readwrite.h" /* for textfile_sizes(), try_fopen(), try_fclose(),
                         * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
                         * try_fgetc_noeof()
                         */
@@ -83,7 +83,7 @@ static void init_winconf_from_file(char id, struct WinConf * winconf)
     /* Prepare reading in file line by line into "line" array. */
     FILE * file = try_fopen(path, "r", context);
     free(path);
-    uint16_t linemax = get_linemax(file, context);
+    uint16_t linemax = textfile_sizes(file, NULL/*, context*/);
     char line[linemax + 1];
 
     /* Read/determine winconf->title, ->draw, ->height(_type),->width(_type). */
@@ -396,7 +396,7 @@ extern void sorted_wintoggle_and_activate()
     /* Read from file order of windows to be toggled + active win selection. */
     char * path = "config/windows/toggle_order_and_active";
     FILE * file = try_fopen(path, "r", f_name);
-    uint16_t linemax = get_linemax(file, f_name);
+    uint16_t linemax = textfile_sizes(file, NULL);
     char win_order[linemax + 1];
     try_fgets(win_order, linemax + 1, file, f_name);
     uint8_t a = try_fgetc_noeof(file, f_name);

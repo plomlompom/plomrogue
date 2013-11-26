@@ -12,7 +12,7 @@
 #include "misc.h" /* for update_log(), try_malloc() */
 #include "map.h" /* for is_passable() */
 #include "main.h" /* for world global */
-#include "readwrite.h" /* for try_fopen(), try_fclose(), get_linemax() */
+#include "readwrite.h" /* for try_fopen(), try_fclose(), textfile_sizes() */
 #include "rexit.h" /* for exit_err() */
 
 
@@ -186,7 +186,7 @@ extern void init_map_object_actions()
 
     char * path = "config/map_object_actions";
     FILE * file = try_fopen(path, "r", f_name);
-    uint16_t linemax = get_linemax(file, f_name);
+    uint16_t linemax = textfile_sizes(file, NULL);
     char line[linemax + 1];
 
     struct MapObjAct ** moa_ptr_ptr = &world.map_obj_acts;

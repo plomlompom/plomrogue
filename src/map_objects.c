@@ -5,8 +5,8 @@
 #include <stdint.h> /* for uint8_t */
 #include <stdio.h> /* for FILE typedef */
 #include <string.h> /* for strchr(), strlen(), memcpy(), strtok() */
-#include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose()
-                        * [read/write]_uint[8/16/23][_bigendian]()
+#include "readwrite.h" /* for textfile_sizes(), try_fopen(), try_fclose(),
+                        * try_fgets()
                         */
 #include "misc.h" /* for try_malloc(), find_passable_pos() */
 #include "main.h" /* for world global */
@@ -72,7 +72,7 @@ extern void init_map_object_defs(char * filename)
 {
     char * f_name = "init_map_object_defs()";
     FILE * file = try_fopen(filename, "r", f_name);
-    uint16_t linemax = get_linemax(file, f_name);
+    uint16_t linemax = textfile_sizes(file, NULL);
     struct MapObjDef ** last_mod_ptr_ptr = &world.map_obj_defs;
     char * delim = " ";
     char line[linemax + 1];

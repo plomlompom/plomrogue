@@ -146,9 +146,8 @@ extern void init_keybindings(char * path, struct KeyBiData * kbd)
     char * f_name = "init_keybindings()";
 
     FILE * file = try_fopen(path, "r", f_name);
-    uint16_t lines, linemax;
-    char * err = "textfile_sizes() in init_keybindings() returns error.";
-    exit_err(textfile_sizes(file, &linemax, &lines), err);
+    uint16_t lines;
+    uint16_t linemax = textfile_sizes(file, &lines);
 
     char command[linemax + 1];
     char * cmdptr;
