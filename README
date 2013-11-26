@@ -2,17 +2,19 @@ plomrogue
 =========
 
 plomlompom tries to build his own roguelike. Currently, it doesn't do much
-interesting, apart from managing keybindings and some ncurses windows in a
-bizarre fashion.
+interesting.
 
-You can move around a player and meet a number of different enemies. They move
-randomly and will only accidentally hit you. You have 5 hitpoints to lose before
-death; they have either 1, 3 or 9. Your score grows by killing enemies, to the
-amount of hitpoints each killed enemy started with. Dead enemies become dirt,
+You can move around a player and meet a number of different enemies. You have 5
+hitpoints to lose before death; they start with different amounts of hitpoints
+depending on their species. Your score grows by killing enemies, to the amount
+of hitpoints each killed enemy started with. Dead enemies become dirt,
 skeletons or "magic meat"--such objects can be collected, and "magic meat" can
-be consumed to gain hitpoints.
+be consumed to gain hitpoints. Note that different kinds of moves take different
+numbers of turns to finish.
 
-The map gets generated randomly, too.
+Enemies' AI is very dumb so far: Each turn, they
+try to move in the (beeline) direction of the nearest enemy, so they often bump
+into obstacles.
 
 There is only one save file (named "savefile"), and it gets overwritten each new
 turn. To start over with a new world, delete it.
@@ -41,7 +43,7 @@ keybindings may be changed in the "Global keys" window, those of the window
 geometry configuration in the "Window geometry keys" window" and those of the
 window-specific keybindings configuration in the "Window keybinding keys"
 window; by default, these three windows are not visible, but may be turned on by
-hitting the "F5", "F6" and "F7" keys.
+hitting the "F6", "F7" and "F8" keys.
 
 What actions are available globally or only in specific windows can be further
 manipulated by editing the files config/keybindings_global and
@@ -61,3 +63,20 @@ beginning. Hit the "next turn / wait" key to increment turns. Keys to
 manage windows, scroll on the map and quit the program are active; keys
 to perform player actions are inactive. Append a number to the -s option
 (like "-s100") to start the recording at the respective turn number.
+
+Hacking
+-------
+
+The movements/actions available to the player and the enemies are defined and
+can be changed in config/map_object_actions. Each line consists of, first, a
+numerical ID used internally to manage the action, secondly the number of turns
+the action takes, and thirdly a string representing the action internally.
+
+The different map object types, i.e. species (including the player's human one)
+and item types, can be edited in config/defs. Here the first value is a
+numerical ID that represents the object type, the second one describes what type
+this object decomposes to when it gets destroyed/killed, the third value is the
+character used to represent the object visually on the map, the fourth value is
+the number of hitpoints the object starts with (items are dead and start with
+zero hitpoints, anything else moves), the fifth is the string that names the
+object in the game log.
