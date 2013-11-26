@@ -11,6 +11,7 @@
 #include "main.h" /* for world global */
 #include "readwrite.h" /* for get_linemax(), try_fopen(), try_fclose(),
                         * try_fgets(), try_fclose_unlink_rename(), try_fwrite()
+                        * try_fgetc()
                         */
 #include "rexit.h" /* for exit_err(), exit_trouble() */
 #include "draw_wins.h" /* for draw_win_map(), draw_win_info(), draw_win_log(),
@@ -398,8 +399,7 @@ extern void sorted_wintoggle_and_activate()
     uint16_t linemax = get_linemax(file, f_name);
     char win_order[linemax + 1];
     try_fgets(win_order, linemax + 1, file, f_name);
-    uint8_t a;
-    exit_trouble(read_uint8(file, &a), f_name, "read_uint8()");
+    uint8_t a = try_fgetc(file, f_name);
     try_fclose(file, f_name);
 
     /* Toggle windows and set active window selection. */
@@ -452,7 +452,7 @@ extern void save_win_configs()
     if (0 != world.wmeta->active)
     {
         struct WinConf * wc = get_winconf_by_win(world.wmeta->active);
-        write_uint8(wc->id, file);
+        try_fputc(wc->id, file, f_name);
     }
     try_fclose_unlink_rename(file, path_tmp, path, f_name);
 }

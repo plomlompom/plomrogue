@@ -5,9 +5,9 @@
 #include <unistd.h> /* for unlink(), acess() */
 #include <stdlib.h> /* for size_t, calloc(), free() */
 #include <string.h> /* for strlen(), strcmp(), memcpy() */
-#include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
-#include "readwrite.h" /* for [read/write]_uint[8/16/32][_bigendian](),
-                        * try_fopen(), try_fclose(), get_linemax()
+#include <stdint.h> /* for uint8_t, uint16_t */
+#include "readwrite.h" /* for try_fopen(), try_fclose(), get_linemax(),
+                        * try_fputc()
                         */
 #include "map_objects.h" /* for struct MapObj, get_player(), read_map_objects(),
                           * write_map_objects()
@@ -195,8 +195,6 @@ extern uint16_t center_offset(uint16_t pos, uint16_t mapsize,
 extern void turn_over(char action)
 {
     char * f_name = "turn_over()";
-    char * err_write = "Trouble in turn_over() with write_uint8() "
-                       "writing to opened file 'record_tmp'.";
 
     char * recordfile_tmp = "record_tmp";
     char * recordfile     = "record";
@@ -207,15 +205,15 @@ extern void turn_over(char action)
         char c = fgetc(file_old);
         while (EOF != c)
         {
-            exit_err(write_uint8(c, file_new), err_write);
+            try_fputc(c, file_new, f_name);
             c = fgetc(file_old);
         }
         try_fclose(file_old, f_name);
-        exit_err(write_uint8(action, file_new), err_write);
+        try_fputc(action, file_new, f_name);
         if (   is_command_id_shortdsc(action, "drop")
             || is_command_id_shortdsc(action, "use"))
         {
-            exit_err(write_uint8(world.inventory_select, file_new), err_write);
+            try_fputc(world.inventory_select, file_new, f_name);
         }
         try_fclose_unlink_rename(file_new, recordfile_tmp, recordfile, f_name);
     }

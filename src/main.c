@@ -10,9 +10,9 @@
 #include "windows.h" /* for structs WinMeta, Win, init_win_meta(),
                       * draw_all_wins()
                       */
-#include "readwrite.h" /* for read_uint32_bigendian](),
+#include "readwrite.h" /* for read_uint32_bigendian(),
                         * write_uint32_bigendian(), try_fopen(), try_fclose(),
-                        * try_fclose_unlink_rename()
+                        * try_fclose_unlink_rename(), try_fgetc()
                         */
 #include "map_objects.h" /* for structs MapObj, init_map_object_defs(),
                           * build_map_objects(), get_player()
@@ -23,7 +23,7 @@
                    * load_interface_conf(), load_game(), rrand()
                    */
 #include "wincontrol.h" /* get_win_by_id(), get_winconf_by_win() */
-#include "rexit.h" /* for exit_game(), exit_err() */
+#include "rexit.h" /* for exit_game() */
 #include "command_db.h" /* for init_command_db(), is_command_id_shortdsc() */
 #include "control.h" /* for control_by_id(), player_control(),
                       * get_available_keycode_to_action()
@@ -92,8 +92,6 @@ int main(int argc, char *argv[])
     world.map_obj_count = 0;
 
     /* For interactive mode, try to load world state from savefile. */
-    char * err_r = "Trouble loading game (in main()) / "
-                   "reading from opened 'savefile'.";
     FILE * file;
     if (1 == world.interactive && 0 == access(savefile, F_OK))
     {
@@ -104,12 +102,10 @@ int main(int argc, char *argv[])
     /* For non-interactive mode, try to load world state from record file. */
     else
     {
-        err_r = "Trouble reading from 'record' file (read_uint32_bigendian() "
-                "in main()).";
         if (0 == world.interactive)
         {
             file = try_fopen(recordfile, "r", f_name);
-            exit_err(read_uint32_bigendian(file, &world.seed), err_r);
+            world.seed = read_uint32_bigendian(file);
         }
 
         /* For interactive-mode in newly started world, generate a start seed
@@ -118,12 +114,8 @@ int main(int argc, char *argv[])
         else
         {
             world.seed = time(NULL);
-
-            char * err_w = "Trouble recording new seed "
-                           "(write_uint32_bigendian() in main()) / writing to "
-                           "file 'record_tmp'.";
             file = try_fopen(recordfile_tmp, "w", f_name);
-            exit_err(write_uint32_bigendian(world.seed, file), err_w);
+            write_uint32_bigendian(world.seed, file);
             try_fclose_unlink_rename(file, recordfile_tmp, recordfile, f_name);
         }
         world.mapseed = world.seed;
@@ -179,7 +171,7 @@ int main(int argc, char *argv[])
         {
             while (world.turn != start_turn)
             {
-                action = getc(file);
+                action = fgetc(file);
                 if (EOF == action)
                 {
                     break;
@@ -187,7 +179,7 @@ int main(int argc, char *argv[])
                 if (   is_command_id_shortdsc(action, "drop")
                     || is_command_id_shortdsc(action, "use"))
                 {
-                    world.inventory_select = getc(file);
+                    world.inventory_select = try_fgetc(file, f_name);
                 }
                 player_control_by_id(action);
             }
@@ -205,13 +197,13 @@ int main(int argc, char *argv[])
             if (   EOF != action
                 && key == get_available_keycode_to_action("wait"))
             {
-                action = getc(file);
+                action = fgetc(file);
                 if (EOF != action)
                 {
                     if (   is_command_id_shortdsc(action, "drop")
                         || is_command_id_shortdsc(action, "use"))
                     {
-                        world.inventory_select = getc(file);
+                        world.inventory_select = try_fgetc(file, f_name);
                     }
                     player_control_by_id(action);
                 }

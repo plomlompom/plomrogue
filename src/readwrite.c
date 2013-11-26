@@ -5,20 +5,10 @@
                      * sprintf(), fwrite(), ferror()
                      */
 #include <stdint.h> /* for uint8_t, uint16_t, uint32_t */
-#include <string.h> /* for strlen()*/
+#include <string.h> /* for strlen() */
 #include <unistd.h> /* for unlink() */
 #include "rexit.h"  /* for exit_err(), exit_trouble() */
 #include "main.h"   /* for world global */
-
-
-
-/* Read/write "x" from/to "file" as bigendian representation of "size" bits. On
- * failure, return 1, else 0. (As of of now, all extern read/write functions
- * build on top of these.) Only use multiples of 8 greater or equal 32 for
- * "size", so that storage inside uint32_t is possible.
- */
-static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size);
-static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size);
 
 
 
@@ -46,6 +36,14 @@ extern void try_fclose(FILE * file, char * f)
 
 
 
+extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
+                       char * f)
+{
+    exit_trouble(0 == fwrite(ptr, size, nmemb, stream), f, "fwrite()");
+}
+
+
+
 extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 {
     char * test = fgets(line, linemax, file);
@@ -55,10 +53,19 @@ extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 
 
 
-extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
-                       char * f)
+extern uint8_t try_fgetc(FILE * file, char * f)
 {
-    exit_trouble(0 == fwrite(ptr, size, nmemb, stream), f, "fwrite()");
+    int test = fgetc(file);
+    exit_trouble(EOF == test, f, "fgetc() unexpectedly hitting EOF");
+    return (uint8_t) test;
+}
+
+
+
+extern void try_fputc(uint8_t c, FILE * file, char * f)
+{
+    int test = fputc(c, file);
+    exit_trouble(EOF == test, f, "fputc() hitting EOF");
 }
 
 
@@ -145,68 +152,24 @@ extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
 
 
 
-static uint8_t read_uintX_bigendian(FILE * file, uint32_t * x, uint8_t size)
+extern uint32_t read_uint32_bigendian(FILE * file)
 {
-    * x = 0;
-    int16_t bitshift = size - 8;
-    int test;
-    for (; bitshift >= 0; bitshift = bitshift - 8)
-    {
-        test = fgetc(file);
-        if (EOF == test)
-        {
-            return 1;
-        }
-        * x = * x + ((uint32_t) test << bitshift);
-    }
-    return 0;
+    char * f_name = "read_uint32_bigendian()";
+    uint32_t x;
+    x =       (uint32_t) try_fgetc(file, f_name) << 24;
+    x = x + ( (uint32_t) try_fgetc(file, f_name) << 16 );
+    x = x + ( (uint32_t) try_fgetc(file, f_name) <<  8 );
+    x = x +   (uint32_t) try_fgetc(file, f_name);
+    return x;
 }
 
 
 
-static uint8_t write_uintX_bigendian(FILE * file, uint32_t x, uint8_t size)
+extern void write_uint32_bigendian(uint32_t x, FILE * file)
 {
-    int16_t bitshift = size - 8;
-    for (; bitshift >= 0; bitshift = bitshift - 8)
-    {
-        if (EOF == fputc((x >> bitshift) & 0xFF, file))
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-
-
-extern uint8_t read_uint8(FILE * file, uint8_t * x)
-{
-    /* Since read_uintX_bigendian() works on -- and zeroes -- four bytes, direct
-     * work on values of fewer bytes would corrupt immediate neighbor values.
-     */
-    uint32_t y = * x;
-    uint8_t err = read_uintX_bigendian(file, &y, 8);
-    * x = (uint8_t) y;
-    return err;
-}
-
-
-
-extern uint8_t read_uint32_bigendian(FILE * file, uint32_t * x)
-{
-    return read_uintX_bigendian(file, x, 32);
-}
-
-
-
-extern uint8_t write_uint8(uint8_t x, FILE * file)
-{
-    return write_uintX_bigendian(file, x, 8);
-}
-
-
-
-extern uint8_t write_uint32_bigendian(uint32_t x, FILE * file)
-{
-    return write_uintX_bigendian(file, x, 32);
+    char * f_name = "write_uint32_bigendian()";
+    try_fputc(   x >> 24,          file, f_name);
+    try_fputc( ( x >> 16 ) & 0xFF, file, f_name);
+    try_fputc( ( x >>  8 ) & 0xFF, file, f_name);
+    try_fputc(   x         & 0xFF, file, f_name);
 }

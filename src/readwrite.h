@@ -25,6 +25,10 @@ extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
  */
 extern char * try_fgets(char * line, int size, FILE * file, char * f);
 
+/* fgetc()/fputc() wrappers to catch EOF returns/upon it call exit_trouble(). */
+extern uint8_t try_fgetc(FILE * file, char * f);
+extern void try_fputc(uint8_t c, FILE * file, char * f);
+
 /* Wrapper to successive call of fclose() from function called "f" on "file",
  * then unlink() on file at "p2" if it exists, then rename() on "p1" to "p2".
  * Used for handling atomic saving of files via temp files.
@@ -48,14 +52,9 @@ extern uint16_t get_linemax(FILE * file, char * f);
 extern uint8_t textfile_sizes(FILE * file, uint16_t * linemax_p,
                               uint16_t * n_lines_p);
 
-/* These routines for reading values "x" from / writing values to "file" ensure
- * a defined endianness and consistent error codes: return 0 on success and 1 on
- * fgetc()/fputc() failure.
- */
-extern uint8_t read_uint8(FILE * file, uint8_t * x);
-extern uint8_t read_uint32_bigendian(FILE * file, uint32_t * x);
-extern uint8_t write_uint8(uint8_t x, FILE * file);
-extern uint8_t write_uint32_bigendian(uint32_t x, FILE * file);
+/* Read/write via try_(fgetc|fputc)() uint32 values with defined endianness. */
+extern uint32_t read_uint32_bigendian(FILE * file);
+extern void write_uint32_bigendian(uint32_t x, FILE * file);
 
 
 
