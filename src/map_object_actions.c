@@ -27,7 +27,7 @@ static uint8_t try_func_name(struct MapObjAct * moa,
 static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted);
 
 /* Bonus stuff to actor_*() to happen if actor==player. Mostly writing of log
- * messages; _pick and _drop also decrement world.inventory_select by 1 if >0.
+ * messages; _pick and _drop also decrement world.inventory_sel by 1 if >0.
  */
 static void playerbonus_wait();
 static void playerbonus_move(char d, uint8_t passable);
@@ -135,9 +135,9 @@ static void playerbonus_drop(uint8_t owns_none)
     else
     {
         update_log("\nYou drop an object.");
-        if (0 < world.inventory_select)
+        if (0 < world.inventory_sel)
         {
-            world.inventory_select--;
+            world.inventory_sel--;
         }
     }
 }
@@ -171,9 +171,9 @@ static void playerbonus_use(uint8_t no_object, uint8_t wrong_object)
     else
     {
         update_log("\nYou consume MAGIC MEAT.");
-        if (0 < world.inventory_select)
+        if (0 < world.inventory_sel)
         {
-            world.inventory_select--;
+            world.inventory_sel--;
         }
     }
 }

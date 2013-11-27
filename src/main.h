@@ -36,7 +36,7 @@ struct World
     uint8_t map_obj_count;            /* Counts map objects generated so far. */
     struct MapObjDef * map_obj_defs;  /* Map object type definitions chain. */
     struct MapObj * map_objs;         /* Pointer to map objects chain start. */
-    uint8_t inventory_select;         /* Player's inventory selection index. */
+    uint8_t inventory_sel;            /* Player's inventory selection index. */
     struct MapObjAct * map_obj_acts;  /* Pointer to map object actions chain. */
 } world;
 

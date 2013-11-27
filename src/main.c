@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     win_map->center = player->pos;
 
     /* Initialize player's inventory selection index to start position. */
-    world.inventory_select = 0;
+    world.inventory_sel = 0;
 
     /* Replay mode. */
     int key;
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                 if (   is_command_id_shortdsc(action, "drop")
                     || is_command_id_shortdsc(action, "use"))
                 {
-                    world.inventory_select = try_fgetc_noeof(file, f_name);
+                    world.inventory_sel = try_fgetc_noeof(file, f_name);
                 }
                 player_control_by_id(action);
             }
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
                     if (   is_command_id_shortdsc(action, "drop")
                         || is_command_id_shortdsc(action, "use"))
                     {
-                        world.inventory_select = try_fgetc_noeof(file, f_name);
+                        world.inventory_sel = try_fgetc_noeof(file, f_name);
                     }
                     player_control_by_id(action);
                 }

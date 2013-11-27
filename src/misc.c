@@ -27,8 +27,7 @@
 
 
 extern uint16_t rrand()
-{
-    /* Constants as recommended by POSIX.1-2001 (see man page rand(3)). */
+{   /* Constants as recommended by POSIX.1-2001 (see man page rand(3)). */
     world.seed = ((world.seed * 1103515245) + 12345) % 4294967296;
     return (world.seed >> 16); /* Ignore less random least significant bits. */
 }
@@ -169,17 +168,17 @@ extern void update_log(char * text)
 
 
 
-extern uint16_t center_offset(uint16_t pos, uint16_t mapsize,
+extern uint16_t center_offset(uint16_t position, uint16_t mapsize,
                               uint16_t framesize)
 {
     uint16_t offset = 0;
     if (mapsize > framesize)
     {
-        if (pos > framesize / 2)
+        if (position > framesize / 2)
         {
-            if (pos < mapsize - (framesize / 2))
+            if (position < mapsize - (framesize / 2))
             {
-                offset = pos - (framesize / 2);
+                offset = position - (framesize / 2);
             }
             else
             {
@@ -213,7 +212,7 @@ extern void turn_over(char action)
         if (   is_command_id_shortdsc(action, "drop")
             || is_command_id_shortdsc(action, "use"))
         {
-            try_fputc(world.inventory_select, file_new, f_name);
+            try_fputc(world.inventory_sel, file_new, f_name);
         }
         try_fclose_unlink_rename(file_new, recordfile_tmp, recordfile, f_name);
     }
@@ -316,10 +315,7 @@ extern void nav_inventory(char dir)
 {
     if ('u' == dir)
     {
-        if (world.inventory_select > 0)
-        {
-            world.inventory_select--;
-        }
+        world.inventory_sel = world.inventory_sel - (world.inventory_sel > 0);
         return;
     }
     struct MapObj * player = get_player();
@@ -330,8 +326,5 @@ extern void nav_inventory(char dir)
     }
     uint8_t n_owned = 0;
     for (; NULL != owned->next; owned = owned->next, n_owned++);
-    if (world.inventory_select < n_owned)
-    {
-        world.inventory_select++;
-    }
+    world.inventory_sel = world.inventory_sel + (world.inventory_sel < n_owned);
 }

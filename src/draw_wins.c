@@ -386,13 +386,13 @@ extern void draw_win_inventory(struct Win * win)
         add_line(win, "(none)", 0, 0);
         return;
     }
-    win->center.y = world.inventory_select;
+    win->center.y = world.inventory_sel;
     struct MapObj * owned = player->owns;
     uint8_t y;
     for (y = 0; NULL != owned; y++)
     {
         attr_t attri = 0;
-        if (y == world.inventory_select)
+        if (y == world.inventory_sel)
         {
             attri = A_REVERSE;
         }

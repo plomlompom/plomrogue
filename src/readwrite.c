@@ -1,6 +1,7 @@
 /* readwrite.c */
 
 #include "readwrite.h"
+#include <stdlib.h> /* for size_t */
 #include <stdio.h>  /* for FILE typedef, fopen(), fgetc(), fputc(), fseek(),
                      * sprintf(), fwrite(), ferror()
                      */
@@ -8,7 +9,6 @@
 #include <string.h> /* for strlen() */
 #include <unistd.h> /* for unlink() */
 #include "rexit.h"  /* for exit_err(), exit_trouble() */
-#include "main.h"   /* for world global */
 
 
 
