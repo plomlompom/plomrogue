@@ -1,8 +1,8 @@
 #include "map.h"
-#include <stdint.h>      /* for uint16_t, uint32_t */
+#include <stdint.h>      /* for uint8_t, uint16_t, uint32_t */
 #include "misc.h"        /* for try_malloc(), center_offset(), rrand() */
 #include "map_objects.h" /* for get_player() */
-#include "yx_uint16.h"   /* for yx_uint16 and dir enums */
+#include "yx_uint16.h"   /* for yx_uint16, dir enums */
 #include "windows.h"     /* for struct Win */
 #include "main.h"        /* for world global */
 #include "wincontrol.h"  /* for get_win_by_id() */
@@ -20,10 +20,7 @@ extern struct Map init_map()
     uint16_t y, x;
     for (y = 0; y < map.size.y; y++)
     {
-        for (x = 0; x < map.size.x; x++)
-        {
-            map.cells[(y * map.size.x) + x] = '~';
-        }
+        for (x = 0; x < map.size.x; map.cells[(y * map.size.x) + x] = '~', x++);
     }
     map.cells[size / 2 + (map.size.x / 2)] = '.';
     uint32_t curpos;
@@ -63,28 +60,24 @@ extern void map_scroll(char d)
         offset = center_offset(win->center.y,
                                world.map->size.y, win->framesize.y);
         win->center.y = offset + (win->framesize.y / 2);
-        if      ('N' == d && win->center.y > 0)
-        {
-            win->center.y--;
-        }
-        else if ('S' == d && win->center.y < world.map->size.y - 1)
+        if ('S' == d && win->center.y < world.map->size.y - 1)
         {
             win->center.y++;
+            return;
         }
+        win->center.y = win->center.y - ('N' == d && win->center.y > 0);
     }
     else if (('W' == d || 'E' == d) && world.map->size.x > win->framesize.x)
     {
         offset = center_offset(win->center.x,
                                world.map->size.x, win->framesize.x);
         win->center.x = offset + (win->framesize.x / 2);
-        if      ('W' == d && win->center.x > 0)
-        {
-            win->center.x--;
-        }
-        else if ('E' == d && win->center.x < world.map->size.x - 1)
+        if ('E' == d && win->center.x < world.map->size.x - 1)
         {
             win->center.x++;
+            return;
         }
+        win->center.x = win->center.x - ('W' == d && win->center.x > 0);
     }
 }
 

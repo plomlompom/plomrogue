@@ -19,22 +19,19 @@ struct Map
 
 
 
-/* Initialize an island map as 64 x 64 cells of "~" cells representing water and
- * "." cells representing land. The shape of the island is generated randomly by
- * starting with a sea containing one land cell in the middle and then going
- * into a cycle of repeatedly selecting a random cell on the map and
- * transforming it into a land cell if it is horizontally or vertically neighbor
- * to one; the cycle ends when a land cell is due to be created right at the
- * border of the map.
+/* Initialize island map as 64 x 64 "~" cells representing water and "." cells
+ * representing land. The shape of the island is generated randomly by starting
+ * with a sea containing one land cell in the middle and then going into a cycle
+ * of repeatedly selecting a random cell on the map and transforming it into a
+ * land cell if it is horizontally or vertically neighbor to one; the cycle ends
+ * when a land cell is due to be created right at the border of the map.
  */
 extern struct Map init_map();
 
-/* Try to change the view center of map into directino described by "d" (north
- * = "N", east = "E" etc.).
- */
+/* Try changing map window's focus into directino "d" (north = "N" etc.). */
 extern void map_scroll(char d);
 
-/* Center map on player. */
+/* Center map window on player. */
 extern void map_center();
 
 /* Check if coordinate pos on (or beyond) map is accessible to map object
