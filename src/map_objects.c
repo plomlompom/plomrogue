@@ -125,12 +125,11 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
     char * f_name = "read_map_objects()";
     struct MapObj ** mo_ptr_ptr = &world.map_objs;
     char * delim = " ";
-    struct MapObj * mo;
     fpos_t pos;
     exit_err(-1 == fgetpos(file, &pos), f_name);
     while (try_fgets(line, linemax + 1, file, f_name))
     {
-        mo = try_malloc(sizeof(struct MapObj), f_name);
+        struct MapObj * mo = try_malloc(sizeof(struct MapObj), f_name);
         mo->next       = NULL;
         mo->id         = atoi(strtok(line, delim));
         mo->type       = atoi(strtok(NULL, delim));
@@ -153,7 +152,7 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
         char * owned = strtok(NULL, "\n");
         if (NULL != owned)
         {
-            mo = get_map_object(world.map_objs, id);
+            struct MapObj * mo = get_map_object(world.map_objs, id);
             char * owned_id = "";
             owned_id = strtok(owned, delim);
             while (NULL != owned_id)
