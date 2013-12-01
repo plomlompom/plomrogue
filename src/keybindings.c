@@ -3,15 +3,14 @@
 #include "keybindings.h"
 #include <stdio.h>     /* for FILE typedef*/
 #include <stdlib.h>    /* for free(), atoi() */
-#include <stdint.h>    /* for uint16_t */
+#include <stdint.h>    /* for uint8_t, uint16_t */
 #include <ncurses.h>   /* for keycode defines in get_name_to_keycode() */
-#include <string.h>    /* for strchr(), strlen(), strcmp(), memcpy()*/
-#include "windows.h"   /* for draw_all_wins() and WinMeta struct */
+#include <string.h>    /* for strchr(), strlen(), strcmp(), memcpy() */
+#include "windows.h"   /* for draw_all_wins()  */
 #include "readwrite.h" /* for texfile_sizes(), try_fopen(), try_fclose()
-                        * try_fclose_unlink_rename(), try_fwrite()
+                        * try_fclose_unlink_rename(), try_fwrite(), try_fgets()
                         */
 #include "main.h"      /* for world global */
-#include "rexit.h"     /* for err_exit() */
 #include "misc.h"      /* for try_malloc() */
 
 
@@ -144,16 +143,14 @@ extern struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n)
 extern void init_keybindings(char * path, struct KeyBiData * kbd)
 {
     char * f_name = "init_keybindings()";
-
     FILE * file = try_fopen(path, "r", f_name);
     uint16_t lines;
     uint16_t linemax = textfile_sizes(file, &lines);
-
     char command[linemax + 1];
     char * cmdptr;
     struct KeyBinding ** loc_last_ptr = &kbd->kbs;
     * loc_last_ptr = 0;
-    while (fgets(command, linemax + 1, file))
+    while (try_fgets(command, linemax + 1, file, f_name))
     {
         if ('\n' == command[0] || 0 == command[0])
         {
@@ -169,9 +166,7 @@ extern void init_keybindings(char * path, struct KeyBiData * kbd)
         kb_p->name[strlen(cmdptr) - 1] = '\0';
         loc_last_ptr = & kb_p->next;
     }
-
     try_fclose(file, f_name);
-
     kbd->edit = 0;
     kbd->select = 0;
 }
@@ -181,11 +176,9 @@ extern void init_keybindings(char * path, struct KeyBiData * kbd)
 extern void save_keybindings(char * path, struct KeyBiData * kbd)
 {
     char * f_name = "save_keybindings()";
-
     char path_tmp[strlen(path) + 4 + 1];
     sprintf(path_tmp, "%s_tmp", path);
     FILE * file = try_fopen(path_tmp, "w", f_name);
-
     uint16_t linemax = 0;
     struct KeyBinding * kb_p = kbd->kbs;
     while (0 != kb_p)
@@ -197,7 +190,6 @@ extern void save_keybindings(char * path, struct KeyBiData * kbd)
         kb_p = kb_p->next;
     }
     linemax = linemax + 6;         /* + 6 = + 3 digits + whitespace + \n + \0 */
-
     char line[linemax];
     kb_p = kbd->kbs;
     while (0 != kb_p)

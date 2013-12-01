@@ -6,7 +6,7 @@
 #ifndef KEYBINDINGS_H
 #define KEYBINDINGS_H
 
-#include <stdint.h> /* for uint16_t */
+#include <stdint.h> /* for uint8_t, uint16_t */
 
 
 
