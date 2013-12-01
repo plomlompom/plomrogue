@@ -282,4 +282,3 @@ extern void set_object_position(struct MapObj * mo, struct yx_uint16 pos)
     struct MapObj * owned = mo->owns;
     for (; owned != NULL; set_object_position(owned, pos), owned = owned->next);
 }
-

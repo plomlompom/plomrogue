@@ -1,7 +1,7 @@
 /* map_object_actions.c */
 
 #include "map_object_actions.h"
-#include <stdint.h> /* for uint8_t */
+#include <stdint.h> /* for uint8_t, uint16_t */
 #include <string.h> /* for strlen(), strcmp() */
 #include "yx_uint16.h" /* for yx_uint16 struct, mv_yx_in_dir(),
                         * yx_uint16_cmp()
@@ -78,14 +78,12 @@ static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted)
         if (player == hitted)
         {
             update_log(" You die.");
+            return;
         }
-        else
+        update_log(" It dies.");
+        if (player == hitter)
         {
-            update_log(" It dies.");
-            if (player == hitter)
-            {
-                world.score = world.score + mod_hitted->lifepoints;
-            }
+            world.score = world.score + mod_hitted->lifepoints;
         }
     }
 }
@@ -131,15 +129,10 @@ static void playerbonus_drop(uint8_t owns_none)
     if (0 != owns_none)
     {
         update_log("\nYou try to drop an object, but you own none.");
+        return;
     }
-    else
-    {
-        update_log("\nYou drop an object.");
-        if (0 < world.inventory_sel)
-        {
-            world.inventory_sel--;
-        }
-    }
+    update_log("\nYou drop an object.");
+    world.inventory_sel = world.inventory_sel - (0 < world.inventory_sel);
 }
 
 
@@ -149,11 +142,9 @@ static void playerbonus_pick(uint8_t picked)
     if (picked)
     {
         update_log("\nYou pick up an object.");
+        return;
     }
-    else
-    {
-        update_log("\nYou try to pick up an object, but there is none.");
-    }
+    update_log("\nYou try to pick up an object, but there is none.");
 }
 
 
@@ -163,19 +154,15 @@ static void playerbonus_use(uint8_t no_object, uint8_t wrong_object)
     if      (no_object)
     {
         update_log("\nYou try to use an object, but you own none.");
+        return;
     }
     else if (wrong_object)
     {
         update_log("\nYou try to use this object, but fail.");
+        return;
     }
-    else
-    {
-        update_log("\nYou consume MAGIC MEAT.");
-        if (0 < world.inventory_sel)
-        {
-            world.inventory_sel--;
-        }
-    }
+    update_log("\nYou consume MAGIC MEAT.");
+    world.inventory_sel = world.inventory_sel - (0 < world.inventory_sel);
 }
 
 
@@ -183,12 +170,10 @@ static void playerbonus_use(uint8_t no_object, uint8_t wrong_object)
 extern void init_map_object_actions()
 {
     char * f_name = "init_map_object_actions()";
-
     char * path = "config/map_object_actions";
     FILE * file = try_fopen(path, "r", f_name);
     uint16_t linemax = textfile_sizes(file, NULL);
     char line[linemax + 1];
-
     struct MapObjAct ** moa_ptr_ptr = &world.map_obj_acts;
     char * delim = " ";
     while (fgets(line, linemax + 1, file))
@@ -351,9 +336,8 @@ extern void actor_use(struct MapObj * mo)
             if (0 < select)
             {
                 select--;
-                for (i = 0, selected = mo->owns;
-                     i != select;
-                     i++, selected = selected->next);
+                selected = mo->owns;
+                for (i = 0; i != select; i++, selected = selected->next);
                 selected->next = next;
             }
             else

@@ -18,7 +18,7 @@ struct MapObjAct
     struct MapObjAct * next;
     uint8_t id;                      /* unique id of map object action */
     char * name;                     /* human-readable identifier */
-    uint8_t effort;                  /* how many turn the action takes */
+    uint8_t effort;                  /* how many turns the action takes */
     void (* func) (struct MapObj *); /* function called after .effort turns */
 };
 
@@ -50,7 +50,7 @@ extern void actor_drop(struct MapObj * mo);
 extern void actor_pick(struct MapObj * mo);
 
 /* Actor "mo" tries to use inventory object indexed by number mo->args.
- * (Currently the only valid use is consuming "MAGIC MEAT".
+ * (Currently the only valid use is consuming "MAGIC MEAT".)
  */
 extern void actor_use(struct MapObj * mo);
 
