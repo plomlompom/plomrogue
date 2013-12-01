@@ -2,13 +2,14 @@
 
 #include "command_db.h"
 #include <stdlib.h> /* for free() */
-#include <stdio.h> /* for FILE typedef, fgets() */
+#include <stdio.h> /* for FILE typedef */
 #include <stdint.h> /* for uint8_t */
 #include <string.h> /* for strlen(), strtok() */
 #include "main.h" /* for world global */
-#include "readwrite.h" /* for textfile_sizes(), try_fopen(), try_fclose() */
+#include "readwrite.h" /* for textfile_sizes(), try_fopen(), try_fclose(),
+                        * try_fgets()
+                        */
 #include "misc.h" /* for try_malloc() */
-#include "rexit.h" /* exit_trouble() */
 
 
 
@@ -79,16 +80,14 @@ extern char * get_command_longdsc(char * dsc_short)
 extern void init_command_db()
 {
     char * f_name = "init_command_db()";
-
     char * path = "config/commands";
     FILE * file = try_fopen(path, "r", f_name);
     uint16_t lines;
     uint16_t linemax = textfile_sizes(file, &lines);
     char line[linemax + 1];
-
     struct Command * cmds = try_malloc(lines * sizeof(struct Command), f_name);
     uint8_t i = 0;
-    while (fgets(line, linemax + 1, file))
+    while (try_fgets(line, linemax + 1, file, f_name))
     {
         if ('\n' == line[0] || 0 == line[0])
         {
@@ -100,7 +99,6 @@ extern void init_command_db()
         i++;
     }
     try_fclose(file, f_name);
-
     world.cmd_db = try_malloc(sizeof(struct CommandDB), f_name);
     world.cmd_db->cmds = cmds;
     world.cmd_db->n = lines;
