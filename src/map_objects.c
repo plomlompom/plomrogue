@@ -2,15 +2,15 @@
 
 #include "map_objects.h"
 #include <stdlib.h> /* for free(), atoi() */
-#include <stdint.h> /* for uint8_t */
+#include <stdint.h> /* for uint8_t, uint16_t */
 #include <stdio.h> /* for FILE typedef */
-#include <string.h> /* for strchr(), strlen(), memcpy(), strtok() */
+#include <string.h> /* for strlen(), memcpy(), strtok() */
 #include "readwrite.h" /* for textfile_sizes(), try_fopen(), try_fclose(),
                         * try_fgets()
                         */
 #include "misc.h" /* for try_malloc(), find_passable_pos() */
 #include "main.h" /* for world global */
-#include "rexit.h" /* for err_exit() */
+#include "rexit.h" /* for exit_err() */
 #include "yx_uint16.h" /* for yx_uint16 struct, yx_uint16_cmp() */
 
 
@@ -78,8 +78,7 @@ extern void init_map_object_defs(char * filename)
     char line[linemax + 1];
     while (try_fgets(line, linemax + 1, file, f_name))
     {
-        struct MapObjDef * mod;
-        mod = try_malloc(sizeof(struct MapObjDef), f_name);
+        struct MapObjDef * mod = try_malloc(sizeof(struct MapObjDef), f_name);
         mod->next = NULL;
         mod->id = atoi(strtok(line, delim));
         mod->corpse_id = atoi(strtok(NULL, delim));
@@ -142,10 +141,6 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
         mo->arg        = atoi(strtok(NULL, delim));;
         mo->progress   = atoi(strtok(NULL, delim));;
         mo->owns       = NULL;
-        if (mo->id > world.map_obj_count)
-        {
-            world.map_obj_count = mo->id;
-        }
         * mo_ptr_ptr = mo;
         mo_ptr_ptr = &mo->next;
     }
@@ -154,10 +149,7 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
     {
         uint8_t id = atoi(strtok(line, delim));
         uint8_t i;
-        for (i = 0; i < 7; i++)
-        {
-            strtok(NULL, delim);
-        }
+        for (i = 0; i < 7; i++, strtok(NULL, delim));
         char * owned = strtok(NULL, "\n");
         if (NULL != owned)
         {
@@ -166,8 +158,7 @@ extern void read_map_objects(FILE * file, char * line, int linemax)
             owned_id = strtok(owned, delim);
             while (NULL != owned_id)
             {
-                own_map_object(&mo->owns, &world.map_objs,
-                               (uint8_t) atoi(owned_id));
+                own_map_object(&mo->owns, &world.map_objs, atoi(owned_id));
                 owned_id = strtok(NULL, delim);
             }
         }
@@ -180,10 +171,9 @@ extern void add_map_object(uint8_t type)
 {
     char * f_name = "add_map_object()";
     struct MapObjDef * mod = get_map_object_def(type);
-    struct MapObj * mo = try_malloc(sizeof(struct MapObj), f_name);
-    mo->id = world.map_obj_count;
-    world.map_obj_count++;
-    mo->type = mod->id;
+    struct MapObj *    mo  = try_malloc(sizeof(struct MapObj), f_name);
+    mo->id         = world.map_obj_count++;
+    mo->type       = mod->id;
     mo->lifepoints = mod->lifepoints;
     while (1)
     {
@@ -205,18 +195,13 @@ extern void add_map_object(uint8_t type)
         }
     }
     mo->progress = 0;
-    mo->command = 0;
-    mo->arg = 0;
-    mo->owns = NULL;
-    mo->next = NULL;
-    struct MapObj ** last_ptr_ptr = &world.map_objs;
-    struct MapObj * mo_ptr;
-    while (NULL != * last_ptr_ptr)
-    {
-        mo_ptr = * last_ptr_ptr;
-        last_ptr_ptr = & mo_ptr->next;
-    }
-    * last_ptr_ptr = mo;
+    mo->command  = 0;
+    mo->arg      = 0;
+    mo->owns     = NULL;
+    mo->next     = NULL;
+    struct MapObj ** mo_ptr_ptr = &world.map_objs;
+    for (; NULL != * mo_ptr_ptr; mo_ptr_ptr = &(*mo_ptr_ptr)->next);
+    * mo_ptr_ptr = mo;
 }
 
 
@@ -268,14 +253,9 @@ extern void own_map_object(struct MapObj ** target, struct MapObj ** source,
         mo = penult->next;
         penult->next = mo->next;
     }
-    struct MapObj ** last_ptr_ptr = target;
-    struct MapObj * mo_ptr;
-    while (NULL != * last_ptr_ptr)
-    {
-        mo_ptr = * last_ptr_ptr;
-        last_ptr_ptr = & mo_ptr->next;
-    }
-    * last_ptr_ptr = mo;
+    struct MapObj ** mo_ptr_ptr = target;
+    for (; NULL != * mo_ptr_ptr; mo_ptr_ptr = &(*mo_ptr_ptr)->next);
+    * mo_ptr_ptr = mo;
     mo->next = NULL;
 }
 
@@ -291,10 +271,7 @@ extern struct MapObj * get_player()
 extern struct MapObjDef * get_map_object_def(uint8_t id)
 {
     struct MapObjDef * mod = world.map_obj_defs;
-    while (id != mod->id)
-    {
-        mod = mod->next;
-    }
+    for (; id != mod->id; mod = mod->next);
     return mod;
 }
 
@@ -304,8 +281,6 @@ extern void set_object_position(struct MapObj * mo, struct yx_uint16 pos)
 {
     mo->pos = pos;
     struct MapObj * owned = mo->owns;
-    for (; owned != NULL; owned = owned->next)
-    {
-        set_object_position(owned, pos);
-    }
+    for (; owned != NULL; set_object_position(owned, pos), owned = owned->next);
 }
+

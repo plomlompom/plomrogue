@@ -267,6 +267,8 @@ extern void save_game()
     try_fwrite(line, strlen(line), 1, file, f_name);
     sprintf(line, "%u\n", world.seed);
     try_fwrite(line, strlen(line), 1, file, f_name);
+    sprintf(line, "%u\n", world.map_obj_count);
+    try_fwrite(line, strlen(line), 1, file, f_name);
     sprintf(line, "%u\n", world.turn);
     try_fwrite(line, strlen(line), 1, file, f_name);
     sprintf(line, "%u\n", world.score);
@@ -288,6 +290,8 @@ extern void load_game()
     world.mapseed = atoi(line);
     try_fgets(line, linemax + 1, file, f_name);
     world.seed = atoi(line);
+    try_fgets(line, linemax + 1, file, f_name);
+    world.map_obj_count = atoi(line);
     try_fgets(line, linemax + 1, file, f_name);
     world.turn = atoi(line);
     try_fgets(line, linemax + 1, file, f_name);
