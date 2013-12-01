@@ -45,8 +45,7 @@ static void clockwise_path(char ** path_ptr)
     for (; i < len; i++)
     {
         uint8_t next_i = i + 1;
-        if (   next_i == len
-            || old_char != path[next_i])
+        if (next_i == len || old_char != path[next_i])
         {
             break;
         }

@@ -19,15 +19,12 @@ extern uint16_t get_available_keycode_to_action(char * name);
 extern uint8_t player_control_by_key(int key);
 extern uint8_t player_control_by_id(int action);
 
-/* Control via "key" active window's geometry / keybindings in respective config
- * view.
- */
+/* Control via "key" active window's config view's geometry / keybindings. */
 extern uint8_t wingeom_control(int key);
 extern uint8_t winkeyb_control(int key);
 
-/* Call by "key" further game / window management actions that don't influence
- * the player character. If the "quit" action is called, return 1 (instead of
- * exiting directly).
+/* Call via "key" further game/window management actions not influencing the
+ * player character. If "quit" is called, return 1, else 0.
  */
 extern uint8_t meta_control(int key);
 

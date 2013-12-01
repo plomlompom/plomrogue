@@ -1,8 +1,7 @@
 /* control.c */
 
 #include "control.h"
-#include <stdint.h> /* for uint8_t */
-#include <string.h> /* for strcmp() */
+#include <stdint.h> /* for uint8_t, uint16_t */
 #include "windows.h" /* for cycle_active_win(), shift_active_win(), struct Win,
                       *  struct WinMeta
                       */
@@ -12,13 +11,10 @@
 #include "map.h" /* for map_scroll(), map_center() */
 #include "main.h" /* for world global */
 #include "wincontrol.h" /* for struct WinConf, scroll_pad(), toggle_window(),
-                         * growshrink_active_window(),toggle_winconfig(),
-                         * toggle_size_type()
+                         * growshrink_active_window(), toggle_winconfig(),
+                         * toggle_win_size_type()
                          */
-#include "map_object_actions.h" /* for struct MapObjAct, actor_wait(),
-                                 * actor_move(), actor_drop(), actor_pick(),
-                                 * actor_pick(), get_moa_id_by_name()
-                                 */
+#include "map_object_actions.h" /* for get_moa_id_by_name() */
 #include "command_db.h" /* for is_command_id_shortdsc() */
 #include "misc.h" /* for reload_interface_conf(), save_interface_conf(),
                    * nav_inventory(), turn_over()
@@ -35,8 +31,8 @@ static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c);
 static uint8_t try_cmd_2args(int cmd, char * match,
                              void (* f) (char, char), char c1, char c2);
 
-/* If "action" is id of command named "match", set player->arg, ->command and
- * call turn_over().
+/* If "action" is id of command named "match", set player's .arg and .command
+ * and call turn_over().
  */
 static uint8_t try_player_cmd(int action, char * match, char * command,
                               uint8_t arg);
