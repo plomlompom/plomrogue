@@ -66,7 +66,8 @@ static char nearest_enemy_dir(struct yx_uint16 origin)
         dist_max = world.map->size.x;
     }
     uint8_t escape = 0;
-    uint8_t dist, i, j;
+    uint8_t dist, j;
+    uint16_t i;
     for (dist = 1; !escape && dist <= dist_max; dist++)
     {
         char * path = try_malloc(dist + 1, f_name);

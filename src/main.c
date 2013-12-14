@@ -3,7 +3,7 @@
 #include "main.h" /* for world global */
 #include <stdlib.h> /* for atoi(), exit(), EXIT_FAILURE */
 #include <stdio.h> /* for FILE typedef, F_OK */
-#include <ncurses.h> /* for initscr(), noecho(), curs_set(), keypad(), raw() */
+#include <ncurses.h> /* for noecho(), curs_set(), keypad(), raw() */
 #include <time.h> /* for time() */
 #include <unistd.h> /* for getopt(), optarg */
 #include <stdint.h> /* for uint32_t */
@@ -15,12 +15,12 @@
                         * try_fclose_unlink_rename(), try_fgetc_noeof(),
                         */
 #include "map_objects.h" /* for structs MapObj, init_map_object_defs(),
-                          * build_map_objects(), get_player()
+                          * add_map_objects(), get_player()
                           */
 #include "map.h" /* for struct Map, init_map() */
-#include "misc.h" /* for update_log(), find_passable_pos(), save_game(),
-                   * try_calloc(), check_tempfile(), check_xor_files(),
-                   * load_interface_conf(), load_game(), rrand()
+#include "misc.h" /* for update_log(), save_game(), try_calloc(), load_game(),
+                   * check_tempfile(), check_files_xor(), load_interface_conf(),
+                   * rrand()
                    */
 #include "wincontrol.h" /* get_win_by_id(), get_winconf_by_win() */
 #include "rexit.h" /* for exit_game() */
