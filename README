@@ -1,81 +1,105 @@
 plomrogue
 =========
 
-plomlompom tries to build his own roguelike. Currently, it doesn't do much
-interesting.
+plomlompom tries to build his own roguelike. It doesn't do much yet (although
+there are insanely ambitious long-term plans).
 
-You can move around a player and meet a number of different enemies. You have 5
-hitpoints to lose before death; they start with different amounts of hitpoints
-depending on their species. Your score grows by killing enemies, to the amount
-of hitpoints each killed enemy started with. Dead enemies become dirt,
-skeletons or "magic meat"--such objects can be collected, and "magic meat" can
-be consumed to gain hitpoints. Note that different kinds of moves take different
-numbers of turns to finish.
+You can move around a player on an island and meet a number of different
+enemies. You have 5 hitpoints to lose before death; they start with different
+amounts of hitpoints, depending on their species. Your score grows by killing
+enemies, to the amount of hitpoints each killed enemy started with. Dead enemies
+become dirt, skeletons or "magic meat"--such objects can be collected, and
+"magic meat" can be consumed to gain hitpoints. Note that different kinds of
+movements/actions take different numbers of turns to finish.
 
 Enemies' AI is very dumb so far: Each turn, they try to move in the (beeline)
-direction of the nearest enemy, so they often bump into obstacles.
+direction of the nearest enemy, so they often bump into, and get stuck behind,
+obstacles. You can use that for your advantage.
 
-There is only one save file (named "savefile"), and it gets overwritten each new
-turn. To start over with a new world, delete it.
+Once you start a new world, every move of yours is recorded in a file called
+"record". Once you re-start the game, all of your previous moves are replayed
+automatially until you end up where you left the game. To start over in a new
+world, delete this file.
 
-Install/run
------------
+System requirements / installation / running the game
+-----------------------------------------------------
 
-Dependencies: the ncurses library.
+The game is expected to run on Linux systems that contain the ncurses library.
+Perform the following steps:
 
-git clone https://github.com/plomlompom/plomrogue
-cd plomrogue
-make
-./roguelike
+$ git clone https://github.com/plomlompom/plomrogue
+$ cd plomrogue
+$ make
+$ ./roguelike
 
-Keybindings and window configuration
-------------------------------------
+(It might also work on other Unix-like systems with ncurses, who knows.)
 
-In the default window configuration, the window appearing on the left sports a
-list of keybindings available globally and additionally via the window currently
-selected as active.
+Note that make generates two executables ./roguelike-server and
+./roguelike-client. ./roguelike is a pre-existing shell script that merely
+executes both of them, with the server as a background job. You may also
+ignore the script and start the two by hand.
+
+Client's keybindings and window management
+------------------------------------------
+
+In the client's default window configuration, the window appearing on the left
+sports a list of keybindings available globally, and additionally via the window
+currently selected as active.
 
 Hit "w" (per default keybindings) to switch the "active" window to a view that
 allows changing its geometry. One further hit on "w" switches the window to a
 view that allows changing its window-specific keybindings. The global
 keybindings may be changed in the "Global keys" window, those of the window
-geometry configuration in the "Window geometry keys" window" and those of the
+geometry configuration in the "Window geometry keys" window, and those of the
 window-specific keybindings configuration in the "Window keybinding keys"
 window; by default, these three windows are not visible, but may be turned on by
 hitting the "F6", "F7" and "F8" keys.
 
 What actions are available globally or only in specific windows can be further
-manipulated by editing the files config/keybindings_global and
-config/windows/Win_* that map keycodes to commands to the respective keybinding
-repositories. While keybindings_global contains merely a list of keycode command
-mappings, the Win_* files start with the name of the windows to be configured,
-followed by a one-character line for internal use (mapping the window to one of
-several internally available window content drawing functions), followed by two
-lines describing the window's designated height and width, and only then an
-optional list of keybindings specific to that window.
+manipulated by editing the files confclient/keybindings_global and
+confclient/windows/Win_* that map keycodes to commands to the respective
+keybinding repositories. While keybindings_global contains merely a list of
+keycode command mappings, the Win_* files start with the name of the windows to
+be configured, followed by a one-character line for internal use (mapping the
+window to one of several internally available window content drawing functions),
+followed by two lines describing the window's designated height and width, and
+only then an optional list of keybindings specific to that window.
 
 Replay game recording
 ---------------------
 
 Run "./roguelike -s" to watch a recording of the current game from the
-beginning. Hit the "next turn / wait" key to increment turns. Keys to
-manage windows, scroll on the map and quit the program are active; keys
-to perform player actions are inactive. Append a number to the -s option
-(like "-s100") to start the recording at the respective turn number.
+beginning. Hit any player action key to increment turns (they will not trigger
+the actions usually mapped to them, only repeat the actions performed at that
+point in the game as defined in the "record" file). Keys to manage windows,
+scroll on the map and quit the program do their usual thing. Append a number to
+the -s option (like "-s100") to start the recording at the respective turn
+number.
 
-Hacking
--------
+Hacking / server internals and configuration
+--------------------------------------------
 
 The movements/actions available to the player and the enemies are defined and
-can be changed in config/map_object_actions. Each line consists of, first, a
-numerical ID used internally to manage the action, secondly the number of turns
-the action takes, and thirdly a string representing the action internally.
+can be changed in ./confserver/map_object_actions. Each line consists of, first,
+a numerical ID used internally to manage the action, secondly the number of
+turns the action takes, and thirdly a string representing the action internally.
 
 The different map object types, i.e. species (including the player's human one)
-and item types, can be edited in config/defs. Here the first value is a
+and item types, can be edited in ./confserver/defs. Here the first value is a
 numerical ID that represents the object type, the second one describes what type
 this object decomposes to when it gets destroyed/killed, the third value is the
 character used to represent the object visually on the map, the fourth value is
 the number of hitpoints the object starts with (items are dead and start with
 zero hitpoints, anything else moves), the fifth is the string that names the
-object in the game log.
+object in the game log. Note that the only valid item use so far, consuming
+"magic meat" to gain hitpoints, is so far hard-coded (this should change in the
+future).
+
+All source files are thoroughly documented to explain more details of
+plomrogue's internals. The ./roguelike-server executable can be run with a -v
+option for helpful debugging info (mostly: what messages the client sends to the
+server). Server and client communicate via files in the ./server/ directory
+(generated when the server is first run). The /server/in fifo receives commands
+for the server as null-terminated strings. The /server/out file contains a
+serialized representation of the game world's data as it is to be available to
+the player / the player's client.

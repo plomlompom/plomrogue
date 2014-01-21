@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# This is only to ensure I write no unintentional bashisms.
+set -o posix
+
+# Abort the script on error.
+set -e
+
+# Use the shell script's arguments to the server's arguments.
+./roguelike-server $@ &
+
+# Give server some time to start up and exit on error.
+sleep 0.01
+
+# The client should not start if the server is not running. (If the server was
+# running in the foreround, any error exit of it so far would be caught by "set
+# -e" above. But "set -e" is blind to error codes generated in the background.)
+kill -0 $! 2> /dev/null
+
+# Give server some time (max. 10 seconds) to generate its out file.
+i=0
+while [ ! -e server/out ] && [ $i -le 10000 ]
+do
+    sleep 0.01
+    i=`expr $i + 1`
+done
+kill -0 $! 2> /dev/null
+
+# Only start the interface when everything else went well.
+./roguelike-client
