@@ -19,7 +19,7 @@
 /* Return "n"-th keybinding in keybindings chain from "kb_p" on. */
 static struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n);
 
-//* Return number of keybindings in keybindings chain from "kb_p" on. */
+/* Return number of keybindings in keybindings chain from "kb_p" on. */
 static uint16_t get_n_of_keybs(struct KeyBinding * kb_p);
 
 /* If "keycode_given" equals "keycode_match", copy "keyname_match" to "keyname"

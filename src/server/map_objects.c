@@ -48,7 +48,7 @@ static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id)
 
 
 
-static struct yx_uint16 find_passable_pos() // struct Map * map)
+static struct yx_uint16 find_passable_pos()
 {
     struct yx_uint16 pos;
     for (pos.y = pos.x = 0; 0 == is_passable(pos);)
