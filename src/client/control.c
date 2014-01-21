@@ -23,16 +23,17 @@
 
 
 
-/* If "cmd" matches "match" in get_available_keycode_to_command(), execute "f"
- * with provided char arguments and return 1; else only return 0.
+/* If "command_id" matches "match" in get_available_keycode_to_command(),
+ * execute "f" with provided char arguments and return 1; else only return 0.
  */
-static uint8_t try_cmd_0args(int cmd, char * match, void (* f) ());
-static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c);
-static uint8_t try_cmd_2args(int cmd, char * match,
+static uint8_t try_cmd_0args(int command_id, char * match, void (* f) ());
+static uint8_t try_cmd_1args(int command_id, char * match,
+                             void (* f) (char), char c);
+static uint8_t try_cmd_2args(int command_id, char * match,
                              void (* f) (char, char), char c1, char c2);
 
-/* If "command_id" is id of command named "match", send (via try_send()) a string
- * of "match" + " " + the string representation of "arg" to the server.
+/* If "command_id" is id of command named "match", send (via try_send()) a
+ * string of "match" + " " + the string representation of "arg" to the server.
  */
 static uint8_t try_player_cmd(int command_id, char * match, char * command_name,
                               uint8_t arg);
@@ -51,9 +52,9 @@ static void wrap_mv_kb_mod(char c1, char c2);
 
 
 
-static uint8_t try_cmd_0args(int cmd, char * match, void (* f) ())
+static uint8_t try_cmd_0args(int command_id, char * match, void (* f) ())
 {
-    if (cmd == get_available_keycode_to_command(match))
+    if (command_id == get_available_keycode_to_command(match))
     {
         f();
         return 1;
@@ -63,9 +64,10 @@ static uint8_t try_cmd_0args(int cmd, char * match, void (* f) ())
 
 
 
-static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c)
+static uint8_t try_cmd_1args(int command_id, char * match,
+                             void (* f) (char), char c)
 {
-    if (cmd == get_available_keycode_to_command(match))
+    if (command_id == get_available_keycode_to_command(match))
     {
         f(c);
         return 1;
@@ -75,10 +77,10 @@ static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c)
 
 
 
-static uint8_t try_cmd_2args(int cmd, char * match,
+static uint8_t try_cmd_2args(int command_id, char * match,
                              void (* f) (char, char), char c1, char c2)
 {
-    if (cmd == get_available_keycode_to_command(match))
+    if (command_id == get_available_keycode_to_command(match))
     {
         f(c1, c2);
         return 1;
