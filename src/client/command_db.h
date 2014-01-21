@@ -26,9 +26,6 @@ struct CommandDB
 
 
 
-/* Is "id" the ID of command whose dsc_short is "shortdsc"? Answer in binary. */
-extern uint8_t is_command_id_shortdsc(uint8_t id, char * shortdsc);
-
 /* Give short description of command ("dsc_short"), get its ID. */
 extern uint8_t get_command_id(char * dsc_short);
 

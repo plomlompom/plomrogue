@@ -13,7 +13,7 @@
 struct KeyBinding
 {
   struct KeyBinding * next;
-  uint16_t key;    /* keycode */
+  uint16_t key;   /* keycode */
   char * command; /* name of command / functionality bound to keycode */
 };
 
