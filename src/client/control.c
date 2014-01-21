@@ -23,7 +23,7 @@
 
 
 
-/* If "cmd" matches "match" in get_available_keycode_to_action(), execute "f"
+/* If "cmd" matches "match" in get_available_keycode_to_command(), execute "f"
  * with provided char arguments and return 1; else only return 0.
  */
 static uint8_t try_cmd_0args(int cmd, char * match, void (* f) ());
@@ -31,14 +31,14 @@ static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c);
 static uint8_t try_cmd_2args(int cmd, char * match,
                              void (* f) (char, char), char c1, char c2);
 
-/* If "action" is id of command named "match", send (via try_send()) a string
+/* If "command_id" is id of command named "match", send (via try_send()) a string
  * of "match" + " " + the string representation of "arg" to the server.
  */
-static uint8_t try_player_cmd(int action, char * match, char * command,
+static uint8_t try_player_cmd(int command_id, char * match, char * command_name,
                               uint8_t arg);
 
-/* Return keycode to action of "name" if available in current window config. */
-static uint16_t get_available_keycode_to_action(char * name);
+/* Return keycode to "command" if it is available in current window config. */
+static uint16_t get_available_keycode_to_command(char * command);
 
 /* Return pointer to global keybindings or to keybindings for wingeometry config
  * (c = "g") or winkeys config (c = "k") or active window's keybindings ("w").
@@ -53,7 +53,7 @@ static void wrap_mv_kb_mod(char c1, char c2);
 
 static uint8_t try_cmd_0args(int cmd, char * match, void (* f) ())
 {
-    if (cmd == get_available_keycode_to_action(match))
+    if (cmd == get_available_keycode_to_command(match))
     {
         f();
         return 1;
@@ -65,7 +65,7 @@ static uint8_t try_cmd_0args(int cmd, char * match, void (* f) ())
 
 static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c)
 {
-    if (cmd == get_available_keycode_to_action(match))
+    if (cmd == get_available_keycode_to_command(match))
     {
         f(c);
         return 1;
@@ -78,7 +78,7 @@ static uint8_t try_cmd_1args(int cmd, char * match, void (* f) (char), char c)
 static uint8_t try_cmd_2args(int cmd, char * match,
                              void (* f) (char, char), char c1, char c2)
 {
-    if (cmd == get_available_keycode_to_action(match))
+    if (cmd == get_available_keycode_to_command(match))
     {
         f(c1, c2);
         return 1;
@@ -88,15 +88,15 @@ static uint8_t try_cmd_2args(int cmd, char * match,
 
 
 
-static uint8_t try_player_cmd(int action, char * match, char * command,
+static uint8_t try_player_cmd(int command_id, char * match, char * command_name,
                               uint8_t arg)
 {
-    if (is_command_id_shortdsc(action, match))
+    if (is_command_id_shortdsc(command_id, match))
     {
-        uint8_t command_size = strlen(command);
+        uint8_t command_size = strlen(command_name);
         uint8_t arg_size = 3;
         char msg[command_size + 1 + arg_size + 1];
-        sprintf(msg, "%s %d", command, arg);
+        sprintf(msg, "%s %d", command_name, arg);
         try_send(msg);
         return 1;
     }
@@ -105,9 +105,9 @@ static uint8_t try_player_cmd(int action, char * match, char * command,
 
 
 
-static uint16_t get_available_keycode_to_action(char * name)
+static uint16_t get_available_keycode_to_command(char * command)
 {
-    uint16_t keycode = get_keycode_to_command(world.kb_global.kbs, name);
+    uint16_t keycode = get_keycode_to_command(world.kb_global.kbs, command);
     if (0 != keycode || 0 == world.wmeta.active)
     {
         return keycode;
@@ -115,15 +115,15 @@ static uint16_t get_available_keycode_to_action(char * name)
     struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
     if (0 == wc->view)
     {
-        keycode = get_keycode_to_command(wc->kb.kbs, name);
+        keycode = get_keycode_to_command(wc->kb.kbs, command);
     }
     else if (1 == wc->view)
     {
-        keycode = get_keycode_to_command(world.kb_wingeom.kbs, name);
+        keycode = get_keycode_to_command(world.kb_wingeom.kbs, command);
     }
     else if (2 == wc->view)
     {
-        keycode = get_keycode_to_command(world.kb_winkeys.kbs, name);
+        keycode = get_keycode_to_command(world.kb_winkeys.kbs, command);
     }
     return keycode;
 }
@@ -168,15 +168,15 @@ static void wrap_mv_kb_mod(char c1, char c2)
 
 extern uint8_t player_control(int key)
 {
-    char * action_name = get_command_to_keycode(world.kb_global.kbs, key);
-    if (NULL == action_name && 0 != world.wmeta.active)
+    char * command = get_command_to_keycode(world.kb_global.kbs, key);
+    if (NULL == command && 0 != world.wmeta.active)
     {
         struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
-        action_name = get_command_to_keycode(wc->kb.kbs, key);
+        command = get_command_to_keycode(wc->kb.kbs, key);
     }
-    if (NULL != action_name)
+    if (NULL != command)
     {
-        uint8_t id = get_command_id(action_name);
+        uint8_t id = get_command_id(command);
         if (   try_player_cmd(id, "wait", "wait", 0)
             || try_player_cmd(id, "drop", "drop", world.player_inventory_select)
             || try_player_cmd(id, "pick", "pick_up", 0)
@@ -227,7 +227,7 @@ extern uint8_t winkeyb_control(int key)
 
 extern uint8_t meta_control(int key)
 {
-    uint8_t ret = 2 * (key == get_available_keycode_to_action("quit"));
+    uint8_t ret = 2 * (key == get_available_keycode_to_command("quit"));
     if (   (0 == ret)
         && (   try_cmd_0args(key, "winconf", toggle_winconfig)
             || try_cmd_0args(key, "reload_conf", reload_interface_conf)
