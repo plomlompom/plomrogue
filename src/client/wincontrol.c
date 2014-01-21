@@ -117,9 +117,9 @@ static void init_winconf_from_file(char id, struct WinConf * winconf)
         kb_p->next = 0;
         kb_p->key = atoi(command);
         cmdptr = strchr(command, ' ') + 1;
-        kb_p->name = try_malloc(strlen(cmdptr), context);
-        memcpy(kb_p->name, cmdptr, strlen(cmdptr) - 1);
-        kb_p->name[strlen(cmdptr) - 1] = '\0';
+        kb_p->command = try_malloc(strlen(cmdptr), context);
+        memcpy(kb_p->command, cmdptr, strlen(cmdptr) - 1);
+        kb_p->command[strlen(cmdptr) - 1] = '\0';
         loc_last_ptr = & kb_p->next;
     }
 
@@ -174,9 +174,9 @@ static void save_win_config(char id)
     struct KeyBinding * kb_p = wc->kb.kbs;
     while (0 != kb_p)
     {
-        if (strlen(kb_p->name) > linemax)
+        if (strlen(kb_p->command) > linemax)
         {
-            linemax = strlen(kb_p->name);
+            linemax = strlen(kb_p->command);
         }
         kb_p = kb_p->next;
     }
@@ -185,7 +185,7 @@ static void save_win_config(char id)
     kb_p = wc->kb.kbs;
     while (0 != kb_p)
     {
-        sprintf(kb_line, "%d %s\n", kb_p->key, kb_p->name);
+        sprintf(kb_line, "%d %s\n", kb_p->key, kb_p->command);
         try_fwrite(kb_line, sizeof(char), strlen(kb_line), file, f_name);
         kb_p = kb_p->next;
     }

@@ -6,8 +6,8 @@
 #include <string.h> /* strlen() */
 #include "command_db.h" /* get_command_id(), is_command_id_shortdsc() */
 #include "io.h" /* try_send() */
-#include "keybindings.h" /* struct KeyBindingDB, get_actionname_to_keycode(),
-                         * get_keycode_to_action(), mod_selected_keyb(),
+#include "keybindings.h" /* struct KeyBindingDB, get_command_to_keycode(),
+                          * get_keycode_to_command(), mod_selected_keyb(),
                           * move_keyb_mod_selection()
                           */
 #include "map_window.h" /* for map_scroll(), map_center() */
@@ -107,7 +107,7 @@ static uint8_t try_player_cmd(int action, char * match, char * command,
 
 static uint16_t get_available_keycode_to_action(char * name)
 {
-    uint16_t keycode = get_keycode_to_action(world.kb_global.kbs, name);
+    uint16_t keycode = get_keycode_to_command(world.kb_global.kbs, name);
     if (0 != keycode || 0 == world.wmeta.active)
     {
         return keycode;
@@ -115,15 +115,15 @@ static uint16_t get_available_keycode_to_action(char * name)
     struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
     if (0 == wc->view)
     {
-        keycode = get_keycode_to_action(wc->kb.kbs, name);
+        keycode = get_keycode_to_command(wc->kb.kbs, name);
     }
     else if (1 == wc->view)
     {
-        keycode = get_keycode_to_action(world.kb_wingeom.kbs, name);
+        keycode = get_keycode_to_command(world.kb_wingeom.kbs, name);
     }
     else if (2 == wc->view)
     {
-        keycode = get_keycode_to_action(world.kb_winkeys.kbs, name);
+        keycode = get_keycode_to_command(world.kb_winkeys.kbs, name);
     }
     return keycode;
 }
@@ -168,11 +168,11 @@ static void wrap_mv_kb_mod(char c1, char c2)
 
 extern uint8_t player_control(int key)
 {
-    char * action_name = get_actionname_to_keycode(world.kb_global.kbs, key);
+    char * action_name = get_command_to_keycode(world.kb_global.kbs, key);
     if (NULL == action_name && 0 != world.wmeta.active)
     {
         struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
-        action_name = get_actionname_to_keycode(wc->kb.kbs, key);
+        action_name = get_command_to_keycode(wc->kb.kbs, key);
     }
     if (NULL != action_name)
     {

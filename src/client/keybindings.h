@@ -14,7 +14,7 @@ struct KeyBinding
 {
   struct KeyBinding * next;
   uint16_t key; /* keycode */
-  char * name;  /* name of functionality bound to keycode */
+  char * command; /* name of command / functionality bound to keycode */
 };
 
 struct KeyBindingDB
@@ -26,17 +26,17 @@ struct KeyBindingDB
 
 
 
-/* Return name of action / functionality coupled to keycode; NULL on failure. */
-extern char * get_actionname_to_keycode(struct KeyBinding * kb_p, uint16_t key);
+/* Return name of command / functionality bound to keycode; NULL on failure. */
+extern char * get_command_to_keycode(struct KeyBinding * kb_p, uint16_t key);
 
-/* Return keycode matched by keybinding to command of "name". */
-extern uint16_t get_keycode_to_action(struct KeyBinding * keybindings,
-                                      char * name);
+/* Return keycode bound to "command". */
+extern uint16_t get_keycode_to_command(struct KeyBinding * keybindings,
+                                       char * command);
 
 /* Return human-readable name (of maximum 9 chars) for "keycode" as matched by
  * ncurses.h; if none is found, return "UNKNOWN".
  */
-extern char * get_name_to_keycode(uint16_t keycode);
+extern char * get_keyname_to_keycode(uint16_t keycode);
 
 /* Initialize/save keybindings data from/to file at "path" to/from keybindings
  * data pointer "kbd".
