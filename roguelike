@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# This is only to ensure I write no unintentional bashisms.
-set -o posix
-
 # Abort the script on error.
 set -e
 
