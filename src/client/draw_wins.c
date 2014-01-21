@@ -43,8 +43,8 @@ static void draw_text_from_bottom(struct Win * win, char * text);
 static char * get_kb_line_and_iterate(struct KeyBinding ** kb_pp);
 
 /* Draw from line "start" on config view for keybindings defined at "kb". */
-static void draw_kb_view(struct Win * w, struct KeyBindingDB * kb,
-                         uint8_t start);
+static void draw_keybinding_config(struct Win * w, struct KeyBindingDB * kb,
+                                   uint8_t start);
 
 /* Draw into window "w" from line "start" on a "title" followed by an empty
  * line followed by a list of all keybindings starting at kb_p.
@@ -248,8 +248,8 @@ static char * get_kb_line_and_iterate(struct KeyBinding ** kb_pp)
 
 
 
-static void draw_kb_view(struct Win * w, struct KeyBindingDB * kb,
-                         uint8_t start)
+static void draw_keybinding_config(struct Win * w, struct KeyBindingDB * kb,
+                                   uint8_t start)
 {
     if (0 == kb->kbs)
     {
@@ -409,7 +409,7 @@ extern void draw_win_available_keybindings(struct Win * win)
 extern void draw_win_keybindings_global(struct Win * win)
 {
     win->center.y = world.kb_global.select;
-    draw_kb_view(win, &world.kb_global, 0);
+    draw_keybinding_config(win, &world.kb_global, 0);
 }
 
 
@@ -417,7 +417,7 @@ extern void draw_win_keybindings_global(struct Win * win)
 extern void draw_win_keybindings_winconf_geometry(struct Win * win)
 {
     win->center.y = world.kb_wingeom.select;
-    draw_kb_view(win, &world.kb_wingeom, 0);
+    draw_keybinding_config(win, &world.kb_wingeom, 0);
 }
 
 
@@ -425,7 +425,7 @@ extern void draw_win_keybindings_winconf_geometry(struct Win * win)
 extern void draw_win_keybindings_winconf_keybindings(struct Win * win)
 {
     win->center.y = world.kb_winkeys.select;
-    draw_kb_view(win, &world.kb_winkeys, 0);
+    draw_keybinding_config(win, &world.kb_winkeys, 0);
 }
 
 
@@ -436,7 +436,7 @@ extern void draw_winconf_keybindings(struct Win * win)
     char * title = "Window's keybindings:";
     add_line(win, title, 0);
     add_line(win, " ", 0);
-    draw_kb_view(win, &wc->kb, 2);
+    draw_keybinding_config(win, &wc->kb, 2);
     win->center.y = wc->kb.select + 2;
 }
 
