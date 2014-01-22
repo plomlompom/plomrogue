@@ -78,9 +78,9 @@ extern void init_win_meta();
  * Pass 0 for "width" to make the window as wide as the terminal screen. Pass 0
  * for "height" for the maximum allowed height: one cell smaller than that of
  * the terminal screen. Pass negative values for either of them to make the
- * window width/height so many cells smaller than what 0 would set. The maximum
- * allowed height is also applied for positive height values that exceed it or
- * negative values that would reduce the window height to less than 1 cell.
+ * window width/height so many cells smaller than what 0 would set. Values that
+ * that would reduce the window height or width to less than 1 cell according to
+ * the aforementioned rules set the height/width as if they were set to 0.
  */
 extern void init_win(struct Win ** wp, char * title, int16_t height,
                      int16_t width, void * func);

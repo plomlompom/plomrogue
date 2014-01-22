@@ -461,21 +461,23 @@ extern void init_win(struct Win ** wp, char * title, int16_t height,
     w->draw         = func;
     w->center.y     = 0;
     w->center.x     = 0;
-    if      (0 < width)
-    {
-        w->framesize.x = width;
-    }
-    else if (0 >= width)
-    {
-        w->framesize.x = world.wmeta.padsize.x + width;
-    }
+    w->framesize.y  = world.wmeta.padsize.y - 1;
     if      (0 < height && height <= world.wmeta.padsize.y - 1)
     {
         w->framesize.y = height;
     }
-    else if (0 >= height && world.wmeta.padsize.y + (height - 1) > 0)
+    else if (0 > height && world.wmeta.padsize.y + (height - 1) > 0)
     {
         w->framesize.y = world.wmeta.padsize.y + (height - 1);
+    }
+    w->framesize.x  = world.wmeta.padsize.x;
+    if      (0 < width)
+    {
+        w->framesize.x = width;
+    }
+    else if (0 > width && world.wmeta.padsize.x + width > 0)
+    {
+        w->framesize.x = world.wmeta.padsize.x + width;
     }
     *wp = w;
 }
