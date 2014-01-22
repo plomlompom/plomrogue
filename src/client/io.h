@@ -21,6 +21,7 @@ extern void try_send(char * msg);
  * library. On each change / activity, re-draw the windows with draw_all_wins().
  * When the loop ends regularly (due to the user sending a quit command), return
  * an appropriate quit message to write to stdout when the client winds down.
+ * Also call reset_windows() on receiving a SIGWINCH.
  */
 extern char * io_loop();
 

@@ -36,6 +36,7 @@ struct World
     uint8_t halfdelay;
     uint8_t player_inventory_select;
     uint8_t player_lifepoints;
+    uint8_t winch; /* if set, SIGWINCH was registered; trigger reset_windows()*/
 };
 
 

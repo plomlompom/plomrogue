@@ -71,6 +71,9 @@ struct WinMeta
  */
 extern void init_wmeta_and_ncurses();
 
+/* Builds world.wmeta.pad from the sizes of the current terminal screen. */
+extern void make_pad();
+
 /* Initialize a Win child "wp" of "wmeta" to "title", "height" and "width" and
  * appoint "func"() as its .draw. Initialize other members to 0.
  *

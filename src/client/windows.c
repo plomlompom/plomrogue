@@ -440,6 +440,21 @@ extern void init_wmeta_and_ncurses()
 
 
 
+extern void make_pad()
+{
+    char * err_s = "make_pad() creates an illegaly large virtual screen.";
+    char * err_m = "make_pad() triggers memory allocation error via newpad().";
+    uint32_t maxy_test = getmaxy(world.wmeta.screen);
+    uint32_t maxx_test = getmaxx(world.wmeta.screen);
+    exit_err(maxy_test > UINT16_MAX || maxx_test > UINT16_MAX, err_s);
+    world.wmeta.padsize.y = maxy_test;
+    world.wmeta.padsize.x = maxx_test;
+    world.wmeta.pad = newpad(world.wmeta.padsize.y, 1);
+    exit_err(NULL == world.wmeta.pad, err_m);
+}
+
+
+
 extern void init_win(struct Win ** wp, char * title, int16_t height,
                      int16_t width, void * func)
 {

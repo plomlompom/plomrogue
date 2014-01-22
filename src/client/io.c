@@ -18,6 +18,7 @@
                                   */
 #include "control.h" /* try_key() */
 #include "map_window.h" /* for map_center() */
+#include "misc.h" /* reset_windows() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* world global */
 
@@ -257,6 +258,12 @@ extern char * io_loop()
     uint8_t change_in_client = 0;
     while (1)
     {
+        if (world.winch)
+        {
+            reset_windows();
+            world.winch = 0;
+            change_in_client++;
+        }
         if (read_world() || change_in_client)
         {
             draw_all_wins();
