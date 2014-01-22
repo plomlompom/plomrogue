@@ -81,10 +81,15 @@ static uint8_t try_2args(struct Command * command, char * match,
 
 static uint8_t try_client_commands(struct Command * command)
 {
-    return (   try_0args(command, "winconf", toggle_winconfig)
-            || try_0args(command, "reload_conf", reload_interface_conf)
-            || try_0args(command, "save_conf", save_interface_conf)
-            || try_0args(command, "map_c", map_center)
+    return (   try_0args(command, "map_c", map_center)
+            || try_1args(command, "map_u", map_scroll, 'N')
+            || try_1args(command, "map_d", map_scroll, 'S')
+            || try_1args(command, "map_r", map_scroll, 'E')
+            || try_1args(command, "map_l", map_scroll, 'W')
+            || try_1args(command, "inv_u", nav_inventory, 'u')
+            || try_1args(command, "inv_d", nav_inventory, 'd')
+            || try_1args(command, "cyc_win_f", cycle_active_win, 'f')
+            || try_1args(command, "cyc_win_b", cycle_active_win, 'b')
             || try_1args(command, "scrl_r", scroll_pad, '+')
             || try_1args(command, "scrl_l", scroll_pad, '-')
             || try_1args(command, "to_a_keywin", toggle_window, 'k')
@@ -95,34 +100,29 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "to_infowin", toggle_window, 'i')
             || try_1args(command, "to_inv", toggle_window, 'c')
             || try_1args(command, "to_logwin", toggle_window, 'l')
-            || try_1args(command, "cyc_win_f", cycle_active_win, 'f')
-            || try_1args(command, "cyc_win_b", cycle_active_win, 'b')
-            || try_1args(command, "inv_u", nav_inventory, 'u')
-            || try_1args(command, "inv_d", nav_inventory, 'd')
-            || try_1args(command, "map_u", map_scroll, 'N')
-            || try_1args(command, "map_d", map_scroll, 'S')
-            || try_1args(command, "map_r", map_scroll, 'E')
-            || try_1args(command, "map_l", map_scroll, 'W')
-            || try_1args(command, "to_height_t", toggle_win_size_type, 'y')
-            || try_1args(command, "to_width_t", toggle_win_size_type, 'x')
+            || try_0args(command, "winconf", toggle_winconfig)
             || try_1args(command, "grow_h", growshrink_active_window, '*')
             || try_1args(command, "shri_h", growshrink_active_window, '_')
             || try_1args(command, "grow_v", growshrink_active_window, '+')
             || try_1args(command, "shri_v", growshrink_active_window, '-')
+            || try_1args(command, "to_height_t", toggle_win_size_type, 'y')
+            || try_1args(command, "to_width_t", toggle_win_size_type, 'x')
             || try_1args(command, "shift_f", shift_active_win, 'f')
             || try_1args(command, "shift_b", shift_active_win, 'b')
+            || try_0args(command, "reload_conf", reload_interface_conf)
+            || try_0args(command, "save_conf", save_interface_conf)
             || try_1args(command, "g_keys_m", mod_selected_keyb, 'G')
-            || try_1args(command, "wg_keys_m", mod_selected_keyb, 'g')
-            || try_1args(command, "wk_keys_m", mod_selected_keyb, 'k')
+            || try_2args(command, "g_keys_u", move_keyb_selection, 'G', 'u')
+            || try_2args(command, "g_keys_d", move_keyb_selection, 'G', 'd')
             || try_1args(command, "w_keys_m", mod_selected_keyb, 'w')
-            || try_2args(command, "wg_keys_u", move_keyb_selection, 'g', 'u')
-            || try_2args(command, "wg_keys_d", move_keyb_selection, 'g', 'd')
-            || try_2args(command, "wk_keys_u", move_keyb_selection, 'k', 'u')
-            || try_2args(command, "wk_keys_d", move_keyb_selection, 'k', 'd')
             || try_2args(command, "w_keys_u", move_keyb_selection, 'w', 'u')
             || try_2args(command, "w_keys_d", move_keyb_selection, 'w', 'd')
-            || try_2args(command, "g_keys_u", move_keyb_selection, 'G', 'u')
-            || try_2args(command, "g_keys_d", move_keyb_selection, 'G', 'd'));
+            || try_1args(command, "wg_keys_m", mod_selected_keyb, 'g')
+            || try_2args(command, "wg_keys_u", move_keyb_selection, 'g', 'u')
+            || try_2args(command, "wg_keys_d", move_keyb_selection, 'g', 'd')
+            || try_1args(command, "wk_keys_m", mod_selected_keyb, 'k')
+            || try_2args(command, "wk_keys_u", move_keyb_selection, 'k', 'u')
+            || try_2args(command, "wk_keys_d", move_keyb_selection, 'k', 'd'));
 }
 
 
@@ -169,17 +169,17 @@ extern uint8_t try_key(uint16_t key)
     }
     if (command)
     {
-        if      (try_client_commands(command))
+        if (try_server_commands(command))
+        {
+            return 1;
+        }
+        else if      (try_client_commands(command))
         {
             return 1;
         }
         else if (!strcmp("quit", command->dsc_short))
         {
             return 2;
-        }
-        else if (try_server_commands(command))
-        {
-            return 1;
         }
     }
     return 0;
