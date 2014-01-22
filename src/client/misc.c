@@ -8,6 +8,7 @@
 #include "keybindings.h" /* init_keybindings(), free_keybindings(),
                           * save_keybindings()
                           */
+#include "map_window.h" /* for map_center() */
 #include "wincontrol.h" /* init_winconfs(), init_wins(),
                          * sorted_wintoggle_and_activate()
                          */
@@ -67,6 +68,7 @@ extern void reload_interface_conf()
 {
     unload_interface_conf();
     load_interface_conf();
+    map_center();
 }
 
 
