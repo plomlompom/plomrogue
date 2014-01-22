@@ -1,51 +1,51 @@
-quit quit
-wait wait / next turn
-player_u player up
-player_d player down
-player_l player left
-player_r player right
-to_g_keywin toggle global keys window
-to_mapwin toggle map window
-to_infowin toggle info window
-to_logwin toggle log window
-to_wg_keywin toggle window geometry keys window
-to_wk_keywin toggle window keybinding keys window
-cyc_win_f cycle window selection forwards
-winconf toggle window configuration view
-cyc_win_b cycle window selection backwards
-scrl_l scroll pad left
-scrl_r scroll pad right
-g_keys_d global keybindings nav down
-g_keys_u global keybindings nav up
-g_keys_m global keybindings modify
-shift_f shift window forwards
-shift_b shift window backwards
-grow_h grow window horizontally
-shri_h shrink window horizontally
-grow_v grow window vertically
-shri_v shrink window vertically
-to_height_t toggle window height type
-to_width_t toggle window width type
-w_keys_d win keys nav down
-w_keys_u win keys nav up
-w_keys_m win keys mod
-wg_keys_d win geometry config keybindings nav down
-wg_keys_u win geometry config keybindings nav up
-wg_keys_m win geometry config keybindings modify
-wk_keys_d win keybindings config keybindings nav down
-wk_keys_u win keybindings config keybindings nav up
-wk_keys_m win keybindings config keybindings modify
-reload_conf reload windows and keybindings configuration
-save_conf save windows and keybindings
-map_u map up
-map_d map down
-map_l map left
-map_r map right
-map_c map center player
-to_a_keywin toggle view of available keybindings
-to_inv toggle inventory window
-drop drop object from inventory
-pick pick up object from ground
-inv_d inventory selection down
-inv_u inventory selection up
-use use selected inventory object
+wait wait 0 wait / next turn
+use use i use selected inventory object
+drop drop i drop object from inventory
+pick pick_up 0 pick up object from ground
+player_u move N player up
+player_d move S player down
+player_l move W player left
+player_r move E player right
+quit 0 0 quit
+to_g_keywin 0 0 toggle global keys window
+to_mapwin 0 0 toggle map window
+to_infowin 0 0 toggle info window
+to_logwin 0 0 toggle log window
+to_wg_keywin 0 0 toggle window geometry keys window
+to_wk_keywin 0 0 toggle window keybinding keys window
+cyc_win_f 0 0 cycle window selection forwards
+winconf 0 0 toggle window configuration view
+cyc_win_b 0 0 cycle window selection backwards
+scrl_l 0 0 scroll pad left
+scrl_r 0 0 scroll pad right
+g_keys_d 0 0 global keybindings nav down
+g_keys_u 0 0 global keybindings nav up
+g_keys_m 0 0 global keybindings modify
+shift_f 0 0 shift window forwards
+shift_b 0 0 shift window backwards
+grow_h 0 0 grow window horizontally
+shri_h 0 0 shrink window horizontally
+grow_v 0 0 grow window vertically
+shri_v 0 0 shrink window vertically
+to_height_t 0 0 toggle window height type
+to_width_t 0 0 toggle window width type
+w_keys_d 0 0 win keys nav down
+w_keys_u 0 0 win keys nav up
+w_keys_m 0 0 win keys mod
+wg_keys_d 0 0 win geometry config keybindings nav down
+wg_keys_u 0 0 win geometry config keybindings nav up
+wg_keys_m 0 0 win geometry config keybindings modify
+wk_keys_d 0 0 win keybindings config keybindings nav down
+wk_keys_u 0 0 win keybindings config keybindings nav up
+wk_keys_m 0 0 win keybindings config keybindings modify
+reload_conf 0 reload windows and keybindings configuration
+save_conf 0 0 save windows and keybindings
+map_u 0 0 map up
+map_d 0 0 map down
+map_l 0 0 map left
+map_r 0 0 map right
+map_c 0 0 map center player
+to_a_keywin 0 0 toggle view of available keybindings
+to_inv 0 0 toggle inventory window
+inv_d 0 0 inventory selection down
+inv_u 0 0 inventory selection up

@@ -1,7 +1,8 @@
 /* src/client/command_db.h
  *
- * The Command DB collects identifiers and verbal descriptions of all commands
- * the user can give.
+ * The Command DB collects the commands available to the user by internal name,
+ * description and, optionally, components of a message to send to the server
+ * when calling it.
  */
 
 #ifndef COMMAND_DB_H
@@ -13,8 +14,10 @@
 
 struct Command
 {
-    char * dsc_short; /* short string name of command to be used internally */
-    char * dsc_long;  /* long string description of command for the user */
+    char * dsc_short; /* short name of command to be used internally */
+    char * dsc_long; /* long description of command to be shown to the user */
+    char * server_msg; /* optionally start string of message to send to server */
+    char arg; /* defines server message suffix by player_control() convention */
 };
 
 struct CommandDB
@@ -25,8 +28,8 @@ struct CommandDB
 
 
 
-/* Give short description of command ("dsc_short"), get long description. */
-extern char * get_command_longdsc(char * dsc_short);
+/* Return Command struct for command described by its "dsc_short" member. */
+extern struct Command * get_command_data(char * dsc_short);
 
 /* Reads CommandDB from CommandDB file, line by line, until first empty line. */
 extern void init_command_db();

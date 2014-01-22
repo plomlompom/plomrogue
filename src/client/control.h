@@ -6,12 +6,15 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <stdint.h> /* uint8_t, uint16_t */
+#include <stdint.h> /* uint8_t */
 
 
 
-/* Try to call by "key" player actions triggering messages to the server. Return
- * 1 on success, 0 on failure.
+/* Tries to call by "key" for player actions triggering messages to the server.
+ * The appropriate Command struct's .server_msg will be sent, followed by a " ",
+ * followed by either a string representation of the numerical value of the
+ * Command struct's .arg, or, if .arg == 'i', world.player_inventory_select.
+ * Returns 1 on success, 0 on failure.
  */
 extern uint8_t player_control(int key);
 

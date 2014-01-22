@@ -3,7 +3,8 @@
 #include "control.h"
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
-#include <string.h> /* strlen(), strcmp() */
+#include <string.h> /* strlen() */
+#include "command_db.h" /* get_command_data() */
 #include "io.h" /* try_send() */
 #include "keybindings.h" /* struct KeyBindingDB, get_command_to_keycode(),
                           * get_keycode_to_command(), mod_selected_keyb(),
@@ -30,12 +31,6 @@ static uint8_t try_cmd_1args(int keycode, char * match,
                              void (* f) (char), char c);
 static uint8_t try_cmd_2args(int keycode, char * match,
                              void (* f) (char, char), char c1, char c2);
-
-/* If "command" matches "match", send (via try_send()) a string of
- * "command_message" + " " + the string representation of "arg" to the server.
- */
-static uint8_t try_player_cmd(char * command, char * match,
-                              char * command_message, uint8_t arg);
 
 /* Return keycode to "command" if it is available in current window config. */
 static uint16_t get_available_keycode_to_command(char * command);
@@ -82,23 +77,6 @@ static uint8_t try_cmd_2args(int keycode, char * match,
     if (keycode == get_available_keycode_to_command(match))
     {
         f(c1, c2);
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t try_player_cmd(char * command, char * match,
-                              char * command_message, uint8_t arg)
-{
-    if (!strcmp(command, match))
-    {
-        uint8_t command_size = strlen(command_message);
-        uint8_t arg_size = 3;
-        char msg[command_size + 1 + arg_size + 1];
-        sprintf(msg, "%s %d", command_message, arg);
-        try_send(msg);
         return 1;
     }
     return 0;
@@ -175,16 +153,19 @@ extern uint8_t player_control(int key)
         struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
         cmd = get_command_to_keycode(wc->kb.kbs, key);
     }
-    if (NULL != cmd
-        && (   try_player_cmd(cmd, "wait", "wait", 0)
-            || try_player_cmd(cmd, "drop", "drop",world.player_inventory_select)
-            || try_player_cmd(cmd, "pick", "pick_up", 0)
-            || try_player_cmd(cmd, "use", "use", world.player_inventory_select)
-            || try_player_cmd(cmd, "player_u", "move", 'N')
-            || try_player_cmd(cmd, "player_d", "move", 'S')
-            || try_player_cmd(cmd, "player_r", "move", 'E')
-            || try_player_cmd(cmd, "player_l", "move", 'W')))
+    if (NULL != cmd)
     {
+        struct Command * command_data = get_command_data(cmd);
+        uint8_t arg = (uint8_t) command_data->arg;
+        if ('i' == arg)
+        {
+            arg = world.player_inventory_select;
+        }
+        uint8_t command_size = strlen(command_data->server_msg);
+        uint8_t arg_size = 3;
+        char msg[command_size + 1 + arg_size + 1];
+        sprintf(msg, "%s %d", command_data->server_msg, arg);
+        try_send(msg);
         return 1;
     }
     return 0;
