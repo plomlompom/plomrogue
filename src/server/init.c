@@ -1,6 +1,7 @@
 /* src/server/init.c */
 
 #include "init.h"
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint32_t */
 #include <stdlib.h> /* exit(), free() */
 #include <string.h> /* atoi() */

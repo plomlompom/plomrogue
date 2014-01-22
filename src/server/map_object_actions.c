@@ -1,6 +1,7 @@
 /* src/server/map_object_actions.c */
 
 #include "map_object_actions.h"
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free(), atoi() */

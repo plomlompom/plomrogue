@@ -4,7 +4,7 @@
 #include <errno.h> /* global errno */
 #include <fcntl.h> /* open(), O_RDONLY, O_NONBLOCK */
 #include <limits.h> /* PIPE_BUF */
-#include <stddef.h> /* size_t */
+#include <stddef.h> /* size_t, NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* define FILE, sprintf() */
 #include <stdlib.h> /* free() */

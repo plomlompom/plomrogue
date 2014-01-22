@@ -2,6 +2,7 @@
 
 #include "keybindings.h"
 #include <ncurses.h> /* keycode defines, cbreak(), halfdelay(), getch() */
+#include <stddef.h> /* NULL */
 #include <stdio.h> /* FILE, sprintf(), snprintf() */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdlib.h> /* free(), atoi() */

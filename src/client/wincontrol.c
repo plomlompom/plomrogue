@@ -3,6 +3,7 @@
 #include "wincontrol.h"
 #include <errno.h> /* global errno */
 #include <dirent.h> /* DIR, struct dirent, opendir(), closedir(), readdir() */
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* FILE */
 #include <stdlib.h> /* free(), atoi() */

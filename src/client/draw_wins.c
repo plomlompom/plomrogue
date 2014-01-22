@@ -2,6 +2,7 @@
 
 #include "draw_wins.h"
 #include <ncurses.h> /* attri_t, chtype */
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, int16_t */
 #include <stdio.h> /* for sprintf() */
 #include <stdlib.h> /* free() */

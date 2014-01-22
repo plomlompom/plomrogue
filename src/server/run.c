@@ -1,6 +1,7 @@
 /* src/server/run.c */
 
 #include "run.h"
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* FILE, sprintf() */
 #include <stdlib.h> /* free() */

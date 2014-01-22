@@ -1,6 +1,7 @@
 /* src/client/command_db.c */
 
 #include "command_db.h"
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint32_t */
 #include <stdio.h> /* FILE */
 #include <stdlib.h> /* free() */

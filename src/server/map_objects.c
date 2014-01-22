@@ -1,6 +1,7 @@
 /* src/server/map_objects.c */
 
 #include "map_objects.h"
+#include <stddef.h> /* NULL */
 #include <stdio.h> /* FILE typedef */
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdlib.h> /* free(), atoi() */
