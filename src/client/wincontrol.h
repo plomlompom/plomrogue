@@ -59,6 +59,9 @@ extern void init_wins();
  */
 extern void sorted_wintoggle_and_activate();
 
+/* Iterate over chars of world.winconf_db.winconf_ids array. Restart after \0.*/
+extern char get_next_winconf_id();
+
 /* Save world.winconfs, visible window chain and active window selection to the
  * respective configuration files in client config windows directory.
  */

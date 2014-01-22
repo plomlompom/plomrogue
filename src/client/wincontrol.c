@@ -56,9 +56,6 @@ static struct WinConf * get_winconf_by_id(char id);
 /* Get (Win->draw) function identified by "c"; NULL if c not mapped to one. */
 static void * get_drawfunc_by_char(char c);
 
-/* Iterate over chars of world.winconf_db.winconf_ids array. Restart after \0.*/
-static char get_next_winconf_id();
-
 
 
 static char * string_prefixed_id(char * prefix, char id)
@@ -287,21 +284,6 @@ static void * get_drawfunc_by_char(char c)
 
 
 
-static char get_next_winconf_id()
-{
-    static uint8_t i = 0;
-    char c = world.winconf_db.winconf_ids[i];
-    if (0 == c)
-    {
-        i = 0;
-        return c;
-    }
-    i++;
-    return c;
-}
-
-
-
 extern struct WinConf * get_winconf_by_win(struct Win * win)
 {
     uint8_t i = 0;
@@ -424,6 +406,21 @@ extern void sorted_wintoggle_and_activate()
             world.wmeta.active = get_win_by_id(win_order[i]);
         }
     }
+}
+
+
+
+extern char get_next_winconf_id()
+{
+    static uint8_t i = 0;
+    char c = world.winconf_db.winconf_ids[i];
+    if (0 == c)
+    {
+        i = 0;
+        return c;
+    }
+    i++;
+    return c;
 }
 
 

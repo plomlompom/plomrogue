@@ -11,7 +11,8 @@
 #include "map_window.h" /* for map_center() */
 #include "wincontrol.h" /* struct WinConf, init_winconfs(), init_wins(),
                          * sorted_wintoggle_and_activate(), get_win_by_id(),
-                         * get_winconf_by_win(), toggle_window()
+                         * get_winconf_by_win(), toggle_window(),
+                         * get_next_winconf_id()
                          */
 #include "windows.h" /* struct Win, make_pad(), suspend_win(), free_win() */
 #include "world.h" /* global world */
@@ -86,7 +87,11 @@ extern void reset_windows()
     {
         w_p = world.wmeta.active;
         suspend_win(w_p);
-        free_win(w_p);
+    }
+    char id;
+    while (0 != (id = get_next_winconf_id()))
+    {
+        free_win(get_win_by_id(id));
     }
     delwin(world.wmeta.pad);
     make_pad();
