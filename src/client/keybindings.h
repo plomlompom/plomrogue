@@ -45,16 +45,16 @@ extern void save_keybindings(char * path, struct KeyBindingDB * kbd);
 /* Free keybinding chain starting at "kb_start". */
 extern void free_keybindings(struct KeyBinding * kb_start);
 
-/* Mark keybinding selected for modification as being edited, get user input to
- * modify it, then unmark it again. Ensure there are max. three digits in the
- * ASCII representation of the keycode read from the user.
+/* Mark keybinding in KeybindingDB (char_selected_kb_db()-) selected by "kb_c"
+ * as being edited, get user input to modify it, then unmark it again. Ensure
+ * there are max. three digits in the ASCII string of the kecode read from user.
  */
-extern void mod_selected_keyb(struct KeyBindingDB * kbd);
+extern void mod_selected_keyb(char kb_c);
 
-/* Move keybinding modification selection upwards ("dir"=="u") or downwards
- * ("dir"=="d") within the limits of the keybindings chain length.
+/* Move .select in KeybindingDB (char-selected_kb_db()-) selected by "kb_c"
+ * upwards ("dir"=="u") or downwards ("dir"=="d") within KeyBindingDB limits.
  */
-extern void move_keyb_mod_selection(struct KeyBindingDB * kbd, char dir);
+extern void move_keyb_selection(char kb_c, char dir);
 
 
 

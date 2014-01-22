@@ -10,7 +10,8 @@
                                   * try_fclose(), try_fclose_unlink_rename(),
                                   * try_fwrite()
                                   */
-#include "../common/try_malloc.h" /* for try_malloc() */
+#include "../common/try_malloc.h" /* try_malloc() */
+#include "wincontrol.h" /* get_winconf_by_win() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* global world */
 
@@ -21,6 +22,11 @@ static struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n);
 
 /* Return number of keybindings in keybindings chain from "kb_p" on. */
 static uint16_t get_n_of_keybs(struct KeyBinding * kb_p);
+
+/* Return pointer to global keybindings or to keybindings for wingeometry config
+ * (c = "g") or winkeys config (c = "k") or active window's keybindings ("w").
+ */
+static struct KeyBindingDB * char_selected_kb_db(char c);
 
 /* If "keycode_given" equals "keycode_match", copy "keyname_match" to "keyname"
  * and return 1; otherwise return 0.
@@ -60,6 +66,28 @@ static uint16_t get_n_of_keybs(struct KeyBinding * kb_p)
         kb_p = kb_p->next;
     }
     return i;
+}
+
+
+
+static struct KeyBindingDB * char_selected_kb_db(char c)
+{
+    struct KeyBindingDB * kbd;
+    kbd = &world.kb_global;
+    if      ('g' == c)
+    {
+        kbd = &world.kb_wingeom;
+    }
+    else if ('k' == c)
+    {
+        kbd = &world.kb_winkeys;
+    }
+    else if ('w' == c)
+    {
+        struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
+        kbd = &wc->kb;
+    }
+    return kbd;
 }
 
 
@@ -211,8 +239,9 @@ extern void free_keybindings(struct KeyBinding * kb_start)
 
 
 
-extern void mod_selected_keyb(struct KeyBindingDB * kbd)
+extern void mod_selected_keyb(char kb_c)
 {
+    struct KeyBindingDB * kbd = char_selected_kb_db(kb_c);
     kbd->edit = 1;
     draw_all_wins();
     cbreak();
@@ -228,8 +257,9 @@ extern void mod_selected_keyb(struct KeyBindingDB * kbd)
 
 
 
-extern void move_keyb_mod_selection(struct KeyBindingDB * kbd, char dir)
+extern void move_keyb_selection(char kb_c, char dir)
 {
+    struct KeyBindingDB * kbd = char_selected_kb_db(kb_c);
     if      ('u' == dir && kbd->select > 0)
     {
         kbd->select--;

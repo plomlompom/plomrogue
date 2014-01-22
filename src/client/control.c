@@ -5,9 +5,8 @@
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen() */
 #include "io.h" /* try_send() */
-#include "keybindings.h" /* struct KeyBindingDB, get_command_to_keycode(),
-                          * get_keycode_to_command(), mod_selected_keyb(),
-                          * move_keyb_mod_selection()
+#include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
+                          * mod_selected_keyb(), move_keyb_selection()
                           */
 #include "map_window.h" /* for map_scroll(), map_center() */
 #include "misc.h" /* reload_interface_conf(), save_interface_conf(),
@@ -21,15 +20,6 @@
 #include "world.h" /* for global world */
 
 
-
-/* Return pointer to global keybindings or to keybindings for wingeometry config
- * (c = "g") or winkeys config (c = "k") or active window's keybindings ("w").
- */
-static struct KeyBindingDB * select_keybindingdb_pointer(char c);
-
-/* Wrappers to make some functions compatible to try_cmd_* single char args. */
-static void wrap_mod_selected_keyb(char c);
-static void wrap_mv_kb_mod(char c1, char c2);
 
 /* If "command"'s .dsc_short fits "match", apply "f" with provided char
  * arguments and return 1; else, return 0.
@@ -50,42 +40,6 @@ static uint8_t try_client_commands(struct Command * command);
  * 'i', world.player_inventory_select. Return 1 on success, 0 on failure.
  */
 static uint8_t try_server_commands(struct Command * command);
-
-
-
-static struct KeyBindingDB * select_keybindingdb_pointer(char c)
-{
-    struct KeyBindingDB * kbd;
-    kbd = &world.kb_global;
-    if      ('g' == c)
-    {
-        kbd = &world.kb_wingeom;
-    }
-    else if ('k' == c)
-    {
-        kbd = &world.kb_winkeys;
-    }
-    else if ('w' == c)
-    {
-        struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
-        kbd = &wc->kb;
-    }
-    return kbd;
-}
-
-
-
-static void wrap_mod_selected_keyb(char c)
-{
-        mod_selected_keyb(select_keybindingdb_pointer(c));
-}
-
-
-
-static void wrap_mv_kb_mod(char c1, char c2)
-{
-        move_keyb_mod_selection(select_keybindingdb_pointer(c1), c2);
-}
 
 
 
@@ -143,9 +97,6 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "to_logwin", toggle_window, 'l')
             || try_1args(command, "cyc_win_f", cycle_active_win, 'f')
             || try_1args(command, "cyc_win_b", cycle_active_win, 'b')
-            || try_1args(command, "g_keys_m", wrap_mod_selected_keyb, 'G')
-            || try_1args(command, "wg_keys_m", wrap_mod_selected_keyb, 'g')
-            || try_1args(command, "wk_keys_m", wrap_mod_selected_keyb, 'k')
             || try_1args(command, "inv_u", nav_inventory, 'u')
             || try_1args(command, "inv_d", nav_inventory, 'd')
             || try_1args(command, "map_u", map_scroll, 'N')
@@ -160,15 +111,18 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "shri_v", growshrink_active_window, '-')
             || try_1args(command, "shift_f", shift_active_win, 'f')
             || try_1args(command, "shift_b", shift_active_win, 'b')
-            || try_1args(command, "w_keys_m", wrap_mod_selected_keyb, 'w')
-            || try_2args(command, "w_keys_u", wrap_mv_kb_mod, 'w', 'u')
-            || try_2args(command, "w_keys_d", wrap_mv_kb_mod, 'w', 'd')
-            || try_2args(command, "g_keys_u", wrap_mv_kb_mod, 'G', 'u')
-            || try_2args(command, "g_keys_d", wrap_mv_kb_mod, 'G', 'd')
-            || try_2args(command, "wg_keys_u", wrap_mv_kb_mod, 'g', 'u')
-            || try_2args(command, "wg_keys_d", wrap_mv_kb_mod, 'g', 'd')
-            || try_2args(command, "wk_keys_u", wrap_mv_kb_mod, 'k', 'u')
-            || try_2args(command, "wk_keys_d", wrap_mv_kb_mod, 'k', 'd'));
+            || try_1args(command, "g_keys_m", mod_selected_keyb, 'G')
+            || try_1args(command, "wg_keys_m", mod_selected_keyb, 'g')
+            || try_1args(command, "wk_keys_m", mod_selected_keyb, 'k')
+            || try_1args(command, "w_keys_m", mod_selected_keyb, 'w')
+            || try_2args(command, "wg_keys_u", move_keyb_selection, 'g', 'u')
+            || try_2args(command, "wg_keys_d", move_keyb_selection, 'g', 'd')
+            || try_2args(command, "wk_keys_u", move_keyb_selection, 'k', 'u')
+            || try_2args(command, "wk_keys_d", move_keyb_selection, 'k', 'd')
+            || try_2args(command, "w_keys_u", move_keyb_selection, 'w', 'u')
+            || try_2args(command, "w_keys_d", move_keyb_selection, 'w', 'd')
+            || try_2args(command, "g_keys_u", move_keyb_selection, 'G', 'u')
+            || try_2args(command, "g_keys_d", move_keyb_selection, 'G', 'd'));
 }
 
 
