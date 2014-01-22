@@ -4,7 +4,6 @@
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen() */
-#include "command_db.h" /* get_command_data() */
 #include "io.h" /* try_send() */
 #include "keybindings.h" /* struct KeyBindingDB, get_command_to_keycode(),
                           * get_keycode_to_command(), mod_selected_keyb(),
@@ -23,18 +22,6 @@
 
 
 
-/* If "keycode" matches "match" in get_available_keycode_to_command(), execute
- * "f" with provided char arguments and return 1; else only return 0.
- */
-static uint8_t try_cmd_0args(int keycode, char * match, void (* f) ());
-static uint8_t try_cmd_1args(int keycode, char * match,
-                             void (* f) (char), char c);
-static uint8_t try_cmd_2args(int keycode, char * match,
-                             void (* f) (char, char), char c1, char c2);
-
-/* Return keycode to "command" if it is available in current window config. */
-static uint16_t get_available_keycode_to_command(char * command);
-
 /* Return pointer to global keybindings or to keybindings for wingeometry config
  * (c = "g") or winkeys config (c = "k") or active window's keybindings ("w").
  */
@@ -44,68 +31,25 @@ static struct KeyBindingDB * select_keybindingdb_pointer(char c);
 static void wrap_mod_selected_keyb(char c);
 static void wrap_mv_kb_mod(char c1, char c2);
 
+/* If "command"'s .dsc_short fits "match", apply "f" with provided char
+ * arguments and return 1; else, return 0.
+ */
+static uint8_t try_0args(struct Command * command, char * match, void (* f) ());
+static uint8_t try_1args(struct Command * command, char * match,
+                         void (* f) (char), char c);
+static uint8_t try_2args(struct Command * command, char * match,
+                         void (* f) (char, char), char c1, char c2);
 
+/* Try if "command" matches a hard-coded list of client-only commands and, if
+ * successful, execute the match and return 1. Else, return 0.
+ */
+static uint8_t try_client_commands(struct Command * command);
 
-static uint8_t try_cmd_0args(int keycode, char * match, void (* f) ())
-{
-    if (keycode == get_available_keycode_to_command(match))
-    {
-        f();
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t try_cmd_1args(int keycode, char * match,
-                             void (* f) (char), char c)
-{
-    if (keycode == get_available_keycode_to_command(match))
-    {
-        f(c);
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t try_cmd_2args(int keycode, char * match,
-                             void (* f) (char, char), char c1, char c2)
-{
-    if (keycode == get_available_keycode_to_command(match))
-    {
-        f(c1, c2);
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint16_t get_available_keycode_to_command(char * command)
-{
-    uint16_t keycode = get_keycode_to_command(world.kb_global.kbs, command);
-    if (0 != keycode || 0 == world.wmeta.active)
-    {
-        return keycode;
-    }
-    struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
-    if      (0 == wc->view)
-    {
-        keycode = get_keycode_to_command(wc->kb.kbs, command);
-    }
-    else if (1 == wc->view)
-    {
-        keycode = get_keycode_to_command(world.kb_wingeom.kbs, command);
-    }
-    else if (2 == wc->view)
-    {
-        keycode = get_keycode_to_command(world.kb_winkeys.kbs, command);
-    }
-    return keycode;
-}
+/* Try out "command" as one for server messaging; sending is .server_msg,
+ * followed by either a string representing "command"'s .arg, or, if .arg is
+ * 'i', world.player_inventory_select. Return 1 on success, 0 on failure.
+ */
+static uint8_t try_server_commands(struct Command * command);
 
 
 
@@ -145,26 +89,103 @@ static void wrap_mv_kb_mod(char c1, char c2)
 
 
 
-extern uint8_t player_control(int key)
+static uint8_t try_0args(struct Command * command, char * match, void (* f) ())
 {
-    char * cmd = get_command_to_keycode(world.kb_global.kbs, key);
-    if (NULL == cmd && 0 != world.wmeta.active)
+    if (!strcmp(command->dsc_short, match))
     {
-        struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
-        cmd = get_command_to_keycode(wc->kb.kbs, key);
+        f();
+        return 1;
     }
-    if (NULL != cmd)
+    return 0;
+}
+
+static uint8_t try_1args(struct Command * command, char * match,
+                             void (* f) (char), char c)
+{
+    if (!strcmp(command->dsc_short, match))
     {
-        struct Command * command_data = get_command_data(cmd);
-        uint8_t arg = (uint8_t) command_data->arg;
+        f(c);
+        return 1;
+    }
+    return 0;
+}
+
+
+
+static uint8_t try_2args(struct Command * command, char * match,
+                             void (* f) (char, char), char c1, char c2)
+{
+    if (!strcmp(command->dsc_short, match))
+    {
+        f(c1, c2);
+        return 1;
+    }
+    return 0;
+}
+
+
+
+static uint8_t try_client_commands(struct Command * command)
+{
+    return (   try_0args(command, "winconf", toggle_winconfig)
+            || try_0args(command, "reload_conf", reload_interface_conf)
+            || try_0args(command, "save_conf", save_interface_conf)
+            || try_0args(command, "map_c", map_center)
+            || try_1args(command, "scrl_r", scroll_pad, '+')
+            || try_1args(command, "scrl_l", scroll_pad, '-')
+            || try_1args(command, "to_a_keywin", toggle_window, 'k')
+            || try_1args(command, "to_g_keywin", toggle_window, '0')
+            || try_1args(command, "to_wg_keywin", toggle_window, '1')
+            || try_1args(command, "to_wk_keywin", toggle_window, '2')
+            || try_1args(command, "to_mapwin", toggle_window, 'm')
+            || try_1args(command, "to_infowin", toggle_window, 'i')
+            || try_1args(command, "to_inv", toggle_window, 'c')
+            || try_1args(command, "to_logwin", toggle_window, 'l')
+            || try_1args(command, "cyc_win_f", cycle_active_win, 'f')
+            || try_1args(command, "cyc_win_b", cycle_active_win, 'b')
+            || try_1args(command, "g_keys_m", wrap_mod_selected_keyb, 'G')
+            || try_1args(command, "wg_keys_m", wrap_mod_selected_keyb, 'g')
+            || try_1args(command, "wk_keys_m", wrap_mod_selected_keyb, 'k')
+            || try_1args(command, "inv_u", nav_inventory, 'u')
+            || try_1args(command, "inv_d", nav_inventory, 'd')
+            || try_1args(command, "map_u", map_scroll, 'N')
+            || try_1args(command, "map_d", map_scroll, 'S')
+            || try_1args(command, "map_r", map_scroll, 'E')
+            || try_1args(command, "map_l", map_scroll, 'W')
+            || try_1args(command, "to_height_t", toggle_win_size_type, 'y')
+            || try_1args(command, "to_width_t", toggle_win_size_type, 'x')
+            || try_1args(command, "grow_h", growshrink_active_window, '*')
+            || try_1args(command, "shri_h", growshrink_active_window, '_')
+            || try_1args(command, "grow_v", growshrink_active_window, '+')
+            || try_1args(command, "shri_v", growshrink_active_window, '-')
+            || try_1args(command, "shift_f", shift_active_win, 'f')
+            || try_1args(command, "shift_b", shift_active_win, 'b')
+            || try_1args(command, "w_keys_m", wrap_mod_selected_keyb, 'w')
+            || try_2args(command, "w_keys_u", wrap_mv_kb_mod, 'w', 'u')
+            || try_2args(command, "w_keys_d", wrap_mv_kb_mod, 'w', 'd')
+            || try_2args(command, "g_keys_u", wrap_mv_kb_mod, 'G', 'u')
+            || try_2args(command, "g_keys_d", wrap_mv_kb_mod, 'G', 'd')
+            || try_2args(command, "wg_keys_u", wrap_mv_kb_mod, 'g', 'u')
+            || try_2args(command, "wg_keys_d", wrap_mv_kb_mod, 'g', 'd')
+            || try_2args(command, "wk_keys_u", wrap_mv_kb_mod, 'k', 'u')
+            || try_2args(command, "wk_keys_d", wrap_mv_kb_mod, 'k', 'd'));
+}
+
+
+
+static uint8_t try_server_commands(struct Command * command)
+{
+    if (command->server_msg)
+    {
+        uint8_t arg = (uint8_t) command->arg;
         if ('i' == arg)
         {
             arg = world.player_inventory_select;
         }
-        uint8_t command_size = strlen(command_data->server_msg);
+        uint8_t command_size = strlen(command->server_msg);
         uint8_t arg_size = 3;
         char msg[command_size + 1 + arg_size + 1];
-        sprintf(msg, "%s %d", command_data->server_msg, arg);
+        sprintf(msg, "%s %d", command->server_msg, arg);
         try_send(msg);
         return 1;
     }
@@ -173,74 +194,39 @@ extern uint8_t player_control(int key)
 
 
 
-extern uint8_t wingeom_control(int key)
+extern uint8_t try_key(uint16_t key)
 {
-    if (   try_cmd_1args(key, "to_height_t", toggle_win_size_type, 'y')
-        || try_cmd_1args(key, "to_width_t", toggle_win_size_type, 'x')
-        || try_cmd_1args(key, "grow_h", growshrink_active_window, '*')
-        || try_cmd_1args(key, "shri_h", growshrink_active_window, '_')
-        || try_cmd_1args(key, "grow_v", growshrink_active_window, '+')
-        || try_cmd_1args(key, "shri_v", growshrink_active_window, '-')
-        || try_cmd_1args(key, "shift_f", shift_active_win, 'f')
-        || try_cmd_1args(key, "shift_b", shift_active_win, 'b'))
+    struct Command * command = get_command_to_keycode(world.kb_global.kbs, key);
+    if (!command)
     {
-        return 1;
+        struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
+        if      (0 == wc->view)
+        {
+            command = get_command_to_keycode(wc->kb.kbs, key);
+        }
+        else if (1 == wc->view)
+        {
+            command = get_command_to_keycode(world.kb_wingeom.kbs, key);
+        }
+        else if (2 == wc->view)
+        {
+            command = get_command_to_keycode(world.kb_winkeys.kbs, key);
+        }
+    }
+    if (command)
+    {
+        if      (try_client_commands(command))
+        {
+            return 1;
+        }
+        else if (!strcmp("quit", command->dsc_short))
+        {
+            return 2;
+        }
+        else if (try_server_commands(command))
+        {
+            return 1;
+        }
     }
     return 0;
-}
-
-
-
-extern uint8_t winkeyb_control(int key)
-{
-    if (   try_cmd_1args(key, "w_keys_m", wrap_mod_selected_keyb, 'w')
-        || try_cmd_2args(key, "w_keys_u", wrap_mv_kb_mod, 'w', 'u')
-        || try_cmd_2args(key, "w_keys_d", wrap_mv_kb_mod, 'w', 'd'))
-    {
-        return 1;
-    }
-    return 0;
-}
-
-
-
-extern uint8_t meta_control(int key)
-{
-    uint8_t ret = 2 * (key == get_available_keycode_to_command("quit"));
-    if (   (0 == ret)
-        && (   try_cmd_0args(key, "winconf", toggle_winconfig)
-            || try_cmd_0args(key, "reload_conf", reload_interface_conf)
-            || try_cmd_0args(key, "save_conf", save_interface_conf)
-            || try_cmd_0args(key, "map_c", map_center)
-            || try_cmd_1args(key, "scrl_r", scroll_pad, '+')
-            || try_cmd_1args(key, "scrl_l", scroll_pad, '-')
-            || try_cmd_1args(key, "to_a_keywin", toggle_window, 'k')
-            || try_cmd_1args(key, "to_g_keywin", toggle_window, '0')
-            || try_cmd_1args(key, "to_wg_keywin", toggle_window, '1')
-            || try_cmd_1args(key, "to_wk_keywin", toggle_window, '2')
-            || try_cmd_1args(key, "to_mapwin", toggle_window, 'm')
-            || try_cmd_1args(key, "to_infowin", toggle_window, 'i')
-            || try_cmd_1args(key, "to_inv", toggle_window, 'c')
-            || try_cmd_1args(key, "to_logwin", toggle_window, 'l')
-            || try_cmd_1args(key, "cyc_win_f", cycle_active_win, 'f')
-            || try_cmd_1args(key, "cyc_win_b", cycle_active_win, 'b')
-            || try_cmd_1args(key, "g_keys_m", wrap_mod_selected_keyb, 'G')
-            || try_cmd_1args(key, "wg_keys_m", wrap_mod_selected_keyb, 'g')
-            || try_cmd_1args(key, "wk_keys_m", wrap_mod_selected_keyb, 'k')
-            || try_cmd_1args(key, "inv_u", nav_inventory, 'u')
-            || try_cmd_1args(key, "inv_d", nav_inventory, 'd')
-            || try_cmd_1args(key, "map_u", map_scroll, 'N')
-            || try_cmd_1args(key, "map_d", map_scroll, 'S')
-            || try_cmd_1args(key, "map_r", map_scroll, 'E')
-            || try_cmd_1args(key, "map_l", map_scroll, 'W')
-            || try_cmd_2args(key, "g_keys_u", wrap_mv_kb_mod, 'G', 'u')
-            || try_cmd_2args(key, "g_keys_d", wrap_mv_kb_mod, 'G', 'd')
-            || try_cmd_2args(key, "wg_keys_u", wrap_mv_kb_mod, 'g', 'u')
-            || try_cmd_2args(key, "wg_keys_d", wrap_mv_kb_mod, 'g', 'd')
-            || try_cmd_2args(key, "wk_keys_u", wrap_mv_kb_mod, 'k', 'u')
-            || try_cmd_2args(key, "wk_keys_d", wrap_mv_kb_mod, 'k', 'd')))
-    {
-        ret = 1;
-    }
-    return ret;
 }

@@ -7,14 +7,15 @@
 #define KEYBINDINGS_H
 
 #include <stdint.h> /* uint8_t, uint16_t */
+struct Command;
 
 
 
 struct KeyBinding
 {
   struct KeyBinding * next;
-  uint16_t key;   /* keycode */
-  char * command; /* name of command / functionality bound to keycode */
+  uint16_t key; /* keycode */
+  struct Command * command; /* command in command DB to which key is bound */
 };
 
 struct KeyBindingDB
@@ -26,12 +27,9 @@ struct KeyBindingDB
 
 
 
-/* Return name of command / functionality bound to keycode; NULL on failure. */
-extern char * get_command_to_keycode(struct KeyBinding * kb_p, uint16_t key);
-
-/* Return keycode bound to "command". */
-extern uint16_t get_keycode_to_command(struct KeyBinding * keybindings,
-                                       char * command);
+/* Return command bound to keycode; NULL on failure. */
+extern struct Command * get_command_to_keycode(struct KeyBinding * kb_p,
+                                               uint16_t key);
 
 /* Return human-readable name (of maximum 9 chars) for "keycode" as matched by
  * ncurses.h; if none is found, return "UNKNOWN".

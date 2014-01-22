@@ -30,7 +30,7 @@ static void copy_tokenized_string(char * line, char ** ch_ptr, char * delim)
 
 
 
-extern struct Command * get_command_data(char * dsc_short)
+extern struct Command * get_command(char * dsc_short)
 {
     struct Command * cmd_ptr = world.cmd_db.cmds;
     uint8_t i = 0;

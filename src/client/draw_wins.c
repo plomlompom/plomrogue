@@ -6,8 +6,7 @@
 #include <stdio.h> /* for sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), strtok() */
-#include "../common/try_malloc.h" /* for try_malloc() */
-#include "command_db.h" /* get_command_data() */
+#include "../common/try_malloc.h" /* try_malloc() */
 #include "keybindings.h" /* struct KeyBinding, get_keyname_to_keycode() */
 #include "wincontrol.h" /* struct WinConf, get_winconf_by_win() */
 #include "windows.h" /* struct Win */
@@ -237,11 +236,10 @@ static char * get_kb_line_and_iterate(struct KeyBinding ** kb_pp)
     char * f_name = "get_kb_line_and_iterate()";
     struct KeyBinding * kb_p = * kb_pp;
     char * keyname = get_keyname_to_keycode(kb_p->key);
-    struct Command * command_data = get_command_data(kb_p->command);
-    char * cmd_dsc = command_data->dsc_long;
-    uint16_t size = 9 + 1 + strlen(cmd_dsc) + 1;
+    struct Command * command = get_command_to_keycode(kb_p, kb_p->key);
+    uint16_t size = 9 + 1 + strlen(command->dsc_long) + 1;
     char * line = try_malloc(size, f_name);
-    sprintf(line, "%-9s %s", keyname, cmd_dsc);
+    sprintf(line, "%-9s %s", keyname, command->dsc_long);
     free(keyname);
     * kb_pp = kb_p->next;
     return line;

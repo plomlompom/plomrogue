@@ -16,11 +16,8 @@
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets(),
                                   * try_fgetc()
                                   */
-#include "control.h" /* meta_control(), player_control(), wingeom_control(),
-                      * winkeyb_control()
-                      */
+#include "control.h" /* try_key() */
 #include "map_window.h" /* for map_center() */
-#include "wincontrol.h" /* WinConf struct, get_winconf_by_win() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* world global */
 
@@ -268,20 +265,10 @@ extern char * io_loop()
         int key = getch();
         if (ERR != key)
         {
-            change_in_client = meta_control(key);
+            change_in_client = try_key((uint16_t) key);
             if (2 == change_in_client)
             {
                 break;
-            }
-            if (!change_in_client)
-            {
-                change_in_client = player_control(key);
-            }
-            if (!change_in_client)
-            {
-                struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
-                change_in_client =    (1 == wc->view && wingeom_control(key))
-                                   || (2 == wc->view && winkeyb_control(key));
             }
         }
     }

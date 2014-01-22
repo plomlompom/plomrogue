@@ -29,7 +29,7 @@ struct CommandDB
 
 
 /* Return Command struct for command described by its "dsc_short" member. */
-extern struct Command * get_command_data(char * dsc_short);
+extern struct Command * get_command(char * dsc_short);
 
 /* Reads CommandDB from CommandDB file, line by line, until first empty line. */
 extern void init_command_db();

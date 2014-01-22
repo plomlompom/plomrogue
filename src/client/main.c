@@ -26,8 +26,8 @@ int main()
     /* Initialize the whole interface. */
     init_win_meta();
     keypad(world.wmeta.screen, TRUE);
-    init_command_db();
-    load_interface_conf();
+    init_command_db();      /* The command DB needs to be initialized before  */
+    load_interface_conf();  /* the interface, whose keybindings depend on it. */
 
     /* This is where most everything happens. */
     char * quit_msg = io_loop();

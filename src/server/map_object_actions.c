@@ -277,7 +277,7 @@ extern uint8_t get_moa_id_by_name(char * name)
         }
         moa = moa->next;
     }
-    exit_err(NULL == moa, "get_moa_id_name() did not find map object action.");
+    exit_err(NULL==moa, "get_moa_id_by_name() did not find map object action.");
     return moa->id;
 }
 
