@@ -4,7 +4,6 @@
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen(), strcmp() */
-#include "command_db.h" /* get_command_id() */
 #include "io.h" /* try_send() */
 #include "keybindings.h" /* struct KeyBindingDB, get_command_to_keycode(),
                           * get_keycode_to_command(), mod_selected_keyb(),

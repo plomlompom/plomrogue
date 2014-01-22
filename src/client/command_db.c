@@ -4,7 +4,7 @@
 #include <stdint.h> /* uint8_t, uint32_t */
 #include <stdio.h> /* FILE */
 #include <stdlib.h> /* free() */
-#include <string.h> /* memcpy(), strlen(), strtok(), strcmp() */
+#include <string.h> /* memcpy(), strlen(), strtok() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets()
                                   * textfile_sizes()
                                   */
@@ -14,32 +14,17 @@
 
 
 
-/* Build string pointed to by "ch_ptr" from next token delimited by "delim". */
-static void copy_tokenized_string(char ** ch_ptr, char * delim);
+/* Point "ch_ptr" to next strtok() string in "line" delimited by "delim".*/
+static void copy_tokenized_string(char * line, char ** ch_ptr, char * delim);
 
 
 
-static void copy_tokenized_string(char ** ch_ptr, char * delim)
+static void copy_tokenized_string(char * line, char ** ch_ptr, char * delim)
 {
     char * f_name = "copy_tokenized_string()";
-    char * dsc_ptr = strtok(NULL, delim);
+    char * dsc_ptr = strtok(line, delim);
     * ch_ptr = try_malloc(strlen(dsc_ptr) + 1, f_name);
     memcpy(* ch_ptr, dsc_ptr, strlen(dsc_ptr) + 1);
-}
-
-
-
-extern uint8_t get_command_id(char * dsc_short)
-{
-    struct Command * cmd_ptr = world.cmd_db.cmds;
-    while (1)
-    {
-        if (0 == strcmp(dsc_short, cmd_ptr->dsc_short))
-        {
-            return cmd_ptr->id;
-        }
-        cmd_ptr = &cmd_ptr[1];
-    }
 }
 
 
@@ -75,9 +60,8 @@ extern void init_command_db()
         {
             break;
         }
-        world.cmd_db.cmds[i].id = atoi(strtok(line, " "));
-        copy_tokenized_string(&world.cmd_db.cmds[i].dsc_short, " ");
-        copy_tokenized_string(&world.cmd_db.cmds[i].dsc_long, "\n");
+        copy_tokenized_string(line, &world.cmd_db.cmds[i].dsc_short, " ");
+        copy_tokenized_string(NULL, &world.cmd_db.cmds[i].dsc_long, "\n");
         i++;
     }
     try_fclose(file, f_name);

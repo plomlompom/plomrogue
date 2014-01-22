@@ -15,7 +15,6 @@ struct Command
 {
     char * dsc_short; /* short string name of command to be used internally */
     char * dsc_long;  /* long string description of command for the user */
-    uint8_t id;       /* unique identifier of command */
 };
 
 struct CommandDB
@@ -25,9 +24,6 @@ struct CommandDB
 };
 
 
-
-/* Give short description of command ("dsc_short"), get its ID. */
-extern uint8_t get_command_id(char * dsc_short);
 
 /* Give short description of command ("dsc_short"), get long description. */
 extern char * get_command_longdsc(char * dsc_short);
