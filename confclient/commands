@@ -38,7 +38,7 @@ wg_keys_m 0 0 win geometry config keybindings modify
 wk_keys_d 0 0 win keybindings config keybindings nav down
 wk_keys_u 0 0 win keybindings config keybindings nav up
 wk_keys_m 0 0 win keybindings config keybindings modify
-reload_conf 0 reload windows and keybindings configuration
+reload_conf 0 0 reload windows and keybindings configuration
 save_conf 0 0 save windows and keybindings
 map_u 0 0 map up
 map_d 0 0 map down
