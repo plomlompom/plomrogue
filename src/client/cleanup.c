@@ -1,11 +1,11 @@
 /* src/client/cleanup.c */
 
 #include "cleanup.h"
+#include <ncurses.h> /* for endwin() */
 #include <stdint.h> /* uint32_t */
 #include <stdlib.h> /* free() */
 #include "command_db.h" /* free_command_db() */
 #include "misc.h" /* unload_interface_conf() */
-#include "windows.h" /* free_winmeta_and_endwin() */
 #include "world.h" /* world global */
 
 
@@ -20,13 +20,13 @@ extern void cleanup()
     free(world.map.cells);
     free(world.log);
     free(world.player_inventory);
-    if (cleanup_flags & CLEANUP_INTERFACE)/* Must come pre ncurses cleanup,   */
-    {                                     /* for by closing all windows it    */
-        unload_interface_conf();          /* relies on world.wmeta data freed */
-    }                                     /* by free_winmeta_and_endwin().    */
+    if (cleanup_flags & CLEANUP_INTERFACE)
+    {
+        unload_interface_conf();
+    }
     if (cleanup_flags & CLEANUP_NCURSES)
     {
-        free_winmeta_and_endwin();
+        endwin();
     }
     if (cleanup_flags & CLEANUP_COMMANDS)
     {

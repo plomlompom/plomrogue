@@ -66,11 +66,10 @@ struct WinMeta
 
 
 
-/* Initialize ncurses and world.wmeta on terminal screen. All struct members
- * initialize to 0, except for .screen, the newly created virtual screen .pad
- * and its .padsize (height: that of the terminal screen; width: 1 cell).
+/* Initialize world.wmeta and ncurses on terminal screen. All struct members
+ * initialize to 0 (.pad = NULL), except for .screen (= initscr()).
  */
-extern void init_win_meta();
+extern void init_wmeta_and_ncurses();
 
 /* Initialize a Win child "wp" of "wmeta" to "title", "height" and "width" and
  * appoint "func"() as its .draw. Initialize other members to 0.
@@ -84,9 +83,6 @@ extern void init_win_meta();
  */
 extern void init_win(struct Win ** wp, char * title, int16_t height,
                      int16_t width, void * func);
-
-/* Free memory initialized below world.wmeta and run endwin(). */
-extern void free_winmeta_and_endwin();
 
 /* Free memory initianized Win structs. */
 extern void free_win(struct Win * win);

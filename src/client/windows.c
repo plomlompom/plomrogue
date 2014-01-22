@@ -6,10 +6,10 @@
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), memcpy(), strnlen() */
-#include <ncurses.h> /* pnoutrefresh(), doupdate(), werase(), wnoutrefresh(),
-                      * erase(), getmaxx(), getmaxy(), delwin(), endwin(),
-                      * initscr(), noecho(), curs_set(), newpad(), mvwaddch(),
-                      * mvwaddstr(), wresize(), chtype
+#include <ncurses.h> /* chtype, pnoutrefresh(), doupdate(), werase(), erase(),
+                      * wnoutrefresh(), getmaxx(), getmaxy(), initscr(),
+                      * noecho(), curs_set(), newpad(), mvwaddch(), mvwaddstr(),
+                      * wresize()
                       */
 #include "../common/rexit.h" /* for exit_err() */
 #include "../common/try_malloc.h" /* for try_malloc() */
@@ -423,24 +423,18 @@ static void shift_win_backward()
 
 
 
-extern void init_win_meta()
+extern void init_wmeta_and_ncurses()
 {
-    char * err_s = "init_win_meta() creates virtual screen beyond legal size.";
-    char * err_m = "init_win_meta() triggers memory alloc error via newpad().";
     world.wmeta.screen = initscr();
     set_cleanup_flag(CLEANUP_NCURSES);
     noecho();
     curs_set(0);
-    uint32_t maxy_test  = getmaxy(world.wmeta.screen);
-    uint32_t maxx_test  = getmaxx(world.wmeta.screen);
-    exit_err(maxy_test > UINT16_MAX || maxx_test > UINT16_MAX, err_s);
-    world.wmeta.padsize.y   = maxy_test;
-    world.wmeta.padsize.x   = maxx_test;
+    world.wmeta.padsize.y   = 0;
+    world.wmeta.padsize.x   = 0;
     world.wmeta.chain_start = 0;
     world.wmeta.chain_end   = 0;
     world.wmeta.pad_offset  = 0;
-    world.wmeta.pad         = newpad(world.wmeta.padsize.y, 1);
-    exit_err(NULL == world.wmeta.pad, err_m);
+    world.wmeta.pad         = NULL;
     world.wmeta.active      = 0;
 }
 
@@ -480,14 +474,6 @@ extern void init_win(struct Win ** wp, char * title, int16_t height,
         w->framesize.x = world.wmeta.padsize.x + width;
     }
     *wp = w;
-}
-
-
-
-extern void free_winmeta_and_endwin()
-{
-    delwin(world.wmeta.pad);
-    endwin();
 }
 
 

@@ -1,7 +1,9 @@
 /* src/client/misc.c */
 
 #include "misc.h"
-#include <stdint.h> /* uint8_t, uint16_t */
+#include <ncurses.h> /* delwin(), getmaxy(), getmaxx(), newpad() */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include "../common/rexit.h" /* exit_err() */
 #include "cleanup.h" /* for set_cleanup_flag() */
 #include "keybindings.h" /* init_keybindings(), free_keybindings(),
                           * save_keybindings()
@@ -30,6 +32,15 @@ extern void load_interface_conf()
     init_keybindings("confclient/keybindings_wingeom", &world.kb_wingeom);
     init_keybindings("confclient/keybindings_winkeys", &world.kb_winkeys);
     init_winconfs();
+    char * err_s = "load_interface_conf() makes illegaly large virtual screen.";
+    char * err_m = "load_interface_conf(): memory alloc error via newpad().";
+    uint32_t maxy_test = getmaxy(world.wmeta.screen);
+    uint32_t maxx_test = getmaxx(world.wmeta.screen);
+    exit_err(maxy_test > UINT16_MAX || maxx_test > UINT16_MAX, err_s);
+    world.wmeta.padsize.y = maxy_test;
+    world.wmeta.padsize.x = maxx_test;
+    world.wmeta.pad = newpad(world.wmeta.padsize.y, 1);
+    exit_err(NULL == world.wmeta.pad, err_m);
     init_wins();
     sorted_wintoggle_and_activate();
     set_cleanup_flag(CLEANUP_INTERFACE);
@@ -47,6 +58,7 @@ extern void unload_interface_conf()
         suspend_win(world.wmeta.active);
     }
     free_winconfs();
+    delwin(world.wmeta.pad);
 }
 
 

@@ -6,7 +6,7 @@
 #include "command_db.h" /* init_command_db() */
 #include "io.h" /* io_loop(), try_send() */
 #include "misc.h" /* load_interface_conf() */
-#include "windows.h" /* init_win_meta(); */
+#include "windows.h" /* init_wmeta_and_ncurses(); */
 #include "world.h" /* struct World */
 
 
@@ -24,7 +24,7 @@ int main()
     set_cleanup_func(cleanup);
 
     /* Initialize the whole interface. */
-    init_win_meta();
+    init_wmeta_and_ncurses();
     keypad(world.wmeta.screen, TRUE);
     init_command_db();      /* The command DB needs to be initialized before  */
     load_interface_conf();  /* the interface, whose keybindings depend on it. */
