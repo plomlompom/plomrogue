@@ -124,7 +124,7 @@ extern void init_win_from_winconf(char id)
 {
     char * err = "get_drawfunc_by_char() returns NULL to init_win_from_file().";
     struct WinConf * winconf = get_winconf_by_id(id);
-    void * f = get_drawfunc_by_char(winconf->draw);
+    void * f = get_drawfunc_by_char(winconf->id);
     exit_err(NULL == f, err);
     init_win(&winconf->win, winconf->title, winconf->height, winconf->width, f);
 }
@@ -179,7 +179,6 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax, FILE * file
     }
     struct WinConf winconf;
     winconf.id = (char) test;
-    winconf.draw = winconf.id;
     try_fgetc(file, f_name);
     try_fgets(line, linemax + 1, file, f_name);
     winconf.title = try_malloc(strlen(line), f_name);
@@ -233,7 +232,7 @@ extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim)
         size = 7;
     }
     char line[size];
-    sprintf(line, "%c\n", wc->draw);
+    sprintf(line, "%c\n", wc->id);
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
     sprintf(line, "%s\n", wc->title);
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
@@ -387,7 +386,7 @@ extern void toggle_winconfig()
     else
     {
         wcp->view     = 0;
-        win->draw     = get_drawfunc_by_char(wcp->draw);
+        win->draw     = get_drawfunc_by_char(wcp->id);
         win->center   = wcp->center;
     }
 }

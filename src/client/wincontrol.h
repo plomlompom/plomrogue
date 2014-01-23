@@ -18,29 +18,24 @@ struct WinConfDB
 {
     struct WinConf * winconfs;
     char * ids;
-    char active; /* id of window selected as active */
     char * order; /* order of visible windows (identified by IDs) */
+    char active; /* id of window selected as active */
 };
 
-/* Stores a window's configuration (like geometry, keybindings) and a pointer to
- * the respective Win struct itself.
- */
+/* Window's configuration (like geometry, keybindings) and the Win itself. */
 struct WinConf
 {
-    char id; /* Unique identifier of WinConf, doubles aas identifier for .win */
-             /* and the char following "Win_" in the respective conffile name.*/
     struct Win * win;    /* Window / Win struct configured by this WinConf. */
     struct KeyBindingDB kb; /* Window-specific keybindings. */
-    uint8_t view; /* 0: use .draw as Win.draw; 1/2: use draw_winconf()_(1/2). */
+    struct yx_uint16 center; /* Designated Win.center */
     int16_t height;      /* Designated height to pass to init_win(). */
     int16_t width;       /* Designated width to pass to init_win(). */
     uint8_t height_type; /* 0: read .height/.width as size in positive cells; */
     uint8_t width_type;  /* 1: as negative diff in cells to the screen size.  */
+    uint8_t view; /* 0: use .draw as Win.draw; 1/2: use draw_winconf()_(1/2). */
+    char id; /* Identifier of WinConf, also identifies Win.draw function. */
     char * title; /* Designated title to pass to init_win(). */
-    char draw;    /* Identifier of designated Win.draw; passed to init_win() */
-                  /* and reset after toggling Win.draw via toggle_winconf(). */
-    struct yx_uint16 center; /* Designated Win.center; to be reset after  */
-};                           /* toggling Win.center via toggle_winconf(). */
+};
 
 
 
