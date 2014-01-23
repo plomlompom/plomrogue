@@ -385,7 +385,7 @@ extern void draw_win_available_keybindings(struct Win * win)
 {
     char * title = "Active window's keybindings:";
     struct KeyBinding * kb_p;
-    struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
+    struct WinConf * wc = get_winconf_by_win(world.wins.win_active);
     if     (0 == wc->view)
     {
         kb_p = wc->kb.kbs;

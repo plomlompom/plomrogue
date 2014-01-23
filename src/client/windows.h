@@ -24,7 +24,7 @@
 #ifndef WINDOWS_H
 #define WINDOWS_H
 
-#include <ncurses.h> /* WINDOW, chtype */
+#include <ncurses.h> /* chtype */
 #include <stdint.h> /* uint16_t, int16_t */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 
@@ -50,32 +50,13 @@ struct Win
     struct yx_uint16 winmapsize;  /* ... with these geometry infos */
 };
 
-/* The window manager's parent struct WinMeta contains the virtual screen,
- * relates it to the terminal screen and anchors the chain of visible windows.
- */
-struct WinMeta
-{
-    struct yx_uint16 padsize; /* virtual screen size */
-    WINDOW * screen;          /* ncurses' pointer to the terminal screen */
-    WINDOW * pad;             /* ncurses pad of virtual screen */
-    struct Win * chain_start; /* first Win in chain; its _prev == 0 */
-    struct Win * chain_end;   /* last Win in chain; its _next == 0 */
-    struct Win * active;      /* Win highlighted/selected for manipulation */
-    uint16_t pad_offset;      /* number of cells view is moved to the right */
-};
 
 
-
-/* Initialize world.wmeta and ncurses on terminal screen. All struct members
- * initialize to 0 (.pad = NULL), except for .screen (= initscr()).
- */
-extern void init_wmeta_and_ncurses();
-
-/* Builds world.wmeta.pad from the sizes of the current terminal screen. */
+/* Builds world.wins.pad from the sizes of the current terminal screen. */
 extern void make_pad();
 
-/* Initialize a Win child "wp" of "wmeta" to "title", "height" and "width" and
- * appoint "func"() as its .draw. Initialize other members to 0.
+/* Initialize a Win at "wp" to "title", "height" and "width" and appoint
+ * "func"() as its .draw. Initialize other members to 0.
  *
  * Pass 0 for "width" to make the window as wide as the terminal screen. Pass 0
  * for "height" for the maximum allowed height: one cell smaller than that of
@@ -90,10 +71,10 @@ extern void init_win(struct Win ** wp, char * title, int16_t height,
 /* Free memory initianized Win structs. */
 extern void free_win(struct Win * win);
 
-/* Append/suspend window "w" to/from chain of visible windows below "wmeta".
- * Appended windows will become active. Suspended active windows will move the
- * active window selection to their successor in the window chain or, failing
- * that, their predecessor, or, failing that, to 0 (no window active).
+/* Append/suspend window "w" to/from chain of visible windows. Appended windows
+ * will become active. Suspended active windows will move the active window
+ * selection to their successor in the window chain or, failing that, their
+ * predecessor, or, failing that, to 0 (no window active).
  */
 extern void append_win(struct Win * w);
 extern void suspend_win(struct Win * w);

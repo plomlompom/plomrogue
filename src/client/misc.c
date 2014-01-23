@@ -58,9 +58,9 @@ extern void save_interface_conf()
     write_keybindings_to_file(file, &world.kb_winkeys, delim);
     write_order_wins_visible_active(file, delim);
     uint8_t i;
-    for (i = 0; i < strlen(world.winconf_db.ids); i++)
+    for (i = 0; i < strlen(world.wins.ids); i++)
     {
-        write_winconf_of_id_to_file(file, world.winconf_db.ids[i], delim);
+        write_winconf_of_id_to_file(file, world.wins.ids[i], delim);
     }
     try_fclose_unlink_rename(file, path_tmp, path, f_name);
 }
@@ -101,12 +101,12 @@ extern void unload_interface_conf()
     world.kb_wingeom.kbs = NULL;
     free_keybindings(world.kb_winkeys.kbs);
     world.kb_winkeys.kbs = NULL;
-    while (0 != world.wmeta.active)
+    while (0 != world.wins.win_active)
     {
-        suspend_win(world.wmeta.active);
+        suspend_win(world.wins.win_active);
     }
     free_winconfs();
-    delwin(world.wmeta.pad);
+    delwin(world.wins.pad);
 }
 
 
@@ -122,23 +122,23 @@ extern void reset_windows()
 {
     endwin();  /* "[S]tandard way" to recalibrate ncurses post SIGWINCH, says */
     refresh(); /* <http://invisible-island.net/ncurses/ncurses-intro.html>.   */
-    struct Win * w_p = world.wmeta.chain_start;
-    char win_ids[strlen(world.winconf_db.ids) + 1];
-    memset(win_ids, '\0', strlen(world.winconf_db.ids) + 1);
+    struct Win * w_p = world.wins.chain_start;
+    char win_ids[strlen(world.wins.ids) + 1];
+    memset(win_ids, '\0', strlen(world.wins.ids) + 1);
     uint8_t i = 0;
     char active = '\0';
     for (; NULL != w_p; w_p = w_p->next, i++)
     {
         struct WinConf * wc_p = get_winconf_by_win(w_p);
         win_ids[i] = wc_p->id;
-        if (w_p == world.wmeta.active)
+        if (w_p == world.wins.win_active)
         {
             active = wc_p->id;
         }
     }
-    while (0 != world.wmeta.active)
+    while (0 != world.wins.win_active)
     {
-        w_p = world.wmeta.active;
+        w_p = world.wins.win_active;
         suspend_win(w_p);
     }
     char id;
@@ -146,7 +146,7 @@ extern void reset_windows()
     {
         free_win(get_win_by_id(id));
     }
-    delwin(world.wmeta.pad);
+    delwin(world.wins.pad);
     make_pad();
     init_wins();
     if (strlen(win_ids) < 1)
@@ -158,7 +158,7 @@ extern void reset_windows()
         toggle_window(win_ids[i]);
         if (active == win_ids[i])
         {
-            world.wmeta.active = get_win_by_id(win_ids[i]);
+            world.wins.win_active = get_win_by_id(win_ids[i]);
         }
     }
 }

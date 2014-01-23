@@ -7,14 +7,12 @@
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), memcpy(), strnlen() */
 #include <ncurses.h> /* chtype, pnoutrefresh(), doupdate(), werase(), erase(),
-                      * wnoutrefresh(), getmaxx(), getmaxy(), initscr(),
-                      * noecho(), curs_set(), newpad(), mvwaddch(), mvwaddstr(),
-                      * wresize()
+                      * wnoutrefresh(), getmaxx(), getmaxy(), mvwaddstr(),
+                      * mvwaddch(), mvwaddstr(), wresize()
                       */
 #include "../common/rexit.h" /* for exit_err() */
 #include "../common/try_malloc.h" /* for try_malloc() */
 #include "../common/yx_uint16.h" /* for struct yx_uint16 */
-#include "cleanup.h" /* for set_cleanup_flag() */
 #include "misc.h" /* for center_offset() */
 #include "world.h" /* for world global */
 
@@ -65,7 +63,7 @@ static void refit_pad()
 {
     /* Determine rightmost window column. */
     uint32_t lastwcol = 0;
-    struct Win * wp = world.wmeta.chain_start;
+    struct Win * wp = world.wins.chain_start;
     while (wp != 0)
     {
         if ((uint32_t) wp->start.x + (uint32_t) wp->framesize.x > lastwcol + 1)
@@ -78,11 +76,11 @@ static void refit_pad()
     /* Only resize the pad if the rightmost window column has changed. */
     char * err_s = "refit_pad() extends virtual screen beyond legal sizes.";
     char * err_m = "refit_pad() triggers memory alloc error via wresize().";
-    if (getmaxx(world.wmeta.pad) + 1 != lastwcol)
+    if (getmaxx(world.wins.pad) + 1 != lastwcol)
     {
         uint8_t t = (lastwcol + 2 > UINT16_MAX);
         exit_err(t, err_s);
-        t = wresize(world.wmeta.pad, getmaxy(world.wmeta.pad), lastwcol + 2);
+        t = wresize(world.wins.pad, getmaxy(world.wins.pad), lastwcol + 2);
         exit_err(t, err_m);
     }
 }
@@ -120,7 +118,7 @@ static void place_win(struct Win * w)
         /* Fit w's top left to bottom left of its ->prev if enough space. */
         uint16_t w_prev_maxy = w->prev->start.y + w->prev->framesize.y;
         if (   w->framesize.x <= w->prev->framesize.x
-            && w->framesize.y <  world.wmeta.padsize.y - w_prev_maxy)
+            && w->framesize.y <  world.wins.padsize.y - w_prev_maxy)
         {
             w->start.x = w->prev->start.x;
             w->start.y = w_prev_maxy + 1;
@@ -143,7 +141,7 @@ static void place_win(struct Win * w)
                 uint16_t w_thr_bottom = w_thr->start.y + w_thr->framesize.y;
                 uint16_t free_width = (w_thr->start.x + w_thr->framesize.x)
                                       - (w_test->start.x + w_test->framesize.x);
-                if (   w->framesize.y < world.wmeta.padsize.y - w_thr_bottom
+                if (   w->framesize.y < world.wins.padsize.y - w_thr_bottom
                     && w->framesize.x < free_width)
                 {
                     w->start.x = w_test->start.x + w_test->framesize.x + 1;
@@ -198,10 +196,10 @@ static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
         }
         if ('<' == dir || '>' == dir)
         {
-            mvwaddch(world.wmeta.pad, start.y + q, start.x + draw_offset, c);
+            mvwaddch(world.wins.pad, start.y + q, start.x + draw_offset, c);
             continue;
         }
-        mvwaddch(world.wmeta.pad, start.y + draw_offset, start.x + q, c);
+        mvwaddch(world.wins.pad, start.y + draw_offset, start.x + q, c);
     }
 }
 
@@ -210,8 +208,8 @@ static void padscroll_hint(char dir, uint16_t dist)
 {
     struct yx_uint16 start;
     start.y = 0;
-    start.x = world.wmeta.pad_offset;
-    scroll_hint(world.wmeta.padsize, dir, dist, "columns", start);
+    start.x = world.wins.pad_offset;
+    scroll_hint(world.wins.padsize, dir, dist, "columns", start);
 }
 
 
@@ -242,8 +240,8 @@ static void draw_wins(struct Win * w)
         for (x = offset_x; x < w->framesize.x + offset_x && x < size_x; x++)
         {
             chtype ch = w->winmap[(y * w->winmapsize.x) + x];
-            mvwaddch(world.wmeta.pad, w->start.y + (y - offset_y),
-                                       w->start.x + (x - offset_x), ch);
+            mvwaddch(world.wins.pad, w->start.y + (y - offset_y),
+                                     w->start.x + (x - offset_x), ch);
         }
     }
     free(w->winmap);
@@ -280,13 +278,13 @@ static void draw_win_borderlines(struct Win * w)
     uint16_t y, x;
     for (y = w->start.y; y <= w->start.y + w->framesize.y; y++)
     {
-        mvwaddch(world.wmeta.pad, y, w->start.x - 1,              '|');
-        mvwaddch(world.wmeta.pad, y, w->start.x + w->framesize.x, '|');
+        mvwaddch(world.wins.pad, y, w->start.x - 1,              '|');
+        mvwaddch(world.wins.pad, y, w->start.x + w->framesize.x, '|');
     }
     for (x = w->start.x; x <= w->start.x + w->framesize.x; x++)
     {
-        mvwaddch(world.wmeta.pad, w->start.y - 1,              x, '-');
-        mvwaddch(world.wmeta.pad, w->start.y + w->framesize.y, x, '-');
+        mvwaddch(world.wins.pad, w->start.y - 1,              x, '-');
+        mvwaddch(world.wins.pad, w->start.y + w->framesize.y, x, '-');
     }
 
     /* Draw as much as possible of the title into center of top border line. */
@@ -301,14 +299,14 @@ static void draw_win_borderlines(struct Win * w)
         uint16_t length_visible = strnlen(w->title, w->framesize.x - 2);
         char title[length_visible + 3];
         char decoration = ' ';
-        if (w == world.wmeta.active)
+        if (w == world.wins.win_active)
         {
             decoration = '$';
         }
         memcpy(title + 1, w->title, length_visible);
         title[0] = title[length_visible + 1] = decoration;
         title[length_visible + 2] = '\0';
-        mvwaddstr(world.wmeta.pad,
+        mvwaddstr(world.wins.pad,
                   w->start.y - 1, w->start.x + title_offset, title);
     }
 }
@@ -328,10 +326,10 @@ static void draw_wins_borderlines(struct Win * w)
 
 static void draw_wins_bordercorners(struct Win * w)
 {
-    mvwaddch(world.wmeta.pad, w->start.y - 1, w->start.x - 1, '+');
-    mvwaddch(world.wmeta.pad, w->start.y - 1, w->start.x + w->framesize.x,'+');
-    mvwaddch(world.wmeta.pad, w->start.y + w->framesize.y, w->start.x - 1,'+');
-    mvwaddch(world.wmeta.pad, w->start.y + w->framesize.y,
+    mvwaddch(world.wins.pad, w->start.y - 1, w->start.x - 1, '+');
+    mvwaddch(world.wins.pad, w->start.y - 1, w->start.x + w->framesize.x, '+');
+    mvwaddch(world.wins.pad, w->start.y + w->framesize.y, w->start.x - 1, '+');
+    mvwaddch(world.wins.pad, w->start.y + w->framesize.y,
              w->start.x + w->framesize.x, '+');
     if (0 != w->next)
     {
@@ -343,40 +341,40 @@ static void draw_wins_bordercorners(struct Win * w)
 
 static void shift_win_forward()
 {
-    if (world.wmeta.active == world.wmeta.chain_end)
+    if (world.wins.win_active == world.wins.chain_end)
     {
-        world.wmeta.chain_end = world.wmeta.active->prev;
-        world.wmeta.chain_end->next = 0;
-        world.wmeta.active->next = world.wmeta.chain_start;
-        world.wmeta.active->next->prev = world.wmeta.active;
-        world.wmeta.chain_start = world.wmeta.active;
-        world.wmeta.chain_start->prev = 0;
+        world.wins.chain_end = world.wins.win_active->prev;
+        world.wins.chain_end->next = 0;
+        world.wins.win_active->next = world.wins.chain_start;
+        world.wins.win_active->next->prev = world.wins.win_active;
+        world.wins.chain_start = world.wins.win_active;
+        world.wins.chain_start->prev = 0;
     }
     else
     {
-        struct Win * old_prev = world.wmeta.active->prev;
-        struct Win * old_next = world.wmeta.active->next;
-        if (world.wmeta.chain_end == world.wmeta.active->next)
+        struct Win * old_prev = world.wins.win_active->prev;
+        struct Win * old_next = world.wins.win_active->next;
+        if (world.wins.chain_end == world.wins.win_active->next)
         {
-            world.wmeta.chain_end = world.wmeta.active;
-            world.wmeta.active->next = 0;
+            world.wins.chain_end = world.wins.win_active;
+            world.wins.win_active->next = 0;
         }
         else
         {
-            world.wmeta.active->next = old_next->next;
-            world.wmeta.active->next->prev = world.wmeta.active;
+            world.wins.win_active->next = old_next->next;
+            world.wins.win_active->next->prev = world.wins.win_active;
         }
-        if (world.wmeta.chain_start == world.wmeta.active)
+        if (world.wins.chain_start == world.wins.win_active)
         {
-            world.wmeta.chain_start = old_next;
+            world.wins.chain_start = old_next;
         }
         else
         {
             old_prev->next = old_next;
         }
         old_next->prev = old_prev;
-        old_next->next = world.wmeta.active;
-        world.wmeta.active->prev = old_next;
+        old_next->next = world.wins.win_active;
+        world.wins.win_active->prev = old_next;
     }
 }
 
@@ -384,58 +382,41 @@ static void shift_win_forward()
 
 static void shift_win_backward()
 {
-    if (world.wmeta.active == world.wmeta.chain_start)
+    if (world.wins.win_active == world.wins.chain_start)
     {
-        world.wmeta.chain_start = world.wmeta.active->next;
-        world.wmeta.chain_start->prev = 0;
-        world.wmeta.active->prev = world.wmeta.chain_end;
-        world.wmeta.active->prev->next = world.wmeta.active;
-        world.wmeta.chain_end = world.wmeta.active;
-        world.wmeta.chain_end->next = 0;
+        world.wins.chain_start = world.wins.win_active->next;
+        world.wins.chain_start->prev = 0;
+        world.wins.win_active->prev = world.wins.chain_end;
+        world.wins.win_active->prev->next = world.wins.win_active;
+        world.wins.chain_end = world.wins.win_active;
+        world.wins.chain_end->next = 0;
     }
     else
     {
-        struct Win * old_prev = world.wmeta.active->prev;
-        struct Win * old_next = world.wmeta.active->next;
-        if (world.wmeta.chain_start == world.wmeta.active->prev)
+        struct Win * old_prev = world.wins.win_active->prev;
+        struct Win * old_next = world.wins.win_active->next;
+        if (world.wins.chain_start == world.wins.win_active->prev)
         {
-            world.wmeta.chain_start = world.wmeta.active;
-            world.wmeta.active->prev = 0;
+            world.wins.chain_start = world.wins.win_active;
+            world.wins.win_active->prev = 0;
         }
         else
         {
-            world.wmeta.active->prev = old_prev->prev;
-            world.wmeta.active->prev->next = world.wmeta.active;
+            world.wins.win_active->prev = old_prev->prev;
+            world.wins.win_active->prev->next = world.wins.win_active;
         }
-        if (world.wmeta.chain_end == world.wmeta.active)
+        if (world.wins.chain_end == world.wins.win_active)
         {
-            world.wmeta.chain_end = old_prev;
+            world.wins.chain_end = old_prev;
         }
         else
         {
             old_next->prev = old_prev;
         }
         old_prev->next = old_next;
-        old_prev->prev = world.wmeta.active;
-        world.wmeta.active->next = old_prev;
+        old_prev->prev = world.wins.win_active;
+        world.wins.win_active->next = old_prev;
     }
-}
-
-
-
-extern void init_wmeta_and_ncurses()
-{
-    world.wmeta.screen = initscr();
-    set_cleanup_flag(CLEANUP_NCURSES);
-    noecho();
-    curs_set(0);
-    world.wmeta.padsize.y   = 0;
-    world.wmeta.padsize.x   = 0;
-    world.wmeta.chain_start = 0;
-    world.wmeta.chain_end   = 0;
-    world.wmeta.pad_offset  = 0;
-    world.wmeta.pad         = NULL;
-    world.wmeta.active      = 0;
 }
 
 
@@ -444,13 +425,13 @@ extern void make_pad()
 {
     char * err_s = "make_pad() creates an illegaly large virtual screen.";
     char * err_m = "make_pad() triggers memory allocation error via newpad().";
-    uint32_t maxy_test = getmaxy(world.wmeta.screen);
-    uint32_t maxx_test = getmaxx(world.wmeta.screen);
+    uint32_t maxy_test = getmaxy(world.wins.screen);
+    uint32_t maxx_test = getmaxx(world.wins.screen);
     exit_err(maxy_test > UINT16_MAX || maxx_test > UINT16_MAX, err_s);
-    world.wmeta.padsize.y = maxy_test;
-    world.wmeta.padsize.x = maxx_test;
-    world.wmeta.pad = newpad(world.wmeta.padsize.y, 1);
-    exit_err(NULL == world.wmeta.pad, err_m);
+    world.wins.padsize.y = maxy_test;
+    world.wins.padsize.x = maxx_test;
+    world.wins.pad = newpad(world.wins.padsize.y, 1);
+    exit_err(NULL == world.wins.pad, err_m);
 }
 
 
@@ -470,23 +451,23 @@ extern void init_win(struct Win ** wp, char * title, int16_t height,
     w->draw         = func;
     w->center.y     = 0;
     w->center.x     = 0;
-    w->framesize.y  = world.wmeta.padsize.y - 1;
-    if      (0 < height && height <= world.wmeta.padsize.y - 1)
+    w->framesize.y  = world.wins.padsize.y - 1;
+    if      (0 < height && height <= world.wins.padsize.y - 1)
     {
         w->framesize.y = height;
     }
-    else if (0 > height && world.wmeta.padsize.y + (height - 1) > 0)
+    else if (0 > height && world.wins.padsize.y + (height - 1) > 0)
     {
-        w->framesize.y = world.wmeta.padsize.y + (height - 1);
+        w->framesize.y = world.wins.padsize.y + (height - 1);
     }
-    w->framesize.x  = world.wmeta.padsize.x;
+    w->framesize.x  = world.wins.padsize.x;
     if      (0 < width)
     {
         w->framesize.x = width;
     }
-    else if (0 > width && world.wmeta.padsize.x + width > 0)
+    else if (0 > width && world.wins.padsize.x + width > 0)
     {
-        w->framesize.x = world.wmeta.padsize.x + width;
+        w->framesize.x = world.wins.padsize.x + width;
     }
     *wp = w;
 }
@@ -503,17 +484,17 @@ extern void free_win(struct Win * win)
 
 extern void append_win(struct Win * w)
 {
-    if (0 != world.wmeta.chain_start)
+    if (0 != world.wins.chain_start)
     {
-        w->prev = world.wmeta.chain_end;
-        world.wmeta.chain_end->next = w;
+        w->prev = world.wins.chain_end;
+        world.wins.chain_end->next = w;
     }
     else
     {
-        world.wmeta.active = w;
-        world.wmeta.chain_start = w;
+        world.wins.win_active = w;
+        world.wins.chain_start = w;
     }
-    world.wmeta.chain_end = w;
+    world.wins.chain_end = w;
     update_wins(w);
 }
 
@@ -521,31 +502,31 @@ extern void append_win(struct Win * w)
 
 extern void suspend_win(struct Win * w)
 {
-    if (world.wmeta.chain_start != w)
+    if (world.wins.chain_start != w)
     {
         w->prev->next = w->next;
     }
     else
     {
-        world.wmeta.chain_start = w->next;
+        world.wins.chain_start = w->next;
     }
     uint8_t pad_refitted = 0;
-    if (world.wmeta.chain_end != w)
+    if (world.wins.chain_end != w)
     {
         w->next->prev = w->prev;
-        if (world.wmeta.active == w)
+        if (world.wins.win_active == w)
         {
-            world.wmeta.active = w->next;
+            world.wins.win_active = w->next;
         }
         update_wins(w->next);      /* Positioning of successor windows may be */
         pad_refitted = 1;          /* affected / need correction. Note that   */
     }                              /* update_wins() already refits the pad,   */
     else                           /* voiding later need for that.            */
     {
-        world.wmeta.chain_end = w->prev;
-        if (world.wmeta.active == w)
+        world.wins.chain_end = w->prev;
+        if (world.wins.win_active == w)
         {
-            world.wmeta.active = w->prev;
+            world.wins.win_active = w->prev;
         }
     }
     w->prev = 0;
@@ -561,10 +542,10 @@ extern void suspend_win(struct Win * w)
 extern void reset_pad_offset(uint16_t new_offset)
 {
     if (new_offset >= 0
-        && (new_offset < world.wmeta.pad_offset
-            || new_offset + world.wmeta.padsize.x < getmaxx(world.wmeta.pad)))
+        && (new_offset < world.wins.pad_offset
+            || new_offset + world.wins.padsize.x < getmaxx(world.wins.pad)))
     {
-        world.wmeta.pad_offset = new_offset;
+        world.wins.pad_offset = new_offset;
     }
 }
 
@@ -572,11 +553,11 @@ extern void reset_pad_offset(uint16_t new_offset)
 
 extern void resize_active_win(struct yx_uint16 size)
 {
-    if (0 != world.wmeta.active
-        && size.x > 0 && size.y > 0 && size.y < world.wmeta.padsize.y)
+    if (0 != world.wins.win_active
+        && size.x > 0 && size.y > 0 && size.y < world.wins.padsize.y)
     {
-        world.wmeta.active->framesize = size;
-        update_wins(world.wmeta.active);          /* Positioning of following */
+        world.wins.win_active->framesize = size;
+        update_wins(world.wins.win_active);       /* Positioning of following */
     }                                             /* windows may be affected. */
 }
 
@@ -584,28 +565,28 @@ extern void resize_active_win(struct yx_uint16 size)
 
 extern void cycle_active_win(char dir)
 {
-    if (0 != world.wmeta.active)
+    if (0 != world.wins.win_active)
     {
         if ('f' == dir)
         {
-            if (world.wmeta.active->next != 0)
+            if (world.wins.win_active->next != 0)
             {
-                world.wmeta.active = world.wmeta.active->next;
+                world.wins.win_active = world.wins.win_active->next;
             }
             else
             {
-                world.wmeta.active = world.wmeta.chain_start;
+                world.wins.win_active = world.wins.chain_start;
             }
         }
         else
         {
-            if (world.wmeta.active->prev != 0)
+            if (world.wins.win_active->prev != 0)
             {
-                world.wmeta.active = world.wmeta.active->prev;
+                world.wins.win_active = world.wins.win_active->prev;
             }
             else
             {
-                world.wmeta.active = world.wmeta.chain_end;
+                world.wins.win_active = world.wins.chain_end;
             }
         }
     }
@@ -615,19 +596,19 @@ extern void cycle_active_win(char dir)
 
 extern void shift_active_win(char dir)
 {
-    if (   0 == world.wmeta.active  /* No shifting with < 2 windows visible. */
-        || world.wmeta.chain_start == world.wmeta.chain_end)
+    if (   0 == world.wins.win_active /* No shifting with <2 windows visible. */
+        || world.wins.chain_start == world.wins.chain_end)
     {
         return;
     }
     if ('f' == dir)
     {
         shift_win_forward();
-        update_wins(world.wmeta.chain_start);
+        update_wins(world.wins.chain_start);
         return;
     }
     shift_win_backward();
-    update_wins(world.wmeta.chain_start);
+    update_wins(world.wins.chain_start);
 }
 
 
@@ -636,31 +617,31 @@ extern void draw_all_wins()
 {
     /* Empty everything before filling it a-new. */
     erase();
-    wnoutrefresh(world.wmeta.screen);
-    werase(world.wmeta.pad);
-    if (world.wmeta.chain_start)
+    wnoutrefresh(world.wins.screen);
+    werase(world.wins.pad);
+    if (world.wins.chain_start)
     {
 
         /* Draw windows' borders first, then windows. */
-        draw_wins_borderlines(world.wmeta.chain_start);
-        draw_wins_bordercorners(world.wmeta.chain_start);
-        draw_wins(world.wmeta.chain_start);
+        draw_wins_borderlines(world.wins.chain_start);
+        draw_wins_bordercorners(world.wins.chain_start);
+        draw_wins(world.wins.chain_start);
 
         /* Draw virtual screen scroll hints. */
-        if (world.wmeta.pad_offset > 0)
+        if (world.wins.pad_offset > 0)
         {
-            padscroll_hint('<', world.wmeta.pad_offset + 1);
+            padscroll_hint('<', world.wins.pad_offset + 1);
         }
-        uint16_t size_x = getmaxx(world.wmeta.pad);
-        uint16_t right_edge = world.wmeta.pad_offset + world.wmeta.padsize.x;
+        uint16_t size_x = getmaxx(world.wins.pad);
+        uint16_t right_edge = world.wins.pad_offset + world.wins.padsize.x;
         if (right_edge < size_x - 1)
         {
             padscroll_hint('>', size_x - right_edge);
         }
 
         /* Write pad segment to be shown on physical screen to screen buffer. */
-        pnoutrefresh(world.wmeta.pad, 0, world.wmeta.pad_offset, 0, 0,
-                     world.wmeta.padsize.y, world.wmeta.padsize.x - 1);
+        pnoutrefresh(world.wins.pad, 0, world.wins.pad_offset, 0, 0,
+                     world.wins.padsize.y, world.wins.padsize.x - 1);
     }
 
     /* Only at the end write accumulated changes to the physical screen. */

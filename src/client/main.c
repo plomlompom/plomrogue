@@ -1,14 +1,14 @@
 /* main.c */
 
+#include <ncurses.h> /* keypad() */
 #include <signal.h> /* struct sigaction, sigaction() */
 #include <stdlib.h> /* exit() */
 #include <string.h> /* memset() */
 #include "../common/rexit.h" /* set_cleanup_func(), exit_trouble() */
-#include "cleanup.h" /* cleanup() */
+#include "cleanup.h" /* cleanup(), set_cleanup_flag() */
 #include "command_db.h" /* init_command_db() */
 #include "io.h" /* io_loop(), try_send() */
 #include "misc.h" /* load_interface_conf(), winch_called() */
-#include "windows.h" /* init_wmeta_and_ncurses(); */
 #include "world.h" /* struct World */
 
 
@@ -32,8 +32,11 @@ int main(int argc, char * argv[])
     set_cleanup_func(cleanup);
 
     /* Initialize the whole interface. */
-    init_wmeta_and_ncurses();
-    keypad(world.wmeta.screen, TRUE);
+    world.wins.screen = initscr();
+    set_cleanup_flag(CLEANUP_NCURSES);
+    noecho();
+    curs_set(0);
+    keypad(world.wins.screen, TRUE);
     init_command_db();      /* The command DB needs to be initialized before  */
     load_interface_conf();  /* the interface, whose keybindings depend on it. */
 

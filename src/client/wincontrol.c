@@ -66,7 +66,7 @@ static void set_winconf_geometry(char id)
     }
     else if (1 == wcp->height_type)
     {
-        wcp->height = wcp->win->framesize.y - world.wmeta.padsize.y + 1;
+        wcp->height = wcp->win->framesize.y - world.wins.padsize.y + 1;
     }
     if      (0 == wcp->width_type)
     {
@@ -74,7 +74,7 @@ static void set_winconf_geometry(char id)
     }
     else if (1 == wcp->width_type)
     {
-        wcp->width = wcp->win->framesize.x - world.wmeta.padsize.x;
+        wcp->width = wcp->win->framesize.x - world.wins.padsize.x;
     }
 }
 
@@ -136,9 +136,9 @@ static struct WinConf * get_winconf_by_id(char id)
     uint8_t i = 0;
     while (1)
     {
-        if (id == world.winconf_db.winconfs[i].id)
+        if (id == world.wins.winconfs[i].id)
         {
-            return &world.winconf_db.winconfs[i];
+            return &world.wins.winconfs[i];
         }
         i++;
     }
@@ -151,9 +151,9 @@ extern struct WinConf * get_winconf_by_win(struct Win * win)
     uint8_t i = 0;
     while (1)
     {
-        if (win == world.winconf_db.winconfs[i].win)
+        if (win == world.wins.winconfs[i].win)
         {
-            return &world.winconf_db.winconfs[i];
+            return &world.wins.winconfs[i];
         }
         i++;
     }
@@ -169,7 +169,8 @@ extern struct Win * get_win_by_id(char id)
 
 
 
-extern uint8_t read_winconf_from_file(char * line, uint32_t linemax, FILE * file)
+extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
+                                      FILE * file)
 {
     char * f_name = "read_winconf_from_file()";
     int test = try_fgetc(file, f_name);
@@ -195,27 +196,27 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax, FILE * file
     winconf.view = 0;
     winconf.center.y = 0;
     winconf.center.x = 0;
-    if (world.winconf_db.ids)
+    if (world.wins.ids)
     {
-        uint8_t old_ids_size = strlen(world.winconf_db.ids);
+        uint8_t old_ids_size = strlen(world.wins.ids);
         char * new_ids = try_malloc(old_ids_size + 1 + 1, f_name);
-        sprintf(new_ids, "%s%c", world.winconf_db.ids, winconf.id);
-        free(world.winconf_db.ids);
-        world.winconf_db.ids = new_ids;
+        sprintf(new_ids, "%s%c", world.wins.ids, winconf.id);
+        free(world.wins.ids);
+        world.wins.ids = new_ids;
         uint16_t old_winconfs_size = old_ids_size * sizeof(struct WinConf);
         uint16_t new_winconfs_size = old_winconfs_size + sizeof(struct WinConf);
         struct WinConf * new_winconfs = try_malloc(new_winconfs_size, f_name);
-        memcpy(new_winconfs, world.winconf_db.winconfs, old_winconfs_size);
+        memcpy(new_winconfs, world.wins.winconfs, old_winconfs_size);
         new_winconfs[old_ids_size] = winconf;
-        free(world.winconf_db.winconfs);
-        world.winconf_db.winconfs = new_winconfs;
+        free(world.wins.winconfs);
+        world.wins.winconfs = new_winconfs;
     }
     else
     {
-        world.winconf_db.ids = try_malloc(2, f_name);
-        sprintf(world.winconf_db.ids, "%c", winconf.id);
-        world.winconf_db.winconfs = try_malloc(sizeof(struct WinConf), f_name);
-        *world.winconf_db.winconfs = winconf;
+        world.wins.ids = try_malloc(2, f_name);
+        sprintf(world.wins.ids, "%c", winconf.id);
+        world.wins.winconfs = try_malloc(sizeof(struct WinConf), f_name);
+        *world.wins.winconfs = winconf;
     }
     return 1;
 }
@@ -245,18 +246,19 @@ extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim)
 
 
 
-extern void read_order_wins_visible_active(char * line, uint32_t linemax, FILE * file)
+extern void read_order_wins_visible_active(char * line, uint32_t linemax,
+                                           FILE * file)
 {
     char * f_name = "read_order_wins_visible_active()";
     char win_order[linemax + 1];
     try_fgets(win_order, linemax + 1, file, f_name);
-    world.winconf_db.order = try_malloc(linemax, f_name);
+    world.wins.order = try_malloc(linemax, f_name);
     win_order[strlen(win_order) - 1] = '\0';
-    sprintf(world.winconf_db.order, "%s", win_order);
+    sprintf(world.wins.order, "%s", win_order);
     int char_or_eof = try_fgetc(file, f_name);
     char * err_eof = "fgetc() unexpectedly hitting EOF";
     exit_trouble(EOF == char_or_eof, f_name, err_eof);
-    world.winconf_db.active = (uint8_t) char_or_eof;
+    world.wins.id_active = (uint8_t) char_or_eof;
     exit_trouble(EOF == try_fgetc(file, f_name), f_name, err_eof);
     try_fgets(line, linemax + 1, file, f_name);
 }
@@ -266,15 +268,15 @@ extern void read_order_wins_visible_active(char * line, uint32_t linemax, FILE *
 extern void write_order_wins_visible_active(FILE * file, char * delim)
 {
     char * f_name = "write_order_wins_visible_active()";
-    char line[strlen(world.winconf_db.ids) + 2];
-    struct Win * w_p = world.wmeta.chain_start;
+    char line[strlen(world.wins.ids) + 2];
+    struct Win * w_p = world.wins.chain_start;
     char active = ' ';
     uint8_t i;
     for (; NULL != w_p; w_p = w_p->next, i++)
     {
         struct WinConf * wc_p = get_winconf_by_win(w_p);
         line[i] = wc_p->id;
-        if (w_p == world.wmeta.active)
+        if (w_p == world.wins.win_active)
         {
             active = wc_p->id;
         }
@@ -296,12 +298,12 @@ extern void free_winconfs()
     {
         free_winconf_data(id);
     }
-    free(world.winconf_db.ids);
-    world.winconf_db.ids = NULL;
-    free(world.winconf_db.winconfs);
-    world.winconf_db.winconfs = NULL;
-    free(world.winconf_db.order);
-    world.winconf_db.order = NULL;
+    free(world.wins.ids);
+    world.wins.ids = NULL;
+    free(world.wins.winconfs);
+    world.wins.winconfs = NULL;
+    free(world.wins.order);
+    world.wins.order = NULL;
 }
 
 
@@ -320,16 +322,16 @@ extern void init_wins()
 extern void sorted_win_toggle_and_activate()
 {
     uint8_t i = 0;
-    for (; i < strlen(world.winconf_db.order); i++)
+    for (; i < strlen(world.wins.order); i++)
     {
-        if (NULL == strchr(world.winconf_db.ids, world.winconf_db.order[i]))
+        if (NULL == strchr(world.wins.ids, world.wins.order[i]))
         {
             continue;
         }
-        toggle_window(world.winconf_db.order[i]);
-        if (world.winconf_db.active == (uint8_t) world.winconf_db.order[i])
+        toggle_window(world.wins.order[i]);
+        if (world.wins.id_active == (uint8_t) world.wins.order[i])
         {
-            world.wmeta.active = get_win_by_id(world.winconf_db.order[i]);
+            world.wins.win_active = get_win_by_id(world.wins.order[i]);
         }
     }
 }
@@ -338,7 +340,7 @@ extern void sorted_win_toggle_and_activate()
 extern char get_next_winconf_id()
 {
     static uint8_t i = 0;
-    char c = world.winconf_db.ids[i];
+    char c = world.wins.ids[i];
     if (0 == c)
     {
         i = 0;
@@ -353,7 +355,7 @@ extern char get_next_winconf_id()
 extern void toggle_window(char id)
 {
     struct Win * win = get_win_by_id(id);
-    if (0 == win->prev && world.wmeta.chain_start != win)   /* Win struct is  */
+    if (0 == win->prev && world.wins.chain_start != win)    /* Win struct is  */
     {                                                       /* outside chain? */
         append_win(win);
     }
@@ -367,7 +369,7 @@ extern void toggle_window(char id)
 
 extern void toggle_winconfig()
 {
-   struct Win * win = world.wmeta.active;
+   struct Win * win = world.wins.win_active;
    struct WinConf * wcp = get_winconf_by_win(win);
     if      (0 == wcp->view)
     {
@@ -395,7 +397,7 @@ extern void toggle_winconfig()
 
 extern void toggle_win_size_type(char axis)
 {
-    struct Win * win = world.wmeta.active;
+    struct Win * win = world.wins.win_active;
     struct WinConf * wcp = get_winconf_by_win(win);
     if ('y' == axis)
     {
@@ -404,7 +406,7 @@ extern void toggle_win_size_type(char axis)
         return;
     }
     wcp->width_type = (   0 == wcp->width_type
-                       && win->framesize.x <= world.wmeta.padsize.x);
+                       && win->framesize.x <= world.wins.padsize.x);
     set_winconf_geometry(wcp->id);
 }
 
@@ -414,11 +416,11 @@ extern void scroll_pad(char dir)
 {
     if      ('+' == dir)
     {
-        reset_pad_offset(world.wmeta.pad_offset + 1);
+        reset_pad_offset(world.wins.pad_offset + 1);
     }
     else if ('-' == dir)
     {
-        reset_pad_offset(world.wmeta.pad_offset - 1);
+        reset_pad_offset(world.wins.pad_offset - 1);
     }
 }
 
@@ -426,9 +428,9 @@ extern void scroll_pad(char dir)
 
 extern void growshrink_active_window(char change)
 {
-    if (0 != world.wmeta.active)
+    if (0 != world.wins.win_active)
     {
-        struct yx_uint16 size = world.wmeta.active->framesize;
+        struct yx_uint16 size = world.wins.win_active->framesize;
         if      (change == '-')
         {
             size.y--;
@@ -446,9 +448,9 @@ extern void growshrink_active_window(char change)
             size.x++;
         }
         resize_active_win(size);
-        struct WinConf * wcp = get_winconf_by_win(world.wmeta.active);
+        struct WinConf * wcp = get_winconf_by_win(world.wins.win_active);
         if (   1 == wcp->width_type
-            && world.wmeta.active->framesize.x > world.wmeta.padsize.x)
+            && world.wins.win_active->framesize.x > world.wins.padsize.x)
         {
             wcp->width_type = 0;
         }

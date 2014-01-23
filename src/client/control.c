@@ -151,9 +151,9 @@ static uint8_t try_server_commands(struct Command * command)
 extern uint8_t try_key(uint16_t key)
 {
     struct Command * command = get_command_to_keycode(world.kb_global.kbs, key);
-    if (!command && world.wmeta.active)
+    if (!command && world.wins.win_active)
     {
-        struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
+        struct WinConf * wc = get_winconf_by_win(world.wins.win_active);
         if      (0 == wc->view)
         {
             command = get_command_to_keycode(wc->kb.kbs, key);

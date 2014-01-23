@@ -15,8 +15,8 @@
 extern void obey_argv(int argc, char * argv[]);
 
 /* Save / load (init) / unload (free/dissolve) / reload interface configuration
- * data, world.wmeta.pad (initialized before opening any windows to the height
- * of the terminal screen and a width of 1) and window chains.
+ * data, world.wins.pad (initialized before opening any windows to the height of
+ * the terminal screen and a width of 1) and window chains.
  *
  * Note that reload_interface_conf() also calls map_center().
  */

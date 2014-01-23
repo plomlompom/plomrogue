@@ -82,7 +82,7 @@ static struct KeyBindingDB * char_selected_kb_db(char c)
     }
     else if ('w' == c)
     {
-        struct WinConf * wc = get_winconf_by_win(world.wmeta.active);
+        struct WinConf * wc = get_winconf_by_win(world.wins.win_active);
         kbd = &wc->kb;
     }
     return kbd;

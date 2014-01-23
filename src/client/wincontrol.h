@@ -12,14 +12,22 @@
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 struct Win;
 
+#include <ncurses.h>
 
 
 struct WinConfDB
 {
+    WINDOW * screen;           /* ncurses' pointer to the terminal screen */
+    WINDOW * pad;              /* ncurses pad of virtual screen */
     struct WinConf * winconfs;
-    char * ids;
-    char * order; /* order of visible windows (identified by IDs) */
-    char active; /* id of window selected as active */
+    struct Win * chain_start; /* first Win in chain; its .prev == 0 */
+    struct Win * chain_end;   /* last Win in chain; its .next == 0 */
+    struct Win * win_active;  /* Win highlighted / selected for manipulation */
+    struct yx_uint16 padsize; /* virtual screen size */
+    char * ids;               /* all windows' ids */
+    char * order;             /* order of visible windows (identified by IDs) */
+    uint16_t pad_offset;      /* number of cells view is moved to the right */
+    char id_active;           /* id of window selected as active */
 };
 
 /* Window's configuration (like geometry, keybindings) and the Win itself. */
@@ -50,19 +58,21 @@ extern void free_winconfs();
 extern void init_wins();
 
 /* Toggle windows in order set by world.win_order. Point active window selection
- * to window identified by world.winconf_db.active.
+ * to window identified by world.wins.win_active.
  */
 extern void sorted_win_toggle_and_activate();
 
-/* Read/write world.win_order and world.winconf_db.active from/to "file". */
-extern void read_order_wins_visible_active(char * line, uint32_t linemax, FILE * file);
+/* Read/write world.win_order and world.wins.win_active from/to "file". */
+extern void read_order_wins_visible_active(char * line, uint32_t linemax,
+                                           FILE * file);
 extern void write_order_wins_visible_active(FILE * file, char * delim);
 
-/* Iterate over chars of world.winconf_db.winconf_ids array. Restart after \0.*/
+/* Iterate over chars of world.wins.winconf_ids array. Restart after \0.*/
 extern char get_next_winconf_id();
 
 /* Read/write individual WinConf (identified by "c") from/to file. */
-extern uint8_t read_winconf_from_file(char * line, uint32_t linemax, FILE * file);
+extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
+                                      FILE * file);
 extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim);
 
 /* Toggle "window configuration" view for active window. Sets sensible
@@ -73,7 +83,7 @@ extern void toggle_winconfig();
 
 /* Toggle WinConf.(height/width)_type ("axis" = "y": height; else: width). Avoid
  * positive diff to screen width (value would be wrongly read as a non-diff),
- * width_type toggles to 1 only if world.wmeta->screen's width >= WinConf.width.
+ * width_type toggles to 1 only if world.wins.screen's width >= WinConf.width.
  */
 extern void toggle_win_size_type(char axis);
 
