@@ -55,15 +55,9 @@ window-specific keybindings configuration in the "Window keybinding keys"
 window; by default, these three windows are not visible, but may be turned on by
 hitting the "F6", "F7" and "F8" keys.
 
-What actions are available globally or only in specific windows can be further
-manipulated by editing the files ./confclient/keybindings_global and
-./confclient/windows/Win_* that map keycodes to commands to the respective
-keybinding repositories. While keybindings_global contains merely a list of
-keycode command mappings, the Win_* files start with the name of the windows to
-be configured, followed by a one-character line for internal use (mapping the
-window to one of several internally available window content drawing functions),
-followed by two lines describing the window's designated height and width, and
-only then an optional list of keybindings specific to that window.
+Keybindings and default window selection / visibilities / geometries are read
+from the textfile ./confclient/interface_conf by default, or by another one
+named by the -i command line option of the client.
 
 Replay game recording
 ---------------------
