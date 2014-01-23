@@ -17,12 +17,16 @@ struct World world;
 
 
 
-int main()
+int main(int argc, char * argv[])
 {
     char * f_name = "main()";
 
     /* Declare hard-coded paths here. */
     world.path_server_in = "server/in";
+    world.path_interface_conf = "confclient/interface_conf";
+
+    /* Parse command line arguments. */
+    obey_argv(argc, argv);
 
     /* So error exits also go through the client's cleanup() function. */
     set_cleanup_func(cleanup);

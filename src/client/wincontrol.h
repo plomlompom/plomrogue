@@ -7,9 +7,9 @@
 #ifndef WINCONTROL_H
 #define WINCONTROL_H
 
-#include <stdint.h> /* for uint8_t, int16_t */
-#include "keybindings.h" /* for KeyBindingDB struct */
-#include "../common/yx_uint16.h" /* for yx_uint16 struct */
+#include <stdint.h> /* uint8_t, int16_t */
+#include "keybindings.h" /* struct KeyBindingDB */
+#include "../common/yx_uint16.h" /* yx_uint16 struct */
 struct Win;
 
 
@@ -17,7 +17,9 @@ struct Win;
 struct WinConfDB
 {
     struct WinConf * winconfs;
-    char * winconf_ids;
+    char * ids;
+    char active; /* id of window selected as active */
+    char * order; /* order of visible windows (identified by IDs) */
 };
 
 /* Stores a window's configuration (like geometry, keybindings) and a pointer to
@@ -46,26 +48,27 @@ struct WinConf
 extern struct WinConf * get_winconf_by_win(struct Win * win);
 extern struct Win * get_win_by_id(char id);
 
-/* Create, initialize (from config files)/free world.winconfs and their Wins. */
-extern void init_winconfs();
+/* Free all WinConf DB data. */
 extern void free_winconfs();
+
+/* Initialize  Win structs for WinConfs in WinConf database. */
 extern void init_wins();
 
-/* Toggle windows in the order desribed by 1st line of toggle_order_and_active
- * file in client config windows directory, where each char may fit a Winconf.id
- * in world.winconfs. Silently ignore id chars not found there. The 1st char of
- * the 2nd line of the same file determines which window (by its .id) to focus
- * as active (but only if this window belongs to the ones just toggled).
+/* Toggle windows in order set by world.win_order. Point active window selection
+ * to window identified by world.winconf_db.active.
  */
-extern void sorted_wintoggle_and_activate();
+extern void sorted_win_toggle_and_activate();
+
+/* Read/write world.win_order and world.winconf_db.active from/to "file". */
+extern void read_order_wins_visible_active(char * line, uint32_t linemax, FILE * file);
+extern void write_order_wins_visible_active(FILE * file, char * delim);
 
 /* Iterate over chars of world.winconf_db.winconf_ids array. Restart after \0.*/
 extern char get_next_winconf_id();
 
-/* Save world.winconfs, visible window chain and active window selection to the
- * respective configuration files in client config windows directory.
- */
-extern void save_win_configs();
+/* Read/write individual WinConf (identified by "c") from/to file. */
+extern uint8_t read_winconf_from_file(char * line, uint32_t linemax, FILE * file);
+extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim);
 
 /* Toggle "window configuration" view for active window. Sets sensible
  * Win.center values for the various configuration views (for winconf_geometry:

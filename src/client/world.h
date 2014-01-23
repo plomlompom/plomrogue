@@ -30,6 +30,7 @@ struct World
     struct yx_uint16 player_pos;
     char * log;
     char * path_server_in;
+    char * path_interface_conf;
     char * player_inventory;
     uint16_t turn;
     uint16_t score;

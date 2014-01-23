@@ -6,11 +6,8 @@
 #include <stdio.h> /* FILE, sprintf(), snprintf() */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdlib.h> /* free(), atoi() */
-#include <string.h> /* strlen(), strchr() */
-#include "../common/readwrite.h" /* try_fopen(), textfile_sizes(), try_fgets(),
-                                  * try_fclose(), try_fclose_unlink_rename(),
-                                  * try_fwrite()
-                                  */
+#include <string.h> /* strlen(), strchr(), strcmp() */
+#include "../common/readwrite.h" /* textfile_sizes(), try_fgets(),try_fwrite()*/
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "wincontrol.h" /* get_winconf_by_win() */
 #include "windows.h" /* draw_all_wins() */
@@ -162,44 +159,10 @@ extern char * get_keyname_to_keycode(uint16_t keycode)
 
 
 
-extern void init_keybindings(char * path, struct KeyBindingDB * kbd)
+extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd,
+                                      char * delim)
 {
-    char * f_name = "init_keybindings()";
-    FILE * file = try_fopen(path, "r", f_name);
-    uint32_t lines;
-    uint32_t linemax = textfile_sizes(file, &lines);
-    char command[linemax + 1];
-    char * cmdptr;
-    struct KeyBinding ** loc_last_ptr = &kbd->kbs;
-    * loc_last_ptr = 0;
-    while (try_fgets(command, linemax + 1, file, f_name))
-    {
-        if ('\n' == command[0] || 0 == command[0])
-        {
-            break;
-        }
-        * loc_last_ptr = try_malloc(sizeof(struct KeyBinding), f_name);
-        struct KeyBinding * kb_p = * loc_last_ptr;
-        kb_p->next = 0;
-        kb_p->key = atoi(command);
-        cmdptr = strchr(command, ' ') + 1;
-        cmdptr[strlen(cmdptr) - 1] = '\0';
-        kb_p->command = get_command(cmdptr);
-        loc_last_ptr = & kb_p->next;
-    }
-    try_fclose(file, f_name);
-    kbd->edit = 0;
-    kbd->select = 0;
-}
-
-
-
-extern void save_keybindings(char * path, struct KeyBindingDB * kbd)
-{
-    char * f_name = "save_keybindings()";
-    char path_tmp[strlen(path) + 4 + 1];
-    sprintf(path_tmp, "%s_tmp", path);
-    FILE * file = try_fopen(path_tmp, "w", f_name);
+    char * f_name = "write_keybindings_to_file()";
     uint16_t linemax = 0;
     struct KeyBinding * kb_p = kbd->kbs;
     while (0 != kb_p)
@@ -210,16 +173,44 @@ extern void save_keybindings(char * path, struct KeyBindingDB * kbd)
         }
         kb_p = kb_p->next;
     }
-    linemax = linemax + 6;         /* + 6 = + 3 digits + whitespace + \n + \0 */
+    linemax = linemax + 6;            /* + 6 = + 3 digits + ' ' + '\n' + '\0' */
     char line[linemax];
     kb_p = kbd->kbs;
     while (0 != kb_p)
     {
-        snprintf(line, linemax, "%d %s\n", kb_p->key, kb_p->command->dsc_short);
+        sprintf(line, "%d %s\n", kb_p->key, kb_p->command->dsc_short);
         try_fwrite(line, sizeof(char), strlen(line), file, f_name);
         kb_p = kb_p->next;
     }
-    try_fclose_unlink_rename(file, path_tmp, path, f_name);
+    try_fwrite(delim, strlen(delim), 1, file, f_name);
+}
+
+
+
+extern void read_keybindings_from_file(char * line, uint32_t linemax,
+                                       FILE * file, struct KeyBindingDB * kbd)
+{
+    char * f_name = "read_keybindings_from_file()";
+    char * cmdptr;
+    struct KeyBinding ** loc_last_ptr = &kbd->kbs;
+    * loc_last_ptr = 0;
+    while (try_fgets(line, linemax + 1, file, f_name))
+    {
+        if (!strcmp("%\n", line))
+        {
+            break;
+        }
+        * loc_last_ptr = try_malloc(sizeof(struct KeyBinding), f_name);
+        struct KeyBinding * kb_p = * loc_last_ptr;
+        kb_p->next = 0;
+        kb_p->key = atoi(line);
+        cmdptr = strchr(line, ' ') + 1;
+        cmdptr[strlen(cmdptr) - 1] = '\0';
+        kb_p->command = get_command(cmdptr);
+        loc_last_ptr = & kb_p->next;
+    }
+    kbd->edit = 0;
+    kbd->select = 0;
 }
 
 

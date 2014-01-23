@@ -7,6 +7,7 @@
 #define KEYBINDINGS_H
 
 #include <stdint.h> /* uint8_t, uint16_t */
+#include <stdio.h> /* FILE */
 struct Command;
 
 
@@ -36,11 +37,11 @@ extern struct Command * get_command_to_keycode(struct KeyBinding * kb_p,
  */
 extern char * get_keyname_to_keycode(uint16_t keycode);
 
-/* Initialize/save keybindings data from/to file at "path" to/from keybindings
- * data pointer "kbd".
- */
-extern void init_keybindings(char * path, struct KeyBindingDB * kbd);
-extern void save_keybindings(char * path, struct KeyBindingDB * kbd);
+/* Read/write from/to "file" "kbd", delimited by "delim". */
+extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd,
+                                      char * delim);
+extern void read_keybindings_from_file(char * line, uint32_t linemax,
+                                       FILE * file, struct KeyBindingDB * kbd);
 
 /* Free keybinding chain starting at "kb_start". */
 extern void free_keybindings(struct KeyBinding * kb_start);

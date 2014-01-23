@@ -11,6 +11,9 @@
 
 
 
+/* Parses command line argument -i into client configuration. */
+extern void obey_argv(int argc, char * argv[]);
+
 /* Save / load (init) / unload (free/dissolve) / reload interface configuration
  * data, world.wmeta.pad (initialized before opening any windows to the height
  * of the terminal screen and a width of 1) and window chains.
