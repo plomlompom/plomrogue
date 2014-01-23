@@ -27,7 +27,7 @@ struct WinConf
 {
     struct Win * win;    /* Window / Win struct configured by this WinConf. */
     struct KeyBindingDB kb; /* Window-specific keybindings. */
-    struct yx_uint16 center; /* Designated Win.center */
+    struct yx_uint16 center; /* Designated Win.center. */
     int16_t height;      /* Designated height to pass to init_win(). */
     int16_t width;       /* Designated width to pass to init_win(). */
     uint8_t height_type; /* 0: read .height/.width as size in positive cells; */
