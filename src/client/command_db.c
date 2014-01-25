@@ -94,9 +94,10 @@ extern void init_command_db()
         sprintf(line_copy, "%s", line);
         struct Command cmd;
         char * arg_string;
-        exit_err((   copy_tokenized_string(line, &cmd.dsc_short, delim)
+        exit_err((  copy_tokenized_string(line, &cmd.dsc_short, delim)
                  || copy_tokenized_string(NULL, &cmd.server_msg, delim)
                  || NULL == (arg_string = strtok(NULL, delim))
+                 || strlen(arg_string) > 1
                  || copy_tokenized_string(NULL, &cmd.dsc_long, "\n")),
                  init_command_db_err(line_copy, i + 1));
         cmd.arg = arg_string[0];
