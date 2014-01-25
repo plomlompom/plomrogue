@@ -73,10 +73,10 @@ extern void init_command_db()
         copy_tokenized_string(line, &world.cmd_db.cmds[i].dsc_short, delim);
         copy_tokenized_string(NULL, &world.cmd_db.cmds[i].server_msg, delim);
         if (!strcmp("0", world.cmd_db.cmds[i].server_msg))
-        {
-            free(world.cmd_db.cmds[i].server_msg);
-            world.cmd_db.cmds[i].server_msg = NULL;
-        }
+        {                                          /* .server_msg==0 detects  */
+            free(world.cmd_db.cmds[i].server_msg); /* non-server commands in  */
+            world.cmd_db.cmds[i].server_msg = NULL;/* control.h's try_key() / */
+        }                                          /* try_server_command().   */
         char * arg_string = strtok(NULL, delim);
         world.cmd_db.cmds[i].arg = arg_string[0];
         copy_tokenized_string(NULL, &world.cmd_db.cmds[i].dsc_long, "\n");

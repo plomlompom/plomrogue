@@ -5,6 +5,7 @@
 #include <fcntl.h> /* open() */
 #include <limits.h> /* PIPE_BUF */
 #include <ncurses.h> /* halfdelay(), getch() */
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* FILE, sprintf(), fseek() */
 #include <string.h> /* strcmp(), strlen(), memcpy() */
@@ -78,7 +79,7 @@ static void read_inventory(char * read_buf, uint32_t linemax, FILE * file)
     char * f_name = "read_inventory()";
     char * delimiter = "%\n";
     free(world.player_inventory);
-    world.player_inventory = NULL;
+    world.player_inventory = NULL;          /* Avoids illegal strlen() below. */
     while (1)
     {
         try_fgets(read_buf, linemax + 1, file, f_name);

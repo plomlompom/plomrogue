@@ -66,8 +66,8 @@ static char * get_message_from_queue()
     world.queue_size = world.queue_size - cutout_len;
     if (0 == world.queue_size)
     {
-        free(world.queue);
-        world.queue = NULL;
+        free(world.queue);  /* NULL so read_fifo_into_queue() may free() this */
+        world.queue = NULL; /* every time, even when it's un-allocated first. */
     }
     else
     {

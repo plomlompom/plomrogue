@@ -358,12 +358,12 @@ extern void draw_win_inventory(struct Win * win)
     win->center.y = world.player_inventory_select;
     char inventory_copy[strlen(world.player_inventory) + 1];
     sprintf(inventory_copy, "%s", world.player_inventory);
-    char * foo = inventory_copy;
+    char * strtok_target = inventory_copy;
     uint8_t i = 0;
     while (1)
     {
-        char * object = strtok(foo, "\n");
-        foo = NULL;
+        char * object = strtok(strtok_target, "\n");
+        strtok_target = NULL;
         if (NULL == object)
         {
             return;

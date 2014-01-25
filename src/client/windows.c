@@ -483,8 +483,8 @@ static void draw_wins(struct Win * w)
                                       w->start.x + (x - offset_x), ch);
         }
     }
-    free(w->winmap);
-    w->winmap = NULL;
+    free(w->winmap); /* NULL so draw_wins.c's try_resize_winmap() may always  */
+    w->winmap = NULL;/* free() it before (re-)allocation, even the first time.*/
     memset(&w->winmap_size, 0, sizeof(struct yx_uint16));
     if (offset_y > 0)
     {
@@ -734,12 +734,10 @@ extern void free_windb()
         free(wc->title);
         free_keybindings(wc->kb.kbs);
     }
-    free(world.windb.ids);
-    world.windb.ids = NULL;
+    free(world.windb.ids);  /* NULL this too since add_win_to_windb() checks  */
+    world.windb.ids = NULL; /* for it to detect its first post-DB-purge round.*/
     free(world.windb.wins);
-    world.windb.wins = NULL;
     free(world.windb.order);
-    world.windb.order = NULL;
 }
 
 

@@ -98,11 +98,8 @@ extern void load_interface_conf()
 extern void unload_interface_conf()
 {
     free_keybindings(world.kb_global.kbs);
-    world.kb_global.kbs = NULL;
     free_keybindings(world.kb_wingeom.kbs);
-    world.kb_wingeom.kbs = NULL;
     free_keybindings(world.kb_winkeys.kbs);
-    world.kb_winkeys.kbs = NULL;
     while ('\0' != world.windb.active)
     {
         toggle_window(world.windb.active);

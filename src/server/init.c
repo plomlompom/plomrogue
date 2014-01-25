@@ -49,15 +49,12 @@ extern void obey_argv(int argc, char * argv[])
 extern void remake_world(uint32_t seed)
 {
     free(world.log);
-    world.log = NULL;
+    world.log = NULL;  /* map_object_action.c's update_log() checks for this. */
     world.seed = seed;
     world.map_obj_count = 0;
     world.score = 0;
     free(world.map.cells);
-    if (world.map_objs)
-    {
-        free_map_objects(world.map_objs);
-    }
+    free_map_objects(world.map_objs);
     world.last_update_turn = 0;
     world.turn = 1;
     init_map();

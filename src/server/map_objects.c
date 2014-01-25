@@ -134,7 +134,6 @@ extern void free_map_object_defs(struct MapObjDef * mod_start)
     free_map_object_defs(mod_start->next);
     free(mod_start->name);
     free(mod_start);
-    mod_start = NULL;
 }
 
 
@@ -159,10 +158,10 @@ extern void free_map_objects(struct MapObj * mo_start)
     free_map_objects(mo_start->owns);
     free_map_objects(mo_start->next);
     free(mo_start);
-    if (mo_start == world.map_objs)
-    {
-        world.map_objs = NULL;
-    }
+    if (mo_start == world.map_objs)  /* So add_map_objects()' NULL-delimited  */
+    {                                /* map object iteration loop does not    */
+        world.map_objs = NULL;       /* iterate over freed memory when called */
+    }                                /* the 1st time after world re-seeding.  */
 }
 
 

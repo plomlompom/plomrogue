@@ -2,6 +2,7 @@
 
 #include <ncurses.h> /* keypad() */
 #include <signal.h> /* struct sigaction, sigaction() */
+#include <stddef.h> /* NULL */
 #include <stdlib.h> /* exit() */
 #include <string.h> /* memset() */
 #include "../common/rexit.h" /* set_cleanup_func(), exit_trouble() */
