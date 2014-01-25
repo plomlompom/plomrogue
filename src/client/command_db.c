@@ -60,7 +60,6 @@ extern void init_command_db()
     uint32_t lines;
     uint32_t linemax = textfile_sizes(file, &lines);
     char line[linemax + 1];
-    world.commandDB.cmds = try_malloc(lines * sizeof(struct Command), f_name);
     uint8_t i = 0;
     char * delim = " ";
     while (try_fgets(line, linemax + 1, file, f_name))
@@ -69,20 +68,28 @@ extern void init_command_db()
         {
             break;
         }
-        copy_tokenized_string(line, &world.commandDB.cmds[i].dsc_short, delim);
-        copy_tokenized_string(NULL, &world.commandDB.cmds[i].server_msg, delim);
-        if (!strcmp("0", world.commandDB.cmds[i].server_msg))
-        {                                             /*.server_msg==0 detects*/
-            free(world.commandDB.cmds[i].server_msg); /* non-server commands  */
-            world.commandDB.cmds[i].server_msg = NULL;/* in try_key() /       */
-        }                                             /* try_server_command().*/
+        struct Command cmd;
+        copy_tokenized_string(line, &cmd.dsc_short, delim);
+        copy_tokenized_string(NULL, &cmd.server_msg, delim);
+        if (!strcmp("0", cmd.server_msg))
+        {                          /* A .server_msg == NULL helps control.c's */
+            free(cmd.server_msg);  /* try_key() and try_server_command() to   */
+            cmd.server_msg = NULL; /* differentiate server commands from      */
+        }                          /* non-server commands.                    */
         char * arg_string = strtok(NULL, delim);
-        world.commandDB.cmds[i].arg = arg_string[0];
-        copy_tokenized_string(NULL, &world.commandDB.cmds[i].dsc_long, "\n");
+        cmd.arg = arg_string[0];
+        copy_tokenized_string(NULL, &cmd.dsc_long, "\n");
+        uint32_t old_size = i * sizeof(struct Command);
+        uint32_t new_size = old_size + sizeof(struct Command);
+        struct Command * new_cmds = try_malloc(new_size, f_name);
+        memcpy(new_cmds, world.commandDB.cmds, old_size);
+        new_cmds[i] = cmd;
+        free(world.commandDB.cmds);
+        world.commandDB.cmds = new_cmds;
         i++;
     }
     try_fclose(file, f_name);
-    world.commandDB.n = lines;
+    world.commandDB.n = i;
     set_cleanup_flag(CLEANUP_COMMANDS);
 }
 

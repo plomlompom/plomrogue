@@ -73,6 +73,10 @@ extern struct Win * get_win_by_id(char id);
 /* Read/write individual Win (identified by "c") and world.winDB.order /
  * world.winDB.active from/to "file". Follow writing with "delim" delimiter.
  * Use "line" and "linemax" as expected by try_fgets().
+ *
+ * Note that read_winconf_from_file() returns 1 on success and 0 if it detects
+ * having found the end of the valid interface configuration file by either
+ * hitting a EOF or a newline (so empty newlines at the end of the file are ok).
  */
 extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
                                       FILE * file);

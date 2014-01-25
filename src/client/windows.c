@@ -625,7 +625,7 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
 {
     char * f_name = "read_winconf_from_file()";
     int test = try_fgetc(file, f_name);
-    if (EOF == test)
+    if (EOF == test || '\n' == test)
     {
         return 0;
     }
