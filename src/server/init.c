@@ -1,7 +1,6 @@
 /* src/server/init.c */
 
 #include "init.h"
-#include <errno.h> /* errno */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint32_t */
 #include <stdlib.h> /* exit(), free() */
@@ -49,6 +48,7 @@ extern void obey_argv(int argc, char * argv[])
 
 extern void remake_world(uint32_t seed)
 {
+    char * f_name = "remake_world()";
     free(world.log);
     world.log = NULL;  /* map_object_action.c's update_log() checks for this. */
     world.seed = seed;
@@ -57,7 +57,6 @@ extern void remake_world(uint32_t seed)
     free(world.map.cells);
     free_map_objects(world.map_objs);
     world.last_update_turn = 0;
-    world.turn = 1;
     init_map();
     add_map_objects(0, 1);
     add_map_objects(1, 1 + rrand() % 27);
@@ -66,9 +65,11 @@ extern void remake_world(uint32_t seed)
     add_map_objects(4, 1 + rrand() % 3);
     add_map_objects(5, 1 + rrand() % 3);
     set_cleanup_flag(CLEANUP_MAP_OBJECTS);
-    int test = unlink(world.path_record);
-    char * err = "remake_world() fails to unlink() record file.";
-    exit_err(test && errno != ENOENT, err);
+    if (world.turn)
+    {
+        exit_trouble(unlink(world.path_record), f_name, "unlink()");
+    }
+    world.turn = 1;
 }
 
 
