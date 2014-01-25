@@ -18,23 +18,23 @@
 
 struct World
 {
-    struct WinDB windb;
-    struct CommandDB cmd_db;        /* Command database. */
-    struct KeyBindingDB kb_global;    /* Global keybindings. */
-    struct KeyBindingDB kb_wingeom;   /* Window geometry config keybindings. */
-    struct KeyBindingDB kb_winkeys; /* Window keybinding config keybindings.*/
-    struct Map map;                 /* Pointer to the game map cells. */
-    time_t last_update;
-    struct yx_uint16 player_pos;
-    char * log;
-    char * path_server_in;
-    char * path_interface_conf;
-    char * player_inventory;
-    uint16_t turn;
-    uint16_t score;
-    uint8_t halfdelay;
-    uint8_t player_inventory_select;
-    uint8_t player_lifepoints;
+    struct WinDB winDB; /* data for window management and individual windows */
+    struct CommandDB commandDB; /* data on commands from commands config file */
+    struct KeyBindingDB kb_global; /* globally availabe keybindings */
+    struct KeyBindingDB kb_wingeom; /* Win geometry config view keybindings */
+    struct KeyBindingDB kb_winkeys; /* Win keybindings config view keybindings*/
+    struct Map map; /* game map geometry and content */
+    time_t last_update; /* used for comparison with server outfile' mtime */
+    struct yx_uint16 player_pos; /* coordinates of player on map */
+    char * log; /* log of player's activities */
+    char * path_server_in; /* path of server's input fifo */
+    char * path_interface_conf; /* path of interface configuration file */
+    char * player_inventory; /* one-item-per-line string list of owned items */
+    uint16_t turn; /* world/game turn */
+    uint16_t player_score; /* player's score*/
+    uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */
+    uint8_t player_inventory_select; /* index of selected item in inventory */
+    uint8_t player_lifepoints; /* how alive the player is */
     uint8_t winch; /* if set, SIGWINCH was registered; trigger reset_windows()*/
 };
 

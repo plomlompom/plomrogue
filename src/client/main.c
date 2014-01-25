@@ -34,11 +34,11 @@ int main(int argc, char * argv[])
     set_cleanup_func(cleanup);
 
     /* Initialize the whole interface. */
-    world.windb.t_screen = initscr();
+    world.winDB.t_screen = initscr();
     set_cleanup_flag(CLEANUP_NCURSES);
     noecho();
     curs_set(0);
-    keypad(world.windb.t_screen, TRUE);
+    keypad(world.winDB.t_screen, TRUE);
     init_command_db();      /* The command DB needs to be initialized before  */
     load_interface_conf();  /* the interface, whose keybindings depend on it. */
 

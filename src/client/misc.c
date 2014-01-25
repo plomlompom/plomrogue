@@ -16,7 +16,7 @@
                           * write_keybindings_to_file()
                           */
 #include "map_window.h" /* map_center() */
-#include "windows.h" /* for free_windb(), make_v_screen_and_init_win_sizes(),
+#include "windows.h" /* for free_winDB(), make_v_screen_and_init_win_sizes(),
                       * read_winconf_from_file(), write_winconf_of_id_to_file(),
                       * toggle_window()
                       */
@@ -55,9 +55,9 @@ extern void save_interface_conf()
     write_keybindings_to_file(file, &world.kb_winkeys, delim);
     write_order_wins_visible_active(file, delim);
     uint8_t i;
-    for (i = 0; i < strlen(world.windb.ids); i++)
+    for (i = 0; i < strlen(world.winDB.ids); i++)
     {
-        write_winconf_of_id_to_file(file, world.windb.ids[i], delim);
+        write_winconf_of_id_to_file(file, world.winDB.ids[i], delim);
     }
     try_fclose_unlink_rename(file, path_tmp, path, f_name);
 }
@@ -82,12 +82,12 @@ extern void load_interface_conf()
     /* Build windows as defined by read interface data and toggle them on. */
     make_v_screen_and_init_win_sizes();
     uint8_t i;
-    char tmp_active = world.windb.active;
-    char tmp_order[strlen(world.windb.order) + 1];
-    sprintf(tmp_order, "%s", world.windb.order);
-    world.windb.order[0] = '\0';
+    char tmp_active = world.winDB.active;
+    char tmp_order[strlen(world.winDB.order) + 1];
+    sprintf(tmp_order, "%s", world.winDB.order);
+    world.winDB.order[0] = '\0';
     for (i = 0; i < strlen(tmp_order); toggle_window(tmp_order[i]), i++);
-    world.windb.active = tmp_active;
+    world.winDB.active = tmp_active;
 
     /* So that the interface config data and the window structs get freed. */
     set_cleanup_flag(CLEANUP_INTERFACE);
@@ -100,12 +100,12 @@ extern void unload_interface_conf()
     free_keybindings(world.kb_global.kbs);
     free_keybindings(world.kb_wingeom.kbs);
     free_keybindings(world.kb_winkeys.kbs);
-    while ('\0' != world.windb.active)
+    while ('\0' != world.winDB.active)
     {
-        toggle_window(world.windb.active);
+        toggle_window(world.winDB.active);
     }
-    free_windb();
-    delwin(world.windb.v_screen);
+    free_winDB();
+    delwin(world.winDB.v_screen);
 }
 
 

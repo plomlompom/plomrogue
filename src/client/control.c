@@ -150,9 +150,9 @@ static uint8_t try_server_commands(struct Command * command)
 extern uint8_t try_key(uint16_t key)
 {
     struct Command * command = get_command_to_keycode(world.kb_global.kbs, key);
-    if (!command && world.windb.active)
+    if (!command && world.winDB.active)
     {
-        struct Win * w = get_win_by_id(world.windb.active);
+        struct Win * w = get_win_by_id(world.winDB.active);
         if      (0 == w->view)
         {
             command = get_command_to_keycode(w->kb.kbs, key);

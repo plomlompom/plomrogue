@@ -347,7 +347,7 @@ extern void draw_win_info(struct Win * win)
     sprintf(text, "%s%d%s%d%s%d",
             dsc_turn, world.turn,
             dsc_hitpoints, world.player_lifepoints,
-            dsc_score, world.score);
+            dsc_score, world.player_score);
     add_text_with_linebreaks(win, text);
 }
 
@@ -384,7 +384,7 @@ extern void draw_win_available_keybindings(struct Win * win)
 {
     char * title = "Active window's keybindings:";
     struct KeyBinding * kb_p;
-    struct Win * w = get_win_by_id(world.windb.active);
+    struct Win * w = get_win_by_id(world.winDB.active);
     if     (0 == w->view)
     {
         kb_p = w->kb.kbs;

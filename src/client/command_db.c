@@ -33,9 +33,9 @@ static void copy_tokenized_string(char * line, char ** ch_ptr, char * delim)
 
 extern struct Command * get_command(char * dsc_short)
 {
-    struct Command * cmd_ptr = world.cmd_db.cmds;
+    struct Command * cmd_ptr = world.commandDB.cmds;
     uint8_t i = 0;
-    while (i < world.cmd_db.n)
+    while (i < world.commandDB.n)
     {
         if (0 == strcmp(dsc_short, cmd_ptr->dsc_short))
         {
@@ -47,7 +47,7 @@ extern struct Command * get_command(char * dsc_short)
     char * err_start = "get_command_data() failed on request for: ";
     char err[strlen(err_start) + strlen(dsc_short) + 1];
     sprintf(err, "%s%s", err_start, dsc_short);
-    exit_err(i == world.cmd_db.n, err);
+    exit_err(i == world.commandDB.n, err);
     return cmd_ptr;
 }
 
@@ -61,7 +61,7 @@ extern void init_command_db()
     uint32_t lines;
     uint32_t linemax = textfile_sizes(file, &lines);
     char line[linemax + 1];
-    world.cmd_db.cmds = try_malloc(lines * sizeof(struct Command), f_name);
+    world.commandDB.cmds = try_malloc(lines * sizeof(struct Command), f_name);
     uint8_t i = 0;
     char * delim = " ";
     while (try_fgets(line, linemax + 1, file, f_name))
@@ -70,20 +70,20 @@ extern void init_command_db()
         {
             break;
         }
-        copy_tokenized_string(line, &world.cmd_db.cmds[i].dsc_short, delim);
-        copy_tokenized_string(NULL, &world.cmd_db.cmds[i].server_msg, delim);
-        if (!strcmp("0", world.cmd_db.cmds[i].server_msg))
-        {                                          /* .server_msg==0 detects  */
-            free(world.cmd_db.cmds[i].server_msg); /* non-server commands in  */
-            world.cmd_db.cmds[i].server_msg = NULL;/* control.h's try_key() / */
-        }                                          /* try_server_command().   */
+        copy_tokenized_string(line, &world.commandDB.cmds[i].dsc_short, delim);
+        copy_tokenized_string(NULL, &world.commandDB.cmds[i].server_msg, delim);
+        if (!strcmp("0", world.commandDB.cmds[i].server_msg))
+        {                                             /*.server_msg==0 detects*/
+            free(world.commandDB.cmds[i].server_msg); /* non-server commands  */
+            world.commandDB.cmds[i].server_msg = NULL;/* in try_key() /       */
+        }                                             /* try_server_command().*/
         char * arg_string = strtok(NULL, delim);
-        world.cmd_db.cmds[i].arg = arg_string[0];
-        copy_tokenized_string(NULL, &world.cmd_db.cmds[i].dsc_long, "\n");
+        world.commandDB.cmds[i].arg = arg_string[0];
+        copy_tokenized_string(NULL, &world.commandDB.cmds[i].dsc_long, "\n");
         i++;
     }
     try_fclose(file, f_name);
-    world.cmd_db.n = lines;
+    world.commandDB.n = lines;
     set_cleanup_flag(CLEANUP_COMMANDS);
 }
 
@@ -92,12 +92,12 @@ extern void init_command_db()
 extern void free_command_db()
 {
     uint8_t i = 0;
-    while (i < world.cmd_db.n)
+    while (i < world.commandDB.n)
     {
-        free(world.cmd_db.cmds[i].dsc_short);
-        free(world.cmd_db.cmds[i].dsc_long);
-        free(world.cmd_db.cmds[i].server_msg);
+        free(world.commandDB.cmds[i].dsc_short);
+        free(world.commandDB.cmds[i].dsc_long);
+        free(world.commandDB.cmds[i].server_msg);
         i++;
     }
-    free(world.cmd_db.cmds);
+    free(world.commandDB.cmds);
 }

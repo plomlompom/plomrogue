@@ -70,8 +70,8 @@ extern uint16_t center_offset(uint16_t position,
 /* Get Win of "id". */
 extern struct Win * get_win_by_id(char id);
 
-/* Read/write individual Win (identified by "c") and world.windb.order /
- * world.windb.active from/to "file". Follow writing with "delim" delimiter.
+/* Read/write individual Win (identified by "c") and world.winDB.order /
+ * world.winDB.active from/to "file". Follow writing with "delim" delimiter.
  * Use "line" and "linemax" as expected by try_fgets().
  */
 extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
@@ -84,8 +84,8 @@ extern void write_order_wins_visible_active(FILE * file, char * delim);
 /* Builds virtual sreen from .t_screen's size, fits win's sizes to them.*/
 extern void make_v_screen_and_init_win_sizes();
 
-/* Free all WinDB data. */
-extern void free_windb();
+/* Free all winDB data. */
+extern void free_winDB();
 
 /* The SIGWINCH handler winch_called() merely sets world.winch to 1. This info
  * is used by io_loop() to call reset_windows_on_winch(), which adapts the

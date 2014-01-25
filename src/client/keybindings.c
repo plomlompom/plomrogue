@@ -81,7 +81,7 @@ static struct KeyBindingDB * char_selected_kb_db(char c)
     }
     else if ('w' == c)
     {
-        struct Win * w = get_win_by_id(world.windb.active);
+        struct Win * w = get_win_by_id(world.winDB.active);
         kbd = &w->kb;
     }
     return kbd;
