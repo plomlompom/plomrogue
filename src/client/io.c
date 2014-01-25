@@ -67,8 +67,8 @@ static FILE * changed_server_out_file(char * path);
  * a hard-coded serialization format. Returns 1 on success and 0 if the out file
  * wasn't read for supposedly not having changed since a last read_world() call.
  *
- * Note that the first successful read_world() triggers map_center(), so that on
- * start the client focuses the map window on the player.
+ * map_center() is triggered by the first successful read_world() or on turn 1,
+ * so the client focuses the map window on the player on client and world start.
  */
 static uint8_t read_world();
 
@@ -201,7 +201,7 @@ static uint8_t read_world()
     read_inventory(read_buf, linemax, file);
     world.player_pos.y = read_value_from_line(read_buf, linemax, file);
     world.player_pos.x = read_value_from_line(read_buf, linemax, file);
-    if (first_read)
+    if (1 == world.turn || first_read)
     {
         map_center();
         first_read = 0;
