@@ -27,6 +27,7 @@
 #include "keybindings.h" /* free_keybindings(), write_keybidings_to_file(),
                           * read_keybindings_from_file()
                           */
+#include "misc.h" /* array_append() */
 #include "world.h" /* global world */
 
 
@@ -99,9 +100,6 @@ static void draw_wins(struct Win * w);
  */
 static void append_win(struct Win * w);
 static void suspend_win(struct Win * w);
-
-/* Copy Win content pointed to by "win" into appendend world.winDB.wins area. */
-static void add_win_to_winDB(struct Win * win);
 
 
 
@@ -554,33 +552,6 @@ static void suspend_win(struct Win * w)
 
 
 
-static void add_win_to_winDB(struct Win * win)
-{
-    char * f_name = "add_win_to_winDB()";
-    if (world.winDB.ids)
-    {
-        uint8_t old_ids_size = strlen(world.winDB.ids);
-        char * new_ids = try_malloc(old_ids_size + 1 + 1, f_name);
-        sprintf(new_ids, "%s%c", world.winDB.ids, win->id);
-        free(world.winDB.ids);
-        world.winDB.ids = new_ids;
-        uint16_t old_wins_size = old_ids_size * sizeof(struct Win);
-        uint16_t new_wins_size = old_wins_size + sizeof(struct Win);
-        struct Win * new_wins = try_malloc(new_wins_size, f_name);
-        memcpy(new_wins, world.winDB.wins, old_wins_size);
-        new_wins[old_ids_size] = *win;
-        free(world.winDB.wins);
-        world.winDB.wins = new_wins;
-        return;
-    }
-    world.winDB.ids = try_malloc(2, f_name);
-    sprintf(world.winDB.ids, "%c", win->id);
-    world.winDB.wins = try_malloc(sizeof(struct Win), f_name);
-    world.winDB.wins[0] = *win;
-}
-
-
-
 extern uint16_t center_offset(uint16_t position, uint16_t mapsize,
                               uint16_t frame_size)
 {
@@ -644,7 +615,21 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
     win.target_width = atoi(line);
     win.target_width_type = (0 >= win.target_width);
     read_keybindings_from_file(line, linemax, file, &win.kb);
-    add_win_to_winDB(&win);
+    if (world.winDB.ids)
+    {
+        uint8_t old_ids_size = strlen(world.winDB.ids);
+        char * new_ids = try_malloc(old_ids_size + 1 + 1, f_name);
+        sprintf(new_ids, "%s%c", world.winDB.ids, win.id);
+        free(world.winDB.ids);
+        world.winDB.ids = new_ids;
+        array_append(old_ids_size, sizeof(struct Win), (void *) &win,
+                     (void **) &world.winDB.wins);
+        return 1;
+    }
+    world.winDB.ids = try_malloc(2, f_name);
+    sprintf(world.winDB.ids, "%c", win.id);
+    world.winDB.wins = try_malloc(sizeof(struct Win), f_name);
+    world.winDB.wins[0] = win;
     return 1;
 }
 

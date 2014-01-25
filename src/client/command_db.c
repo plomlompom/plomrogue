@@ -14,6 +14,7 @@
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "world.h" /* global world */
 
+#include "misc.h"
 
 
 /* Point "ch_ptr" to next strtok() string in "line" delimited by "delim".*/
@@ -79,13 +80,8 @@ extern void init_command_db()
         char * arg_string = strtok(NULL, delim);
         cmd.arg = arg_string[0];
         copy_tokenized_string(NULL, &cmd.dsc_long, "\n");
-        uint32_t old_size = i * sizeof(struct Command);
-        uint32_t new_size = old_size + sizeof(struct Command);
-        struct Command * new_cmds = try_malloc(new_size, f_name);
-        memcpy(new_cmds, world.commandDB.cmds, old_size);
-        new_cmds[i] = cmd;
-        free(world.commandDB.cmds);
-        world.commandDB.cmds = new_cmds;
+        array_append(i, sizeof(struct Command), (void *) &cmd,
+                     (void **) &world.commandDB.cmds);
         i++;
     }
     try_fclose(file, f_name);
