@@ -208,8 +208,6 @@ extern void read_keybindings_from_file(char * line, uint32_t linemax,
         kb_p->command = get_command(cmdptr);
         loc_last_ptr = & kb_p->next;
     }
-    kbd->edit = 0;
-    kbd->select = 0;
 }
 
 

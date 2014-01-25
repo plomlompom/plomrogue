@@ -10,7 +10,7 @@
 #include <stdlib.h> /* free(), atoi() */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdio.h> /* sprintf() */
-#include <string.h> /* memcpy(), strlen(), strnlen(), strchr() */
+#include <string.h> /* memcpy(), strlen(), strnlen(), strchr(), memset() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/readwrite.h" /* try_fputc(), try_write(), try_fgets(),
                                   * try_fgetc()
@@ -485,8 +485,7 @@ static void draw_wins(struct Win * w)
     }
     free(w->winmap);
     w->winmap = NULL;
-    w->winmap_size.y = 0;
-    w->winmap_size.x = 0;
+    memset(&w->winmap_size, 0, sizeof(struct yx_uint16));
     if (offset_y > 0)
     {
         winscroll_hint(w, '^', offset_y + 1);
@@ -631,6 +630,7 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
         return 0;
     }
     struct Win win;
+    memset(&win, 0, sizeof(struct Win));
     win.id = (char) test;
     try_fgetc(file, f_name);
     try_fgets(line, linemax + 1, file, f_name);
@@ -644,14 +644,6 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
     win.target_width = atoi(line);
     win.target_width_type = (0 >= win.target_width);
     read_keybindings_from_file(line, linemax, file, &win.kb);
-    win.view = 0;
-    win.target_center.y = 0;
-    win.target_center.x = 0;
-    win.winmap_size.y = 0;
-    win.winmap_size.x = 0;
-    win.winmap       = NULL;
-    win.center.y     = 0;
-    win.center.x     = 0;
     add_win_to_windb(&win);
     return 1;
 }
@@ -845,8 +837,7 @@ extern void toggle_winconfig()
     {
         w->view          = 1;
         w->target_center = w->center;
-        w->center.y      = 0;
-        w->center.x      = 0;
+        memset(&w->center, 0, sizeof(struct yx_uint16));
         return;
     }
     else if (1 == w->view)

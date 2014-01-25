@@ -5,7 +5,7 @@
 #include <stdio.h> /* FILE typedef */
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdlib.h> /* free(), atoi() */
-#include <string.h> /* strlen(), memcpy(), strtok() */
+#include <string.h> /* strlen(), memcpy(), strtok(), memset() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets(),
                                   * textfile_sizes()
                                   */
@@ -67,6 +67,7 @@ static void add_map_object(uint8_t type)
     char * f_name = "add_map_object()";
     struct MapObjDef * mod = get_map_object_def(type);
     struct MapObj *    mo  = try_malloc(sizeof(struct MapObj), f_name);
+    memset(mo, 0, sizeof(struct MapObj));
     mo->id         = world.map_obj_count++;
     mo->type       = mod->id;
     mo->lifepoints = mod->lifepoints;
@@ -89,11 +90,6 @@ static void add_map_object(uint8_t type)
             break;
         }
     }
-    mo->progress = 0;
-    mo->command  = 0;
-    mo->arg      = 0;
-    mo->owns     = NULL;
-    mo->next     = NULL;
     struct MapObj ** mo_ptr_ptr = &world.map_objs;
     for (; NULL != * mo_ptr_ptr; mo_ptr_ptr = &(*mo_ptr_ptr)->next);
     * mo_ptr_ptr = mo;
