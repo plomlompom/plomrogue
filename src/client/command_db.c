@@ -56,8 +56,7 @@ extern struct Command * get_command(char * dsc_short)
 extern void init_command_db()
 {
     char * f_name = "init_command_db()";
-    char * path = "confclient/commands";
-    FILE * file = try_fopen(path, "r", f_name);
+    FILE * file = try_fopen(world.path_commands, "r", f_name);
     uint32_t lines;
     uint32_t linemax = textfile_sizes(file, &lines);
     char line[linemax + 1];

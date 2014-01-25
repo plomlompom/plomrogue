@@ -29,6 +29,7 @@ struct World
     char * log; /* log of player's activities */
     char * path_server_in; /* path of server's input fifo */
     char * path_interface_conf; /* path of interface configuration file */
+    char * path_commands; /* path of commands config file */
     char * player_inventory; /* one-item-per-line string list of owned items */
     uint16_t turn; /* world/game turn */
     uint16_t player_score; /* player's score*/

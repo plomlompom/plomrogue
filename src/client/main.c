@@ -24,7 +24,8 @@ int main(int argc, char * argv[])
     char * f_name = "main()";
 
     /* Declare hard-coded paths here. */
-    world.path_server_in = "server/in";
+    world.path_server_in      = "server/in";
+    world.path_commands       = "confclient/commands";
     world.path_interface_conf = "confclient/interface_conf";
 
     /* Parse command line arguments. */
