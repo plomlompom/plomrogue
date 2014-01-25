@@ -9,6 +9,7 @@
 #include "command_db.h" /* init_command_db() */
 #include "io.h" /* io_loop(), try_send() */
 #include "misc.h" /* load_interface_conf(), winch_called() */
+#include "windows.h" /* struct Win, winch_called() */
 #include "world.h" /* struct World */
 
 
@@ -32,11 +33,11 @@ int main(int argc, char * argv[])
     set_cleanup_func(cleanup);
 
     /* Initialize the whole interface. */
-    world.wins.screen = initscr();
+    world.windb.t_screen = initscr();
     set_cleanup_flag(CLEANUP_NCURSES);
     noecho();
     curs_set(0);
-    keypad(world.wins.screen, TRUE);
+    keypad(world.windb.t_screen, TRUE);
     init_command_db();      /* The command DB needs to be initialized before  */
     load_interface_conf();  /* the interface, whose keybindings depend on it. */
 

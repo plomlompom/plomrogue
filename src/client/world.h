@@ -12,13 +12,13 @@
 #include "../common/yx_uint16.h" /* struct yx_uint16 */
 #include "keybindings.h" /* stuct KeyBindingDB */
 #include "command_db.h" /* struct CommandDB */
-#include "wincontrol.h" /* WinConfDB */
+#include "windows.h" /* WinDB */
 
 
 
 struct World
 {
-    struct WinConfDB wins;
+    struct WinDB windb;
     struct CommandDB cmd_db;        /* Command database. */
     struct KeyBindingDB kb_global;    /* Global keybindings. */
     struct KeyBindingDB kb_wingeom;   /* Window geometry config keybindings. */

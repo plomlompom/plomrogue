@@ -9,7 +9,6 @@
 #include <string.h> /* strlen(), strchr(), strcmp() */
 #include "../common/readwrite.h" /* textfile_sizes(), try_fgets(),try_fwrite()*/
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "wincontrol.h" /* get_winconf_by_win() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* global world */
 
@@ -82,8 +81,8 @@ static struct KeyBindingDB * char_selected_kb_db(char c)
     }
     else if ('w' == c)
     {
-        struct WinConf * wc = get_winconf_by_win(world.wins.win_active);
-        kbd = &wc->kb;
+        struct Win * w = get_win_by_id(world.windb.active);
+        kbd = &w->kb;
     }
     return kbd;
 }

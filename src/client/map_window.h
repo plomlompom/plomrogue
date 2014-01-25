@@ -6,8 +6,6 @@
 #ifndef MAP_WINDOW_H
 #define MAP_WINDOW_H
 
-#include "../common/yx_uint16.h" /* for yx_uint16  */
-
 
 
 /* Try changing map window's focus into direction "d" (north = "N" etc.). */

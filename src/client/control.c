@@ -12,11 +12,10 @@
 #include "misc.h" /* reload_interface_conf(), save_interface_conf(),
                    * nav_inventory()
                    */
-#include "wincontrol.h" /* struct WinConf, toggle_window(), toggle_winconfig(),
-                         * scroll_pad(), get_winconf_by_win(),
-                         * growshrink_active_window(), toggle_win_size_type()
-                         */
-#include "windows.h" /* for cycle_active_win(), shift_active_win() */
+#include "windows.h" /* get_win_byid(), shift_active_win(), resize_active_win(),
+                      * toggle_win_size_type(), toggle_window(),
+                      * cycle_active_win(), scroll_v_screen()
+                      */
 #include "world.h" /* for global world */
 
 
@@ -90,8 +89,8 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "inv_d", nav_inventory, 'd')
             || try_1args(command, "cyc_win_f", cycle_active_win, 'f')
             || try_1args(command, "cyc_win_b", cycle_active_win, 'b')
-            || try_1args(command, "scrl_r", scroll_pad, '+')
-            || try_1args(command, "scrl_l", scroll_pad, '-')
+            || try_1args(command, "scrl_r", scroll_v_screen, '+')
+            || try_1args(command, "scrl_l", scroll_v_screen, '-')
             || try_1args(command, "to_a_keywin", toggle_window, 'k')
             || try_1args(command, "to_g_keywin", toggle_window, '0')
             || try_1args(command, "to_wg_keywin", toggle_window, '1')
@@ -101,10 +100,10 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "to_inv", toggle_window, 'c')
             || try_1args(command, "to_logwin", toggle_window, 'l')
             || try_0args(command, "winconf", toggle_winconfig)
-            || try_1args(command, "grow_h", growshrink_active_window, '*')
-            || try_1args(command, "shri_h", growshrink_active_window, '_')
-            || try_1args(command, "grow_v", growshrink_active_window, '+')
-            || try_1args(command, "shri_v", growshrink_active_window, '-')
+            || try_1args(command, "grow_h", resize_active_win, '*')
+            || try_1args(command, "shri_h", resize_active_win, '_')
+            || try_1args(command, "grow_v", resize_active_win, '+')
+            || try_1args(command, "shri_v", resize_active_win, '-')
             || try_1args(command, "to_height_t", toggle_win_size_type, 'y')
             || try_1args(command, "to_width_t", toggle_win_size_type, 'x')
             || try_1args(command, "shift_f", shift_active_win, 'f')
@@ -151,18 +150,18 @@ static uint8_t try_server_commands(struct Command * command)
 extern uint8_t try_key(uint16_t key)
 {
     struct Command * command = get_command_to_keycode(world.kb_global.kbs, key);
-    if (!command && world.wins.win_active)
+    if (!command && world.windb.active)
     {
-        struct WinConf * wc = get_winconf_by_win(world.wins.win_active);
-        if      (0 == wc->view)
+        struct Win * w = get_win_by_id(world.windb.active);
+        if      (0 == w->view)
         {
-            command = get_command_to_keycode(wc->kb.kbs, key);
+            command = get_command_to_keycode(w->kb.kbs, key);
         }
-        else if (1 == wc->view)
+        else if (1 == w->view)
         {
             command = get_command_to_keycode(world.kb_wingeom.kbs, key);
         }
-        else if (2 == wc->view)
+        else if (2 == w->view)
         {
             command = get_command_to_keycode(world.kb_winkeys.kbs, key);
         }

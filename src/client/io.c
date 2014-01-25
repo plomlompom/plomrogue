@@ -17,9 +17,9 @@
                                   * try_fgetc()
                                   */
 #include "control.h" /* try_key() */
-#include "map_window.h" /* for map_center() */
+#include "map_window.h" /* map_center() */
 #include "misc.h" /* reset_windows() */
-#include "windows.h" /* draw_all_wins() */
+#include "windows.h" /* reset_windows_on_winch(), draw_all_wins() */
 #include "world.h" /* world global */
 
 
@@ -260,7 +260,7 @@ extern char * io_loop()
     {
         if (world.winch)
         {
-            reset_windows();
+            reset_windows_on_winch();
             world.winch = 0;
             change_in_client++;
         }

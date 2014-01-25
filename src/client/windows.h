@@ -24,90 +24,122 @@
 #ifndef WINDOWS_H
 #define WINDOWS_H
 
-#include <ncurses.h> /* chtype */
-#include <stdint.h> /* uint16_t, int16_t */
+#include <ncurses.h> /* WINDOW, chtype */
+#include <stdint.h> /* uint8_t, int16_t, uint16_t */
+#include "keybindings.h" /* struct KeyBindingDB */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 
 
 
-/* "Win" structs describe windows as frames located inside the virtual screen
- * pad through which "winmaps" are visible, 2-dimensional maps of ncurses
- * chtypes. If a winmap is bigger than its frame, scrolling hints will appear at
- * the proper edges. Win structs are chained into a linked list of all the
- * windows visible on the virtual screen and also contain pointers to what
- * content is to be drawn inside the window, and by use of what method.
- */
-struct Win
+struct WinDB
 {
-    struct Win * prev;  /* chain pointers; if 0, they mark the start or end  */
-    struct Win * next;  /* of the chain; if both are 0, Win is outside chain */
-    struct yx_uint16 framesize;   /* window frame size to see winmap through */
-    struct yx_uint16 start;       /* upper left corner of window in pad */
-    struct yx_uint16 center;      /* winmap cell to center frame on if smaller*/
-    char * title;                 /* title to be used in window title bar */
-    void (* draw) (struct Win *); /* function that draws/updates the winmap */
-    chtype * winmap;              /* sequence of cells, sorted into lines ... */
-    struct yx_uint16 winmapsize;  /* ... with these geometry infos */
+    WINDOW * t_screen; /* ncurses' pointer to the terminal screen */
+    WINDOW * v_screen; /* virtual screen (ncurses pad) */
+    struct Win * wins; /* array of windows */
+    struct yx_uint16 v_screen_size; /* virtual screen size */
+    char * ids; /* all windows' ids, followed by \0 */
+    char * order; /* visible windows' id's order, followed by \0 */
+    uint16_t v_screen_offset; /* how many cells v_screen view moved rightwards*/
+    char active; /* id of window selected as active */
 };
 
+struct Win
+{
+    struct KeyBindingDB kb; /* window-specific keybindings */
+    char * title; /* title to be used in window title bar */
+    struct yx_uint16 target_center; /* saves .center when toggling .view */
+    struct yx_uint16 frame_size; /* size of window/frame to see winmap through*/
+    struct yx_uint16 start; /* upper left corner of window in v_screen */
+    struct yx_uint16 center; /* winnap cell to center frame on if < winmap */
+    struct yx_uint16 winmap_size; /* delimits .winmap, sorts it into lines */
+    chtype * winmap; /* window content in sequence of chtype's to write */
+    int16_t target_height; /* window size / .frame_size description in config */
+    int16_t target_width;  /* file format, i.e. values <= 0 may be used      */
+    char id; /* Win identifier; also maps to default window drawing function. */
+    uint8_t target_height_type; /* 0: read .height/.width as positive size; */
+    uint8_t target_width_type;  /* 1: as negative diff to v_screen size     */
+    uint8_t view; /* winde view mode: 0: use default draw function set by .id */
+};                /* 1/2: use one of the two config view draw function */
 
 
-/* Builds world.wins.pad from the sizes of the current terminal screen. */
-extern void make_pad();
 
-/* Initialize a Win at "wp" to "title", "height" and "width" and appoint
- * "func"() as its .draw. Initialize other members to 0.
- *
- * Pass 0 for "width" to make the window as wide as the terminal screen. Pass 0
- * for "height" for the maximum allowed height: one cell smaller than that of
- * the terminal screen. Pass negative values for either of them to make the
- * window width/height so many cells smaller than what 0 would set. Values that
- * that would reduce the window height or width to less than 1 cell according to
- * the aforementioned rules set the height/width as if they were set to 0.
+/* Return yx offset to focus map of "mapsize" on "position" in "frame_size". */
+extern uint16_t center_offset(uint16_t position,
+                              uint16_t mapsize, uint16_t frame_size);
+
+/* Get Win of "id". */
+extern struct Win * get_win_by_id(char id);
+
+/* Read/write individual Win (identified by "c") and world.windb.order /
+ * world.windb.active from/to "file". Follow writing with "delim" delimiter.
+ * Use "line" and "linemax" as expected by try_fgets().
  */
-extern void init_win(struct Win ** wp, char * title, int16_t height,
-                     int16_t width, void * func);
+extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
+                                      FILE * file);
+extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim);
+extern void read_order_wins_visible_active(char * line, uint32_t linemax,
+                                           FILE * file);
+extern void write_order_wins_visible_active(FILE * file, char * delim);
 
-/* Free memory initianized Win structs. */
-extern void free_win(struct Win * win);
+/* Builds virtual sreen from .t_screen's size, fits win's sizes to them.*/
+extern void make_v_screen_and_init_win_sizes();
 
-/* Append/suspend window "w" to/from chain of visible windows. Appended windows
- * will become active. Suspended active windows will move the active window
- * selection to their successor in the window chain or, failing that, their
- * predecessor, or, failing that, to 0 (no window active).
+/* Free all WinDB data. */
+extern void free_windb();
+
+/* The SIGWINCH handler winch_called() merely sets world.winch to 1. This info
+ * is used by io_loop() to call reset_windows_on_winch(), which adapts the
+ * currently loaded interface configuration to the new .t_screen size.
  */
-extern void append_win(struct Win * w);
-extern void suspend_win(struct Win * w);
+extern void winch_called();
+extern void reset_windows_on_winch();
 
-/* Apply scrolling offset "new_offset" to virtual screen if it is equal/greater
- * 0 and does not push the view (further) beyond the virtual screen's border. If
- * the view is already beyond the virtual screen's border due to it having
- * shrunk after suspension of windows, only allow screen scrolling leftwards.
+/* Draw .v_screen and its windows. Add scroll hints where edges of .t_screen hit
+ * .non-edges inside the virtual screen. Then update .t_screen.
  */
-extern void reset_pad_offset(uint16_t new_offset);
+extern void draw_all_wins();
 
-/* Apply "size" to the active window if it provides a minimum size of 1x1 cells
- * and is in height at least one cell smaller than the screen's vertical height
- * (to provide space for the title bar). Does nothing if no window is active.
- */
-extern void resize_active_win(struct yx_uint16 size);
+/* Toggle display of a window of "id". */
+extern void toggle_window(char id);
 
-/* Cycle active window selection forwards ("dir" == "f") or backwards (any
- * other "dir"). Wrap around in the windows chain if start / end of it is met.
- * Does nothing if no window is active.
+/* Toggle "window configuration" view for active window. Sets sensible .center
+ * values for each configuration view (for winconf_geometry: y=0, x=0; for
+ * winconf_keys: x=0 (y is set by draw_winconf_keybindings()); stores default
+ * view's .center in .target_center to return to it when toggling back.
  */
-extern void cycle_active_win(char dir);
+extern void toggle_winconfig();
+
+/* Toggle active window's .target_(height/width)_type ("axis" = "y": height;
+ * else: width). Don't toggle to .target_width_type of 1 (saving the width as a
+ * diff to the .t_screen's width) if window's width is larger than .t_screen's
+ * width, for such width is better saved directly with .target_width_type of 0.
+ */
+extern void toggle_win_size_type(char axis);
+
+/* Grow or shrink active window horizontally ("change" = "*"/"_") or vertically
+ * ("change" = "+"/"-") if the new size was at least 1x1, the height at least
+ * one cell smaller than .v_screen's vertical hight (to provide space for the
+ * title bar) and the width max. (2^16) - 1 cells. If a new window width would
+ * surpass that of .t_screen, set active window's .target_width_type to 0.
+ */
+extern void resize_active_win(char c);
 
 /* Move active window forwards ("dir" == "f") or backwards (any other "dir") in
- * the window chain. Wrap around in the window chain if start / end of it is
- * met. Does nothing if no window is active.
+ * window chain. Wrap around in the window chain if start / end of it is met.
  */
 extern void shift_active_win(char dir);
 
-/* Draw virtual screen and its windows. Add scroll hints where edges of terminal
- * screen hit non-edges inside the virtual screen. Then update terminal screen.
+/* Sroll .v_screen one cell to the left if "dir" is "-" and .v_screen_offset is
+ * more than 1, or to the right if "dir" is "+" and .v_screen's right edge would
+ * not move (further, if suspension of windows has moved it to the left already)
+ * leftwards to .t_screen's right edge.
  */
-extern void draw_all_wins();
+extern void scroll_v_screen(char dir);
+
+/* Cycle active window selection forwards ("dir" == "f") or backwards (any
+ * other "dir"). Wrap around in the windows chain if start / end of it is met.
+ */
+extern void cycle_active_win(char dir);
 
 
 
