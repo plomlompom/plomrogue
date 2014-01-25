@@ -31,7 +31,7 @@ struct CommandDB
 /* Return Command struct for command described by its "dsc_short" member. */
 extern struct Command * get_command(char * dsc_short);
 
-/* Reads CommandDB from CommandDB file, line by line, until first empty line. */
+/* Reads in CommandDB config file line by line until end or first empty line. */
 extern void init_command_db();
 
 /* Free all memory allocated with init_command_db. */

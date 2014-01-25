@@ -3,7 +3,7 @@
 #include "command_db.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint32_t */
-#include <stdio.h> /* FILE */
+#include <stdio.h> /* FILE, sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memcpy(), strlen(), strtok(), strcmp() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets()
@@ -12,22 +12,43 @@
 #include "../common/rexit.h" /* for exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
+#include "misc.h" /* array_append() */
 #include "world.h" /* global world */
 
-#include "misc.h"
 
 
-/* Point "ch_ptr" to next strtok() string in "line" delimited by "delim".*/
-static void copy_tokenized_string(char * line, char ** ch_ptr, char * delim);
+/* Helpers to init_command_db(). */
+static uint8_t copy_tokenized_string(char * line, char ** ch_ptr, char * delim);
+static char * init_command_db_err(char * line_copy, uint8_t line_number);
 
 
-
-static void copy_tokenized_string(char * line, char ** ch_ptr, char * delim)
+static uint8_t copy_tokenized_string(char * line, char ** ch_ptr, char * delim)
 {
     char * f_name = "copy_tokenized_string()";
     char * dsc_ptr = strtok(line, delim);
+    if (!dsc_ptr)
+    {
+        return 1;
+    }
     * ch_ptr = try_malloc(strlen(dsc_ptr) + 1, f_name);
     memcpy(* ch_ptr, dsc_ptr, strlen(dsc_ptr) + 1);
+    return 0;
+}
+
+
+
+static char * init_command_db_err(char * line_copy, uint8_t line_number)
+{
+    char * f_name = "init_command_db_err";
+    char * err_start = "Failed reading command config file at ";
+    char * err_middle = " due to malformed line ";
+    line_copy[strlen(line_copy) - 1] = '\0';
+    char * err = try_malloc(strlen(err_start) + strlen(world.path_commands) +
+                            strlen(err_middle) + 3 + 2 + strlen(line_copy) + 1,
+                            f_name);
+    sprintf(err, "%s%s%s%d: %s", err_start, world.path_commands, err_middle,
+            line_number, line_copy);
+    return err;
 }
 
 
@@ -69,17 +90,21 @@ extern void init_command_db()
         {
             break;
         }
+        char line_copy[strlen(line) + 1];
+        sprintf(line_copy, "%s", line);
         struct Command cmd;
-        copy_tokenized_string(line, &cmd.dsc_short, delim);
-        copy_tokenized_string(NULL, &cmd.server_msg, delim);
+        char * arg_string;
+        exit_err((   copy_tokenized_string(line, &cmd.dsc_short, delim)
+                 || copy_tokenized_string(NULL, &cmd.server_msg, delim)
+                 || NULL == (arg_string = strtok(NULL, delim))
+                 || copy_tokenized_string(NULL, &cmd.dsc_long, "\n")),
+                 init_command_db_err(line_copy, i + 1));
+        cmd.arg = arg_string[0];
         if (!strcmp("0", cmd.server_msg))
         {                          /* A .server_msg == NULL helps control.c's */
             free(cmd.server_msg);  /* try_key() and try_server_command() to   */
             cmd.server_msg = NULL; /* differentiate server commands from      */
         }                          /* non-server commands.                    */
-        char * arg_string = strtok(NULL, delim);
-        cmd.arg = arg_string[0];
-        copy_tokenized_string(NULL, &cmd.dsc_long, "\n");
         array_append(i, sizeof(struct Command), (void *) &cmd,
                      (void **) &world.commandDB.cmds);
         i++;
