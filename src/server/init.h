@@ -14,6 +14,7 @@
 extern void obey_argv(int argc, char * argv[]);
 
 /* Dissolves old game world if it exists, and generates a new one from "seed".
+ * Unlinks any pre-existing file at world.path_record to re-start record.
  *
  * Map object (action) definitions read in from server config directory are not
  * affected. world.last_update_turn is set to 0 and world.turn to 1, so that

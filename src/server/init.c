@@ -1,12 +1,13 @@
 /* src/server/init.c */
 
 #include "init.h"
+#include <errno.h> /* errno */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint32_t */
 #include <stdlib.h> /* exit(), free() */
 #include <string.h> /* atoi() */
 #include <time.h> /* time() */
-#include <unistd.h> /* optarg, getopt(), access() */
+#include <unistd.h> /* optarg, getopt(), access(), unlink() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_sizes(),
                                   * try_fgets()
                                   */
@@ -65,6 +66,9 @@ extern void remake_world(uint32_t seed)
     add_map_objects(4, 1 + rrand() % 3);
     add_map_objects(5, 1 + rrand() % 3);
     set_cleanup_flag(CLEANUP_MAP_OBJECTS);
+    int test = unlink(world.path_record);
+    char * err = "remake_world() fails to unlink() record file.";
+    exit_err(test && errno != ENOENT, err);
 }
 
 
