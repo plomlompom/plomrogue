@@ -129,6 +129,7 @@ extern void reload_interface_conf()
     unload_interface_conf();
     load_interface_conf();
     map_center();
+    world.winDB.v_screen_offset = 0;
 }
 
 
