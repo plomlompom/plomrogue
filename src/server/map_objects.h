@@ -37,8 +37,8 @@ struct MapObjDef
 
 
 
-/* Initialize map object definitions chain from file at path "filename". */
-extern void init_map_object_defs(char * filename);
+/* Initialize map object definitions chain. */
+extern void init_map_object_defs();
 
 /* Free map object definitions chain starting at "mod_start". */
 extern void free_map_object_defs(struct MapObjDef * mod_start);

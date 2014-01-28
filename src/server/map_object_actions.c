@@ -219,10 +219,10 @@ static void playerbonus_use(uint8_t no_object, uint8_t wrong_object)
 
 
 
-extern void init_map_object_actions(char * path)
+extern void init_map_object_actions()
 {
     char * f_name = "init_map_object_actions()";
-    FILE * file = try_fopen(path, "r", f_name);
+    FILE * file = try_fopen(world.path_map_obj_acts, "r", f_name);
     uint16_t linemax = textfile_sizes(file, NULL);
     char line[linemax + 1];
     struct MapObjAct ** moa_ptr_ptr = &world.map_obj_acts;

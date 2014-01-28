@@ -41,11 +41,19 @@ int main(int argc, char ** argv)
             exit_err(-1 == test, printf_err);
         }
     }
+    world.path_map_obj_defs = "confserver/defs";
+    world.path_map_obj_acts = "confserver/map_object_actions";
     world.path_in     = "server/in";
     world.path_out    = "server/out";
     world.path_record = "record";
     world.tmp_suffix  = "_tmp";
     set_err_try_fgets_delim("%%\n");
+
+    /* Check existence of config files. */
+    char * err_mod = "No map object definitions file.";
+    char * err_moa = "No map object actions file.";
+    exit_err(access(world.path_map_obj_defs, F_OK), err_mod);
+    exit_err(access(world.path_map_obj_acts, F_OK), err_moa);
 
     /* Treat world.path_in file as server process lock file. */
     char * err = "Found pre-existing input fifo file. This indicates another "
@@ -57,8 +65,8 @@ int main(int argc, char ** argv)
     set_cleanup_flag(CLEANUP_FIFO);
 
     /* Init from config files map object (action) definitions. */
-    init_map_object_defs("confserver/defs");
-    init_map_object_actions("confserver/map_object_actions");
+    init_map_object_defs();
+    init_map_object_actions();
 
     /* Enter play or replay mode loops, then leave properly. */
     run_game();

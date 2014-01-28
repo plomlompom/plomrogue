@@ -101,13 +101,13 @@ static void add_map_object(uint8_t type)
 
 
 
-extern void init_map_object_defs(char * filename)
+extern void init_map_object_defs()
 {
     char * f_name = "init_map_object_defs()";
     char * context = "Failed reading map object definitions file. ";
     char * err_toolarge = "Value is too large.";
     char * err_uniq     = "Declaration of ID already used.";
-    FILE * file = try_fopen(filename, "r", f_name);
+    FILE * file = try_fopen(world.path_map_obj_defs, "r", f_name);
     uint16_t linemax = textfile_sizes(file, NULL);
     struct MapObjDef ** last_mod_ptr_ptr = &world.map_obj_defs;
     char line[linemax + 1];

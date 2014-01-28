@@ -24,8 +24,8 @@ struct MapObjAct
 
 
 
-/* Init MapObjAct chain at world.map_obj_acts from file at "path". */
-extern void init_map_object_actions(char * path);
+/* Init MapObjAct chain at world.map_obj_acts. */
+extern void init_map_object_actions();
 
 /* Free MapObjAct * chain starting at "moa". */
 extern void free_map_object_actions(struct MapObjAct * moa);
