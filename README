@@ -18,8 +18,8 @@ obstacles. You can use that for your advantage.
 
 Once you start a new world, every move of yours is recorded in a file called
 "record". Once you re-start the game, all of your previous moves are replayed
-automatially until you end up where you left the game. To start over in a new
-world, delete this file.
+automatically up to the point wherere you left the game. To start over in a new
+world, simply delete this file.
 
 System requirements / installation / running the game
 -----------------------------------------------------
@@ -53,11 +53,17 @@ keybindings may be changed in the "Global keys" window, those of the window
 geometry configuration in the "Window geometry keys" window, and those of the
 window-specific keybindings configuration in the "Window keybinding keys"
 window; by default, these three windows are not visible, but may be turned on by
-hitting the "F6", "F7" and "F8" keys.
+(per default keybindings) hitting the "F6", "F7" and "F8" keys.
 
 Keybindings and default window selection / visibilities / geometries are read
 from the textfile ./confclient/interface_conf by default, or by another one
-named by the -i command line option of the client.
+named by the -i command line option of the client. Some other default window
+configurations are stored below ./confclient/single_windows/: "map", "info",
+"inventory" and "log". Each of these opens up only a single window into the
+client, filling up the entire terminal. This may be useful for running multiple
+clients in parallel in multiple terminal windows that may be managed by one's
+own window manager choice, instead of relying on plomrogue-client's bizarre
+in-client window management.
 
 Replay game recording
 ---------------------
@@ -93,7 +99,7 @@ All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v
 option for helpful debugging info (mostly: what messages the client sends to the
 server). Server and client communicate via files in the ./server/ directory
-(generated when the server is first run). The /server/in fifo receives commands
-for the server as null-terminated strings. The /server/out file contains a
+(generated when the server is first run). The ./server/in fifo receives commands
+for the server as null-terminated strings. The ./server/out file contains a
 serialized representation of the game world's data as it is to be available to
 the player / the player's client.

@@ -1,0 +1,97 @@
+81 quit
+58 wait
+107 player_u
+106 player_d
+104 player_l
+108 player_r
+112 pick
+117 use
+100 drop
+46 map_c
+265 to_a_keywin
+266 to_mapwin
+267 to_infowin
+268 to_inv
+269 to_logwin
+270 to_g_keywin
+271 to_wg_keywin
+272 to_wk_keywin
+119 winconf
+62 cyc_win_f
+60 cyc_win_b
+262 scrl_l
+360 scrl_r
+114 reload_conf
+67 save_conf
+%
+258 shift_f
+259 shift_b
+42 grow_h
+95 shri_h
+43 grow_v
+45 shri_v
+121 to_height_t
+120 to_width_t
+%
+258 w_keys_d
+259 w_keys_u
+10 w_keys_m
+%
+l
+l
+%
+0
+Global keys
+-13
+29
+258 g_keys_d
+259 g_keys_u
+10 g_keys_m
+%
+1
+Window geometry keys
+8
+29
+258 wg_keys_d
+259 wg_keys_u
+10 wg_keys_m
+%
+2
+Window keybinding keys
+3
+29
+258 wk_keys_d
+259 wk_keys_u
+10 wk_keys_m
+%
+c
+Inventory
+5
+33
+259 inv_u
+258 inv_d
+%
+i
+Info
+3
+33
+%
+k
+Available keys
+0
+29
+%
+l
+Log
+0
+0
+%
+m
+Map
+0
+-64
+259 map_u
+258 map_d
+260 map_l
+261 map_r
+%
