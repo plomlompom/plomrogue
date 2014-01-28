@@ -3,12 +3,16 @@
 #include "map_objects.h"
 #include <stddef.h> /* NULL */
 #include <stdio.h> /* FILE typedef */
-#include <stdint.h> /* uint8_t, uint16_t */
+#include <stdint.h> /* uint8_t, uint16_t, UINT8_MAX */
 #include <stdlib.h> /* free(), atoi() */
-#include <string.h> /* strlen(), memcpy(), strtok(), memset() */
-#include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets(),
+#include <string.h> /* strlen(), memcpy(), memset() */
+#include "../common/err_try_fgets.h" /* err_try_fgets(), err_line(),
+                                      * reset_err_try_fgets_counter()
+                                      */
+#include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgetc(),
                                   * textfile_sizes()
                                   */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 #include "cleanup.h" /* set_cleanup_flag() */
@@ -100,24 +104,47 @@ static void add_map_object(uint8_t type)
 extern void init_map_object_defs(char * filename)
 {
     char * f_name = "init_map_object_defs()";
+    char * context = "Failed reading map object definitions file. ";
+    char * err_toolarge = "Value is too large.";
+    char * err_uniq     = "Declaration of ID already used.";
     FILE * file = try_fopen(filename, "r", f_name);
     uint16_t linemax = textfile_sizes(file, NULL);
     struct MapObjDef ** last_mod_ptr_ptr = &world.map_obj_defs;
-    char * delim = " ";
     char line[linemax + 1];
-    while (try_fgets(line, linemax + 1, file, f_name))
+    reset_err_try_fgets_counter();
+    while (1)
     {
+        int test_for_end = try_fgetc(file, f_name);
+        if (EOF == test_for_end || '\n' == test_for_end)
+        {
+            break;
+        }
+        exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
         struct MapObjDef * mod = try_malloc(sizeof(struct MapObjDef), f_name);
         mod->next = NULL;
-        mod->id = atoi(strtok(line, delim));
-        mod->corpse_id = atoi(strtok(NULL, delim));
-        mod->char_on_map = * strtok(NULL, delim);
-        mod->lifepoints = atoi(strtok(NULL, delim));
-        char * name = strtok(NULL, "\n");
-        mod->name = try_malloc(strlen(name) + 1, f_name);
-        memcpy(mod->name, name, strlen(name) + 1);
+        err_try_fgets(line, linemax, file, context, "nfi");
+        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        mod->id = atoi(line);
+        struct MapObjDef * mod_test = world.map_obj_defs;
+        for (; NULL != mod_test; mod_test = mod_test->next)
+        {
+            err_line(mod->id == mod_test->id, line, context, err_uniq);
+        }
+        err_try_fgets(line, linemax, file, context, "0nfi");
+        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        mod->corpse_id = atoi(line);
+        err_try_fgets(line, linemax, file, context, "0nfs");
+        mod->char_on_map = line[0];
+        err_try_fgets(line, linemax, file, context, "0nfi");
+        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        mod->lifepoints = atoi(line);
+        err_try_fgets(line, linemax, file, context, "0nf");
+        line[strlen(line) - 1] = '\0';
+        mod->name = try_malloc(strlen(line) + 1, f_name);
+        memcpy(mod->name, line, strlen(line) + 1);
         * last_mod_ptr_ptr = mod;
         last_mod_ptr_ptr = &mod->next;
+        err_try_fgets(line, linemax, file, context, "d");
     }
     try_fclose(file, f_name);
     set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
@@ -207,7 +234,11 @@ extern struct MapObj * get_player()
 extern struct MapObjDef * get_map_object_def(uint8_t id)
 {
     struct MapObjDef * mod = world.map_obj_defs;
-    for (; id != mod->id; mod = mod->next);
+    for (; NULL != mod && id != mod->id; mod = mod->next);
+    char * err_intro = "Requested map object definition of unused ID ";
+    char err[strlen(err_intro) + 3 + 1 + 1];
+    sprintf(err, "%s%d.", err_intro, id);
+    exit_err(NULL == mod, err);
     return mod;
 }
 

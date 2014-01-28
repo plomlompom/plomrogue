@@ -1,7 +1,42 @@
-0 5 @ 5 HUMAN
-1 4 a 1 ANT
-2 5 z 3 ZOMBIE
-3 6 S 9 SHOGGOTH
-4 4 # 0 DIRT
-5 4 % 0 SKELETON
-6 4 m 0 MAGIC MEAT
+0
+5
+@
+5
+HUMAN
+%%
+1
+4
+a
+1
+ANT
+%%
+2
+5
+z
+3
+ZOMBIE
+%%
+3
+6
+S
+9
+SHOGGOTH
+%%
+4
+4
+#
+0
+DIRT
+%%
+5
+4
+%
+0
+SKELETON
+%%
+6
+4
+m
+0
+MAGIC MEAT
+%%

@@ -2,14 +2,17 @@
 
 #include "map_object_actions.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t */
-#include <stdio.h> /* sprintf() */
+#include <stdint.h> /* uint8_t, uint16_t, UINT8_MAx */
+#include <stdio.h> /* sprintf(), ungetc() */
 #include <stdlib.h> /* free(), atoi() */
-#include <string.h> /* strlen(), strcmp(), memcpy(), strtok(), strncmp() */
+#include <string.h> /* strlen(), strcmp(), memcpy(), strncmp() */
+#include "../common/err_try_fgets.h" /* err_try_fgets(), err_line(),
+                                      * reset_err_try_fgets_counter()
+                                      */
 #include "../common/readwrite.h" /* textfile_sizes(), try_fopen(), try_fclose(),
-                                  * try_fgets()
+                                  * try_fgetc()
                                   */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 #include "cleanup.h" /* set_cleanup_flag() */
@@ -223,20 +226,35 @@ extern void init_map_object_actions(char * path)
     uint16_t linemax = textfile_sizes(file, NULL);
     char line[linemax + 1];
     struct MapObjAct ** moa_ptr_ptr = &world.map_obj_acts;
-    char * delim = " ";
-    while (try_fgets(line, linemax + 1, file, f_name))
+    char * context = "Failed reading map object actions config file. ";
+    char * err_toolarge = "Value is too large.";
+    char * err_uniq     = "Declaration of ID already used.";
+    reset_err_try_fgets_counter();
+    while (1)
     {
-        if ('\n' == line[0] || 0 == line[0])
+        int test_for_end = try_fgetc(file, f_name);
+        if (EOF == test_for_end || '\n' == test_for_end)
         {
             break;
         }
+        exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
         struct MapObjAct * moa = try_malloc(sizeof(struct MapObjAct), f_name);
-        moa->id = atoi(strtok(line, delim));
-        moa->effort = atoi(strtok(NULL, delim));
-        char * funcname = strtok(NULL, "\n");
-        uint8_t len_name = strlen(funcname) + 1;
+        err_try_fgets(line, linemax, file, context, "nfi");
+        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        moa->id = atoi(line);
+        struct MapObjAct * moa_test = world.map_obj_acts;
+        for (; NULL != moa_test; moa_test = moa_test->next)
+        {
+            err_line(moa->id == moa_test->id, line, context, err_uniq);
+        }
+        err_try_fgets(line, linemax, file, context, "0nfi");
+        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        moa->effort = atoi(line);
+        err_try_fgets(line, linemax, file, context, "0nf");
+        line[strlen(line) - 1] = '\0';
+        uint8_t len_name = strlen(line) + 1;
         moa->name = try_malloc(len_name, f_name);
-        memcpy(moa->name, funcname, len_name);
+        memcpy(moa->name, line, len_name);
         if (!(   try_func_name(moa, "move", actor_move)
               || try_func_name(moa, "pick_up", actor_pick)
               || try_func_name(moa, "drop", actor_drop)
@@ -247,6 +265,7 @@ extern void init_map_object_actions(char * path)
         moa->next = NULL;
         * moa_ptr_ptr = moa;
         moa_ptr_ptr = &moa->next;
+        err_try_fgets(line, linemax, file, context, "d");
     }
     try_fclose(file, f_name);
     set_cleanup_flag(CLEANUP_MAP_OBJECT_ACTS);

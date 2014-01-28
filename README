@@ -80,9 +80,11 @@ Hacking / server internals and configuration
 --------------------------------------------
 
 The movements/actions available to the player and the enemies are defined and
-can be changed in ./confserver/map_object_actions. Each line consists of, first,
-a numerical ID used internally to manage the action, secondly the number of
-turns the action takes, and thirdly a string representing the action internally.
+can be changed in ./confserver/map_object_actions. Each entry consists of a
+first line of a numerical ID used internally to uniquely identify and manage the
+action, a second line of the number of turns the action takes, and a third line
+of a string that maps the action to the game logic to perform when it is called.
+Finally, a delimiter line of "%%" ends the entry.
 
 The different map object types, i.e. species (including the player's human one)
 and item types, can be edited in ./confserver/defs. Here the first value is a
@@ -91,7 +93,8 @@ this object decomposes to when it gets destroyed/killed, the third value is the
 character used to represent the object visually on the map, the fourth value is
 the number of hitpoints the object starts with (items are dead and start with
 zero hitpoints, anything else moves), the fifth is the string that names the
-object in the game log. Note that the only valid item use so far, consuming
+object in the game log. Finally, the same delimiter as for the map object action
+definitions file follows. Note that the only valid item use so far, consuming
 "magic meat" to gain hitpoints, is so far hard-coded (this should change in the
 future).
 
