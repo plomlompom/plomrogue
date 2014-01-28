@@ -11,10 +11,8 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* memcpy(), strlen(), strnlen(), strchr(), memset() */
+#include "../common/readwrite.h" /* try_fputc(), try_write(), try_fgetc() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
-#include "../common/readwrite.h" /* try_fputc(), try_write(), try_fgets(),
-                                  * try_fgetc()
-                                  */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint16.h" /* struct yx_uint16 */
 #include "draw_wins.h" /* draw_winconf_geometry(), draw_winconf_keybindings(),
@@ -24,6 +22,7 @@
                         * draw_win_keybindings_winconf_geometry(),
                         * draw_win_keybindings_global()
                         */
+#include "err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "keybindings.h" /* free_keybindings(), write_keybidings_to_file(),
                           * read_keybindings_from_file()
                           */
@@ -595,23 +594,31 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
                                       FILE * file)
 {
     char * f_name = "read_winconf_from_file()";
-    int test = try_fgetc(file, f_name);
-    if (EOF == test || '\n' == test)
+    char * context = "Failed reading individual window's configuration from "
+                     "interface config file. ";
+    char * err_id  = "Illegal ID(s) selected.";
+    char * err_2   = "Double-initialized window.";
+    int test_for_end = try_fgetc(file, f_name);
+    if (EOF == test_for_end || '\n' == test_for_end)
     {
         return 0;
     }
+    exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
+    err_try_fgets(line, linemax, file, context, "ns");
+    err_line(NULL == strchr(world.winDB.legal_ids, line[0]), line, context,
+             err_id);
+    exit_err(world.winDB.ids && NULL!=strchr(world.winDB.ids, line[0]), err_2);
     struct Win win;
     memset(&win, 0, sizeof(struct Win));
-    win.id = (char) test;
-    try_fgetc(file, f_name);
-    try_fgets(line, linemax + 1, file, f_name);
+    win.id = (char) line[0];
+    err_try_fgets(line, linemax, file, context, "0n");
     win.title = try_malloc(strlen(line), f_name);
-    memcpy(win.title, line, strlen(line) - 1);  /* Eliminate newline char */
-    win.title[strlen(line) - 1] = '\0';         /* char at end of string. */
-    try_fgets(line, linemax + 1, file, f_name);
+    memcpy(win.title, line, strlen(line) - 1);      /* Eliminate newline char */
+    win.title[strlen(line) - 1] = '\0';             /* char at end of string. */
+    err_try_fgets(line, linemax, file, context, "0ni");
     win.target_height = atoi(line);
     win.target_height_type = (0 >= win.target_height);
-    try_fgets(line, linemax + 1, file, f_name);
+    err_try_fgets(line, linemax, file, context, "0ni");
     win.target_width = atoi(line);
     win.target_width_type = (0 >= win.target_width);
     read_keybindings_from_file(line, linemax, file, &win.kb);
@@ -635,7 +642,7 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
 
 
 
-extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim)
+extern void write_winconf_of_id_to_file(FILE * file, char c)
 {
     char * f_name = "write_winconf_of_id_to_file()";
     struct Win * wc = get_win_by_id(c);
@@ -653,38 +660,53 @@ extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim)
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
     sprintf(line, "%d\n", wc->target_width);
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
-    write_keybindings_to_file(file, &wc->kb, delim);
+    write_keybindings_to_file(file, &wc->kb);
 }
 
 
 
 extern void read_order_wins_visible_active(char * line, uint32_t linemax,
-                                           FILE * file)
+                                           FILE * file, char ** tmp_order,
+                                           char * tmp_active)
 {
     char * f_name = "read_order_wins_visible_active()";
-    char win_order[linemax + 1];
-    try_fgets(win_order, linemax + 1, file, f_name);
-    win_order[strlen(win_order) - 1] = '\0';
-    world.winDB.order = try_malloc(strlen(win_order) + 1, f_name);
-    sprintf(world.winDB.order, "%s", win_order);
-    int char_or_eof = try_fgetc(file, f_name);
-    char * err_eof = "fgetc() unexpectedly hitting EOF";
-    exit_trouble(EOF == char_or_eof, f_name, err_eof);
-    world.winDB.active = (uint8_t) char_or_eof;
-    exit_trouble(EOF == try_fgetc(file, f_name), f_name, err_eof);
-    try_fgets(line, linemax + 1, file, f_name);
+    char * context   = "Failed reading order and activation of visible windows "
+                       "from interface config file. ";
+    char * err_id    = "Illegal ID(s) selected.";
+    err_try_fgets(line, linemax, file, context, "01");
+    uint32_t i = 0;
+    for (; i < strlen(line) - 1; i++)
+    {
+        char * test = strchr(world.winDB.legal_ids, line[i]);
+        err_line(!test, line, context, err_id);
+    }
+    line[strlen(line) - 1] = '\0';
+    *tmp_order = try_malloc(strlen(line) + 1, f_name);
+    sprintf(*tmp_order, "%s", line);
+    if (*tmp_order[0])
+    {
+        err_try_fgets(line, linemax, file, context, "0nfs");
+        err_line(NULL == strchr(*tmp_order, line[0]), line, context, err_id);
+        *tmp_active = line[0];
+    }
+    else
+    {
+        err_try_fgets(line, linemax, file, context, "0ne");
+        *tmp_active = '\0';
+    }
+    err_try_fgets(line, linemax, file, context, "d");
 }
 
 
 
-extern void write_order_wins_visible_active(FILE * file, char * delim)
+extern void write_order_wins_visible_active(FILE * file)
 {
     char * f_name = "write_order_wins_visible_active()";
     try_fwrite(world.winDB.order, strlen(world.winDB.order), 1, file, f_name);
     try_fputc('\n', file, f_name);
     try_fputc(world.winDB.active, file, f_name);
     try_fputc('\n', file, f_name);
-    try_fwrite(delim, strlen(delim), 1, file, f_name);
+    try_fwrite(world.delim, strlen(world.delim), 1, file, f_name);
 }
 
 

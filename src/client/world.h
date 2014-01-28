@@ -28,9 +28,10 @@ struct World
     struct yx_uint16 player_pos; /* coordinates of player on map */
     char * log; /* log of player's activities */
     char * path_server_in; /* path of server's input fifo */
-    char * path_interface_conf; /* path of interface configuration file */
+    char * path_interface; /* path of interface configuration file */
     char * path_commands; /* path of commands config file */
     char * player_inventory; /* one-item-per-line string list of owned items */
+    char * delim; /* delimiter for multi-line blocks in config files */
     uint16_t turn; /* world/game turn */
     uint16_t player_score; /* player's score*/
     uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */

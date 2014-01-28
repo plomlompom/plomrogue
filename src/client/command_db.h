@@ -28,7 +28,9 @@ struct CommandDB
 
 
 
-/* Return Command struct for command described by its "dsc_short" member. */
+/* Return Command struct for command described by its "dsc_short" member. Return
+ * NULL if no such command is found.
+ */
 extern struct Command * get_command(char * dsc_short);
 
 /* Reads in CommandDB config file line by line until end or first empty line. */

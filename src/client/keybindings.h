@@ -37,9 +37,8 @@ extern struct Command * get_command_to_keycode(struct KeyBinding * kb_p,
  */
 extern char * get_keyname_to_keycode(uint16_t keycode);
 
-/* Read/write from/to "file" "kbd", delimited by "delim". */
-extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd,
-                                      char * delim);
+/* Read/write from/to "file" "kbd", delimited by world.delim. */
+extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd);
 extern void read_keybindings_from_file(char * line, uint32_t linemax,
                                        FILE * file, struct KeyBindingDB * kbd);
 

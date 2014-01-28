@@ -37,6 +37,7 @@ struct WinDB
     WINDOW * v_screen; /* virtual screen (ncurses pad) */
     struct Win * wins; /* array of windows */
     struct yx_uint16 v_screen_size; /* virtual screen size */
+    char * legal_ids; /* ids allowed to be used */
     char * ids; /* all windows' ids, followed by \0 */
     char * order; /* visible windows' id's order, followed by \0 */
     uint16_t v_screen_offset; /* how many cells v_screen view moved rightwards*/
@@ -71,19 +72,25 @@ extern uint16_t center_offset(uint16_t position,
 extern struct Win * get_win_by_id(char id);
 
 /* Read/write individual Win (identified by "c") and world.winDB.order /
- * world.winDB.active from/to "file". Follow writing with "delim" delimiter.
- * Use "line" and "linemax" as expected by try_fgets().
+ * world.winDB.active from/to "file" up to the world.delim delimiter. Use "line"
+ * and "linemax" as expected by try_fgets().
  *
  * Note that read_winconf_from_file() returns 1 on success and 0 if it detects
  * having found the end of the valid interface configuration file by either
  * hitting a EOF or a newline (so empty newlines at the end of the file are ok).
+ *
+ * Note that read_order_wins_visible_active() only reads the promised values
+ * into pointers for temporary storage. This is due to the order in which window
+ * data is initialized: winDB.order and winDB.active should only be set when all
+ * windows have been initialized, so cleaning up on error is not confused.
  */
 extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
                                       FILE * file);
-extern void write_winconf_of_id_to_file(FILE * file, char c, char * delim);
+extern void write_winconf_of_id_to_file(FILE * file, char c);
 extern void read_order_wins_visible_active(char * line, uint32_t linemax,
-                                           FILE * file);
-extern void write_order_wins_visible_active(FILE * file, char * delim);
+                                           FILE * file, char ** tmp_order,
+                                           char * tmp_active);
+extern void write_order_wins_visible_active(FILE * file);
 
 /* Builds virtual sreen from .t_screen's size, fits win's sizes to them.*/
 extern void make_v_screen_and_init_win_sizes();

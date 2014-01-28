@@ -3,12 +3,14 @@
 #include "keybindings.h"
 #include <ncurses.h> /* keycode defines, cbreak(), halfdelay(), getch() */
 #include <stddef.h> /* NULL */
-#include <stdio.h> /* FILE, sprintf(), snprintf() */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdio.h> /* FILE, sprintf() */
 #include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* strlen(), strchr(), strcmp() */
-#include "../common/readwrite.h" /* textfile_sizes(), try_fgets(),try_fwrite()*/
+#include "../common/readwrite.h" /* try_fwrite()*/
 #include "../common/try_malloc.h" /* try_malloc() */
+#include "command_db.h" /* get_command() */
+#include "err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* global world */
 
@@ -158,8 +160,7 @@ extern char * get_keyname_to_keycode(uint16_t keycode)
 
 
 
-extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd,
-                                      char * delim)
+extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd)
 {
     char * f_name = "write_keybindings_to_file()";
     uint16_t linemax = 0;
@@ -181,7 +182,7 @@ extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd,
         try_fwrite(line, sizeof(char), strlen(line), file, f_name);
         kb_p = kb_p->next;
     }
-    try_fwrite(delim, strlen(delim), 1, file, f_name);
+    try_fwrite(world.delim, strlen(world.delim), 1, file, f_name);
 }
 
 
@@ -190,22 +191,38 @@ extern void read_keybindings_from_file(char * line, uint32_t linemax,
                                        FILE * file, struct KeyBindingDB * kbd)
 {
     char * f_name = "read_keybindings_from_file()";
-    char * cmdptr;
+    char * context = "Failed reading keybindings from interface config file. ";
+    char * err_space    = "Line illegally ends in whitespace.";
+    char * err_nospace  = "No whitespace found in line.";
+    char * err_int      = "Line starts not with a decimal number in digits.";
+    char * err_toolarge = "Keycode number too large, must be below 1000.";
+    char * err_cmd      = "No such command in command DB.";
     struct KeyBinding ** loc_last_ptr = &kbd->kbs;
     * loc_last_ptr = 0;
-    while (try_fgets(line, linemax + 1, file, f_name))
+    while (1)
     {
-        if (!strcmp("%\n", line))
+        err_try_fgets(line, linemax, file, context, "0nf");
+        if (!strcmp(world.delim, line))
         {
             break;
         }
+        err_line(' ' == line[strlen(line) - 2], line, context, err_space);
+        char * ptr_space;
+        err_line(!(ptr_space = strchr(line, ' ')), line, context, err_nospace);
+        uint8_t i = 0;
+        err_line(0 == (ptr_space - line), line, context, err_int);
+        for (; i < (ptr_space - line); i++)
+        {
+            err_line(line[i] < '0' || '9' < line[i], line, context, err_int);
+        }
+        err_line(i > 3, line, context, err_toolarge);
         * loc_last_ptr = try_malloc(sizeof(struct KeyBinding), f_name);
         struct KeyBinding * kb_p = * loc_last_ptr;
+        line[strlen(line) - 1] = '\0';
+        kb_p->command = get_command(ptr_space + 1);
+        err_line(!(kb_p->command), line, context, err_cmd);
         kb_p->next = 0;
         kb_p->key = atoi(line);
-        cmdptr = strchr(line, ' ') + 1;
-        cmdptr[strlen(cmdptr) - 1] = '\0';
-        kb_p->command = get_command(cmdptr);
         loc_last_ptr = & kb_p->next;
     }
 }
