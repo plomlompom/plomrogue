@@ -6,6 +6,7 @@
 #include <stdlib.h> /* exit() */
 #include <string.h> /* memset() */
 #include <unistd.h> /* access() */
+#include "../common/err_try_fgets.h" /* set_err_try_fgets_delim() */
 #include "../common/rexit.h" /* set_cleanup_func(), exit_trouble(),exit_err() */
 #include "cleanup.h" /* cleanup(), set_cleanup_flag() */
 #include "command_db.h" /* init_command_db() */
@@ -30,6 +31,7 @@ int main(int argc, char * argv[])
     world.path_interface  = "confclient/interface_conf";
     world.winDB.legal_ids = "012ciklm";
     world.delim           = "%\n";
+    set_err_try_fgets_delim(world.delim);
 
     /* Parse command line arguments. */
     obey_argv(argc, argv);

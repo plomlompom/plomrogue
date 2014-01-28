@@ -11,6 +11,7 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* memcpy(), strlen(), strnlen(), strchr(), memset() */
+#include "../common/err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "../common/readwrite.h" /* try_fputc(), try_write(), try_fgetc() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -22,7 +23,6 @@
                         * draw_win_keybindings_winconf_geometry(),
                         * draw_win_keybindings_global()
                         */
-#include "err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "keybindings.h" /* free_keybindings(), write_keybidings_to_file(),
                           * read_keybindings_from_file()
                           */

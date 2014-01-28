@@ -8,13 +8,13 @@
 #include <stdlib.h> /* free(), exit() */
 #include <string.h> /* memcpy(), strlen() */
 #include <unistd.h> /* global optarg, getopt() */
+#include "../common/err_try_fgets.h" /* reset_err_try_fgets_counter() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_sizes(),
                                   * try_fclose_unlink_rename(),
                                   */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
-#include "err_try_fgets.h" /* reset_err_try_fgets_counter() */
 #include "keybindings.h" /* free_keybindings(), read_keybindings_from_file(),
                           * write_keybindings_to_file()
                           */

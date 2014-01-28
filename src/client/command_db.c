@@ -6,10 +6,10 @@
 #include <stdio.h> /* FILE, sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strlen(), strcmp() */
+#include "../common/err_try_fgets.h" /* reset_err_try_fgets_counter() */
 #include "../common/readwrite.h" /* try_fopen(),try_fclose(),textfile_sizes() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "err_try_fgets.h" /* reset_err_try_fgets_counter() */
 #include "misc.h" /* array_append() */
 #include "world.h" /* global world */
 #include "cleanup.h" /* set_cleanup_flag() */

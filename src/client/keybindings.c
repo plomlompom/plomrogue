@@ -7,10 +7,10 @@
 #include <stdio.h> /* FILE, sprintf() */
 #include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* strlen(), strchr(), strcmp() */
+#include "../common/err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "../common/readwrite.h" /* try_fwrite()*/
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "command_db.h" /* get_command() */
-#include "err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* global world */
 
