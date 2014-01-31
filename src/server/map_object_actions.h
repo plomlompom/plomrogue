@@ -17,9 +17,9 @@ struct MapObjAct
 {
     struct MapObjAct * next;
     void (* func) (struct MapObj *); /* function called after .effort turns */
-    char * name;                     /* human-readable identifier */
-    uint8_t id;                      /* unique id of map object action */
-    uint8_t effort;                  /* how many turns the action takes */
+    char * name; /* human-readable identifier */
+    uint8_t id; /* unique id of map object action; must be >0 */
+    uint8_t effort; /* how many turns the action takes */
 };
 
 

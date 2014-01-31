@@ -12,7 +12,7 @@
                                   * textfile_sizes(), try_fputc()
                                   */
 #include "../common/rexit.h" /* exit_trouble() */
-#include "ai.h" /* pretty_dumb_ai() */
+#include "ai.h" /* ai() */
 #include "init.h" /* remake_world() */
 #include "io.h" /* io_round() */
 #include "map_object_actions.h" /* get_moa_id_by_name() */
@@ -40,7 +40,6 @@ static void turn_over()
     struct MapObj * player = get_player();
     struct MapObj * map_object = player;
     uint16_t start_turn = world.turn;
-    uint8_t first_round = 1;
     while (    0 < player->lifepoints
            || (0 == player->lifepoints && start_turn == world.turn))
     {
@@ -51,15 +50,14 @@ static void turn_over()
         }
         if (0 < map_object->lifepoints)
         {
-            if (0 == first_round && 0 == map_object->progress)
+            if (0 == map_object->command)
             {
                 if (map_object == player)
                 {
                     break;
                 }
-                pretty_dumb_ai(map_object);
+                ai(map_object);
             }
-            first_round = 0;
             map_object->progress++;
             struct MapObjAct * moa = world.map_obj_acts;
             while (moa->id != map_object->command)
@@ -69,6 +67,7 @@ static void turn_over()
             if (map_object->progress == moa->effort)
             {
                 moa->func(map_object);
+                map_object->command = 0;
                 map_object->progress = 0;
             }
         }

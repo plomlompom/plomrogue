@@ -20,7 +20,7 @@ struct MapObj
     uint8_t id;                  /* individual map object's unique identifier */
     uint8_t type;                /* ID of appropriate map object definition */
     uint8_t lifepoints;          /* 0: object is inanimate; >0: hitpoints */
-    uint8_t command;             /* map object's current action */
+    uint8_t command;             /* map object's current action; 0 if none */
     uint8_t arg;                 /* optional field for .command argument */
     uint8_t progress;            /* turns already passed to realize .command */
 };

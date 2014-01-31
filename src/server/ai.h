@@ -10,13 +10,11 @@ struct MapObj;
 
 
 
-/* Determine next non-player actor command / arguments by the actor's AI.
- *
- * The AI is pretty dumb so far. Actors basically try to move towards their
- * nearest neighbor in a straight line, easily getting stuck behind obstacles or
- * ending up in endless chase circles with each other.
+/* Determine next non-player actor command / arguments by the actor's AI. It's
+ * pretty dumb so far. Actors will try to move towards their path-wise nearest
+ * neighbor. If no one else is found in the neighborhood, they will simply wait.
  */
-extern void pretty_dumb_ai(struct MapObj * mo);
+extern void ai(struct MapObj * mo);
 
 
 
