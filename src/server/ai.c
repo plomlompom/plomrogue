@@ -22,6 +22,28 @@
 static void get_neighbor_scores(char * dirs, uint8_t len_dirs,
                                 uint8_t * score_map, struct yx_uint16 pos_yx,
                                 uint32_t pos_i, uint8_t max_score,
+                                uint8_t * neighbor_scores);
+
+/* Iterate over scored cells in "score_map" of world.map's 2D geometry. Compare
+ * each cell's score against the scores of its immediate neighbors in "dirs"
+ * directions; if at least one of these is lower, re-set the current cell's
+ * score to one higher than its lowest neighbor score. Repeat this whole process
+ * until all cells have settled on their final score. Ignore cells whose
+ * position in "score_map" fits a non-island cell in world.map.cells. Expect
+ * "max_score" to be the maximum score for cells, marking them as unreachable.
+ */
+static void dijkstra_map(char * dirs, uint8_t * score_map, uint8_t max_score);
+
+/* Return char of direction ("N", "E", "S" or "W") of enemy with the shortest
+ * path to "mo_target". If no enemy is around, return 0.
+ */
+static char get_dir_to_nearest_enemy(struct MapObj * mo_target);
+
+
+
+static void get_neighbor_scores(char * dirs, uint8_t len_dirs,
+                                uint8_t * score_map, struct yx_uint16 pos_yx,
+                                uint32_t pos_i, uint8_t max_score,
                                 uint8_t * neighbor_scores)
 {
     memset(neighbor_scores, max_score, len_dirs);
@@ -49,14 +71,6 @@ static void get_neighbor_scores(char * dirs, uint8_t len_dirs,
 
 
 
-/* Iterate over scored cells in "score_map" of world.map's 2D geometry. Compare
- * each cell's score against the scores of its immediate neighbors in "dirs"
- * directions; if at least one of these is lower, re-set the current cell's
- * score to one higher than its lowest neighbor score. Repeat this whole process
- * until all cells have settled on their final score. Ignore cells whose
- * position in "score_map" fits a non-island cell in world.map.cells. Expect
- * "max_score" to be the maximum score for cells, marking them as unreachable.
- */
 static void dijkstra_map(char * dirs, uint8_t * score_map, uint8_t max_score)
 {
     uint8_t len_dirs = strlen(dirs);
@@ -98,9 +112,6 @@ static void dijkstra_map(char * dirs, uint8_t * score_map, uint8_t max_score)
 
 
 
-/* Return char of direction ("N", "E", "S" or "W") of enemy with the shortest
- * path to "mo_target". If no enemy is around, return 0.
- */
 static char get_dir_to_nearest_enemy(struct MapObj * mo_target)
 {
     /* Calculate for each cell the distance to the nearest map actor that is
