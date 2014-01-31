@@ -116,7 +116,7 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_target)
 {
     /* Calculate for each cell the distance to the nearest map actor that is
      * not "mo_target", with movement only possible in the directions of "dir".
-     * (Actor's own cells start with a distance of 0 towards themselves.)
+     * (Actors' own cells start with a distance of 0 towards themselves.)
      */
     uint8_t max_score = UINT8_MAX; /* Score for cells treated as unreachable. */
     char * dirs = "NESW";
