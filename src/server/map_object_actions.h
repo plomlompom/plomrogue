@@ -46,7 +46,7 @@ extern void actor_move(struct MapObj * mo);
 /* Actor "mo" tries to drop from inventory object indexed by number mo->args. */
 extern void actor_drop(struct MapObj * mo);
 
-/* Actor "mo" tries to pick up object from ground into its inventory. */
+/* Actor "mo" tries to pick up topmost object from ground into its inventory. */
 extern void actor_pick(struct MapObj * mo);
 
 /* Actor "mo" tries to use inventory object indexed by number mo->args.

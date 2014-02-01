@@ -364,12 +364,13 @@ extern void actor_drop(struct MapObj * mo)
 
 extern void actor_pick(struct MapObj * mo)
 {
-    struct MapObj * picked;
-    for (picked = world.map_objs; NULL != picked; picked = picked->next)
+    struct MapObj * picked = NULL;
+    struct MapObj * mo_i;
+    for (mo_i = world.map_objs; NULL != mo_i; mo_i = mo_i->next)
     {
-        if (picked != mo && yx_uint16_cmp(&picked->pos, &mo->pos))
+        if (mo_i != mo && yx_uint16_cmp(&mo_i->pos, &mo->pos))
         {
-            break;
+            picked = mo_i;
         }
     }
     if (NULL != picked)
