@@ -323,7 +323,7 @@ extern void draw_win_map(struct Win * win)
 {
     try_resize_winmap(win, world.map.size.y, world.map.size.x);
     uint16_t z = 0;
-    uint16_t x, y;
+    uint8_t x, y;
     for (y = 0; y < world.map.size.y; y++)
     {
         for (x = 0; x < world.map.size.x; x++)

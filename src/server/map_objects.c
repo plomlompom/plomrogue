@@ -14,12 +14,12 @@
                                   */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "../common/yx_uint16.h" /* yx_uint16 struct */
+#include "../common/yx_uint8.h" /* yx_uint8 struct */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "map.h" /* is_passable() */
 #include "rrand.h" /* rrand() */
 #include "world.h" /* global world */
-#include "yx_uint16.h" /* yx_uint16_cmp() */
+#include "yx_uint8.h" /* yx_uint8_cmp() */
 
 
 
@@ -27,7 +27,7 @@
 static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id);
 
 /* Return random passable (as by is_passable()) position on world.map. */
-static struct yx_uint16 find_passable_pos();
+static struct yx_uint8 find_passable_pos();
 
 /* Add object of "type" to map on random position. Don't place actor on actor.*/
 static void add_map_object(uint8_t type);
@@ -53,9 +53,9 @@ static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id)
 
 
 
-static struct yx_uint16 find_passable_pos()
+static struct yx_uint8 find_passable_pos()
 {
-    struct yx_uint16 pos;
+    struct yx_uint8 pos;
     for (pos.y = pos.x = 0; 0 == is_passable(pos);)
     {
         pos.y = rrand() % world.map.size.y;
@@ -77,12 +77,12 @@ static void add_map_object(uint8_t type)
     mo->lifepoints = mod->lifepoints;
     while (1)
     {
-        struct yx_uint16 pos = find_passable_pos(world.map);
+        struct yx_uint8 pos = find_passable_pos(world.map);
         struct MapObj * mo_ptr;
         uint8_t clear = 1;
         for (mo_ptr = world.map_objs; mo_ptr != NULL; mo_ptr = mo_ptr->next)
         {
-            if (yx_uint16_cmp(&pos, &mo_ptr->pos) && 0 != mo_ptr->lifepoints)
+            if (yx_uint8_cmp(&pos, &mo_ptr->pos) && 0 != mo_ptr->lifepoints)
             {
                 clear = 0;
                 break;
@@ -108,7 +108,7 @@ extern void init_map_object_defs()
     char * err_toolarge = "Value is too large.";
     char * err_uniq     = "Declaration of ID already used.";
     FILE * file = try_fopen(world.path_map_obj_defs, "r", f_name);
-    uint16_t linemax = textfile_sizes(file, NULL);
+    uint32_t linemax = textfile_sizes(file, NULL);
     struct MapObjDef ** last_mod_ptr_ptr = &world.map_obj_defs;
     char line[linemax + 1];
     reset_err_try_fgets_counter();
@@ -244,7 +244,7 @@ extern struct MapObjDef * get_map_object_def(uint8_t id)
 
 
 
-extern void set_object_position(struct MapObj * mo, struct yx_uint16 pos)
+extern void set_object_position(struct MapObj * mo, struct yx_uint8 pos)
 {
     mo->pos = pos;
     struct MapObj * owned = mo->owns;

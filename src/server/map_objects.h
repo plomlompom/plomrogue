@@ -8,7 +8,7 @@
 #define MAP_OBJECTS_H
 
 #include <stdint.h> /* uint8_t */
-#include "../common/yx_uint16.h" /* yx_uint16 structs */
+#include "../common/yx_uint8.h" /* yx_uint8 structs */
 
 
 
@@ -16,7 +16,7 @@ struct MapObj
 {
     struct MapObj * next;        /* pointer to next one in map object chain */
     struct MapObj * owns;        /* chain of map objects owned / in inventory */
-    struct yx_uint16 pos;        /* coordinate on map */
+    struct yx_uint8 pos;         /* coordinate on map */
     uint8_t id;                  /* individual map object's unique identifier */
     uint8_t type;                /* ID of appropriate map object definition */
     uint8_t lifepoints;          /* 0: object is inanimate; >0: hitpoints */
@@ -62,7 +62,7 @@ extern struct MapObj * get_player();
 extern struct MapObjDef * get_map_object_def(uint8_t id);
 
 /* Move not only "mo" to "pos", but also all map objects owned by it. */
-extern void set_object_position(struct MapObj * mo, struct yx_uint16 pos);
+extern void set_object_position(struct MapObj * mo, struct yx_uint8 pos);
 
 
 

@@ -7,13 +7,14 @@
 #define MAP_H
 
 #include <stdint.h> /* uint8_t */
+#include "../common/yx_uint8.h" /* yx_uint8 struct */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 
 
 
 struct Map
 {
-    struct yx_uint16 size; /* Map's height/width in number of cells. */
+    struct yx_uint16 size; /* Map's height/width (use max. 256x256)! */
     char * cells; /* Sequence of bytes encoding map cells. */
     uint8_t dist_orthogonal; /* Ratio of the diagonal movement penalty as   */
     uint8_t dist_diagonal;   /* encoded by (.dist_diagonal/.dist_orthonal). */
@@ -33,7 +34,7 @@ extern void init_map();
 /* Check if coordinate "pos" on (or beyond) world.map is accessible to map
  * object movement.
  */
-extern uint8_t is_passable(struct yx_uint16 pos);
+extern uint8_t is_passable(struct yx_uint8 pos);
 
 
 

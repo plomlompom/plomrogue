@@ -1,7 +1,7 @@
 /* src/client/map.c */
 
 #include "map.h"
-#include <stdint.h> /* uint16_t */
+#include <stdint.h> /* uint8_t */
 #include "misc.h" /* center_offset() */
 #include "windows.h" /* struct Win, get_win_by_id() */
 #include "world.h" /* for global world */
@@ -11,7 +11,7 @@
 extern void map_scroll(char d)
 {
     struct Win * win = get_win_by_id('m');
-    uint16_t offset;
+    uint8_t offset;
     if (('8' == d || '2' == d) && world.map.size.y > win->frame_size.y)
     {
         offset = center_offset(win->center.y,
@@ -43,5 +43,6 @@ extern void map_scroll(char d)
 extern void map_center()
 {
     struct Win * win_map = get_win_by_id('m');
-    win_map->center = world.player_pos;
+    win_map->center.y = world.player_pos.y;
+    win_map->center.x = world.player_pos.x;
 }

@@ -14,14 +14,14 @@
                                   */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "../common/yx_uint16.h" /* yx_uint16 struct */
+#include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "map_objects.h" /* structs MapObj, MapObjDef, get_player(),
                           * set_object_position(), own_map_object(),
                           * get_map_object_def()
                           */
 #include "map.h" /* is_passable() */
-#include "yx_uint16.h" /* mv_yx_in_dir(), yx_uint16_cmp() */
+#include "yx_uint8.h" /* mv_yx_in_dir(), yx_uint8_cmp() */
 #include "world.h" /* global world */
 
 
@@ -232,7 +232,7 @@ extern void init_map_object_actions()
 {
     char * f_name = "init_map_object_actions()";
     FILE * file = try_fopen(world.path_map_obj_acts, "r", f_name);
-    uint16_t linemax = textfile_sizes(file, NULL);
+    uint32_t linemax = textfile_sizes(file, NULL);
     char line[linemax + 1];
     struct MapObjAct ** moa_ptr_ptr = &world.map_obj_acts;
     char * context = "Failed reading map object actions config file. ";
@@ -325,7 +325,7 @@ extern void actor_wait(struct MapObj * mo)
 extern void actor_move(struct MapObj * mo)
 {
     char d = mo->arg;
-    struct yx_uint16 target = mv_yx_in_dir(d, mo->pos);
+    struct yx_uint8 target = mv_yx_in_dir(d, mo->pos);
     struct MapObj * other_mo;
     for (other_mo = world.map_objs; other_mo != 0; other_mo = other_mo->next)
     {
@@ -333,7 +333,7 @@ extern void actor_move(struct MapObj * mo)
         {
             continue;
         }
-        if (yx_uint16_cmp(&target, &other_mo->pos))
+        if (yx_uint8_cmp(&target, &other_mo->pos))
         {
             actor_hits_actor(mo, other_mo);
             return;
@@ -377,7 +377,7 @@ extern void actor_pick(struct MapObj * mo)
     struct MapObj * mo_i;
     for (mo_i = world.map_objs; NULL != mo_i; mo_i = mo_i->next)
     {
-        if (mo_i != mo && yx_uint16_cmp(&mo_i->pos, &mo->pos))
+        if (mo_i != mo && yx_uint8_cmp(&mo_i->pos, &mo->pos))
         {
             picked = mo_i;
         }

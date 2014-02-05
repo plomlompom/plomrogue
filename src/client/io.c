@@ -110,7 +110,7 @@ static void read_map_cells(FILE * file)
     char * f_name = "read_map_cells()";
     free(world.map.cells);
     world.map.cells = try_malloc(world.map.size.y * world.map.size.x, f_name);
-    uint16_t y, x;
+    uint8_t y, x;
     for (y = 0; y < world.map.size.y; y++)
     {
         for (x = 0; x < world.map.size.x; x++)

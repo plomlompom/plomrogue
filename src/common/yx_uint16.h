@@ -1,7 +1,6 @@
 /* yx_uint16.h
  *
- * Struct coordinates in 2-dimensional space (such as the ncurses screen and
- * game maps).
+ * Used for window / screen maps and game map size.
  */
 
 #ifndef YX_UINT16_H

@@ -183,7 +183,7 @@ static void write_inventory(struct MapObj * player, FILE * file)
 static void write_map(FILE * file)
 {
     char * f_name = "write_map()";
-    uint32_t map_size = world.map.size.y * world.map.size.x;
+    uint16_t map_size = world.map.size.y * world.map.size.x;
     char visible_map[map_size];
     memcpy(visible_map, world.map.cells, map_size);
     struct MapObj * o;
@@ -203,7 +203,7 @@ static void write_map(FILE * file)
             }
         }
     }
-    uint16_t x, y;
+    uint8_t x, y;
     for (y = 0; y < world.map.size.y; y++)
     {
         for (x = 0; x < world.map.size.x; x++)

@@ -26,8 +26,8 @@
 
 #include <ncurses.h> /* WINDOW, chtype */
 #include <stdint.h> /* uint8_t, int16_t, uint16_t */
-#include "keybindings.h" /* struct KeyBindingDB */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
+#include "keybindings.h" /* struct KeyBindingDB */
 
 
 

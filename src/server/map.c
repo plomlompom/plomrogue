@@ -1,9 +1,9 @@
 /* src/server/map.c */
 
 #include "map.h"
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint16_t */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "../common/yx_uint16.h" /* struct yx_uint16 */
+#include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "rrand.h" /* rrand() */
 #include "world.h" /* global world */
 
@@ -12,9 +12,9 @@
 extern void init_map()
 {
     char * f_name = "init_map()";
-    uint32_t size = world.map.size.x * world.map.size.y;
+    uint16_t size = world.map.size.x * world.map.size.y;
     world.map.cells = try_malloc(size, f_name);
-    uint16_t y, x;
+    uint8_t y, x;
     for (y = 0; y < world.map.size.y; y++)
     {
         for (x = 0;
@@ -22,7 +22,7 @@ extern void init_map()
              world.map.cells[(y * world.map.size.x) + x] = '~', x++);
     }
     world.map.cells[size / 2 + (world.map.size.x / 2)] = '.';
-    uint32_t curpos;
+    uint16_t curpos;
     while (1)
     {
         y = rrand() % world.map.size.y;
@@ -51,7 +51,7 @@ extern void init_map()
 
 
 
-extern uint8_t is_passable(struct yx_uint16 pos)
+extern uint8_t is_passable(struct yx_uint8 pos)
 {
     uint8_t passable = 0;
     if (   0 <= pos.x && pos.x < world.map.size.x
