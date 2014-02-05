@@ -9,7 +9,7 @@
 #include <unistd.h> /* access() */
 #include "../common/readwrite.h" /* try_fopen(), try_fcose(), try_fwrite(),
                                   * try_fgets(), try_fclose_unlink_rename(),
-                                  * textfile_sizes(), try_fputc()
+                                  * textfile_width(), try_fputc()
                                   */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "ai.h" /* ai() */
@@ -158,7 +158,7 @@ extern void obey_msg(char * msg, uint8_t do_record)
         if (!access(world.path_record, F_OK))
         {
             FILE * file_read = try_fopen(world.path_record, "r", f_name);
-            uint32_t linemax = textfile_sizes(file_read, NULL);
+            uint32_t linemax = textfile_width(file_read);
             char line[linemax + 1];
             while (try_fgets(line, linemax + 1, file_read, f_name))
             {

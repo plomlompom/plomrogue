@@ -10,7 +10,7 @@
                                       * reset_err_try_fgets_counter()
                                       */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgetc(),
-                                  * textfile_sizes()
+                                  * textfile_width()
                                   */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -108,7 +108,7 @@ extern void init_map_object_defs()
     char * err_toolarge = "Value is too large.";
     char * err_uniq     = "Declaration of ID already used.";
     FILE * file = try_fopen(world.path_map_obj_defs, "r", f_name);
-    uint32_t linemax = textfile_sizes(file, NULL);
+    uint32_t linemax = textfile_width(file);
     struct MapObjDef ** last_mod_ptr_ptr = &world.map_obj_defs;
     char line[linemax + 1];
     reset_err_try_fgets_counter();

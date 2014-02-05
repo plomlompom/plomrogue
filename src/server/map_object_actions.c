@@ -9,7 +9,7 @@
 #include "../common/err_try_fgets.h" /* err_try_fgets(), err_line(),
                                       * reset_err_try_fgets_counter()
                                       */
-#include "../common/readwrite.h" /* textfile_sizes(), try_fopen(), try_fclose(),
+#include "../common/readwrite.h" /* textfile_width(), try_fopen(), try_fclose(),
                                   * try_fgetc()
                                   */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
@@ -232,7 +232,7 @@ extern void init_map_object_actions()
 {
     char * f_name = "init_map_object_actions()";
     FILE * file = try_fopen(world.path_map_obj_acts, "r", f_name);
-    uint32_t linemax = textfile_sizes(file, NULL);
+    uint32_t linemax = textfile_width(file);
     char line[linemax + 1];
     struct MapObjAct ** moa_ptr_ptr = &world.map_obj_acts;
     char * context = "Failed reading map object actions config file. ";

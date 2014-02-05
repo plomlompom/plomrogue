@@ -7,7 +7,7 @@
 #include <string.h> /* atoi() */
 #include <time.h> /* time() */
 #include <unistd.h> /* optarg, getopt(), access(), unlink() */
-#include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_sizes(),
+#include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_width(),
                                   * try_fgets()
                                   */
 #include "../common/rexit.h" /* exit_err() */
@@ -80,7 +80,7 @@ extern void run_game()
     if (!access(world.path_record, F_OK))
     {
         FILE * file = try_fopen(world.path_record, "r", f_name);
-        uint32_t linemax = textfile_sizes(file, NULL);
+        uint32_t linemax = textfile_width(file);
         char line[linemax + 1];
         while (   (!world.replay || (world.turn < world.replay))
                && NULL != try_fgets(line, linemax + 1, file, f_name))

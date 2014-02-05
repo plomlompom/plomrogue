@@ -2,14 +2,13 @@
 
 #include "misc.h"
 #include <ncurses.h> /* delwin() */
-#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint32_t */
 #include <stdio.h> /* FILE, sprintf() */
 #include <stdlib.h> /* free(), exit() */
 #include <string.h> /* memcpy(), strlen() */
 #include <unistd.h> /* global optarg, getopt() */
 #include "../common/err_try_fgets.h" /* reset_err_try_fgets_counter() */
-#include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_sizes(),
+#include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_width(),
                                   * try_fclose_unlink_rename(),
                                   */
 #include "../common/rexit.h" /* exit_err() */
@@ -73,7 +72,7 @@ extern void load_interface_conf()
     /* Read keybindings and WincConf DB from interface config file. */
     reset_err_try_fgets_counter();
     FILE * file = try_fopen(world.path_interface, "r", f_name);
-    uint32_t linemax = textfile_sizes(file, NULL);
+    uint32_t linemax = textfile_width(file);
     char line[linemax + 1];
     read_keybindings_from_file(line, linemax, file, &world.kb_global);
     read_keybindings_from_file(line, linemax, file, &world.kb_wingeom);

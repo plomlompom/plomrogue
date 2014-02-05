@@ -95,12 +95,11 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
 
 
 
-extern uint32_t textfile_sizes(FILE * file, uint32_t * n_lines_p)
+extern uint32_t textfile_width(FILE * file)
 {
-    char * f_name = "textfile_sizes()";
+    char * f_name = "textfile_width()";
     int c = 0;
     uint32_t c_count = 0;
-    uint32_t n_lines = 0;
     uint32_t linemax = 0;
     while (1)
     {
@@ -117,10 +116,6 @@ extern uint32_t textfile_sizes(FILE * file, uint32_t * n_lines_p)
                 linemax = c_count;
             }
             c_count = 0;
-            if (n_lines_p)
-            {
-                n_lines++;
-            }
         }
     }
   if (0 == linemax && 0 < c_count) /* Handle files that consist of only one */
@@ -128,9 +123,5 @@ extern uint32_t textfile_sizes(FILE * file, uint32_t * n_lines_p)
       linemax = c_count;
    }
    exit_trouble(-1 == fseek(file, 0, SEEK_SET), f_name, "fseek()");
-   if (n_lines_p)
-   {
-       * n_lines_p = n_lines;
-   }
    return linemax;
 }

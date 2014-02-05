@@ -15,7 +15,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets(),
-                                  * try_fgetc()
+                                  * try_fgetc(), textfile_width()
                                   */
 #include "control.h" /* try_key() */
 #include "map.h" /* map_center() */
@@ -193,7 +193,7 @@ static uint8_t read_world()
     {
         return 0;
     }
-    uint32_t linemax = textfile_sizes(file, NULL);
+    uint32_t linemax = textfile_width(file);
     char * read_buf = try_malloc(linemax + 1, f_name);
     world.turn = read_value_from_line(read_buf, linemax, file);
     world.player_score = read_value_from_line(read_buf, linemax, file);

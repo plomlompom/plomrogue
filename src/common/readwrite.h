@@ -35,10 +35,9 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
                                      char * f);
 
 /* Return largest line length from "file" the largest line length (including
- * newline chars) and write the number of newline chars in "file" to the memory
- * pointed to by "n_lines_p" if it is not passed as NULL.
+ * newline chars).
  */
-extern uint32_t textfile_sizes(FILE * file, uint32_t * n_lines_p);
+extern uint32_t textfile_width(FILE * file);
 
 
 

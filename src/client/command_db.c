@@ -7,7 +7,7 @@
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strlen(), strcmp() */
 #include "../common/err_try_fgets.h" /* reset_err_try_fgets_counter() */
-#include "../common/readwrite.h" /* try_fopen(),try_fclose(),textfile_sizes() */
+#include "../common/readwrite.h" /* try_fopen(),try_fclose(),textfile_width() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "misc.h" /* array_append() */
@@ -50,7 +50,7 @@ extern void init_command_db()
     char * f_name = "init_command_db()";
     char * context = "Failed reading command DB file. ";
     FILE * file = try_fopen(world.path_commands, "r", f_name);
-    uint32_t linemax = textfile_sizes(file, NULL);
+    uint32_t linemax = textfile_width(file);
     char line[linemax + 1];
     reset_err_try_fgets_counter();
     uint8_t i = 0;
