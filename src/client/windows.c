@@ -551,8 +551,8 @@ static void suspend_win(struct Win * w)
 
 
 
-extern uint16_t center_offset(uint16_t position, uint16_t mapsize,
-                              uint16_t frame_size)
+extern uint16_t center_offset(uint16_t position, uint32_t mapsize,
+                              uint32_t frame_size)
 {
     uint16_t offset = 0;
     if (mapsize > frame_size)

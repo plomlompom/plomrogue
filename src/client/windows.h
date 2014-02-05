@@ -25,7 +25,7 @@
 #define WINDOWS_H
 
 #include <ncurses.h> /* WINDOW, chtype */
-#include <stdint.h> /* uint8_t, int16_t, uint16_t */
+#include <stdint.h> /* uint8_t, int16_t, uint16_t, uint32_t */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 #include "keybindings.h" /* struct KeyBindingDB */
 
@@ -66,7 +66,7 @@ struct Win
 
 /* Return yx offset to focus map of "mapsize" on "position" in "frame_size". */
 extern uint16_t center_offset(uint16_t position,
-                              uint16_t mapsize, uint16_t frame_size);
+                              uint32_t mapsize, uint32_t frame_size);
 
 /* Get Win of "id". */
 extern struct Win * get_win_by_id(char id);

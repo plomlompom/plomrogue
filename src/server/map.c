@@ -1,7 +1,7 @@
 /* src/server/map.c */
 
 #include "map.h"
-#include <stdint.h> /* uint8_t, uint16_t */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "rrand.h" /* rrand() */
@@ -12,7 +12,7 @@
 extern void init_map()
 {
     char * f_name = "init_map()";
-    uint16_t size = world.map.size.x * world.map.size.y;
+    uint32_t size = world.map.size.x * world.map.size.y;
     world.map.cells = try_malloc(size, f_name);
     uint8_t y, x;
     for (y = 0; y < world.map.size.y; y++)
@@ -21,13 +21,14 @@ extern void init_map()
              x < world.map.size.x;
              world.map.cells[(y * world.map.size.x) + x] = '~', x++);
     }
-    world.map.cells[size / 2 + (world.map.size.x / 2)] = '.';
+    uint8_t add_half_width = !(world.map.size.y % 2) * (world.map.size.x / 2);
+    world.map.cells[(size / 2) + add_half_width] = '.';
     uint16_t curpos;
     while (1)
     {
         y = rrand() % world.map.size.y;
         x = rrand() % world.map.size.x;
-        curpos = y * world.map.size.x + x;
+        curpos = (y * world.map.size.x) + x;
         if ('~' == world.map.cells[curpos]
             && (   (   curpos >= world.map.size.x
                     && '.' == world.map.cells[curpos - world.map.size.x])
@@ -39,8 +40,8 @@ extern void init_map()
                     && (curpos+1) % world.map.size.x != 0
                     && '.' == world.map.cells[curpos+1])))
         {
-            if (  y == 0 || y == world.map.size.y - 1 || x == 0
-                || x == world.map.size.x - 1)
+            if (   y == 0 || y == world.map.size.y - 1
+                || x == 0 || x == world.map.size.x - 1)
             {
                 break;
             }
@@ -57,7 +58,7 @@ extern uint8_t is_passable(struct yx_uint8 pos)
     if (   0 <= pos.x && pos.x < world.map.size.x
         && 0 <= pos.y && pos.y < world.map.size.y)
     {
-        passable = (('.' == world.map.cells[pos.y * world.map.size.x + pos.x]));
+        passable = ('.' == world.map.cells[(pos.y * world.map.size.x) + pos.x]);
     }
     return passable;
 }

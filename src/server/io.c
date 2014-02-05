@@ -5,7 +5,7 @@
 #include <fcntl.h> /* open(), O_RDONLY, O_NONBLOCK */
 #include <limits.h> /* PIPE_BUF */
 #include <stddef.h> /* size_t, NULL */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint32_t */
 #include <stdio.h> /* define FILE, sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), memset(), memcpy() */
@@ -183,7 +183,7 @@ static void write_inventory(struct MapObj * player, FILE * file)
 static void write_map(FILE * file)
 {
     char * f_name = "write_map()";
-    uint16_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.size.y * world.map.size.x;
     char visible_map[map_size];
     memcpy(visible_map, world.map.cells, map_size);
     struct MapObj * o;

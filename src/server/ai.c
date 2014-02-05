@@ -44,7 +44,7 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin);
 static void get_neighbor_scores(uint32_t * score_map, uint16_t pos_i,
                                 uint32_t max_score, uint32_t * neighbors)
 {
-    uint16_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.size.y * world.map.size.x;
     uint8_t i_dir;
     for (i_dir = 0; i_dir < N_DIRS; neighbors[i_dir] = max_score, i_dir++);
     uint8_t open_north = pos_i >= world.map.size.x;
@@ -90,7 +90,7 @@ static void get_neighbor_scores(uint32_t * score_map, uint16_t pos_i,
 static void dijkstra_map(uint32_t * score_map, uint32_t max_score)
 {
     uint32_t i_scans, neighbors[N_DIRS], min_neighbor_o, min_neighbor_d;
-    uint16_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.size.y * world.map.size.x;
     uint16_t pos;
     uint8_t scores_still_changing = 1;
     uint8_t i_dirs;
@@ -138,7 +138,7 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
      * not "mo_origin", with movement only possible in the directions of "dir".
      * (Actors' own cells start with a distance of 0 towards themselves.)
      */
-    uint16_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.size.y * world.map.size.x;
     uint32_t max_score = UINT32_MAX - (world.map.dist_diagonal + 1);
     uint32_t score_map[map_size];
     uint32_t i;
