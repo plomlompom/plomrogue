@@ -14,7 +14,7 @@ extern void init_map()
     char * f_name = "init_map()";
     uint32_t size = world.map.size.x * world.map.size.y;
     world.map.cells = try_malloc(size, f_name);
-    uint8_t y, x;
+    uint16_t y, x;
     for (y = 0; y < world.map.size.y; y++)
     {
         for (x = 0;

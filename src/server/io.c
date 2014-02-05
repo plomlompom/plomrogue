@@ -203,7 +203,7 @@ static void write_map(FILE * file)
             }
         }
     }
-    uint8_t x, y;
+    uint16_t x, y;
     for (y = 0; y < world.map.size.y; y++)
     {
         for (x = 0; x < world.map.size.x; x++)
