@@ -16,12 +16,17 @@ kill -0 $! 2> /dev/null
 
 # Give server some time (max. 10 seconds) to generate its out file.
 i=0
-while [ ! -e server/out ] && [ $i -le 10000 ]
+while [ ! -e server/out ] && [ $i -le 1000 ]
 do
     sleep 0.01
     i=`expr $i + 1`
 done
-kill -0 $! 2> /dev/null
+if [ ! -e server/out ]
+then
+    echo "Server failed generating outfile within given time limit."
+    false
+fi
 
 # Only start the interface when everything else went well.
+kill -0 $! 2> /dev/null
 ./roguelike-client
