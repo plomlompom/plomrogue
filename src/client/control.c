@@ -8,7 +8,7 @@
 #include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
                           * mod_selected_keyb(), move_keyb_selection()
                           */
-#include "map_window.h" /* for map_scroll(), map_center() */
+#include "map.h" /* for map_scroll(), map_center() */
 #include "misc.h" /* reload_interface_conf(), save_interface_conf(),
                    * nav_inventory()
                    */
@@ -81,10 +81,10 @@ static uint8_t try_2args(struct Command * command, char * match,
 static uint8_t try_client_commands(struct Command * command)
 {
     return (   try_0args(command, "map_c", map_center)
-            || try_1args(command, "map_u", map_scroll, 'N')
-            || try_1args(command, "map_d", map_scroll, 'S')
-            || try_1args(command, "map_r", map_scroll, 'E')
-            || try_1args(command, "map_l", map_scroll, 'W')
+            || try_1args(command, "map_u", map_scroll, '8')
+            || try_1args(command, "map_d", map_scroll, '2')
+            || try_1args(command, "map_r", map_scroll, '6')
+            || try_1args(command, "map_l", map_scroll, '4')
             || try_1args(command, "inv_u", nav_inventory, 'u')
             || try_1args(command, "inv_d", nav_inventory, 'd')
             || try_1args(command, "cyc_win_f", cycle_active_win, 'f')

@@ -49,6 +49,12 @@ int main(int argc, char ** argv)
     world.tmp_suffix  = "_tmp";
     set_err_try_fgets_delim("%%\n");
 
+    /* Set map geometry. */
+    world.map.size.x = 64;
+    world.map.size.y = 64;
+    world.map.dist_orthogonal = 5;
+    world.map.dist_diagonal   = 7;
+
     /* Check existence of config files. */
     char * err_mod = "No map object definitions file.";
     char * err_moa = "No map object actions file.";

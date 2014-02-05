@@ -18,7 +18,7 @@
 #include "keybindings.h" /* free_keybindings(), read_keybindings_from_file(),
                           * write_keybindings_to_file()
                           */
-#include "map_window.h" /* map_center() */
+#include "map.h" /* map_center() */
 #include "windows.h" /* free_winDB(), make_v_screen_and_init_win_sizes(),
                       * read_winconf_from_file(), write_winconf_of_id_to_file(),
                       * toggle_window()

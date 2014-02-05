@@ -8,7 +8,7 @@
 
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <sys/types.h> /* time_t */
-#include "../common/map.h" /* struct Map */
+#include "map.h" /* struct Map */
 #include "../common/yx_uint16.h" /* struct yx_uint16 */
 #include "keybindings.h" /* stuct KeyBindingDB */
 #include "command_db.h" /* struct CommandDB */

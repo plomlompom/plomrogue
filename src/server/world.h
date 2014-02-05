@@ -7,7 +7,7 @@
 #define MAIN_H
 
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include "../common/map.h" /* struct Map */
+#include "map.h" /* struct Map */
 struct MapObjDef;
 struct MapObjAct;
 struct MapObj;

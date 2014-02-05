@@ -16,6 +16,9 @@ Enemies' AI is very dumb so far: Each turn, they try to move towards their
 path-wise nearest enemy. If no enemy is found in their surroundings, they just
 wait.
 
+Note that diagonal movement is possible, but takes (40%) longer than orthogonal
+movement.
+
 Once you start a new world, every move of yours is recorded in a file called
 "record". Once you re-start the game, all of your previous moves are replayed
 automatically up to the point wherere you left the game. To start over in a new

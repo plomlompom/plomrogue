@@ -40,8 +40,10 @@ static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted);
 
 /* Bonus stuff to actor_*() to happen if actor==player. Mostly writing of log
  * messages; _pick and _drop also decrement world.inventory_sel by 1 if >0.
+ * (match_dir() is just a little helper to playerbonus_move().)
  */
 static void playerbonus_wait();
+static uint8_t match_dir(char d, char ** dsc_d, char match, char * dsc_match);
 static void playerbonus_move(char d, uint8_t passable);
 static void playerbonus_drop(uint8_t owns_none);
 static void playerbonus_pick(uint8_t picked);
@@ -151,21 +153,28 @@ static void playerbonus_wait()
 
 
 
+static uint8_t match_dir(char d, char ** dsc_d, char match, char * dsc_match)
+{
+    if (d == match)
+    {
+        * dsc_d = dsc_match;
+        return 1;
+    }
+    return 0;
+}
+
+
+
 static void playerbonus_move(char d, uint8_t passable)
 {
     char * dsc_dir = "north";
-    if      ('E' == d)
-    {
-        dsc_dir = "east" ;
-    }
-    else if ('S' == d)
-    {
-        dsc_dir = "south";
-    }
-    else if ('W' == d)
-    {
-        dsc_dir = "west" ;
-    }
+    if (   match_dir(d, &dsc_dir, '6', "east")
+        || match_dir(d, &dsc_dir, '2', "south")
+        || match_dir(d, &dsc_dir, '4', "west")
+        || match_dir(d, &dsc_dir, '7', "north-west")
+        || match_dir(d, &dsc_dir, '9', "north-east")
+        || match_dir(d, &dsc_dir, '1', "south-west")
+        || match_dir(d, &dsc_dir, '3', "south-east"));
     char * dsc_move = "You move ";
     if (0 == passable)
     {

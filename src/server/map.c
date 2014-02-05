@@ -2,7 +2,6 @@
 
 #include "map.h"
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include "../common/map.h" /* struct Map */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint16.h" /* struct yx_uint16 */
 #include "rrand.h" /* rrand() */
@@ -13,8 +12,6 @@
 extern void init_map()
 {
     char * f_name = "init_map()";
-    world.map.size.x = 64;
-    world.map.size.y = 64;
     uint32_t size = world.map.size.x * world.map.size.y;
     world.map.cells = try_malloc(size, f_name);
     uint16_t y, x;

@@ -12,7 +12,7 @@
 60 cyc_win_b
 262 scrl_l
 360 scrl_r
-114 reload_conf
+82 reload_conf
 67 save_conf
 %
 258 shift_f
@@ -62,7 +62,7 @@ Inventory
 100 drop
 259 inv_u
 258 inv_d
-117 use
+99 use
 %
 i
 Info
@@ -85,10 +85,14 @@ Map
 -64
 112 pick
 58 wait
-107 player_u
-106 player_d
-104 player_l
-108 player_r
+107 move_8
+117 move_9
+108 move_6
+110 move_3
+106 move_2
+98 move_1
+104 move_4
+121 move_7
 259 map_u
 258 map_d
 260 map_l

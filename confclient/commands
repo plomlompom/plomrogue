@@ -3,25 +3,45 @@ wait / next turn
 wait
 0
 %
-player_u
-player up
+move_8
+move north
 move
-N
+8
 %
-player_d
-player down
+move_9
+move north-east
 move
-S
+9
 %
-player_l
-player left
+move_6
+move east
 move
-W
+6
 %
-player_r
-player right
+move_3
+move south-east
 move
-E
+3
+%
+move_2
+move south
+move
+2
+%
+move_1
+move south-west
+move
+1
+%
+move_4
+move west
+move
+4
+%
+move_7
+move north-west
+move
+7
 %
 pick
 pick up object from ground
