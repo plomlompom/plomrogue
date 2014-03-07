@@ -4,7 +4,7 @@
 set -e
 
 # Use the shell script's arguments to the server's arguments.
-./roguelike-server $@ &
+./roguelike-server "$@" &
 
 # Give server some time to start up and exit on error.
 sleep 0.01
