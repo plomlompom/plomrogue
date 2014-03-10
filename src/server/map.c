@@ -55,8 +55,7 @@ extern void init_map()
 extern uint8_t is_passable(struct yx_uint8 pos)
 {
     uint8_t passable = 0;
-    if (   0 <= pos.x && pos.x < world.map.size.x
-        && 0 <= pos.y && pos.y < world.map.size.y)
+    if (pos.x < world.map.size.x && pos.y < world.map.size.y)
     {
         passable = ('.' == world.map.cells[(pos.y * world.map.size.x) + pos.x]);
     }
