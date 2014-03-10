@@ -196,7 +196,6 @@ static uint8_t read_world()
     uint32_t linemax = textfile_width(file);
     char * read_buf = try_malloc(linemax + 1, f_name);
     world.turn = read_value_from_line(read_buf, linemax, file);
-    world.player_score = read_value_from_line(read_buf, linemax, file);
     world.player_lifepoints = read_value_from_line(read_buf, linemax, file);
     read_inventory(read_buf, linemax, file);
     world.player_pos.y = read_value_from_line(read_buf, linemax, file);

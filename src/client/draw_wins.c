@@ -340,14 +340,10 @@ extern void draw_win_info(struct Win * win)
 {
     char * dsc_turn      = "Turn: ";
     char * dsc_hitpoints = "\nHitpoints: ";
-    char * dsc_score     = "\nScore: ";
-    uint16_t maxl = strlen(dsc_turn) + strlen(dsc_hitpoints) + strlen(dsc_score)
-                    + 5 + 3 + 5; /* Max strlens of strings of numbers to use. */
+    uint16_t maxl = strlen(dsc_turn) + 5 + strlen(dsc_hitpoints) + 3;
     char text[maxl + 1];
-    sprintf(text, "%s%d%s%d%s%d",
-            dsc_turn, world.turn,
-            dsc_hitpoints, world.player_lifepoints,
-            dsc_score, world.player_score);
+    sprintf(text, "%s%d%s%d",
+            dsc_turn, world.turn, dsc_hitpoints, world.player_lifepoints);
     add_text_with_linebreaks(win, text);
 }
 

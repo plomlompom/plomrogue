@@ -137,10 +137,6 @@ static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted)
             return;
         }
         update_log(" It dies.");
-        if (player == hitter)
-        {
-            world.score = world.score + mod_hitted->lifepoints;
-        }
     }
 }
 

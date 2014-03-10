@@ -33,7 +33,6 @@ struct World
     uint16_t replay; /* Turn up to which to replay game. No replay if zero. */
     uint16_t turn; /* Current game turn. */
     uint16_t last_update_turn; /* Last turn the .path_out file was updated. */
-    uint16_t score; /* Player's score. */
     uint8_t is_verbose; /* Should server send debugging info to stdout? */
     uint8_t map_obj_count; /* Counts map objects generated so far. */
 };

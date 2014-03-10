@@ -53,7 +53,6 @@ extern void remake_world(uint32_t seed)
     world.log = NULL;  /* map_object_action.c's update_log() checks for this. */
     world.seed = seed;
     world.map_obj_count = 0;
-    world.score = 0;
     free(world.map.cells);
     free_map_objects(world.map_objs);
     world.last_update_turn = 0;

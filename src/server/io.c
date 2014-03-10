@@ -126,7 +126,6 @@ static void update_out_file()
     FILE * file = try_fopen(path_tmp, "w", f_name);
     struct MapObj * player = get_player();
     write_value_as_line(world.turn, file);
-    write_value_as_line(world.score, file);
     write_value_as_line(player->lifepoints, file);
     write_inventory(player, file);
     write_value_as_line(player->pos.y, file);

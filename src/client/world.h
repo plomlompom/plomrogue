@@ -33,7 +33,6 @@ struct World
     char * delim; /* delimiter for multi-line blocks in config files */
     struct yx_uint8 player_pos; /* coordinates of player on map */
     uint16_t turn; /* world/game turn */
-    uint16_t player_score; /* player's score*/
     uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */
     uint8_t player_inventory_select; /* index of selected item in inventory */
     uint8_t player_lifepoints; /* how alive the player is */
