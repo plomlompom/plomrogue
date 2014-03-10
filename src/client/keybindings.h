@@ -15,7 +15,7 @@ struct Command;
 struct KeyBinding
 {
   struct KeyBinding * next;
-  uint16_t key; /* keycode */
+  uint16_t keycode;
   struct Command * command; /* command in command DB to which key is bound */
 };
 
@@ -30,7 +30,7 @@ struct KeyBindingDB
 
 /* Return command bound to keycode; NULL on failure. */
 extern struct Command * get_command_to_keycode(struct KeyBinding * kb_p,
-                                               uint16_t key);
+                                               uint16_t keycode);
 
 /* Return human-readable name (of maximum 9 chars) for "keycode" as matched by
  * ncurses.h; if none is found, return "UNKNOWN".

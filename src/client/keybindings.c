@@ -105,11 +105,11 @@ static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
 
 
 extern struct Command * get_command_to_keycode(struct KeyBinding * kb_p,
-                                               uint16_t key)
+                                               uint16_t keycode)
 {
     while (0 != kb_p)
     {
-        if (key == kb_p->key)
+        if (keycode == kb_p->keycode)
         {
             return kb_p->command;
         }
@@ -178,7 +178,7 @@ extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd)
     kb_p = kbd->kbs;
     while (0 != kb_p)
     {
-        sprintf(line, "%d %s\n", kb_p->key, kb_p->command->dsc_short);
+        sprintf(line, "%d %s\n", kb_p->keycode, kb_p->command->dsc_short);
         try_fwrite(line, sizeof(char), strlen(line), file, f_name);
         kb_p = kb_p->next;
     }
@@ -222,7 +222,7 @@ extern void read_keybindings_from_file(char * line, uint32_t linemax,
         kb_p->command = get_command(ptr_space + 1);
         err_line(!(kb_p->command), line, context, err_cmd);
         kb_p->next = 0;
-        kb_p->key = atoi(line);
+        kb_p->keycode = atoi(line);
         loc_last_ptr = & kb_p->next;
     }
 }
@@ -251,12 +251,12 @@ extern void mod_selected_keyb(char kb_c)
     kbd->edit = 1;
     draw_all_wins();
     cbreak();
-    int key = getch();
+    int keycode = getch();
     halfdelay(world.halfdelay);
-    if (key < 1000)
+    if (keycode < 1000)
     {
         struct KeyBinding * kb_p = get_keyb_of_n(kbd->kbs, kbd->select);
-        kb_p->key = key;
+        kb_p->keycode = keycode;
     }
     kbd->edit = 0;
 }

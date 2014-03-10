@@ -235,8 +235,8 @@ static char * get_kb_line_and_iterate(struct KeyBinding ** kb_pp)
 {
     char * f_name = "get_kb_line_and_iterate()";
     struct KeyBinding * kb_p = * kb_pp;
-    char * keyname = get_keyname_to_keycode(kb_p->key);
-    struct Command * command = get_command_to_keycode(kb_p, kb_p->key);
+    char * keyname = get_keyname_to_keycode(kb_p->keycode);
+    struct Command * command = get_command_to_keycode(kb_p, kb_p->keycode);
     uint16_t size = 9 + 1 + strlen(command->dsc_long) + 1;
     char * line = try_malloc(size, f_name);
     sprintf(line, "%-9s %s", keyname, command->dsc_long);
