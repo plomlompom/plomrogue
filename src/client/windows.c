@@ -180,7 +180,10 @@ static void * get_drawfunc_by_char(char c)
         || match_func(c, &f, 'm', draw_win_map)
         || match_func(c, &f, '0', draw_win_keybindings_global)
         || match_func(c, &f, '1', draw_win_keybindings_winconf_geometry)
-        || match_func(c, &f, '2', draw_win_keybindings_winconf_keybindings));
+        || match_func(c, &f, '2', draw_win_keybindings_winconf_keybindings))
+    {
+        ;
+    }
     return f;
 }
 
@@ -240,7 +243,7 @@ static void refit_v_screen()
     /* Only resize .v_screen if the rightmost window column has changed. */
     char * err_s = "refit_v_screen() grows virtual screen beyond legal sizes.";
     char * err_m = "refit_v_screen() triggers memory alloc error in wresize().";
-    if (getmaxx(world.winDB.v_screen) + 1 != lastwcol)
+    if ((uint32_t) getmaxx(world.winDB.v_screen) + 1 != lastwcol)
     {
         uint8_t t = (lastwcol + 2 > UINT16_MAX);
         exit_err(t, err_s);

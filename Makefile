@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -Werror -g
 TARGET_SERVER=roguelike-server
 TARGET_CLIENT=roguelike-client
 SRCDIR=src

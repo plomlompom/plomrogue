@@ -77,7 +77,7 @@ static void update_log(char * text)
             }
             last_stop--;
         }
-        if (   (last_stop + 1) - last_nl == strlen(text)
+        if (   (last_stop + 1) - last_nl == (uint16_t) strlen(text)
             && 0 == strncmp(world.log + last_nl, text, strlen(text)))
         {
             text = ".";
@@ -170,7 +170,10 @@ static void playerbonus_move(char d, uint8_t passable)
         || match_dir(d, &dsc_dir, '7', "north-west")
         || match_dir(d, &dsc_dir, '9', "north-east")
         || match_dir(d, &dsc_dir, '1', "south-west")
-        || match_dir(d, &dsc_dir, '3', "south-east"));
+        || match_dir(d, &dsc_dir, '3', "south-east"))
+    {
+        ;
+    }
     char * dsc_move = "You move ";
     if (0 == passable)
     {
