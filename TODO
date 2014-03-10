@@ -21,6 +21,8 @@ SERVER:
 
 - is it actually useful to define map object action ids in the config file?
 
+- make shape of map (and diagonal movement penalty) configurable in config file
+
 CLIENT:
 
 - enable toggling of window borders
