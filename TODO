@@ -19,8 +19,6 @@ SERVER:
 
 - get rid of the hard-coding of the MAGIC MEAT item type and its use mode
 
-- remove score
-
 - is it actually useful to define map object action ids in the config file?
 
 CLIENT:
