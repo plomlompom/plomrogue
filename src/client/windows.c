@@ -505,7 +505,7 @@ static void draw_wins(struct Win * w)
     struct Win * next = get_win_after(w->id);
     if (next)
     {
-        return draw_wins(next);
+        draw_wins(next);
     }
 }
 
