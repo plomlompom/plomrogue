@@ -51,7 +51,7 @@ static void init_win_size_from_winconf_and_v_screen_size(char id);
  * match_func() is just a little helper to it.
  */
 static uint8_t match_func(char c, void (** f) (), char c_m, void (* f_m) ());
-static void * get_drawfunc_by_char(char c);
+static void (* get_drawfunc_by_char(char c)) ();
 
 /* Write "win"'s size back to .target_(height/width) as per .target_*_type. */
 static void set_win_target_size(struct Win * win);
@@ -170,7 +170,7 @@ static uint8_t match_func(char c, void (** f) (), char c_m, void (* f_m) ())
 
 
 
-static void * get_drawfunc_by_char(char c)
+static void (* get_drawfunc_by_char(char c)) ()
 {
     void (* f) (struct Win *) = NULL;
     if (   match_func(c, &f, 'c', draw_win_inventory)
