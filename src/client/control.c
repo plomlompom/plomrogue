@@ -149,21 +149,21 @@ static uint8_t try_server_commands(struct Command * command)
 
 extern uint8_t try_key(uint16_t key)
 {
-    struct Command * command = get_command_to_keycode(world.kb_global.kbs, key);
+    struct Command * command = get_command_to_keycode(&world.kb_global, key);
     if (!command && world.winDB.active)
     {
         struct Win * w = get_win_by_id(world.winDB.active);
         if      (0 == w->view)
         {
-            command = get_command_to_keycode(w->kb.kbs, key);
+            command = get_command_to_keycode(&w->kb, key);
         }
         else if (1 == w->view)
         {
-            command = get_command_to_keycode(world.kb_wingeom.kbs, key);
+            command = get_command_to_keycode(&world.kb_wingeom, key);
         }
         else if (2 == w->view)
         {
-            command = get_command_to_keycode(world.kb_winkeys.kbs, key);
+            command = get_command_to_keycode(&world.kb_winkeys, key);
         }
     }
     if (command)

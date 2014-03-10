@@ -32,7 +32,3 @@ CLIENT:
 - enable toggling of showing "\n" in the window content either as newline breaks
   (as currently) or as " / " (without newline break) for more efficent screen
   estate use
-
-- does get_n_of_keybs() really need to be its own function? (only used once)
-
-- transform Keybindings struct series from a linked list into an array

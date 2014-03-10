@@ -5,22 +5,17 @@
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* FILE, sprintf() */
-#include <stdlib.h> /* free(), atoi() */
+#include <stdlib.h> /* atoi() */
 #include <string.h> /* strlen(), strchr(), strcmp() */
 #include "../common/err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "../common/readwrite.h" /* try_fwrite()*/
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "command_db.h" /* get_command() */
+#include "misc.h" /* array_append() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* global world */
 
 
-
-/* Return "n"-th keybinding in keybindings chain from "kb_p" on. */
-static struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n);
-
-/* Return number of keybindings in keybindings chain from "kb_p" on. */
-static uint16_t get_n_of_keybs(struct KeyBinding * kb_p);
 
 /* Return pointer to global keybindings or to keybindings for wingeometry config
  * (c = "g") or winkeys config (c = "k") or active window's keybindings ("w").
@@ -35,58 +30,24 @@ static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
 
 
 
-static struct KeyBinding * get_keyb_of_n(struct KeyBinding * kb_p, uint16_t n)
-{
-    uint16_t i = 0;
-    while (1)
-    {
-        if (n == i)
-        {
-            break;
-        }
-        i++;
-        kb_p = kb_p->next;
-    }
-    return kb_p;
-}
-
-
-
-static uint16_t get_n_of_keybs(struct KeyBinding * kb_p)
-{
-    uint16_t i = 0;
-    while (1)
-    {
-        if (0 == kb_p)
-        {
-            break;
-        }
-        i++;
-        kb_p = kb_p->next;
-    }
-    return i;
-}
-
-
-
 static struct KeyBindingDB * char_selected_kb_db(char c)
 {
-    struct KeyBindingDB * kbd;
-    kbd = &world.kb_global;
+    struct KeyBindingDB * kbdb;
+    kbdb = &world.kb_global;
     if      ('g' == c)
     {
-        kbd = &world.kb_wingeom;
+        kbdb = &world.kb_wingeom;
     }
     else if ('k' == c)
     {
-        kbd = &world.kb_winkeys;
+        kbdb = &world.kb_winkeys;
     }
     else if ('w' == c)
     {
         struct Win * w = get_win_by_id(world.winDB.active);
-        kbd = &w->kb;
+        kbdb = &w->kb;
     }
-    return kbd;
+    return kbdb;
 }
 
 
@@ -104,16 +65,16 @@ static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
 
 
 
-extern struct Command * get_command_to_keycode(struct KeyBinding * kb_p,
+extern struct Command * get_command_to_keycode(struct KeyBindingDB * kbdb,
                                                uint16_t keycode)
 {
-    while (0 != kb_p)
+    uint16_t n_kb;
+    for (n_kb = 0; n_kb < kbdb->n_of_kbs; n_kb++)
     {
-        if (keycode == kb_p->keycode)
+        if (keycode == kbdb->kbs[n_kb].keycode)
         {
-            return kb_p->command;
+            return kbdb->kbs[n_kb].command;
         }
-        kb_p = kb_p->next;
     }
     return NULL;
 }
@@ -164,23 +125,21 @@ extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd)
 {
     char * f_name = "write_keybindings_to_file()";
     uint16_t linemax = 0;
-    struct KeyBinding * kb_p = kbd->kbs;
-    while (0 != kb_p)
+    uint16_t n_kb;
+    for (n_kb = 0; n_kb < kbd->n_of_kbs; n_kb++)
     {
-        if (strlen(kb_p->command->dsc_short) > linemax)
+        if (strlen(kbd->kbs[n_kb].command->dsc_short) > linemax)
         {
-            linemax = strlen(kb_p->command->dsc_short);
+            linemax = strlen(kbd->kbs[n_kb].command->dsc_short);
         }
-        kb_p = kb_p->next;
     }
     linemax = linemax + 6;            /* + 6 = + 3 digits + ' ' + '\n' + '\0' */
     char line[linemax];
-    kb_p = kbd->kbs;
-    while (0 != kb_p)
+    for (n_kb = 0; n_kb < kbd->n_of_kbs; n_kb++)
     {
-        sprintf(line, "%d %s\n", kb_p->keycode, kb_p->command->dsc_short);
+        sprintf(line, "%d %s\n",
+                kbd->kbs[n_kb].keycode, kbd->kbs[n_kb].command->dsc_short);
         try_fwrite(line, sizeof(char), strlen(line), file, f_name);
-        kb_p = kb_p->next;
     }
     try_fwrite(world.delim, strlen(world.delim), 1, file, f_name);
 }
@@ -188,17 +147,15 @@ extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd)
 
 
 extern void read_keybindings_from_file(char * line, uint32_t linemax,
-                                       FILE * file, struct KeyBindingDB * kbd)
+                                       FILE * file, struct KeyBindingDB * kbdb)
 {
-    char * f_name = "read_keybindings_from_file()";
     char * context = "Failed reading keybindings from interface config file. ";
     char * err_space    = "Line illegally ends in whitespace.";
     char * err_nospace  = "No whitespace found in line.";
     char * err_int      = "Line starts not with a decimal number in digits.";
     char * err_toolarge = "Keycode number too large, must be below 1000.";
     char * err_cmd      = "No such command in command DB.";
-    struct KeyBinding ** loc_last_ptr = &kbd->kbs;
-    * loc_last_ptr = 0;
+    kbdb->n_of_kbs = 0;
     while (1)
     {
         err_try_fgets(line, linemax, file, context, "0nf");
@@ -216,62 +173,46 @@ extern void read_keybindings_from_file(char * line, uint32_t linemax,
             err_line(line[i] < '0' || '9' < line[i], line, context, err_int);
         }
         err_line(i > 3, line, context, err_toolarge);
-        * loc_last_ptr = try_malloc(sizeof(struct KeyBinding), f_name);
-        struct KeyBinding * kb_p = * loc_last_ptr;
+
+        struct KeyBinding kb;
         line[strlen(line) - 1] = '\0';
-        kb_p->command = get_command(ptr_space + 1);
-        err_line(!(kb_p->command), line, context, err_cmd);
-        kb_p->next = 0;
-        kb_p->keycode = atoi(line);
-        loc_last_ptr = & kb_p->next;
+        kb.command = get_command(ptr_space + 1);
+        err_line(!(kb.command), line, context, err_cmd);
+        kb.keycode = atoi(line);
+        array_append(kbdb->n_of_kbs, sizeof(struct KeyBinding), (void *) &kb,
+                     (void **) kbdb);
+        kbdb->n_of_kbs++;
     }
-}
-
-
-
-extern void free_keybindings(struct KeyBinding * kb_start)
-{
-    if (0 == kb_start)
-    {
-        return;
-    }
-    struct KeyBinding * kb_p = kb_start->next;
-    if (0 != kb_p)
-    {
-        free_keybindings(kb_p);
-    }
-    free(kb_start);
 }
 
 
 
 extern void mod_selected_keyb(char kb_c)
 {
-    struct KeyBindingDB * kbd = char_selected_kb_db(kb_c);
-    kbd->edit = 1;
+    struct KeyBindingDB * kbdb = char_selected_kb_db(kb_c);
+    kbdb->edit = 1;
     draw_all_wins();
     cbreak();
     int keycode = getch();
     halfdelay(world.halfdelay);
     if (keycode < 1000)
     {
-        struct KeyBinding * kb_p = get_keyb_of_n(kbd->kbs, kbd->select);
-        kb_p->keycode = keycode;
+        kbdb->kbs[kbdb->select].keycode = keycode;
     }
-    kbd->edit = 0;
+    kbdb->edit = 0;
 }
 
 
 
 extern void move_keyb_selection(char kb_c, char dir)
 {
-    struct KeyBindingDB * kbd = char_selected_kb_db(kb_c);
-    if      ('u' == dir && kbd->select > 0)
+    struct KeyBindingDB * kbdb = char_selected_kb_db(kb_c);
+    if      ('u' == dir && kbdb->select > 0)
     {
-        kbd->select--;
+        kbdb->select--;
     }
-    else if ('d' == dir && kbd->select < get_n_of_keybs(kbd->kbs) - 1)
+    else if ('d' == dir && kbdb->select < kbdb->n_of_kbs - 1)
     {
-        kbd->select++;
+        kbdb->select++;
     }
 }

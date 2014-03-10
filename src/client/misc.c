@@ -14,7 +14,7 @@
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
-#include "keybindings.h" /* free_keybindings(), read_keybindings_from_file(),
+#include "keybindings.h" /* read_keybindings_from_file(),
                           * write_keybindings_to_file()
                           */
 #include "map.h" /* map_center() */
@@ -79,7 +79,7 @@ extern void load_interface_conf()
     read_keybindings_from_file(line, linemax, file, &world.kb_winkeys);
     char active_tmp;
     char * order_tmp;
-    read_order_wins_visible_active(line, linemax, file, &order_tmp, &active_tmp);
+    read_order_wins_visible_active(line, linemax, file, &order_tmp,&active_tmp);
     while (read_winconf_from_file(line, linemax, file));
     try_fclose(file, f_name);
 
@@ -110,9 +110,12 @@ extern void load_interface_conf()
 
 extern void unload_interface_conf()
 {
-    free_keybindings(world.kb_global.kbs);
-    free_keybindings(world.kb_wingeom.kbs);
-    free_keybindings(world.kb_winkeys.kbs);
+    free(world.kb_global.kbs);
+    world.kb_global.kbs = NULL;
+    free(world.kb_wingeom.kbs);
+    world.kb_wingeom.kbs = NULL;
+    free(world.kb_winkeys.kbs);
+    world.kb_winkeys.kbs = NULL;
     while ('\0' != world.winDB.active)
     {
         toggle_window(world.winDB.active);

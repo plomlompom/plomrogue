@@ -38,19 +38,19 @@ static void add_line(struct Win * w, char * line, attr_t attri);
  */
 static void draw_text_from_bottom(struct Win * win, char * text);
 
-/* Return keybinding list line via "kb_pp", iterate pointer pointed to by it. */
-static char * get_kb_line_and_iterate(struct KeyBinding ** kb_pp);
+/* Return a properly formatted keybinding list line for "kb". */
+static char * get_kb_line(struct KeyBinding * kb);
 
 /* Draw from line "start" on config view for keybindings defined at "kb". */
 static void draw_keybinding_config(struct Win * w, struct KeyBindingDB * kb,
                                    uint8_t start);
 
 /* Draw into window "w" from line "start" on a "title" followed by an empty
- * line followed by a list of all keybindings starting at kb_p.
+ * line followed by a list of all keybindings starting in "kbdb".
  */
 static uint16_t draw_titled_keybinding_list(char * title, struct Win * w,
                                             uint16_t start,
-                                            struct KeyBinding * kb_p);
+                                            struct KeyBindingDB * kbdb);
 
 
 
@@ -231,44 +231,40 @@ static void draw_text_from_bottom(struct Win * win, char * text)
 
 
 
-static char * get_kb_line_and_iterate(struct KeyBinding ** kb_pp)
+static char * get_kb_line(struct KeyBinding * kb)
 {
-    char * f_name = "get_kb_line_and_iterate()";
-    struct KeyBinding * kb_p = * kb_pp;
-    char * keyname = get_keyname_to_keycode(kb_p->keycode);
-    struct Command * command = get_command_to_keycode(kb_p, kb_p->keycode);
-    uint16_t size = 9 + 1 + strlen(command->dsc_long) + 1;
-    char * line = try_malloc(size, f_name);
-    sprintf(line, "%-9s %s", keyname, command->dsc_long);
+    char * f_name = "get_kb_line()";
+    char * keyname = get_keyname_to_keycode(kb->keycode);
+    uint16_t size = 9 + 1 + strlen(kb->command->dsc_long) + 1;
+    char * kb_line = try_malloc(size, f_name);
+    sprintf(kb_line, "%-9s %s", keyname, kb->command->dsc_long);
     free(keyname);
-    * kb_pp = kb_p->next;
-    return line;
+    return kb_line;
 }
 
 
 
-static void draw_keybinding_config(struct Win * w, struct KeyBindingDB * kb,
+static void draw_keybinding_config(struct Win * w, struct KeyBindingDB * kbdb,
                                    uint8_t start)
 {
-    if (0 == kb->kbs)
+    if (0 == kbdb->n_of_kbs)
     {
         add_line(w, "(none)", 0);
         return;
     }
-    struct KeyBinding * kb_p = kb->kbs;
-    uint16_t y;
-    for (y = start; 0 != kb_p; y++)
+    uint16_t y, kb_n;
+    for (y = start, kb_n = 0; kb_n < kbdb->n_of_kbs; y++, kb_n++)
     {
         attr_t attri = 0;
-        if (y - start == kb->select)
+        if (y - start == kbdb->select)
         {
             attri = A_REVERSE;
-            if (1 == kb->edit)
+            if (1 == kbdb->edit)
             {
                 attri = attri | A_BLINK;
             }
         }
-        char * kb_line = get_kb_line_and_iterate(&kb_p);
+        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
         add_line(w, kb_line, attri);
         free(kb_line);
     }
@@ -278,21 +274,22 @@ static void draw_keybinding_config(struct Win * w, struct KeyBindingDB * kb,
 
 static uint16_t draw_titled_keybinding_list(char * title, struct Win * w,
                                             uint16_t start,
-                                            struct KeyBinding * kb_p)
+                                            struct KeyBindingDB * kbdb)
 {
     uint16_t y;
     uint8_t state = 0;
-    for (y = start; (0 == state || 0 != kb_p); y++)
+    uint16_t kb_n = 0;
+    for (y = start; (0 == state || kb_n < kbdb->n_of_kbs); y++, kb_n++)
     {
         if (0 == state)
         {
             add_line(w, title, 0);
             y++;
             add_line(w, " ", 0);
-            state = 1 + (0 == kb_p);
+            state = 1 + (0 == kbdb->n_of_kbs);
             continue;
         }
-        char * kb_line = get_kb_line_and_iterate(&kb_p);
+        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
         add_line(w, kb_line, 0);
         free(kb_line);
     }
@@ -379,24 +376,24 @@ extern void draw_win_inventory(struct Win * win)
 extern void draw_win_available_keybindings(struct Win * win)
 {
     char * title = "Active window's keybindings:";
-    struct KeyBinding * kb_p;
+    struct KeyBindingDB * kbdb;
     struct Win * w = get_win_by_id(world.winDB.active);
     if     (0 == w->view)
     {
-        kb_p = w->kb.kbs;
+        kbdb = &w->kb;
     }
     else if (1 == w->view)
     {
-        kb_p = world.kb_wingeom.kbs;
+        kbdb = &world.kb_wingeom;
     }
     else if (2 == w->view)
     {
-        kb_p = world.kb_winkeys.kbs;
+        kbdb = &world.kb_winkeys;
     }
-    uint16_t offset = draw_titled_keybinding_list(title, win, 0, kb_p);
+    uint16_t offset = draw_titled_keybinding_list(title, win, 0, kbdb);
     add_line(win, " ", 0);
-    struct KeyBinding * kbs_glo = world.kb_global.kbs;
-    draw_titled_keybinding_list("Global keybindings", win, offset + 1, kbs_glo);
+    draw_titled_keybinding_list("Global keybindings", win, offset + 1,
+                                &world.kb_global);
 }
 
 

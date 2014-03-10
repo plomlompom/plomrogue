@@ -23,7 +23,7 @@
                         * draw_win_keybindings_winconf_geometry(),
                         * draw_win_keybindings_global()
                         */
-#include "keybindings.h" /* free_keybindings(), write_keybidings_to_file(),
+#include "keybindings.h" /* write_keybidings_to_file(),
                           * read_keybindings_from_file()
                           */
 #include "misc.h" /* array_append() */
@@ -739,7 +739,8 @@ extern void free_winDB()
     {
         struct Win * wc = get_win_by_id(id);
         free(wc->title);
-        free_keybindings(wc->kb.kbs);
+        free(wc->kb.kbs);
+        wc->kb.kbs = NULL;
     }
     free(world.winDB.ids);  /* NULL this too since add_win_to_winDB() checks  */
     world.winDB.ids = NULL; /* for it to detect its first post-DB-purge round.*/

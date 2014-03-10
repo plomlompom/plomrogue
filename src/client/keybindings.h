@@ -14,7 +14,6 @@ struct Command;
 
 struct KeyBinding
 {
-  struct KeyBinding * next;
   uint16_t keycode;
   struct Command * command; /* command in command DB to which key is bound */
 };
@@ -22,14 +21,15 @@ struct KeyBinding
 struct KeyBindingDB
 {
     struct KeyBinding * kbs;
+    uint16_t n_of_kbs; /* how many KeyBinding structs are stored below .kbs? */
     uint16_t select; /* linear list index of keybinding selected for editing */
     uint8_t edit;    /* 1 if currently editing a keybinding, else 0 */
 };
 
 
 
-/* Return command bound to keycode; NULL on failure. */
-extern struct Command * get_command_to_keycode(struct KeyBinding * kb_p,
+/* Return command bound to "keycode" in "kbdb"; NULL if none found. */
+extern struct Command * get_command_to_keycode(struct KeyBindingDB * kbdb,
                                                uint16_t keycode);
 
 /* Return human-readable name (of maximum 9 chars) for "keycode" as matched by
@@ -41,9 +41,6 @@ extern char * get_keyname_to_keycode(uint16_t keycode);
 extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd);
 extern void read_keybindings_from_file(char * line, uint32_t linemax,
                                        FILE * file, struct KeyBindingDB * kbd);
-
-/* Free keybinding chain starting at "kb_start". */
-extern void free_keybindings(struct KeyBinding * kb_start);
 
 /* Mark keybinding in KeybindingDB (char_selected_kb_db()-) selected by "kb_c"
  * as being edited, get user input to modify it, then unmark it again. Ensure
