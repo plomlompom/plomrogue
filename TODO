@@ -13,6 +13,8 @@ BOTH SERVER/CLIENT:
 
 - check for return values of *printf()
 
+- make config files format more readable / self-explanatory
+
 SERVER:
 
 - implement field of view / line of sight and obstacles for those on the map
