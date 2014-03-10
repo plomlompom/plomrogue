@@ -750,7 +750,7 @@ extern void free_winDB()
 
 
 
-extern void winch_called(int signal)
+extern void winch_called()
 {
     world.winch = 1;
 }
