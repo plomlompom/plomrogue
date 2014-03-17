@@ -13,9 +13,8 @@
 extern void set_cleanup_func(void (* f)());
 
 /* If "err" == 0, do nothing. Else, clean up and exit with an error message that
- * consists, first, of "msg" or (if "msg" is a NULL pointer) a generic "Details
- * unknown", secondly of "err" as the "internal error code", and thirdly of
- * errno if it is non-zero.
+ * consists of "msg" or (if "msg" is NULL pointer) a generic "Details unknown"
+ * and of errno's content (if it is non-zero).
  */
 extern void exit_err(int err, char * msg);
 

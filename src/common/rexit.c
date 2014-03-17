@@ -31,9 +31,7 @@ extern void exit_err(int err, char * msg)
     {
         msg = "Details unknown.";
     }
-    printf("Aborted program due to error. %s\n"
-            "Internal error code: %d\n",
-            msg, err);
+    printf("Aborted program due to error. %s\n", msg);
     if (0 != errno)
     {
         perror("errno states");
