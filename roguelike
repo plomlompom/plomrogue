@@ -10,20 +10,20 @@ set -e
 sleep 0.01
 
 # The client should not start if the server is not running. (If the server was
-# running in the foreround, any error exit of it so far would be caught by "set
+# running in the foreground, any error exit of it so far would be caught by "set
 # -e" above. But "set -e" is blind to error codes generated in the background.)
 kill -0 $! 2> /dev/null
 
-# Give server some time (max. 10 seconds) to generate its out file.
+# Give server some time (max. 10 seconds) to generate its worldstate file.
 i=0
-while [ ! -e server/out ] && [ $i -le 1000 ]
+while [ ! -e server/worldstate ] && [ $i -le 1000 ]
 do
     sleep 0.01
     i=`expr $i + 1`
 done
-if [ ! -e server/out ]
+if [ ! -e server/worldstate ]
 then
-    echo "Server failed generating outfile within given time limit."
+    echo "Server failed generating worldstate file within given time limit."
     false
 fi
 

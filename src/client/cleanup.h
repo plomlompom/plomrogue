@@ -16,7 +16,9 @@ enum cleanup_flag
 {
     CLEANUP_NCURSES    = 0x0001,
     CLEANUP_INTERFACE  = 0x0002,
-    CLEANUP_COMMANDS   = 0x0004
+    CLEANUP_COMMANDS   = 0x0004,
+    CLEANUP_SERVER_IN  = 0x0008,
+    CLEANUP_SERVER_OUT = 0x0008
 };
 
 extern void set_cleanup_flag(enum cleanup_flag flag);

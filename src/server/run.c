@@ -3,16 +3,17 @@
 #include "run.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include <stdio.h> /* FILE, sprintf() */
+#include <stdio.h> /* FILE, sprintf(), fflush() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen(), strncmp(), atoi() */
+#include <string.h> /* strlen(), strcmp() strncmp(), atoi() */
 #include <unistd.h> /* access() */
 #include "../common/readwrite.h" /* try_fopen(), try_fcose(), try_fwrite(),
                                   * try_fgets(), try_fclose_unlink_rename(),
                                   * textfile_width(), try_fputc()
                                   */
-#include "../common/rexit.h" /* exit_trouble() */
+#include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "ai.h" /* ai() */
+#include "cleanup.h" /* unset_cleanup_flag() */
 #include "init.h" /* remake_world() */
 #include "io.h" /* io_round() */
 #include "map_object_actions.h" /* get_moa_id_by_name() */
@@ -43,6 +44,13 @@ static uint8_t is_effort_finished(struct MapObjAct * moa,
  * turn game over to the NPCs via turn_over(); then return 1. Else, return 0.
  */
 static uint8_t apply_player_command(char * msg, char * command_name);
+
+/* Compares first line of file at world.path_out to world.server_test, aborts if
+ * they don't match, but not before unsetting the flags deleting files in the
+ * server directory, for in that case those must be assumed to belong to another
+ * server process.
+ */
+static void server_test();
 
 
 
@@ -134,6 +142,27 @@ static uint8_t apply_player_command(char * msg, char * command_name)
 
 
 
+static void server_test()
+{
+    char * f_name = "server_test()";
+    char test[10 + 1 + 10 + 1 + 1];
+    FILE * file = try_fopen(world.path_out, "r", f_name);
+    try_fgets(test, 10 + 10 + 1 + 1, file, f_name);
+    try_fclose(file, f_name);
+    if (strcmp(test, world.server_test))
+    {
+        unset_cleanup_flag(CLEANUP_WORLDSTATE);
+        unset_cleanup_flag(CLEANUP_OUT);
+        unset_cleanup_flag(CLEANUP_IN);
+        char * msg = "Server test string in server output file does not match. "
+                     "This indicates that the current server process has been "
+                     "superseded by another one.";
+        exit_err(1, msg);
+    }
+}
+
+
+
 extern void obey_msg(char * msg, uint8_t do_record)
 {
     char * f_name = "obey_msg()";
@@ -179,6 +208,7 @@ extern uint8_t io_loop()
     char * f_name = "io_loop()";
     while (1)
     {
+        server_test();
         char * msg = io_round();
         if (NULL == msg)
         {
@@ -192,6 +222,14 @@ extern uint8_t io_loop()
         {
             free(msg);
             return 1;
+        }
+        if (!strcmp("PING", msg))
+        {
+            free(msg);
+            char * pong = "PONG\n";
+            try_fwrite(pong, strlen(pong), 1, world.file_out, f_name);
+            fflush(world.file_out);
+            continue;
         }
         if (world.replay)
         {

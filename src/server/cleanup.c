@@ -4,9 +4,11 @@
 #include <stdint.h> /* uint32_t */
 #include <stdlib.h> /* free() */
 #include <unistd.h> /* unlink() */
+#include "../common/readwrite.h" /* try_fclose() */
 #include "map_object_actions.h" /* free_map_object_actions() */
 #include "map_objects.h" /* free_map_objects(), free_map_object_defs() */
 #include "world.h" /* global world */
+
 
 
 
@@ -17,12 +19,13 @@ static uint32_t cleanup_flags = 0x0000;
 
 extern void cleanup()
 {
+    char * f_name = "cleanup()";
     free(world.queue);
     free(world.log);
     free(world.map.cells);
-    if (cleanup_flags & CLEANUP_OUTFILE)
+    if (cleanup_flags & CLEANUP_WORLDSTATE)
     {
-        unlink(world.path_out);
+        unlink(world.path_worldstate);
     }
     if (cleanup_flags & CLEANUP_MAP_OBJECTS)
     {
@@ -36,14 +39,28 @@ extern void cleanup()
     {
         free_map_object_actions(world.map_obj_acts);
     }
-    if (cleanup_flags & CLEANUP_FIFO)    /* Fifo also serves as lockfile that */
-    {                                    /* affirms the running of a server   */
-        unlink(world.path_in);           /* instance. Therefore it should be  */
-    }                                    /* the last thing to be deleted.     */
+    if (cleanup_flags & CLEANUP_IN)
+    {
+        try_fclose(world.file_in, f_name);
+        unlink(world.path_in);
+    }
+    if (cleanup_flags & CLEANUP_OUT)
+    {
+        try_fclose(world.file_out, f_name);
+        free(world.server_test);
+        unlink(world.path_out);
+    }
 }
 
 
 extern void set_cleanup_flag(enum cleanup_flag flag)
 {
     cleanup_flags = cleanup_flags | flag;
+}
+
+
+
+extern void unset_cleanup_flag(enum cleanup_flag flag)
+{
+    cleanup_flags = cleanup_flags ^ flag;
 }

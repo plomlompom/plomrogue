@@ -4,7 +4,7 @@
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen() */
-#include "io.h" /* try_send() */
+#include "io.h" /* send() */
 #include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
                           * mod_selected_keyb(), move_keyb_selection()
                           */
@@ -139,7 +139,7 @@ static uint8_t try_server_commands(struct Command * command)
         uint8_t arg_size = 3;
         char msg[command_size + 1 + arg_size + 1];
         sprintf(msg, "%s %d", command->server_msg, arg);
-        try_send(msg);
+        send(msg);
         return 1;
     }
     return 0;

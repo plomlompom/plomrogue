@@ -7,10 +7,11 @@
 #include <string.h> /* memset() */
 #include <unistd.h> /* access() */
 #include "../common/err_try_fgets.h" /* set_err_try_fgets_delim() */
+#include "../common/readwrite.h" /* try_fopen() */
 #include "../common/rexit.h" /* set_cleanup_func(), exit_trouble(),exit_err() */
 #include "cleanup.h" /* cleanup(), set_cleanup_flag() */
 #include "command_db.h" /* init_command_db() */
-#include "io.h" /* io_loop(), try_send() */
+#include "io.h" /* io_loop() */
 #include "misc.h" /* load_interface_conf(), winch_called() */
 #include "windows.h" /* winch_called() */
 #include "world.h" /* struct World */
@@ -26,12 +27,13 @@ int main(int argc, char * argv[])
     char * f_name = "main()";
 
     /* Declare hard-coded paths and values here. */
-    world.path_server_in  = "server/in";
-    world.path_commands   = "confclient/commands";
-    world.path_interface  = "confclient/interface_conf";
-    world.winDB.legal_ids = "012ciklm";
-    world.delim           = "%\n";
+    world.path_commands    = "confclient/commands";
+    world.path_interface   = "confclient/interface_conf";
+    world.winDB.legal_ids  = "012ciklm";
+    world.delim            = "%\n";
     set_err_try_fgets_delim(world.delim);
+    char * path_server_in  = "server/in";
+    char * path_server_out = "server/out";
 
     /* Parse command line arguments. */
     obey_argv(argc, argv);
@@ -57,6 +59,13 @@ int main(int argc, char * argv[])
     memset(&act, 0, sizeof(act));
     act.sa_handler = &winch_called;
     exit_trouble(sigaction(SIGWINCH, &act, NULL), f_name, "sigaction()");
+
+    /* Open file streams for communicating with the server. */
+    exit_err(access(path_server_in, F_OK), "No server input file found.");
+    world.file_server_in = try_fopen(path_server_in, "a", f_name);
+    set_cleanup_flag(CLEANUP_SERVER_IN);
+    world.file_server_out = try_fopen(path_server_out, "r", f_name);
+    set_cleanup_flag(CLEANUP_SERVER_OUT);
 
     /* This is where most everything happens. */
     char * quit_msg = io_loop();

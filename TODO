@@ -2,18 +2,14 @@ Next planned steps in plomrogue development:
 
 BOTH SERVER/CLIENT:
 
-- implement better server/client architecture, meeting these criteria:
-  - keep interaction of server and client in the filesystem (as currently
-    happens by use of plain text files and fifos) to allow for easy scripting
-  - allow for specific requests of the client for specific server data (such as:
-    "what path do you propose for the player character to get from A to B?")
-  - reduce hard disk i/o for server/client interaction (use fifos only?)
-  - further avoid exits that keep the server running and the lock file existing
-    when it shouldn't
+- make server and client communicate by specific world state info requests 
+  in server/out, replacing server/worldstate
 
 - check for return values of *printf()
 
 - make config files format more readable / self-explanatory
+
+- get rid of the useless "internal error code" in error messages
 
 SERVER:
 

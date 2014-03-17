@@ -5,18 +5,17 @@ plomlompom tries to build his own roguelike. It doesn't do much yet (although
 plomlompom has insanely ambitious long-term plans).
 
 You can move around a player on an island and meet different enemies. You have 5
-hitpoints to lose before death; they start with different amounts of hitpoints,
-depending on their species. Dead enemies become dirt, skeletons or "magic meat"
--- such objects can be collected, and "magic meat" can be consumed to gain
-hitpoints. Note that different kinds of movements/actions take different numbers
-of turns to finish.
+hitpoints to lose before death. Enemies start with different amounts of
+hitpoints, depending on their species. Dead enemies become dirt, skeletons or
+"magic meat" -- such objects can be collected, and "magic meat" can be consumed
+to gain hitpoints. Note that different kinds of movements/actions take different
+numbers of turns to finish.
 
 Enemies' AI is very dumb so far: Each turn, they try to move towards their
-path-wise nearest enemy. If no enemy is found in their surroundings, they just
-wait.
+shortest-path-wise nearest enemy. If no enemy is found in their surroundings,
+they just wait.
 
-Note that diagonal movement is possible, but takes (40%) longer than orthogonal
-movement.
+Diagonal movement is possible, but takes (40%) longer than orthogonal movement.
 
 Once you start a new world, every move of yours is recorded in a file called
 "record". Once you re-start the game, all of your previous moves are replayed
@@ -36,10 +35,10 @@ $ ./roguelike
 
 (It may also work on other Unix-like systems with ncurses, who knows.)
 
-Note that make generates two executables ./roguelike-server and
-./roguelike-client. ./roguelike is a pre-existing shell script that merely
-executes both of them, with the server as a background job. You can also
-ignore the script and start the two by hand.
+Make generates two executables ./roguelike-server and ./roguelike-client.
+./roguelike is a pre-existing shell script that merely executes both of them,
+with the server as a background job. You can also ignore the script and start
+the two by hand.
 
 Client's keybindings and window management
 ------------------------------------------
@@ -103,7 +102,8 @@ All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v
 option for helpful debugging info (mostly: what messages the client sends to the
 server). Server and client communicate via files in the ./server/ directory
-(generated when the server is first run). The ./server/in fifo receives commands
-for the server as null-terminated strings. The ./server/out file contains a
-serialized representation of the game world's data as it is to be available to
+(generated when the server is first run). The ./server/in file is read by the
+server for newline-delimited commands. The ./server/out file contains server
+messages to be read by clients. The ./server/worldstate file contains a
+serialized representation of the game world's data as it is to be visible to
 the player / the player's client.

@@ -1,21 +1,21 @@
 /* src/client/io.c */
 
 #include "io.h"
-#include <errno.h> /* global errno */
-#include <fcntl.h> /* open() */
 #include <limits.h> /* PIPE_BUF */
 #include <ncurses.h> /* halfdelay(), getch() */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include <stdio.h> /* FILE, sprintf(), fseek() */
+#include <stdio.h> /* FILE, sprintf(), fseek(), fflush() */
 #include <string.h> /* strcmp(), strlen(), memcpy() */
 #include <stdlib.h> /* free(), atoi() */
 #include <sys/stat.h> /* stat() */
-#include <unistd.h> /* access(), write() */
+#include <sys/types.h> /* time_t */
+#include <time.h> /* time() */
+#include <unistd.h> /* access() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets(),
-                                  * try_fgetc(), textfile_width()
+                                  * try_fgetc(), textfile_width(), try_fputc()
                                   */
 #include "control.h" /* try_key() */
 #include "map.h" /* map_center() */
@@ -47,8 +47,8 @@ static void read_log(char * read_buf, uint32_t linemax, FILE * file);
 static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
                                      FILE * file);
 
-/* If the server's out file has changed since the last read_world(), return a
- * pointer to its file descriptor; else, return NULL.
+/* If the server's worldstate file has changed since the last read_world(),
+ * return a pointer to its file descriptor; else, return NULL.
  *
  * Two tests are performed to check for a file change. The file's last data
  * modification time in seconds via stat() is compared against world.last_update
@@ -61,16 +61,27 @@ static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
  * the new world also starts in turn 1, not signifying any world change to the
  * turn check. The stat() check detects this change with at most 1 second delay.
  */
-static FILE * changed_server_out_file(char * path);
+static FILE * changed_worldstate_file(char * path);
 
-/* Attempt to read the server's out file as representation of the game world in
- * a hard-coded serialization format. Returns 1 on success and 0 if the out file
- * wasn't read for supposedly not having changed since a last read_world() call.
+/* Attempt to read the server's worldstate file as representation of the game
+ * world in a hard-coded serialization format. Returns 1 on success and 0 if the
+ * out file wasn't read for supposedly not having changed since a last
+ * read_world() call.
  *
  * map_center() is triggered by the first successful read_world() or on turn 1,
  * so the client focuses the map window on the player on client and world start.
  */
 static uint8_t read_world();
+
+/* If "last_server_answer_time" is too old, send a PING to the server; or, if a
+ * previous PING has not sparked any answer after a while, abort the client.
+ */
+static void test_ping_pong(time_t last_server_answer_time);
+
+/* Update "last_server_answer_time" if new stuff has been written to the
+ * server's out file.
+ */
+static void test_server_activity(time_t * last_server_answer_time);
 
 
 
@@ -157,9 +168,9 @@ static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
 
 
 
-static FILE * changed_server_out_file(char * path)
+static FILE * changed_worldstate_file(char * path)
 {
-    char * f_name = "changed_server_out_file()";
+    char * f_name = "changed_worldstate_file()";
     struct stat stat_buf;
     exit_trouble(stat(path, &stat_buf), f_name, "stat()");
     if (stat_buf.st_mtime != world.last_update)
@@ -184,11 +195,11 @@ static FILE * changed_server_out_file(char * path)
 static uint8_t read_world()
 {
     char * f_name = "read_world()";
-    char * path = "server/out";
-    char * quit_msg = "No server out file found to read. Server may be down.";
+    char * path = "server/worldstate";
+    char * quit_msg = "No worldstate file found to read. Server may be down.";
     static uint8_t first_read = 1;
     exit_err(access(path, F_OK), quit_msg);
-    FILE * file = changed_server_out_file(path);
+    FILE * file = changed_worldstate_file(path);
     if (!file)
     {
         return 0;
@@ -216,37 +227,52 @@ static uint8_t read_world()
 
 
 
-extern void try_send(char * msg)
+static void test_ping_pong(time_t last_server_answer_time)
 {
-    char * f_name = "try_send()";
+    static uint8_t ping_sent = 0;
+    time_t now = time(0);
+    if (ping_sent && last_server_answer_time > now - 3)
+    {
+        ping_sent = 0;
+    }
+    if (!ping_sent && last_server_answer_time < now - 3)
+    {
+        send("PING");
+        ping_sent = 1;
+        return;
+    }
+    exit_err(last_server_answer_time < now - 6, "Server not answering.");
+}
+
+
+
+static void test_server_activity(time_t * last_server_answer_time)
+{
+    char * f_name = "test_server_activity()";
+    int test = try_fgetc(world.file_server_out, f_name);
+    if (EOF == test)
+    {
+        return;
+    }
+    do
+    {
+        ;
+    }
+    while (EOF != (test = try_fgetc(world.file_server_out, f_name)));
+    * last_server_answer_time = time(0);
+}
+
+
+
+extern void send(char * msg)
+{
+    char * f_name = "send()";
     uint32_t msg_size = strlen(msg) + 1;
-    char * err = "try_send() tries to send message larger than PIPE_BUF bytes.";
+    char * err = "send() tries to send message larger than PIPE_BUF bytes.";
     exit_err(msg_size > PIPE_BUF, err);
-    int fd_out;
-    uint16_t j = 1;
-    while (0 != j)
-    {
-        fd_out = open(world.path_server_in, O_WRONLY | O_NONBLOCK);
-        if (fd_out > 0)
-        {
-            break;
-        }
-        exit_err(-1 == fd_out && ENXIO != errno, "Server fifo not found.");
-        j++;
-    }
-    exit_err(0 == j, "Failed to open server fifo for writing.");
-    j = 1;
-    while (0 != j)
-    {
-        int test = write(fd_out, msg, msg_size);
-        if (test > 0)
-        {
-            break;
-        }
-        j++;
-    }
-    exit_err(0 == j, "Failed to write to server fifo.");
-    exit_trouble(-1 == close(fd_out), f_name, "close()");
+    try_fwrite(msg, strlen(msg), 1, world.file_server_in, f_name);
+    try_fputc('\n', world.file_server_in, f_name);
+    fflush(world.file_server_in);
 }
 
 
@@ -256,8 +282,11 @@ extern char * io_loop()
     world.halfdelay = 1;            /* Ensures read_world() is only called 10 */
     halfdelay(world.halfdelay);     /* times a second during user inactivity. */
     uint8_t change_in_client = 0;
+    time_t last_server_answer_time = time(0);
     while (1)
     {
+        test_server_activity(&last_server_answer_time);
+        test_ping_pong(last_server_answer_time);
         if (world.winch)
         {
             reset_windows_on_winch();
@@ -279,6 +308,6 @@ extern char * io_loop()
             }
         }
     }
-    try_send("QUIT");
+    send("QUIT");
     return "Sent QUIT to server.";
 }

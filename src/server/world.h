@@ -7,6 +7,7 @@
 #define MAIN_H
 
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdio.h> /* define FILE */
 #include "map.h" /* struct Map */
 struct MapObjDef;
 struct MapObjAct;
@@ -16,18 +17,22 @@ struct MapObj;
 
 struct World
 {
+    FILE * file_in; /* Input stream on file at .path_in. */
+    FILE * file_out; /* Output stream on file at .path_out. */
     struct Map map;
     struct MapObjDef * map_obj_defs; /* Map object definitions. */
     struct MapObjAct * map_obj_acts; /* Map object action definitions. */
     struct MapObj * map_objs; /* Map objects. */
     char * log; /* Logs the game events from the player's view. */
-    char * path_in; /* Fifo to receive command messages. */
-    char * path_out; /* File to write the game state as visible to clients.*/
+    char * server_test; /* String uniquely identifying server process. */
+    char * path_in; /* File to write client messages into. */
+    char * path_out; /* File to write server messages into. */
+    char * path_worldstate; /* File to represent world state  to clients.*/
     char * path_record; /* Record file from which to read the game history. */
     char * path_map_obj_defs; /* path for map object definitions config file */
     char * path_map_obj_acts; /* path for map object actions config file */
     char * tmp_suffix; /* Appended to paths of files for their tmp versions. */
-    char * queue; /* Stores un-processed messages received via input fifo. */
+    char * queue; /* Stores un-processed messages read from the input file. */
     uint32_t queue_size;/* Length of .queue sequence of \0-terminated strings.*/
     uint32_t seed; /* Randomness seed. */
     uint16_t replay; /* Turn up to which to replay game. No replay if zero. */

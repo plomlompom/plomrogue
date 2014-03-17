@@ -15,13 +15,17 @@
 enum cleanup_flag
 {
     CLEANUP_FIFO            = 0x0001,
-    CLEANUP_OUTFILE         = 0x0002,
+    CLEANUP_WORLDSTATE      = 0x0002,
     CLEANUP_MAP_OBJECT_DEFS = 0x0004,
     CLEANUP_MAP_OBJECTS     = 0x0008,
-    CLEANUP_MAP_OBJECT_ACTS = 0x0010
+    CLEANUP_MAP_OBJECT_ACTS = 0x0010,
+    CLEANUP_IN              = 0x0020,
+    CLEANUP_OUT             = 0x0040
 };
 
+/* In addition, unset_cleanup_flag() may be used to unset flags. */
 extern void set_cleanup_flag(enum cleanup_flag flag);
+extern void unset_cleanup_flag(enum cleanup_flag flag);
 
 /* Frees memory and unlinks some files. */
 extern void cleanup();

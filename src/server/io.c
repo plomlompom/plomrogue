@@ -2,18 +2,17 @@
 
 #include "io.h"
 #include <errno.h> /* global errno */
-#include <fcntl.h> /* open(), O_RDONLY, O_NONBLOCK */
 #include <limits.h> /* PIPE_BUF */
 #include <stddef.h> /* size_t, NULL */
 #include <stdint.h> /* uint8_t, uint32_t */
-#include <stdio.h> /* define FILE, sprintf() */
+#include <stdio.h> /* defines EOF, FILE, sprintf() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen(), memset(), memcpy() */
-#include <unistd.h> /* read(), close() */
+#include <string.h> /* strlen(), memcpy() */
+#include <sys/types.h> /* time_t */
+#include <time.h> /* time() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
-                                  * try_fwrite(), try_fputc()
+                                  * try_fwrite(), try_fputc(), try_fgetc()
                                   */
-#include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "map_objects.h" /* structs MapObj, MapObjDef, get_map_obj_def() */
@@ -28,13 +27,15 @@
 */
 static char * get_message_from_queue();
 
-/* Read fifo input to put into queue. Only stop reading when bytes were received
- * and the receiving has stopped. Read max. PIPE_BUF-sized chunks for atomicity.
+/* Read input file for input into world.queue. new queue input. Wait a few
+ * seconds until giving up. Translate '\n' chars in input file into '\0' chars.
  */
-static void read_fifo_into_queue();
+static void read_file_into_queue();
 
-/* Write to output file the world state as it is to be visible to clients. */
-static void update_out_file();
+/* Write world state as visible to clients to its file. Write single dot line to
+ * server output file to satisfy client ping mechanisms.
+ */
+static void update_worldstate_file();
 
 /* Write "value" to new \n-delimited line of "file". */
 static void write_value_as_line(uint32_t value, FILE * file);
@@ -53,76 +54,75 @@ static char * get_message_from_queue()
 {
     char * f_name = "get_message_from_queue()";
     char * message = NULL;
-    size_t cutout_len = strlen(world.queue);
-    if (0 < cutout_len)
+    if (world.queue_size)
     {
-        cutout_len++;
-        message = try_malloc(cutout_len, f_name);
-        memcpy(message, world.queue, cutout_len);
-    }
-    for (;
-         cutout_len != world.queue_size && '\0' == world.queue[cutout_len];
-         cutout_len++);
-    world.queue_size = world.queue_size - cutout_len;
-    if (0 == world.queue_size)
-    {
-        free(world.queue);  /* NULL so read_fifo_into_queue() may free() this */
-        world.queue = NULL; /* every time, even when it's un-allocated first. */
-    }
-    else
-    {
-        char * new_queue = try_malloc(world.queue_size, f_name);
-        memcpy(new_queue, &(world.queue[cutout_len]), world.queue_size);
-        free(world.queue);
-        world.queue = new_queue;
+        size_t cutout_len = strlen(world.queue);
+        if (0 < cutout_len)
+        {
+            cutout_len++;
+            message = try_malloc(cutout_len, f_name);
+            memcpy(message, world.queue, cutout_len);
+        }
+        for (;
+             cutout_len != world.queue_size && '\0' == world.queue[cutout_len];
+             cutout_len++);
+        world.queue_size = world.queue_size - cutout_len;
+        if (0 == world.queue_size)
+        {
+            free(world.queue);   /* NULL so read_file_into_queue() may free() */
+            world.queue = NULL;  /* this every time, even when it's           */
+        }                        /* un-allocated first. */
+        else
+        {
+            char * new_queue = try_malloc(world.queue_size, f_name);
+            memcpy(new_queue, &(world.queue[cutout_len]), world.queue_size);
+            free(world.queue);
+            world.queue = new_queue;
+        }
     }
     return message;
 }
 
 
 
-static void read_fifo_into_queue()
+static void read_file_into_queue()
 {
-    char * f_name = "read_fifo_into_queue()";
-    uint32_t buf_size = PIPE_BUF;
-    int fdesc_infile = open(world.path_in, O_RDONLY | O_NONBLOCK);
-    exit_trouble(-1 == fdesc_infile, "open()", f_name);
-    char buf[buf_size];
-    memset(buf, 0, buf_size);
-    int bytes_read;
-    uint8_t read_state = 0; /* 0: waiting for input. 1: started receiving it. */
-    while (1)
+    char * f_name = "read_file_into_queue()";
+    uint8_t wait_seconds = 5;
+    time_t now = time(0);
+    int test;
+    while (EOF == (test = try_fgetc(world.file_in, f_name)))
     {
-        bytes_read = read(fdesc_infile, buf, buf_size);
-        if (bytes_read > 0)
+        if (time(0) > now + wait_seconds)
         {
-            read_state = 1;
-            uint32_t old_queue_size = world.queue_size;
-            world.queue_size = world.queue_size + bytes_read;
-            char * new_queue = try_malloc(world.queue_size, f_name);
-            memcpy(new_queue, world.queue, old_queue_size);
-            memcpy(&(new_queue[old_queue_size]), buf, bytes_read);
-            free(world.queue);
-            world.queue = new_queue;
-            memset(buf, 0, buf_size);
-            continue;
-        }
-        exit_trouble(-1 == bytes_read && errno != EAGAIN, "read()", f_name);
-        if (1 == read_state)
-        {
-            break;
+            return;
         }
     }
-    exit_trouble(close(fdesc_infile), f_name, "close()");
+    do
+    {
+        char c = (char) test;
+        if ('\n' == c)
+        {
+            c = '\0';
+        }
+        char * new_queue = try_malloc(world.queue_size + 1, f_name);
+        memcpy(new_queue, world.queue, world.queue_size);
+        char * new_pos = new_queue + world.queue_size;
+        * new_pos = c;
+        world.queue_size++;
+        free(world.queue);
+        world.queue = new_queue;
+    }
+    while (EOF != (test = try_fgetc(world.file_in, f_name)));
 }
 
 
 
-static void update_out_file()
+static void update_worldstate_file()
 {
-    char * f_name = "update_out_file()";
-    char path_tmp[strlen(world.path_out) + strlen(world.tmp_suffix) + 1];
-    sprintf(path_tmp, "%s%s", world.path_out, world.tmp_suffix);
+    char * f_name = "update_worldstate_file()";
+    char path_tmp[strlen(world.path_worldstate) + strlen(world.tmp_suffix) + 1];
+    sprintf(path_tmp, "%s%s", world.path_worldstate, world.tmp_suffix);
     FILE * file = try_fopen(path_tmp, "w", f_name);
     struct MapObj * player = get_player();
     write_value_as_line(world.turn, file);
@@ -137,8 +137,11 @@ static void update_out_file()
     {
         try_fwrite(world.log, strlen(world.log), 1, file, f_name);
     }
-    try_fclose_unlink_rename(file, path_tmp, world.path_out, f_name);
-    set_cleanup_flag(CLEANUP_OUTFILE);
+    try_fclose_unlink_rename(file, path_tmp, world.path_worldstate, f_name);
+    set_cleanup_flag(CLEANUP_WORLDSTATE);
+    char * dot = ".\n";;
+    try_fwrite(dot, strlen(dot), 1, world.file_out, f_name);
+    fflush(world.file_out);
 }
 
 
@@ -224,11 +227,11 @@ extern char * io_round()
     }
     if (world.turn != world.last_update_turn)
     {
-        update_out_file();
+        update_worldstate_file();
         world.last_update_turn = world.turn;
     }
-    read_fifo_into_queue();
-    if ('\0' != world.queue[world.queue_size - 1])
+    read_file_into_queue();
+    if (world.queue_size && '\0' != world.queue[world.queue_size - 1])
     {
         char * new_queue = try_malloc(world.queue_size + 1, f_name);
         memcpy(new_queue, world.queue, world.queue_size);
