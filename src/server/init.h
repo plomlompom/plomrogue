@@ -13,6 +13,12 @@
 /* Parses command line arguments -v and -s into server configuration. */
 extern void obey_argv(int argc, char * argv[]);
 
+/* Set map geometry and, from config files, map object (action) definitions. */
+extern void init_map_and_map_objects_configs();
+
+/* Start server in file and out file, latter with server process test string. */
+extern void setup_server_io();
+
 /* Dissolves old game world if it exists, and generates a new one from "seed".
  * Unlinks a pre-existing file at world.path_record if called on a world.turn>0,
  * i.e. if called after iterating through an already established game world.

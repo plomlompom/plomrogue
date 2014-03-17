@@ -1,18 +1,26 @@
 /* src/server/init.c */
 
 #include "init.h"
+#include <errno.h> /* global errno, EEXIST */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint32_t */
+#include <stdio.h> /* sprintf(), fflush() */
 #include <stdlib.h> /* exit(), free() */
-#include <string.h> /* atoi() */
+#include <string.h> /* atoi(), strlen() */
+#include <sys/stat.h> /* mkdir() */
+#include <sys/types.h> /* defines pid_t, time_t */
 #include <time.h> /* time() */
-#include <unistd.h> /* optarg, getopt(), access(), unlink() */
+#include <unistd.h> /* optarg, getopt(), access(), unlink(), getpid() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_width(),
-                                  * try_fgets()
+                                  * try_fgets(), try_fwrite()
                                   */
 #include "../common/rexit.h" /* exit_err() */
+#include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
-#include "map_objects.h" /* free_map_objects(), add_map_objects() */
+#include "map_object_actions.h" /* init_map_object_actions() */
+#include "map_objects.h" /* free_map_objects(), add_map_objects(),
+                          * init_map_object_defs()
+                          */
 #include "map.h" /* init_map() */
 #include "rrand.h" /* rrand() */
 #include "run.h" /* obey_msg(), io_loop() */
@@ -42,6 +50,46 @@ extern void obey_argv(int argc, char * argv[])
             exit(EXIT_FAILURE);
         }
     }
+}
+
+
+
+extern void init_map_and_map_objects_configs()
+{
+    world.map.size.x = 64;
+    world.map.size.y = 64;
+    world.map.dist_orthogonal = 5;
+    world.map.dist_diagonal   = 7;
+    char * err_mod = "No map object definitions file.";
+    char * err_moa = "No map object actions file.";
+    exit_err(access(world.path_map_obj_defs, F_OK), err_mod);
+    exit_err(access(world.path_map_obj_acts, F_OK), err_moa);
+    init_map_object_defs();
+    init_map_object_actions();
+}
+
+
+
+extern void setup_server_io()
+{
+    char * f_name = "setup_server_io()";
+    int test = mkdir("server", 0700);
+    exit_trouble(test && EEXIST != errno, f_name, "mkdir()");
+    world.file_out = try_fopen(world.path_out, "w", f_name);
+    world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, f_name);
+    sprintf(world.server_test, "%d %d\n", getpid(), (int) time(0));
+    try_fwrite(world.server_test, strlen(world.server_test), 1,
+               world.file_out, f_name);
+    fflush(world.file_out);
+    set_cleanup_flag(CLEANUP_OUT);
+    if (!access(world.path_in, F_OK))  /* This keeps out input from old input */
+    {                                  /* file streams of clients             */
+        unlink(world.path_in);         /* communicating with server processes */
+    }                                  /* superseded by this current one.     */
+    world.file_in = try_fopen(world.path_in, "w", f_name);
+    try_fclose(world.file_in, f_name);
+    world.file_in = try_fopen(world.path_in, "r", f_name);
+    set_cleanup_flag(CLEANUP_IN);
 }
 
 
