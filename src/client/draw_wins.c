@@ -309,7 +309,7 @@ static void draw_titled_keybinding_list(char * title, struct Win * win,
 {
     uint8_t state = 0;
     uint16_t kb_n = 0;
-    for (; (0 == state || kb_n < kbdb->n_of_kbs); kb_n++)
+    while (0 == state || kb_n < kbdb->n_of_kbs)
     {
         if (0 == state)
         {
@@ -321,6 +321,7 @@ static void draw_titled_keybinding_list(char * title, struct Win * win,
         char * kb_line = get_kb_line(&kbdb->kbs[kb_n], win->linebreak);
         add_line(win, kb_line, 0, offset, (last * kbdb->n_of_kbs == kb_n + 1));
         free(kb_line);
+        kb_n++;
     }
     if (2 == state)
     {
