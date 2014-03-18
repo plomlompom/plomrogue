@@ -52,7 +52,7 @@ static void add_text_with_linebreaks(struct Win * win, char * text);
 static void draw_text_from_bottom(struct Win * win, char * text);
 
 /* Return a properly formatted keybinding list line for "kb". */
-static char * get_kb_line(struct KeyBinding * kb, uint8_t linebreak_type);
+static char * get_kb_line(struct KeyBinding * kb);
 
 /* Draw from line "start" on config view for keybindings defined at "kb". */
 static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
@@ -254,20 +254,13 @@ static void draw_text_from_bottom(struct Win * win, char * text)
 
 
 
-static char * get_kb_line(struct KeyBinding * kb, uint8_t linebreak_type)
+static char * get_kb_line(struct KeyBinding * kb)
 {
     char * f_name = "get_kb_line()";
     char * keyname = get_keyname_to_keycode(kb->keycode);
-    char * format = "%-9s %s";
-    uint16_t first_size = 9;
-    if (1 != linebreak_type)
-    {
-        format = "%s: %s";
-        first_size = strlen(keyname) + 1;
-    }
-    uint16_t size = first_size + 1 + strlen(kb->command->dsc_long) + 1;
+    uint16_t size = strlen(keyname) + 3 + strlen(kb->command->dsc_long) + 1;
     char * kb_line = try_malloc(size, f_name);
-    sprintf(kb_line, format, keyname, kb->command->dsc_long);
+    sprintf(kb_line, "%s - %s", keyname, kb->command->dsc_long);
     free(keyname);
     return kb_line;
 }
@@ -295,7 +288,7 @@ static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
             }
             win->center.y = win->winmap_size.y;
         }
-        char * kb_line = get_kb_line(&kbdb->kbs[kb_n], win->linebreak);
+        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
         add_line(win, kb_line, attri, &offset, (kbdb->n_of_kbs == kb_n + 1));
         free(kb_line);
     }
@@ -318,7 +311,7 @@ static void draw_titled_keybinding_list(char * title, struct Win * win,
             state = 1 + (0 == kbdb->n_of_kbs);
             continue;
         }
-        char * kb_line = get_kb_line(&kbdb->kbs[kb_n], win->linebreak);
+        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
         add_line(win, kb_line, 0, offset, (last * kbdb->n_of_kbs == kb_n + 1));
         free(kb_line);
         kb_n++;
