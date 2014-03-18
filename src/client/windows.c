@@ -601,6 +601,7 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
                      "interface config file. ";
     char * err_id  = "Illegal ID(s) selected.";
     char * err_2   = "Double-initialized window.";
+    char * err_brk = "Illegal line break type index.";
     int test_for_end = try_fgetc(file, f_name);
     if (EOF == test_for_end || '\n' == test_for_end)
     {
@@ -618,6 +619,9 @@ extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
     win.title = try_malloc(strlen(line), f_name);
     memcpy(win.title, line, strlen(line) - 1);      /* Eliminate newline char */
     win.title[strlen(line) - 1] = '\0';             /* char at end of string. */
+    err_try_fgets(line, linemax, file, context, "0nsi");
+    err_line(atoi(line) > 2, line, context, err_brk);
+    win.linebreak = atoi(line);
     err_try_fgets(line, linemax, file, context, "0ni");
     win.target_height = atoi(line);
     win.target_height_type = (0 >= win.target_height);
@@ -658,6 +662,8 @@ extern void write_winconf_of_id_to_file(FILE * file, char c)
     sprintf(line, "%c\n", wc->id);
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
     sprintf(line, "%s\n", wc->title);
+    try_fwrite(line, sizeof(char), strlen(line), file, f_name);
+    sprintf(line, "%d\n", wc->linebreak);
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
     sprintf(line, "%d\n", wc->target_height);
     try_fwrite(line, sizeof(char), strlen(line), file, f_name);
@@ -873,6 +879,25 @@ extern void toggle_win_size_type(char axis)
     w->target_width_type = (   0 == w->target_width_type
                             && w->frame_size.x <= world.winDB.v_screen_size.x);
     set_win_target_size(w);
+}
+
+
+
+extern void toggle_linebreak_type()
+{
+    struct Win * w = get_win_by_id(world.winDB.active);
+    if      (0 == w->linebreak)
+    {
+        w->linebreak = 1;
+    }
+    else if (1 == w->linebreak)
+    {
+        w->linebreak = 2;
+    }
+    else if (2 == w->linebreak)
+    {
+        w->linebreak = 0;
+    }
 }
 
 

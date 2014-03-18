@@ -34,7 +34,7 @@ extern void err_line(uint8_t test, char * line, char * intro, char * msg);
  *
  * The available "test" conditions are as follows:
  *
- * '0': check against the line being empty (not even containing a \n char)
+ * '0': check for "line" not being empty (not even containing a \n char)
  * 'n': check for "line" ending with an \n char
  * 'e': check for "line" starting with an \n char
  * 'f': check for "line" not starting with an \n char

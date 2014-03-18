@@ -59,7 +59,8 @@ struct Win
     char id; /* Win identifier; also maps to default window drawing function. */
     uint8_t target_height_type; /* 0: read .height/.width as positive size; */
     uint8_t target_width_type;  /* 1: as negative diff to v_screen size     */
-    uint8_t view; /* winde view mode: 0: use default draw function set by .id */
+    uint8_t linebreak; /* linebreaking modes: 0: wide; 1: long; 1: compact */
+    uint8_t view; /* window view mode: 0: use .id- set default draw function */
 };                /* 1/2: use one of the two config view draw function */
 
 
@@ -126,6 +127,8 @@ extern void toggle_winconfig();
  * width, for such width is better saved directly with .target_width_type of 0.
  */
 extern void toggle_win_size_type(char axis);
+
+extern void toggle_linebreak_type();
 
 /* Grow or shrink active window horizontally ("change" = "*"/"_") or vertically
  * ("change" = "+"/"-") if the new size was at least 1x1, the height at least

@@ -46,6 +46,7 @@ m
 %
 0
 Global keys
+0
 -13
 29
 258 g_keys_d
@@ -54,6 +55,7 @@ Global keys
 %
 1
 Window geometry keys
+0
 8
 29
 258 wg_keys_d
@@ -62,6 +64,7 @@ Window geometry keys
 %
 2
 Window keybinding keys
+0
 3
 29
 258 wk_keys_d
@@ -70,6 +73,7 @@ Window keybinding keys
 %
 c
 Inventory
+0
 5
 33
 259 inv_u
@@ -77,21 +81,25 @@ Inventory
 %
 i
 Info
+0
 3
 33
 %
 k
 Available keys
 0
+0
 29
 %
 l
 Log
+0
 -10
 33
 %
 m
 Map
+0
 0
 0
 259 map_u

@@ -9,6 +9,8 @@ BOTH SERVER/CLIENT:
 
 - make config files format more readable / self-explanatory
 
+- in startup script, pipe server output to log file instead of stdout
+
 SERVER:
 
 - implement field of view / line of sight and obstacles for those on the map
@@ -23,6 +25,4 @@ CLIENT:
 
 - enable toggling of window borders
 
-- enable toggling of showing "\n" in the window content either as newline breaks
-  (as currently) or as " / " (without newline break) for more efficent screen
-  estate use
+- make log scrollable

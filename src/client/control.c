@@ -14,7 +14,8 @@
                    */
 #include "windows.h" /* get_win_byid(), shift_active_win(), resize_active_win(),
                       * toggle_win_size_type(), toggle_window(),
-                      * cycle_active_win(), scroll_v_screen()
+                      * cycle_active_win(), scroll_v_screen(),
+                      * toggle_linebreak_type()
                       */
 #include "world.h" /* for global world */
 
@@ -104,6 +105,7 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "shri_h", resize_active_win, '_')
             || try_1args(command, "grow_v", resize_active_win, '+')
             || try_1args(command, "shri_v", resize_active_win, '-')
+            || try_0args(command, "to_break", toggle_linebreak_type)
             || try_1args(command, "to_height_t", toggle_win_size_type, 'y')
             || try_1args(command, "to_width_t", toggle_win_size_type, 'x')
             || try_1args(command, "shift_f", shift_active_win, 'f')
@@ -168,11 +170,11 @@ extern uint8_t try_key(uint16_t key)
     }
     if (command)
     {
-        if (try_server_commands(command))
+        if      (try_server_commands(command))
         {
             return 1;
         }
-        else if      (try_client_commands(command))
+        else if (try_client_commands(command))
         {
             return 1;
         }

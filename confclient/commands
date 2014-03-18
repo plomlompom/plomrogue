@@ -103,6 +103,9 @@ grow window vertically
 shri_v
 shrink window vertically
 %
+to_break
+toggle line break type
+%
 to_height_t
 toggle window height type
 %
