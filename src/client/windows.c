@@ -911,7 +911,7 @@ extern void resize_active_win(char change)
         {
             w->frame_size.y--;
         }
-        else if (change == '_' && w->frame_size.y > 1)
+        else if (change == '_' && w->frame_size.x > 1)
         {
             w->frame_size.x--;
         }
