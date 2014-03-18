@@ -26,3 +26,5 @@ CLIENT:
 - make log scrollable
 
 - re-organize code: empty misc.h into proper modules, split up windows.h
+
+- simplify get_keyname_to_keycode()
