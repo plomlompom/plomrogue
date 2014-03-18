@@ -9,8 +9,6 @@ BOTH SERVER/CLIENT:
 
 - make config files format more readable / self-explanatory
 
-- in startup script, pipe server output to log file instead of stdout
-
 SERVER:
 
 - implement field of view / line of sight and obstacles for those on the map

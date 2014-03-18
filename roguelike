@@ -3,8 +3,8 @@
 # Abort the script on error.
 set -e
 
-# Use the shell script's arguments to the server's arguments.
-./roguelike-server "$@" &
+# Use shell script's arguments for server and pipe server output to log file.
+./roguelike-server "$@" > log 2>&1 &
 
 # Give server some time to start up and exit on error.
 sleep 0.01
