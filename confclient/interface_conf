@@ -63,7 +63,7 @@ c
 Inventory
 2
 4
-30
+28
 100 drop
 259 inv_u
 258 inv_d
@@ -73,11 +73,11 @@ i
 Info
 2
 1
-30
+28
 %
 k
 Available keys
-0
+1
 0
 29
 %
@@ -85,13 +85,13 @@ l
 Log
 0
 -7
-30
+28
 %
 m
 Map
 0
 0
--61
+-59
 112 pick
 58 wait
 107 move_8
