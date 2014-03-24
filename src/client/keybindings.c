@@ -57,7 +57,7 @@ static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
 {
     if (keycode_given == keycode_match)
     {
-        sprintf(keyname, keyname_match);
+        sprintf(keyname, "%s", keyname_match);
         return 1;
     }
     return 0;
