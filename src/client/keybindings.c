@@ -84,7 +84,7 @@ extern struct Command * get_command_to_keycode(struct KeyBindingDB * kbdb,
 extern char * get_keyname_to_keycode(uint16_t keycode)
 {
     char * f_name = "get_name_to_keycode()";
-    char * keyname = try_malloc(15, f_name);                /* FIXME: Why 15? */
+    char * keyname = try_malloc(10, f_name);        /* max keyname length + 1 */
     if (32 < keycode && keycode < 127)
     {
         sprintf(keyname, "%c", keycode);
