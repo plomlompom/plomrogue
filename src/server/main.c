@@ -35,7 +35,7 @@ int main(int argc, char ** argv)
             exit_err(-1 == test, printf_err);
         }
     }
-    world.path_map_obj_defs = "confserver/defs";
+    world.path_map_obj_defs = "confserver/map_objects";
     world.path_map_obj_acts = "confserver/map_object_actions";
     world.path_worldstate   = "server/worldstate";
     world.path_out          = "server/out";
