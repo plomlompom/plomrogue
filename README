@@ -87,10 +87,10 @@ of a string that maps the action to the game logic to do when it is called.
 Finally, a delimiter line of "%%" ends the entry.
 
 The different map object types, i.e. species (including the player's human one)
-and item types, can be edited in ./confserver/defs. Here the first value is a
-numerical ID that represents the object type, the second one describes what type
-this object decomposes to when it gets destroyed/killed, the third value is the
-ASCII character used to represent the object visually on the map, the fourth
+and item types, can be edited in ./confserver/map_objects. Here the first value
+is a numerical ID that represents the object type, the second one describes what
+type this object decomposes to when it gets destroyed/killed, the third value is
+the ASCII character used to represent the object visually on the map, the fourth
 value is the number of hitpoints the object starts with (items are dead and
 start with zero hitpoints, anything else moves), the fifth is the string that
 names the object in the game log, the sixth defines if the object is consumable
