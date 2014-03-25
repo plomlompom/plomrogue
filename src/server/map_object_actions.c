@@ -405,7 +405,7 @@ extern void actor_use(struct MapObj * mo)
         struct MapObj * selected = mo->owns;
         for (; i != select; i++, selected = selected->next);
         struct MapObjDef * mod = get_map_object_def(selected->type);
-        if (!strcmp("MAGIC MEAT", mod->name))
+        if (mod->consumable)
         {
             wrong_object = 0;
             struct MapObj * next = selected->next;
@@ -421,7 +421,7 @@ extern void actor_use(struct MapObj * mo)
             {
                 mo->owns = next;
             }
-            mo->lifepoints++;
+            mo->lifepoints = mo->lifepoints + mod->consumable;
         }
     }
     if (mo == get_player())

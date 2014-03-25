@@ -33,6 +33,7 @@ struct MapObjDef
     uint8_t id;         /* map object definition identifier / sets .type */
     uint8_t corpse_id;  /* type to change map object into upon destruction */
     uint8_t lifepoints; /* default start value for map object's .lifepoints */
+    uint8_t consumable; /* can be eaten if !0, for so much hitpoint win */
 };
 
 

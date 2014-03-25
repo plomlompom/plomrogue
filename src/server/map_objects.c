@@ -142,6 +142,9 @@ extern void init_map_object_defs()
         line[strlen(line) - 1] = '\0';
         mod->name = try_malloc(strlen(line) + 1, f_name);
         memcpy(mod->name, line, strlen(line) + 1);
+        err_try_fgets(line, linemax, file, context, "0nfi");
+        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        mod->consumable = atoi(line);
         * last_mod_ptr_ptr = mod;
         last_mod_ptr_ptr = &mod->next;
         err_try_fgets(line, linemax, file, context, "d");

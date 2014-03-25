@@ -22,6 +22,8 @@ SERVER:
 - for game continuation, replace re-playing of whole record files with loading
   game state snapshots / save files
 
+- rename confserver/defs to confserver/map_objects
+
 CLIENT:
 
 - enable toggling of window borders

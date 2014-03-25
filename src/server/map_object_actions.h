@@ -50,8 +50,7 @@ extern void actor_drop(struct MapObj * mo);
 extern void actor_pick(struct MapObj * mo);
 
 /* Actor "mo" tries to use inventory object indexed by number mo->args.
- * (Currently the only valid use is consuming an item named "MAGIC MEAT",
- * which increments the actors lifepoints.)
+ * (Currently the only valid use is consuming items defined as consumable.)
  */
 extern void actor_use(struct MapObj * mo);
 
