@@ -1,7 +1,8 @@
 /* err_try_fgets.c */
 
-#include <stdint.h> /* uint8_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint32_t, UINT8_MAX */
 #include <stdio.h> /* FILE, sprintf() */
+#include <stdlib.h> /* atoi() */
 #include <string.h> /* strlen(), strchr(), strcmp() */
 #include "../common/readwrite.h" /* try_fgets() */
 #include "../common/rexit.h" /* exit_err() */
@@ -57,6 +58,7 @@ extern void err_try_fgets(char * line, uint32_t linemax, FILE * file,
     char * err_int   = "Expected valid positive or negative integer number.";
     char * err_full  = "Hit non-empty line where empty line was expected.";
     char * err_delim = "Expected proper delimiter, found something else.";
+    char * err_uint8 = "Value is too large. Must be 255 or less.";
     char * f_name = "err_try_fgets()";
     line[0] = '\0';
     try_fgets(line, linemax + 1, file, f_name);
@@ -83,4 +85,6 @@ extern void err_try_fgets(char * line, uint32_t linemax, FILE * file,
         err_line(strlen(line) < 2 && ('-' == line[i] || '+' == line[i]),
                  line, context, err_int);
     }
+    err_line(strchr(test, '8') && atoi(line) > UINT8_MAX, line, context,
+             err_uint8);
 }

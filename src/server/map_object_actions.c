@@ -2,7 +2,7 @@
 
 #include "map_object_actions.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t, UINT8_MAx */
+#include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf(), ungetc() */
 #include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* strlen(), strcmp(), memcpy(), strncmp() */
@@ -235,8 +235,7 @@ extern void init_map_object_actions()
     char line[linemax + 1];
     struct MapObjAct ** moa_ptr_ptr = &world.map_obj_acts;
     char * context = "Failed reading map object actions config file. ";
-    char * err_toolarge = "Value is too large.";
-    char * err_uniq     = "Declaration of ID already used.";
+    char * err_uniq = "Declaration of ID already used.";
     reset_err_try_fgets_counter();
     while (1)
     {
@@ -247,16 +246,14 @@ extern void init_map_object_actions()
         }
         exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
         struct MapObjAct * moa = try_malloc(sizeof(struct MapObjAct), f_name);
-        err_try_fgets(line, linemax, file, context, "nfi");
-        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        err_try_fgets(line, linemax, file, context, "nfi8");
         moa->id = atoi(line);
         struct MapObjAct * moa_test = world.map_obj_acts;
         for (; NULL != moa_test; moa_test = moa_test->next)
         {
             err_line(moa->id == moa_test->id, line, context, err_uniq);
         }
-        err_try_fgets(line, linemax, file, context, "0nfi");
-        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        err_try_fgets(line, linemax, file, context, "0nfi8");
         moa->effort = atoi(line);
         err_try_fgets(line, linemax, file, context, "0nf");
         line[strlen(line) - 1] = '\0';

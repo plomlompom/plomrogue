@@ -3,7 +3,7 @@
 #include "map_objects.h"
 #include <stddef.h> /* NULL */
 #include <stdio.h> /* FILE typedef */
-#include <stdint.h> /* uint8_t, uint16_t, UINT8_MAX */
+#include <stdint.h> /* uint8_t, uint16_t */
 #include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* strlen(), memcpy(), memset() */
 #include "../common/err_try_fgets.h" /* err_try_fgets(), err_line(),
@@ -105,8 +105,7 @@ extern void init_map_object_defs()
 {
     char * f_name = "init_map_object_defs()";
     char * context = "Failed reading map object definitions file. ";
-    char * err_toolarge = "Value is too large.";
-    char * err_uniq     = "Declaration of ID already used.";
+    char * err_uniq = "Declaration of ID already used.";
     FILE * file = try_fopen(world.path_map_obj_defs, "r", f_name);
     uint32_t linemax = textfile_width(file);
     struct MapObjDef ** last_mod_ptr_ptr = &world.map_obj_defs;
@@ -122,28 +121,24 @@ extern void init_map_object_defs()
         exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
         struct MapObjDef * mod = try_malloc(sizeof(struct MapObjDef), f_name);
         mod->next = NULL;
-        err_try_fgets(line, linemax, file, context, "nfi");
-        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        err_try_fgets(line, linemax, file, context, "nfi8");
         mod->id = atoi(line);
         struct MapObjDef * mod_test = world.map_obj_defs;
         for (; NULL != mod_test; mod_test = mod_test->next)
         {
             err_line(mod->id == mod_test->id, line, context, err_uniq);
         }
-        err_try_fgets(line, linemax, file, context, "0nfi");
-        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        err_try_fgets(line, linemax, file, context, "0nfi8");
         mod->corpse_id = atoi(line);
         err_try_fgets(line, linemax, file, context, "0nfs");
         mod->char_on_map = line[0];
-        err_try_fgets(line, linemax, file, context, "0nfi");
-        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        err_try_fgets(line, linemax, file, context, "0nfi8");
         mod->lifepoints = atoi(line);
         err_try_fgets(line, linemax, file, context, "0nf");
         line[strlen(line) - 1] = '\0';
         mod->name = try_malloc(strlen(line) + 1, f_name);
         memcpy(mod->name, line, strlen(line) + 1);
-        err_try_fgets(line, linemax, file, context, "0nfi");
-        err_line(atoi(line) > UINT8_MAX, line, context, err_toolarge);
+        err_try_fgets(line, linemax, file, context, "0nfi8");
         mod->consumable = atoi(line);
         * last_mod_ptr_ptr = mod;
         last_mod_ptr_ptr = &mod->next;
