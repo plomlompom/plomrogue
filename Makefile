@@ -33,7 +33,7 @@ $(BUILDDIR)/%.o : $(SRCDIR)/%.c
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# "make clean" to tries to delete all files that could possibly have been built.
+# "make clean" to try to delete all files that could possibly have been built.
 # Declare target "phony", i.e. this is not about building a file.
 .PHONY : clean
 clean :
