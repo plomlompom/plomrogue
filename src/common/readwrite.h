@@ -34,9 +34,7 @@ extern char * try_fgets(char * line, int size, FILE * file, char * f);
 extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
                                      char * f);
 
-/* Return largest line length from "file" the largest line length (including
- * newline chars).
- */
+/* Return largest line length from "file" (including  newline chars). */
 extern uint32_t textfile_width(FILE * file);
 
 
