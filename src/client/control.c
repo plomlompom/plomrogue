@@ -12,11 +12,12 @@
 #include "misc.h" /* reload_interface_conf(), save_interface_conf(),
                    * nav_inventory()
                    */
-#include "windows.h" /* get_win_byid(), shift_active_win(), resize_active_win(),
-                      * toggle_win_size_type(), toggle_window(),
-                      * cycle_active_win(), scroll_v_screen(),
-                      * toggle_linebreak_type()
-                      */
+#include "wincontrol.h" /* shift_active_win(), resize_active_win(),
+                         * toggle_win_size_type(), toggle_window(),
+                         * cycle_active_win(), scroll_v_screen(),
+                         * toggle_linebreak_type(), toggle_winconfig()
+                         */
+#include "windows.h" /* get_win_by_id() */
 #include "world.h" /* for global world */
 
 

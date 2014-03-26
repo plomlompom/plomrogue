@@ -4,12 +4,12 @@
 #include <ncurses.h> /* chtype, getmaxx(), getmaxy(), erase(), werase(),
                       * endwin(), delwin(), wnoutrefresh(), pnoutrefresh(),
                       * doupdate(), refresh(), delwin(), newpad(), mvwaddch(),
-                      * mvwaddstr(), wresize()
+                      * mvwaddstr()
                       */
 #include <stddef.h> /* NULL */
-#include <stdlib.h> /* free(), atoi() */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdio.h> /* sprintf() */
+#include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* memcpy(), strlen(), strnlen(), strchr(), memset() */
 #include "../common/err_try_fgets.h" /* err_try_fgets(), err_line() */
 #include "../common/readwrite.h" /* try_fputc(), try_write(), try_fgetc() */
@@ -27,16 +27,10 @@
                           * read_keybindings_from_file()
                           */
 #include "misc.h" /* array_append() */
+#include "wincontrol.h" /* toggle_window() */
 #include "world.h" /* global world */
 
 
-
-/* Get position of id "c" in world.winDB.order or return Win before/after (or
- * NULL if there is no window before/after).
- */
-static uint8_t get_pos_in_order(char c);
-static struct Win * get_win_after(char c);
-static struct Win * get_win_before(char c);
 
 /* Calculate "id"'s window's size from v_screen size and .target_(height/width).
  * A .target_width == 0 makes the window as wide as .t_screen. .target_height ==
@@ -53,20 +47,8 @@ static void init_win_size_from_winconf_and_v_screen_size(char id);
 static uint8_t match_func(char c, void (** f) (), char c_m, void (* f_m) ());
 static void (* get_drawfunc_by_char(char c)) ();
 
-/* Write "win"'s size back to .target_(height/width) as per .target_*_type. */
-static void set_win_target_size(struct Win * win);
-
 /* Iterate over chars of world.winDB.ids array / string. Restart after \0.*/
 static char get_next_win_id();
-
-/* Make .v_screen just wide enough to contain all visible windows. */
-static void refit_v_screen();
-
-/* Update geometry (sizes, positions) of window "w" and its successors in the
- * window chain. Use place_win() for the positioning algorithm.
- */
-static void update_wins(struct Win * w);
-static void place_win(struct Win * w);
 
 /* Draw scroll hint (a line saying that there are "dist" more elements of "unit"
  * further into the direction symbolized by "dir") into .v_screen, onto an
@@ -91,42 +73,6 @@ static void draw_wins_bordercorners(struct Win * w);
 
 /* Draw contents of all windows in window chain from window "w" onwards. */
 static void draw_wins(struct Win * w);
-
-/* Append/suspend window "w" to/from chain of visible windows. Appended windows
- * will become active. Suspended active windows will move the active window
- * selection to their successor in the window chain or, failing that, their
- * predecessor, or, failing that, to 0 (no window active).
- */
-static void append_win(struct Win * w);
-static void suspend_win(struct Win * w);
-
-
-
-static uint8_t get_pos_in_order(char c)
-{
-    uint8_t i;
-    for (i = 0; c != world.winDB.order[i]; i++);
-    return i;
-}
-
-
-
-static struct Win * get_win_after(char c)
-{
-    return get_win_by_id(world.winDB.order[get_pos_in_order(c) + 1]);
-}
-
-
-
-static struct Win * get_win_before(char c)
-{
-    uint8_t i = get_pos_in_order(c);
-    if (i > 0)
-    {
-        return get_win_by_id(world.winDB.order[i - 1]);
-    }
-    return NULL;
-}
 
 
 
@@ -189,28 +135,6 @@ static void (* get_drawfunc_by_char(char c)) ()
 
 
 
-static void set_win_target_size(struct Win * wcp)
-{
-    if      (0 == wcp->target_height_type)
-    {
-        wcp->target_height = wcp->frame_size.y;
-    }
-    else if (1 == wcp->target_height_type)
-    {
-        wcp->target_height = wcp->frame_size.y - world.winDB.v_screen_size.y +1;
-    }
-    if      (0 == wcp->target_width_type)
-    {
-        wcp->target_width = wcp->frame_size.x;
-    }
-    else if (1 == wcp->target_width_type)
-    {
-        wcp->target_width = wcp->frame_size.x - world.winDB.v_screen_size.x;
-    }
-}
-
-
-
 static char get_next_win_id()
 {
     static uint8_t i = 0;
@@ -222,104 +146,6 @@ static char get_next_win_id()
     }
     i++;
     return c;
-}
-
-
-
-static void refit_v_screen()
-{
-    /* Determine rightmost window column. */
-    uint32_t lastwcol = 0;
-    struct Win * wp = get_win_by_id(world.winDB.order[0]);
-    while (wp != 0)
-    {
-        if ((uint32_t) wp->start.x + (uint32_t) wp->frame_size.x > lastwcol + 1)
-        {
-            lastwcol = (uint32_t) wp->start.x + (uint32_t) wp->frame_size.x - 1;
-        }
-        wp = get_win_after(wp->id);
-    }
-
-    /* Only resize .v_screen if the rightmost window column has changed. */
-    char * err_s = "refit_v_screen() grows virtual screen beyond legal sizes.";
-    char * err_m = "refit_v_screen() triggers memory alloc error in wresize().";
-    if ((uint32_t) getmaxx(world.winDB.v_screen) + 1 != lastwcol)
-    {
-        uint8_t t = (lastwcol + 2 > UINT16_MAX);
-        exit_err(t, err_s);
-        t = wresize(world.winDB.v_screen, getmaxy(world.winDB.v_screen),
-                    lastwcol + 2);
-        exit_err(t, err_m);
-    }
-}
-
-
-
-static void update_wins(struct Win * w)
-{
-    place_win(w);
-    refit_v_screen();
-    struct Win * next = get_win_after(w->id);
-    if (next)
-    {
-        update_wins(next);
-    }
-}
-
-
-
-static void place_win(struct Win * w)
-{
-    /* If w is first window, it goes into the top left corner. */
-    w->start.x = 0;
-    w->start.y = 1;                             /* Leave space for title bar. */
-    struct Win * w_prev = get_win_before(w->id);
-    if (w_prev)
-    {
-
-        /* If not, fit w's top left to top right of last top predecessor. */
-        struct Win * w_top = w_prev;
-        for (;
-             w_top->start.y != 1;
-             w_top = get_win_before(w_top->id));
-        w->start.x = w_top->start.x + w_top->frame_size.x + 1;
-
-        /* Fit w's top left to bottom left of its ->prev if enough space. */
-        uint16_t w_prev_maxy = w_prev->start.y + w_prev->frame_size.y;
-        if (   w->frame_size.x <= w_prev->frame_size.x
-            && w->frame_size.y <  world.winDB.v_screen_size.y - w_prev_maxy)
-        {
-            w->start.x = w_prev->start.x;
-            w->start.y = w_prev_maxy + 1;
-            return;
-        }
-
-        /* Failing that, try to fit w' top left to the top right of the last
-         * predecessor w_test 1) not followed by windows with a left corner
-         * further rightwards than its own 2) with enough space rightwards for w
-         * until the bottom right of w_thr directly throning over it 3) and with
-         * this same space extending far enough to the bottom for fitting in w.
-         */
-        struct Win * w_test = w_prev;
-        struct Win * w_thr;
-        while (w_test != w_top)
-        {
-            for (w_thr = get_win_before(w_test->id);
-                 w_test->start.y <= w_thr->start.y;
-                 w_thr = get_win_before(w_thr->id));
-            uint16_t w_thr_bottom = w_thr->start.y + w_thr->frame_size.y;
-            uint16_t free_width =   (w_thr->start.x + w_thr->frame_size.x)
-                                  - (w_test->start.x + w_test->frame_size.x);
-            if (   w->frame_size.y < world.winDB.v_screen_size.y - w_thr_bottom
-                && w->frame_size.x < free_width)
-            {
-                w->start.x = w_test->start.x + w_test->frame_size.x + 1;
-                w->start.y = w_thr_bottom + 1;
-                break;
-            }
-            w_test = w_thr;
-        }
-    }
 }
 
 
@@ -511,45 +337,18 @@ static void draw_wins(struct Win * w)
 
 
 
-static void append_win(struct Win * w)
+extern uint8_t get_win_pos_in_order(char c)
 {
-    char * f_name = "append_win()";
-    uint8_t old_size = strlen(world.winDB.order) + 1;
-    char * new_order = try_malloc(old_size + 1, f_name);
-    memcpy(new_order, world.winDB.order, old_size - 1);
-    new_order[old_size - 1] = w->id;
-    new_order[old_size] = '\0';
-    free(world.winDB.order);
-    world.winDB.order = new_order;
-    world.winDB.active = w->id;
-    update_wins(w);
+    uint8_t i;
+    for (i = 0; c != world.winDB.order[i]; i++);
+    return i;
 }
 
 
 
-static void suspend_win(struct Win * w)
+extern struct Win * get_win_after(char c)
 {
-    char * f_name = "suspend_win()";
-    uint8_t new_size = strlen(world.winDB.order);
-    char * new_order = try_malloc(new_size, f_name);
-    uint8_t i = get_pos_in_order(w->id);
-    char next_char = world.winDB.order[i + 1];
-    world.winDB.order[i] = '\0';
-    char * second_part = &world.winDB.order[i + 1];
-    sprintf(new_order, "%s%s", world.winDB.order, second_part);
-    free(world.winDB.order);
-    world.winDB.order = new_order;
-    world.winDB.active = world.winDB.order[i];
-    if (!world.winDB.order[i] && 0 < i)
-    {
-        world.winDB.active = world.winDB.order[i - 1];
-    }
-    if (world.winDB.order[i])
-    {
-        update_wins(get_win_by_id(next_char)); /* Already calls               */
-        return;                                /* refit_v_screen(), so leave. */
-    }
-    refit_v_screen();
+    return get_win_by_id(world.winDB.order[get_win_pos_in_order(c) + 1]);
 }
 
 
@@ -824,197 +623,4 @@ extern void draw_all_wins()
 
     /* Only at the end write accumulated changes to .t_screen. */
     doupdate();
-}
-
-
-
-extern void toggle_window(char id)
-{
-    struct Win * win = get_win_by_id(id);
-    if (NULL == strchr(world.winDB.order, id))
-    {
-        append_win(win);
-        return;
-    }
-    suspend_win(win);
-}
-
-
-
-extern void toggle_winconfig()
-{
-    if (!world.winDB.active)
-    {
-        return;
-    }
-    struct Win * w = get_win_by_id(world.winDB.active);
-    if      (0 == w->view)
-    {
-        w->view          = 1;
-        w->target_center = w->center;
-        memset(&w->center, 0, sizeof(struct yx_uint16));
-        return;
-    }
-    else if (1 == w->view)
-    {
-        w->view          = 2;
-        w->center.x      = 0;
-        return;
-    }
-    w->view          = 0;
-    w->center        = w->target_center;
-}
-
-
-
-extern void toggle_win_size_type(char axis)
-{
-    struct Win * w = get_win_by_id(world.winDB.active);
-    if ('y' == axis)
-    {
-        w->target_height_type = (0 == w->target_height_type);
-        set_win_target_size(w);
-        return;
-    }
-    w->target_width_type = (   0 == w->target_width_type
-                            && w->frame_size.x <= world.winDB.v_screen_size.x);
-    set_win_target_size(w);
-}
-
-
-
-extern void toggle_linebreak_type()
-{
-    struct Win * w = get_win_by_id(world.winDB.active);
-    if      (0 == w->linebreak)
-    {
-        w->linebreak = 1;
-    }
-    else if (1 == w->linebreak)
-    {
-        w->linebreak = 2;
-    }
-    else if (2 == w->linebreak)
-    {
-        w->linebreak = 0;
-    }
-}
-
-
-
-extern void resize_active_win(char change)
-{
-    if (world.winDB.active)
-    {
-        struct Win * w = get_win_by_id(world.winDB.active);
-        if      (change == '-' && w->frame_size.y > 1)
-        {
-            w->frame_size.y--;
-        }
-        else if (change == '_' && w->frame_size.x > 1)
-        {
-            w->frame_size.x--;
-        }
-        else if (   change == '+'
-                 && w->frame_size.y < world.winDB.v_screen_size.y - 1)
-        {
-            w->frame_size.y++;
-        }
-        else if (change == '*' && w->frame_size.y < UINT16_MAX)
-        {
-            w->frame_size.x++;
-        }
-        if (   1 == w->target_width_type
-            && w->frame_size.x > world.winDB.v_screen_size.x)
-        {
-            w->target_width_type = 0;
-        }
-        set_win_target_size(w);
-        update_wins(w);
-    }
-}
-
-
-
-extern void shift_active_win(char dir)
-{
-    uint8_t len_order = strlen(world.winDB.order);
-    if (1 < len_order)
-    {
-        char tmp[len_order + 1];
-        tmp[len_order] = '\0';
-        uint8_t pos = get_pos_in_order(world.winDB.active);
-        if ('f' == dir)
-        {
-            if (pos == len_order - 1)
-            {
-                memcpy(tmp + 1, world.winDB.order, len_order - 1);
-                tmp[0] = world.winDB.active;
-                memcpy(world.winDB.order, tmp, len_order + 1);
-            }
-            else
-            {
-                world.winDB.order[pos] = world.winDB.order[pos + 1];
-                world.winDB.order[pos + 1] = world.winDB.active;
-            }
-        }
-        else
-        {
-            if (pos == 0)
-            {
-                memcpy(tmp, world.winDB.order + 1, len_order - 1);
-                tmp[len_order - 1] = world.winDB.active;
-                memcpy(world.winDB.order, tmp, len_order + 1);
-            }
-            else
-            {
-                world.winDB.order[pos] = world.winDB.order[pos - 1];
-                world.winDB.order[pos - 1] = world.winDB.active;
-            }
-        }
-        update_wins(get_win_by_id(world.winDB.order[0]));
-    }
-}
-
-
-
-extern void scroll_v_screen(char dir)
-{
-    if      (   '+' == dir
-             &&   world.winDB.v_screen_offset + world.winDB.v_screen_size.x + 1
-                < getmaxx(world.winDB.v_screen))
-    {
-        world.winDB.v_screen_offset++;
-    }
-    else if (   '-' == dir
-             && world.winDB.v_screen_offset > 0)
-    {
-        world.winDB.v_screen_offset--;
-    }
-}
-
-
-
-extern void cycle_active_win(char dir)
-{
-    uint8_t len_order = strlen(world.winDB.order);
-    if (1 < len_order)
-    {
-        uint8_t pos = get_pos_in_order(world.winDB.active);
-        if ('f' == dir)
-        {
-            world.winDB.active = world.winDB.order[pos + 1];
-            if ('\0' == world.winDB.active)
-            {
-                world.winDB.active = world.winDB.order[0];
-            }
-            return;
-        }
-        if (pos > 0)
-        {
-            world.winDB.active = world.winDB.order[pos - 1];
-            return;
-        }
-        world.winDB.active = world.winDB.order[len_order - 1];
-    }
 }
