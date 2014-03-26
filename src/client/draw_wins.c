@@ -1,5 +1,6 @@
 /* src/client/draw_wins.c */
 
+#define _POSIX_C_SOURCE 200809L /* strdup() */
 #include "draw_wins.h"
 #include <ncurses.h> /* typedefs attr_t, chtype, define A_REVERSE */
 #include <stddef.h> /* NULL */

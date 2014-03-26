@@ -1,5 +1,6 @@
 /* src/client/io.c */
 
+#define _POSIX_C_SOURCE 1 /* PIPE_BUF */
 #include "io.h"
 #include <limits.h> /* PIPE_BUF */
 #include <ncurses.h> /* halfdelay(), getch() */

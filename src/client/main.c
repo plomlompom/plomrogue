@@ -1,5 +1,6 @@
 /* main.c */
 
+#define _POSIX_C_SOURCE 1 /* struct sigaction, sigaction() */
 #include <ncurses.h> /* keypad() */
 #include <signal.h> /* struct sigaction, sigaction() */
 #include <stddef.h> /* NULL */

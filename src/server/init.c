@@ -1,5 +1,6 @@
 /* src/server/init.c */
 
+#define _POSIX_C_SOURCE 2 /* getopt(), optarg */
 #include "init.h"
 #include <errno.h> /* global errno, EEXIST */
 #include <stddef.h> /* NULL */

@@ -1,5 +1,6 @@
 /* src/client/windows.c */
 
+#define _POSIX_C_SOURCE 200809L /* strnlen() */
 #include "windows.h"
 #include <ncurses.h> /* chtype, getmaxx(), getmaxy(), erase(), werase(),
                       * endwin(), delwin(), wnoutrefresh(), pnoutrefresh(),

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Werror -Wformat-security -g
+CFLAGS=-std=c11 -pedantic-errors -Wall -Werror -Wextra -Wformat-security -g
 TARGET_SERVER=roguelike-server
 TARGET_CLIENT=roguelike-client
 SRCDIR=src

@@ -1,5 +1,6 @@
 /* src/client/interface_conf.c */
 
+#define _POSIX_C_SOURCE 2 /* getopt(), optarg */
 #include "interface_conf.h"
 #include <ncurses.h> /* delwin() */
 #include <stdint.h> /* uint8_t, uint32_t */
