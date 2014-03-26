@@ -9,7 +9,7 @@ BOTH SERVER/CLIENT:
 
 - make config files format more readable / self-explanatory
 
-- be more strict and humble when allocating memory from the heap
+- be more strict and humble when allocating memory from the stack
 
 SERVER:
 
