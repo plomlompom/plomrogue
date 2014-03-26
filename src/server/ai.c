@@ -3,6 +3,8 @@
 #include "ai.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
+#include <stdlib.h> /* free() */
+#include "../common/try_malloc.h" /* try_malloc() */
 #include "map_object_actions.h" /* get_moa_id_by_name() */
 #include "map_objects.h" /* struct MapObj */
 #include "world.h" /* global world */
@@ -134,13 +136,15 @@ static void dijkstra_map(uint32_t * score_map, uint32_t max_score)
 
 static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
 {
+    char * f_name = "get_dir_to_nearest_enemy()";
+
     /* Calculate for each cell the distance to the nearest map actor that is
      * not "mo_origin", with movement only possible in the directions of "dir".
      * (Actors' own cells start with a distance of 0 towards themselves.)
      */
     uint32_t map_size = world.map.size.y * world.map.size.x;
     uint32_t max_score = UINT32_MAX - (world.map.dist_diagonal + 1);
-    uint32_t score_map[map_size];
+    uint32_t * score_map = try_malloc(map_size * sizeof(uint32_t), f_name);
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
@@ -161,6 +165,7 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
     uint32_t neighbors[N_DIRS];
     uint16_t pos_i = (mo_origin->pos.y * world.map.size.x) + mo_origin->pos.x;
     get_neighbor_scores(score_map, pos_i, max_score, neighbors);
+    free(score_map);
     char dir_to_nearest_enemy = 0;
     uint32_t min_neighbor = max_score;
     char * dirs = "89632147";  /* get_neighbor_scores()'s clockwise dir order.*/
