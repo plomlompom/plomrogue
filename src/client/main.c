@@ -11,8 +11,8 @@
 #include "../common/rexit.h" /* set_cleanup_func(), exit_trouble(),exit_err() */
 #include "cleanup.h" /* cleanup(), set_cleanup_flag() */
 #include "command_db.h" /* init_command_db() */
+#include "interface_conf.h" /* load_interface_conf(), obey_argv() */
 #include "io.h" /* io_loop() */
-#include "misc.h" /* load_interface_conf(), winch_called() */
 #include "windows.h" /* winch_called() */
 #include "world.h" /* struct World */
 

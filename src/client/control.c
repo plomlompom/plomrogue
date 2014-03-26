@@ -4,14 +4,13 @@
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen() */
+#include "interface_conf.h" /* reload_interface_conf(), save_interface_conf() */
 #include "io.h" /* send() */
 #include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
                           * mod_selected_keyb(), move_keyb_selection()
                           */
 #include "map.h" /* for map_scroll(), map_center() */
-#include "misc.h" /* reload_interface_conf(), save_interface_conf(),
-                   * nav_inventory()
-                   */
+#include "misc.h" /* nav_inventory() */
 #include "wincontrol.h" /* shift_active_win(), resize_active_win(),
                          * toggle_win_size_type(), toggle_window(),
                          * cycle_active_win(), scroll_v_screen(),

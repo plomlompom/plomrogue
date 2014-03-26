@@ -6,7 +6,7 @@
 #include <stdlib.h> /* free() */
 #include "../common/readwrite.h" /* try_fclose() */
 #include "command_db.h" /* free_command_db() */
-#include "misc.h" /* unload_interface_conf() */
+#include "interface_conf.h" /* unload_interface_conf() */
 #include "world.h" /* world global */
 
 
