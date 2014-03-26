@@ -224,9 +224,9 @@ static void write_map(FILE * file)
 
 
 extern void read_config_file(char * path, enum cleanup_flag cleanup,
-                             size_t size, struct EntrySkeleton ** entry_start,
                              void (* read) (char *, uint32_t, char *,
-                                            struct EntrySkeleton *, FILE *))
+                                            struct EntrySkeleton *, FILE *),
+                             size_t size, struct EntrySkeleton ** entry_start)
 {
     char * f_name = "init_map_object_defs()";
     char * context_prefix = "Failed reading config file: ";

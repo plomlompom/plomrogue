@@ -25,9 +25,9 @@ struct EntrySkeleton
     struct EntrySkeleton * next;
 };
 extern void read_config_file(char * path, enum cleanup_flag cleanup,
-                             size_t size, struct EntrySkeleton ** entry_start,
                              void (* read) (char *, uint32_t, char *,
-                                            struct EntrySkeleton *, FILE *));
+                                            struct EntrySkeleton *, FILE *),
+                             size_t size, struct EntrySkeleton ** entry_start);
 
 /* Return single \0-terminated string read from input queue (world.queue); or,
  * if queue is empty and world.turn is unequal world.last_update_turn, update

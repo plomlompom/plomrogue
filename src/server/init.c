@@ -68,13 +68,11 @@ extern void init_map_and_map_objects_configs()
     exit_err(access(world.path_map_obj_defs, F_OK), err_mod);
     exit_err(access(world.path_map_obj_acts, F_OK), err_moa);
     read_config_file(world.path_map_obj_defs, CLEANUP_MAP_OBJECT_DEFS,
-                     sizeof(struct MapObjDef),
-                     (struct EntrySkeleton **) &world.map_obj_defs,
-                     read_map_object_def);
+                     read_map_object_def, sizeof(struct MapObjDef),
+                     (struct EntrySkeleton **) &world.map_obj_defs);
     read_config_file(world.path_map_obj_acts, CLEANUP_MAP_OBJECT_ACTS,
-                     sizeof(struct MapObjAct),
-                     (struct EntrySkeleton **) &world.map_obj_acts,
-                     read_map_object_action);
+                     read_map_object_action, sizeof(struct MapObjAct),
+                     (struct EntrySkeleton **) &world.map_obj_acts);
 }
 
 
