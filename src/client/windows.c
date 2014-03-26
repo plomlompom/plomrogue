@@ -550,8 +550,8 @@ extern void free_winDB()
         free(wc->kb.kbs);
         wc->kb.kbs = NULL;
     }
-    free(world.winDB.ids);  /* NULL this too since add_win_to_winDB() checks  */
-    world.winDB.ids = NULL; /* for it to detect its first post-DB-purge round.*/
+    free(world.winDB.ids); /* NULL this since read_winconf_from_file() checks */
+    world.winDB.ids = NULL;/* for it to detect its first post-DB-purge round. */
     free(world.winDB.wins);
     free(world.winDB.order);
 }
