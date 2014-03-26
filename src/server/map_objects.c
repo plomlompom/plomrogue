@@ -6,22 +6,16 @@
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* strlen(), memcpy(), memset() */
-#include "../common/err_try_fgets.h" /* err_try_fgets(), err_line(),
-                                      * reset_err_try_fgets_counter()
-                                      */
-#include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgetc(),
-                                  * textfile_width()
-                                  */
-#include "../common/rexit.h" /* exit_err(), exit_trouble() */
+#include "../common/err_try_fgets.h" /* err_try_fgets() */
+#include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 struct */
-#include "cleanup.h" /* set_cleanup_flag() */
 #include "map.h" /* is_passable() */
 #include "rrand.h" /* rrand() */
 #include "world.h" /* global world */
 #include "yx_uint8.h" /* yx_uint8_cmp() */
 
-
+#include "io.h" /* struct EntrySkeleton */
 
 /* Return pointer to map object of "id" in chain starting at "ptr". */
 static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id);
@@ -101,51 +95,23 @@ static void add_map_object(uint8_t type)
 
 
 
-extern void init_map_object_defs()
+extern void read_map_object_def(char * line, uint32_t linemax, char * context,
+                                struct EntrySkeleton * entry, FILE * file)
 {
     char * f_name = "init_map_object_defs()";
-    char * context = "Failed reading map object definitions file. ";
-    char * err_uniq = "Declaration of ID already used.";
-    FILE * file = try_fopen(world.path_map_obj_defs, "r", f_name);
-    uint32_t linemax = textfile_width(file);
-    struct MapObjDef ** last_mod_ptr_ptr = &world.map_obj_defs;
-    char line[linemax + 1];
-    reset_err_try_fgets_counter();
-    while (1)
-    {
-        int test_for_end = try_fgetc(file, f_name);
-        if (EOF == test_for_end || '\n' == test_for_end)
-        {
-            break;
-        }
-        exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
-        struct MapObjDef * mod = try_malloc(sizeof(struct MapObjDef), f_name);
-        mod->next = NULL;
-        err_try_fgets(line, linemax, file, context, "nfi8");
-        mod->id = atoi(line);
-        struct MapObjDef * mod_test = world.map_obj_defs;
-        for (; NULL != mod_test; mod_test = mod_test->next)
-        {
-            err_line(mod->id == mod_test->id, line, context, err_uniq);
-        }
-        err_try_fgets(line, linemax, file, context, "0nfi8");
-        mod->corpse_id = atoi(line);
-        err_try_fgets(line, linemax, file, context, "0nfs");
-        mod->char_on_map = line[0];
-        err_try_fgets(line, linemax, file, context, "0nfi8");
-        mod->lifepoints = atoi(line);
-        err_try_fgets(line, linemax, file, context, "0nf");
-        line[strlen(line) - 1] = '\0';
-        mod->name = try_malloc(strlen(line) + 1, f_name);
-        memcpy(mod->name, line, strlen(line) + 1);
-        err_try_fgets(line, linemax, file, context, "0nfi8");
-        mod->consumable = atoi(line);
-        * last_mod_ptr_ptr = mod;
-        last_mod_ptr_ptr = &mod->next;
-        err_try_fgets(line, linemax, file, context, "d");
-    }
-    try_fclose(file, f_name);
-    set_cleanup_flag(CLEANUP_MAP_OBJECT_DEFS);
+    struct MapObjDef * mod = (struct MapObjDef *) entry;
+    err_try_fgets(line, linemax, file, context, "0nfi8");
+    mod->corpse_id = atoi(line);
+    err_try_fgets(line, linemax, file, context, "0nfs");
+    mod->char_on_map = line[0];
+    err_try_fgets(line, linemax, file, context, "0nfi8");
+    mod->lifepoints = atoi(line);
+    err_try_fgets(line, linemax, file, context, "0nf");
+    line[strlen(line) - 1] = '\0';
+    mod->name = try_malloc(strlen(line) + 1, f_name);
+    memcpy(mod->name, line, strlen(line) + 1);
+    err_try_fgets(line, linemax, file, context, "0nfi8");
+    mod->consumable = atoi(line);
 }
 
 

@@ -16,12 +16,15 @@
                                   */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "cleanup.h" /* set_cleanup_flag() */
-#include "map_object_actions.h" /* init_map_object_actions() */
-#include "map_objects.h" /* free_map_objects(), add_map_objects(),
-                          * init_map_object_defs()
-                          */
+#include "cleanup.h" /* set_cleanup_flag(), CLEANUP_MAP_OBJ_DEFS,
+                      * CLEANUP_MAP_OBJ_ACTS
+                      */
+#include "io.h" /* read_config_file(), struct EntrySkeleton */
 #include "map.h" /* init_map() */
+#include "map_object_actions.h" /* struct MapObjAct, read_map_object_action() */
+#include "map_objects.h" /* struct MapObjDef, free_map_objects(),
+                          * add_map_objects(), read_map_object_def()
+                          */
 #include "rrand.h" /* rrand() */
 #include "run.h" /* obey_msg(), io_loop() */
 #include "world.h" /* global world */
@@ -64,8 +67,14 @@ extern void init_map_and_map_objects_configs()
     char * err_moa = "No map object actions file.";
     exit_err(access(world.path_map_obj_defs, F_OK), err_mod);
     exit_err(access(world.path_map_obj_acts, F_OK), err_moa);
-    init_map_object_defs();
-    init_map_object_actions();
+    read_config_file(world.path_map_obj_defs, CLEANUP_MAP_OBJECT_DEFS,
+                     sizeof(struct MapObjDef),
+                     (struct EntrySkeleton **) &world.map_obj_defs,
+                     read_map_object_def);
+    read_config_file(world.path_map_obj_acts, CLEANUP_MAP_OBJECT_ACTS,
+                     sizeof(struct MapObjAct),
+                     (struct EntrySkeleton **) &world.map_obj_acts,
+                     read_map_object_action);
 }
 
 

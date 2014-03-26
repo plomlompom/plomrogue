@@ -7,8 +7,10 @@
 #ifndef MAP_OBJECTS_H
 #define MAP_OBJECTS_H
 
-#include <stdint.h> /* uint8_t */
+#include <stdint.h> /* uint8_t, uint32_t */
+#include <stdio.h> /* FILE */
 #include "../common/yx_uint8.h" /* yx_uint8 structs */
+struct EntrySkeleton;
 
 
 
@@ -27,10 +29,10 @@ struct MapObj
 
 struct MapObjDef
 {
+    uint8_t id;         /* map object definition identifier / sets .type */
     struct MapObjDef * next;
     char char_on_map;   /* map object symbol to appear on map */
     char * name;        /* string to describe object in game log */
-    uint8_t id;         /* map object definition identifier / sets .type */
     uint8_t corpse_id;  /* type to change map object into upon destruction */
     uint8_t lifepoints; /* default start value for map object's .lifepoints */
     uint8_t consumable; /* can be eaten if !0, for so much hitpoint win */
@@ -38,8 +40,11 @@ struct MapObjDef
 
 
 
-/* Initialize map object definitions chain. */
-extern void init_map_object_defs();
+/* Read-in to "entry" multi-line entry from MapObjDef config "file", using
+ * pre-allocated "line", "linemax" and "context" as input for err_try_fgets().
+ */
+extern void read_map_object_def(char * line, uint32_t linemax, char * context,
+                                struct EntrySkeleton * entry, FILE * file);
 
 /* Free map object definitions chain starting at "mod_start". */
 extern void free_map_object_defs(struct MapObjDef * mod_start);

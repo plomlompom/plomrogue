@@ -8,24 +8,29 @@
 #ifndef MAP_OBJECT_ACTIONS_H
 #define MAP_OBJECT_ACTIONS_H
 
-#include <stdint.h> /* uint8_t */
+#include <stdint.h> /* uint8_t, uint23_t */
+#include <stdio.h> /* FILE */
 struct MapObj;
+struct EntrySkeleton;
 
 
 
 struct MapObjAct
 {
+    uint8_t id; /* unique id of map object action; must be >0 */
     struct MapObjAct * next;
     void (* func) (struct MapObj *); /* function called after .effort turns */
     char * name; /* human-readable identifier */
-    uint8_t id; /* unique id of map object action; must be >0 */
     uint8_t effort; /* how many turns the action takes */
 };
 
 
 
-/* Init MapObjAct chain at world.map_obj_acts. */
-extern void init_map_object_actions();
+/* Read-in to "entry" multi-line entry from MapObjAct config "file", using
+ * pre-allocated "line", "linemax" and "context" as input for err_try_fgets().
+ */
+extern void read_map_object_action(char * line, uint32_t linemax,char * context,
+                                   struct EntrySkeleton * entry, FILE * file);
 
 /* Free MapObjAct * chain starting at "moa". */
 extern void free_map_object_actions(struct MapObjAct * moa);
