@@ -1,6 +1,6 @@
 /* src/client/interface_conf.c */
 
-#include "misc.h"
+#include "interface_conf.h"
 #include <ncurses.h> /* delwin() */
 #include <stdint.h> /* uint8_t, uint32_t */
 #include <stdio.h> /* FILE, sprintf() */

@@ -10,7 +10,7 @@
 #include "../common/readwrite.h" /* try_fopen(),try_fclose(),textfile_width() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "misc.h" /* array_append() */
+#include "array_append.h" /* array_append() */
 #include "world.h" /* global world */
 #include "cleanup.h" /* set_cleanup_flag() */
 

@@ -11,7 +11,7 @@
 #include "../common/readwrite.h" /* try_fwrite()*/
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "command_db.h" /* get_command() */
-#include "misc.h" /* array_append() */
+#include "array_append.h" /* array_append() */
 #include "windows.h" /* draw_all_wins() */
 #include "world.h" /* global world */
 

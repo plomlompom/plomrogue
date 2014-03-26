@@ -10,7 +10,6 @@
                           * mod_selected_keyb(), move_keyb_selection()
                           */
 #include "map.h" /* for map_scroll(), map_center() */
-#include "misc.h" /* nav_inventory() */
 #include "wincontrol.h" /* shift_active_win(), resize_active_win(),
                          * toggle_win_size_type(), toggle_window(),
                          * cycle_active_win(), scroll_v_screen(),
@@ -20,6 +19,9 @@
 #include "world.h" /* for global world */
 
 
+
+/* Move world.inventory_sel up ("dir"="u") or down (else) as far as possible. */
+static void nav_inventory(char dir);
 
 /* If "command"'s .dsc_short fits "match", apply "f" with provided char
  * arguments and return 1; else, return 0.
@@ -40,6 +42,26 @@ static uint8_t try_client_commands(struct Command * command);
  * 'i', world.player_inventory_select. Return 1 on success, 0 on failure.
  */
 static uint8_t try_server_commands(struct Command * command);
+
+
+
+static void nav_inventory(char dir)
+{
+    if ('u' == dir)
+    {
+        world.player_inventory_select = world.player_inventory_select
+                                        - (world.player_inventory_select > 0);
+        return;
+    }
+    uint8_t n_elems = 0;
+    uint8_t i;
+    for (i = 0; '\0' != world.player_inventory[i]; i++)
+    {
+        n_elems = n_elems + ('\n' == world.player_inventory[i]);
+    }
+    world.player_inventory_select = world.player_inventory_select
+                                    + (world.player_inventory_select < n_elems);
+}
 
 
 

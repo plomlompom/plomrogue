@@ -19,7 +19,6 @@
                                   */
 #include "control.h" /* try_key() */
 #include "map.h" /* map_center() */
-#include "misc.h" /* reset_windows() */
 #include "windows.h" /* reset_windows_on_winch(), draw_all_wins() */
 #include "world.h" /* world global */
 

@@ -2,8 +2,7 @@
 
 #include "map.h"
 #include <stdint.h> /* uint8_t */
-#include "misc.h" /* center_offset() */
-#include "windows.h" /* struct Win, get_win_by_id() */
+#include "windows.h" /* struct Win, center_offset(), get_win_by_id() */
 #include "world.h" /* for global world */
 
 
