@@ -9,6 +9,8 @@ BOTH SERVER/CLIENT:
 
 - make config files format more readable / self-explanatory
 
+- be more strict and humble when allocating memory from the heap
+
 SERVER:
 
 - implement field of view / line of sight and obstacles for those on the map
