@@ -29,8 +29,7 @@ struct World
     char * path_out; /* File to write server messages into. */
     char * path_worldstate; /* File to represent world state  to clients.*/
     char * path_record; /* Record file from which to read the game history. */
-    char * path_map_obj_defs; /* path for map object definitions config file */
-    char * path_map_obj_acts; /* path for map object actions config file */
+    char * path_config; /* Path for map object (action) definitions file. */
     char * tmp_suffix; /* Appended to paths of files for their tmp versions. */
     char * queue; /* Stores un-processed messages read from the input file. */
     uint32_t queue_size;/* Length of .queue sequence of \0-terminated strings.*/

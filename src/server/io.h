@@ -7,27 +7,7 @@
 #ifndef IO_H
 #define IO_H
 
-#include <stddef.h> /* size_t */
-#include <stdint.h> /* uint8_t, uint32_t */
-#include <stdio.h> /* FILE */
-#include "cleanup.h" /* enum cleanup_flag */
 
-
-
-/* Wrapper to reading in config files from "path" for DB entries of "size
- * starting at "entry_start", to be unset by "cleanup" and reading in individual
- * entry data line by line via "read"(). Assumes all entries start with the
- * items collected in the EntrySkeleton struct.
- */
-struct EntrySkeleton
-{
-    uint8_t id;
-    struct EntrySkeleton * next;
-};
-extern void read_config_file(char * path, enum cleanup_flag cleanup,
-                             void (* read) (char *, uint32_t, char *,
-                                            struct EntrySkeleton *, FILE *),
-                             size_t size, struct EntrySkeleton ** entry_start);
 
 /* Return single \0-terminated string read from input queue (world.queue); or,
  * if queue is empty and world.turn is unequal world.last_update_turn, update

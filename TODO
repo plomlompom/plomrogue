@@ -7,9 +7,13 @@ BOTH SERVER/CLIENT:
 
 - check for return values of *printf()
 
-- make config files format more readable / self-explanatory
-
 - be more strict and humble when allocating memory from the stack
+
+- in textfield_width(), handle too large lines somehow
+
+- use select() polling where possible for server-client communication
+
+- may err_line store the processed line internally as it does the line count
 
 SERVER:
 
@@ -22,8 +26,12 @@ SERVER:
 - for game continuation, replace re-playing of whole record files with loading
   game state snapshots / save files
 
+- why does an MapObjAct id of 0 fail?
+
 CLIENT:
 
 - enable toggling of window borders
 
 - make log scrollable
+
+- implement server-config-file-like parsing for client-config-files, too

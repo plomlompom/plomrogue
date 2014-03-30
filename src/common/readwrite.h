@@ -22,7 +22,7 @@ extern void try_fputc(uint8_t c, FILE * file, char * f);
 
 /* Wrapper to calling fgetc() and fgets() from function "f". The return code is
  * returned unless ferror() indicates an error (i.e. to signify an end of file,
- * fgetc() may return an EOF and fgets() a NULL.
+ * fgetc() may return an EOF and fgets() a NULL).
  */
 extern int try_fgetc(FILE * file, char * f);
 extern char * try_fgets(char * line, int size, FILE * file, char * f);

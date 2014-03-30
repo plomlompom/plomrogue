@@ -45,8 +45,8 @@ extern void err_line(uint8_t test, char * line, char * intro, char * msg);
  *       be '+' or '-'; a '+' or '-' without digits following is invalid)
  * '8': check for "line" describing an integer smaller than or equal UINT8_MAX
 */
-extern void err_try_fgets(char * line, uint32_t linemax, FILE * file,
-                          char * context, char * test);
+extern char * err_try_fgets(char * line, uint32_t linemax, FILE * file,
+                            char * context, char * test);
 
 
 

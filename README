@@ -79,23 +79,52 @@ option (like "-s100") to start the recording at the respective turn number.
 Hacking / server internals and configuration
 --------------------------------------------
 
-The movements/actions available to the player and the enemies are defined and
-can be changed in ./confserver/map_object_actions. Each entry consists of a
-first line of a numerical ID used internally to uniquely identify and manage the
-action, a second line of the number of turns the action takes, and a third line
-of a string that maps the action to the game logic to do when it is called.
-Finally, a delimiter line of "%%" ends the entry.
+The ./confserver/world file defines the map object types and the actions
+available to them. Each object type and action is defined by a multi-line block
+wherein each line sets one attribute of the object type or action.
 
-The different map object types, i.e. species (including the player's human one)
-and item types, can be edited in ./confserver/map_objects. Here the first value
-is a numerical ID that represents the object type, the second one describes what
-type this object decomposes to when it gets destroyed/killed, the third value is
-the ASCII character used to represent the object visually on the map, the fourth
-value is the number of hitpoints the object starts with (items are dead and
-start with zero hitpoints, anything else moves), the fifth is the string that
-names the object in the game log, the sixth defines if the object is consumable
-(it is if it is non-zero) and how many hitpoints are gained if it is. Finally,
-the same delimiter as for the map object action definitions file follows.
+Here's a typical action definition block:
+
+ACTION 1
+NAME move
+EFFORT 5
+
+A line of "ACTION" followed by a number starts an action definition block and
+sets the action's id for internal use to 1. The number after "EFFORT" determines
+how many turns this action takes for the actor performing it. The string after
+"NAME" names the action. Furthermore, if it is one of "move", "pick_up", "drop"
+or "use", it matches internal functions described by these strings to this
+action. All other names (including "wait") currently are matched to a do-nothing
+wait function.
+
+Here's a typical map object type definition block: 
+
+OBJECT 2
+NAME ZOMBIE
+SYMBOL z
+LIFEPOINTS 3
+CORPSE_ID 5
+CONSUMABLE 0
+
+A line of "OBJECT" followed by a number starts it, and the number sets the
+object type's internal id. The number after "CONSUMABLE" defines the object
+as consumable (and to so many hitpoints gain). The character after "SYMBOL" is
+the one shown on the map to represent to object type. "LIFEPOINTS" is the start
+hitpoints value for this object type and defines it as animate if it is
+non-zero. The string after "NAME" sets the object type's name. "CORPSE_ID" sets
+the id of the object type that objects of this type degrade to if their
+hitpoints drop to zero if they start out as inanimate (what is not implemented
+yet: or if they are inanimate, but are otherwise crushed). Note that the
+"CORPSE_ID" must match the id of an object type defined in the file (before or
+after, it may even be the same).
+
+All this definition block members must be present within a block, but only
+"ACTION" / "OBJECT" must be positioned at the respective blocks' first line,
+the others may appear in whatever order and even multiple times. If a block is
+finished, however, it cannot be re-defined by starting a new block wit the same
+object type or action id. Tokens in this config file are separated by
+whitespace. Single quotes can be put around string values that are to include
+whitespace by themslves.
 
 All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v

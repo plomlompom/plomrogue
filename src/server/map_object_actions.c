@@ -3,14 +3,12 @@
 #include "map_object_actions.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t */
-#include <stdio.h> /* sprintf(), ungetc() */
-#include <stdlib.h> /* free(), atoi() */
+#include <stdio.h> /* sprintf() */
+#include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), strcmp(), memcpy(), strncmp() */
-#include "../common/err_try_fgets.h" /* err_try_fgets() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
-#include "io.h" /* struct EntrySkeleton */
 #include "map_objects.h" /* structs MapObj, MapObjDef, get_player(),
                           * set_object_position(), own_map_object(),
                           * get_map_object_def()
@@ -25,8 +23,8 @@
 static void update_log(char * text);
 
 /* If "name" fits "moa"->name, set "moa"->func to "func". */
-static uint8_t try_func_name(struct MapObjAct * moa,
-                             char * name, void (* func) (struct MapObj *));
+//static uint8_t try_func_name(struct MapObjAct * moa,
+//                             char * name, void (* func) (struct MapObj *));
 
 /* One actor "wounds" another actor, decrementing his lifepoints and, if they
  * reach zero in the process, killing it. Generates appropriate log message.
@@ -84,19 +82,6 @@ static void update_log(char * text)
     sprintf(new_text + len_old, "%s", text);
     free(world.log);
     world.log = new_text;
-}
-
-
-
-static uint8_t try_func_name(struct MapObjAct * moa,
-                             char * name, void (* func) (struct MapObj *))
-{
-    if (0 == strcmp(moa->name, name))
-    {
-        moa->func = func;
-        return 1;
-    }
-    return 0;
 }
 
 
@@ -218,29 +203,6 @@ static void playerbonus_use(uint8_t no_object, uint8_t wrong_object)
         return;
     }
     update_log("\nYou consume MAGIC MEAT.");
-}
-
-
-
-extern void read_map_object_action(char * line, uint32_t linemax,char * context,
-                                   struct EntrySkeleton * entry, FILE * file)
-{
-    char * f_name = "init_map_object_actions()";
-    struct MapObjAct * moa = (struct MapObjAct *) entry;
-    err_try_fgets(line, linemax, file, context, "0nfi8");
-    moa->effort = atoi(line);
-    err_try_fgets(line, linemax, file, context, "0nf");
-    line[strlen(line) - 1] = '\0';
-    uint8_t len_name = strlen(line) + 1;
-    moa->name = try_malloc(len_name, f_name);
-    memcpy(moa->name, line, len_name);
-    if (!(   try_func_name(moa, "move", actor_move)
-          || try_func_name(moa, "pick_up", actor_pick)
-          || try_func_name(moa, "drop", actor_drop)
-          || try_func_name(moa, "use", actor_use)))
-    {
-        moa->func = actor_wait;
-    }
 }
 
 

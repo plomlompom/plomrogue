@@ -8,10 +8,8 @@
 #ifndef MAP_OBJECT_ACTIONS_H
 #define MAP_OBJECT_ACTIONS_H
 
-#include <stdint.h> /* uint8_t, uint23_t */
-#include <stdio.h> /* FILE */
+#include <stdint.h> /* uint8_t */
 struct MapObj;
-struct EntrySkeleton;
 
 
 
@@ -25,12 +23,6 @@ struct MapObjAct
 };
 
 
-
-/* Read-in to "entry" multi-line entry from MapObjAct config "file", using
- * pre-allocated "line", "linemax" and "context" as input for err_try_fgets().
- */
-extern void read_map_object_action(char * line, uint32_t linemax,char * context,
-                                   struct EntrySkeleton * entry, FILE * file);
 
 /* Free MapObjAct * chain starting at "moa". */
 extern void free_map_object_actions(struct MapObjAct * moa);

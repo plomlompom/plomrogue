@@ -1,13 +1,14 @@
 /* src/server/init.c */
 
-#define _POSIX_C_SOURCE 2 /* getopt(), optarg */
+//#define _POSIX_C_SOURCE 2 /* getopt(), optarg */
+#define _POSIX_C_SOURCE 200809L /* getopt(), optarg, strdup() */
 #include "init.h"
 #include <errno.h> /* global errno, EEXIST */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint32_t */
-#include <stdio.h> /* sprintf(), fflush() */
-#include <stdlib.h> /* exit(), free() */
-#include <string.h> /* atoi(), strlen() */
+#include <stdio.h> /* FILE, sprintf(), fflush() */
+#include <stdlib.h> /* exit(), free(), atoi() */
+#include <string.h> /* strlen() */
 #include <sys/stat.h> /* mkdir() */
 #include <sys/types.h> /* defines pid_t, time_t */
 #include <time.h> /* time() */
@@ -17,15 +18,10 @@
                                   */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "cleanup.h" /* set_cleanup_flag(), CLEANUP_MAP_OBJ_DEFS,
-                      * CLEANUP_MAP_OBJ_ACTS
-                      */
-#include "io.h" /* read_config_file(), struct EntrySkeleton */
+#include "cleanup.h" /* set_cleanup_flag() */
+#include "configfile.h" /* read_config_file() */
 #include "map.h" /* init_map() */
-#include "map_object_actions.h" /* struct MapObjAct, read_map_object_action() */
-#include "map_objects.h" /* struct MapObjDef, free_map_objects(),
-                          * add_map_objects(), read_map_object_def()
-                          */
+#include "map_objects.h" /* free_map_objects(), add_map_objects() */
 #include "rrand.h" /* rrand() */
 #include "run.h" /* obey_msg(), io_loop() */
 #include "world.h" /* global world */
@@ -64,16 +60,7 @@ extern void init_map_and_map_objects_configs()
     world.map.size.y = 64;
     world.map.dist_orthogonal = 5;
     world.map.dist_diagonal   = 7;
-    char * err_mod = "No map object definitions file.";
-    char * err_moa = "No map object actions file.";
-    exit_err(access(world.path_map_obj_defs, F_OK), err_mod);
-    exit_err(access(world.path_map_obj_acts, F_OK), err_moa);
-    read_config_file(world.path_map_obj_defs, CLEANUP_MAP_OBJECT_DEFS,
-                     read_map_object_def, sizeof(struct MapObjDef),
-                     (struct EntrySkeleton **) &world.map_obj_defs);
-    read_config_file(world.path_map_obj_acts, CLEANUP_MAP_OBJECT_ACTS,
-                     read_map_object_action, sizeof(struct MapObjAct),
-                     (struct EntrySkeleton **) &world.map_obj_acts);
+    read_config_file();
 }
 
 

@@ -5,21 +5,17 @@
 #include <limits.h> /* PIPE_BUF */
 #include <stddef.h> /* size_t, NULL */
 #include <stdint.h> /* uint8_t, uint32_t */
-#include <stdio.h> /* defines EOF, FILE, sprintf(), ungetc() */
-#include <stdlib.h> /* free(), atoi() */
+#include <stdio.h> /* defines EOF, FILE, sprintf() */
+#include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), memcpy() */
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time() */
-#include "../common/err_try_fgets.h" /* err_try_fgets(), err_line(),
-                                      * reset_err_try_fgets_counter()
-                                      */
+#include "../common/err_try_fgets.h" /* err_line() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
-                                  * try_fwrite(), try_fputc(), try_fgetc(),
-                                  * try_fclose()
+                                  * try_fwrite(), try_fputc(), try_fgetc()
                                   */
-#include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "cleanup.h" /* set_cleanup_flag(), enum cleanup_flag */
+#include "cleanup.h" /* set_cleanup_flag() */
 #include "map_objects.h" /* structs MapObj, MapObjDef, get_map_obj_def() */
 #include "world.h" /* global world  */
 
@@ -219,49 +215,6 @@ static void write_map(FILE * file)
         }
         try_fputc('\n', file, f_name);
     }
-}
-
-
-
-extern void read_config_file(char * path, enum cleanup_flag cleanup,
-                             void (* read) (char *, uint32_t, char *,
-                                            struct EntrySkeleton *, FILE *),
-                             size_t size, struct EntrySkeleton ** entry_start)
-{
-    char * f_name = "init_map_object_defs()";
-    char * context_prefix = "Failed reading config file: ";
-    char context[strlen(context_prefix) + strlen(path) + 1];
-    sprintf(context, "%s%s", context_prefix, path);
-    char * err_uniq = "Declaration of ID already used.";
-    FILE * file = try_fopen(path, "r", f_name);
-    uint32_t linemax = textfile_width(file);
-    char line[linemax + 1];
-    reset_err_try_fgets_counter();
-    struct EntrySkeleton ** entry_ptr_ptr = entry_start;
-    while (1)
-    {
-        int test_for_end = try_fgetc(file, f_name);
-        if (EOF == test_for_end || '\n' == test_for_end)
-        {
-            break;
-        }
-        exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
-        err_try_fgets(line, linemax, file, context, "nfi8");
-        struct EntrySkeleton * entry = try_malloc(size, f_name);
-        entry->id = atoi(line);
-        struct EntrySkeleton * entry_test = * entry_start;
-        for (; NULL != entry_test; entry_test = entry_test->next)
-        {
-            err_line(entry->id == entry_test->id, line, context, err_uniq);
-        }
-        read(line, linemax, context, entry, file);
-        entry->next = NULL;
-        * entry_ptr_ptr = entry;
-        entry_ptr_ptr = &entry->next;
-        err_try_fgets(line, linemax, file, context, "d");
-    }
-    try_fclose(file, f_name);
-    set_cleanup_flag(cleanup);
 }
 
 

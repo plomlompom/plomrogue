@@ -2,11 +2,9 @@
 
 #include "map_objects.h"
 #include <stddef.h> /* NULL */
-#include <stdio.h> /* FILE typedef */
 #include <stdint.h> /* uint8_t, uint16_t */
-#include <stdlib.h> /* free(), atoi() */
-#include <string.h> /* strlen(), memcpy(), memset() */
-#include "../common/err_try_fgets.h" /* err_try_fgets() */
+#include <stdlib.h> /* free() */
+#include <string.h> /* memset(), strlen() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 struct */
@@ -15,7 +13,7 @@
 #include "world.h" /* global world */
 #include "yx_uint8.h" /* yx_uint8_cmp() */
 
-#include "io.h" /* struct EntrySkeleton */
+
 
 /* Return pointer to map object of "id" in chain starting at "ptr". */
 static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id);
@@ -91,27 +89,6 @@ static void add_map_object(uint8_t type)
     struct MapObj ** mo_ptr_ptr = &world.map_objs;
     for (; NULL != * mo_ptr_ptr; mo_ptr_ptr = &(*mo_ptr_ptr)->next);
     * mo_ptr_ptr = mo;
-}
-
-
-
-extern void read_map_object_def(char * line, uint32_t linemax, char * context,
-                                struct EntrySkeleton * entry, FILE * file)
-{
-    char * f_name = "init_map_object_defs()";
-    struct MapObjDef * mod = (struct MapObjDef *) entry;
-    err_try_fgets(line, linemax, file, context, "0nfi8");
-    mod->corpse_id = atoi(line);
-    err_try_fgets(line, linemax, file, context, "0nfs");
-    mod->char_on_map = line[0];
-    err_try_fgets(line, linemax, file, context, "0nfi8");
-    mod->lifepoints = atoi(line);
-    err_try_fgets(line, linemax, file, context, "0nf");
-    line[strlen(line) - 1] = '\0';
-    mod->name = try_malloc(strlen(line) + 1, f_name);
-    memcpy(mod->name, line, strlen(line) + 1);
-    err_try_fgets(line, linemax, file, context, "0nfi8");
-    mod->consumable = atoi(line);
 }
 
 
