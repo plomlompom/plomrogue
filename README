@@ -124,7 +124,8 @@ the others may appear in whatever order and even multiple times. If a block is
 finished, however, it cannot be re-defined by starting a new block wit the same
 object type or action id. Tokens in this config file are separated by
 whitespace. Single quotes can be put around string values that are to include
-whitespace by themslves.
+whitespace by themslves. Note that all numbers must be decimal representations
+of unsigned 8 bit integers, i.e. >= 0 and < 256 and sans preceding "+".
 
 All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v
