@@ -11,8 +11,6 @@ BOTH SERVER/CLIENT:
 
 - in textfield_width(), handle too large lines somehow
 
-- use select() polling where possible for server-client communication
-
 - may err_line store the processed line internally as it does the line count
 
 SERVER:

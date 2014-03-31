@@ -1,5 +1,6 @@
 /* src/server/io.c */
 
+#define _BSD_SOURCE /* usleep() */
 #include "io.h"
 #include <errno.h> /* global errno */
 #include <limits.h> /* PIPE_BUF */
@@ -10,6 +11,7 @@
 #include <string.h> /* strlen(), memcpy() */
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time() */
+#include <unistd.h> /* usleep() */
 #include "../common/err_try_fgets.h" /* err_line() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
                                   * try_fwrite(), try_fputc(), try_fgetc()
@@ -94,6 +96,7 @@ static void read_file_into_queue()
     int test;
     while (EOF == (test = try_fgetc(world.file_in, f_name)))
     {
+        usleep(33);
         if (time(0) > now + wait_seconds)
         {
             return;
