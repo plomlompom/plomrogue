@@ -9,8 +9,6 @@ BOTH SERVER/CLIENT:
 
 - be more strict and humble when allocating memory from the stack
 
-- in textfield_width(), handle too large lines somehow
-
 - may err_line store the processed line internally as it does the line count
 
 SERVER:

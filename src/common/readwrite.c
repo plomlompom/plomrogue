@@ -2,7 +2,7 @@
 
 #include "readwrite.h"
 #include <stddef.h> /* size_t */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
 #include <stdio.h> /* FILE, fseek(), sprintf(), fgets(), fgetc(), ferror(),
                     * fputc(), fwrite(), fclose(), fopen()
                     */
@@ -108,6 +108,7 @@ extern uint32_t textfile_width(FILE * file)
         {
             break;
         }
+        exit_trouble(UINT32_MAX == c_count, f_name, "too large text file line");
         c_count++;
         if ('\n' == c)
         {
