@@ -30,8 +30,8 @@
 */
 static char * get_message_from_queue();
 
-/* Read input file for input into world.queue. new queue input. Wait a few
- * seconds until giving up. Translate '\n' chars in input file into '\0' chars.
+/* Poll input file for world.queue input. Wait a few seconds until giving up;
+ * poll only every 0.03 seconds.. Translate '\n' chars in input file into '\0'.
  */
 static void read_file_into_queue();
 
