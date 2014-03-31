@@ -397,7 +397,7 @@ extern void draw_win_inventory(struct Win * win)
 
 extern void draw_win_available_keybindings(struct Win * win)
 {
-    char * title = "Active window's keybindings:";
+    char * title = "Active window's keys:";
     struct KeyBindingDB * kbdb;
     struct Win * win_active = get_win_by_id(world.winDB.active);
     if     (0 == win_active->view)
@@ -415,7 +415,7 @@ extern void draw_win_available_keybindings(struct Win * win)
     uint16_t offset = 0;
     draw_titled_keybinding_list(title, win, &offset, 0, kbdb);
     add_line(win, " ", 0, &offset, 0);
-    title = "Global keybindings:";
+    title = "Global keys:";
     draw_titled_keybinding_list(title, win, &offset, 1, &world.kb_global);
 }
 
@@ -448,7 +448,7 @@ extern void draw_win_keybindings_winconf_keybindings(struct Win * win)
 
 extern void draw_winconf_keybindings(struct Win * win)
 {
-    char * title = "Window's keybindings:";
+    char * title = "Window's keys:";
     uint16_t offset = 0;
     add_line(win, title, 0, &offset, 0);
     add_line(win, " ", 0, &offset, 0);

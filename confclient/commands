@@ -44,17 +44,17 @@ move
 7
 %
 pick
-pick up object from ground
+pick up
 pick_up
 0
 %
 use
-use selected inventory object
+use object
 use
 i
 %
 drop
-drop object from inventory
+drop
 drop
 i
 %
@@ -62,16 +62,16 @@ quit
 quit
 %
 cyc_win_f
-cycle window selection forwards
+nav down window
 %
 cyc_win_b
-cycle window selection backwards
+nav up window
 %
 shift_f
-shift window forwards
+shift down window
 %
 shift_b
-shift window backwards
+shift up window
 %
 scrl_l
 scroll pad left
@@ -80,28 +80,28 @@ scrl_r
 scroll pad right
 %
 g_keys_d
-global keybindings nav down
+nav down global keys
 %
 g_keys_u
-global keybindings nav up
+nav up global keys
 %
 g_keys_m
-global keybindings modify
+mod global keys
 %
 winconf
-toggle window configuration view
+toggle win config view
 %
 grow_h
-grow window horizontally
+grow window width
 %
 shri_h
-shrink window horizontally
+shrink window width
 %
 grow_v
-grow window vertically
+grow window height
 %
 shri_v
-shrink window vertically
+shrink window height
 %
 to_break
 toggle line break type
@@ -113,43 +113,43 @@ to_width_t
 toggle window width type
 %
 inv_d
-inventory selection down
+nav down object
 %
 inv_u
-inventory selection up
+nav up object
 %
 w_keys_d
-win keys nav down
+nav down window keys
 %
 w_keys_u
-win keys nav up
+nav up window nav
 %
 w_keys_m
-win keys mod
+mod window key
 %
 wg_keys_d
-win geometry config keybindings nav down
+nav down win geometry config keys
 %
 wg_keys_u
-win geometry config keybindings nav up
+nav up win geometry config keys
 %
 wg_keys_m
-win geometry config keybindings modify
+mod win geometry config keys
 %
 wk_keys_d
-win keybindings config keybindings nav down
+nav down win keys config keys
 %
 wk_keys_u
-win keybindings config keybindings nav up
+nav up win keys config keys
 %
 wk_keys_m
-win keybindings config keybindings modify
+mod win keys config keys
 %
 reload_conf
-reload windows and keybindings configuration
+reload interface config
 %
 save_conf
-save windows and keybindings
+save interface config
 %
 map_u
 map up
@@ -167,26 +167,26 @@ map_c
 map center player
 %
 to_a_keywin
-toggle view of available keybindings
+toggle available keys view
 %
 to_inv
-toggle inventory window
+toggle inventory view
 %
 to_g_keywin
-toggle global keys window
+toggle global keys view
 %
 to_mapwin
-toggle map window
+toggle map view
 %
 to_infowin
-toggle info window
+toggle info view
 %
 to_logwin
-toggle log window
+toggle log view
 %
 to_wg_keywin
-toggle window geometry keys window
+toggle geometry keys view
 %
 to_wk_keywin
-toggle window keybinding keys window
+toggle keybinding keys view
 %
