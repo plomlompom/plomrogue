@@ -108,8 +108,8 @@ extern uint32_t textfile_width(FILE * file)
         {
             break;
         }
-        exit_trouble(UINT32_MAX == c_count, f_name, "too large text file line");
         c_count++;
+        exit_trouble(UINT32_MAX == c_count, f_name, "too large text file line");
         if ('\n' == c)
         {
             if (c_count > linemax)
