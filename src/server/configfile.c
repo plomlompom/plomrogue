@@ -216,9 +216,9 @@ static void tokens_into_entries(struct Context * context)
                  context->line, context->err_pre, err_fin);
         err_line((object_flags & READY_OBJ) ^ READY_OBJ,
                  context->line, context->err_pre, err_fin);
-        object_flags = action_flags = READY_OBJ;
         write_if_entry(&moa, (struct EntryHead ***) &moa_p_p);
         write_if_entry(&mod, (struct EntryHead ***) &mod_p_p);
+        object_flags = action_flags = READY_OBJ;
     }
     if (!context->token0)
     {
@@ -410,7 +410,8 @@ static uint8_t try_func_name(struct MapObjAct * moa,
 
 
 
-extern void read_config_file() {
+extern void read_config_file()
+{
     char * f_name = "read_new_config_file()";
     char * path = world.path_config;
     struct Context context;
