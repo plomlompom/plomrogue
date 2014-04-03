@@ -107,7 +107,7 @@ extern struct Command * get_command(char * dsc_short)
 
 extern void init_command_db()
 {
-    parse_file("confclient/new_commands", tokens_into_entries);
+    parse_file(world.path_commands, tokens_into_entries);
 }
 
 

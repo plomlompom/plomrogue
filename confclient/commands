@@ -1,192 +1,192 @@
-wait
-wait / next turn
-wait
-0
-%
-move_8
-move north
-move
-8
-%
-move_9
-move north-east
-move
-9
-%
-move_6
-move east
-move
-6
-%
-move_3
-move south-east
-move
-3
-%
-move_2
-move south
-move
-2
-%
-move_1
-move south-west
-move
-1
-%
-move_4
-move west
-move
-4
-%
-move_7
-move north-west
-move
-7
-%
-pick
-pick up
-pick_up
-0
-%
-use
-use object
-use
-i
-%
-drop
-drop
-drop
-i
-%
-quit
-quit
-%
-cyc_win_f
-nav down window
-%
-cyc_win_b
-nav up window
-%
-shift_f
-shift down window
-%
-shift_b
-shift up window
-%
-scrl_l
-scroll pad left
-%
-scrl_r
-scroll pad right
-%
-g_keys_d
-nav down global keys
-%
-g_keys_u
-nav up global keys
-%
-g_keys_m
-mod global keys
-%
-winconf
-toggle win config view
-%
-grow_h
-grow window width
-%
-shri_h
-shrink window width
-%
-grow_v
-grow window height
-%
-shri_v
-shrink window height
-%
-to_break
-toggle line break type
-%
-to_height_t
-toggle window height type
-%
-to_width_t
-toggle window width type
-%
-inv_d
-nav down object
-%
-inv_u
-nav up object
-%
-w_keys_d
-nav down window keys
-%
-w_keys_u
-nav up window nav
-%
-w_keys_m
-mod window key
-%
-wg_keys_d
-nav down win geometry config keys
-%
-wg_keys_u
-nav up win geometry config keys
-%
-wg_keys_m
-mod win geometry config keys
-%
-wk_keys_d
-nav down win keys config keys
-%
-wk_keys_u
-nav up win keys config keys
-%
-wk_keys_m
-mod win keys config keys
-%
-reload_conf
-reload interface config
-%
-save_conf
-save interface config
-%
-map_u
-map up
-%
-map_d
-map down
-%
-map_l
-map left
-%
-map_r
-map right
-%
-map_c
-map center player
-%
-to_a_keywin
-toggle available keys view
-%
-to_inv
-toggle inventory view
-%
-to_g_keywin
-toggle global keys view
-%
-to_mapwin
-toggle map view
-%
-to_infowin
-toggle info view
-%
-to_logwin
-toggle log view
-%
-to_wg_keywin
-toggle geometry keys view
-%
-to_wk_keywin
-toggle keybinding keys view
-%
+COMMAND wait
+DESCRIPTION 'wait / next turn'
+SERVER_COMMAND wait
+SERVER_ARGUMENT 0
+
+COMMAND move_8
+DESCRIPTION 'move north'
+SERVER_COMMAND move
+SERVER_ARGUMENT 8
+
+COMMAND move_9
+DESCRIPTION 'move north-east'
+SERVER_COMMAND move
+SERVER_ARGUMENT 9
+
+COMMAND move_6
+DESCRIPTION 'move east'
+SERVER_COMMAND move
+SERVER_ARGUMENT 6
+
+COMMAND move_3
+DESCRIPTION 'move south-east'
+SERVER_COMMAND move
+SERVER_ARGUMENT 3
+
+COMMAND move_2
+DESCRIPTION 'move south'
+SERVER_COMMAND move
+SERVER_ARGUMENT 2
+
+COMMAND move_1
+DESCRIPTION 'move south-west'
+SERVER_COMMAND move
+SERVER_ARGUMENT 1
+
+COMMAND move_4
+DESCRIPTION 'move west'
+SERVER_COMMAND move
+SERVER_ARGUMENT 4
+
+COMMAND move_7
+DESCRIPTION 'move north-west'
+SERVER_COMMAND move
+SERVER_ARGUMENT 7
+
+COMMAND pick
+DESCRIPTION 'pick up'
+SERVER_COMMAND pick_up
+SERVER_ARGUMENT 0
+
+COMMAND use
+DESCRIPTION 'use object'
+SERVER_COMMAND use
+SERVER_ARGUMENT i
+
+COMMAND drop
+DESCRIPTION 'drop'
+SERVER_COMMAND drop
+SERVER_ARGUMENT i
+
+COMMAND quit
+DESCRIPTION 'quit'
+
+COMMAND cyc_win_f
+DESCRIPTION 'nav down window'
+
+COMMAND cyc_win_b
+DESCRIPTION 'nav up window'
+
+COMMAND shift_f
+DESCRIPTION 'shift down window'
+
+COMMAND shift_b
+DESCRIPTION 'shift up window'
+
+COMMAND scrl_l
+DESCRIPTION 'scroll pad left'
+
+COMMAND scrl_r
+DESCRIPTION 'scroll pad right'
+
+COMMAND g_keys_d
+DESCRIPTION 'nav down global keys'
+
+COMMAND g_keys_u
+DESCRIPTION 'nav up global keys'
+
+COMMAND g_keys_m
+DESCRIPTION 'mod global keys'
+
+COMMAND winconf
+DESCRIPTION 'toggle win config view'
+
+COMMAND grow_h
+DESCRIPTION 'grow window width'
+
+COMMAND shri_h
+DESCRIPTION 'shrink window width'
+
+COMMAND grow_v
+DESCRIPTION 'grow window height'
+
+COMMAND shri_v
+DESCRIPTION 'shrink window height'
+
+COMMAND to_break
+DESCRIPTION 'toggle line break type'
+
+COMMAND to_height_t
+DESCRIPTION 'toggle window height type'
+
+COMMAND to_width_t
+DESCRIPTION 'toggle window width type'
+
+COMMAND inv_d
+DESCRIPTION 'nav down object'
+
+COMMAND inv_u
+DESCRIPTION 'nav up object'
+
+COMMAND w_keys_d
+DESCRIPTION 'nav down window keys'
+
+COMMAND w_keys_u
+DESCRIPTION 'nav up window nav'
+
+COMMAND w_keys_m
+DESCRIPTION 'mod window key'
+
+COMMAND wg_keys_d
+DESCRIPTION 'nav down win geometry config keys'
+
+COMMAND wg_keys_u
+DESCRIPTION 'nav up win geometry config keys'
+
+COMMAND wg_keys_m
+DESCRIPTION 'mod win geometry config keys'
+
+COMMAND wk_keys_d
+DESCRIPTION 'nav down win keys config keys'
+
+COMMAND wk_keys_u
+DESCRIPTION 'nav up win keys config keys'
+
+COMMAND wk_keys_m
+DESCRIPTION 'mod win keys config keys'
+
+COMMAND reload_conf
+DESCRIPTION 'reload interface config'
+
+COMMAND save_conf
+DESCRIPTION 'save interface config'
+
+COMMAND map_u
+DESCRIPTION 'map up'
+
+COMMAND map_d
+DESCRIPTION 'map down'
+
+COMMAND map_l
+DESCRIPTION 'map left'
+
+COMMAND map_r
+DESCRIPTION 'map right'
+
+COMMAND map_c
+DESCRIPTION 'map center player'
+
+COMMAND to_a_keywin
+DESCRIPTION 'toggle available keys view'
+
+COMMAND to_inv
+DESCRIPTION 'toggle inventory view'
+
+COMMAND to_g_keywin
+DESCRIPTION 'toggle global keys view'
+
+COMMAND to_mapwin
+DESCRIPTION 'toggle map view'
+
+COMMAND to_infowin
+DESCRIPTION 'toggle info view'
+
+COMMAND to_logwin
+DESCRIPTION 'toggle log view'
+
+COMMAND to_wg_keywin
+DESCRIPTION 'toggle geometry keys view'
+
+COMMAND to_wk_keywin
+DESCRIPTION 'toggle keybinding keys view'
+
