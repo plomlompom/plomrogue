@@ -56,9 +56,7 @@ struct EntryHead
  * Individual MapObjDef / MapObjAct DB entries are put together line by line
  * before being written. Writing only happens after all necessary members of an
  * entry have been assembled, and when additionally a) a new entry is started by
- * a context->token0 of "ACTION" or "OBJECT"; or b) a NULL context->token0 is
- * passed. This is interpreted as the end of the MapObjDef / MapObjAct DB read,
- * so the appropriate cleanup flags are set and test_corpse_ids() is called.
+ * a context->token0 of "ACTION" or "OBJECT"; or b) context->token0 is NULL.
  */
 static void tokens_into_entries(struct Context * context);
 
@@ -122,22 +120,18 @@ static void tokens_into_entries(struct Context * context)
         write_if_entry(&mod, (struct EntryHead ***) &mod_p_p);
         object_flags = action_flags = READY_OBJ;
     }
-    if (!context->token0)
+    if (   context->token0
+        && !(   new_entry(context, str_act, &action_flags,
+                          sizeof(struct MapObjAct), (struct EntryHead**) &moa,
+                          (struct EntryHead *) world.map_obj_acts)
+             || new_entry(context, str_obj, &object_flags,
+                          sizeof(struct MapObjDef), (struct EntryHead**) &mod,
+                          (struct EntryHead *) world.map_obj_defs)
+             || set_members(context, &object_flags, &action_flags,
+                            (struct MapObjDef *) mod, (struct MapObjAct *) moa)))
     {
-        set_cleanup_flag(CLEANUP_MAP_OBJECT_ACTS | CLEANUP_MAP_OBJECT_DEFS);
-        test_corpse_ids();
-        return;
-    }
-    if (!(   new_entry(context, str_act, &action_flags,
-                       sizeof(struct MapObjAct), (struct EntryHead**) &moa,
-                       (struct EntryHead *) world.map_obj_acts)
-          || new_entry(context, str_obj, &object_flags,
-                       sizeof(struct MapObjDef), (struct EntryHead**) &mod,
-                       (struct EntryHead *) world.map_obj_defs)
-          || set_members(context, &object_flags, &action_flags,
-                         (struct MapObjDef *) mod, (struct MapObjAct *) moa)))
-    {
-        err_line(1, context->line, context->err_pre, "Unknown argument");
+        char * err_unknown = "Unknown argument.";
+        err_line(1, context->line, context->err_pre, err_unknown);
     }
 }
 
@@ -261,4 +255,6 @@ static uint8_t try_func_name(struct MapObjAct * moa,
 extern void read_config_file()
 {
     parse_file(world.path_config, tokens_into_entries);
+    set_cleanup_flag(CLEANUP_MAP_OBJECT_ACTS | CLEANUP_MAP_OBJECT_DEFS);
+    test_corpse_ids();
 }

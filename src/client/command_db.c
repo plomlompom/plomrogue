@@ -36,8 +36,7 @@ enum cmd_flag
  * Individual CommandDB entries are put together line by line before being
  * written. Writing happens after all necessary members of an entry have been
  * assembled, and when additionally a) a new entry is started by a
- * context->token0 of "COMMAND"; or b) a NULL context->token0 is passed. This is
- * interpreted as the CommandDB read's end: appropriate cleanup flags are set.
+ * context->token0 of "COMMAND"; or b) a NULL context->token0 is passed.
  */
 static void tokens_into_entries(struct Context * context);
 
@@ -51,8 +50,9 @@ static void tokens_into_entries(struct Context * context)
     static struct Command * cmd = NULL;
     if (!context->token0 || !strcmp(context->token0, str_cmd))
     {
-        err_line((cmd_flags & READY_CMD) ^ READY_CMD, context->line,
-                  context->err_pre, "Last definition block not finished yet.");
+        char * err_fin = "Last definition block not finished yet.";
+        err_line((cmd_flags & READY_CMD) ^ READY_CMD,
+                  context->line, context->err_pre, err_fin);
         if (cmd)
         {
             array_append(world.commandDB.n, sizeof(struct Command),
@@ -61,27 +61,26 @@ static void tokens_into_entries(struct Context * context)
             cmd = NULL;
         }
     }
-    if (!context->token0)
+    if (context->token0 && !strcmp(context->token0, str_cmd))
     {
-        set_cleanup_flag(CLEANUP_COMMANDS);
-    }
-    else if (!strcmp(context->token0, str_cmd))
-    {
+        char * err_uniq = "Declaration of ID already used.";
         cmd_flags = EDIT_STARTED;
         cmd = try_malloc(sizeof(struct Command), f_name);
         memset(cmd, 0, sizeof(struct Command));
         cmd->dsc_short = strdup(context->token1);
-        err_line(NULL != get_command(cmd->dsc_short), context->line,
-                 context->err_pre, "Declaration of ID already used.");
+        err_line(NULL != get_command(cmd->dsc_short),
+                 context->line, context->err_pre, err_uniq);
     }
-    else if (!(   set_val(context, "DESCRIPTION", &cmd_flags,
-                          DESC_SET, 's', (char *) &cmd->dsc_long)
-               || set_val(context, "SERVER_COMMAND", &cmd_flags,
-                          SERVERCMD_SET, 's', (char *) &cmd->server_msg)
-               || set_val(context, "SERVER_ARGUMENT", &cmd_flags,
-                          SERVERARG_SET, 'c', (char *) &cmd->arg)))
+    else if (   context->token0
+             && !(   set_val(context, "DESCRIPTION", &cmd_flags,
+                             DESC_SET, 's', (char *) &cmd->dsc_long)
+                  || set_val(context, "SERVER_COMMAND", &cmd_flags,
+                             SERVERCMD_SET, 's', (char *) &cmd->server_msg)
+                  || set_val(context, "SERVER_ARGUMENT", &cmd_flags,
+                             SERVERARG_SET, 'c', (char *) &cmd->arg)))
     {
-        err_line(1, context->line, context->err_pre, "Unknown argument");
+        char * err_unknown = "Unknown argument.";
+        err_line(1, context->line, context->err_pre, err_unknown);
     }
 }
 
@@ -108,6 +107,7 @@ extern struct Command * get_command(char * dsc_short)
 extern void init_command_db()
 {
     parse_file(world.path_commands, tokens_into_entries);
+    set_cleanup_flag(CLEANUP_COMMANDS);
 }
 
 
