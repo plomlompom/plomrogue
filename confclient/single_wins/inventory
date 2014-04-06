@@ -1,109 +1,113 @@
-81 quit
-58 wait
-107 move_8
-117 move_9
-108 move_6
-110 move_3
-106 move_2
-98 move_1
-104 move_4
-121 move_7
-112 pick
-99 use
-100 drop
-46 map_c
-265 to_a_keywin
-266 to_mapwin
-267 to_infowin
-268 to_inv
-269 to_logwin
-270 to_g_keywin
-271 to_wg_keywin
-272 to_wk_keywin
-119 winconf
-62 cyc_win_f
-60 cyc_win_b
-262 scrl_l
-360 scrl_r
-114 reload_conf
-67 save_conf
-%
-258 shift_f
-259 shift_b
-42 grow_h
-95 shri_h
-43 grow_v
-45 shri_v
-121 to_height_t
-120 to_width_t
-%
-258 w_keys_d
-259 w_keys_u
-10 w_keys_m
-%
-c
-c
-%
-0
-Global keys
-0
--13
-29
-258 g_keys_d
-259 g_keys_u
-10 g_keys_m
-%
-1
-Window geometry keys
-0
-8
-29
-258 wg_keys_d
-259 wg_keys_u
-10 wg_keys_m
-%
-2
-Window keybinding keys
-0
-3
-29
-258 wk_keys_d
-259 wk_keys_u
-10 wk_keys_m
-%
-c
-Inventory
-0
-0
-0
-259 inv_u
-258 inv_d
-%
-i
-Info
-0
-3
-33
-%
-k
-Available keys
-0
-0
-29
-%
-l
-Log
-0
--10
-33
-%
-m
-Map
-0
-0
--64
-259 map_u
-258 map_d
-260 map_l
-261 map_r
-%
+
+KEYBINDINGS 'global'
+KEY 81 quit
+KEY 265 to_a_keywin
+KEY 266 to_mapwin
+KEY 267 to_infowin
+KEY 268 to_inv
+KEY 269 to_logwin
+KEY 270 to_g_keywin
+KEY 271 to_wg_keywin
+KEY 272 to_wk_keywin
+KEY 119 winconf
+KEY 62 cyc_win_f
+KEY 60 cyc_win_b
+KEY 262 scrl_l
+KEY 360 scrl_r
+KEY 82 reload_conf
+KEY 67 save_conf
+KEY 112 pick
+KEY 58 wait
+KEY 107 move_8
+KEY 117 move_9
+KEY 108 move_6
+KEY 110 move_3
+KEY 106 move_2
+KEY 98 move_1
+KEY 104 move_4
+KEY 121 move_7
+KEY 46 map_c
+KEY 100 drop
+KEY 99 use
+
+KEYBINDINGS 'wingeom'
+KEY 258 shift_f
+KEY 259 shift_b
+KEY 42 grow_h
+KEY 95 shri_h
+KEY 43 grow_v
+KEY 45 shri_v
+KEY 98 to_break
+KEY 121 to_height_t
+KEY 120 to_width_t
+
+KEYBINDINGS 'winkeys'
+KEY 258 w_keys_d
+KEY 259 w_keys_u
+KEY 10 w_keys_m
+
+WIN_ORDER 'c'
+WIN_FOCUS 'c'
+
+WINDOW 1
+NAME 'Window geometry keys'
+BREAK 0
+WIDTH 29
+HEIGHT 8
+KEY 258 wg_keys_d
+KEY 259 wg_keys_u
+KEY 10 wg_keys_m
+
+WINDOW 2
+NAME 'Window keybinding keys'
+BREAK 0
+WIDTH 29
+HEIGHT 3
+KEY 258 wk_keys_d
+KEY 259 wk_keys_u
+KEY 10 wk_keys_m
+
+WINDOW c
+NAME 'Inventory'
+BREAK 2
+WIDTH 0
+HEIGHT 0
+KEY 259 inv_u
+KEY 258 inv_d
+
+WINDOW i
+NAME 'Info'
+BREAK 2
+WIDTH 28
+HEIGHT 1
+
+WINDOW k
+NAME 'Available keys'
+BREAK 1
+WIDTH 29
+HEIGHT 0
+
+WINDOW l
+NAME 'Log'
+BREAK 0
+WIDTH 28
+HEIGHT -7
+
+WINDOW m
+NAME 'Map'
+BREAK 0
+WIDTH -59
+HEIGHT 0
+KEY 259 map_u
+KEY 258 map_d
+KEY 260 map_l
+KEY 261 map_r
+
+WINDOW 0
+NAME 'Global keys'
+BREAK 0
+WIDTH 29
+HEIGHT -13
+KEY 258 g_keys_d
+KEY 259 g_keys_u
+KEY 10 g_keys_m
