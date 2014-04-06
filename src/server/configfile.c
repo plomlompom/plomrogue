@@ -6,7 +6,8 @@
 #include <stdlib.h> /* atoi(), free() */
 #include <string.h> /* strcmp() */
 #include "../common/parse_file.h" /* EDIT_STARTED, set_val(), test_for_int(),
-                                   * err_line(), parse_file(),token_from_line()
+                                   * err_line(), parse_file(),token_from_line(),
+                                   * finalize_by_readyflag()
                                    */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -110,13 +111,10 @@ static void tokens_into_entries(char * token0, char * token1)
     static struct EntryHead * mod = NULL;
     if (!token0 || !strcmp(token0,str_act) || !strcmp(token0,str_obj))
     {
-        err_line(   ((action_flags & READY_ACT) ^ READY_ACT)
-                 || ((object_flags & READY_OBJ) ^ READY_OBJ),
-                 "Last definitino block not finished yet.");
+        finalize_by_readyflag(&action_flags, READY_ACT);
+        finalize_by_readyflag(&object_flags, READY_OBJ);
         write_if_entry(&moa, (struct EntryHead ***) &moa_p_p);
         write_if_entry(&mod, (struct EntryHead ***) &mod_p_p);
-        action_flags = READY_ACT;
-        object_flags = READY_OBJ;
     }
     err_line(token0 && NULL != token_from_line(NULL), "Too many values.");
     if (   token0

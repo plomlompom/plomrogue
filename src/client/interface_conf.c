@@ -10,7 +10,7 @@
 #include <string.h> /* memset(), strchr(), strcmp(), strdup(), strlen() */
 #include <unistd.h> /* optarg, getopt() */
 #include "../common/parse_file.h" /* EDIT_STARTED, parse_file(), set_val(),
-                                   * token_from_line()
+                                   * token_from_line(), finalize_by_readyflag()
                                    */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
                                   * try_fwrite()
@@ -187,14 +187,10 @@ static void tokens_into_entries(char * token0, char * token1)
     if (!token0 || !strcmp(token0, str_win) || !strcmp(token0, str_ord)
                 || !strcmp(token0, str_kbd))
     {
-        err_line(   ((win_flags & READY_WIN) ^ READY_WIN)
-                 || ((ord_flags & READY_ORD) ^ READY_ORD)
-                 || ((kbd_flags & READY_KBD) ^ READY_KBD),
-                 "Last definition block not yet finished yet.");
+        finalize_by_readyflag(&win_flags, READY_WIN);
+        finalize_by_readyflag(&ord_flags, READY_ORD);
+        finalize_by_readyflag(&kbd_flags, READY_KBD);
         write_if_win(&win);
-        ord_flags = READY_ORD;
-        win_flags = READY_WIN;
-        kbd_flags = READY_KBD;
     }
     if (!token0)
     {

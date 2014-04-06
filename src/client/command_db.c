@@ -7,7 +7,8 @@
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strcmp(), strdup() */
 #include "../common/parse_file.h" /* EDIT_STARTED, parse_file(), set_val(),
-                                   * token_from_line(), err_line()
+                                   * token_from_line(), err_line(),
+                                   * finalize_by_readyflag()
                                    */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "array_append.h" /* array_append() */
@@ -48,8 +49,7 @@ static void tokens_into_entries(char * token0, char * token1)
     static struct Command * cmd = NULL;
     if (!token0 || !strcmp(token0, str_cmd))
     {
-        char * err_fin = "Last definition block not finished yet.";
-        err_line((cmd_flags & READY_CMD) ^ READY_CMD, err_fin);
+        finalize_by_readyflag(&cmd_flags, READY_CMD);
         if (cmd)
         {
             array_append(world.commandDB.n, sizeof(struct Command),

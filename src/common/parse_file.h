@@ -52,6 +52,9 @@ extern uint8_t set_val(char * token0, char * token1, char * comparand,
                        uint8_t * flags, uint8_t set_flag, char type,
                        char * element);
 
+/* Check "ready_flag" is set in "flags", re-set "flags" to "ready_flag" only. */
+extern void finalize_by_readyflag(uint8_t * flags, uint8_t ready_flag);
+
 
 
 #endif
