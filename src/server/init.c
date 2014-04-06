@@ -1,6 +1,5 @@
 /* src/server/init.c */
 
-//#define _POSIX_C_SOURCE 2 /* getopt(), optarg */
 #define _POSIX_C_SOURCE 200809L /* getopt(), optarg, strdup() */
 #include "init.h"
 #include <errno.h> /* global errno, EEXIST */

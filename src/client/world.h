@@ -32,7 +32,6 @@ struct World
     char * path_interface; /* path of interface configuration file */
     char * path_commands; /* path of commands config file */
     char * player_inventory; /* one-item-per-line string list of owned items */
-    char * delim; /* delimiter for multi-line blocks in config files */
     struct yx_uint8 player_pos; /* coordinates of player on map */
     uint16_t turn; /* world/game turn */
     uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */

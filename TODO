@@ -9,8 +9,6 @@ BOTH SERVER/CLIENT:
 
 - be more strict and humble when allocating memory from the stack
 
-- may err_line store the processed line internally as it does the line count
-
 SERVER:
 
 - implement field of view / line of sight and obstacles for those on the map
@@ -29,5 +27,3 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
-
-- implement server-config-file-like parsing for client-config-files, too

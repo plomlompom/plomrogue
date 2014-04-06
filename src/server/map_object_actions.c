@@ -22,10 +22,6 @@
 /* Append "text" to game log, or a "." if "text" is the same as the last one. */
 static void update_log(char * text);
 
-/* If "name" fits "moa"->name, set "moa"->func to "func". */
-//static uint8_t try_func_name(struct MapObjAct * moa,
-//                             char * name, void (* func) (struct MapObj *));
-
 /* One actor "wounds" another actor, decrementing his lifepoints and, if they
  * reach zero in the process, killing it. Generates appropriate log message.
  */

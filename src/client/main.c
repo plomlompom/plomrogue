@@ -7,7 +7,6 @@
 #include <stdlib.h> /* exit() */
 #include <string.h> /* memset() */
 #include <unistd.h> /* access() */
-#include "../common/err_try_fgets.h" /* set_err_try_fgets_delim() */
 #include "../common/readwrite.h" /* try_fopen() */
 #include "../common/rexit.h" /* set_cleanup_func(), exit_trouble(),exit_err() */
 #include "cleanup.h" /* cleanup(), set_cleanup_flag() */
@@ -31,8 +30,6 @@ int main(int argc, char * argv[])
     world.path_commands    = "confclient/commands";
     world.path_interface   = "confclient/interface_conf";
     world.winDB.legal_ids  = "012ciklm";
-    world.delim            = "%\n";
-    set_err_try_fgets_delim(world.delim);
     char * path_server_in  = "server/in";
     char * path_server_out = "server/out";
 

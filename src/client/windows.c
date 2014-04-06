@@ -10,14 +10,10 @@
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdio.h> /* sprintf() */
-#include <stdlib.h> /* free(), atoi() */
-#include <string.h> /* memcpy(), strlen(), strnlen(), strchr(), memset() */
-#include "../common/err_try_fgets.h" /* err_try_fgets(), err_line() */
-#include "../common/readwrite.h" /* try_fputc(), try_write(), try_fgetc() */
+#include <stdlib.h> /* free() */
+#include <string.h> /* memcpy(), strlen(), strnlen(), memset() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
-#include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint16.h" /* struct yx_uint16 */
-#include "array_append.h" /* array_append() */
 #include "draw_wins.h" /* draw_winconf_geometry(), draw_winconf_keybindings(),
                         * draw_win_inventory(), draw_win_info(), draw_win_log(),
                         * draw_win_available_keybindings(), draw_win_map(),
@@ -25,9 +21,6 @@
                         * draw_win_keybindings_winconf_geometry(),
                         * draw_win_keybindings_global()
                         */
-#include "keybindings.h" /* write_keybidings_to_file(),
-                          * read_keybindings_from_file()
-                          */
 #include "wincontrol.h" /* toggle_window() */
 #include "world.h" /* global world */
 
@@ -393,133 +386,6 @@ extern struct Win * get_win_by_id(char id)
 
 
 
-extern uint8_t read_winconf_from_file(char * line, uint32_t linemax,
-                                      FILE * file)
-{
-    char * f_name = "read_winconf_from_file()";
-    char * context = "Failed reading individual window's configuration from "
-                     "interface config file. ";
-    char * err_id  = "Illegal ID(s) selected.";
-    char * err_2   = "Double-initialized window.";
-    char * err_brk = "Illegal line break type index.";
-    int test_for_end = try_fgetc(file, f_name);
-    if (EOF == test_for_end || '\n' == test_for_end)
-    {
-        return 0;
-    }
-    exit_trouble(EOF == ungetc(test_for_end, file), f_name, "ungetc()");
-    err_try_fgets(line, linemax, file, context, "ns");
-    err_line(NULL == strchr(world.winDB.legal_ids, line[0]), line, context,
-             err_id);
-    exit_err(world.winDB.ids && NULL!=strchr(world.winDB.ids, line[0]), err_2);
-    struct Win win;
-    memset(&win, 0, sizeof(struct Win));
-    win.id = (char) line[0];
-    err_try_fgets(line, linemax, file, context, "0n");
-    win.title = try_malloc(strlen(line), f_name);
-    memcpy(win.title, line, strlen(line) - 1);      /* Eliminate newline char */
-    win.title[strlen(line) - 1] = '\0';             /* char at end of string. */
-    err_try_fgets(line, linemax, file, context, "0nsi");
-    err_line(atoi(line) > 2, line, context, err_brk);
-    win.linebreak = atoi(line);
-    err_try_fgets(line, linemax, file, context, "0ni");
-    win.target_height = atoi(line);
-    win.target_height_type = (0 >= win.target_height);
-    err_try_fgets(line, linemax, file, context, "0ni");
-    win.target_width = atoi(line);
-    win.target_width_type = (0 >= win.target_width);
-    read_keybindings_from_file(line, linemax, file, &win.kb);
-    if (world.winDB.ids)
-    {
-        uint8_t old_ids_size = strlen(world.winDB.ids);
-        char * new_ids = try_malloc(old_ids_size + 1 + 1, f_name);
-        sprintf(new_ids, "%s%c", world.winDB.ids, win.id);
-        free(world.winDB.ids);
-        world.winDB.ids = new_ids;
-        array_append(old_ids_size, sizeof(struct Win), (void *) &win,
-                     (void **) &world.winDB.wins);
-        return 1;
-    }
-    world.winDB.ids = try_malloc(2, f_name);
-    sprintf(world.winDB.ids, "%c", win.id);
-    world.winDB.wins = try_malloc(sizeof(struct Win), f_name);
-    world.winDB.wins[0] = win;
-    return 1;
-}
-
-
-
-extern void write_winconf_of_id_to_file(FILE * file, char c)
-{
-    char * f_name = "write_winconf_of_id_to_file()";
-    struct Win * wc = get_win_by_id(c);
-    uint8_t size = strlen(wc->title) + 2;
-    if (size < 7)  /* Ensure that at least 5 + 2 char fit into line so that   */
-    {              /* the digit representation of any uint16_t may be stored. */
-        size = 7;
-    }
-    char line[size];
-    sprintf(line, "%c\n", wc->id);
-    try_fwrite(line, sizeof(char), strlen(line), file, f_name);
-    sprintf(line, "%s\n", wc->title);
-    try_fwrite(line, sizeof(char), strlen(line), file, f_name);
-    sprintf(line, "%d\n", wc->linebreak);
-    try_fwrite(line, sizeof(char), strlen(line), file, f_name);
-    sprintf(line, "%d\n", wc->target_height);
-    try_fwrite(line, sizeof(char), strlen(line), file, f_name);
-    sprintf(line, "%d\n", wc->target_width);
-    try_fwrite(line, sizeof(char), strlen(line), file, f_name);
-    write_keybindings_to_file(file, &wc->kb);
-}
-
-
-
-extern void read_order_wins_visible_active(char * line, uint32_t linemax,
-                                           FILE * file, char ** tmp_order,
-                                           char * tmp_active)
-{
-    char * f_name = "read_order_wins_visible_active()";
-    char * context   = "Failed reading order and activation of visible windows "
-                       "from interface config file. ";
-    char * err_id    = "Illegal ID(s) selected.";
-    err_try_fgets(line, linemax, file, context, "01");
-    uint32_t i = 0;
-    for (; i < strlen(line) - 1; i++)
-    {
-        char * test = strchr(world.winDB.legal_ids, line[i]);
-        err_line(!test, line, context, err_id);
-    }
-    line[strlen(line) - 1] = '\0';
-    *tmp_order = try_malloc(strlen(line) + 1, f_name);
-    sprintf(*tmp_order, "%s", line);
-    if (*tmp_order[0])
-    {
-        err_try_fgets(line, linemax, file, context, "0nfs");
-        err_line(NULL == strchr(*tmp_order, line[0]), line, context, err_id);
-        *tmp_active = line[0];
-    }
-    else
-    {
-        err_try_fgets(line, linemax, file, context, "0ne");
-        *tmp_active = '\0';
-    }
-    err_try_fgets(line, linemax, file, context, "d");
-}
-
-
-
-extern void write_order_wins_visible_active(FILE * file)
-{
-    char * f_name = "write_order_wins_visible_active()";
-    try_fwrite(world.winDB.order, strlen(world.winDB.order), 1, file, f_name);
-    try_fputc('\n', file, f_name);
-    try_fputc(world.winDB.active, file, f_name);
-    try_fputc('\n', file, f_name);
-    try_fwrite(world.delim, strlen(world.delim), 1, file, f_name);
-}
-
-
-
 extern void make_v_screen_and_init_win_sizes()
 {
     char * f_name = "make_v_screen_and_init_win_sizes()";
@@ -549,10 +415,8 @@ extern void free_winDB()
         struct Win * wc = get_win_by_id(id);
         free(wc->title);
         free(wc->kb.kbs);
-        wc->kb.kbs = NULL;
     }
-    free(world.winDB.ids); /* NULL this since read_winconf_from_file() checks */
-    world.winDB.ids = NULL;/* for it to detect its first post-DB-purge round. */
+    free(world.winDB.ids);
     free(world.winDB.wins);
     free(world.winDB.order);
 }

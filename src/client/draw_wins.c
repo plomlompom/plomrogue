@@ -276,7 +276,7 @@ static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
         add_line(win, "(none)", 0, &offset, 0);
         return;
     }
-    uint16_t kb_n;
+    uint8_t kb_n;
     for (kb_n = 0; kb_n < kbdb->n_of_kbs; kb_n++)
     {
         attr_t attri = 0;
@@ -302,7 +302,7 @@ static void draw_titled_keybinding_list(char * title, struct Win * win,
                                         struct KeyBindingDB * kbdb)
 {
     uint8_t state = 0;
-    uint16_t kb_n = 0;
+    uint8_t kb_n = 0;
     while (0 == state || kb_n < kbdb->n_of_kbs)
     {
         if (0 == state)

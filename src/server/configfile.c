@@ -1,15 +1,14 @@
 /* src/server/configfile.c */
 
 #include <stddef.h> /* size_t, NULL */
-#include <stdio.h> /* sprintf() */
+#include <stdio.h> /* snprintf() */
 #include <stdint.h> /* uint8_t */
 #include <stdlib.h> /* atoi(), free() */
 #include <string.h> /* strcmp() */
-#include "../common/err_try_fgets.h" /* err_line() */
-#include "../common/parse_file.h" /* Context, EDIT_STARTED, set_val(),
-                                   * set_uint8(), parse_file()
+#include "../common/parse_file.h" /* EDIT_STARTED, set_val(), test_for_int(),
+                                   * err_line(), parse_file(),token_from_line()
                                    */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag(), CLEANUP_MAP_OBJ_DEFS,
                       * CLEANUP_MAP_OBJ_ACTS
@@ -38,8 +37,8 @@ enum flag
 
 
 
-/* What MapObjDef and MapObjAct structs have in common at their top. Used to
- * have common functions run over structs of both types.
+/* What MapObjDef and MapObjAct structs have in common at their top. Use this to
+ * allow same functions run over structs of both types.
  */
 struct EntryHead
 {
@@ -49,23 +48,24 @@ struct EntryHead
 
 
 
-/* Get tokens from "context" and, by their order (in the individual context and
- * in subsequent calls of this function), interpret them as data to write into
- * the MapObjAct / MapObjDef DB.
+/* Interpret "token0" and "token1" as data to write into the MapObjAct /
+ * MapObjDef DB.
  *
  * Individual MapObjDef / MapObjAct DB entries are put together line by line
  * before being written. Writing only happens after all necessary members of an
  * entry have been assembled, and when additionally a) a new entry is started by
- * a context->token0 of "ACTION" or "OBJECT"; or b) context->token0 is NULL.
+ * a "token0" of "ACTION" or "OBJECT"; or b) "token0" is NULL.
+ *
+ * Also check against the line parse_file() read tokens from having more tokens.
  */
-static void tokens_into_entries(struct Context * context);
+static void tokens_into_entries(char * token0, char * token1);
 
-/* Start reading a new DB entry of "size" from tokens in "context" if ->token0
- * matches "comparand". Set EDIT_STARTED in "flags" to mark beginning of new
- * entry reading. Check that id of new entry in ->token1 has not already been
- * used in DB starting at "entry_cmp".
+/* Start reading a new DB entry of "size" from tokens if "token0" matches
+ * "comparand". Set EDIT_STARTED in "flags" to mark beginning of new entry
+ * reading. Check that "token1" id of new entry has not already been used in DB
+ * starting at "entry_cmp".
  */
-static uint8_t new_entry(struct Context * context, char * comparand,
+static uint8_t new_entry(char * token0, char * token1, char * comparand,
                          uint8_t * flags, size_t size,
                          struct EntryHead ** entry,
                          struct EntryHead * entry_cmp);
@@ -79,14 +79,14 @@ static void write_if_entry(struct EntryHead ** entry,
  */
 static void test_corpse_ids();
 
-/* Try to read tokens in "context" as members for the entry currently edited,
- * which must be either "mod" or "moa". What member of which of the two is set
- * depends on which of "object_flags" and "action_flags" has EDIT_STARTED set
- * and on the key name of ->token0. Return 1 if interpretation succeeds, else 0.
+/* Try to read tokens as members for the entry currently edited, which must be
+ * either "mod" or "moa". What member of which of the two is set depends on
+ * which of "object_flags" and "action_flags" has EDIT_STARTED set and on the
+ * key name in "token0". Return 1 if interpretation succeeds, else 0.
  *
  * Note that MapObjAct entries' .name also determines their .func.
  */
-static uint8_t set_members(struct Context * context, uint8_t * object_flags,
+static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
                            uint8_t * action_flags, struct MapObjDef * mod,
                            struct MapObjAct * moa);
 
@@ -98,7 +98,7 @@ static uint8_t try_func_name(struct MapObjAct * moa,
 
 
 
-static void tokens_into_entries(struct Context * context)
+static void tokens_into_entries(char * token0, char * token1)
 {
     char * str_act = "ACTION";
     char * str_obj = "OBJECT";
@@ -108,50 +108,48 @@ static void tokens_into_entries(struct Context * context)
     static uint8_t object_flags = READY_OBJ;
     static struct EntryHead * moa = NULL;
     static struct EntryHead * mod = NULL;
-    if (   !context->token0
-        || !strcmp(context->token0,str_act) || !strcmp(context->token0,str_obj))
+    if (!token0 || !strcmp(token0,str_act) || !strcmp(token0,str_obj))
     {
-        char * err_fin = "Last definition block not finished yet.";
-        err_line((action_flags & READY_ACT) ^ READY_ACT,
-                 context->line, context->err_pre, err_fin);
-        err_line((object_flags & READY_OBJ) ^ READY_OBJ,
-                 context->line, context->err_pre, err_fin);
+        err_line(   ((action_flags & READY_ACT) ^ READY_ACT)
+                 || ((object_flags & READY_OBJ) ^ READY_OBJ),
+                 "Last definitino block not finished yet.");
         write_if_entry(&moa, (struct EntryHead ***) &moa_p_p);
         write_if_entry(&mod, (struct EntryHead ***) &mod_p_p);
-        object_flags = action_flags = READY_OBJ;
+        action_flags = READY_ACT;
+        object_flags = READY_OBJ;
     }
-    if (   context->token0
-        && !(   new_entry(context, str_act, &action_flags,
+    err_line(token0 && NULL != token_from_line(NULL), "Too many values.");
+    if (   token0
+        && !(   new_entry(token0, token1, str_act, &action_flags,
                           sizeof(struct MapObjAct), (struct EntryHead**) &moa,
                           (struct EntryHead *) world.map_obj_acts)
-             || new_entry(context, str_obj, &object_flags,
+             || new_entry(token0, token1, str_obj, &object_flags,
                           sizeof(struct MapObjDef), (struct EntryHead**) &mod,
                           (struct EntryHead *) world.map_obj_defs)
-             || set_members(context, &object_flags, &action_flags,
+             || set_members(token0, token1, &object_flags, &action_flags,
                             (struct MapObjDef *) mod, (struct MapObjAct *) moa)))
     {
-        char * err_unknown = "Unknown argument.";
-        err_line(1, context->line, context->err_pre, err_unknown);
+        err_line(1, "Unknown argument.");
     }
 }
 
 
 
-static uint8_t new_entry(struct Context * context, char * comparand,
+static uint8_t new_entry(char * token0, char * token1, char * comparand,
                          uint8_t * flags, size_t size,
                          struct EntryHead ** entry,struct EntryHead * entry_cmp)
 {
     char * f_name = "new_entry()";
-    char * err_uni = "Declaration of ID already used.";
-    if (!strcmp(context->token0, comparand))
+    if (!strcmp(token0, comparand))
     {
+        char * err_uniq = "Declaration of ID already used.";
         * flags = EDIT_STARTED;
         * entry = try_malloc(size, f_name);
-        set_uint8(context, &((*entry)->id));
+        test_for_int(token1, '8');
+        (*entry)-> id = atoi(token1);
         for (; NULL != entry_cmp; entry_cmp = entry_cmp->next)
         {
-            err_line((*entry)->id == entry_cmp->id,
-                     context->line, context->err_pre, err_uni);
+            err_line((*entry)->id == entry_cmp->id, err_uniq);
         }
         return 1;
     }
@@ -165,10 +163,10 @@ static void write_if_entry(struct EntryHead ** entry,
 {
     if (*entry)
     {
-        (* entry)->next = NULL;
-        ** entry_p_p_p = *entry;
-        * entry_p_p_p = &((*entry)->next);
-        * entry = NULL;  /* So later runs of this don't re-append same entry. */
+        (*entry)->next = NULL;
+        **entry_p_p_p = *entry;
+        *entry_p_p_p = &((*entry)->next);
+        *entry = NULL;   /* So later runs of this don't re-append same entry. */
     }
 }
 
@@ -177,10 +175,11 @@ static void write_if_entry(struct EntryHead ** entry,
 static void test_corpse_ids()
 {
     char * f_name = "test_corpse_ids()";
-    char * err_corpse_prefix = "In the object definition DB, one object corpse "
-                               "ID does not reference any known object in the "
-                               "DB. ID of responsible object: ";
-    char * err_corpse = try_malloc(strlen(err_corpse_prefix) + 3 + 1, f_name);
+    char * prefix = "In the object definitions DB, one object corpse ID does "
+                    "not reference any known object in the DB. ID of "
+                    "responsible object: ";
+    size_t size = strlen(prefix) + 3 + 1; /* 3: uint8_t representation strlen */
+    char * err_corpse = try_malloc(size, f_name);
     struct MapObjDef * test_entry_0 = world.map_obj_defs;
     for (; test_entry_0; test_entry_0 = test_entry_0->next)
     {
@@ -193,7 +192,8 @@ static void test_corpse_ids()
                 corpse_id_found = 1;
             }
         }
-        sprintf(err_corpse, "%s%d", err_corpse_prefix, test_entry_0->id);
+        int test = snprintf(err_corpse, size, "%s%d", prefix, test_entry_0->id);
+        exit_trouble(test < 0, f_name, "snprintf()");
         exit_err(!corpse_id_found, err_corpse);
     }
     free(err_corpse);
@@ -201,12 +201,12 @@ static void test_corpse_ids()
 
 
 
-static uint8_t set_members(struct Context * context, uint8_t * object_flags,
+static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
                            uint8_t * action_flags, struct MapObjDef * mod,
                            struct MapObjAct * moa)
 {
-    if (   * action_flags & EDIT_STARTED
-        && set_val(context, "NAME", action_flags,
+    if (   *action_flags & EDIT_STARTED
+        && set_val(token0, token1, "NAME", action_flags,
                    NAME_SET, 's', (char *) &moa->name))
     {
         if (!(   try_func_name(moa, "move", actor_move)
@@ -219,17 +219,17 @@ static uint8_t set_members(struct Context * context, uint8_t * object_flags,
         *action_flags = *action_flags | NAME_SET;
         return 1;
     }
-    else if (   set_val(context, "NAME", object_flags,
+    else if (   set_val(token0, token1, "NAME", object_flags,
                         NAME_SET, 's', (char *) &mod->name)
-             || set_val(context, "SYMBOL", object_flags,
+             || set_val(token0, token1, "SYMBOL", object_flags,
                         SYMBOL_SET, 'c', (char *) &mod->char_on_map)
-             || set_val(context, "EFFORT", action_flags,
+             || set_val(token0, token1, "EFFORT", action_flags,
                         EFFORT_SET, '8', (char *) &moa->effort)
-             || set_val(context, "LIFEPOINTS", object_flags,
+             || set_val(token0, token1, "LIFEPOINTS", object_flags,
                         LIFEPOINTS_SET, '8', (char *) &mod->lifepoints)
-             || set_val(context, "CONSUMABLE", object_flags,
+             || set_val(token0, token1, "CONSUMABLE", object_flags,
                         CONSUMABLE_SET, '8', (char *) &mod->consumable)
-             || set_val(context, "CORPSE_ID", object_flags,
+             || set_val(token0, token1, "CORPSE_ID", object_flags,
                         CORPSE_ID_SET, '8', (char *) &mod->corpse_id))
     {
         return 1;
@@ -239,8 +239,8 @@ static uint8_t set_members(struct Context * context, uint8_t * object_flags,
 
 
 
-static uint8_t try_func_name(struct MapObjAct * moa,
-                             char * name, void (* func) (struct MapObj *))
+static uint8_t try_func_name(struct MapObjAct * moa, char * name,
+                             void (* func) (struct MapObj *))
 {
     if (0 == strcmp(moa->name, name))
     {

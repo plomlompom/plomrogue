@@ -2,38 +2,114 @@
 
 #define _POSIX_C_SOURCE 200809L /* strdup() */
 #include "parse_file.h"
-#include <stddef.h> /* NULL */ // size_t
-#include <stdio.h> /* FILE, sprintf() */
-#include <stdint.h> /* uint8_t, uint32_t */
-#include <stdlib.h> /* free() */ // atoi()
-#include <string.h> /* strchr, strdup(), strlen() */ // strcmp()
+#include <stddef.h> /* size_t, NULL */
+#include <stdio.h> /* FILE, snprintf() */
+#include <stdint.h> /* int16_t,uint8_t,uint32_t, INT16_MIN, UINT{8,16,32}_MAX */
+#include <stdlib.h> /* atoi(), free() */
+#include <string.h> /* strchr, strcmp(), strdup(), strlen() */
 #include <unistd.h> /* access(), F_OK */
-#include "err_try_fgets.h" /* err_line(), err_try_fgets(),
-                            * reset_err_try_fgets_counter()
-                            */
-#include "readwrite.h" /* try_fopen(),try_fclose(), textfile_width() */
-#include "rexit.h" /* exit_err() */
+#include "readwrite.h" /* try_fopen(), try_fclose(), textfile_width() */
+#include "rexit.h" /* exit_err(), exit_trouble() */
 #include "try_malloc.h" /* try_malloc() */
 
 
 
-/* Return next token from "line" or NULL if none is found. Tokens either a)
- * start at the first non-whitespace character and end before the next
- * whitespace character after that; or b) if the first non-whitespace character
- * is a single quote followed by at least one other single quote some time later
- * on the line, the token starts after that first single quote and ends before
- * the second, with the next token_from_line() call starting its token search
- * after that second quote. The only way to return an empty string (instead of
- * NULL) as a token is to delimit the token by two succeeding single quotes.
- * */
-static char * token_from_line(char * line);
+/* Set by parse_file(), used by err_line() for more informative messages. */
+static uint32_t err_line_count = 0;
+static char * err_line_line = NULL;
+static char * err_line_intro = NULL;
+
+
 
 /* Determines the end of the token_from_line() token. */
 static void set_token_end(char ** start, char ** limit_char);
 
 
 
-static char * token_from_line(char * line)
+static void set_token_end(char ** start, char ** limit_char)
+{
+    char * end_quote = ('\'' == (* start)[0]) ? strchr(* start + 1, '\''): NULL;
+    * start = (end_quote) ? * start + 1 : *start;
+    if (end_quote)
+    {
+        * end_quote = '\0';
+        * limit_char = end_quote;
+        return;
+    }
+    char * space = strchr(*start, ' ');
+    char * tab   = strchr(*start, '\t');
+    space = (!space || (tab && tab < space)) ? tab : space;
+    if (space)
+    {
+        * space = '\0';
+    }
+    *limit_char = strchr(*start, '\0');
+}
+
+
+
+extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
+{
+    char * f_name = "read_new_config_file()";
+    char * prefix = "Failed reading config file: \"";
+    char * affix = "\". ";
+    size_t size = strlen(prefix) + strlen(path) + strlen(affix) + 1;
+    err_line_intro = try_malloc(size, f_name);
+    int test = snprintf(err_line_intro, size, "%s%s%s", prefix, path, affix);
+    exit_trouble(test < 0, f_name, "snprintf()");
+    exit_err(access(path, F_OK), err_line_intro);
+    FILE * file = try_fopen(path, "r", f_name);
+    uint32_t linemax = textfile_width(file);
+    err_line_line = try_malloc(linemax + 1, f_name);
+    err_line_count = 0;
+    err_line(0 == linemax, "File is empty.");
+    char * token0 = NULL; /* For final token_to_entry() if while() stagnates. */
+    char * token1;
+    char * err_val = "No value given.";
+    while (try_fgets(err_line_line, linemax + 1, file, f_name))
+    {
+        err_line_count++;
+        err_line(UINT32_MAX == err_line_count, "Line reaches max lines limit.");
+        char * line_copy = strdup(err_line_line);
+        token0 = token_from_line(line_copy);
+        if (token0)
+        {
+            err_line(0 == (token1 = token_from_line(NULL)), err_val);
+            token_to_entry(token0, token1);
+            token0 = NULL;
+        }
+        free(line_copy);
+    }
+    token_to_entry(token0, token1);
+    try_fclose(file, f_name);
+    free(err_line_line);
+    free(err_line_intro);
+}
+
+
+
+extern void err_line(uint8_t test, char * msg)
+{
+    if (!test)
+    {
+        return;
+    }
+    char * f_name = "err_line()";
+    char * prefix = " Offending line ";
+    char * affix = ":\n";
+    size_t size =   strlen(err_line_intro) + strlen(msg) + strlen(prefix)
+                  + 10                 /* strlen for uint32_t representations */
+                  + strlen(affix) + strlen(err_line_line) + 1;
+    char * err = try_malloc(size, f_name);
+    int ret = snprintf(err, size, "%s%s%s%d%s%s", err_line_intro, msg, prefix,
+                       err_line_count, affix, err_line_line);
+    exit_trouble(ret < 0, f_name, "snprintf()");
+    exit_err(1, err);
+}
+
+
+
+extern char * token_from_line(char * line)
 {
     static char * final_char = NULL;
     static char * limit_char = NULL;
@@ -69,117 +145,66 @@ static char * token_from_line(char * line)
 
 
 
-static void set_token_end(char ** start, char ** limit_char)
+extern void test_for_int(char * string, char type)
 {
-    char * end_quote = ('\'' == (*start)[0]) ? strchr(*start + 1, '\'') : NULL;
-    *start = (end_quote) ? *start + 1 : *start;
-    if (end_quote)
+    char * err;
+    if ('8' == type)
     {
-        *end_quote = '\0';
-        *limit_char = end_quote;
-        return;
+        err = "Value must be proper representation of unsigned 8 bit integer.";
     }
-    char * space = strchr(*start, ' ');
-    char * tab   = strchr(*start, '\t');
-    space = (!space || (tab && tab < space)) ? tab : space;
-    if (space)
+    if ('i' == type)
     {
-        * space = '\0';
+        err = "Value must be proper representation of signed 16 bit integer.";
     }
-    *limit_char = strchr(*start, '\0');
-}
-
-
-
-extern void set_uint8(struct Context * context, uint8_t * target)
-{
-    char * err_uint8 = "Value not unsigned decimal number between 0 and 255.";
+    err_line(strlen(string) < 1, err);
     uint8_t i;
-    uint8_t is_uint8 = 1;
-    for (i = 0; '\0' != context->token1[i]; i++)
+    uint8_t test;
+    for (i = 0; '\0' != string[i]; i++)
     {
-        if (i > 2 || '0' > context->token1[i] || '9' < context->token1[i])
-        {
-            is_uint8 = 0;
-        }
+        char * err_many = "Value of too many characters.";
+        err_line(string[i + 1] && UINT8_MAX == i, err_many);
+        test = (   (0 == i && ('-' == string[i] || '+' == string[i]))
+                || ('0' <= string[i]  && string[i] <= '9'));
+        err_line(!test, err);
     }
-    if (is_uint8 && atoi(context->token1) > UINT8_MAX)
-    {
-        is_uint8 = 0;
-    }
-    err_line(!(is_uint8), context->line, context->err_pre, err_uint8);
-    *target = atoi(context->token1);
+    err_line(strlen(string) < 2 && ('-' == string[i] || '+' == string[i]), err);
+    err_line('8'==type && (atoi(string) < 0 || atoi(string) > UINT8_MAX), err);
+    test = 'i'==type && (atoi(string) < INT16_MIN || atoi(string) > INT16_MAX);
+    err_line(test, err);
 }
 
 
 
-extern uint8_t set_val(struct Context * context, char * comparand,
+extern uint8_t set_val(char * token0, char * token1, char * comparand,
                        uint8_t * flags, uint8_t set_flag, char type,
                        char * element)
 {
-    char * err_out = "Outside appropriate definition's context.";
-    char * err_singlechar = "Value must be single ASCII character.";
-    if (!strcmp(context->token0, comparand))
+    if (!strcmp(token0, comparand))
     {
-        err_line(!(* flags & EDIT_STARTED),
-                 context->line, context->err_pre, err_out);
-        * flags = * flags | set_flag;
+        char * err_out = "Outside appropriate definition's context.";
+        char * err_singlechar = "Value must be single ASCII character.";
+        err_line(!(*flags & EDIT_STARTED), err_out);
+        *flags = *flags | set_flag;
         if      ('s' == type)
         {
-            * (char **) element = strdup(context->token1);
+            * (char **) element = strdup(token1);
         }
         else if ('c' == type)
         {
-            err_line(1 != strlen(context->token1),
-                     context->line, context->err_pre, err_singlechar);
-            * element = (context->token1)[0];
+            err_line(1 != strlen(token1), err_singlechar);
+            *element = (token1)[0];
         }
         else if ('8' == type)
         {
-            set_uint8(context, (uint8_t *) element);
+            test_for_int(token1, '8');
+            * (uint8_t *) element = atoi(token1);
+        }
+        else if ('i' == type)
+        {
+            test_for_int(token1, 'i');
+            * (int16_t *) element = atoi(token1);
         }
         return 1;
     }
     return 0;
-}
-
-
-
-extern void parse_file(char * path, void (* token_to_entry) (struct Context *))
-{
-    char * f_name = "read_new_config_file()";
-    struct Context context;
-    char * err_pre_prefix = "Failed reading config file: \"";
-    char * err_pre_affix = "\". ";
-    context.err_pre = try_malloc(strlen(err_pre_prefix) + strlen(path)
-                                 + strlen(err_pre_affix) + 1, f_name);
-    sprintf(context.err_pre, "%s%s%s", err_pre_prefix, path, err_pre_affix);
-    exit_err(access(path, F_OK), context.err_pre);
-    FILE * file = try_fopen(path, "r", f_name);
-    uint32_t linemax = textfile_width(file);
-    context.line = try_malloc(linemax + 1, f_name);
-    reset_err_try_fgets_counter();
-    err_line(0 == linemax, context.line, context.err_pre, "File is empty.");
-    context.token0 = NULL;      /* For token_to_entry() if while() stagnates. */
-    char * err_val = "No value given.";
-    char * err_many = "Too many values.";
-    while (err_try_fgets(context.line, linemax + 1, file, context.err_pre, ""))
-    {
-        char * line_copy = strdup(context.line);
-        context.token0 = token_from_line(line_copy);
-        if (context.token0)
-        {
-            err_line(0 == (context.token1 = token_from_line(NULL)),
-                     context.line, context.err_pre, err_val);
-            err_line(NULL != token_from_line(NULL),
-                     context.line, context.err_pre, err_many);
-            token_to_entry(&context);
-            context.token0 = NULL;
-        }
-        free(line_copy);
-    }
-    token_to_entry(&context);
-    try_fclose(file, f_name);
-    free(context.line);
-    free(context.err_pre);
 }

@@ -33,7 +33,7 @@ struct CommandDB
  */
 extern struct Command * get_command(char * dsc_short);
 
-/* Reads in CommandDB config file. */
+/* Read in CommandDB config file. */
 extern void init_command_db();
 
 /* Free all memory allocated with init_command_db. */

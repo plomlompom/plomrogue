@@ -8,9 +8,7 @@
 #define MAP_OBJECTS_H
 
 #include <stdint.h> /* uint8_t */
-//#include <stdio.h> /* FILE */
 #include "../common/yx_uint8.h" /* yx_uint8 structs */
-//struct EntrySkeleton;
 
 
 
@@ -39,12 +37,6 @@ struct MapObjDef
 };
 
 
-
-/* Read-in to "entry" multi-line entry from MapObjDef config "file", using
- * pre-allocated "line", "linemax" and "context" as input for err_try_fgets().
- */
-//extern void read_map_object_def(char * line, uint32_t linemax, char * context,
-//                                struct EntrySkeleton * entry, FILE * file);
 
 /* Free map object definitions chain starting at "mod_start". */
 extern void free_map_object_defs(struct MapObjDef * mod_start);

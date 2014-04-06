@@ -12,7 +12,6 @@
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time() */
 #include <unistd.h> /* usleep() */
-#include "../common/err_try_fgets.h" /* err_line() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
                                   * try_fwrite(), try_fputc(), try_fgetc()
                                   */

@@ -7,7 +7,6 @@
 #define KEYBINDINGS_H
 
 #include <stdint.h> /* uint8_t, uint16_t */
-#include <stdio.h> /* FILE */
 struct Command;
 
 
@@ -21,9 +20,9 @@ struct KeyBinding
 struct KeyBindingDB
 {
     struct KeyBinding * kbs;
-    uint16_t n_of_kbs; /* how many KeyBinding structs are stored below .kbs? */
-    uint16_t select; /* linear list index of keybinding selected for editing */
-    uint8_t edit;    /* 1 if currently editing a keybinding, else 0 */
+    uint8_t n_of_kbs; /* how many KeyBinding structs are stored below .kbs? */
+    uint8_t select; /* linear list index of keybinding selected for editing */
+    uint8_t edit; /* 1 if currently editing a keybinding, else 0 */
 };
 
 
@@ -36,11 +35,6 @@ extern struct Command * get_command_to_keycode(struct KeyBindingDB * kbdb,
  * ncurses.h; if none is found, return "(unknown)".
  */
 extern char * get_keyname_to_keycode(uint16_t keycode);
-
-/* Read/write from/to "file" "kbd", delimited by world.delim. */
-extern void write_keybindings_to_file(FILE * file, struct KeyBindingDB * kbd);
-extern void read_keybindings_from_file(char * line, uint32_t linemax,
-                                       FILE * file, struct KeyBindingDB * kbd);
 
 /* Mark keybinding in KeybindingDB (char_selected_kb_db()-) selected by "kb_c"
  * as being edited, get user input to modify it, then unmark it again. Ensure

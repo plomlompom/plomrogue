@@ -6,11 +6,9 @@
 #include <stdint.h> /* uint8_t */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strcmp(), strdup() */
-#include "../common/err_try_fgets.h" /* err_line() */
-#include "../common/parse_file.h" /* Context, EDIT_STARTED, parse_file(),
-                                   * set_val()
+#include "../common/parse_file.h" /* EDIT_STARTED, parse_file(), set_val(),
+                                   * token_from_line(), err_line()
                                    */
-#include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "array_append.h" /* array_append() */
 #include "world.h" /* global world */
@@ -38,49 +36,48 @@ enum cmd_flag
  * assembled, and when additionally a) a new entry is started by a
  * context->token0 of "COMMAND"; or b) a NULL context->token0 is passed.
  */
-static void tokens_into_entries(struct Context * context);
+static void tokens_into_entries(char * token0, char * token1);
 
 
 
-static void tokens_into_entries(struct Context * context)
+static void tokens_into_entries(char * token0, char * token1)
 {
     char * f_name = "tokens_into_entries()";
     char * str_cmd = "COMMAND";
     static uint8_t cmd_flags = READY_CMD;
     static struct Command * cmd = NULL;
-    if (!context->token0 || !strcmp(context->token0, str_cmd))
+    if (!token0 || !strcmp(token0, str_cmd))
     {
         char * err_fin = "Last definition block not finished yet.";
-        err_line((cmd_flags & READY_CMD) ^ READY_CMD,
-                  context->line, context->err_pre, err_fin);
+        err_line((cmd_flags & READY_CMD) ^ READY_CMD, err_fin);
         if (cmd)
         {
             array_append(world.commandDB.n, sizeof(struct Command),
                          (void *) cmd, (void **) &world.commandDB.cmds);
             world.commandDB.n++;
+            free(cmd);
             cmd = NULL;
         }
     }
-    if (context->token0 && !strcmp(context->token0, str_cmd))
+    err_line(token0 && NULL != token_from_line(NULL), "Too many values.");
+    if (token0 && !strcmp(token0, str_cmd))
     {
         char * err_uniq = "Declaration of ID already used.";
         cmd_flags = EDIT_STARTED;
         cmd = try_malloc(sizeof(struct Command), f_name);
         memset(cmd, 0, sizeof(struct Command));
-        cmd->dsc_short = strdup(context->token1);
-        err_line(NULL != get_command(cmd->dsc_short),
-                 context->line, context->err_pre, err_uniq);
+        cmd->dsc_short = strdup(token1);
+        err_line(NULL != get_command(cmd->dsc_short), err_uniq);
     }
-    else if (   context->token0
-             && !(   set_val(context, "DESCRIPTION", &cmd_flags,
+    else if (   token0
+             && !(   set_val(token0, token1, "DESCRIPTION", &cmd_flags,
                              DESC_SET, 's', (char *) &cmd->dsc_long)
-                  || set_val(context, "SERVER_COMMAND", &cmd_flags,
+                  || set_val(token0, token1, "SERVER_COMMAND", &cmd_flags,
                              SERVERCMD_SET, 's', (char *) &cmd->server_msg)
-                  || set_val(context, "SERVER_ARGUMENT", &cmd_flags,
+                  || set_val(token0, token1, "SERVER_ARGUMENT", &cmd_flags,
                              SERVERARG_SET, 'c', (char *) &cmd->arg)))
     {
-        char * err_unknown = "Unknown argument.";
-        err_line(1, context->line, context->err_pre, err_unknown);
+        err_line(1, "Unknown arguemnt.");
     }
 }
 

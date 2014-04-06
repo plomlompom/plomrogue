@@ -2,7 +2,6 @@
 
 #include <stdio.h> /* printf() */
 #include <stdlib.h> /* exit() */
-#include "../common/err_try_fgets.h" /* set_err_try_fgets_delim() */
 #include "../common/rexit.h" /* exit_err, set_cleanup_func() */
 #include "cleanup.h" /* set_cleanup_flag(), cleanup() */
 #include "init.h" /* run_game(), obey_argv(), obey_argv(), setup_server_io(),
@@ -41,7 +40,6 @@ int main(int argc, char ** argv)
     world.path_in           = "server/in";
     world.path_record       = "record";
     world.tmp_suffix        = "_tmp";
-    set_err_try_fgets_delim("%%\n");
 
     /* Init map, map object configurations and server i/o files. */
     init_map_and_map_objects_configs();
