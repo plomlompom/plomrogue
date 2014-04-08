@@ -102,11 +102,11 @@ static uint8_t start_kbd(char * token0, char * token1, char * str_kbd,
 /* Helper to tokens_into_entries(), sets specific entry member data. "token0"
  * and the state of flags determine what entry member to edit; "win" and "kbdb"
  * are entries to write "token1" data into (as is the global "tmp_active"). If
- * "token0" is "KEY", a keybinding is defined and "token2" is read / must not be
- * NULL. In that case, the line read is checked against having a 4th token.
+ * "token0" is "str_key", a keybinding is defined and "token2" is read/must not
+ * be NULL. In that case, the line read is checked against having a 4th token.
  */
 static uint8_t set_members(char * token0, char * token1, uint8_t * win_flags,
-                           uint8_t * ord_flags, uint8_t kbd_flags,
+                           uint8_t * ord_flags,uint8_t kbd_flags,char * str_key,
                            struct Win * win, struct KeyBindingDB * kbdb);
 
 /* Add keybinding defined in "token1" as keycode and "token2" as command to
@@ -182,6 +182,7 @@ static void tokens_into_entries(char * token0, char * token1)
     char * str_win = "WINDOW";
     char * str_ord = "WIN_ORDER";
     char * str_kbd = "KEYBINDINGS";
+    char * str_key = "KEY";
     static uint8_t win_flags = READY_WIN;
     static uint8_t ord_flags = READY_ORD;
     static uint8_t kbd_flags = READY_KBD;
@@ -197,7 +198,7 @@ static void tokens_into_entries(char * token0, char * token1)
     }
     if (token0)
     {
-        if (strcmp(token0, "KEY"))
+        if (strcmp(token0, str_key))
         {
             parsetest_too_many_values();
         }
@@ -205,7 +206,7 @@ static void tokens_into_entries(char * token0, char * token1)
               || start_ord(token0, token1, str_ord, &ord_flags)
               || start_kbd(token0, token1, str_kbd, &kbd_flags, &kbdb)
               || set_members(token0, token1, &win_flags, &ord_flags, kbd_flags,
-                             win, kbdb)))
+                             str_key, win, kbdb)))
         {
            parse_unknown_arg();
         }
@@ -307,7 +308,7 @@ static uint8_t start_kbd(char * token0, char * token1, char * str_kbd,
 
 
 static uint8_t set_members(char * token0, char * token1, uint8_t * win_flags,
-                           uint8_t * ord_flags, uint8_t kbd_flags,
+                           uint8_t * ord_flags,uint8_t kbd_flags,char * str_key,
                            struct Win * win, struct KeyBindingDB * kbdb)
 {
     if (   parse_val(token0, token1, "NAME", win_flags,
@@ -329,7 +330,7 @@ static uint8_t set_members(char * token0, char * token1, uint8_t * win_flags,
         err_line(!strlen(tmp_order) && tmp_active, err_null);
         err_line(!strchr(tmp_order, tmp_active), err_outside);
     }
-    else if (!strcmp(token0, "KEY"))
+    else if (!strcmp(token0, str_key))
     {
         if (*win_flags & EDIT_STARTED)
         {
