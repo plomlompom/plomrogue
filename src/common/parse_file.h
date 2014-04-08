@@ -6,6 +6,7 @@
 #ifndef PARSE_FILE_H
 #define PARSE_FILE_H
 
+#include <stddef.h> /* size_t */
 #include <stdint.h> /* uint8_t */
 
 
@@ -42,18 +43,36 @@ extern void err_line(uint8_t test, char * msg);
 extern char * token_from_line(char * line);
 
 /* Test for "string" to represent proper int16 (type: "i") or uint8 ("8"). */
-extern void test_for_int(char * string, char type);
+extern void parsetest_int(char * string, char type);
+
+/* Test for "string" to be of length 1 (excluding "\0" terminator). */
+extern void parsetest_singlechar(char * string);
+
+/* Calls err_line() with fitting message if EDIT_STARTED not set in "flags". */
+extern void parsetest_defcontext(uint8_t flags);
+
+/* Ensure token_from_line() does not find any more tokens on the line. */
+extern void parsetest_too_many_values();
+
+/* Trigger err_line() with "Unknown argument" message. */
+extern void parse_unknown_arg();
+
+/* If "test"!=0 call err_line() with "Declaration of ID already used" message.*/
+extern void parse_id_uniq(int test);
+
+/* Set "flags"=EDIT_STARTED and return pointer to new zeroed array of "size". */
+extern char * parse_init_entry(uint8_t * flags, size_t size);
 
 /* If "token0" fits "comparand", set "element" to value read from "token1" as
  * string (type: "s"), char ("c") uint8 ("8") or int16 ("i"), set that element's
  * flag to "flags" and return 1; else return 0.
  */
-extern uint8_t set_val(char * token0, char * token1, char * comparand,
-                       uint8_t * flags, uint8_t set_flag, char type,
-                       char * element);
+extern uint8_t parse_val(char * token0, char * token1, char * comparand,
+                         uint8_t * flags, uint8_t set_flag, char type,
+                         char * element);
 
 /* Check "ready_flag" is set in "flags", re-set "flags" to "ready_flag" only. */
-extern void finalize_by_readyflag(uint8_t * flags, uint8_t ready_flag);
+extern void parse_and_reduce_to_readyflag(uint8_t * flags, uint8_t ready_flag);
 
 
 

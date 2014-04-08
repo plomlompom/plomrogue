@@ -145,7 +145,7 @@ extern char * token_from_line(char * line)
 
 
 
-extern void test_for_int(char * string, char type)
+extern void parsetest_int(char * string, char type)
 {
     char * err;
     if ('8' == type)
@@ -175,15 +175,59 @@ extern void test_for_int(char * string, char type)
 
 
 
-extern uint8_t set_val(char * token0, char * token1, char * comparand,
-                       uint8_t * flags, uint8_t set_flag, char type,
-                       char * element)
+extern void parsetest_defcontext(uint8_t flags)
+{
+    err_line(!(flags & EDIT_STARTED),"Outside appropriate definition context.");
+}
+
+
+
+extern void parsetest_singlechar(char * string)
+{
+    err_line(1 != strlen(string), "Value must be single ASCII character.");
+}
+
+
+
+extern void parsetest_too_many_values()
+{
+    err_line(NULL != token_from_line(NULL), "Too many values.");
+}
+
+
+
+extern void parse_id_uniq(int test)
+{
+    err_line(0 != test, "Declaration of ID already used.");
+}
+
+
+
+extern void parse_unknown_arg()
+{
+    err_line(1, "Unknown argument.");
+}
+
+
+
+extern char * parse_init_entry(uint8_t * flags, size_t size)
+{
+    char * f_name = "parse_init_entry()";
+    *flags = EDIT_STARTED;
+    char * p = try_malloc(size, f_name);
+    memset(p, 0, size);
+    return p;
+}
+
+
+
+extern uint8_t parse_val(char * token0, char * token1, char * comparand,
+                         uint8_t * flags, uint8_t set_flag, char type,
+                         char * element)
 {
     if (!strcmp(token0, comparand))
     {
-        char * err_out = "Outside appropriate definition's context.";
-        char * err_singlechar = "Value must be single ASCII character.";
-        err_line(!(*flags & EDIT_STARTED), err_out);
+        parsetest_defcontext(*flags);
         *flags = *flags | set_flag;
         if      ('s' == type)
         {
@@ -191,17 +235,17 @@ extern uint8_t set_val(char * token0, char * token1, char * comparand,
         }
         else if ('c' == type)
         {
-            err_line(1 != strlen(token1), err_singlechar);
+            parsetest_singlechar(token1);
             *element = (token1)[0];
         }
         else if ('8' == type)
         {
-            test_for_int(token1, '8');
+            parsetest_int(token1, '8');
             * (uint8_t *) element = atoi(token1);
         }
         else if ('i' == type)
         {
-            test_for_int(token1, 'i');
+            parsetest_int(token1, 'i');
             * (int16_t *) element = atoi(token1);
         }
         return 1;
@@ -211,7 +255,7 @@ extern uint8_t set_val(char * token0, char * token1, char * comparand,
 
 
 
-extern void finalize_by_readyflag(uint8_t * flags, uint8_t ready_flag)
+extern void parse_and_reduce_to_readyflag(uint8_t * flags, uint8_t ready_flag)
 {
     char * err_fin = "Last definition block not finished yet.";
     err_line((*flags & ready_flag) ^ ready_flag, err_fin);

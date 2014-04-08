@@ -5,12 +5,12 @@
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t */
 #include <stdlib.h> /* free() */
-#include <string.h> /* memset(), strcmp(), strdup() */
-#include "../common/parse_file.h" /* EDIT_STARTED, parse_file(), set_val(),
-                                   * token_from_line(), err_line(),
-                                   * finalize_by_readyflag()
+#include <string.h> /* strcmp(), strdup() */
+#include "../common/parse_file.h" /* EDIT_STARTED,parse_init_entry(),
+                                   * parse_id_uniq(), parse_unknown_arg(),
+                                   * parsetest_too_many_values(), parse_file(),
+                                   * parse_and_reduce_to_readyflag(),parse_val()
                                    */
-#include "../common/try_malloc.h" /* try_malloc() */
 #include "array_append.h" /* array_append() */
 #include "world.h" /* global world */
 #include "cleanup.h" /* set_cleanup_flag() */
@@ -28,14 +28,12 @@ enum cmd_flag
 
 
 
-/* Get tokens from "context" and, by their order (in the individual context and
- * in subsequent calls of this function), interpret them as data to write into
- * the CommandDB.
+/* Interpret "token0" and "token1" as data to write into the CommandDB.
  *
  * Individual CommandDB entries are put together line by line before being
  * written. Writing happens after all necessary members of an entry have been
- * assembled, and when additionally a) a new entry is started by a
- * context->token0 of "COMMAND"; or b) a NULL context->token0 is passed.
+ * assembled, and when additionally a) a new entry is started by a "token0" of
+ * "COMMAND"; or b) of "token0" of NULL is passed.
  */
 static void tokens_into_entries(char * token0, char * token1);
 
@@ -43,13 +41,12 @@ static void tokens_into_entries(char * token0, char * token1);
 
 static void tokens_into_entries(char * token0, char * token1)
 {
-    char * f_name = "tokens_into_entries()";
     char * str_cmd = "COMMAND";
     static uint8_t cmd_flags = READY_CMD;
     static struct Command * cmd = NULL;
     if (!token0 || !strcmp(token0, str_cmd))
     {
-        finalize_by_readyflag(&cmd_flags, READY_CMD);
+        parse_and_reduce_to_readyflag(&cmd_flags, READY_CMD);
         if (cmd)
         {
             array_append(world.commandDB.n, sizeof(struct Command),
@@ -59,25 +56,25 @@ static void tokens_into_entries(char * token0, char * token1)
             cmd = NULL;
         }
     }
-    err_line(token0 && NULL != token_from_line(NULL), "Too many values.");
-    if (token0 && !strcmp(token0, str_cmd))
+    if (token0)
     {
-        char * err_uniq = "Declaration of ID already used.";
-        cmd_flags = EDIT_STARTED;
-        cmd = try_malloc(sizeof(struct Command), f_name);
-        memset(cmd, 0, sizeof(struct Command));
-        cmd->dsc_short = strdup(token1);
-        err_line(NULL != get_command(cmd->dsc_short), err_uniq);
-    }
-    else if (   token0
-             && !(   set_val(token0, token1, "DESCRIPTION", &cmd_flags,
-                             DESC_SET, 's', (char *) &cmd->dsc_long)
-                  || set_val(token0, token1, "SERVER_COMMAND", &cmd_flags,
-                             SERVERCMD_SET, 's', (char *) &cmd->server_msg)
-                  || set_val(token0, token1, "SERVER_ARGUMENT", &cmd_flags,
-                             SERVERARG_SET, 'c', (char *) &cmd->arg)))
-    {
-        err_line(1, "Unknown arguemnt.");
+        parsetest_too_many_values();
+        if      (!strcmp(token0, str_cmd))
+        {
+            cmd = (struct Command *) parse_init_entry(&cmd_flags,
+                                                      sizeof(struct Command));
+            cmd->dsc_short = strdup(token1);
+            parse_id_uniq(NULL != get_command(cmd->dsc_short));
+        }
+        else if (!(   parse_val(token0, token1, "DESCRIPTION", &cmd_flags,
+                                DESC_SET, 's', (char *) &cmd->dsc_long)
+                   || parse_val(token0, token1, "SERVER_COMMAND", &cmd_flags,
+                                SERVERCMD_SET, 's', (char *) &cmd->server_msg)
+                   || parse_val(token0, token1, "SERVER_ARGUMENT", &cmd_flags,
+                                SERVERARG_SET, 'c', (char *) &cmd->arg)))
+        {
+            parse_unknown_arg();
+        }
     }
 }
 

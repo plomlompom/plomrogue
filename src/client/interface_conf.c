@@ -7,10 +7,14 @@
 #include <stdint.h> /* UINT8_MAX, uint8_t, uint32_t */
 #include <stdlib.h> /* EXIT_SUCCESS, atoi(), exit(), free() */
 #include <stdio.h> /* FILE, sprintf() */
-#include <string.h> /* memset(), strchr(), strcmp(), strdup(), strlen() */
+#include <string.h> /* strchr(), strcmp(), strdup(), strlen() */
 #include <unistd.h> /* optarg, getopt() */
-#include "../common/parse_file.h" /* EDIT_STARTED, parse_file(), set_val(),
-                                   * token_from_line(), finalize_by_readyflag()
+#include "../common/parse_file.h" /* EDIT_STARTED, parse_file(), parse_val(),
+                                   * token_from_line(), parsetest_singlechar(),
+                                   * parse_and_reduce_to_readyflag(),
+                                   * parsetest_defcontext(),parse_unknown_arg(),
+                                   * parsetest_too_many_values(),
+                                   * parse_id_uniq(), parse_init_entry()
                                    */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
                                   * try_fwrite()
@@ -101,15 +105,14 @@ static uint8_t start_kbd(char * token0, char * token1, char * str_kbd,
  * "token0" is "KEY", a keybinding is defined and "token2" is read / must not be
  * NULL. In that case, the line read is checked against having a 4th token.
  */
-static uint8_t set_members(char * token0, char * token1, char * token2,
-                           uint8_t * win_flags, uint8_t * ord_flags,
-                           uint8_t kbd_flags,
+static uint8_t set_members(char * token0, char * token1, uint8_t * win_flags,
+                           uint8_t * ord_flags, uint8_t kbd_flags,
                            struct Win * win, struct KeyBindingDB * kbdb);
 
 /* Add keybinding defined in "token1" as keycode and "token2" as command to
  * "kbdb" if "flags" are set to EDIT_STARTED.
  */
-static void set_keybindings(char * token1, char * token2, uint8_t flags,
+static void set_keybindings(char * token1, uint8_t flags,
                             struct KeyBindingDB * kbdb);
 
 
@@ -187,25 +190,25 @@ static void tokens_into_entries(char * token0, char * token1)
     if (!token0 || !strcmp(token0, str_win) || !strcmp(token0, str_ord)
                 || !strcmp(token0, str_kbd))
     {
-        finalize_by_readyflag(&win_flags, READY_WIN);
-        finalize_by_readyflag(&ord_flags, READY_ORD);
-        finalize_by_readyflag(&kbd_flags, READY_KBD);
+        parse_and_reduce_to_readyflag(&win_flags, READY_WIN);
+        parse_and_reduce_to_readyflag(&ord_flags, READY_ORD);
+        parse_and_reduce_to_readyflag(&kbd_flags, READY_KBD);
         write_if_win(&win);
     }
-    if (!token0)
+    if (token0)
     {
-        return;
-    }
-    char * token2 = token_from_line(NULL);
-    err_line(strcmp(token0, "KEY") && NULL != token2, "Too many values.");
-    if (   start_win(token0, token1, str_win, &win_flags, &win)
-        || start_ord(token0, token1, str_ord, &ord_flags)
-        || start_kbd(token0, token1, str_kbd, &kbd_flags, &kbdb)
-        || set_members(token0, token1, token2, &win_flags, &ord_flags,
-                       kbd_flags, win, kbdb));
-    else
-    {
-        err_line(1, "Unknown argument.");
+        if (strcmp(token0, "KEY"))
+        {
+            parsetest_too_many_values();
+        }
+       if (!(   start_win(token0, token1, str_win, &win_flags, &win)
+             || start_ord(token0, token1, str_ord, &ord_flags)
+             || start_kbd(token0, token1, str_kbd, &kbd_flags, &kbdb)
+             || set_members(token0, token1, &win_flags, &ord_flags, kbd_flags,
+                            win, kbdb)))
+        {
+           parse_unknown_arg();
+        }
     }
 }
 
@@ -241,14 +244,9 @@ static uint8_t start_win(char * token0, char * token1, char * str_win,
     {
         return 0;
     }
-    char * f_name = "start_win()";
-    char * err_uniq = "Declaration of ID already used.";
-    *win_flags = EDIT_STARTED;
-    *win = try_malloc(sizeof(struct Win), f_name);
-    memset(*win, 0, sizeof(struct Win));
-    err_line(1 != strlen(token1), "Value must be single ASCII character.");
-    err_line(   world.winDB.ids
-             && (NULL != strchr(world.winDB.ids, token1[0])), err_uniq);
+    *win = (struct Win *) parse_init_entry(win_flags, sizeof(struct Win));
+    parsetest_singlechar(token1);
+    parse_id_uniq(world.winDB.ids && (NULL!=strchr(world.winDB.ids,token1[0])));
     (*win)->id = token1[0];
     return 1;
 }
@@ -308,24 +306,23 @@ static uint8_t start_kbd(char * token0, char * token1, char * str_kbd,
 
 
 
-static uint8_t set_members(char * token0, char * token1, char * token2,
-                           uint8_t * win_flags, uint8_t * ord_flags,
-                           uint8_t kbd_flags,
+static uint8_t set_members(char * token0, char * token1, uint8_t * win_flags,
+                           uint8_t * ord_flags, uint8_t kbd_flags,
                            struct Win * win, struct KeyBindingDB * kbdb)
 {
-    if (   set_val(token0, token1, "NAME", win_flags,
-                   NAME_SET, 's', (char *) &win->title)
-        || set_val(token0, token1, "WIDTH", win_flags,
-                   WIDTH_SET, 'i', (char *) &win->target_width)
-        || set_val(token0, token1, "HEIGHT", win_flags,
-                   HEIGHT_SET, 'i', (char *) &win->target_height));
-    else if (set_val(token0, token1, "BREAK", win_flags,
-                     BREAK_SET, '8', (char *) &win->linebreak))
+    if (   parse_val(token0, token1, "NAME", win_flags,
+                     NAME_SET, 's', (char *) &win->title)
+        || parse_val(token0, token1, "WIDTH", win_flags,
+                     WIDTH_SET, 'i', (char *) &win->target_width)
+        || parse_val(token0, token1, "HEIGHT", win_flags,
+                     HEIGHT_SET, 'i', (char *) &win->target_height));
+    else if (parse_val(token0, token1, "BREAK", win_flags,
+                       BREAK_SET, '8', (char *) &win->linebreak))
     {
         err_line(2 < win->linebreak, "Value must be 0, 1 or 2.");
     }
-    else if (set_val(token0, token1, "WIN_FOCUS", ord_flags,
-                     FOCUS_SET, 'c', &tmp_active))
+    else if (parse_val(token0, token1, "WIN_FOCUS", ord_flags,
+                       FOCUS_SET, 'c', &tmp_active))
     {
         char * err_null = "Value not empty as it should be.";
         char * err_outside = "ID not found in WIN_ORDER ID series.";
@@ -334,14 +331,13 @@ static uint8_t set_members(char * token0, char * token1, char * token2,
     }
     else if (!strcmp(token0, "KEY"))
     {
-        err_line(NULL != token_from_line(NULL), "Too many values.");
-        if (* win_flags & EDIT_STARTED)
+        if (*win_flags & EDIT_STARTED)
         {
-            set_keybindings(token1, token2, * win_flags, &win->kb);
+            set_keybindings(token1, *win_flags, &win->kb);
         }
         else
         {
-            set_keybindings(token1, token2, kbd_flags, kbdb);
+            set_keybindings(token1, kbd_flags, kbdb);
         }
     }
     else
@@ -353,13 +349,14 @@ static uint8_t set_members(char * token0, char * token1, char * token2,
 
 
 
-static void set_keybindings(char * token1, char * token2, uint8_t flags,
+static void set_keybindings(char * token1, uint8_t flags,
                             struct KeyBindingDB * kbdb)
 {
-    char * err_out  = "Outside appropriate definition's context.";
-    char * err_code = "Invalid keycode. Must be >= 0 and < 1000.";
-    err_line(!(flags & EDIT_STARTED), err_out);
+    char * token2 = token_from_line(NULL);
     err_line(!token2, "No binding to key given.");
+    parsetest_too_many_values();
+    char * err_code = "Invalid keycode. Must be >= 0 and < 1000.";
+    parsetest_defcontext(flags);
     char * err_many = "No more than 255 keybindings allowed in one section.";
     err_line(UINT8_MAX == kbdb->n_of_kbs, err_many);
     struct KeyBinding kb;
@@ -491,4 +488,3 @@ extern void reload_interface_conf()
     map_center();
     world.winDB.v_screen_offset = 0;
 }
-
