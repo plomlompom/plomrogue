@@ -24,7 +24,7 @@
 #include "array_append.h" /* array_append() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "command_db.h" /* get_command() */
-#include "keybindings.h" /* KeyBinding, KeyBindingDB, get_command_to_keycode() */
+#include "keybindings.h" /* KeyBinding, KeyBindingDB, get_command_to_keycode()*/
 #include "map.h" /* map_center() */
 #include "wincontrol.h" /* toggle_window() */
 #include "windows.h" /* Win, free_winDB(), make_v_screen_and_init_win_sizes() */
@@ -201,11 +201,11 @@ static void tokens_into_entries(char * token0, char * token1)
         {
             parsetest_too_many_values();
         }
-       if (!(   start_win(token0, token1, str_win, &win_flags, &win)
-             || start_ord(token0, token1, str_ord, &ord_flags)
-             || start_kbd(token0, token1, str_kbd, &kbd_flags, &kbdb)
-             || set_members(token0, token1, &win_flags, &ord_flags, kbd_flags,
-                            win, kbdb)))
+        if (!(   start_win(token0, token1, str_win, &win_flags, &win)
+              || start_ord(token0, token1, str_ord, &ord_flags)
+              || start_kbd(token0, token1, str_kbd, &kbd_flags, &kbdb)
+              || set_members(token0, token1, &win_flags, &ord_flags, kbd_flags,
+                             win, kbdb)))
         {
            parse_unknown_arg();
         }
