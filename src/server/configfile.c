@@ -26,6 +26,10 @@
  */
 enum flag
 {
+    HEIGHT_SET     = 0x02,
+    WIDTH_SET      = 0x04,
+    ORTH_SET       = 0x08,
+    DIAG_SET       = 0x10,
     NAME_SET       = 0x02,
     EFFORT_SET     = 0x04,
     CORPSE_ID_SET  = 0x04,
@@ -34,7 +38,8 @@ enum flag
     CONSUMABLE_SET = 0x20,
     READY_ACT = NAME_SET | EFFORT_SET,
     READY_OBJ = NAME_SET | CORPSE_ID_SET | SYMBOL_SET | LIFEPOINTS_SET
-                | CONSUMABLE_SET
+                | CONSUMABLE_SET,
+    READY_MAP = HEIGHT_SET | WIDTH_SET | ORTH_SET | DIAG_SET
 };
 
 
@@ -72,6 +77,11 @@ static uint8_t start_entry(char * token0, char * token1, char * comparand,
                          struct EntryHead ** entry,
                          struct EntryHead * entry_cmp);
 
+/* Start reading map definition if "token0" matches "comparand". Set "map_flags"
+ * to EDIT_STARTED to mark beginning of map definition reading.
+ */
+static uint8_t start_map(char * token0, char * comparand, uint8_t * map_flags);
+
 /* Write DB entry pointed to by "entry" to its appropriate location. */
 static void write_if_entry(struct EntryHead ** entry,
                            struct EntryHead *** entry_p_p_p);
@@ -81,16 +91,19 @@ static void write_if_entry(struct EntryHead ** entry,
  */
 static void test_corpse_ids();
 
-/* Try to read tokens as members for the entry currently edited, which must be
- * either "mod" or "moa". What member of which of the two is set depends on
- * which of "object_flags" and "action_flags" has EDIT_STARTED set and on the
- * key name in "token0". Return 1 if interpretation succeeds, else 0.
+/* Try to read tokens as members for the definition currently edited, which may
+ * be "mod" or "moa" or that of world.map. What member of which of the three is
+ * set depends on which of the flags has EDIT_STARTED set and on the key name in
+ * "token0". Return 1 if interpretation succeeds, else 0.
  *
  * Note that MapObjAct entries' .name also determines their .func.
  */
 static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
-                           uint8_t * action_flags, struct MapObjDef * mod,
-                           struct MapObjAct * moa);
+                           uint8_t * action_flags, uint8_t * map_flags,
+                           struct MapObjDef * mod, struct MapObjAct * moa);
+
+/* set_members() helper specifically for editing world.map members. */
+static uint8_t set_map_members(char * token0,char * token1,uint8_t * map_flags);
 
 /* If "name" fits "moa"->name, set "moa"->func to "func". (Derives MapObjAct
  * .func from .name for set_members().
@@ -104,16 +117,20 @@ static void tokens_into_entries(char * token0, char * token1)
 {
     char * str_act = "ACTION";
     char * str_obj = "OBJECT";
+    char * str_map = "MAP_TYPE";
     static struct MapObjAct ** moa_p_p = &world.map_obj_acts;
     static struct MapObjDef ** mod_p_p = &world.map_obj_defs;
     static uint8_t action_flags = READY_ACT;
     static uint8_t object_flags = READY_OBJ;
+    static uint8_t map_flags = READY_MAP;
     static struct EntryHead * moa = NULL;
     static struct EntryHead * mod = NULL;
-    if (!token0 || !strcmp(token0,str_act) || !strcmp(token0,str_obj))
+    if (!token0 || !strcmp(token0, str_act) || !strcmp(token0, str_obj)
+                || !strcmp(token0, str_map))
     {
         parse_and_reduce_to_readyflag(&action_flags, READY_ACT);
         parse_and_reduce_to_readyflag(&object_flags, READY_OBJ);
+        parse_and_reduce_to_readyflag(&map_flags, READY_MAP);
         write_if_entry(&moa, (struct EntryHead ***) &moa_p_p);
         write_if_entry(&mod, (struct EntryHead ***) &mod_p_p);
     }
@@ -126,8 +143,10 @@ static void tokens_into_entries(char * token0, char * token1)
               || start_entry(token0, token1, str_obj, &object_flags,
                              sizeof(struct MapObjDef),(struct EntryHead**) &mod,
                              (struct EntryHead *) world.map_obj_defs)
+              || start_map(token0, str_map, &map_flags)
               || set_members(token0, token1, &object_flags, &action_flags,
-                             (struct MapObjDef *)mod,(struct MapObjAct *) moa)))
+                              &map_flags, (struct MapObjDef *)mod,
+                              (struct MapObjAct *) moa)))
         {
             parse_unknown_arg();
         }
@@ -152,6 +171,18 @@ static uint8_t start_entry(char * token0, char * token1, char * comparand,
     {
         parse_id_uniq((*entry)->id == entry_cmp->id);
     }
+    return 1;
+}
+
+
+
+static uint8_t start_map(char * token0, char * comparand, uint8_t * map_flags)
+{
+    if (strcmp(token0, comparand))
+    {
+        return 0;
+    }
+    *map_flags = EDIT_STARTED;
     return 1;
 }
 
@@ -200,9 +231,33 @@ static void test_corpse_ids()
 
 
 
+static uint8_t set_map_members(char * token0, char * token1, uint8_t * map_flags)
+{
+    if      (   parse_val(token0, token1, "HEIGHT", map_flags,
+                          HEIGHT_SET, 'i', (char *) &world.map.size.y)
+             || parse_val(token0, token1, "WIDTH", map_flags,
+                          WIDTH_SET, 'i', (char *) &world.map.size.x))
+    {
+        int test = atoi(token1) > 256 || atoi(token1) < 1;
+        err_line(test, "Value must be >= 1 and <= 256.");
+        return 1;
+    }
+    else if (    parse_val(token0, token1, "DIST_ORTHOGONAL", map_flags,
+                          ORTH_SET, '8', (char *) &world.map.dist_orthogonal)
+             ||  parse_val(token0, token1, "DIST_DIAGONAL", map_flags,
+                          DIAG_SET, '8', (char *) &world.map.dist_diagonal))
+    {
+        err_line(0 == atoi(token1), "Value must not be zero.");
+        return 1;
+    }
+    return 0;
+}
+
+
+
 static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
-                           uint8_t * action_flags, struct MapObjDef * mod,
-                           struct MapObjAct * moa)
+                           uint8_t * action_flags, uint8_t * map_flags,
+                           struct MapObjDef * mod, struct MapObjAct * moa)
 {
     if (   *action_flags & EDIT_STARTED
         && parse_val(token0, token1, "NAME", action_flags,
@@ -218,7 +273,8 @@ static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
         *action_flags = *action_flags | NAME_SET;
         return 1;
     }
-    else if (   parse_val(token0, token1, "NAME", object_flags,
+    else if (   set_map_members(token0, token1, map_flags)
+             || parse_val(token0, token1, "NAME", object_flags,
                           NAME_SET, 's', (char *) &mod->name)
              || parse_val(token0, token1, "SYMBOL", object_flags,
                           SYMBOL_SET, 'c', (char *) &mod->char_on_map)
@@ -254,6 +310,7 @@ static uint8_t try_func_name(struct MapObjAct * moa, char * name,
 extern void read_config_file()
 {
     parse_file(world.path_config, tokens_into_entries);
+    exit_err(!world.map.size.y, "Map not defined in config file.");
     set_cleanup_flag(CLEANUP_MAP_OBJECT_ACTS | CLEANUP_MAP_OBJECT_DEFS);
     test_corpse_ids();
 }

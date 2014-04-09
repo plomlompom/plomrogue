@@ -1,6 +1,6 @@
 /* src/server/init.c */
 
-#define _POSIX_C_SOURCE 200809L /* getopt(), optarg, strdup() */
+#define _POSIX_C_SOURCE 2 /* getopt(), optarg */
 #include "init.h"
 #include <errno.h> /* global errno, EEXIST */
 #include <stddef.h> /* NULL */
@@ -18,7 +18,6 @@
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
-#include "configfile.h" /* read_config_file() */
 #include "map.h" /* init_map() */
 #include "map_objects.h" /* free_map_objects(), add_map_objects() */
 #include "rrand.h" /* rrand() */
@@ -49,17 +48,6 @@ extern void obey_argv(int argc, char * argv[])
             exit(EXIT_FAILURE);
         }
     }
-}
-
-
-
-extern void init_map_and_map_objects_configs()
-{
-    world.map.size.x = 64;
-    world.map.size.y = 64;
-    world.map.dist_orthogonal = 5;
-    world.map.dist_diagonal   = 7;
-    read_config_file();
 }
 
 

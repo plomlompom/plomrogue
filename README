@@ -79,9 +79,30 @@ option (like "-s100") to start the recording at the respective turn number.
 Hacking / server internals and configuration
 --------------------------------------------
 
-The ./confserver/world file defines the map object types and the actions
-available to them. Each object type and action is defined by a multi-line block
-wherein each line sets one attribute of the object type or action.
+The ./confserver/world file defines the map object types, actions available to
+them and the map itself. Each definition consists of a multi-line block wherein
+each line sets one attribute of the object type, action or the map.
+
+Here's a typical map definition block:
+
+MAP_TYPE 0
+HEIGHT 64
+WIDTH 64
+DIST_ORTHOGONAL 5
+DIST_DIAGONAL 7
+
+A line of "MAP_TYPE" followed by a non-empty token starts the map definition
+block. In the future, the second token may differentiate different map types,
+but as of right now, only one is available and the value is not interpreted.
+The numbers after "HEIGHT" and "WIDTH" give the map's vertical and horizontal
+extensions in cells. They must be >= 1 and <= 256. The numbers after
+"DIST_ORTHOGONAL" and "DIST_DIAGONAL" define the diagonal movement penalty as
+the second value divided by the first. The above values define a penalty ratio
+of 7/5 or 1.4, i.e. it takes 40% longer in turns to move diagonally than
+orthogonally. Set both to the same value to eliminate the diagonal movement
+penalty. A negative penalty to realize weird geometry is possible by setting
+"DIST_DIAGONAL" to a lower value than "DIST_ORTHOGONAL". Both values, however,
+must be >= 1 and <= 255.
 
 Here's a typical action definition block:
 
@@ -118,14 +139,16 @@ yet: or if they are inanimate, but are otherwise crushed). Note that the
 "CORPSE_ID" must match the id of an object type defined in the file (before or
 after, it may even be the same).
 
-All this definition block members must be present within a block, but only
-"ACTION" / "OBJECT" must be positioned at the respective blocks' first line,
-the others may appear in whatever order and even multiple times. If a block is
-finished, however, it cannot be re-defined by starting a new block wit the same
-object type or action id. Tokens in this config file are separated by
-whitespace. Single quotes can be put around string values that are to include
-whitespace by themslves. Note that all numbers must be decimal representations
-of unsigned 8 bit integers, i.e. >= 0 and < 256 and sans preceding "+".
+All these definition block members must be present within their blocks, but only
+"ACTION" / "OBJECT" / "MAP_TYPE" must be positioned at their respective blocks'
+first line; the others may appear in whatever order and even multiple times. If
+an object or action definition block is finished, however, it cannot be
+re-defined by starting a new block with the same object type or action id.
+
+Tokens in this config file are separated by whitespace. Single quotes can be
+put around string values that are to include whitespace by themslves. Note that
+all numbers must be decimal representations of unsigned 8 bit integers, i.e.
+>= 0 and < 256 and sans preceding "+".
 
 All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v

@@ -15,8 +15,6 @@ SERVER:
 
 - is it actually useful to define map object action ids in the config file?
 
-- make shape of map (and diagonal movement penalty) configurable in config file
-
 - for game continuation, replace re-playing of whole record files with loading
   game state snapshots / save files
 

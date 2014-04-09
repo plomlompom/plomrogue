@@ -13,9 +13,6 @@
 /* Parses command line arguments -v and -s into server configuration. */
 extern void obey_argv(int argc, char * argv[]);
 
-/* Set map geometry and, from config files, map object (action) definitions. */
-extern void init_map_and_map_objects_configs();
-
 /* Start server in file and out file, latter with server process test string. */
 extern void setup_server_io();
 

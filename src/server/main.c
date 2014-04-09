@@ -4,9 +4,8 @@
 #include <stdlib.h> /* exit() */
 #include "../common/rexit.h" /* exit_err, set_cleanup_func() */
 #include "cleanup.h" /* set_cleanup_flag(), cleanup() */
-#include "init.h" /* run_game(), obey_argv(), obey_argv(), setup_server_io(),
-                   * init_map_and_map_object_configs()
-                   */
+#include "configfile.h" /* read_config_file() */
+#include "init.h" /* run_game(), obey_argv(), obey_argv(), setup_server_io() */
 #include "world.h" /* struct World */
 
 
@@ -41,8 +40,8 @@ int main(int argc, char ** argv)
     world.path_record       = "record";
     world.tmp_suffix        = "_tmp";
 
-    /* Init map, map object configurations and server i/o files. */
-    init_map_and_map_objects_configs();
+    /* Init config file and server i/o files. */
+    read_config_file();
     setup_server_io();
 
     /* Enter play or replay mode loops, then leave properly. */
