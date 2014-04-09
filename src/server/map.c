@@ -1,7 +1,8 @@
 /* src/server/map.c */
 
 #include "map.h"
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
+#include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "rrand.h" /* rrand() */
@@ -24,7 +25,9 @@ extern void init_map()
     uint8_t add_half_width = !(world.map.size.y % 2) * (world.map.size.x / 2);
     world.map.cells[(size / 2) + add_half_width] = '.';
     uint16_t curpos;
-    while (1)
+    char * err = "Map generation reached iteration limit. Change map size?";
+    uint32_t i;
+    for (i = 0; ; i++, exit_err(256 * UINT16_MAX == i, err))
     {
         y = rrand() % world.map.size.y;
         x = rrand() % world.map.size.x;

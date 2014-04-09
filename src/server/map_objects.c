@@ -2,7 +2,7 @@
 
 #include "map_objects.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t */
+#include <stdint.h> /* uint8_t, uint16_t, UINT16_MAX */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strlen() */
 #include "../common/rexit.h" /* exit_err() */
@@ -18,10 +18,7 @@
 /* Return pointer to map object of "id" in chain starting at "ptr". */
 static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id);
 
-/* Return random passable (as by is_passable()) position on world.map. */
-static struct yx_uint8 find_passable_pos();
-
-/* Add object of "type" to map on random position. Don't place actor on actor.*/
+/* Add object of "type" to map on passable position. Don't put actor on actor.*/
 static void add_map_object(uint8_t type);
 
 
@@ -45,19 +42,6 @@ static struct MapObj * get_map_object(struct MapObj * ptr, uint8_t id)
 
 
 
-static struct yx_uint8 find_passable_pos()
-{
-    struct yx_uint8 pos;
-    for (pos.y = pos.x = 0; 0 == is_passable(pos);)
-    {
-        pos.y = rrand() % world.map.size.y;
-        pos.x = rrand() % world.map.size.x;
-    }
-    return pos;
-}
-
-
-
 static void add_map_object(uint8_t type)
 {
     char * f_name = "add_map_object()";
@@ -67,9 +51,17 @@ static void add_map_object(uint8_t type)
     mo->id         = world.map_obj_count++;
     mo->type       = mod->id;
     mo->lifepoints = mod->lifepoints;
+    char * err = "Space to put map object on too hard to find. Map too small?";
+    uint16_t i = 0;
     while (1)
     {
-        struct yx_uint8 pos = find_passable_pos(world.map);
+        struct yx_uint8 pos;
+        for (pos.y = pos.x = 0; 0 == is_passable(pos); i++)
+        {
+            exit_err(UINT16_MAX == i, err);
+            pos.y = rrand() % world.map.size.y;
+            pos.x = rrand() % world.map.size.x;
+        }
         struct MapObj * mo_ptr;
         uint8_t clear = 1;
         for (mo_ptr = world.map_objs; mo_ptr != NULL; mo_ptr = mo_ptr->next)
