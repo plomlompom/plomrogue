@@ -20,6 +20,8 @@ SERVER:
 
 - why does an MapObjAct id of 0 fail?
 
+- make config file define to which map object type the player belongs
+
 CLIENT:
 
 - enable toggling of window borders
