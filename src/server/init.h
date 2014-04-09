@@ -23,8 +23,7 @@ extern void setup_server_io();
  * Map object (action) definitions read in from server config directory are not
  * affected. world.last_update_turn is set to 0 and world.turn to 1, so that
  * io_round()'s criteria for updating the output file are triggered even when
- * this function is called during a round 1. How many map objects of what type
- * id are generated on the map is currently hard-coded.
+ * this function is called during a round 1.
  */
 extern void remake_world(uint32_t seed);
 

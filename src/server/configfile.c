@@ -36,9 +36,10 @@ enum flag
     SYMBOL_SET     = 0x08,
     LIFEPOINTS_SET = 0x10,
     CONSUMABLE_SET = 0x20,
+    START_N_SET    = 0x40,
     READY_ACT = NAME_SET | EFFORT_SET,
     READY_OBJ = NAME_SET | CORPSE_ID_SET | SYMBOL_SET | LIFEPOINTS_SET
-                | CONSUMABLE_SET,
+                | CONSUMABLE_SET | START_N_SET,
     READY_MAP = HEIGHT_SET | WIDTH_SET | ORTH_SET | DIAG_SET
 };
 
@@ -280,6 +281,8 @@ static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
                           SYMBOL_SET, 'c', (char *) &mod->char_on_map)
              || parse_val(token0, token1, "EFFORT", action_flags,
                           EFFORT_SET, '8', (char *) &moa->effort)
+             || parse_val(token0, token1, "START_NUMBER", object_flags,
+                          START_N_SET, '8', (char *) &mod->start_n)
              || parse_val(token0, token1, "LIFEPOINTS", object_flags,
                           LIFEPOINTS_SET, '8', (char *) &mod->lifepoints)
              || parse_val(token0, token1, "CONSUMABLE", object_flags,

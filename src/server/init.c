@@ -19,8 +19,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "map.h" /* init_map() */
-#include "map_objects.h" /* free_map_objects(), add_map_objects() */
-#include "rrand.h" /* rrand() */
+#include "map_objects.h" /* MapObjDef, free_map_objects(), add_map_objects() */
 #include "run.h" /* obey_msg(), io_loop() */
 #include "world.h" /* global world */
 
@@ -87,12 +86,11 @@ extern void remake_world(uint32_t seed)
     free_map_objects(world.map_objs);
     world.last_update_turn = 0;
     init_map();
-    add_map_objects(0, 1);
-    add_map_objects(1, 1 + rrand() % 27);
-    add_map_objects(2, 1 + rrand() % 9);
-    add_map_objects(3, 1 + rrand() % 3);
-    add_map_objects(4, 1 + rrand() % 3);
-    add_map_objects(5, 1 + rrand() % 3);
+    struct MapObjDef * mod;
+    for (mod = world.map_obj_defs; NULL != mod; mod = mod->next)
+    {
+        add_map_objects(mod->id, mod->start_n);
+    }
     set_cleanup_flag(CLEANUP_MAP_OBJECTS);
     if (world.turn)
     {
