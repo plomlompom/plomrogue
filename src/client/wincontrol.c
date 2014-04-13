@@ -96,54 +96,60 @@ static void update_wins(struct Win * w)
 
 static void place_win(struct Win * w)
 {
+    uint8_t sep = 1;         /* Width of inter-window borders and title bars. */
+
     /* If w is first window, it goes into the top left corner. */
     w->start.x = 0;
-    w->start.y = 1;                             /* Leave space for title bar. */
+    w->start.y = 0 + sep;
     struct Win * w_prev = get_win_before(w->id);
     if (w_prev)
     {
 
-        /* If not, fit w's top left to top right of last top predecessor. */
+        /* If not, get w's next predecessor starting a new stack on the screen
+         * top, fit w's top left corner to that predecessor's top right corner.
+         */
         struct Win * w_top = w_prev;
         for (;
-             w_top->start.y != 1;
+             w_top->start.y != 0 + sep;
              w_top = get_win_before(w_top->id));
-        w->start.x = w_top->start.x + w_top->frame_size.x + 1;
+        w->start.x = w_top->start.x + w_top->frame_size.x + sep;
 
-        /* Fit w's top left to bottom left of its ->prev if enough space. */
-        uint16_t w_prev_maxy = w_prev->start.y + w_prev->frame_size.y;
+        /* If enough space is found below w's predecessor, fit w's top left
+         * corner to that predecessor's bottom left corner.
+         */
+        uint16_t next_free_y = w_prev->start.y + w_prev->frame_size.y + sep;
         if (   w->frame_size.x <= w_prev->frame_size.x
-            && w->frame_size.y <  world.winDB.v_screen_size.y - w_prev_maxy)
+            && w->frame_size.y <= world.winDB.v_screen_size.y - next_free_y)
         {
             w->start.x = w_prev->start.x;
-            w->start.y = w_prev_maxy + 1;
+            w->start.y = next_free_y;
             return;
         }
 
-        /* Failing that, try to fit w' top left to the top right of the last
-         * predecessor w_test 1) not followed by windows with a left corner
-         * further rightwards than its own 2) with enough space rightwards for w
-         * until the bottom right of w_thr directly throning over it 3) and with
-         * this same space extending far enough to the bottom for fitting in w.
+        /* If that fails, try to fit w's top left corner to the top right corner
+         * of its next predecessor w_test 1) below w_top (w's next predecessor
+         * starting a new stack on the screen top) 2) and the most rightward
+         * lower neighbor of a window w_high, itself throning over enough free
+         * space for w to fit below it, rightwards of its lower neighbor w_test.
          */
         struct Win * w_test = w_prev;
-        struct Win * w_thr;
+        struct Win * w_high;
         while (w_test != w_top)
         {
-            for (w_thr = get_win_before(w_test->id);
-                 w_test->start.y <= w_thr->start.y;
-                 w_thr = get_win_before(w_thr->id));
-            uint16_t w_thr_bottom = w_thr->start.y + w_thr->frame_size.y;
-            uint16_t free_width =   (w_thr->start.x + w_thr->frame_size.x)
-                                  - (w_test->start.x + w_test->frame_size.x);
-            if (   w->frame_size.y < world.winDB.v_screen_size.y - w_thr_bottom
-                && w->frame_size.x < free_width)
+            for (w_high = get_win_before(w_test->id);  /* Walk down chain     */
+                 w_test->start.y <= w_high->start.y;   /* until w_high starts */
+                 w_high = get_win_before(w_high->id)); /* higher than w_test. */
+            next_free_y = w_high->start.y + w_high->frame_size.y + sep;
+            uint16_t first_free_x = w_test->start.x + w_test->frame_size.x +sep;
+            uint16_t last_free_x = w_high->start.x + w_high->frame_size.x;
+            if (   w->frame_size.y <= world.winDB.v_screen_size.y - next_free_y
+                && w->frame_size.x <= last_free_x - first_free_x)
             {
-                w->start.x = w_test->start.x + w_test->frame_size.x + 1;
-                w->start.y = w_thr_bottom + 1;
+                w->start.x = first_free_x;
+                w->start.y = next_free_y;
                 break;
             }
-            w_test = w_thr;
+            w_test = w_high;
         }
     }
 }
