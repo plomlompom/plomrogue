@@ -109,9 +109,7 @@ static void place_win(struct Win * w)
          * top, fit w's top left corner to that predecessor's top right corner.
          */
         struct Win * w_top = w_prev;
-        for (;
-             w_top->start.y != 0 + sep;
-             w_top = get_win_before(w_top->id));
+        for (; w_top->start.y != 0 + sep; w_top = get_win_before(w_top->id));
         w->start.x = w_top->start.x + w_top->frame_size.x + sep;
 
         /* If enough space is found below w's predecessor, fit w's top left
