@@ -15,7 +15,7 @@ struct MapObj;
 
 struct MapObjAct
 {
-    uint8_t id; /* unique id of map object action; must be >0 */
+    uint8_t id; /* identifies action in MapObj.command; therefore must be >0 */
     struct MapObjAct * next;
     void (* func) (struct MapObj *); /* function called after .effort turns */
     char * name; /* human-readable identifier */
