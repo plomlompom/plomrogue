@@ -111,12 +111,12 @@ NAME move
 EFFORT 5
 
 A line of "ACTION" followed by a number starts an action definition block and
-sets the action's id for internal use to 1. The number after "EFFORT" determines
-how many turns this action takes for the actor performing it. The string after
-"NAME" names the action. Furthermore, if it is one of "move", "pick_up", "drop"
-or "use", it matches internal functions described by these strings to this
-action. All other names (including "wait") currently are matched to a do-nothing
-wait function.
+sets the action's id (must be > 0) for internal use to 1. The number after
+"EFFORT" determines how many turns this action takes for the actor performing
+it. The string after "NAME" names the action. Furthermore, if it is one of
+"move", "pick_up", "drop" or "use", it matches internal functions described by
+these strings to this action. All other names (including "wait") currently are
+matched to a do-nothing wait function.
 
 Here's a typical map object type definition block: 
 

@@ -142,17 +142,21 @@ static void tokens_into_entries(char * token0, char * token1)
     if (token0)
     {
         parsetest_too_many_values();
-        if (!(   start_entry(token0, token1, str_act, &action_flags,
-                             sizeof(struct MapObjAct),(struct EntryHead**) &moa,
-                             (struct EntryHead *) world.map_obj_acts)
-              || start_entry(token0, token1, str_obj, &object_flags,
-                             sizeof(struct MapObjDef),(struct EntryHead**) &mod,
-                             (struct EntryHead *) world.map_obj_defs)
-              || start_map(token0, str_map, &map_flags)
-              || set_player_type(token0, str_player, token1)
-              || set_members(token0, token1, &object_flags, &action_flags,
-                              &map_flags, (struct MapObjDef *)mod,
-                              (struct MapObjAct *) moa)))
+        if (start_entry(token0, token1, str_act, &action_flags,
+                        sizeof(struct MapObjAct), (struct EntryHead**) &moa,
+                        (struct EntryHead *) world.map_obj_acts))
+        {
+            err_line(0 == atoi(token1), "Value must not be 0.");
+        }
+        else if (!(   start_entry(token0, token1, str_obj, &object_flags,
+                                  sizeof(struct MapObjDef),
+                                  (struct EntryHead**) &mod,
+                                  (struct EntryHead *) world.map_obj_defs)
+                   || start_map(token0, str_map, &map_flags)
+                   || set_player_type(token0, str_player, token1)
+                   || set_members(token0, token1, &object_flags, &action_flags,
+                                  &map_flags, (struct MapObjDef *)mod,
+                                  (struct MapObjAct *) moa)))
         {
             parse_unknown_arg();
         }
@@ -237,7 +241,7 @@ static void test_corpse_ids()
 
 
 
-static uint8_t set_map_members(char * token0, char * token1, uint8_t * map_flags)
+static uint8_t set_map_members(char * token0, char * token1,uint8_t * map_flags)
 {
     if      (   parse_val(token0, token1, "HEIGHT", map_flags,
                           HEIGHT_SET, 'i', (char *) &world.map.size.y)
