@@ -23,3 +23,5 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
+
+- handle systems without SIGWINCH
