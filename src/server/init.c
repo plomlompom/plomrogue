@@ -89,7 +89,18 @@ extern void remake_world(uint32_t seed)
     struct MapObjDef * mod;
     for (mod = world.map_obj_defs; NULL != mod; mod = mod->next)
     {
-        add_map_objects(mod->id, mod->start_n);
+        if (world.player_type == mod->id)
+        {
+            add_map_objects(mod->id, mod->start_n);
+            break;
+        }
+    }
+    for (mod = world.map_obj_defs; NULL != mod; mod = mod->next)
+    {
+        if (world.player_type != mod->id)
+        {
+            add_map_objects(mod->id, mod->start_n);
+        }
     }
     set_cleanup_flag(CLEANUP_MAP_OBJECTS);
     if (world.turn)

@@ -15,8 +15,8 @@
 #include "cleanup.h" /* set_cleanup_flag(), CLEANUP_MAP_OBJ_DEFS,
                       * CLEANUP_MAP_OBJ_ACTS
                       */
-#include "map_object_actions.h" /* struct MapObjAct */
-#include "map_objects.h" /* struct MapObj, struct MapObjDef */
+#include "map_object_actions.h" /* MapObjAct */
+#include "map_objects.h" /* MapObj, MapObjDef, struct MapObjDef */
 #include "world.h" /* world global */
 
 
@@ -92,6 +92,9 @@ static void write_if_entry(struct EntryHead ** entry,
  */
 static void test_corpse_ids();
 
+/* If "token0" matches "comparand", set world.player_type to int in "token1". */
+static uint8_t set_player_type(char * token0, char * comparand, char * token1);
+
 /* Try to read tokens as members for the definition currently edited, which may
  * be "mod" or "moa" or that of world.map. What member of which of the three is
  * set depends on which of the flags has EDIT_STARTED set and on the key name in
@@ -119,6 +122,7 @@ static void tokens_into_entries(char * token0, char * token1)
     char * str_act = "ACTION";
     char * str_obj = "OBJECT";
     char * str_map = "MAP_TYPE";
+    char * str_player = "PLAYER_TYPE";
     static struct MapObjAct ** moa_p_p = &world.map_obj_acts;
     static struct MapObjDef ** mod_p_p = &world.map_obj_defs;
     static uint8_t action_flags = READY_ACT;
@@ -127,7 +131,7 @@ static void tokens_into_entries(char * token0, char * token1)
     static struct EntryHead * moa = NULL;
     static struct EntryHead * mod = NULL;
     if (!token0 || !strcmp(token0, str_act) || !strcmp(token0, str_obj)
-                || !strcmp(token0, str_map))
+                || !strcmp(token0, str_map) || !strcmp(token0, str_player))
     {
         parse_and_reduce_to_readyflag(&action_flags, READY_ACT);
         parse_and_reduce_to_readyflag(&object_flags, READY_OBJ);
@@ -145,6 +149,7 @@ static void tokens_into_entries(char * token0, char * token1)
                              sizeof(struct MapObjDef),(struct EntryHead**) &mod,
                              (struct EntryHead *) world.map_obj_defs)
               || start_map(token0, str_map, &map_flags)
+              || set_player_type(token0, str_player, token1)
               || set_members(token0, token1, &object_flags, &action_flags,
                               &map_flags, (struct MapObjDef *)mod,
                               (struct MapObjAct *) moa)))
@@ -244,14 +249,27 @@ static uint8_t set_map_members(char * token0, char * token1, uint8_t * map_flags
         return 1;
     }
     else if (    parse_val(token0, token1, "DIST_ORTHOGONAL", map_flags,
-                          ORTH_SET, '8', (char *) &world.map.dist_orthogonal)
+                           ORTH_SET, '8', (char *) &world.map.dist_orthogonal)
              ||  parse_val(token0, token1, "DIST_DIAGONAL", map_flags,
-                          DIAG_SET, '8', (char *) &world.map.dist_diagonal))
+                           DIAG_SET, '8', (char *) &world.map.dist_diagonal))
     {
         err_line(0 == atoi(token1), "Value must not be zero.");
         return 1;
     }
     return 0;
+}
+
+
+
+static uint8_t set_player_type(char * token0, char * comparand, char * token1)
+{
+    if (strcmp(token0, comparand))
+    {
+        return 0;
+    }
+    parsetest_int(token1, '8');
+    world.player_type = atoi(token1);
+    return 1;
 }
 
 
@@ -314,6 +332,17 @@ extern void read_config_file()
 {
     parse_file(world.path_config, tokens_into_entries);
     exit_err(!world.map.size.y, "Map not defined in config file.");
+    uint8_t player_type_is_valid = 0;
+    struct MapObjDef * mod;
+    for (mod = world.map_obj_defs; NULL != mod; mod = mod->next)
+    {
+        if (world.player_type == mod->id)
+        {
+            player_type_is_valid = 1;
+            break;
+        }
+    }
+    exit_err(!player_type_is_valid, "No valid map object type set for player.");
     set_cleanup_flag(CLEANUP_MAP_OBJECT_ACTS | CLEANUP_MAP_OBJECT_DEFS);
     test_corpse_ids();
 }
