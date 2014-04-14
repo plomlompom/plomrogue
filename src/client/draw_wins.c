@@ -398,13 +398,9 @@ extern void draw_win_inventory(struct Win * win)
 extern void draw_win_available_keybindings(struct Win * win)
 {
     char * title = "Active window's keys:";
-    struct KeyBindingDB * kbdb;
     struct Win * win_active = get_win_by_id(world.winDB.active);
-    if     (0 == win_active->view)
-    {
-        kbdb = &win_active->kb;
-    }
-    else if (1 == win_active->view)
+    struct KeyBindingDB * kbdb = &win_active->kb;
+    if      (1 == win_active->view)
     {
         kbdb = &world.kb_wingeom;
     }
