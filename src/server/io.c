@@ -1,6 +1,6 @@
 /* src/server/io.c */
 
-#define _BSD_SOURCE /* usleep() */
+#define _POSIX_C_SOURCE 199309L
 #include "io.h"
 #include <errno.h> /* global errno */
 #include <limits.h> /* PIPE_BUF */
@@ -10,8 +10,7 @@
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), memcpy() */
 #include <sys/types.h> /* time_t */
-#include <time.h> /* time() */
-#include <unistd.h> /* usleep() */
+#include <time.h> /* time(), nanosleep() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
                                   * try_fwrite(), try_fputc(), try_fgetc()
                                   */
@@ -92,10 +91,13 @@ static void read_file_into_queue()
     char * f_name = "read_file_into_queue()";
     uint8_t wait_seconds = 5;
     time_t now = time(0);
+    struct timespec dur;
+    dur.tv_sec = 0;
+    dur.tv_nsec = 33333333;
     int test;
     while (EOF == (test = try_fgetc(world.file_in, f_name)))
     {
-        usleep(33);
+        nanosleep(&dur, NULL);
         if (time(0) > now + wait_seconds)
         {
             return;
