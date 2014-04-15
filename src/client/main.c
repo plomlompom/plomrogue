@@ -1,8 +1,9 @@
 /* main.c */
 
-#define _POSIX_C_SOURCE 1 /* struct sigaction, sigaction() */
+#define _POSIX_C_SOURCE 1 /* sigaction, sigaction() */
+#define _DARWIN_C_SOURCE 1 /* SIGWINCH on OS X */
 #include <ncurses.h> /* keypad() */
-#include <signal.h> /* struct sigaction, sigaction() */
+#include <signal.h> /* SIGWINCH, sigaction, sigaction() */
 #include <stddef.h> /* NULL */
 #include <stdlib.h> /* exit() */
 #include <string.h> /* memset() */
