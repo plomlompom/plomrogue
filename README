@@ -46,7 +46,7 @@ sports a list of keybindings available globally, and additionally via the window
 selected as active.
 
 Hit "W" (per default keybindings) to switch the "active" window to a view that
-allows changing its geometry. One more hit on "w" switches the window to a view
+allows changing its geometry. One more hit on "W" switches the window to a view
 that allows changing its window-specific keybindings. The global keybindings can
 be changed in the "Global keys" window, those of the window geometry
 configuration in the "Window geometry keys" window, and those of the
