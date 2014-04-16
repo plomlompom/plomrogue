@@ -15,8 +15,6 @@ Enemies' AI is very dumb so far: Each turn, they try to move towards their
 shortest-path-wise nearest enemy. If no enemy is found in their surroundings,
 they just wait.
 
-Diagonal movement is possible, but takes (40%) longer than orthogonal movement.
-
 Once you start a new world, every move of yours is recorded in a file called
 "record". Once you re-start the game, all of your previous moves are replayed
 automatically up to the point wherere you left the game. To start over in a new
@@ -47,7 +45,7 @@ In the client's default window configuration, the window appearing on the left
 sports a list of keybindings available globally, and additionally via the window
 selected as active.
 
-Hit "w" (per default keybindings) to switch the "active" window to a view that
+Hit "W" (per default keybindings) to switch the "active" window to a view that
 allows changing its geometry. One more hit on "w" switches the window to a view
 that allows changing its window-specific keybindings. The global keybindings can
 be changed in the "Global keys" window, those of the window geometry
@@ -88,21 +86,12 @@ Here's a typical map definition block:
 MAP_TYPE 0
 HEIGHT 64
 WIDTH 64
-DIST_ORTHOGONAL 5
-DIST_DIAGONAL 7
 
 A line of "MAP_TYPE" followed by a non-empty token starts the map definition
 block. In the future, the second token may differentiate different map types,
 but as of right now, only one is available and the value is not interpreted.
 The numbers after "HEIGHT" and "WIDTH" give the map's vertical and horizontal
-extensions in cells. They must be >= 1 and <= 256. The numbers after
-"DIST_ORTHOGONAL" and "DIST_DIAGONAL" define the diagonal movement penalty as
-the second value divided by the first. The above values define a penalty ratio
-of 7/5 or 1.4, i.e. it takes 40% longer in turns to move diagonally than
-orthogonally. Set both to the same value to eliminate the diagonal movement
-penalty. A negative penalty to realize weird geometry is possible by setting
-"DIST_DIAGONAL" to a lower value than "DIST_ORTHOGONAL". Both values, however,
-must be >= 1 and <= 255.
+extensions in cells. They must be >= 1 and <= 256. 
 
 Here's a typical action definition block:
 

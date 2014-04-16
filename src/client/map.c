@@ -23,12 +23,12 @@ extern void map_scroll(char d)
         }
         win->center.y = win->center.y - ('8' == d && win->center.y > 0);
     }
-    else if (('4' == d || '6' == d) && world.map.size.x > win->frame_size.x)
+    else if (('4' == d || '6' == d) && (world.map.size.x*2) > win->frame_size.x)
     {
         offset = center_offset(win->center.x,
-                               world.map.size.x, win->frame_size.x);
+                               world.map.size.x*2, win->frame_size.x);
         win->center.x = offset + (win->frame_size.x / 2);
-        if ('6' == d && win->center.x < world.map.size.x - 1)
+        if ('6' == d && win->center.x < (world.map.size.x * 2) - 1)
         {
             win->center.x++;
             return;
@@ -43,5 +43,5 @@ extern void map_center()
 {
     struct Win * win_map = get_win_by_id('m');
     win_map->center.y = world.player_pos.y;
-    win_map->center.x = world.player_pos.x;
+    win_map->center.x = world.player_pos.x * 2;
 }

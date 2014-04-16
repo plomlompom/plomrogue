@@ -27,17 +27,6 @@
  */
 static void turn_over();
 
-/* Helper to turn_over() to determine whether a map object's action effort has
- * reached its end. The simplicity of just comparing map_object->progress to
- * moa->effort is suspended for actor movement, for in this case the effort
- * depends on the diagonal movement penalty expressed in the ratio of
- * world.map.dist_diagonal / world.map.dist_orthogonal. (Movement being diagonal
- * or orthogonal is determined by the ->arg char encoding an even or un-even
- * number digit).
- */
-static uint8_t is_effort_finished(struct MapObjAct * moa,
-                                  struct MapObj * map_object);
-
 /* If "msg"'s first part matches "command_name", set player's MapObj's .command
  * to the command's id and its .arg to a numerical value following in the latter
  * part of "msg" (if no digits are found, use 0); then finish player's turn and
@@ -83,7 +72,7 @@ static void turn_over()
             {
                 moa = moa->next;
             }
-            if (is_effort_finished(moa, map_object))
+            if (map_object->progress == moa->effort)
             {
                 moa->func(map_object);
                 map_object->command = 0;
@@ -92,37 +81,6 @@ static void turn_over()
         }
         map_object = map_object->next;
     }
-}
-
-
-
-static uint8_t is_effort_finished(struct MapObjAct * moa,
-                                  struct MapObj * map_object)
-{
-    if (moa->func != actor_move)
-    {
-        if (map_object->progress == moa->effort)
-        {
-            return 1;
-        }
-    }
-    else if (strchr("8624", map_object->arg))
-    {
-        if (map_object->progress == moa->effort)
-        {
-            return 1;
-        }
-    }
-    else if (strchr("1379", map_object->arg))
-    {
-        uint16_t diagonal_effort =   (moa->effort * world.map.dist_diagonal)
-                                   / world.map.dist_orthogonal;
-        if (map_object->progress == diagonal_effort)
-        {
-            return 1;
-        }
-    }
-    return 0;
 }
 
 

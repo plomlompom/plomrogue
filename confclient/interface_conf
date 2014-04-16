@@ -9,7 +9,7 @@ KEY 269 to_logwin
 KEY 270 to_g_keywin
 KEY 271 to_wg_keywin
 KEY 272 to_wk_keywin
-KEY 119 winconf
+KEY 87 winconf
 KEY 62 cyc_win_f
 KEY 60 cyc_win_b
 KEY 262 scrl_l
@@ -62,7 +62,7 @@ HEIGHT 4
 KEY 100 drop
 KEY 259 inv_u
 KEY 258 inv_d
-KEY 99 use
+KEY 117 use
 
 WINDOW i
 NAME 'Info'
@@ -89,14 +89,12 @@ WIDTH -59
 HEIGHT 0
 KEY 112 pick
 KEY 58 wait
-KEY 107 move_8
-KEY 117 move_9
-KEY 108 move_6
-KEY 110 move_3
-KEY 106 move_2
-KEY 98 move_1
-KEY 104 move_4
-KEY 121 move_7
+KEY 101 move_e
+KEY 100 move_d
+KEY 99 move_c
+KEY 120 move_x
+KEY 115 move_s
+KEY 119 move_w
 KEY 259 map_u
 KEY 258 map_d
 KEY 260 map_l

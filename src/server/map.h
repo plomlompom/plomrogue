@@ -16,18 +16,15 @@ struct Map
 {
     struct yx_uint16 size; /* Map's height/width (use max. 256x256)! */
     char * cells; /* Sequence of bytes encoding map cells. */
-    uint8_t dist_orthogonal; /* Ratio of the diagonal movement penalty as   */
-    uint8_t dist_diagonal;   /* encoded by (.dist_diagonal/.dist_orthonal). */
 };
 
 
 
 /* Initialize island map "~" cells representing water and "." cells representing
- * land. The shape of the island is generated randomly by starting with a sea
- * containing one land cell in the middle and then going into a cycle of
- * repeatedly selecting a random cell on the map and transforming it into a land
- * cell if it is horizontally or vertically neighbor to one; the cycle ends when
- * a land cell is due to be created right at the border of the map.
+ * land. The island shape is built randomly by starting with a sea of one land
+ * cell in the middle, then going into a cycle of repeatedly selecting a random
+ * seal cell and transforming it into land if it is neighbor to land; the cycle
+ * ends when a land cell is due to be created right at the border of the map.
  */
 extern void init_map();
 

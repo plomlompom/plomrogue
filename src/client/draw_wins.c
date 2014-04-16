@@ -338,14 +338,14 @@ extern void draw_win_log(struct Win * win)
 
 extern void draw_win_map(struct Win * win)
 {
-    try_resize_winmap(win, world.map.size.y, world.map.size.x);
+    try_resize_winmap(win, world.map.size.y, world.map.size.x * 2);
     uint16_t z = 0;
     uint16_t x, y;
     for (y = 0; y < world.map.size.y; y++)
     {
         for (x = 0; x < world.map.size.x; x++)
         {
-            set_ch_on_yx(win, y, x, world.map.cells[z]);
+            set_ch_on_yx(win, y, x * 2 + (y % 2), world.map.cells[z]);
             z++;
         }
     }

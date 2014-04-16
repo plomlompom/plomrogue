@@ -34,9 +34,9 @@ extern uint8_t get_moa_id_by_name(char * name);
 extern void actor_wait(struct MapObj * mo);
 
 /* Actor "mo" tries to move one step in direction described by char mo->arg
- * (where east is '6', north '8') etc. Move either succeeds, or another actor is
- * encountered and hit (which leads ot its lifepoint decreasing by one and
- * eventually death), or the move fails due to an impassable target square.
+ * (where noth-east is 'e', east 'd' etc.) Move either succeeds, or another
+ * actor is encountered and hit (which leads ot its lifepoint decreasing by one
+ * and eventually death), or the move fails due to an impassable target square.
  */
 extern void actor_move(struct MapObj * mo);
 

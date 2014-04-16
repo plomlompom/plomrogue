@@ -28,8 +28,6 @@ enum flag
 {
     HEIGHT_SET     = 0x02,
     WIDTH_SET      = 0x04,
-    ORTH_SET       = 0x08,
-    DIAG_SET       = 0x10,
     NAME_SET       = 0x02,
     EFFORT_SET     = 0x04,
     CORPSE_ID_SET  = 0x04,
@@ -40,7 +38,7 @@ enum flag
     READY_ACT = NAME_SET | EFFORT_SET,
     READY_OBJ = NAME_SET | CORPSE_ID_SET | SYMBOL_SET | LIFEPOINTS_SET
                 | CONSUMABLE_SET | START_N_SET,
-    READY_MAP = HEIGHT_SET | WIDTH_SET | ORTH_SET | DIAG_SET
+    READY_MAP = HEIGHT_SET | WIDTH_SET
 };
 
 
@@ -92,6 +90,9 @@ static void write_if_entry(struct EntryHead ** entry,
  */
 static void test_corpse_ids();
 
+/* set_members() helper specifically for editing world.map members. */
+static uint8_t set_map_members(char * token0,char * token1,uint8_t * map_flags);
+
 /* If "token0" matches "comparand", set world.player_type to int in "token1". */
 static uint8_t set_player_type(char * token0, char * comparand, char * token1);
 
@@ -105,9 +106,6 @@ static uint8_t set_player_type(char * token0, char * comparand, char * token1);
 static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
                            uint8_t * action_flags, uint8_t * map_flags,
                            struct MapObjDef * mod, struct MapObjAct * moa);
-
-/* set_members() helper specifically for editing world.map members. */
-static uint8_t set_map_members(char * token0,char * token1,uint8_t * map_flags);
 
 /* If "name" fits "moa"->name, set "moa"->func to "func". (Derives MapObjAct
  * .func from .name for set_members().
@@ -250,14 +248,6 @@ static uint8_t set_map_members(char * token0, char * token1,uint8_t * map_flags)
     {
         int test = atoi(token1) > 256 || atoi(token1) < 1;
         err_line(test, "Value must be >= 1 and <= 256.");
-        return 1;
-    }
-    else if (    parse_val(token0, token1, "DIST_ORTHOGONAL", map_flags,
-                           ORTH_SET, '8', (char *) &world.map.dist_orthogonal)
-             ||  parse_val(token0, token1, "DIST_DIAGONAL", map_flags,
-                           DIAG_SET, '8', (char *) &world.map.dist_diagonal))
-    {
-        err_line(0 == atoi(token1), "Value must not be zero.");
         return 1;
     }
     return 0;

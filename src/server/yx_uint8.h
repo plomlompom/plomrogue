@@ -14,9 +14,10 @@
 /* Return 1 if two yx_uint8 coordinates at "a" and "b" are equal, else 0. */
 extern uint8_t yx_uint8_cmp(struct yx_uint8 * a, struct yx_uint8 * b);
 
-/* Return yx_uint8 coordinate one step from "yx" in direction "dir" (numpad
- * digits: north '8', east: '6', etc.) If "dir" is invalid or would wrap the
- * move around the edge of a 2^16x2^16 cells field, "yx" remains unchanged.
+/* Return yx_uint8 coordinate one step from "yx" in direction "dir" ('e':
+ * northeast, 'd': east, 'c': south-east, 'x': south-west, 's': west, ' 'w':
+ * north-west). If "dir" is invalid or would wrap the move around the edge of a
+ * 2^8x2^8 cells field, "yx" remains unchanged.
  */
 extern struct yx_uint8 mv_yx_in_dir(char dir, struct yx_uint8 yx);
 

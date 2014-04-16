@@ -139,14 +139,12 @@ static uint8_t match_dir(char d, char ** dsc_d, char match, char * dsc_match)
 
 static void playerbonus_move(char d, uint8_t passable)
 {
-    char * dsc_dir = "north";
-    if (   match_dir(d, &dsc_dir, '6', "east")
-        || match_dir(d, &dsc_dir, '2', "south")
-        || match_dir(d, &dsc_dir, '4', "west")
-        || match_dir(d, &dsc_dir, '7', "north-west")
-        || match_dir(d, &dsc_dir, '9', "north-east")
-        || match_dir(d, &dsc_dir, '1', "south-west")
-        || match_dir(d, &dsc_dir, '3', "south-east"))
+    char * dsc_dir = "north-east";
+    if (   match_dir(d, &dsc_dir, 'd', "east")
+        || match_dir(d, &dsc_dir, 'c', "south-east")
+        || match_dir(d, &dsc_dir, 'x', "south-west")
+        || match_dir(d, &dsc_dir, 's', "west")
+        || match_dir(d, &dsc_dir, 'w', "north-west"))
     {
         ;
     }

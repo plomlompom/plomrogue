@@ -23,3 +23,5 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
+
+- nav_inventory() expects too short inventory string length for i
