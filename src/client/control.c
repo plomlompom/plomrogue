@@ -1,9 +1,10 @@
 /* src/client/control.c */
 
 #include "control.h"
-#include <stdint.h> /* uint8_t, uint16_t */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen() */
+#include "../common/rexit.h" /* exit_err() */
 #include "interface_conf.h" /* reload_interface_conf(), save_interface_conf() */
 #include "io.h" /* send() */
 #include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
@@ -54,7 +55,9 @@ static void nav_inventory(char dir)
         return;
     }
     uint8_t n_elems = 0;
-    uint8_t i;
+    uint32_t i;
+    char * err = "Inventory string is too large.";
+    exit_err(UINT32_MAX <= strlen(world.player_inventory), err);
     for (i = 0; '\0' != world.player_inventory[i]; i++)
     {
         n_elems = n_elems + ('\n' == world.player_inventory[i]);

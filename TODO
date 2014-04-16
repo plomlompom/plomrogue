@@ -9,6 +9,8 @@ BOTH SERVER/CLIENT:
 
 - be more strict and humble when allocating memory from the stack
 
+- handle crashes on OS X: <https://github.com/plomlompom/plomrogue/issues/1>
+
 SERVER:
 
 - implement field of view / line of sight and obstacles for those on the map
@@ -23,5 +25,3 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
-
-- nav_inventory() expects too short inventory string length for i
