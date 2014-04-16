@@ -34,7 +34,7 @@ KEY 259 w_keys_u
 KEY 10 w_keys_m
 
 WIN_ORDER 'kmicl'
-WIN_FOCUS 'k'
+WIN_FOCUS 'm'
 
 WINDOW 1
 NAME 'Window geometry keys'
