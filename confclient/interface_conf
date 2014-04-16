@@ -1,6 +1,13 @@
 
 KEYBINDINGS 'global'
 KEY 81 quit
+KEY 87 winconf
+KEY 62 cyc_win_f
+KEY 60 cyc_win_b
+KEY 262 scrl_l
+KEY 360 scrl_r
+KEY 82 reload_conf
+KEY 67 save_conf
 KEY 265 to_a_keywin
 KEY 266 to_mapwin
 KEY 267 to_infowin
@@ -9,13 +16,6 @@ KEY 269 to_logwin
 KEY 270 to_g_keywin
 KEY 271 to_wg_keywin
 KEY 272 to_wk_keywin
-KEY 87 winconf
-KEY 62 cyc_win_f
-KEY 60 cyc_win_b
-KEY 262 scrl_l
-KEY 360 scrl_r
-KEY 82 reload_conf
-KEY 67 save_conf
 
 KEYBINDINGS 'wingeom'
 KEY 258 shift_f
@@ -34,7 +34,7 @@ KEY 259 w_keys_u
 KEY 10 w_keys_m
 
 WIN_ORDER 'kmicl'
-WIN_FOCUS 'm'
+WIN_FOCUS 'k'
 
 WINDOW 1
 NAME 'Window geometry keys'
@@ -57,7 +57,7 @@ KEY 10 wk_keys_m
 WINDOW c
 NAME 'Inventory'
 BREAK 2
-WIDTH 28
+WIDTH 13
 HEIGHT 4
 KEY 100 drop
 KEY 259 inv_u
@@ -66,26 +66,26 @@ KEY 117 use
 
 WINDOW i
 NAME 'Info'
-BREAK 2
-WIDTH 28
-HEIGHT 1
+BREAK 0
+WIDTH 13
+HEIGHT 2
 
 WINDOW k
 NAME 'Available keys'
-BREAK 1
-WIDTH 29
+BREAK 0
+WIDTH 27
 HEIGHT 0
 
 WINDOW l
 NAME 'Log'
 BREAK 0
-WIDTH 28
-HEIGHT -7
+WIDTH 13
+HEIGHT -8
 
 WINDOW m
 NAME 'Map'
 BREAK 0
-WIDTH -59
+WIDTH -42
 HEIGHT 0
 KEY 112 pick
 KEY 58 wait

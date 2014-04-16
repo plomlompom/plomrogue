@@ -157,26 +157,25 @@ COMMAND map_c
 DESCRIPTION 'map center player'
 
 COMMAND to_a_keywin
-DESCRIPTION 'toggle available keys view'
+DESCRIPTION 'window available keys'
 
 COMMAND to_inv
-DESCRIPTION 'toggle inventory view'
+DESCRIPTION 'window inventory'
 
 COMMAND to_g_keywin
-DESCRIPTION 'toggle global keys view'
+DESCRIPTION 'window global keys'
 
 COMMAND to_mapwin
-DESCRIPTION 'toggle map view'
+DESCRIPTION 'window map'
 
 COMMAND to_infowin
-DESCRIPTION 'toggle info view'
+DESCRIPTION 'window info'
 
 COMMAND to_logwin
-DESCRIPTION 'toggle log view'
+DESCRIPTION 'window log'
 
 COMMAND to_wg_keywin
-DESCRIPTION 'toggle geometry keys view'
+DESCRIPTION 'window geometry keys'
 
 COMMAND to_wk_keywin
-DESCRIPTION 'toggle keybinding keys view'
-
+DESCRIPTION 'window keybinding keys'
