@@ -25,5 +25,3 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
-
-- fix buggy scrollling of large maps

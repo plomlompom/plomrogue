@@ -10,7 +10,7 @@
 extern void map_scroll(char d)
 {
     struct Win * win = get_win_by_id('m');
-    uint8_t offset;
+    uint16_t offset;
     if (('8' == d || '2' == d) && world.map.size.y > win->frame_size.y)
     {
         offset = center_offset(win->center.y,
