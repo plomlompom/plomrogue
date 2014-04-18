@@ -4,7 +4,7 @@
 #include <stddef.h> /* size_t */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
 #include <stdio.h> /* FILE, fseek(), sprintf(), fgets(), fgetc(), ferror(),
-                    * fputc(), fwrite(), fclose(), fopen()
+                    * fputc(), fwrite(), fclose(), fopen(), clearerr()
                     */
 #include <string.h> /* strlen() */
 #include <unistd.h> /* for access(), unlink() */
@@ -53,6 +53,7 @@ extern void try_fputc(uint8_t c, FILE * file, char * f)
 
 extern int try_fgetc(FILE * file, char * f)
 {
+    clearerr(file); /* OSX' (BSD?) fgetc() needs this to undo previous EOFs. */
     int test = fgetc(file);
     exit_trouble(EOF == test && ferror(file), f, "fgetc()");
     return test;
