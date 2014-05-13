@@ -16,6 +16,7 @@
                                   */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
+#include "field_of_view.h" /* build_visible_map() */
 #include "map_objects.h" /* structs MapObj, MapObjDef, get_map_obj_def() */
 #include "world.h" /* global world  */
 
@@ -44,8 +45,8 @@ static void write_value_as_line(uint32_t value, FILE * file);
 /* Write to "file" player's inventory, one item name per line. End in "%\n". */
 static void write_inventory(struct MapObj * player, FILE * file);
 
-/* Write to "file" game map, with map objects super-imposed. Write one row per
- * \n-delimited line. Super-impose animated objects over inanimate objects.
+/* Write to "file" game map as visible to the player, build_visible_map()-drawn.
+ * Write one row per \n-delimited line.
  */
 static void write_map(FILE * file);
 
@@ -190,26 +191,7 @@ static void write_inventory(struct MapObj * player, FILE * file)
 static void write_map(FILE * file)
 {
     char * f_name = "write_map()";
-    uint32_t map_size = world.map.size.y * world.map.size.x;
-    char visible_map[map_size];
-    memcpy(visible_map, world.map.cells, map_size);
-    struct MapObj * o;
-    struct MapObjDef * d;
-    char c;
-    uint8_t i;
-    for (i = 0; i < 2; i++)
-    {
-        for (o = world.map_objs; o != 0; o = o->next)
-        {
-            if ((   (0 == i && 0 == o->lifepoints)
-                 || (1 == i && 0 < o->lifepoints)))
-            {
-                d = get_map_object_def(o->type);
-                c = d->char_on_map;
-                visible_map[(o->pos.y * world.map.size.x) + o->pos.x] = c;
-            }
-        }
-    }
+    char * visible_map = build_visible_map();
     uint16_t x, y;
     for (y = 0; y < world.map.size.y; y++)
     {
@@ -219,6 +201,7 @@ static void write_map(FILE * file)
         }
         try_fputc('\n', file, f_name);
     }
+    free(visible_map);
 }
 
 
