@@ -1,12 +1,12 @@
 /* src/server/map.h
  *
- * Struct for the game map and routines to create and scroll on it.
+ * Struct for the game map and routines to create and navigate on it.
  */
 
 #ifndef MAP_H
 #define MAP_H
 
-#include <stdint.h> /* uint8_t */
+#include <stdint.h> /* uint8_t, uint16_t */
 #include "../common/yx_uint8.h" /* yx_uint8 struct */
 #include "../common/yx_uint16.h" /* yx_uint16 struct */
 
@@ -33,6 +33,9 @@ extern void init_map();
  * object movement.
  */
 extern uint8_t is_passable(struct yx_uint8 pos);
+
+/* Transform "yx" to an index position in the world map. */
+extern uint16_t yx_to_map_pos(struct yx_uint8 * yx);
 
 
 

@@ -93,6 +93,9 @@ static void test_corpse_ids();
 /* set_members() helper specifically for editing world.map members. */
 static uint8_t set_map_members(char * token0,char * token1,uint8_t * map_flags);
 
+/* If "token0" matches "comparand", set world.enemy_fov to "token1". */
+static uint8_t set_enemy_fov(char * token0, char * comparand, char * token1);
+
 /* If "token0" matches "comparand", set world.player_type to int in "token1". */
 static uint8_t set_player_type(char * token0, char * comparand, char * token1);
 
@@ -121,6 +124,7 @@ static void tokens_into_entries(char * token0, char * token1)
     char * str_obj = "OBJECT";
     char * str_map = "MAP_TYPE";
     char * str_player = "PLAYER_TYPE";
+    char * str_enemyfov = "ENEMY_FOV";
     static struct MapObjAct ** moa_p_p = &world.map_obj_acts;
     static struct MapObjDef ** mod_p_p = &world.map_obj_defs;
     static uint8_t action_flags = READY_ACT;
@@ -129,7 +133,8 @@ static void tokens_into_entries(char * token0, char * token1)
     static struct EntryHead * moa = NULL;
     static struct EntryHead * mod = NULL;
     if (!token0 || !strcmp(token0, str_act) || !strcmp(token0, str_obj)
-                || !strcmp(token0, str_map) || !strcmp(token0, str_player))
+                || !strcmp(token0, str_map) || !strcmp(token0, str_player)
+                || !strcmp(token0, str_enemyfov))
     {
         parse_and_reduce_to_readyflag(&action_flags, READY_ACT);
         parse_and_reduce_to_readyflag(&object_flags, READY_OBJ);
@@ -152,6 +157,7 @@ static void tokens_into_entries(char * token0, char * token1)
                                   (struct EntryHead *) world.map_obj_defs)
                    || start_map(token0, str_map, &map_flags)
                    || set_player_type(token0, str_player, token1)
+                   || set_enemy_fov(token0, str_enemyfov, token1)
                    || set_members(token0, token1, &object_flags, &action_flags,
                                   &map_flags, (struct MapObjDef *)mod,
                                   (struct MapObjAct *) moa)))
@@ -251,6 +257,21 @@ static uint8_t set_map_members(char * token0, char * token1,uint8_t * map_flags)
         return 1;
     }
     return 0;
+}
+
+
+
+static uint8_t set_enemy_fov(char * token0, char * comparand, char * token1)
+{
+    if (strcmp(token0, comparand))
+    {
+        return 0;
+    }
+    parsetest_int(token1, '8');
+    int test = atoi(token1) > 1;
+    err_line(test, "Value must be 0 or 1.");
+    world.enemy_fov = atoi(token1);
+    return 1;
 }
 
 

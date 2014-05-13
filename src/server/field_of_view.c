@@ -7,21 +7,12 @@
 #include <string.h> /* memset(), strchr(), strdup() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "map_objects.h" /* MapObj, MapObjDef, get_player() */
+#include "map.h" /* yx_to_map_pos() */
+#include "map_objects.h" /* MapObj */
 #include "yx_uint8.h" /* yx_uint8 */
 #include "world.h" /* global world  */
 
 
-
-/* States that cells in the fov map may be in. */
-enum fov_cell_states {
-    VISIBLE      = 0x01,
-    HIDDEN       = 0x02,
-    SHADOW_LEFT  = 0x04,
-    SHADOW_RIGHT = 0x08,
-    LIMIT        = 0x10,
-    HIDE_LATER   = 0x20
-};
 
 /* Values for mv_yx_in_dir_wrap()'s wrapping directory memory. */
 enum wraps
@@ -33,7 +24,7 @@ enum wraps
 };
 
 /* Transform "yx" to an index position in the world map. */
-static uint16_t yx_to_pos(struct yx_uint8 * yx);
+//static uint16_t yx_to_pos(struct yx_uint8 * yx);
 
 /* Move "yx" into hex direction "d". If this moves "yx" beyond the minimal (0)
  * or maximal (UINT8_MAX) column or row, it wraps to the opposite side. Such
@@ -147,31 +138,6 @@ static void shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
 static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
                                          struct yx_uint8 * yx_eye,
                                          uint8_t * fov_map);
-
-/* Return overlay of world map wherein all cell positions visible from player's
- * positions have flag VISIBLE set.
- *
- * This is achieved by spiraling out clock-wise from the player position,
- * flagging cells as VISIBLE unless they're already marked as HIDDEN, and, on
- * running into obstacles for view that are not HIDDEN, casting shadows from
- * these, i.e. drawing cells as HIDDEN that would be hidden by said obstacle,
- * before continuing the original spiraling path.
- *
- * Shadowcasting during spiraling is initially lazy, flagging only the shadows'
- * interior cells as HIDDEN and their border cells as HIDE_LATER. Only at the
- * end are all cells flagged HIDE_LATER flagged as HIDDEN. This is to handle
- * cases where obstacles to view sit right at the border of pre-estabilshed
- * shadows, therefore might be ignored if HIDDEN and not cast shadows on their
- * own that may slightly extend beyond the pre-established shadows they border.
- */
-static uint8_t * build_fov_map();
-
-
-
-static uint16_t yx_to_pos(struct yx_uint8 * yx)
-{
-    return (yx->y * world.map.size.x) + yx->x;
-}
 
 
 
@@ -290,7 +256,7 @@ extern void draw_border_circle(struct yx_uint8 yx, uint8_t radius,
     {
          if (mv_yx_in_dir_legal(dir, &yx))
          {
-            uint16_t pos = yx_to_pos(&yx);
+            uint16_t pos = yx_to_map_pos(&yx);
             fov_map[pos] = LIMIT;
         }
     }
@@ -518,7 +484,7 @@ static uint16_t shadow_arm(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
                            uint8_t shift_right)
 {
     struct yx_uint8 yx_border = *yx_start;
-    uint16_t pos;
+    uint16_t pos = yx_to_map_pos(&yx_border);
     if (mv_yx_in_dir_legal(dir, &yx_border))
     {
         uint8_t met_limit = 0;
@@ -527,7 +493,7 @@ static uint16_t shadow_arm(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
         yx_border = *yx_start;
         while (!met_limit && mv_yx_in_dir_legal(dirs[i_dirs], &yx_border))
         {
-            pos = yx_to_pos(&yx_border);
+            pos = yx_to_map_pos(&yx_border);
             met_limit = fov_map[pos] & LIMIT;
             fov_map[pos] = fov_map[pos] | flag;
             i_dirs = dirs[i_dirs + 1] ? i_dirs + 1 : 0;
@@ -546,7 +512,7 @@ static void shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
     uint16_t pos_a, pos_b, pos_start, i;
     pos_a = shadow_arm(yx_eye, yx_start, fov_map, dir_left, SHADOW_LEFT, 0);
     pos_b = shadow_arm(yx_eye, yx_start, fov_map, dir_right, SHADOW_RIGHT, 1);
-    pos_start = yx_to_pos(yx_start);
+    pos_start = yx_to_map_pos(yx_start);
     fov_map[pos_start] = fov_map[pos_start] | SHADOW_LEFT | SHADOW_RIGHT;
     fill_shadow(yx_eye, yx_start, fov_map, pos_a, pos_b);
     for (i = 0; i < world.map.size.y * world.map.size.x; i++)
@@ -568,7 +534,7 @@ static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
                                          uint8_t * fov_map)
 {
     char * dirs = "dcxswe";
-    uint16_t pos = yx_to_pos(yx_cell);
+    uint16_t pos = yx_to_map_pos(yx_cell);
     if (!(fov_map[pos] & HIDDEN))
     {
         fov_map[pos] = fov_map[pos] | VISIBLE;
@@ -594,17 +560,16 @@ static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
 
 
 
-static uint8_t * build_fov_map()
+extern uint8_t * build_fov_map(struct MapObj * eye)
 {
     char * f_name = "build_fov_map()";
     uint8_t radius = 2 * world.map.size.y;
     uint32_t map_size = world.map.size.y * world.map.size.x;
-    struct MapObj * player = get_player();
-    struct yx_uint8 yx = player->pos;
+    struct yx_uint8 yx = eye->pos;
     uint8_t * fov_map = try_malloc(map_size, f_name);
     memset(fov_map, 0, map_size);
     draw_border_circle(yx, radius, fov_map);
-    fov_map[yx_to_pos(&yx)] = VISIBLE;
+    fov_map[yx_to_map_pos(&yx)] = VISIBLE;
     uint8_t dist;
     for (dist = 1; dist <= radius; dist++)
     {
@@ -617,7 +582,7 @@ static uint8_t * build_fov_map()
             first_round = 0;
             if (mv_yx_in_dir_legal(i_dir, &yx))
             {
-                set_view_of_cell_and_shadows(&yx, &player->pos, fov_map);
+                set_view_of_cell_and_shadows(&yx, &eye->pos, fov_map);
             }
         }
     }
@@ -630,43 +595,4 @@ static uint8_t * build_fov_map()
         }
     }
     return fov_map;
-}
-
-
-
-extern char * build_visible_map()
-{
-    char * f_name = "build_visible_map()";
-    uint8_t * fov_map = build_fov_map();
-    uint32_t map_size = world.map.size.y * world.map.size.x;
-    char * visible_map = try_malloc(map_size, f_name);
-    memset(visible_map, ' ', map_size);
-    uint16_t pos_i;
-    for (pos_i = 0; pos_i < map_size; pos_i++)
-    {
-        if (fov_map[pos_i] & VISIBLE)
-        {
-            visible_map[pos_i] = world.map.cells[pos_i];
-        }
-    }
-    struct MapObj * o;
-    struct MapObjDef * d;
-    char c;
-    uint8_t i;
-    for (i = 0; i < 2; i++)
-    {
-        for (o = world.map_objs; o != 0; o = o->next)
-        {
-            if (   fov_map[yx_to_pos(&o->pos)] & VISIBLE
-                && (   (0 == i && 0 == o->lifepoints)
-                    || (1 == i && 0 < o->lifepoints)))
-            {
-                d = get_map_object_def(o->type);
-                c = d->char_on_map;
-                visible_map[yx_to_pos(&o->pos)] = c;
-            }
-        }
-    }
-    free(fov_map);
-    return visible_map;
 }

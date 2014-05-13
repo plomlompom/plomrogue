@@ -40,6 +40,7 @@ struct World
     uint8_t player_type; /* Map object type that player will start as. */
     uint8_t is_verbose; /* Should server send debugging info to stdout? */
     uint8_t map_obj_count; /* Counts map objects generated so far. */
+    uint8_t enemy_fov; /* != 0 if non-player actors only see field of view. */
 };
 
 extern struct World world;

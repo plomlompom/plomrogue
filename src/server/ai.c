@@ -5,6 +5,7 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
+#include "field_of_view.h" /* build_fov_map() */
 #include "map_object_actions.h" /* get_moa_id_by_name() */
 #include "map_objects.h" /* struct MapObj */
 #include "world.h" /* global world */
@@ -27,15 +28,16 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
  * each cell's score against the score of its immediate neighbors in N_DIRS
  * directions. If it's neighbors are low enough that the result would be lower
  * than the current value, re-set it to 1 point higher than its lowest-scored
- * neighbor- Repeat this whole process until all cells have settled on their
+ * neighbor. Repeat this whole process until all cells have settled on their
  * final score. Ignore cells whose position in "score_map" fits cells of
- * unreachable terrain in world.map.cells. Expect "max_score" to be the maximum
- * score for cells, marking them as unreachable.
+ * unreachable terrain in world.map.cells or whose score is greater than
+ * "max_score". Expect "max_score" to be the maximum score for cells, marking
+ * them as unreachable.
  */
 static void dijkstra_map(uint16_t * score_map, uint16_t max_score);
 
 /* Return numpad char of direction ("8", "6", "2", "4" etc.) of enemy with the
- * shortest path to "mo_origin". If no enemy is around, return 0.
+ * shortest path visible to "mo_origin". If no enemy is around, return 0.
  */
 static char get_dir_to_nearest_enemy(struct MapObj * mo_origin);
 
@@ -93,7 +95,7 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
         scores_still_changing = 0;
         for (pos = 0; pos < map_size; pos++)
         {
-            if ('.' == world.map.cells[pos])
+            if ('.' == world.map.cells[pos] && score_map[pos] <= max_score)
             {
                 get_neighbor_scores(score_map, pos, max_score, neighbors);
                 min_neighbor = max_score;
@@ -120,18 +122,27 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
 {
     char * f_name = "get_dir_to_nearest_enemy()";
 
-    /* Calculate for each cell the distance to the nearest map actor that is
-     * not "mo_origin", with movement only possible in the directions of "dir".
+    /* Calculate for each cell the distance to the visibly nearest map actor not
+     * "mo_origin", with movement only possible in the directions of "dir".
      * (Actors' own cells start with a distance of 0 towards themselves.)
      */
     uint32_t map_size = world.map.size.y * world.map.size.x;
-    uint16_t max_score = UINT16_MAX;
+    uint16_t max_score = UINT16_MAX - 1;
     uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t), f_name);
+    uint8_t * fov_map = world.enemy_fov ? build_fov_map(mo_origin) : NULL;
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
-        score_map[i] = max_score;
+        if (world.enemy_fov)
+        {
+            score_map[i] = fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
+        }
+        else
+        {
+            score_map[i] = max_score;
+        }
     }
+    free(fov_map);
     struct MapObj * mo = world.map_objs;
     for (; mo != NULL; mo = mo->next)
     {

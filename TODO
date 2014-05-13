@@ -13,6 +13,8 @@ BOTH SERVER/CLIENT:
 
 SERVER:
 
+- optimize too-slow AI / FOV algorithms
+
 - is it actually useful to define map object action ids in the config file?
 
 - for game continuation, replace re-playing of whole record files with loading
