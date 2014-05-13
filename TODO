@@ -23,3 +23,5 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
+
+- repair single window interface config files (fix double use of keycode 100)
