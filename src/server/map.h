@@ -1,22 +1,13 @@
 /* src/server/map.h
  *
- * Struct for the game map and routines to create and navigate on it.
+ * Routines to create and navigate game map.
  */
 
-#ifndef MAP_H
-#define MAP_H
+#ifndef MAP_H_SERVER
+#define MAP_H_SERVER
 
 #include <stdint.h> /* uint8_t, uint16_t */
 #include "../common/yx_uint8.h" /* yx_uint8 struct */
-#include "../common/yx_uint16.h" /* yx_uint16 struct */
-
-
-
-struct Map
-{
-    struct yx_uint16 size; /* Map's height/width (use max. 256x256)! */
-    char * cells; /* Sequence of bytes encoding map cells. */
-};
 
 
 

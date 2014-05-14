@@ -8,7 +8,7 @@
 
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* define FILE */
-#include "map.h" /* struct Map */
+#include "../common/map.h" /* struct Map */
 struct MapObjDef;
 struct MapObjAct;
 struct MapObj;
