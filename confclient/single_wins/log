@@ -1,4 +1,3 @@
-
 KEYBINDINGS 'global'
 KEY 81 quit
 KEY 265 to_a_keywin
@@ -25,7 +24,7 @@ KEY 120 move_x
 KEY 115 move_s
 KEY 119 move_w
 KEY 46 map_c
-KEY 100 drop
+KEY 68 drop
 KEY 117 use
 
 KEYBINDINGS 'wingeom'

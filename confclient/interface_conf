@@ -59,7 +59,7 @@ NAME 'Inventory'
 BREAK 2
 WIDTH 13
 HEIGHT 4
-KEY 100 drop
+KEY 68 drop
 KEY 259 inv_u
 KEY 258 inv_d
 KEY 117 use
