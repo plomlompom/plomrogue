@@ -5,7 +5,7 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "field_of_view.h" /* build_fov_map() */
+#include "field_of_view.h" /* VISIBLE */
 #include "map_object_actions.h" /* get_moa_id_by_name() */
 #include "map_objects.h" /* struct MapObj */
 #include "world.h" /* global world */
@@ -129,20 +129,11 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
     uint32_t map_size = world.map.size.y * world.map.size.x;
     uint16_t max_score = UINT16_MAX - 1;
     uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t), f_name);
-    uint8_t * fov_map = world.enemy_fov ? build_fov_map(mo_origin) : NULL;
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
-        if (world.enemy_fov)
-        {
-            score_map[i] = fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
-        }
-        else
-        {
-            score_map[i] = max_score;
-        }
+        score_map[i] = mo_origin->fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
     }
-    free(fov_map);
     struct MapObj * mo = world.map_objs;
     for (; mo != NULL; mo = mo->next)
     {

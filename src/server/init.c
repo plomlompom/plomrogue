@@ -18,8 +18,11 @@
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
+#include "field_of_view.h" /* build_fov_map() */
 #include "map.h" /* init_map() */
-#include "map_objects.h" /* MapObjDef, free_map_objects(), add_map_objects() */
+#include "map_objects.h" /* MapObj, MapObjDef, free_map_objects(),
+                          * add_map_objects(), get_player()
+                          */
 #include "run.h" /* obey_msg(), io_loop() */
 #include "world.h" /* global world */
 
@@ -103,6 +106,11 @@ extern void remake_world(uint32_t seed)
         }
     }
     set_cleanup_flag(CLEANUP_MAP_OBJECTS);
+    struct MapObj * mo;
+    for (mo = world.map_objs; NULL != mo; mo = mo->next)
+    {
+        mo->fov_map = mo->lifepoints ? build_fov_map(mo) : NULL;
+    }
     if (world.turn)
     {
         exit_trouble(unlink(world.path_record), f_name, "unlink()");

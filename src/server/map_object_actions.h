@@ -37,6 +37,7 @@ extern void actor_wait(struct MapObj * mo);
  * (where noth-east is 'e', east 'd' etc.) Move either succeeds, or another
  * actor is encountered and hit (which leads ot its lifepoint decreasing by one
  * and eventually death), or the move fails due to an impassable target square.
+ * On success, update object's field of view map.
  */
 extern void actor_move(struct MapObj * mo);
 

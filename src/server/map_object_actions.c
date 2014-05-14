@@ -9,6 +9,7 @@
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
+#include "field_of_view.h" /* build_fov_map() */
 #include "map_objects.h" /* structs MapObj, MapObjDef, get_player(),
                           * set_object_position(), own_map_object(),
                           * get_map_object_def()
@@ -262,6 +263,8 @@ extern void actor_move(struct MapObj * mo)
     if (passable)
     {
         set_object_position(mo, target);
+        free(mo->fov_map);
+        mo->fov_map = build_fov_map(mo);
     }
     if (mo == get_player())
     {

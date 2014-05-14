@@ -16,9 +16,11 @@
                                   */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
-#include "field_of_view.h" /* VISIBLE, build_fov_map() */
+#include "field_of_view.h" /* VISIBLE */
 #include "map.h" /* yx_to_map_pos() */
-#include "map_objects.h" /* structs MapObj, MapObjDef, get_map_obj_def() */
+#include "map_objects.h" /* structs MapObj, MapObjDef, get_map_obj_def(),
+                          * get_player()
+                          */
 #include "world.h" /* global world  */
 
 
@@ -197,14 +199,13 @@ static void write_inventory(struct MapObj * player, FILE * file)
 static char * build_visible_map(struct MapObj * player)
 {
     char * f_name = "build_visible_map()";
-    uint8_t * fov_map = build_fov_map(player);
     uint32_t map_size = world.map.size.y * world.map.size.x;
     char * visible_map = try_malloc(map_size, f_name);
     memset(visible_map, ' ', map_size);
     uint16_t pos_i;
     for (pos_i = 0; pos_i < map_size; pos_i++)
     {
-        if (fov_map[pos_i] & VISIBLE)
+        if (player->fov_map[pos_i] & VISIBLE)
         {
             visible_map[pos_i] = world.map.cells[pos_i];
         }
@@ -217,7 +218,7 @@ static char * build_visible_map(struct MapObj * player)
     {
         for (o = world.map_objs; o != 0; o = o->next)
         {
-            if (   fov_map[yx_to_map_pos(&o->pos)] & VISIBLE
+            if (   player->fov_map[yx_to_map_pos(&o->pos)] & VISIBLE
                 && (   (0 == i && 0 == o->lifepoints)
                     || (1 == i && 0 < o->lifepoints)))
             {
@@ -227,7 +228,6 @@ static char * build_visible_map(struct MapObj * player)
             }
         }
     }
-    free(fov_map);
     return visible_map;
 }
 

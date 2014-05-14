@@ -17,6 +17,7 @@ struct MapObj
     struct MapObj * next;        /* pointer to next one in map object chain */
     struct MapObj * owns;        /* chain of map objects owned / in inventory */
     struct yx_uint8 pos;         /* coordinate on map */
+    uint8_t * fov_map;           /* map of the object's field of view */
     uint8_t id;                  /* individual map object's unique identifier */
     uint8_t type;                /* ID of appropriate map object definition */
     uint8_t lifepoints;          /* 0: object is inanimate; >0: hitpoints */

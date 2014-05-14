@@ -12,10 +12,8 @@ to gain hitpoints. Note that different kinds of movements/actions take different
 numbers of turns to finish.
 
 Enemies' AI is very dumb so far: Each turn, they try to move towards their
-shortest-path-wise nearest enemy. If no enemy is found in their surroundings,
-they just wait. Contrary to the player, they by default see the whole map. (To
-make them see only what is in their line of sight, enable ENEMY_FOV in the
-server config file; see below "Hacking / server internals and configuration".)
+shortest-path-wise nearest enemy visible to them. If they see no enemy, they
+just wait.
 
 Once you start a new world, every move of yours is recorded in a file called
 "record". Once you re-start the game, all of your previous moves are replayed
@@ -134,10 +132,7 @@ after, it may even be the same). "START_NUMBER" sets the number of objects that
 are to appear of the given type on the map on game start.
 
 A line of "PLAYER_TYPE" followed by a number sets the map object type (id) of
-the player's creature. "ENEMY_FOV" followed by "0" or "1" sets whether enemies
-see the whole map or only that to which they have an unobstructed line of sight.
-Since plomrogue's FOV algorithm is currently very expensive, this is disabled by
-default.
+the player's creature.
 
 All these definition block members must be present within their blocks, but only
 "ACTION" / "OBJECT" / "MAP_TYPE" must be positioned at their respective blocks'

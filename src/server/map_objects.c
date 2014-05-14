@@ -117,6 +117,7 @@ extern void free_map_objects(struct MapObj * mo_start)
     }
     free_map_objects(mo_start->owns);
     free_map_objects(mo_start->next);
+    free(mo_start->fov_map);
     free(mo_start);
     if (mo_start == world.map_objs)  /* So add_map_objects()' NULL-delimited  */
     {                                /* map object iteration loop does not    */
