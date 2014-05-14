@@ -23,9 +23,6 @@ enum wraps
     WRAP_W = 0x08
 };
 
-/* Transform "yx" to an index position in the world map. */
-//static uint16_t yx_to_pos(struct yx_uint8 * yx);
-
 /* Move "yx" into hex direction "d". If this moves "yx" beyond the minimal (0)
  * or maximal (UINT8_MAX) column or row, it wraps to the opposite side. Such
  * wrapping is returned as a wraps enum value and stored, so that further calls
