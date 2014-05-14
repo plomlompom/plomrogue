@@ -186,7 +186,8 @@ static void add_line_compact(struct Win * win, char * line, attr_t attri,
     uint32_t len_line_new = len_line + strlen(separator);
     char line_new[len_line_new];
     sprintf(line_new, "%s%s", line, separator);
-    uint16_t x, y;
+    uint16_t x = 0;
+    uint16_t y;
     uint32_t z;
     for (z = 0, y = y_start; z < len_line_new; y++)
     {
@@ -204,7 +205,7 @@ static void add_line_compact(struct Win * win, char * line, attr_t attri,
             try_resize_winmap(win, y + 1 + 1, win->winmap_size.x);
         }
     }
-    * offset = x;
+    *offset = x;
 }
 
 

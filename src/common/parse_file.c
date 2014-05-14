@@ -64,7 +64,7 @@ extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
     err_line_count = 0;
     err_line(0 == linemax, "File is empty.");
     char * token0 = NULL; /* For final token_to_entry() if while() stagnates. */
-    char * token1;
+    char * token1 = NULL;
     char * err_val = "No value given.";
     while (try_fgets(err_line_line, linemax + 1, file, f_name))
     {

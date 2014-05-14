@@ -143,7 +143,7 @@ static void write_def(FILE * file, char * prefix, uint8_t quotes, char * val,
                       char type)
 {
     char * f_name = "write_def()";
-    char * val_str;
+    char * val_str = NULL;
     int test_val_str = 1;
     if      ('s' == type)
     {

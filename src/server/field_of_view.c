@@ -383,7 +383,7 @@ static char * eye_to_cell(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
     int16_t diff_x = yx_cell->x - yx_eye->x;
     uint8_t indent = yx_eye->y % 2;
     char * dir = dir_from_delta(indent, diff_y, diff_x);
-    char * dirs;
+    char * dirs = NULL;
     if (1 == strlen(dir))
     {
         return strdup(dir);
