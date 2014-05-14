@@ -31,7 +31,7 @@
 static void read_inventory(char * read_buf, uint32_t linemax, FILE * file);
 
 /* Read the next characters in "file" into world.map.cells. In detail: Read
- * world.map.size.y times world.map.size.x characters, followed by one ignored
+ * world.map.length times world.map.length characters, followed by one ignored
  * character (that we assume is a newline).
  */
 static void read_map_cells(FILE * file);
@@ -120,14 +120,14 @@ static void read_map_cells(FILE * file)
 {
     char * f_name = "read_map_cells()";
     free(world.map.cells);
-    world.map.cells = try_malloc(world.map.size.y * world.map.size.x, f_name);
+    world.map.cells = try_malloc(world.map.length * world.map.length, f_name);
     uint16_t y, x;
-    for (y = 0; y < world.map.size.y; y++)
+    for (y = 0; y < world.map.length; y++)
     {
-        for (x = 0; x < world.map.size.x; x++)
+        for (x = 0; x < world.map.length; x++)
         {
             char c = try_fgetc(file, f_name);
-            world.map.cells[(y * world.map.size.x) + x] = c;
+            world.map.cells[(y * world.map.length) + x] = c;
         }
         try_fgetc(file, f_name);
     }
@@ -216,8 +216,7 @@ static uint8_t read_world()
         map_center();
         first_read = 0;
     }
-    world.map.size.y = read_value_from_line(read_buf, linemax, file);
-    world.map.size.x = read_value_from_line(read_buf, linemax, file);
+    world.map.length = read_value_from_line(read_buf, linemax, file);
     read_map_cells(file);
     read_log(read_buf, linemax, file);
     free(read_buf);

@@ -13,7 +13,6 @@
 #include <stdlib.h> /* free() */
 #include <string.h> /* memcpy(), strlen(), strnlen(), memset() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
-#include "../common/yx_uint16.h" /* struct yx_uint16 */
 #include "draw_wins.h" /* draw_winconf_geometry(), draw_winconf_keybindings(),
                         * draw_win_inventory(), draw_win_info(), draw_win_log(),
                         * draw_win_available_keybindings(), draw_win_map(),
@@ -22,7 +21,7 @@
                         * draw_win_keybindings_global()
                         */
 #include "wincontrol.h" /* toggle_window() */
-#include "world.h" /* global world */
+#include "world.h" /* world */
 
 
 

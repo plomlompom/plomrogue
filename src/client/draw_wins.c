@@ -10,9 +10,8 @@
 #include <string.h> /* memset(), strchr(), strdup/(), strlen() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "../common/yx_uint16.h" /* struct yx_uint16 */
 #include "keybindings.h" /* struct KeyBindingDB, get_keyname_to_keycode() */
-#include "windows.h" /* struct Win, get_win_by_id() */
+#include "windows.h" /* yx_uint16, Win, get_win_by_id() */
 #include "world.h" /* global world */
 
 
@@ -339,12 +338,12 @@ extern void draw_win_log(struct Win * win)
 
 extern void draw_win_map(struct Win * win)
 {
-    try_resize_winmap(win, world.map.size.y, world.map.size.x * 2);
+    try_resize_winmap(win, world.map.length, world.map.length * 2);
     uint16_t z = 0;
     uint16_t x, y;
-    for (y = 0; y < world.map.size.y; y++)
+    for (y = 0; y < world.map.length; y++)
     {
-        for (x = 0; x < world.map.size.x; x++)
+        for (x = 0; x < world.map.length; x++)
         {
             set_ch_on_yx(win, y, x * 2 + (y % 2), world.map.cells[z]);
             z++;

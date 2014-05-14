@@ -50,20 +50,20 @@ static uint8_t is_neighbor(struct yx_uint8 pos, char type)
 {
     uint8_t ind = pos.y % 2;
     uint8_t diag_west = pos.x + ind > 0;
-    uint8_t diag_east = pos.x + ind <= world.map.size.x - 1;
-    uint16_t pos_i = (pos.y * world.map.size.x) + pos.x;
+    uint8_t diag_east = pos.x + ind <= world.map.length - 1;
+    uint16_t pos_i = (pos.y * world.map.length) + pos.x;
     if (   (   pos.y > 0                    && diag_east
-            && type == world.map.cells[pos_i - world.map.size.x + ind])
-        || (   pos.x < world.map.size.x - 1
+            && type == world.map.cells[pos_i - world.map.length + ind])
+        || (   pos.x < world.map.length - 1
             && type == world.map.cells[pos_i + 1])
-        || (   pos.y < world.map.size.y - 1 && diag_east
-            && type == world.map.cells[pos_i + world.map.size.x + ind])
+        || (   pos.y < world.map.length - 1 && diag_east
+            && type == world.map.cells[pos_i + world.map.length + ind])
         || (   pos.y > 0                    && diag_west
-            && type == world.map.cells[pos_i - world.map.size.x - !ind])
+            && type == world.map.cells[pos_i - world.map.length - !ind])
         || (   pos.x > 0
             && type == world.map.cells[pos_i - 1])
-        || (   pos.y < world.map.size.y - 1 && diag_west
-            && type == world.map.cells[pos_i + world.map.size.x - !ind]))
+        || (   pos.y < world.map.length - 1 && diag_west
+            && type == world.map.cells[pos_i + world.map.length - !ind]))
     {
         return 1;
     }
@@ -75,11 +75,11 @@ static uint8_t is_neighbor(struct yx_uint8 pos, char type)
 static void make_sea()
 {
     uint16_t y, x;
-    for (y = 0; y < world.map.size.y; y++)
+    for (y = 0; y < world.map.length; y++)
     {
         for (x = 0;
-             x < world.map.size.x;
-             world.map.cells[(y * world.map.size.x) + x] = '~', x++);
+             x < world.map.length;
+             world.map.cells[(y * world.map.length) + x] = '~', x++);
     }
 }
 
@@ -88,20 +88,20 @@ static void make_sea()
 static void make_island()
 {
     char type = '.';
-    uint8_t add_half_width = !(world.map.size.y % 2) * (world.map.size.x / 2);
-    uint32_t size = world.map.size.x * world.map.size.y;
+    uint8_t add_half_width = !(world.map.length % 2) * (world.map.length / 2);
+    uint32_t size = world.map.length * world.map.length;
     world.map.cells[(size / 2) + add_half_width] = type;
     struct yx_uint8 pos;
     iter_limit(1);
     while (iter_limit(0))
     {
-        pos.y = rrand() % world.map.size.y;
-        pos.x = rrand() % world.map.size.x;
-        uint16_t pos_i = (pos.y * world.map.size.x) + pos.x;
+        pos.y = rrand() % world.map.length;
+        pos.x = rrand() % world.map.length;
+        uint16_t pos_i = (pos.y * world.map.length) + pos.x;
         if ('~' == world.map.cells[pos_i] && is_neighbor(pos, type))
         {
-            if (   pos.y == 0 || pos.y == world.map.size.y - 1
-                || pos.x == 0 || pos.x == world.map.size.x - 1)
+            if (   pos.y == 0 || pos.y == world.map.length - 1
+                || pos.x == 0 || pos.x == world.map.length - 1)
             {
                 break;
             }
@@ -116,15 +116,15 @@ static void make_trees()
 {
     char type = 'X';
     struct yx_uint8 pos;
-    uint16_t n_trees = (world.map.size.x * world.map.size.y) / 16;
+    uint16_t n_trees = (world.map.length * world.map.length) / 16;
     uint16_t i_trees = 0;
     iter_limit(1);
     while (i_trees <= n_trees && iter_limit(0))
     {
         uint8_t single_allowed = rrand() % 32;
-        pos.y = rrand() % world.map.size.y;
-        pos.x = rrand() % world.map.size.x;
-        uint16_t pos_i = (pos.y * world.map.size.x) + pos.x;
+        pos.y = rrand() % world.map.length;
+        pos.x = rrand() % world.map.length;
+        uint16_t pos_i = (pos.y * world.map.length) + pos.x;
         if ('.' == world.map.cells[pos_i]
             && (!single_allowed || is_neighbor(pos, type)))
         {
@@ -139,7 +139,7 @@ static void make_trees()
 extern void init_map()
 {
     char * f_name = "init_map()";
-    world.map.cells = try_malloc(world.map.size.x * world.map.size.y, f_name);
+    world.map.cells = try_malloc(world.map.length * world.map.length, f_name);
     make_sea();
     make_island();
     make_trees();
@@ -150,9 +150,9 @@ extern void init_map()
 extern uint8_t is_passable(struct yx_uint8 pos)
 {
     uint8_t passable = 0;
-    if (pos.x < world.map.size.x && pos.y < world.map.size.y)
+    if (pos.x < world.map.length && pos.y < world.map.length)
     {
-        passable = ('.' == world.map.cells[(pos.y * world.map.size.x) + pos.x]);
+        passable = ('.' == world.map.cells[(pos.y * world.map.length) + pos.x]);
     }
     return passable;
 }
@@ -161,5 +161,5 @@ extern uint8_t is_passable(struct yx_uint8 pos)
 
 extern uint16_t yx_to_map_pos(struct yx_uint8 * yx)
 {
-    return (yx->y * world.map.size.x) + yx->x;
+    return (yx->y * world.map.length) + yx->x;
 }

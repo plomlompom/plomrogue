@@ -6,13 +6,14 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "yx_uint16.h" /* yx_uint16 struct */
+#include <stdint.h> /* uint16_t */
+
 
 
 struct Map
 {
-    struct yx_uint16 size;   /* map's height/width in number of cells */
     char * cells;            /* sequence of bytes encoding map cells */
+    uint16_t length;         /* map's edge length */
 };
 
 

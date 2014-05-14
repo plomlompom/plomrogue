@@ -9,8 +9,7 @@
 #include <string.h> /* memcpy(), memset(), strchr(), strlen() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "../common/yx_uint16.h" /* struct yx_uint16 */
-#include "windows.h" /* struct Win, get_win_by_id(), get_win_pos_in_order() */
+#include "windows.h" /* Win,yx_uint16, get_win_by_id(),get_win_pos_in_order() */
 #include "world.h" /* global world */
 
 

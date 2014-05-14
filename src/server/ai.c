@@ -46,19 +46,19 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin);
 static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
                                 uint16_t max_score, uint16_t * neighbors)
 {
-    uint32_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.length * world.map.length;
     uint8_t i_dir;
     for (i_dir = 0; i_dir < N_DIRS; neighbors[i_dir] = max_score, i_dir++);
-    uint8_t open_north     = pos_i >= world.map.size.x;
-    uint8_t open_east      = pos_i + 1 % world.map.size.x;
-    uint8_t open_south     = pos_i + world.map.size.x < map_size;
-    uint8_t open_west      = pos_i % world.map.size.x;
-    uint8_t is_indented    = (pos_i / world.map.size.x) % 2;
+    uint8_t open_north     = pos_i >= world.map.length;
+    uint8_t open_east      = pos_i + 1 % world.map.length;
+    uint8_t open_south     = pos_i + world.map.length < map_size;
+    uint8_t open_west      = pos_i % world.map.length;
+    uint8_t is_indented    = (pos_i / world.map.length) % 2;
     uint8_t open_diag_west = is_indented || open_west;
     uint8_t open_diag_east = !is_indented || open_east;
     if (open_north && open_diag_east)
     {
-        neighbors[0] = score_map[pos_i - world.map.size.x + is_indented];
+        neighbors[0] = score_map[pos_i - world.map.length + is_indented];
     }
     if (open_east)
     {
@@ -66,11 +66,11 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
     }
     if (open_south && open_diag_east)
     {
-        neighbors[2] = score_map[pos_i + world.map.size.x + is_indented];
+        neighbors[2] = score_map[pos_i + world.map.length + is_indented];
     }
     if (open_south && open_diag_west)
     {
-        neighbors[3] = score_map[pos_i + world.map.size.x - !is_indented];
+        neighbors[3] = score_map[pos_i + world.map.length - !is_indented];
     }
     if (open_west)
     {
@@ -78,7 +78,7 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
     }
     if (open_north && open_diag_west)
     {
-        neighbors[5] = score_map[pos_i - world.map.size.x - !is_indented];
+        neighbors[5] = score_map[pos_i - world.map.length - !is_indented];
     }
 }
 
@@ -86,7 +86,7 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
 
 static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
 {
-    uint32_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.length * world.map.length;
     uint16_t pos, i_scans, neighbors[N_DIRS], min_neighbor;
     uint8_t scores_still_changing = 1;
     uint8_t i_dirs;
@@ -126,7 +126,7 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
      * "mo_origin", with movement only possible in the directions of "dir".
      * (Actors' own cells start with a distance of 0 towards themselves.)
      */
-    uint32_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.length * world.map.length;
     uint16_t max_score = UINT16_MAX - 1;
     uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t), f_name);
     uint32_t i;
@@ -141,13 +141,13 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
         {
             continue;
         }
-        score_map[(mo->pos.y * world.map.size.x) + mo->pos.x] = 0;
+        score_map[(mo->pos.y * world.map.length) + mo->pos.x] = 0;
     }
     dijkstra_map(score_map, max_score);
 
     /* Return direction of "mo_origin"'s lowest-scored neighbor cell. */
     uint16_t neighbors[N_DIRS];
-    uint16_t pos_i = (mo_origin->pos.y * world.map.size.x) + mo_origin->pos.x;
+    uint16_t pos_i = (mo_origin->pos.y * world.map.length) + mo_origin->pos.x;
     get_neighbor_scores(score_map, pos_i, max_score, neighbors);
     free(score_map);
     char dir_to_nearest_enemy = 0;

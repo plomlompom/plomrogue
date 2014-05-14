@@ -59,8 +59,8 @@ static void add_map_object(uint8_t type)
         for (pos.y = pos.x = 0; 0 == is_passable(pos); i++)
         {
             exit_err(UINT16_MAX == i, err);
-            pos.y = rrand() % world.map.size.y;
-            pos.x = rrand() % world.map.size.x;
+            pos.y = rrand() % world.map.length;
+            pos.x = rrand() % world.map.length;
         }
         struct MapObj * mo_ptr;
         uint8_t clear = 1;

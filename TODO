@@ -9,8 +9,6 @@ BOTH SERVER/CLIENT:
 
 - be more strict and humble when allocating memory from the stack
 
-- maps are always as wide as high, so only use one of the two values
-
 SERVER:
 
 - optimize too-slow AI / FOV algorithms

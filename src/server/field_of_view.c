@@ -205,7 +205,7 @@ static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
 extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
 {
     uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx, 0);
-    if (!wraptest && yx->x < world.map.size.x && yx->y < world.map.size.y)
+    if (!wraptest && yx->x < world.map.length && yx->y < world.map.length)
     {
         return 1;
     }
@@ -420,11 +420,11 @@ static char * eye_to_cell(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
 static uint8_t is_top_left_shaded(uint16_t pos_a, uint16_t pos_b,
                                   int16_t a_y_on_left)
 {
-    uint16_t start_last_row = world.map.size.x * (world.map.size.y - 1);
+    uint16_t start_last_row = world.map.length * (world.map.length - 1);
     uint8_t a_on_left_or_bottom =    0 <= a_y_on_left
                                   || (pos_a >= start_last_row);
-    uint8_t b_on_top_or_right =    pos_b < world.map.size.x
-                                || pos_b % world.map.size.x==world.map.size.x-1;
+    uint8_t b_on_top_or_right =    pos_b < world.map.length
+                                || pos_b % world.map.length==world.map.length-1;
     return pos_a != pos_b && b_on_top_or_right && a_on_left_or_bottom;
 }
 
@@ -433,18 +433,18 @@ static uint8_t is_top_left_shaded(uint16_t pos_a, uint16_t pos_b,
 static void fill_shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
                         uint8_t * fov_map, uint16_t pos_a, uint16_t pos_b)
 {
-    int16_t a_y_on_left = !(pos_a%world.map.size.x)? pos_a/world.map.size.x :-1;
-    int16_t b_y_on_left = !(pos_b%world.map.size.x)? pos_b/world.map.size.x :-1;
+    int16_t a_y_on_left = !(pos_a%world.map.length)? pos_a/world.map.length :-1;
+    int16_t b_y_on_left = !(pos_b%world.map.length)? pos_b/world.map.length :-1;
     uint8_t top_left_shaded = is_top_left_shaded(pos_a, pos_b, a_y_on_left);
     uint16_t pos;
     uint8_t y, x, in_shade;
-    for (y = 0; y < world.map.size.y; y++)
+    for (y = 0; y < world.map.length; y++)
     {
         in_shade =    (top_left_shaded || (b_y_on_left >= 0 && y > b_y_on_left))
                    && (a_y_on_left < 0 || y < a_y_on_left);
-        for (x = 0; x < world.map.size.x; x++)
+        for (x = 0; x < world.map.length; x++)
         {
-            pos = (y * world.map.size.x) + x;
+            pos = (y * world.map.length) + x;
             if (yx_eye->y == yx_cell->y && yx_eye->x < yx_cell->x)
             {
                 uint8_t val = fov_map[pos] & (SHADOW_LEFT | SHADOW_RIGHT);
@@ -512,7 +512,7 @@ static void shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
     pos_start = yx_to_map_pos(yx_start);
     fov_map[pos_start] = fov_map[pos_start] | SHADOW_LEFT | SHADOW_RIGHT;
     fill_shadow(yx_eye, yx_start, fov_map, pos_a, pos_b);
-    for (i = 0; i < world.map.size.y * world.map.size.x; i++)
+    for (i = 0; i < world.map.length * world.map.length; i++)
     {
         if (fov_map[i] & (SHADOW_LEFT | SHADOW_RIGHT) && i != pos_start)
         {
@@ -560,8 +560,8 @@ static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
 extern uint8_t * build_fov_map(struct MapObj * eye)
 {
     char * f_name = "build_fov_map()";
-    uint8_t radius = 2 * world.map.size.y;
-    uint32_t map_size = world.map.size.y * world.map.size.x;
+    uint8_t radius = 2 * world.map.length;
+    uint32_t map_size = world.map.length * world.map.length;
     struct yx_uint8 yx = eye->pos;
     uint8_t * fov_map = try_malloc(map_size, f_name);
     memset(fov_map, 0, map_size);
@@ -584,7 +584,7 @@ extern uint8_t * build_fov_map(struct MapObj * eye)
         }
     }
     uint16_t i;
-    for (i = 0; i < world.map.size.y * world.map.size.x; i++)
+    for (i = 0; i < world.map.length * world.map.length; i++)
     {
         if (fov_map[i] & HIDE_LATER)
         {

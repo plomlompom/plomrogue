@@ -144,8 +144,7 @@ static void update_worldstate_file()
     write_inventory(player, file);
     write_value_as_line(player->pos.y, file);
     write_value_as_line(player->pos.x, file);
-    write_value_as_line(world.map.size.y, file);
-    write_value_as_line(world.map.size.x, file);
+    write_value_as_line(world.map.length, file);
     write_map(player, file);
     if (world.log)
     {
@@ -199,7 +198,7 @@ static void write_inventory(struct MapObj * player, FILE * file)
 static char * build_visible_map(struct MapObj * player)
 {
     char * f_name = "build_visible_map()";
-    uint32_t map_size = world.map.size.y * world.map.size.x;
+    uint32_t map_size = world.map.length * world.map.length;
     char * visible_map = try_malloc(map_size, f_name);
     memset(visible_map, ' ', map_size);
     uint16_t pos_i;
@@ -238,11 +237,11 @@ static void write_map(struct MapObj * player, FILE * file)
     char * f_name = "write_map()";
     char * visible_map = build_visible_map(player);
     uint16_t x, y;
-    for (y = 0; y < world.map.size.y; y++)
+    for (y = 0; y < world.map.length; y++)
     {
-        for (x = 0; x < world.map.size.x; x++)
+        for (x = 0; x < world.map.length; x++)
         {
-            try_fputc(visible_map[(y * world.map.size.x) + x], file, f_name);
+            try_fputc(visible_map[(y * world.map.length) + x], file, f_name);
         }
         try_fputc('\n', file, f_name);
     }
