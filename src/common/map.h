@@ -13,7 +13,7 @@
 struct Map
 {
     char * cells;            /* sequence of bytes encoding map cells */
-    uint16_t length;         /* map's edge length */
+    uint16_t length;         /* map's edge length, i.e. both height and width */
 };
 
 
