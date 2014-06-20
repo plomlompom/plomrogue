@@ -6,7 +6,7 @@
 #ifndef AI_H
 #define AI_H
 
-struct MapObj;
+struct Thing;
 
 
 
@@ -14,7 +14,7 @@ struct MapObj;
  * pretty dumb so far. Actors will try to move towards their path-wise nearest
  * neighbor. If no one else is found in the neighborhood, they will simply wait.
  */
-extern void ai(struct MapObj * mo);
+extern void ai(struct Thing * t);
 
 
 

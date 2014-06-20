@@ -5,8 +5,8 @@
 #include <stdlib.h> /* free() */
 #include <unistd.h> /* unlink() */
 #include "../common/readwrite.h" /* try_fclose() */
-#include "map_object_actions.h" /* free_map_object_actions() */
-#include "map_objects.h" /* free_map_objects(), free_map_object_defs() */
+#include "thing_actions.h" /* free_thing_actions() */
+#include "things.h" /* free_things(), free_thing_types() */
 #include "world.h" /* global world */
 
 
@@ -27,17 +27,17 @@ extern void cleanup()
     {
         unlink(world.path_worldstate);
     }
-    if (cleanup_flags & CLEANUP_MAP_OBJECTS)
+    if (cleanup_flags & CLEANUP_THINGS)
     {
-        free_map_objects(world.map_objs);
+        free_things(world.things);
     }
-    if (cleanup_flags & CLEANUP_MAP_OBJECT_DEFS)
+    if (cleanup_flags & CLEANUP_THING_TYPES)
     {
-        free_map_object_defs(world.map_obj_defs);
+        free_thing_types(world.thing_types);
     }
-    if (cleanup_flags & CLEANUP_MAP_OBJECT_ACTS)
+    if (cleanup_flags & CLEANUP_THING_ACTIONS)
     {
-        free_map_object_actions(world.map_obj_acts);
+        free_thing_actions(world.thing_actions);
     }
     if (cleanup_flags & CLEANUP_IN)
     {

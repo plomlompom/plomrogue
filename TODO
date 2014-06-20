@@ -18,8 +18,6 @@ SERVER:
 - for game continuation, replace re-playing of whole record files with loading
   game state snapshots / save files
 
-- rename MapObject to Thing, MapObjectDef to ThingType etc.
-
 CLIENT:
 
 - enable toggling of window borders

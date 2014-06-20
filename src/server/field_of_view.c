@@ -8,7 +8,7 @@
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "map.h" /* yx_to_map_pos() */
-#include "map_objects.h" /* MapObj */
+#include "things.h" /* Thing */
 #include "yx_uint8.h" /* yx_uint8 */
 #include "world.h" /* global world  */
 
@@ -557,7 +557,7 @@ static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
 
 
 
-extern uint8_t * build_fov_map(struct MapObj * eye)
+extern uint8_t * build_fov_map(struct Thing * eye)
 {
     char * f_name = "build_fov_map()";
     uint8_t radius = 2 * world.map.length;

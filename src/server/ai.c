@@ -6,8 +6,8 @@
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "field_of_view.h" /* VISIBLE */
-#include "map_object_actions.h" /* get_moa_id_by_name() */
-#include "map_objects.h" /* struct MapObj */
+#include "thing_actions.h" /* get_thing_action_id_by_name() */
+#include "things.h" /* struct Thing */
 #include "world.h" /* global world */
 
 
@@ -37,9 +37,9 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
 static void dijkstra_map(uint16_t * score_map, uint16_t max_score);
 
 /* Return numpad char of direction ("8", "6", "2", "4" etc.) of enemy with the
- * shortest path visible to "mo_origin". If no enemy is around, return 0.
+ * shortest path visible to "t_origin". If no enemy is around, return 0.
  */
-static char get_dir_to_nearest_enemy(struct MapObj * mo_origin);
+static char get_dir_to_nearest_enemy(struct Thing * thing_origin);
 
 
 
@@ -118,12 +118,12 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
 
 
 
-static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
+static char get_dir_to_nearest_enemy(struct Thing * t_origin)
 {
     char * f_name = "get_dir_to_nearest_enemy()";
 
     /* Calculate for each cell the distance to the visibly nearest map actor not
-     * "mo_origin", with movement only possible in the directions of "dir".
+     * "t_origin", with movement only possible in the directions of "dir".
      * (Actors' own cells start with a distance of 0 towards themselves.)
      */
     uint32_t map_size = world.map.length * world.map.length;
@@ -132,22 +132,22 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
-        score_map[i] = mo_origin->fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
+        score_map[i] = t_origin->fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
     }
-    struct MapObj * mo = world.map_objs;
-    for (; mo != NULL; mo = mo->next)
+    struct Thing * t = world.things;
+    for (; t != NULL; t = t->next)
     {
-        if (!mo->lifepoints || mo == mo_origin)
+        if (!t->lifepoints || t == t_origin)
         {
             continue;
         }
-        score_map[(mo->pos.y * world.map.length) + mo->pos.x] = 0;
+        score_map[(t->pos.y * world.map.length) + t->pos.x] = 0;
     }
     dijkstra_map(score_map, max_score);
 
-    /* Return direction of "mo_origin"'s lowest-scored neighbor cell. */
+    /* Return direction of "t_origin"'s lowest-scored neighbor cell. */
     uint16_t neighbors[N_DIRS];
-    uint16_t pos_i = (mo_origin->pos.y * world.map.length) + mo_origin->pos.x;
+    uint16_t pos_i = (t_origin->pos.y * world.map.length) + t_origin->pos.x;
     get_neighbor_scores(score_map, pos_i, max_score, neighbors);
     free(score_map);
     char dir_to_nearest_enemy = 0;
@@ -166,13 +166,13 @@ static char get_dir_to_nearest_enemy(struct MapObj * mo_origin)
 
 
 
-extern void ai(struct MapObj * mo)
+extern void ai(struct Thing * t)
 {
-    mo->command = get_moa_id_by_name("wait");
-    char sel = get_dir_to_nearest_enemy(mo);
+    t->command = get_thing_action_id_by_name("wait");
+    char sel = get_dir_to_nearest_enemy(t);
     if (0 != sel)
     {
-        mo->command = get_moa_id_by_name("move");
-        mo->arg = sel;
+        t->command = get_thing_action_id_by_name("move");
+        t->arg = sel;
     }
 }

@@ -1,6 +1,6 @@
-/* src/server/map_object_actions.c */
+/* src/server/thing_actions.c */
 
-#include "map_object_actions.h"
+#include "thing_actions.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
@@ -10,10 +10,9 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "field_of_view.h" /* build_fov_map() */
-#include "map_objects.h" /* structs MapObj, MapObjDef, get_player(),
-                          * set_object_position(), own_map_object(),
-                          * get_map_object_def()
-                          */
+#include "things.h" /* structs Thing, ThingType, get_player(), own_thing(),
+                     * set_thing_position(), get_thing_type()
+                     */
 #include "map.h" /* is_passable() */
 #include "yx_uint8.h" /* mv_yx_in_dir(), yx_uint8_cmp() */
 #include "world.h" /* global world */
@@ -26,7 +25,7 @@ static void update_log(char * text);
 /* One actor "wounds" another actor, decrementing his lifepoints and, if they
  * reach zero in the process, killing it. Generates appropriate log message.
  */
-static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted);
+static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted);
 
 /* Bonus stuff to actor_*() to happen if actor==player. Mostly writing of log
  * messages; _pick and _drop also decrement world.inventory_sel by 1 if >0.
@@ -37,7 +36,7 @@ static uint8_t match_dir(char d, char ** dsc_d, char match, char * dsc_match);
 static void playerbonus_move(char d, uint8_t passable);
 static void playerbonus_drop(uint8_t owns_none);
 static void playerbonus_pick(uint8_t picked);
-static void playerbonus_use(uint8_t no_object, uint8_t wrong_object);
+static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing);
 
 
 
@@ -83,22 +82,22 @@ static void update_log(char * text)
 
 
 
-static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted)
+static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
 {
-    struct MapObjDef * mod_hitter = get_map_object_def(hitter->type);
-    struct MapObjDef * mod_hitted = get_map_object_def(hitted->type);
-    struct MapObj * player = get_player();
+    struct ThingType * tt_hitter = get_thing_type(hitter->type);
+    struct ThingType * tt_hitted = get_thing_type(hitted->type);
+    struct Thing * player = get_player();
     char * msg1 = "You";
     char * msg2 = "wound";
     char * msg3 = "you";
     if      (player != hitter)
     {
-        msg1 = mod_hitter->name;
+        msg1 = tt_hitter->name;
         msg2 = "wounds";
     }
     if (player != hitted)
     {
-        msg3 = mod_hitted->name;
+        msg3 = tt_hitted->name;
     }
     uint8_t len = 1 + strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
     char msg[len];
@@ -107,7 +106,7 @@ static void actor_hits_actor(struct MapObj * hitter, struct MapObj * hitted)
     hitted->lifepoints--;
     if (0 == hitted->lifepoints)
     {
-        hitted->type = mod_hitted->corpse_id;
+        hitted->type = tt_hitted->corpse_id;
         if (player == hitted)
         {
             update_log(" You die.");
@@ -185,14 +184,14 @@ static void playerbonus_pick(uint8_t picked)
 
 
 
-static void playerbonus_use(uint8_t no_object, uint8_t wrong_object)
+static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing)
 {
-    if      (no_object)
+    if      (no_thing)
     {
         update_log("\nYou try to use an object, but you own none.");
         return;
     }
-    else if (wrong_object)
+    else if (wrong_thing)
     {
         update_log("\nYou try to use this object, but fail.");
         return;
@@ -202,39 +201,39 @@ static void playerbonus_use(uint8_t no_object, uint8_t wrong_object)
 
 
 
-extern void free_map_object_actions(struct MapObjAct * moa)
+extern void free_thing_actions(struct ThingAction * ta)
 {
-    if (NULL == moa)
+    if (NULL == ta)
     {
         return;
     }
-    free(moa->name);
-    free_map_object_actions(moa->next);
-    free(moa);
+    free(ta->name);
+    free_thing_actions(ta->next);
+    free(ta);
 }
 
 
 
-extern uint8_t get_moa_id_by_name(char * name)
+extern uint8_t get_thing_action_id_by_name(char * name)
 {
-    struct MapObjAct * moa = world.map_obj_acts;
-    while (NULL != moa)
+    struct ThingAction * ta = world.thing_actions;
+    while (NULL != ta)
     {
-        if (0 == strcmp(moa->name, name))
+        if (0 == strcmp(ta->name, name))
         {
             break;
         }
-        moa = moa->next;
+        ta = ta->next;
     }
-    exit_err(NULL==moa, "get_moa_id_by_name() did not find map object action.");
-    return moa->id;
+    exit_err(NULL == ta, "get_thing_action_id_by_name() did not find action.");
+    return ta->id;
 }
 
 
 
-extern void actor_wait(struct MapObj * mo)
+extern void actor_wait(struct Thing * t)
 {
-    if (mo == get_player())
+    if (t == get_player())
     {
         playerbonus_wait();
     }
@@ -242,31 +241,31 @@ extern void actor_wait(struct MapObj * mo)
 
 
 
-extern void actor_move(struct MapObj * mo)
+extern void actor_move(struct Thing * t)
 {
-    char d = mo->arg;
-    struct yx_uint8 target = mv_yx_in_dir(d, mo->pos);
-    struct MapObj * other_mo;
-    for (other_mo = world.map_objs; other_mo != 0; other_mo = other_mo->next)
+    char d = t->arg;
+    struct yx_uint8 target = mv_yx_in_dir(d, t->pos);
+    struct Thing * other_t;
+    for (other_t = world.things; other_t != 0; other_t = other_t->next)
     {
-        if (0 == other_mo->lifepoints || other_mo == mo)
+        if (0 == other_t->lifepoints || other_t == t)
         {
             continue;
         }
-        if (yx_uint8_cmp(&target, &other_mo->pos))
+        if (yx_uint8_cmp(&target, &other_t->pos))
         {
-            actor_hits_actor(mo, other_mo);
+            actor_hits_actor(t, other_t);
             return;
         }
     }
     uint8_t passable = is_passable(target);
     if (passable)
     {
-        set_object_position(mo, target);
-        free(mo->fov_map);
-        mo->fov_map = build_fov_map(mo);
+        set_thing_position(t, target);
+        free(t->fov_map);
+        t->fov_map = build_fov_map(t);
     }
-    if (mo == get_player())
+    if (t == get_player())
     {
         playerbonus_move(d, passable);
     }
@@ -274,18 +273,18 @@ extern void actor_move(struct MapObj * mo)
 
 
 
-extern void actor_drop(struct MapObj * mo)
+extern void actor_drop(struct Thing * t)
 {
-    uint8_t owns_none = (NULL == mo->owns);
+    uint8_t owns_none = (NULL == t->owns);
     if (!owns_none)
     {
-        uint8_t select = mo->arg;
-        struct MapObj * owned = mo->owns;
+        uint8_t select = t->arg;
+        struct Thing * owned = t->owns;
         uint8_t i = 0;
         for (; i != select; i++, owned = owned->next);
-        own_map_object(&world.map_objs, &mo->owns, owned->id);
+        own_thing(&world.things, &t->owns, owned->id);
     }
-    if (mo == get_player())
+    if (t == get_player())
     {
         playerbonus_drop(owns_none);
     }
@@ -293,23 +292,23 @@ extern void actor_drop(struct MapObj * mo)
 
 
 
-extern void actor_pick(struct MapObj * mo)
+extern void actor_pick(struct Thing * t)
 {
-    struct MapObj * picked = NULL;
-    struct MapObj * mo_i;
-    for (mo_i = world.map_objs; NULL != mo_i; mo_i = mo_i->next)
+    struct Thing * picked = NULL;
+    struct Thing * t_i;
+    for (t_i = world.things; NULL != t_i; t_i = t_i->next)
     {
-        if (mo_i != mo && yx_uint8_cmp(&mo_i->pos, &mo->pos))
+        if (t_i != t && yx_uint8_cmp(&t_i->pos, &t->pos))
         {
-            picked = mo_i;
+            picked = t_i;
         }
     }
     if (NULL != picked)
     {
-        own_map_object(&mo->owns, &world.map_objs, picked->id);
-        set_object_position(picked, mo->pos);
+        own_thing(&t->owns, &world.things, picked->id);
+        set_thing_position(picked, t->pos);
     }
-    if (mo == get_player())
+    if (t == get_player())
     {
         playerbonus_pick(NULL != picked);
     }
@@ -317,38 +316,38 @@ extern void actor_pick(struct MapObj * mo)
 
 
 
-extern void actor_use(struct MapObj * mo)
+extern void actor_use(struct Thing * t)
 {
-    uint8_t wrong_object = 1;
-    uint8_t no_object = (NULL == mo->owns);
-    if (!no_object)
+    uint8_t wrong_thing = 1;
+    uint8_t no_thing = (NULL == t->owns);
+    if (!no_thing)
     {
-        uint8_t select = mo->arg;
+        uint8_t select = t->arg;
         uint8_t i = 0;
-        struct MapObj * selected = mo->owns;
+        struct Thing * selected = t->owns;
         for (; i != select; i++, selected = selected->next);
-        struct MapObjDef * mod = get_map_object_def(selected->type);
-        if (mod->consumable)
+        struct ThingType * tt = get_thing_type(selected->type);
+        if (tt->consumable)
         {
-            wrong_object = 0;
-            struct MapObj * next = selected->next;
+            wrong_thing = 0;
+            struct Thing * next = selected->next;
             free(selected);
             if (0 < select)
             {
                 select--;
-                selected = mo->owns;
+                selected = t->owns;
                 for (i = 0; i != select; i++, selected = selected->next);
                 selected->next = next;
             }
             else
             {
-                mo->owns = next;
+                t->owns = next;
             }
-            mo->lifepoints = mo->lifepoints + mod->consumable;
+            t->lifepoints = t->lifepoints + tt->consumable;
         }
     }
-    if (mo == get_player())
+    if (t == get_player())
     {
-        playerbonus_use(no_object, wrong_object);
+        playerbonus_use(no_thing, wrong_thing);
     }
 }

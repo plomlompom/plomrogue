@@ -18,9 +18,7 @@
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "field_of_view.h" /* VISIBLE */
 #include "map.h" /* yx_to_map_pos() */
-#include "map_objects.h" /* structs MapObj, MapObjDef, get_map_obj_def(),
-                          * get_player()
-                          */
+#include "things.h" /* Thing, ThingType, get_thing_type(), get_player() */
 #include "world.h" /* global world  */
 
 
@@ -46,17 +44,17 @@ static void update_worldstate_file();
 static void write_value_as_line(uint32_t value, FILE * file);
 
 /* Write to "file" player's inventory, one item name per line. End in "%\n". */
-static void write_inventory(struct MapObj * player, FILE * file);
+static void write_inventory(struct Thing * player, FILE * file);
 
 /* Return map cells sequence as visible to the "player", with invisible cells as
- * whitespace. Super-impose over visible map cells map objects positioned there.
+ * whitespace. Super-impose over visible map cells things positioned there.
  */
-static char * build_visible_map(struct MapObj * player);
+static char * build_visible_map(struct Thing * player);
 
 /* Write to "file" game map as visible to "player", build_visible_map()-drawn.
  * Write one row per \n-delimited line.
  */
-static void write_map(struct MapObj * player, FILE * file);
+static void write_map(struct Thing * player, FILE * file);
 
 
 
@@ -138,7 +136,7 @@ static void update_worldstate_file()
     char path_tmp[strlen(world.path_worldstate) + strlen(world.tmp_suffix) + 1];
     sprintf(path_tmp, "%s%s", world.path_worldstate, world.tmp_suffix);
     FILE * file = try_fopen(path_tmp, "w", f_name);
-    struct MapObj * player = get_player();
+    struct Thing * player = get_player();
     write_value_as_line(world.turn, file);
     write_value_as_line(player->lifepoints, file);
     write_inventory(player, file);
@@ -169,10 +167,10 @@ static void write_value_as_line(uint32_t value, FILE * file)
 
 
 
-static void write_inventory(struct MapObj * player, FILE * file)
+static void write_inventory(struct Thing * player, FILE * file)
 {
     char * f_name = "write_inventory()";
-    struct MapObj * owned = player->owns;
+    struct Thing * owned = player->owns;
     if (NULL == owned)
     {
         char * empty = "(none)\n";
@@ -183,8 +181,8 @@ static void write_inventory(struct MapObj * player, FILE * file)
         uint8_t q;
         for (q = 0; NULL != owned; q++)
         {
-            struct MapObjDef * mod = get_map_object_def(owned->type);
-            try_fwrite(mod->name, strlen(mod->name), 1, file, f_name);
+            struct ThingType * tt = get_thing_type(owned->type);
+            try_fwrite(tt->name, strlen(tt->name), 1, file, f_name);
             try_fputc('\n', file, f_name);
             owned = owned->next;
         }
@@ -195,7 +193,7 @@ static void write_inventory(struct MapObj * player, FILE * file)
 
 
 
-static char * build_visible_map(struct MapObj * player)
+static char * build_visible_map(struct Thing * player)
 {
     char * f_name = "build_visible_map()";
     uint32_t map_size = world.map.length * world.map.length;
@@ -209,21 +207,21 @@ static char * build_visible_map(struct MapObj * player)
             visible_map[pos_i] = world.map.cells[pos_i];
         }
     }
-    struct MapObj * o;
-    struct MapObjDef * d;
+    struct Thing * t;
+    struct ThingType * tt;
     char c;
     uint8_t i;
     for (i = 0; i < 2; i++)
     {
-        for (o = world.map_objs; o != 0; o = o->next)
+        for (t = world.things; t != 0; t = t->next)
         {
-            if (   player->fov_map[yx_to_map_pos(&o->pos)] & VISIBLE
-                && (   (0 == i && 0 == o->lifepoints)
-                    || (1 == i && 0 < o->lifepoints)))
+            if (   player->fov_map[yx_to_map_pos(&t->pos)] & VISIBLE
+                && (   (0 == i && 0 == t->lifepoints)
+                    || (1 == i && 0 < t->lifepoints)))
             {
-                d = get_map_object_def(o->type);
-                c = d->char_on_map;
-                visible_map[yx_to_map_pos(&o->pos)] = c;
+                tt = get_thing_type(t->type);
+                c = tt->char_on_map;
+                visible_map[yx_to_map_pos(&t->pos)] = c;
             }
         }
     }
@@ -232,7 +230,7 @@ static char * build_visible_map(struct MapObj * player)
 
 
 
-static void write_map(struct MapObj * player, FILE * file)
+static void write_map(struct Thing * player, FILE * file)
 {
     char * f_name = "write_map()";
     char * visible_map = build_visible_map(player);

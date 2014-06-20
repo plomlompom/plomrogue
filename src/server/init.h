@@ -20,7 +20,7 @@ extern void setup_server_io();
  * Unlinks a pre-existing file at world.path_record if called on a world.turn>0,
  * i.e. if called after iterating through an already established game world.
  *
- * Map object (action) definitions read in from server config directory are not
+ * Thing (action) definitions read in from server config directory are not
  * affected. The map is populated accordingly. world.last_update_turn is set to
  * 0 and world.turn to 1, so that io_round()'s criteria for updating the output
  * file are triggered even when this function is called during a round 1.

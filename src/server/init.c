@@ -20,9 +20,9 @@
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "field_of_view.h" /* build_fov_map() */
 #include "map.h" /* init_map() */
-#include "map_objects.h" /* MapObj, MapObjDef, free_map_objects(),
-                          * add_map_objects(), get_player()
-                          */
+#include "things.h" /* Thing, ThingType, free_things(), add_things(),
+                     * get_player()
+                     */
 #include "run.h" /* obey_msg(), io_loop() */
 #include "world.h" /* global world */
 
@@ -82,34 +82,34 @@ extern void remake_world(uint32_t seed)
 {
     char * f_name = "remake_world()";
     free(world.log);
-    world.log = NULL;  /* map_object_action.c's update_log() checks for this. */
+    world.log = NULL;  /* thing_actions.c's update_log() checks for this. */
     world.seed = seed;
-    world.map_obj_count = 0;
+    world.thing_count = 0;
     free(world.map.cells);
-    free_map_objects(world.map_objs);
+    free_things(world.things);
     world.last_update_turn = 0;
     init_map();
-    struct MapObjDef * mod;
-    for (mod = world.map_obj_defs; NULL != mod; mod = mod->next)
+    struct ThingType * tt;
+    for (tt = world.thing_types; NULL != tt; tt = tt->next)
     {
-        if (world.player_type == mod->id)
+        if (world.player_type == tt->id)
         {
-            add_map_objects(mod->id, mod->start_n);
+            add_things(tt->id, tt->start_n);
             break;
         }
     }
-    for (mod = world.map_obj_defs; NULL != mod; mod = mod->next)
+    for (tt = world.thing_types; NULL != tt; tt = tt->next)
     {
-        if (world.player_type != mod->id)
+        if (world.player_type != tt->id)
         {
-            add_map_objects(mod->id, mod->start_n);
+            add_things(tt->id, tt->start_n);
         }
     }
-    set_cleanup_flag(CLEANUP_MAP_OBJECTS);
-    struct MapObj * mo;
-    for (mo = world.map_objs; NULL != mo; mo = mo->next)
+    set_cleanup_flag(CLEANUP_THINGS);
+    struct Thing * t;
+    for (t = world.things; NULL != t; t = t->next)
     {
-        mo->fov_map = mo->lifepoints ? build_fov_map(mo) : NULL;
+        t->fov_map = t->lifepoints ? build_fov_map(t) : NULL;
     }
     if (world.turn)
     {

@@ -16,8 +16,8 @@
 #include "cleanup.h" /* unset_cleanup_flag() */
 #include "init.h" /* remake_world() */
 #include "io.h" /* io_round() */
-#include "map_object_actions.h" /* get_moa_id_by_name() */
-#include "map_objects.h" /* struct MapObj, get_player() */
+#include "thing_actions.h" /* get_thing_action_id_by_name() */
+#include "things.h" /* Thing, get_player() */
 #include "world.h" /* global world */
 
 
@@ -27,7 +27,7 @@
  */
 static void turn_over();
 
-/* If "msg"'s first part matches "command_name", set player's MapObj's .command
+/* If "msg"'s first part matches "command_name", set player's Thing's .command
  * to the command's id and its .arg to a numerical value following in the latter
  * part of "msg" (if no digits are found, use 0); then finish player's turn and
  * turn game over to the NPCs via turn_over(); then return 1. Else, return 0.
@@ -45,41 +45,41 @@ static void server_test();
 
 static void turn_over()
 {
-    struct MapObj * player = get_player();
-    struct MapObj * map_object = player;
+    struct Thing * player = get_player();
+    struct Thing * thing = player;
     uint16_t start_turn = world.turn;
     while (    0 < player->lifepoints
            || (0 == player->lifepoints && start_turn == world.turn))
     {
-        if (NULL == map_object)
+        if (NULL == thing)
         {
             world.turn++;
-            map_object = world.map_objs;
+            thing = world.things;
         }
-        if (0 < map_object->lifepoints)
+        if (0 < thing->lifepoints)
         {
-            if (0 == map_object->command)
+            if (0 == thing->command)
             {
-                if (map_object == player)
+                if (thing == player)
                 {
                     break;
                 }
-                ai(map_object);
+                ai(thing);
             }
-            map_object->progress++;
-            struct MapObjAct * moa = world.map_obj_acts;
-            while (moa->id != map_object->command)
+            thing->progress++;
+            struct ThingAction * ta = world.thing_actions;
+            while (ta->id != thing->command)
             {
-                moa = moa->next;
+                ta = ta->next;
             }
-            if (map_object->progress == moa->effort)
+            if (thing->progress == ta->effort)
             {
-                moa->func(map_object);
-                map_object->command = 0;
-                map_object->progress = 0;
+                ta->func(thing);
+                thing->command = 0;
+                thing->progress = 0;
             }
         }
-        map_object = map_object->next;
+        thing = thing->next;
     }
 }
 
@@ -89,9 +89,9 @@ static uint8_t apply_player_command(char * msg, char * command_name)
 {
     if (!strncmp(msg, command_name, strlen(command_name)))
     {
-        struct MapObj * player = get_player();
+        struct Thing * player = get_player();
         player->arg = atoi(&(msg[strlen(command_name)]));
-        player->command = get_moa_id_by_name(command_name);
+        player->command = get_thing_action_id_by_name(command_name);
         turn_over();
         return 1;
     }
@@ -126,10 +126,10 @@ extern void obey_msg(char * msg, uint8_t do_record)
     char * f_name = "obey_msg()";
     if (   apply_player_command(msg, "wait")   /* TODO: Check for non-error   */
         || apply_player_command(msg, "move")   /* return value of a modified  */
-        || apply_player_command(msg, "pick_up")/* get_moa_id_by_name(); if id */
-        || apply_player_command(msg, "drop")   /* found, execute on it what's */
-        || apply_player_command(msg, "use"));  /* in apply_player_command().  */
-    else
+        || apply_player_command(msg, "pick_up")/*get_thing_action_id_by_name()*/
+        || apply_player_command(msg, "drop")   /* and if id found, execute on */
+        || apply_player_command(msg, "use"));  /* it what's in                */
+    else                                       /* apply_player_command().     */
     {
         char * seed_command = "seed";
         if (!strncmp(msg, seed_command, strlen(seed_command)))

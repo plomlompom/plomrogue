@@ -77,10 +77,9 @@ option (like "-s100") to start the recording at the respective turn number.
 Hacking / server internals and configuration
 --------------------------------------------
 
-The ./confserver/world file defines the map object types, actions available to
-them, the map geometry and the map object type (species) of the player. Each
-definition consists of a single- or multi-line block wherein each line sets one
-attribute.
+The ./confserver/world file defines the thing types, actions available to them,
+the map geometry and the thing type (species) of the player. Each definition
+consists of a single- or multi-line block wherein each line sets one attribute.
 
 Here's a typical action definition block:
 
@@ -96,9 +95,9 @@ it. The string after "NAME" names the action. Furthermore, if it is one of
 these strings to this action. All other names (including "wait") currently are
 matched to a do-nothing wait function.
 
-Here's a typical map object type definition block: 
+Here's a typical thing type definition block: 
 
-OBJECT 2
+THINGTYPE 2
 NAME ZOMBIE
 SYMBOL z
 LIFEPOINTS 3
@@ -106,18 +105,18 @@ CORPSE_ID 5
 CONSUMABLE 0
 START_NUMBER 9
 
-A line of "OBJECT" followed by a number starts it, and the number sets the
-object type's internal id. The number after "CONSUMABLE" defines the object
-as consumable (and to so many hitpoints gain). The character after "SYMBOL" is
-the one shown on the map to represent to object type. "LIFEPOINTS" is the start
-hitpoints value for this object type and defines it as animate if it is
-non-zero. The string after "NAME" sets the object type's name. "CORPSE_ID" sets
-the id of the object type that objects of this type degrade to if their
-hitpoints drop to zero if they start out as inanimate (what is not implemented
-yet: or if they are inanimate, but are otherwise crushed). Note that the
-"CORPSE_ID" must match the id of an object type defined in the file (before or
-after, it may even be the same). "START_NUMBER" sets the number of objects that
-are to appear of the given type on the map on game start.
+A line of "THINGTYPE" followed by a number starts it, and the number sets the
+thing type's internal id. The number after "CONSUMABLE" defines the thing as
+consumable (and to so many hitpoints gain). The character after "SYMBOL" is the
+one shown on the map to represent to thing type. "LIFEPOINTS" is the start
+hitpoints value for this thing type and defines it as animate if it is non-zero.
+The string after "NAME" sets the thing type's name. "CORPSE_ID" sets the id of
+the thing type that things of this type degrade to if their hitpoints drop to
+zero if they start out as inanimate (what is not implemented yet: or if they are
+inanimate, but are otherwise crushed). Note that the "CORPSE_ID" must match the
+id of a thing type defined in the file (before or after, it may even be the
+same). "START_NUMBER" sets the number of things that are to appear of the
+given type on the map on game start.
 
 The map is defined by a single-line block. Its number value sets the map
 square's edge length. It must be >= 1 and <= 256:
@@ -125,15 +124,15 @@ square's edge length. It must be >= 1 and <= 256:
 MAP_LENGTH 64
 
 The player type / species is also defined by a single line block. Its number
-value sets the player's creature's map object type by its id:
+value sets the player's creature's thing type by its id:
 
 PLAYER_TYPE 0
 
 All these definition block members must be present within their respective
-blocks, but only "ACTION" and "OBJECT" must be positioned at their respective
+blocks, but only "ACTION" and "THINGTYPE" must be positioned at their respective
 blocks' first line; the others may appear in whatever order and even multiple
-times. If an object or action definition block is finished, however, it cannot
-be re-defined by starting a new block with the same object type or action id.
+times. If a thing or action definition block is finished, however, it cannot
+be re-defined by starting a new block with the same thing type or action id.
 
 Tokens in this config file are separated by whitespace. Single quotes can be
 put around string values that are to include whitespace by themslves. Note that

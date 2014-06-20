@@ -12,16 +12,16 @@
                                    */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "cleanup.h" /* set_cleanup_flag(), CLEANUP_MAP_OBJ_DEFS,
-                      * CLEANUP_MAP_OBJ_ACTS
+#include "cleanup.h" /* set_cleanup_flag(), CLEANUP_THING_TYPES,
+                      * CLEANUP_THING_ACTIONS
                       */
-#include "map_object_actions.h" /* MapObjAct */
-#include "map_objects.h" /* MapObj, MapObjDef, struct MapObjDef */
+#include "thing_actions.h" /* ThingAction */
+#include "things.h" /* Thing, ThingType */
 #include "world.h" /* world global */
 
 
 
-/* Flags defining state of object and action entry reading ((un-)finished /
+/* Flags defining state of thing type and action entry reading ((un-)finished /
  * ready for starting the reading of a new definition etc.)
  */
 enum flag
@@ -35,15 +35,15 @@ enum flag
     LIFEPOINTS_SET = 0x10,
     CONSUMABLE_SET = 0x20,
     START_N_SET    = 0x40,
-    READY_ACT = NAME_SET | EFFORT_SET,
-    READY_OBJ = NAME_SET | CORPSE_ID_SET | SYMBOL_SET | LIFEPOINTS_SET
-                | CONSUMABLE_SET | START_N_SET
+    READY_ACTION   = NAME_SET | EFFORT_SET,
+    READY_THING    = NAME_SET | CORPSE_ID_SET | SYMBOL_SET | LIFEPOINTS_SET
+                     | CONSUMABLE_SET | START_N_SET
 };
 
 
 
-/* What MapObjDef and MapObjAct structs have in common at their top. Use this to
- * allow same functions run over structs of both types.
+/* What ThingType and ThingAction structs have in common at their top. Use this
+ * to allow same functions run over structs of both types.
  */
 struct EntryHead
 {
@@ -53,13 +53,13 @@ struct EntryHead
 
 
 
-/* Interpret "token0" and "token1" as data to write into the MapObjAct /
- * MapObjDef DB.
+/* Interpret "token0" and "token1" as data to write into the ThingAction /
+ * ThingType DB.
  *
- * Individual MapObjDef / MapObjAct DB entries are put together line by line
+ * Individual ThingType / ThingAction DB entries are put together line by line
  * before being written. Writing only happens after all necessary members of an
  * entry have been assembled, and when additionally a) a new entry is started by
- * a "token0" of "ACTION" or "OBJECT"; or b) "token0" is NULL.
+ * a "token0" of "ACTION" or "THINGTYPE"; or b) "token0" is NULL.
  *
  * Also check against the line parse_file() read tokens from having more tokens.
  */
@@ -79,8 +79,8 @@ static uint8_t start_entry(char * token0, char * token1, char * comparand,
 static void write_if_entry(struct EntryHead ** entry,
                            struct EntryHead *** entry_p_p_p);
 
-/* Ensure that all .corpse_id members in the MapObjDef DB fit .id members of
- * MapObjDef DB entries.
+/* Ensure that all .corpse_id members in the ThingType DB fit .id members of
+ * ThingType DB entries.
  */
 static void test_corpse_ids();
 
@@ -91,62 +91,62 @@ static uint8_t set_player_type(char * token0, char * comparand, char * token1);
 static uint8_t set_map_length(char * token0, char * comparand, char * token1);
 
 /* Try to read tokens as members for the definition currently edited, which may
- * be "mod" or "moa". What member of which of the two is set depends on which of
+ * be "tt" or "ta". What member of which of the two is set depends on which of
  * the flags has EDIT_STARTED set and on the key name in "token0". Return 1 if
  * interpretation succeeds, else 0.
  *
- * Note that MapObjAct entries' .name also determines their .func.
+ * Note that ThingAction entries' .name also determines their .func.
  */
 static uint8_t set_members(char * token0, char * token1,
-                           uint8_t * object_flags, uint8_t * action_flags,
-                           struct MapObjDef * mod, struct MapObjAct * moa);
+                           uint8_t * thing_flags, uint8_t * action_flags,
+                           struct ThingType * tt, struct ThingAction * ta);
 
-/* If "name" fits "moa"->name, set "moa"->func to "func". (Derives MapObjAct
+/* If "name" fits "ta"->name, set "ta"->func to "func". (Derives ThingAction
  * .func from .name for set_members().
  */
-static uint8_t try_func_name(struct MapObjAct * moa,
-                             char * name, void (* func) (struct MapObj *));
+static uint8_t try_func_name(struct ThingAction * ta,
+                             char * name, void (* func) (struct Thing *));
 
 
 
 static void tokens_into_entries(char * token0, char * token1)
 {
-    char * str_act = "ACTION";
-    char * str_obj = "OBJECT";
+    char * str_action = "ACTION";
+    char * str_thing = "THINGTYPE";
     char * str_player = "PLAYER_TYPE";
     char * str_map_length = "MAP_LENGTH";
-    static struct MapObjAct ** moa_p_p = &world.map_obj_acts;
-    static struct MapObjDef ** mod_p_p = &world.map_obj_defs;
-    static uint8_t action_flags = READY_ACT;
-    static uint8_t object_flags = READY_OBJ;
-    static struct EntryHead * moa = NULL;
-    static struct EntryHead * mod = NULL;
-    if (!token0 || !strcmp(token0, str_act) || !strcmp(token0, str_obj)
+    static struct ThingAction ** ta_p_p = &world.thing_actions;
+    static struct ThingType ** tt_p_p = &world.thing_types;
+    static uint8_t action_flags = READY_ACTION;
+    static uint8_t thing_flags = READY_THING;
+    static struct EntryHead * ta = NULL;
+    static struct EntryHead * tt = NULL;
+    if (!token0 || !strcmp(token0, str_action) || !strcmp(token0, str_thing)
                 || !strcmp(token0, str_player))
     {
-        parse_and_reduce_to_readyflag(&action_flags, READY_ACT);
-        parse_and_reduce_to_readyflag(&object_flags, READY_OBJ);
-        write_if_entry(&moa, (struct EntryHead ***) &moa_p_p);
-        write_if_entry(&mod, (struct EntryHead ***) &mod_p_p);
+        parse_and_reduce_to_readyflag(&action_flags, READY_ACTION);
+        parse_and_reduce_to_readyflag(&thing_flags, READY_THING);
+        write_if_entry(&ta, (struct EntryHead ***) &ta_p_p);
+        write_if_entry(&tt, (struct EntryHead ***) &tt_p_p);
     }
     if (token0)
     {
         parsetest_too_many_values();
-        if (start_entry(token0, token1, str_act, &action_flags,
-                        sizeof(struct MapObjAct), (struct EntryHead**) &moa,
-                        (struct EntryHead *) world.map_obj_acts))
+        if (start_entry(token0, token1, str_action, &action_flags,
+                        sizeof(struct ThingAction), (struct EntryHead**) &ta,
+                        (struct EntryHead *) world.thing_actions))
         {
             err_line(0 == atoi(token1), "Value must not be 0.");
         }
-        else if (!(   start_entry(token0, token1, str_obj, &object_flags,
-                                  sizeof(struct MapObjDef),
-                                  (struct EntryHead**) &mod,
-                                  (struct EntryHead *) world.map_obj_defs)
+        else if (!(   start_entry(token0, token1, str_thing, &thing_flags,
+                                  sizeof(struct ThingType),
+                                  (struct EntryHead**) &tt,
+                                  (struct EntryHead *) world.thing_types)
                    || set_player_type(token0, str_player, token1)
                    || set_map_length(token0, str_map_length, token1)
-                   || set_members(token0, token1, &object_flags, &action_flags,
-                                  (struct MapObjDef *)mod,
-                                  (struct MapObjAct *) moa)))
+                   || set_members(token0, token1, &thing_flags, &action_flags,
+                                  (struct ThingType *) tt,
+                                  (struct ThingAction *) ta)))
         {
             parse_unknown_arg();
         }
@@ -193,16 +193,16 @@ static void write_if_entry(struct EntryHead ** entry,
 static void test_corpse_ids()
 {
     char * f_name = "test_corpse_ids()";
-    char * prefix = "In the object definitions DB, one object corpse ID does "
-                    "not reference any known object in the DB. ID of "
-                    "responsible object: ";
+    char * prefix = "In the thing types DB, one thing corpse ID does not "
+                    "reference any known thing type in the DB. ID of "
+                    "responsible thing type: ";
     size_t size = strlen(prefix) + 3 + 1; /* 3: uint8_t representation strlen */
     char * err_corpse = try_malloc(size, f_name);
-    struct MapObjDef * test_entry_0 = world.map_obj_defs;
+    struct ThingType * test_entry_0 = world.thing_types;
     for (; test_entry_0; test_entry_0 = test_entry_0->next)
     {
         uint8_t corpse_id_found = 0;
-        struct MapObjDef * test_entry_1 = world.map_obj_defs;
+        struct ThingType * test_entry_1 = world.thing_types;
         for (; test_entry_1; test_entry_1 = test_entry_1->next)
         {
             if (test_entry_0->corpse_id == test_entry_1->id)
@@ -247,38 +247,38 @@ static uint8_t set_map_length(char * token0, char * comparand, char * token1)
 
 
 
-static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
+static uint8_t set_members(char * token0, char * token1, uint8_t * thing_flags,
                            uint8_t * action_flags,
-                           struct MapObjDef * mod, struct MapObjAct * moa)
+                           struct ThingType * tt, struct ThingAction * ta)
 {
     if (   *action_flags & EDIT_STARTED
         && parse_val(token0, token1, "NAME", action_flags,
-                     NAME_SET, 's', (char *) &moa->name))
+                     NAME_SET, 's', (char *) &ta->name))
     {
-        if (!(   try_func_name(moa, "move", actor_move)
-              || try_func_name(moa, "pick_up", actor_pick)
-              || try_func_name(moa, "drop", actor_drop)
-              || try_func_name(moa, "use", actor_use)))
+        if (!(   try_func_name(ta, "move", actor_move)
+              || try_func_name(ta, "pick_up", actor_pick)
+              || try_func_name(ta, "drop", actor_drop)
+              || try_func_name(ta, "use", actor_use)))
         {
-            moa->func = actor_wait;
+            ta->func = actor_wait;
         }
         *action_flags = *action_flags | NAME_SET;
         return 1;
     }
-    else if (   parse_val(token0, token1, "NAME", object_flags,
-                          NAME_SET, 's', (char *) &mod->name)
-             || parse_val(token0, token1, "SYMBOL", object_flags,
-                          SYMBOL_SET, 'c', (char *) &mod->char_on_map)
+    else if (   parse_val(token0, token1, "NAME", thing_flags,
+                          NAME_SET, 's', (char *) &tt->name)
+             || parse_val(token0, token1, "SYMBOL", thing_flags,
+                          SYMBOL_SET, 'c', (char *) &tt->char_on_map)
              || parse_val(token0, token1, "EFFORT", action_flags,
-                          EFFORT_SET, '8', (char *) &moa->effort)
-             || parse_val(token0, token1, "START_NUMBER", object_flags,
-                          START_N_SET, '8', (char *) &mod->start_n)
-             || parse_val(token0, token1, "LIFEPOINTS", object_flags,
-                          LIFEPOINTS_SET, '8', (char *) &mod->lifepoints)
-             || parse_val(token0, token1, "CONSUMABLE", object_flags,
-                          CONSUMABLE_SET, '8', (char *) &mod->consumable)
-             || parse_val(token0, token1, "CORPSE_ID", object_flags,
-                          CORPSE_ID_SET, '8', (char *) &mod->corpse_id))
+                          EFFORT_SET, '8', (char *) &ta->effort)
+             || parse_val(token0, token1, "START_NUMBER", thing_flags,
+                          START_N_SET, '8', (char *) &tt->start_n)
+             || parse_val(token0, token1, "LIFEPOINTS", thing_flags,
+                          LIFEPOINTS_SET, '8', (char *) &tt->lifepoints)
+             || parse_val(token0, token1, "CONSUMABLE", thing_flags,
+                          CONSUMABLE_SET, '8', (char *) &tt->consumable)
+             || parse_val(token0, token1, "CORPSE_ID", thing_flags,
+                          CORPSE_ID_SET, '8', (char *) &tt->corpse_id))
     {
         return 1;
     }
@@ -287,12 +287,12 @@ static uint8_t set_members(char * token0, char * token1, uint8_t * object_flags,
 
 
 
-static uint8_t try_func_name(struct MapObjAct * moa, char * name,
-                             void (* func) (struct MapObj *))
+static uint8_t try_func_name(struct ThingAction * ta, char * name,
+                             void (* func) (struct Thing *))
 {
-    if (0 == strcmp(moa->name, name))
+    if (0 == strcmp(ta->name, name))
     {
-        moa->func = func;
+        ta->func = func;
         return 1;
     }
     return 0;
@@ -305,16 +305,16 @@ extern void read_config_file()
     parse_file(world.path_config, tokens_into_entries);
     exit_err(!world.map.length, "Map size not defined in config file.");
     uint8_t player_type_is_valid = 0;
-    struct MapObjDef * mod;
-    for (mod = world.map_obj_defs; NULL != mod; mod = mod->next)
+    struct ThingType * tt;
+    for (tt = world.thing_types; NULL != tt; tt = tt->next)
     {
-        if (world.player_type == mod->id)
+        if (world.player_type == tt->id)
         {
             player_type_is_valid = 1;
             break;
         }
     }
-    exit_err(!player_type_is_valid, "No valid map object type set for player.");
-    set_cleanup_flag(CLEANUP_MAP_OBJECT_ACTS | CLEANUP_MAP_OBJECT_DEFS);
+    exit_err(!player_type_is_valid, "No valid thing type set for player.");
+    set_cleanup_flag(CLEANUP_THING_ACTIONS | CLEANUP_THING_TYPES);
     test_corpse_ids();
 }

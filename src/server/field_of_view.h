@@ -9,7 +9,7 @@
 #define FIELD_OF_VIEW_H
 
 #include <stdint.h> /* uint8_t */
-struct MapObj;
+struct Thing;
 
 
 
@@ -39,7 +39,7 @@ enum fov_cell_states {
  * shadows, therefore might be ignored if HIDDEN and not cast shadows on their
  * own that may slightly extend beyond the pre-established shadows they border.
  */
-extern uint8_t * build_fov_map(struct MapObj * eye);
+extern uint8_t * build_fov_map(struct Thing * eye);
 
 
 

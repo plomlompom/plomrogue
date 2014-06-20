@@ -14,13 +14,13 @@
  */
 enum cleanup_flag
 {
-    CLEANUP_FIFO            = 0x0001,
-    CLEANUP_WORLDSTATE      = 0x0002,
-    CLEANUP_MAP_OBJECT_DEFS = 0x0004,
-    CLEANUP_MAP_OBJECTS     = 0x0008,
-    CLEANUP_MAP_OBJECT_ACTS = 0x0010,
-    CLEANUP_IN              = 0x0020,
-    CLEANUP_OUT             = 0x0040
+    CLEANUP_FIFO          = 0x0001,
+    CLEANUP_WORLDSTATE    = 0x0002,
+    CLEANUP_THING_TYPES   = 0x0004,
+    CLEANUP_THINGS        = 0x0008,
+    CLEANUP_THING_ACTIONS = 0x0010,
+    CLEANUP_IN            = 0x0020,
+    CLEANUP_OUT           = 0x0040
 };
 
 /* In addition, unset_cleanup_flag() may be used to unset flags. */

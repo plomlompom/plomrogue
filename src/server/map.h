@@ -20,8 +20,8 @@
  */
 extern void init_map();
 
-/* Check if coordinate "pos" on (or beyond) world.map is accessible to map
- * object movement.
+/* Check if coordinate "pos" on (or beyond) world.map is accessible to thing
+ * movement.
  */
 extern uint8_t is_passable(struct yx_uint8 pos);
 
