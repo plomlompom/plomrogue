@@ -21,6 +21,8 @@ SERVER:
 - save confserver/world data in record and save file, too; handle them like god
   commands
 
+- ensure atomic re-writing of savefile
+
 CLIENT:
 
 - enable toggling of window borders

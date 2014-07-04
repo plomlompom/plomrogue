@@ -34,7 +34,6 @@ struct World
     uint16_t last_update_turn; /* Last turn the .path_out file was updated. */
     uint8_t player_type; /* Thing type that player will start as. */
     uint8_t is_verbose; /* Should server send debugging info to stdout? */
-    uint8_t enemy_fov; /* != 0 if non-player actors only see field of view. */
 };
 
 extern struct World world;
