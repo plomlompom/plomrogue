@@ -14,10 +14,11 @@
 
 
 
-/* Set by parse_file(), used by err_line() for more informative messages. */
+/* Set by parse_file(), helps err_line() deciding what to do/output on error. */
 static uint32_t err_line_count = 0;
 static char * err_line_line = NULL;
 static char * err_line_intro = NULL;
+static uint8_t err_line_exit = 1;
 
 
 
@@ -54,23 +55,23 @@ extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
     char * prefix = "Failed reading config file: \"";
     char * affix = "\". ";
     size_t size = strlen(prefix) + strlen(path) + strlen(affix) + 1;
-    err_line_intro = try_malloc(size, f_name);
-    int test = snprintf(err_line_intro, size, "%s%s%s", prefix, path, affix);
+    char * errline_intro = try_malloc(size, f_name);
+    int test = snprintf(errline_intro, size, "%s%s%s", prefix, path, affix);
     exit_trouble(test < 0, f_name, "snprintf()");
-    exit_err(access(path, F_OK), err_line_intro);
+    exit_err(access(path, F_OK), errline_intro);
     FILE * file = try_fopen(path, "r", f_name);
     uint32_t linemax = textfile_width(file);
-    err_line_line = try_malloc(linemax + 1, f_name);
-    err_line_count = 0;
+    char * errline_line = try_malloc(linemax + 1, f_name);
+    set_err_line_options(errline_intro, errline_line, 0, 1);
     err_line(0 == linemax, "File is empty.");
     char * token0 = NULL; /* For final token_to_entry() if while() stagnates. */
     char * token1 = NULL;
     char * err_val = "No value given.";
-    while (try_fgets(err_line_line, linemax + 1, file, f_name))
+    while (try_fgets(errline_line, linemax + 1, file, f_name))
     {
         err_line_count++;
         err_line(UINT32_MAX == err_line_count, "Line reaches max lines limit.");
-        char * line_copy = strdup(err_line_line);
+        char * line_copy = strdup(errline_line);
         token0 = token_from_line(line_copy);
         if (token0)
         {
@@ -82,17 +83,28 @@ extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
     }
     token_to_entry(token0, token1);
     try_fclose(file, f_name);
-    free(err_line_line);
-    free(err_line_intro);
+    free(errline_line);
+    free(errline_intro);
 }
 
 
 
-extern void err_line(uint8_t test, char * msg)
+extern void set_err_line_options(char * intro, char * line, uint32_t count,
+                                 uint8_t exit)
+{
+    err_line_count = count;
+    err_line_line = line;
+    err_line_intro = intro;
+    err_line_exit = exit;
+}
+
+
+
+extern uint8_t err_line(uint8_t test, char * msg)
 {
     if (!test)
     {
-        return;
+        return 0;
     }
     char * f_name = "err_line()";
     char * prefix = " Offending line ";
@@ -104,7 +116,14 @@ extern void err_line(uint8_t test, char * msg)
     int ret = snprintf(err, size, "%s%s%s%d%s%s", err_line_intro, msg, prefix,
                        err_line_count, affix, err_line_line);
     exit_trouble(ret < 0, f_name, "snprintf()");
-    exit_err(1, err);
+    if (err_line_exit)
+    {
+        exit_err(1, err);
+    }
+    exit_trouble(0 > printf("%s\n", err), f_name, "printf()");
+    exit_trouble(EOF == fflush(stdout), f_name, "fflush()");
+    free(err);
+    return 1;
 }
 
 
@@ -124,6 +143,10 @@ extern char * token_from_line(char * line)
             *(--final_char) = '\0';
         }
     }
+    if (final_char < start)
+    {
+        return NULL;
+    }
     uint8_t empty = 1;
     uint32_t i;
     for (i = 0; '\0' != start[i]; i++)
@@ -137,7 +160,7 @@ extern char * token_from_line(char * line)
     }
     if (empty)
     {
-        return start = NULL;
+        return NULL;
     }
     set_token_end(&start, &limit_char);
     return start;
@@ -145,32 +168,42 @@ extern char * token_from_line(char * line)
 
 
 
-extern void parsetest_int(char * string, char type)
+extern uint8_t parsetest_int(char * string, char type)
 {
-    char * err;
-    if ('8' == type)
-    {
-        err = "Value must be proper representation of unsigned 8 bit integer.";
-    }
-    if ('i' == type)
-    {
-        err = "Value must be proper representation of signed 16 bit integer.";
-    }
-    err_line(strlen(string) < 1, err);
+    char * err_8 = "Value must represent proper unsigned 8 bit integer.";
+    char * err_i = "Value must represent proper signed 16 bit integer.";
+    char * err_u = "Value must represent proper unsigned 16 bit integer.";
+    char * err_U = "Value must represent proper unsigned 32 bit integer.";
+    char * err = ('8' == type) ? err_8 : err_U;
+    err = ('i' == type) ? err_i : err;
+    err = ('u' == type) ? err_u : err;
+    uint8_t ret = err_line(strlen(string) < 1, err);
     uint8_t i;
     uint8_t test;
     for (i = 0; '\0' != string[i]; i++)
     {
         char * err_many = "Value of too many characters.";
-        err_line(string[i + 1] && UINT8_MAX == i, err_many);
+        ret = ret + err_line(string[i + 1] && UINT8_MAX == i, err_many);
         test = (   (0 == i && ('-' == string[i] || '+' == string[i]))
                 || ('0' <= string[i]  && string[i] <= '9'));
-        err_line(!test, err);
+        ret = ret + err_line(!test, err);
     }
-    err_line(strlen(string) < 2 && ('-' == string[i] || '+' == string[i]), err);
-    err_line('8'==type && (atoi(string) < 0 || atoi(string) > UINT8_MAX), err);
-    test = 'i'==type && (atoi(string) < INT16_MIN || atoi(string) > INT16_MAX);
-    err_line(test, err);
+    ret = ret + err_line(   strlen(string) < 2
+                         && ('-' == string[i] || '+' == string[i]), err);
+    test =     (   '8' == type
+                && (   strlen(string) > 4
+                    || atoi(string) < 0 || atoi(string) > UINT8_MAX))
+            || (   'i' == type
+                && (   strlen(string) > 6
+                    || atol(string) < INT16_MIN || atol(string) > INT16_MAX))
+            || (   'u' == type
+                && (   strlen(string) > 6
+                    || atoll(string) < 0 || atol(string) > UINT16_MAX))
+            || (   'U' == type
+                && (   strlen(string) > 11
+                    || atoll(string) < 0 || atoll(string) > UINT32_MAX));
+    ret = ret + err_line(test, err);
+    return ret;
 }
 
 
@@ -182,9 +215,9 @@ extern void parsetest_defcontext(uint8_t flags)
 
 
 
-extern void parsetest_singlechar(char * string)
+extern uint8_t parsetest_singlechar(char * string)
 {
-    err_line(1 != strlen(string), "Value must be single ASCII character.");
+    return err_line(1 !=strlen(string),"Value must be single ASCII character.");
 }
 
 
@@ -222,32 +255,52 @@ extern char * parse_init_entry(uint8_t * flags, size_t size)
 
 
 extern uint8_t parse_val(char * token0, char * token1, char * comparand,
-                         uint8_t * flags, uint8_t set_flag, char type,
-                         char * element)
+                         char type, char * element)
 {
     if (!strcmp(token0, comparand))
     {
-        parsetest_defcontext(*flags);
-        *flags = *flags | set_flag;
         if      ('s' == type)
         {
             * (char **) element = strdup(token1);
         }
-        else if ('c' == type)
+        else if ('c' == type && !parsetest_singlechar(token1))
         {
-            parsetest_singlechar(token1);
             *element = (token1)[0];
         }
-        else if ('8' == type)
+        else if (!parsetest_int(token1, type))
         {
-            parsetest_int(token1, '8');
-            * (uint8_t *) element = atoi(token1);
+            if ('8' == type)
+            {
+                * (uint8_t *) element = atoi(token1);
+            }
+            else if ('i' == type)
+            {
+                * (int16_t *) element = atoi(token1);
+            }
+            else if ('u' == type)
+            {
+                * (uint16_t *) element = atol(token1);
+            }
+            else if ('U' == type)
+            {
+                * (uint32_t *) element = atoll(token1);
+            }
         }
-        else if ('i' == type)
-        {
-            parsetest_int(token1, 'i');
-            * (int16_t *) element = atoi(token1);
-        }
+        return 1;
+    }
+    return 0;
+}
+
+
+
+extern uint8_t parse_flagval(char * token0, char * token1, char * comparand,
+                             uint8_t * flags, uint8_t set_flag, char type,
+                             char * element)
+{
+    if (parse_val(token0, token1, comparand, type, element))
+    {
+        parsetest_defcontext(*flags);
+        *flags = *flags | set_flag;
         return 1;
     }
     return 0;

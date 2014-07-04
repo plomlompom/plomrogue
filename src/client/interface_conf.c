@@ -9,7 +9,7 @@
 #include <stdio.h> /* FILE, sprintf() */
 #include <string.h> /* strchr(), strcmp(), strdup(), strlen() */
 #include <unistd.h> /* optarg, getopt() */
-#include "../common/parse_file.h" /* EDIT_STARTED, parse_file(), parse_val(),
+#include "../common/parse_file.h" /* EDIT_STARTED, parse_file(),parse_flagval(),
                                    * token_from_line(), parsetest_singlechar(),
                                    * parse_and_reduce_to_readyflag(),
                                    * parsetest_defcontext(),parse_unknown_arg(),
@@ -311,19 +311,19 @@ static uint8_t set_members(char * token0, char * token1, uint8_t * win_flags,
                            uint8_t * ord_flags,uint8_t kbd_flags,char * str_key,
                            struct Win * win, struct KeyBindingDB * kbdb)
 {
-    if (   parse_val(token0, token1, "NAME", win_flags,
-                     NAME_SET, 's', (char *) &win->title)
-        || parse_val(token0, token1, "WIDTH", win_flags,
-                     WIDTH_SET, 'i', (char *) &win->target_width)
-        || parse_val(token0, token1, "HEIGHT", win_flags,
-                     HEIGHT_SET, 'i', (char *) &win->target_height));
-    else if (parse_val(token0, token1, "BREAK", win_flags,
-                       BREAK_SET, '8', (char *) &win->linebreak))
+    if (   parse_flagval(token0, token1, "NAME", win_flags,
+                         NAME_SET, 's', (char *) &win->title)
+        || parse_flagval(token0, token1, "WIDTH", win_flags,
+                         WIDTH_SET, 'i', (char *) &win->target_width)
+        || parse_flagval(token0, token1, "HEIGHT", win_flags,
+                         HEIGHT_SET, 'i', (char *) &win->target_height));
+    else if (parse_flagval(token0, token1, "BREAK", win_flags,
+                           BREAK_SET, '8', (char *) &win->linebreak))
     {
         err_line(2 < win->linebreak, "Value must be 0, 1 or 2.");
     }
-    else if (parse_val(token0, token1, "WIN_FOCUS", ord_flags,
-                       FOCUS_SET, 'c', &tmp_active))
+    else if (parse_flagval(token0, token1, "WIN_FOCUS", ord_flags,
+                           FOCUS_SET, 'c', &tmp_active))
     {
         char * err_null = "Value not empty as it should be.";
         char * err_outside = "ID not found in WIN_ORDER ID series.";

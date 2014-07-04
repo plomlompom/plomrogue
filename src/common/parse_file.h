@@ -19,17 +19,23 @@ enum parse_flags
 
 
 /* Parse file at "path" by passing each line's first two tokens to
- * "token_to_entry". Ignore empty line. Non-empty lines must feature at least
+ * "token_to_entry". Ignore empty lines. Non-empty lines must feature at least
  * two tokens as delimited either be whitespace or single quotes (to allow for
  * tokens featuring whitespaces). When EOF is reached, token_to_entry() is
  * called a last time with a first token of NULL.
  */
 extern void parse_file(char * path, void ( *token_to_entry) (char *, char *));
 
-/* If "test" != 0, exit on output of "msg" and faulty line and line number as
- * parsed by parse_file(). (Ought to be called as offspring to parse_file().)
+/* Set err_line() options: "intro" message, char array used to store analyzed
+ * lines ("line"), line start "count", whether to "exit" on error message.
  */
-extern void err_line(uint8_t test, char * msg);
+extern void set_err_line_options(char * intro, char * line, uint32_t count,
+                                 uint8_t exit);
+
+/* If "test", output "msg", faulty line, its number and exit if so defined by
+ * set_err_line_options(), else return 1 on "test" and 0 if "test" is 0.
+ */
+extern uint8_t err_line(uint8_t test, char * msg);
 
 /* Return next token from "line" or NULL if none is found. Tokens either a)
  * start at the first non-whitespace character and end before the next
@@ -42,11 +48,13 @@ extern void err_line(uint8_t test, char * msg);
  * */
 extern char * token_from_line(char * line);
 
-/* Test for "string" to represent proper int16 (type: "i") or uint8 ("8"). */
-extern void parsetest_int(char * string, char type);
+/* Test for "string" to represent proper int16 (type: "i"), uint8 ("8"), uint16
+ * ("u") or uint32 ("U"). Returns 0 if proper value, else >0.
+ */
+extern uint8_t parsetest_int(char * string, char type);
 
-/* Test for "string" to be of length 1 (excluding "\0" terminator). */
-extern void parsetest_singlechar(char * string);
+/* Test for "string" to be of length 1 (excluding "\0"). Return 1 on failure. */
+extern uint8_t parsetest_singlechar(char * string);
 
 /* Calls err_line() with fitting message if EDIT_STARTED not set in "flags". */
 extern void parsetest_defcontext(uint8_t flags);
@@ -64,12 +72,16 @@ extern void parse_id_uniq(int test);
 extern char * parse_init_entry(uint8_t * flags, size_t size);
 
 /* If "token0" fits "comparand", set "element" to value read from "token1" as
- * string (type: "s"), char ("c") uint8 ("8") or int16 ("i"), set that element's
- * flag to "flags" and return 1; else return 0.
+ * string (type: "s"), char ("c") uint8 ("8"), uint16 ("u"), uint32 ("U") or
+ * int16 ("i"), and return 1; else 0.
  */
 extern uint8_t parse_val(char * token0, char * token1, char * comparand,
-                         uint8_t * flags, uint8_t set_flag, char type,
-                         char * element);
+                         char type, char * element);
+
+/* Wrapper to parse_val() that sets "flags" to "flags"|"set_flag" on success. */
+extern uint8_t parse_flagval(char * token0, char * token1, char * comparand,
+                             uint8_t * flags, uint8_t set_flag, char type,
+                             char * element);
 
 /* Check "ready_flag" is set in "flags", re-set "flags" to "ready_flag" only. */
 extern void parse_and_reduce_to_readyflag(uint8_t * flags, uint8_t ready_flag);

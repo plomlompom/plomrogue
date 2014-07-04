@@ -6,6 +6,7 @@
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "field_of_view.h" /* VISIBLE */
+#include "hardcoded_strings.h" /* s */
 #include "thing_actions.h" /* get_thing_action_id_by_name() */
 #include "things.h" /* struct Thing */
 #include "world.h" /* global world */
@@ -168,11 +169,11 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
 
 extern void ai(struct Thing * t)
 {
-    t->command = get_thing_action_id_by_name("wait");
-    char sel = get_dir_to_nearest_enemy(t);
-    if (0 != sel)
-    {
-        t->command = get_thing_action_id_by_name("move");
+    t->command = get_thing_action_id_by_name(s[CMD_WAIT]);
+    char sel = t->fov_map ? get_dir_to_nearest_enemy(t) : 0;/* t->fov_map may */
+    if (0 != sel)                                           /* be absent due  */
+    {                                                       /* to god command.*/
+        t->command = get_thing_action_id_by_name(s[CMD_MOVE]);
         t->arg = sel;
     }
 }

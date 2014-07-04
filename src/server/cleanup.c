@@ -5,6 +5,7 @@
 #include <stdlib.h> /* free() */
 #include <unistd.h> /* unlink() */
 #include "../common/readwrite.h" /* try_fclose() */
+#include "hardcoded_strings.h" /* s */
 #include "thing_actions.h" /* free_thing_actions() */
 #include "things.h" /* free_things(), free_thing_types() */
 #include "world.h" /* global world */
@@ -25,7 +26,7 @@ extern void cleanup()
     free(world.map.cells);
     if (cleanup_flags & CLEANUP_WORLDSTATE)
     {
-        unlink(world.path_worldstate);
+        unlink(s[PATH_WORLDSTATE]);
     }
     if (cleanup_flags & CLEANUP_THINGS)
     {
@@ -42,13 +43,13 @@ extern void cleanup()
     if (cleanup_flags & CLEANUP_IN)
     {
         try_fclose(world.file_in, f_name);
-        unlink(world.path_in);
+        unlink(s[PATH_IN]);
     }
     if (cleanup_flags & CLEANUP_OUT)
     {
         try_fclose(world.file_out, f_name);
         free(world.server_test);
-        unlink(world.path_out);
+        unlink(s[PATH_OUT]);
     }
 }
 

@@ -1,22 +1,24 @@
 Next planned steps in plomrogue development:
 
-BOTH SERVER/CLIENT:
-
-- make server and client communicate by specific world state info requests 
-  in server/out, replacing server/worldstate
+IN GENERAL:
 
 - check for return values of *printf()
 
 - be more strict and humble when allocating memory from the stack
 
+- expand use of hardcoded_strings module(s)
+
+BOTH SERVER/CLIENT:
+
+- make server and client communicate by specific world state info requests 
+  in server/out, replacing server/worldstate
+
 SERVER:
 
 - optimize too-slow AI / FOV algorithms
 
-- is it actually useful to define map object action ids in the config file?
-
-- for game continuation, replace re-playing of whole record files with loading
-  game state snapshots / save files
+- save confserver/world data in record and save file, too; handle them like god
+  commands
 
 CLIENT:
 

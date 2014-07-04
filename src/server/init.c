@@ -19,12 +19,50 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "field_of_view.h" /* build_fov_map() */
-#include "map.h" /* init_map() */
+#include "hardcoded_strings.h" /* s */
+#include "map.h" /* remake_map() */
 #include "things.h" /* Thing, ThingType, free_things(), add_things(),
                      * get_player()
                      */
 #include "run.h" /* obey_msg(), io_loop() */
 #include "world.h" /* global world */
+
+
+
+
+/* Replay game from record file up to the turn named in world.replay, then turn
+ * over to manual replay via io_loop().
+ */
+static void replay_game();
+
+
+
+static void replay_game()
+{
+    char * f_name = "replay_game()";
+    exit_err(access(s[PATH_RECORD], F_OK), "No record found to replay.");
+    FILE * file = try_fopen(s[PATH_RECORD], "r", f_name);
+    uint32_t linemax = textfile_width(file);
+    char line[linemax + 1];
+    while (   world.turn < world.replay
+           && NULL != try_fgets(line, linemax + 1, file, f_name))
+    {
+        obey_msg(line, 0);
+    }
+    uint8_t end = 0;
+    while (!io_loop())
+    {
+        if (!end)
+        {
+            end = (NULL == try_fgets(line, linemax + 1, file, f_name));
+            if (!end)
+            {
+                obey_msg(line, 0);
+            }
+        }
+    }
+    try_fclose(file, f_name);
+}
 
 
 
@@ -59,36 +97,35 @@ extern void setup_server_io()
     char * f_name = "setup_server_io()";
     int test = mkdir("server", 0700);
     exit_trouble(test && EEXIST != errno, f_name, "mkdir()");
-    world.file_out = try_fopen(world.path_out, "w", f_name);
+    world.file_out = try_fopen(s[PATH_OUT], "w", f_name);
     world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, f_name);
     sprintf(world.server_test, "%d %d\n", getpid(), (int) time(0));
     try_fwrite(world.server_test, strlen(world.server_test), 1,
                world.file_out, f_name);
     fflush(world.file_out);
     set_cleanup_flag(CLEANUP_OUT);
-    if (!access(world.path_in, F_OK))  /* This keeps out input from old input */
+    char * path_in = s[PATH_IN];
+    if (!access(path_in, F_OK))        /* This keeps out input from old input */
     {                                  /* file streams of clients             */
-        unlink(world.path_in);         /* communicating with server processes */
+        unlink(path_in)   ;            /* communicating with server processes */
     }                                  /* superseded by this current one.     */
-    world.file_in = try_fopen(world.path_in, "w", f_name);
+    world.file_in = try_fopen(path_in, "w", f_name);
     try_fclose(world.file_in, f_name);
-    world.file_in = try_fopen(world.path_in, "r", f_name);
+    world.file_in = try_fopen(path_in, "r", f_name);
     set_cleanup_flag(CLEANUP_IN);
 }
 
 
 
-extern void remake_world(uint32_t seed)
+extern void remake_world()
 {
     char * f_name = "remake_world()";
     free(world.log);
-    world.log = NULL;  /* thing_actions.c's update_log() checks for this. */
-    world.seed = seed;
-    world.thing_count = 0;
-    free(world.map.cells);
+    world.log = NULL;      /* thing_actions.c's update_log() checks for this. */
+    world.seed_map = world.seed;
     free_things(world.things);
     world.last_update_turn = 0;
-    init_map();
+    remake_map();
     struct ThingType * tt;
     for (tt = world.thing_types; NULL != tt; tt = tt->next)
     {
@@ -111,9 +148,9 @@ extern void remake_world(uint32_t seed)
     {
         t->fov_map = t->lifepoints ? build_fov_map(t) : NULL;
     }
-    if (world.turn)
+    if (!access(s[PATH_RECORD], F_OK))
     {
-        exit_trouble(unlink(world.path_record), f_name, "unlink()");
+        exit_trouble(unlink(s[PATH_RECORD]), f_name, "unlink()");
     }
     world.turn = 1;
 }
@@ -123,41 +160,32 @@ extern void remake_world(uint32_t seed)
 extern void run_game()
 {
     char * f_name = "run_game()";
-    if (!access(world.path_record, F_OK))
+    if (world.replay)
     {
-        FILE * file = try_fopen(world.path_record, "r", f_name);
+        replay_game();
+        return;
+    }
+    char * path_savefile = s[PATH_SAVE];
+    if (!access(path_savefile, F_OK))
+    {
+        FILE * file = try_fopen(path_savefile, "r", f_name);
         uint32_t linemax = textfile_width(file);
         char line[linemax + 1];
-        while (   (!world.replay || (world.turn < world.replay))
-               && NULL != try_fgets(line, linemax + 1, file, f_name))
+        while (NULL != try_fgets(line, linemax + 1, file, f_name))
         {
-            obey_msg(line, 0);
-        }
-        if (!world.replay)
-        {
-            try_fclose(file, f_name);
-            io_loop();
-            return;
-        }
-        uint8_t end = 0;
-        while (!io_loop())
-        {
-            if (!end)
+            if (strlen(line) && strcmp("\n", line))
             {
-                end = (NULL == try_fgets(line, linemax + 1, file, f_name));
-                if (!end)
-                {
-                    obey_msg(line, 0);
-                }
+                obey_msg(line, 0);
             }
         }
         try_fclose(file, f_name);
-        return;
     }
-    exit_err(world.replay, "No record file found to replay.");
-    char * command = "seed";
-    char msg[strlen(command) + 1 + 11 + 1];
-    sprintf(msg, "%s %d", command, (int) time(NULL));
-    obey_msg(msg, 1);
+    else
+    {
+        char * command = s[CMD_MAKE_WORLD];
+        char msg[strlen(command) + 1 + 11 + 1];
+        sprintf(msg, "%s %d", command, (int) time(NULL));
+        obey_msg(msg, 1);
+    }
     io_loop();
 }

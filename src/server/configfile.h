@@ -8,8 +8,8 @@
 
 
 
-/* Parse file at world.path_config into thing type and thing action definitions
- * at world.thing_types and world.thing_actions.
+/* Parse thing type / action definitons file nto thing type and thing action
+ * definitions at world.thing_types and world.thing_actions.
  */
 extern void read_config_file();
 

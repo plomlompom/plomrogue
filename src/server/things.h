@@ -14,8 +14,8 @@
 
 struct Thing
 {
-    struct Thing * next;        /* pointer to next one in things chain */
-    struct Thing * owns;        /* chain of things owned / in inventory */
+    struct Thing * next;         /* pointer to next one in things chain */
+    struct Thing * owns;         /* chain of things owned / in inventory */
     struct yx_uint8 pos;         /* coordinate on map */
     uint8_t * fov_map;           /* map of the thing's field of view */
     uint8_t id;                  /* individual thing's unique identifier */
@@ -40,8 +40,17 @@ struct ThingType
 
 
 
+/* Return thing of "id" in chain at "ptr", search inventories too if "deep". */
+extern struct Thing * get_thing(struct Thing * ptr, uint8_t id, uint8_t deep);
+
 /* Free thing types chain starting at "tt_start". */
 extern void free_thing_types(struct ThingType * tt_start);
+
+/* Add thing of "id" and "type" to map on random passable position (positions
+ * which contain an actor are not deemed passable) if "find_pos", else on y=0,
+ * x=0. If "id" is >= 0 and <= UINT8_MAX, use lowest unused id. Return thing.
+ */
+extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t find_pos);
 
 /* Add thing(s) ("n": how many?) of "type" to map on random position(s). New
  * animate things are never placed in the same square with other animate ones.

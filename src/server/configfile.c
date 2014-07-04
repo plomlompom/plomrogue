@@ -8,13 +8,15 @@
 #include "../common/parse_file.h" /* EDIT_STARTED, parsetest_int(),parse_file(),
                                    * parsetest_too_many_values(),parse_id_uniq()
                                    * parse_unknown_arg(), parse_init_entry(),
-                                   * parse_and_reduce_to_readyflag(),parse_val()
+                                   * parse_and_reduce_to_readyflag(),
+                                   * parse_flagval()
                                    */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag(), CLEANUP_THING_TYPES,
                       * CLEANUP_THING_ACTIONS
                       */
+#include "hardcoded_strings.h" /* s */
 #include "thing_actions.h" /* ThingAction */
 #include "things.h" /* Thing, ThingType */
 #include "world.h" /* world global */
@@ -252,33 +254,33 @@ static uint8_t set_members(char * token0, char * token1, uint8_t * thing_flags,
                            struct ThingType * tt, struct ThingAction * ta)
 {
     if (   *action_flags & EDIT_STARTED
-        && parse_val(token0, token1, "NAME", action_flags,
-                     NAME_SET, 's', (char *) &ta->name))
+        && parse_flagval(token0, token1, "NAME", action_flags,
+                         NAME_SET, 's', (char *) &ta->name))
     {
-        if (!(   try_func_name(ta, "move", actor_move)
-              || try_func_name(ta, "pick_up", actor_pick)
-              || try_func_name(ta, "drop", actor_drop)
-              || try_func_name(ta, "use", actor_use)))
+        if (!(   try_func_name(ta, s[CMD_MOVE], actor_move)
+              || try_func_name(ta, s[CMD_PICKUP], actor_pick)
+              || try_func_name(ta, s[CMD_DROP], actor_drop)
+              || try_func_name(ta, s[CMD_USE], actor_use)))
         {
             ta->func = actor_wait;
         }
         *action_flags = *action_flags | NAME_SET;
         return 1;
     }
-    else if (   parse_val(token0, token1, "NAME", thing_flags,
-                          NAME_SET, 's', (char *) &tt->name)
-             || parse_val(token0, token1, "SYMBOL", thing_flags,
-                          SYMBOL_SET, 'c', (char *) &tt->char_on_map)
-             || parse_val(token0, token1, "EFFORT", action_flags,
-                          EFFORT_SET, '8', (char *) &ta->effort)
-             || parse_val(token0, token1, "START_NUMBER", thing_flags,
-                          START_N_SET, '8', (char *) &tt->start_n)
-             || parse_val(token0, token1, "LIFEPOINTS", thing_flags,
-                          LIFEPOINTS_SET, '8', (char *) &tt->lifepoints)
-             || parse_val(token0, token1, "CONSUMABLE", thing_flags,
-                          CONSUMABLE_SET, '8', (char *) &tt->consumable)
-             || parse_val(token0, token1, "CORPSE_ID", thing_flags,
-                          CORPSE_ID_SET, '8', (char *) &tt->corpse_id))
+    else if (   parse_flagval(token0, token1, "NAME", thing_flags,
+                              NAME_SET, 's', (char *) &tt->name)
+             || parse_flagval(token0, token1, "SYMBOL", thing_flags,
+                              SYMBOL_SET, 'c', (char *) &tt->char_on_map)
+             || parse_flagval(token0, token1, "EFFORT", action_flags,
+                              EFFORT_SET, '8', (char *) &ta->effort)
+             || parse_flagval(token0, token1, "START_NUMBER", thing_flags,
+                              START_N_SET, '8', (char *) &tt->start_n)
+             || parse_flagval(token0, token1, "LIFEPOINTS", thing_flags,
+                              LIFEPOINTS_SET, '8', (char *) &tt->lifepoints)
+             || parse_flagval(token0, token1, "CONSUMABLE", thing_flags,
+                              CONSUMABLE_SET, '8', (char *) &tt->consumable)
+             || parse_flagval(token0, token1, "CORPSE_ID", thing_flags,
+                              CORPSE_ID_SET, '8', (char *) &tt->corpse_id))
     {
         return 1;
     }
@@ -302,7 +304,7 @@ static uint8_t try_func_name(struct ThingAction * ta, char * name,
 
 extern void read_config_file()
 {
-    parse_file(world.path_config, tokens_into_entries);
+    parse_file(s[PATH_CONFIG], tokens_into_entries);
     exit_err(!world.map.length, "Map size not defined in config file.");
     uint8_t player_type_is_valid = 0;
     struct ThingType * tt;

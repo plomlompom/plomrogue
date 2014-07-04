@@ -2,6 +2,7 @@
 
 #include "map.h"
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
+#include <stdlib.h> /* free() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
@@ -136,13 +137,17 @@ static void make_trees()
 
 
 
-extern void init_map()
+extern void remake_map()
 {
     char * f_name = "init_map()";
+    free(world.map.cells);
     world.map.cells = try_malloc(world.map.length * world.map.length, f_name);
+    uint32_t store_seed = world.seed;
+    world.seed = world.seed_map;
     make_sea();
     make_island();
     make_trees();
+    world.seed = store_seed;
 }
 
 

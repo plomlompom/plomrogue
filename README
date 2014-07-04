@@ -15,10 +15,9 @@ Enemies' AI is very dumb so far: Each turn, they try to move towards their
 shortest-path-wise nearest enemy visible to them. If they see no enemy, they
 just wait.
 
-Once you start a new world, every move of yours is recorded in a file called
-"record". Once you re-start the game, all of your previous moves are replayed
-automatically up to the point wherere you left the game. To start over in a new
-world, simply delete this file.
+Every move of yours re-writes a file "savefile" that describes the new state of
+the world. Once you re-start the game, the game state is recreated from the
+"savefile" file. To start over in a new world, simply delete this file.
 
 System requirements / installation / running the game
 -----------------------------------------------------
@@ -67,12 +66,15 @@ in-client window management.
 Replay game recording
 ---------------------
 
-Run "./roguelike -s" to watch a recording of the current game from the
-beginning. Hit any player action key to increment turns (they will not trigger
-the actions usually mapped to them, only repeat the actions done at that point
-in the game as defined in the "record" file). Keys to manage windows, scroll on
-the map and quit the program do their usual thing. Append a number to the -s
-option (like "-s100") to start the recording at the respective turn number.
+Once you start a new world, every move of yours is recorded in a file called
+"record". It gets overwritten when a new game world is started after deletion
+of the "savefile" file. Run "./roguelike -s" to watch the current game's
+recording from the beginning. Hit any player action key to increment turns (they
+will not trigger the actions usually mapped to them, only repeat the actions
+done at that point in the game as defined in the "record" file). Keys to manage
+windows, scroll on the map and quit the program do their usual thing. Append a
+number to the -s option (like "-s100") to start the recording at the respective
+turn number.
 
 Hacking / server internals and configuration
 --------------------------------------------

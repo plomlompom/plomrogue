@@ -9,7 +9,8 @@
 #include "../common/parse_file.h" /* EDIT_STARTED,parse_init_entry(),
                                    * parse_id_uniq(), parse_unknown_arg(),
                                    * parsetest_too_many_values(), parse_file(),
-                                   * parse_and_reduce_to_readyflag(),parse_val()
+                                   * parse_and_reduce_to_readyflag(),
+                                   * parse_flagval()
                                    */
 #include "array_append.h" /* array_append() */
 #include "world.h" /* global world */
@@ -66,12 +67,12 @@ static void tokens_into_entries(char * token0, char * token1)
             cmd->dsc_short = strdup(token1);
             parse_id_uniq(NULL != get_command(cmd->dsc_short));
         }
-        else if (!(   parse_val(token0, token1, "DESCRIPTION", &cmd_flags,
-                                DESC_SET, 's', (char *) &cmd->dsc_long)
-                   || parse_val(token0, token1, "SERVER_COMMAND", &cmd_flags,
-                                SERVERCMD_SET, 's', (char *) &cmd->server_msg)
-                   || parse_val(token0, token1, "SERVER_ARGUMENT", &cmd_flags,
-                                SERVERARG_SET, 'c', (char *) &cmd->arg)))
+        else if (!(   parse_flagval(token0, token1, "DESCRIPTION", &cmd_flags,
+                                    DESC_SET, 's', (char *) &cmd->dsc_long)
+                   || parse_flagval(token0, token1,"SERVER_COMMAND", &cmd_flags,
+                                    SERVERCMD_SET, 's',(char *)&cmd->server_msg)
+                   || parse_flagval(token0, token1,"SERVER_ARGUMENT",&cmd_flags,
+                                    SERVERARG_SET, 'c', (char *) &cmd->arg)))
         {
             parse_unknown_arg();
         }

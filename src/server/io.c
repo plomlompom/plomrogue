@@ -14,14 +14,22 @@
 #include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
                                   * try_fwrite(), try_fputc(), try_fgetc()
                                   */
+#include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "field_of_view.h" /* VISIBLE */
+#include "hardcoded_strings.h" /* s */
 #include "map.h" /* yx_to_map_pos() */
 #include "things.h" /* Thing, ThingType, get_thing_type(), get_player() */
 #include "world.h" /* global world  */
 
 
+
+/* Write to "file" god commands (one per line) to recreate thing "t". */
+static void write_key_value(FILE * file, char * key, uint32_t value);
+
+/* Write to "file" \n-delimited line of "key" + space + "value" as string. */
+static void write_thing(FILE * file, struct Thing * t);
 
 /* Cut out and return first \0-terminated string from world.queue and
  * appropriately reduce world.queue_size. Return NULL if queue is empty.
@@ -55,6 +63,45 @@ static char * build_visible_map(struct Thing * player);
  * Write one row per \n-delimited line.
  */
 static void write_map(struct Thing * player, FILE * file);
+
+
+
+static void write_key_value(FILE * file, char * key, uint32_t value)
+{
+    char * f_name = "write_key_value()";
+    try_fwrite(key, strlen(key), 1, file, f_name);
+    try_fputc(' ', file, f_name);
+    char * line = try_malloc(11, f_name);
+    exit_trouble(-1 == sprintf(line, "%u", value), f_name, "sprintf()");
+    try_fwrite(line, strlen(line), 1, file, f_name);
+    free(line);
+    try_fputc('\n', file, f_name);
+}
+
+
+
+static void write_thing(FILE * file, struct Thing * t)
+{
+    char * f_name = "write_thing()";
+    struct Thing * o;
+    for (o = t->owns; o; o = o->next)
+    {
+        write_thing(file, o);
+    }
+    write_key_value(file, s[CMD_THING], t->id);
+    write_key_value(file, s[CMD_TYPE], t->type);
+    write_key_value(file, s[CMD_POS_Y], t->pos.y);
+    write_key_value(file, s[CMD_POS_X], t->pos.x);
+    write_key_value(file, s[CMD_COMMAND], t->command);
+    write_key_value(file, s[CMD_ARGUMENT], t->arg);
+    write_key_value(file, s[CMD_PROGRESS], t->progress);
+    write_key_value(file, s[CMD_LIFEPOINTS], t->lifepoints);
+    for (o = t->owns; o; o = o->next)
+    {
+        write_key_value(file, s[CMD_CARRIES], o->id);
+    }
+    try_fputc('\n', file, f_name);
+}
 
 
 
@@ -133,8 +180,8 @@ static void read_file_into_queue()
 static void update_worldstate_file()
 {
     char * f_name = "update_worldstate_file()";
-    char path_tmp[strlen(world.path_worldstate) + strlen(world.tmp_suffix) + 1];
-    sprintf(path_tmp, "%s%s", world.path_worldstate, world.tmp_suffix);
+    char path_tmp[strlen(s[PATH_WORLDSTATE]) + strlen(s[PATH_SUFFIX_TMP]) + 1];
+    sprintf(path_tmp, "%s%s", s[PATH_WORLDSTATE], s[PATH_SUFFIX_TMP]);
     FILE * file = try_fopen(path_tmp, "w", f_name);
     struct Thing * player = get_player();
     write_value_as_line(world.turn, file);
@@ -148,7 +195,7 @@ static void update_worldstate_file()
     {
         try_fwrite(world.log, strlen(world.log), 1, file, f_name);
     }
-    try_fclose_unlink_rename(file, path_tmp, world.path_worldstate, f_name);
+    try_fclose_unlink_rename(file, path_tmp, s[PATH_WORLDSTATE], f_name);
     set_cleanup_flag(CLEANUP_WORLDSTATE);
     char * dot = ".\n";;
     try_fwrite(dot, strlen(dot), 1, world.file_out, f_name);
@@ -199,29 +246,32 @@ static char * build_visible_map(struct Thing * player)
     uint32_t map_size = world.map.length * world.map.length;
     char * visible_map = try_malloc(map_size, f_name);
     memset(visible_map, ' ', map_size);
-    uint16_t pos_i;
-    for (pos_i = 0; pos_i < map_size; pos_i++)
-    {
-        if (player->fov_map[pos_i] & VISIBLE)
+    if (player->fov_map) /* May fail if player thing was created / positioned */
+    {                    /* by god command after turning off FOV building.    */
+        uint16_t pos_i;
+        for (pos_i = 0; pos_i < map_size; pos_i++)
         {
-            visible_map[pos_i] = world.map.cells[pos_i];
-        }
-    }
-    struct Thing * t;
-    struct ThingType * tt;
-    char c;
-    uint8_t i;
-    for (i = 0; i < 2; i++)
-    {
-        for (t = world.things; t != 0; t = t->next)
-        {
-            if (   player->fov_map[yx_to_map_pos(&t->pos)] & VISIBLE
-                && (   (0 == i && 0 == t->lifepoints)
-                    || (1 == i && 0 < t->lifepoints)))
+            if (player->fov_map[pos_i] & VISIBLE)
             {
-                tt = get_thing_type(t->type);
-                c = tt->char_on_map;
-                visible_map[yx_to_map_pos(&t->pos)] = c;
+                visible_map[pos_i] = world.map.cells[pos_i];
+            }
+        }
+        struct Thing * t;
+        struct ThingType * tt;
+        char c;
+        uint8_t i;
+        for (i = 0; i < 2; i++)
+        {
+            for (t = world.things; t != 0; t = t->next)
+            {
+                if (   player->fov_map[yx_to_map_pos(&t->pos)] & VISIBLE
+                    && (   (0 == i && 0 == t->lifepoints)
+                        || (1 == i && 0 < t->lifepoints)))
+                {
+                    tt = get_thing_type(t->type);
+                    c = tt->char_on_map;
+                    visible_map[yx_to_map_pos(&t->pos)] = c;
+                }
             }
         }
     }
@@ -271,4 +321,26 @@ extern char * io_round()
         world.queue = new_queue;
     }
     return get_message_from_queue();
+}
+
+
+
+extern void save_world()
+{
+    char * f_name = "save_world()";
+    char * path = s[PATH_SAVE];
+    FILE * file = try_fopen(path, "w", f_name);
+    write_key_value(file, s[CMD_DO_FOV], 0);
+    try_fputc('\n', file, f_name);
+    write_key_value(file, s[CMD_SEED_MAP], world.seed_map);
+    write_key_value(file, s[CMD_SEED_RAND], world.seed);
+    write_key_value(file, s[CMD_TURN], world.turn);
+    try_fputc('\n', file, f_name);
+    struct Thing * t;
+    for (t = world.things; t; t = t->next)
+    {
+        write_thing(file, t);
+    }
+    write_key_value(file, s[CMD_DO_FOV], 1);
+    try_fclose(file, f_name);
 }

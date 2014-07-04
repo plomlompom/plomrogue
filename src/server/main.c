@@ -5,6 +5,7 @@
 #include "../common/rexit.h" /* exit_err, set_cleanup_func() */
 #include "cleanup.h" /* set_cleanup_flag(), cleanup() */
 #include "configfile.h" /* read_config_file() */
+#include "hardcoded_strings.h" /* s */
 #include "init.h" /* run_game(), obey_argv(), obey_argv(), setup_server_io() */
 #include "world.h" /* struct World */
 
@@ -20,6 +21,7 @@ int main(int argc, char ** argv)
     set_cleanup_func(cleanup);
 
     /* Init settings from command line / hard-coded values. Print start info. */
+    init_strings();
     obey_argv(argc, argv);
     if (world.is_verbose)
     {
@@ -33,12 +35,6 @@ int main(int argc, char ** argv)
             exit_err(-1 == test, printf_err);
         }
     }
-    world.path_config       = "confserver/world";
-    world.path_worldstate   = "server/worldstate";
-    world.path_out          = "server/out";
-    world.path_in           = "server/in";
-    world.path_record       = "record";
-    world.tmp_suffix        = "_tmp";
 
     /* Init config file and server i/o files. */
     read_config_file();
