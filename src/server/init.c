@@ -148,7 +148,7 @@ extern void remake_world()
     {
         t->fov_map = t->lifepoints ? build_fov_map(t) : NULL;
     }
-    if (!access(s[PATH_RECORD], F_OK))
+    if (!world.replay && !access(s[PATH_RECORD], F_OK))
     {
         exit_trouble(unlink(s[PATH_RECORD]), f_name, "unlink()");
     }
