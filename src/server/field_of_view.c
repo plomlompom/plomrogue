@@ -15,20 +15,9 @@
 
 /* Number of degrees a circle is divided into. The greater it is, the greater
  * the angle precision. But make it one whole zero larger and bizarre FOV bugs
- * appear on large maps, probably due to value overflows.
+ * appear on large maps, probably due to value overflows (TODO: more research!).
  */
 #define CIRCLE 3600000
-
-
-
-/* Values for mv_yx_in_dir_wrap()'s wrapping directory memory. */
-enum wraps
-{
-    WRAP_N = 0x01,
-    WRAP_S = 0x02,
-    WRAP_E = 0x04,
-    WRAP_W = 0x08
-};
 
 
 
@@ -134,10 +123,11 @@ static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx)
 
 static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
 {
-    static uint8_t wrap = 0;
+    static int8_t wrap_west_east   = 0;
+    static int8_t wrap_north_south = 0;
     if (unwrap)
     {
-        wrap = 0;
+        wrap_west_east = wrap_north_south = 0;
         return 0;
     }
     struct yx_uint8 original;
@@ -146,21 +136,21 @@ static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
     mv_yx_in_hex_dir(d, yx);
     if      (strchr("edc", d) && yx->x < original.x)
     {
-        wrap = wrap & WRAP_W ? wrap ^ WRAP_W : wrap | WRAP_E;
+        wrap_west_east++;
     }
     else if (strchr("xsw", d) && yx->x > original.x)
     {
-        wrap = wrap & WRAP_E ? wrap ^ WRAP_E : wrap | WRAP_W;
+        wrap_west_east--;
     }
     if      (strchr("we", d) && yx->y > original.y)
     {
-        wrap = wrap & WRAP_S ? wrap ^ WRAP_S : wrap | WRAP_N;
+        wrap_north_south--;
     }
     else if (strchr("xc", d) && yx->y < original.y)
     {
-        wrap = wrap & WRAP_N ? wrap ^ WRAP_N : wrap | WRAP_S;
+        wrap_north_south++;
     }
-    return wrap;
+    return (wrap_west_east != 0) + (wrap_north_south != 0);
 }
 
 
