@@ -15,8 +15,8 @@ BOTH SERVER/CLIENT:
 
 SERVER:
 
-- optimize too-slow AI / FOV algorithms; maybe use
-  <http://forums.roguetemple.com/index.php?topic=3675.0>?
+- consider
+  <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=TheCreationOfSpace#comment_0>
 
 - save confserver/world data in record and save file, too; handle them like god
   commands

@@ -121,7 +121,7 @@ static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t)
                 t->pos.x = length;
             }
             free(t->fov_map);
-            t->fov_map = do_fov && t->lifepoints ? build_fov_map(t) : t->fov_map;
+            t->fov_map= do_fov && t->lifepoints ? build_fov_map(t) : t->fov_map;
         }
         return 1;
     }
@@ -196,10 +196,11 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
     static struct Thing * t = NULL;
     if (t && (   parse_thing_type(tok0, tok1, t)
               || parse_thing_command(tok0, tok1, t)
-              || parse_val(tok0, tok1, s[CMD_ARGUMENT], '8', (char *) &t->arg)
-              || parse_val(tok0, tok1, s[CMD_PROGRESS], '8', (char *) &t->progress)
+              || parse_val(tok0, tok1, s[CMD_ARGUMENT], '8', (char *)&t->arg)
+              || parse_val(tok0, tok1, s[CMD_PROGRESS],'8',(char *)&t->progress)
 
-              || parse_val(tok0, tok1, s[CMD_LIFEPOINTS],'8',(char *) &t->lifepoints)
+              || parse_val(tok0, tok1, s[CMD_LIFEPOINTS],'8',
+                                                        (char *) &t->lifepoints)
               || parse_position(tok0, tok1, t)
               || parse_carry(tok0, tok1, t)));
     else if (parse_val(tok0, tok1, s[CMD_THING], '8', (char *) &id))
@@ -209,7 +210,7 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
         {
             t = add_thing(id, 0, 0);
             set_cleanup_flag(CLEANUP_THINGS);
-            t->fov_map = do_fov && t->lifepoints ? build_fov_map(t) : t->fov_map;
+            t->fov_map= do_fov && t->lifepoints ? build_fov_map(t) : t->fov_map;
         }
     }
     else
@@ -345,12 +346,12 @@ extern void obey_msg(char * msg, uint8_t do_record)
         || parse_val(tok0, tok1, s[CMD_SEED_RAND], 'U', (char *) &world.seed)
         || parse_val(tok0, tok1, s[CMD_TURN], 'u', (char *) &world.turn)
         || parse_do_fov(tok0, tok1));
-    else if (parse_val(tok0, tok1, s[CMD_SEED_MAP], 'U', (char *) &world.seed_map))
+    else if (parse_val(tok0, tok1, s[CMD_SEED_MAP],'U',(char *)&world.seed_map))
 
     {
         remake_map();
     }
-    else if (parse_val(tok0, tok1, s[CMD_MAKE_WORLD], 'U', (char *) &world.seed))
+    else if (parse_val(tok0, tok1, s[CMD_MAKE_WORLD],'U', (char *) &world.seed))
     {
         remake_world();
     }

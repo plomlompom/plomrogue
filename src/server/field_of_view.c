@@ -1,16 +1,20 @@
 /* src/server/field_of_view.c */
 
-#define _POSIX_C_SOURCE 200809L /* strdup() */
 #include "field_of_view.h"
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, int32_t */
 #include <stdlib.h> /* free() */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include <string.h> /* memset(), strchr(), strdup() */
+#include <string.h> /* memset() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "map.h" /* yx_to_map_pos() */
 #include "things.h" /* Thing */
 #include "yx_uint8.h" /* yx_uint8 */
-#include "world.h" /* global world  */
+#include "world.h" /* world  */
+
+
+
+/* Number of degrees a circle is divided into. */
+#define CIRCLE 36000000
 
 
 
@@ -23,132 +27,76 @@ enum wraps
     WRAP_W = 0x08
 };
 
+
+
+/* Angle of a shadow. */
+struct shadow_angle
+{
+    struct shadow_angle * next;
+    uint32_t left_angle;
+    uint32_t right_angle;
+};
+
+
+
+/* Move "yx" into hex direction "d". */
+static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx);
+
 /* Move "yx" into hex direction "d". If this moves "yx" beyond the minimal (0)
  * or maximal (UINT8_MAX) column or row, it wraps to the opposite side. Such
  * wrapping is returned as a wraps enum value and stored, so that further calls
  * to move "yx" back into the opposite direction may unwrap it again. Pass an
- * "unwrap" of UNWRAP to re-set the internal wrap memory to 0.
+ * "unwrap" of !0 to re-set the internal wrap memory to 0.
  */
 static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap);
 
 /* Wrapper to "mv_yx_in_dir_wrap()", returns 1 if the wrapped function moved
  * "yx" within the wrap borders and the map size, else 0.
  */
-extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx);
+static uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx);
 
-/* Return one by one hex dir characters of walking through a circle of "radius".
- * The circle is initialized by passing a "new_circle" of 1 and the "radius"
- * and only returns non-null hex direction characters if "new_circle" is 0.
+/* Recalculate angle < 0 or > CIRCLE to a value between these two limits. */
+static uint32_t correct_angle(int32_t angle);
+
+/* Try merging the angle between "left_angle" and "right_angle" to "shadow" if
+ * it meets the shadow from the right or the left. Returns 1 on success, else 0.
  */
-static char next_circle_dir(uint8_t new_circle, uint8_t radius_new);
+static uint8_t try_merge(struct shadow_angle * shadow,
+                         uint32_t left_angle, uint32_t right_angle);
 
-/* Draw circle of hexes flagged LIMIT "radius" away from "yx" to "fov_map". */
-extern void draw_border_circle(struct yx_uint8 yx, uint8_t radius,
-                               uint8_t * fov_map);
-
-/* eye_to_cell_dir_ratio() helper. */
-static void geometry_to_char_ratio(uint8_t * n1, uint8_t * n2, uint8_t indent,
-                                   int16_t diff_y, int16_t diff_x,
-                                   uint8_t vertical, uint8_t variant);
-
-/* From the chars in "available_dirs" and the geometry described by the other
- * parameters return a string of hex direction characters representing the
- * approximation of a straight line. "variant" marks the direction as either in
- * the northern, north-eastern or south-western hex neighborhood if 1, or the
- * others if 0.
+/* Try merging the shadow angle between "left_angle" and "right_angle" into an
+ * existing shadow angle in "shadows". On success, see if this leads to any
+ * additional shadow angle overlaps and merge these accordingly. Return 1 on
+ * success, else 0.
  */
-static char * eye_to_cell_dir_ratio(char * available_dirs, uint8_t indent,
-                                    int16_t diff_y, int16_t diff_x,
-                                    uint8_t vertical, uint8_t variant,
-                                    uint8_t shift_right);
+static uint8_t try_merging_angles(uint32_t left_angle, uint32_t right_angle,
+                                  struct shadow_angle ** shadows);
 
-/* Return string approximating in one or two hex direction chars the direction
- * that a "diff_y" and "diff_x" lead to in the internal half-indented 2D
- * encoding of hexagonal maps, with "indent" the movement's start indentation.
+/* If "pos_in_map" in angle between"left_angle" to "right_angle" to the viewing
+ * actor is in a shadow from the shadow list "shadows", mark it as HIDDEN on the
+ * "fov_map"; else, if the world map features a viewing obstacle on the world
+ * map, calculate its shadow angle to the viewer and add it to "shadows".
  */
-static char * dir_from_delta(uint8_t indent, int16_t diff_y, int16_t diff_x);
+static void set_shadow(uint32_t left_angle, uint32_t right_angle,
+                       struct shadow_angle ** shadows, uint16_t pos_in_map,
+                       uint8_t * fov_map);
 
-/* Return string of hex movement direction characters describing the best
- * possible hex approximation to a straight line from "yx_eye" to "yx_cell". If
- * "right" is set and the string is of length two, return it with the direction
- * strings scarcer character appearing first.
+/* Free shadow angles list "angles". */
+static void free_angles(struct shadow_angle * angles);
+
+/* Evaluate map position "test_pos" in distance "dist" to the view origin, and
+ * on the circle of that distance to the origin on hex "hex_i" (as counted from
+ * the circle's rightmost point), for setting shaded cells in "fov_map" and
+ * potentially adding a new shadow to linked shadow angle list "shadows".
  */
-static char * eye_to_cell(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
-                          uint8_t right);
-
-/* Return string of hex movement direction characters describing the best
- * possible hex approximation to a straight line from "yx_eye" to "yx_cell". If
- * "right" is set and the string is of length two, return it with the direction
- * strings scarcer character appearing first.
- */
-static char * eye_to_cell(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
-                          uint8_t right);
-
-/* fill_shadow() helper, determining if map's top left cell starts a shadow. */
-static uint8_t is_top_left_shaded(uint16_t pos_a, uint16_t pos_b,
-                                  int16_t a_y_on_left);
-
-/* Flag as HIDDEN all cells in "fov_map" that are enclosed by 1) the map's
- * borders or cells flagged LIMIT and 2) the shadow arms of cells flagged
- * SHADOW_LEFT and SHADOW_RIGHT extending from "yx_cell", as seen as left and
- * right as seen from "yx_eye". "pos_a" and "pos_b" store the terminal positions
- * of these arms in "fov_map" ("pos_a" for the left, "pos_b" for the right one).
- */
-static void fill_shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
-                        uint8_t * fov_map, uint16_t pos_a, uint16_t pos_b);
-
-/* Flag with "flag" cells of a path from "yx_start" to the end of the map or (if
- * closer) the view border circle of the cells flagged as LIMIT, in a direction
- * parallel to the one determined by walking a path from "yx_eye" to the cell
- * reachable by moving one step into "dir" from "yx_start". If "shift_right" is
- * set, choose among the possible paths the one whose starting cell is set most
- * to the right, else do the opposite.
- */
-static uint16_t shadow_arm(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
-                           uint8_t * fov_map, char dir, uint8_t flag,
-                           uint8_t shift_right);
-
-/* From "yx_start", draw shadow of what is invisible as seen from "yx_eye" into
- * "fov_map" by extending shadow arms from "yx_start" as shadow borders until
- * the edges of the map or, if smaller, the maximum viewing distance, flag these
- * shadow arms' cells as HIDE_LATER and the area enclosed by them as HIDDEN.
- * "dir_left" and "dir_right" are hex directions to move to from "yx_start" for
- * cells whose shortest straight path to "yx_eye" serve as the lines of sight
- * enclosing the shadow left and right (left and right as seen from "yx_eye").
- */
-static void shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
-                   uint8_t * fov_map, char dir_left, char dir_right);
-
-/* In "fov_map", if cell of position "yx_cell" is not HIDDEN, set it as VISIBLE,
- * and if an obstacle to view is positioned there in the game map, flag cells
- *behind it, unseen from "yx_eye", as HIDDEN on the interior and HIDE_LATER on
- * their borders.
- *
- * The shape and width of shadows is determined by 1) calculating an approximate
- * direction of "yx_cell" as seen from "yx_eye" as one hex movement direction,
- * or two directly neighboring each other (i.e. "east", "east and north-east"),
- * 2) deriving the two hex movement directions clockwise immediately preceding
- * the first (or only) direction and immediately succeeding the second (or only)
- * one and 3) passing the two directions thus gained as shadow arm direction
- * calibration values to shadow() (after this function's other arguments).
- */
-static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
-                                         struct yx_uint8 * yx_eye,
-                                         uint8_t * fov_map);
+static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
+                          struct yx_uint8 * test_pos,
+                          struct shadow_angle ** shadows);
 
 
 
-static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
+static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx)
 {
-    static uint8_t wrap = 0;
-    if (unwrap)
-    {
-        wrap = 0;
-        return 0;
-    }
-    struct yx_uint8 original;
-    original.y = yx->y;
-    original.x = yx->x;
     if     (d == 'e')
     {
         yx->x = yx->x + (yx->y % 2);
@@ -177,10 +125,22 @@ static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
         yx->x = yx->x - !(yx->y % 2);
         yx->y--;
     }
-    else
+}
+
+
+
+static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
+{
+    static uint8_t wrap = 0;
+    if (unwrap)
     {
-        exit_trouble(1, "mv_yx_in_dir_wrap()", "illegal direction");
+        wrap = 0;
+        return 0;
     }
+    struct yx_uint8 original;
+    original.y = yx->y;
+    original.x = yx->x;
+    mv_yx_in_hex_dir(d, yx);
     if      (strchr("edc", d) && yx->x < original.x)
     {
         wrap = wrap & WRAP_W ? wrap ^ WRAP_W : wrap | WRAP_E;
@@ -202,7 +162,7 @@ static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
 
 
 
-extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
+static uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
 {
     uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx, 0);
     if (!wraptest && yx->x < world.map.length && yx->y < world.map.length)
@@ -214,344 +174,163 @@ extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
 
 
 
-static char next_circle_dir(uint8_t new_circle, uint8_t radius_new)
+static uint32_t correct_angle(int32_t angle)
 {
-    static uint8_t i_dirs = 0;
-    static uint8_t i_dist = 0;
-    static uint8_t radius = 0;
-    char * dirs = "dcxswe";
-    if (new_circle)
+    while (angle < 0)
     {
-        i_dirs = 0;
-        i_dist = 0;
-        radius = radius_new;
-        return '\0';
+        angle = angle + CIRCLE;
     }
-    char ret_dir = dirs[i_dirs];
-    i_dist++;
-    if (i_dist == radius)
+    while (angle > CIRCLE)
     {
-        i_dist = 0;
-        i_dirs++;
+        angle = angle - CIRCLE;
     }
-    return ret_dir;
+    return angle;
 }
 
 
 
-extern void draw_border_circle(struct yx_uint8 yx, uint8_t radius,
-                               uint8_t * fov_map)
+static uint8_t try_merge(struct shadow_angle * shadow,
+                         uint32_t left_angle, uint32_t right_angle)
 {
-    uint8_t dist;
-    for (dist = 1; dist <= radius; dist++)
+    if      (   shadow->right_angle <= left_angle + 1
+             && shadow->right_angle >= right_angle)
     {
-        mv_yx_in_dir_wrap('w', &yx, 0);
+        shadow->right_angle = right_angle;
     }
-    next_circle_dir(1, radius);
-    char dir;
-    while ('\0' != (dir = next_circle_dir(0, 0)))
+    else if (   shadow->left_angle + 1 >= right_angle
+             && shadow->left_angle     <= left_angle)
     {
-         if (mv_yx_in_dir_legal(dir, &yx))
-         {
-            uint16_t pos = yx_to_map_pos(&yx);
-            fov_map[pos] = LIMIT;
+        shadow->left_angle = left_angle;
+    }
+    else
+    {
+        return 0;
+    }
+    return 1;
+}
+
+
+
+static uint8_t try_merging_angles(uint32_t left_angle, uint32_t right_angle,
+                                  struct shadow_angle ** shadows)
+{
+    uint8_t angle_merge = 0;
+    struct shadow_angle * shadow;
+    for (shadow = *shadows; shadow; shadow = shadow->next)
+    {
+        if (try_merge(shadow, left_angle, right_angle))
+        {
+            angle_merge = 1;
         }
     }
-    mv_yx_in_dir_wrap(0, NULL, 1);
-}
-
-
-
-static void geometry_to_char_ratio(uint8_t * n1, uint8_t * n2, uint8_t indent,
-                                   int16_t diff_y, int16_t diff_x,
-                                   uint8_t vertical, uint8_t variant)
-{
-    if      (vertical)
+    if (angle_merge)
     {
-        *n1 = (diff_y / 2) - diff_x + ( indent * (diff_y % 2));
-        *n2 = (diff_y / 2) + diff_x + (!indent * (diff_y % 2));
-    }
-    else if (!vertical)
-    {
-        *n1 = diff_y;
-        *n2 = diff_x - (diff_y / 2) - (indent * (diff_y % 2));
-    }
-    if (!variant)
-    {
-        uint8_t tmp = *n1;
-        *n1 = *n2;
-        *n2 = tmp;
-    }
-}
-
-
-
-static char * eye_to_cell_dir_ratio(char * available_dirs, uint8_t indent,
-                                    int16_t diff_y, int16_t diff_x,
-                                    uint8_t vertical, uint8_t variant,
-                                    uint8_t shift_right)
-{
-    char * f_name = "eye_to_cell_dir_ratio()";
-    uint8_t n1, n2;
-    geometry_to_char_ratio(&n1, &n2, indent, diff_y, diff_x, vertical, variant);
-    uint8_t size_chars = n1 + n2;
-    char * dirs = try_malloc(size_chars + 1, f_name);
-    uint8_t n_strong_char = n1 / n2;
-    uint8_t more_char1 = 0 < n_strong_char;
-    n_strong_char = !more_char1 ? (n2 / n1) : n_strong_char;
-    uint16_t i, i_alter;
-    uint8_t i_of_char = shift_right;
-    for (i = 0, i_alter = 0; i < size_chars; i++)
-    {
-        char dirchar = available_dirs[i_of_char];
-        if (more_char1 != i_of_char)
+        struct shadow_angle * shadow1;
+        for (shadow1 = *shadows; shadow1; shadow1 = shadow1->next)
         {
-            i_alter++;
-            if (i_alter == n_strong_char)
+            struct shadow_angle * last_shadow = NULL;
+            struct shadow_angle * shadow2;
+            for (shadow2 = *shadows; shadow2; shadow2 = shadow2->next)
             {
-                i_alter = 0;
-                i_of_char = !i_of_char;
-            }
-        }
-        else
-        {
-            i_of_char = !i_of_char;
-        }
-
-        dirs[i] = dirchar;
-    }
-    dirs[i] = '\0';
-    return dirs;
-}
-
-
-
-static char * dir_from_delta(uint8_t indent, int16_t diff_y, int16_t diff_x)
-{
-    int16_t double_x = 2 * diff_x;
-    int16_t indent_corrected_double_x_pos =  double_x - indent  + !indent;
-    int16_t indent_corrected_double_x_neg = -double_x - !indent +  indent;
-    if (diff_y > 0)
-    {
-        if (diff_y ==  double_x || diff_y == indent_corrected_double_x_pos)
-        {
-            return "c";
-        }
-        if (diff_y == -double_x || diff_y == indent_corrected_double_x_neg)
-        {
-            return "x";
-        }
-        if (diff_y  <  double_x || diff_y  < indent_corrected_double_x_pos)
-        {
-            return "dc";
-        }
-        if (diff_y  < -double_x || diff_y  < indent_corrected_double_x_neg)
-        {
-            return "xs";
-        }
-        return "cx";
-    }
-    if (diff_y < 0)
-    {
-        if (diff_y ==  double_x || diff_y == indent_corrected_double_x_pos)
-        {
-            return "w";
-        }
-        if (diff_y == -double_x || diff_y == indent_corrected_double_x_neg)
-        {
-            return "e";
-        }
-        if (diff_y  >  double_x || diff_y  > indent_corrected_double_x_pos)
-        {
-            return "sw";
-        }
-        if (diff_y  > -double_x || diff_y  > indent_corrected_double_x_neg)
-        {
-            return "ed";
-        }
-        return "we";
-    }
-    return 0 > diff_x ? "s" : "d";
-}
-
-
-
-static char * eye_to_cell(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
-                          uint8_t right)
-{
-    int16_t diff_y = yx_cell->y - yx_eye->y;
-    int16_t diff_x = yx_cell->x - yx_eye->x;
-    uint8_t indent = yx_eye->y % 2;
-    char * dir = dir_from_delta(indent, diff_y, diff_x);
-    char * dirs = NULL;
-    if (1 == strlen(dir))
-    {
-        return strdup(dir);
-    }
-    else if (!strcmp(dir, "dc"))
-    {
-        dirs = eye_to_cell_dir_ratio(dir, indent,  diff_y,  diff_x,  0,0,right);
-    }
-    else if (!strcmp(dir, "xs"))
-    {
-        dirs = eye_to_cell_dir_ratio(dir, !indent,  diff_y, -diff_x, 0,1,right);
-    }
-    else if (!strcmp(dir, "cx"))
-    {
-        dirs = eye_to_cell_dir_ratio(dir, indent,  diff_y,  diff_x,  1,0,right);
-    }
-    else if (!strcmp(dir, "sw"))
-    {
-        dirs = eye_to_cell_dir_ratio(dir, !indent, -diff_y, -diff_x, 0,0,right);
-    }
-    else if (!strcmp(dir, "ed"))
-    {
-        dirs = eye_to_cell_dir_ratio(dir, indent, -diff_y,  diff_x, 0,1,right);
-    }
-    else if (!strcmp(dir, "we"))
-    {
-        dirs = eye_to_cell_dir_ratio(dir, indent, -diff_y,  diff_x, 1,1,right);
-    }
-    return dirs;
-}
-
-
-
-static uint8_t is_top_left_shaded(uint16_t pos_a, uint16_t pos_b,
-                                  int16_t a_y_on_left)
-{
-    uint16_t start_last_row = world.map.length * (world.map.length - 1);
-    uint8_t a_on_left_or_bottom =    0 <= a_y_on_left
-                                  || (pos_a >= start_last_row);
-    uint8_t b_on_top_or_right =    pos_b < world.map.length
-                                || pos_b % world.map.length==world.map.length-1;
-    return pos_a != pos_b && b_on_top_or_right && a_on_left_or_bottom;
-}
-
-
-
-static void fill_shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_cell,
-                        uint8_t * fov_map, uint16_t pos_a, uint16_t pos_b)
-{
-    int16_t a_y_on_left = !(pos_a%world.map.length)? pos_a/world.map.length :-1;
-    int16_t b_y_on_left = !(pos_b%world.map.length)? pos_b/world.map.length :-1;
-    uint8_t top_left_shaded = is_top_left_shaded(pos_a, pos_b, a_y_on_left);
-    uint16_t pos;
-    uint8_t y, x, in_shade;
-    for (y = 0; y < world.map.length; y++)
-    {
-        in_shade =    (top_left_shaded || (b_y_on_left >= 0 && y > b_y_on_left))
-                   && (a_y_on_left < 0 || y < a_y_on_left);
-        for (x = 0; x < world.map.length; x++)
-        {
-            pos = (y * world.map.length) + x;
-            if (yx_eye->y == yx_cell->y && yx_eye->x < yx_cell->x)
-            {
-                uint8_t val = fov_map[pos] & (SHADOW_LEFT | SHADOW_RIGHT);
-                in_shade = 0 < val ? 1 : in_shade;
-            }
-            else if (yx_eye->y == yx_cell->y && yx_eye->x > yx_cell->x)
-            {
-                uint8_t val = fov_map[pos] & (SHADOW_LEFT | SHADOW_RIGHT);
-                in_shade = 0 < val ? 0 : in_shade;
-            }
-            else if (yx_eye->y > yx_cell->y && y <= yx_cell->y)
-            {
-                in_shade = 0 < (fov_map[pos] & SHADOW_LEFT) ? 1 : in_shade;
-                in_shade = (fov_map[pos] & SHADOW_RIGHT) ? 0 : in_shade;
-            }
-            else if (yx_eye->y < yx_cell->y && y >= yx_cell->y)
-            {
-                in_shade = 0 < (fov_map[pos] & SHADOW_RIGHT) ? 1 : in_shade;
-                in_shade = (fov_map[pos] & SHADOW_LEFT) ? 0 : in_shade;
-            }
-            if (!(fov_map[pos] & (SHADOW_LEFT | SHADOW_RIGHT))
-                && in_shade)
-            {
-                fov_map[pos] = fov_map[pos] | HIDDEN;
+                if (   shadow1 != shadow2
+                    && try_merge(shadow1, shadow2->left_angle,
+                                          shadow2->right_angle))
+                {
+                    struct shadow_angle * to_free = shadow2;
+                    if (last_shadow)
+                    {
+                        last_shadow->next = shadow2->next;
+                        shadow2 = last_shadow;
+                    }
+                    else
+                    {
+                        *shadows = shadow2->next;
+                        shadow2 = *shadows;
+                    }
+                    free(to_free);
+                }
+                last_shadow = shadow2;
             }
         }
     }
+    return angle_merge;
 }
 
 
 
-static uint16_t shadow_arm(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
-                           uint8_t * fov_map, char dir, uint8_t flag,
-                           uint8_t shift_right)
+static void set_shadow(uint32_t left_angle, uint32_t right_angle,
+                       struct shadow_angle ** shadows, uint16_t pos_in_map,
+                       uint8_t * fov_map)
 {
-    struct yx_uint8 yx_border = *yx_start;
-    uint16_t pos = yx_to_map_pos(&yx_border);
-    if (mv_yx_in_dir_legal(dir, &yx_border))
+    char * f_name = "set_shadow()";
+    struct shadow_angle * shadow_i;
+    if (fov_map[pos_in_map] & VISIBLE)
     {
-        uint8_t met_limit = 0;
-        uint8_t i_dirs = 0;
-        char * dirs = eye_to_cell(yx_eye, &yx_border, shift_right);
-        yx_border = *yx_start;
-        while (!met_limit && mv_yx_in_dir_legal(dirs[i_dirs], &yx_border))
+        for (shadow_i = *shadows; shadow_i; shadow_i = shadow_i->next)
         {
-            pos = yx_to_map_pos(&yx_border);
-            met_limit = fov_map[pos] & LIMIT;
-            fov_map[pos] = fov_map[pos] | flag;
-            i_dirs = dirs[i_dirs + 1] ? i_dirs + 1 : 0;
-        }
-        free(dirs);
-    }
-    mv_yx_in_dir_wrap(0, NULL, 1);
-    return pos;
-}
-
-
-
-static void shadow(struct yx_uint8 * yx_eye, struct yx_uint8 * yx_start,
-                   uint8_t * fov_map, char dir_left, char dir_right)
-{
-    uint16_t pos_a, pos_b, pos_start, i;
-    pos_a = shadow_arm(yx_eye, yx_start, fov_map, dir_left, SHADOW_LEFT, 0);
-    pos_b = shadow_arm(yx_eye, yx_start, fov_map, dir_right, SHADOW_RIGHT, 1);
-    pos_start = yx_to_map_pos(yx_start);
-    fov_map[pos_start] = fov_map[pos_start] | SHADOW_LEFT | SHADOW_RIGHT;
-    fill_shadow(yx_eye, yx_start, fov_map, pos_a, pos_b);
-    for (i = 0; i < world.map.length * world.map.length; i++)
-    {
-        if (fov_map[i] & (SHADOW_LEFT | SHADOW_RIGHT) && i != pos_start)
-        {
-            fov_map[i] = fov_map[i] | HIDE_LATER;
-        }
-        fov_map[i] = fov_map[i] ^ (fov_map[i] & SHADOW_LEFT);
-        fov_map[i] = fov_map[i] ^ (fov_map[i] & SHADOW_RIGHT);
-    }
-    return;
-}
-
-
-
-static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
-                                         struct yx_uint8 * yx_eye,
-                                         uint8_t * fov_map)
-{
-    char * dirs = "dcxswe";
-    uint16_t pos = yx_to_map_pos(yx_cell);
-    if (!(fov_map[pos] & HIDDEN))
-    {
-        fov_map[pos] = fov_map[pos] | VISIBLE;
-        if ('X' == world.map.cells[pos])
-        {
-            uint8_t last_pos = strlen(dirs) - 1;
-            int16_t diff_y = yx_cell->y - yx_eye->y;
-            int16_t diff_x = yx_cell->x - yx_eye->x;
-            uint8_t indent = yx_eye->y % 2;
-            char * dir = dir_from_delta(indent, diff_y, diff_x);
-            uint8_t start_pos = strchr(dirs, dir[0]) - dirs;
-            char prev = start_pos > 0 ? dirs[start_pos - 1] : dirs[last_pos];
-            char next = start_pos < last_pos ? dirs[start_pos + 1] : dirs[0];
-            if (dir[1])
+            if (   left_angle <=  shadow_i->left_angle
+                && right_angle >= shadow_i->right_angle)
             {
-                uint8_t end_pos = strchr(dirs, dir[1]) - dirs;
-                next = end_pos < last_pos ? dirs[end_pos + 1] : dirs[0];
+                fov_map[pos_in_map] = HIDDEN;
+                return;
             }
-            shadow(yx_eye, yx_cell, fov_map, prev, next);
         }
+    }
+    if ('X' == world.map.cells[pos_in_map])
+    {
+        if (!try_merging_angles(left_angle, right_angle, shadows))
+        {
+            struct shadow_angle * shadow;
+            shadow = try_malloc(sizeof(struct shadow_angle), f_name);
+            shadow->left_angle  = left_angle;
+            shadow->right_angle = right_angle;
+            shadow->next = NULL;
+            if (*shadows)
+            {
+                for (shadow_i = *shadows; shadow_i; shadow_i = shadow_i->next)
+                {
+                    if (!shadow_i->next)
+                    {
+                        shadow_i->next = shadow;
+                        return;
+                    }
+                }
+            }
+            *shadows = shadow;
+        }
+    }
+}
+
+
+
+static void free_angles(struct shadow_angle * angles)
+{
+    if (angles->next)
+    {
+        free_angles(angles->next);
+    }
+    free(angles);
+}
+
+
+
+static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
+                          struct yx_uint8 * test_pos,
+                          struct shadow_angle ** shadows)
+{
+    int32_t left_angle_uncorrected =   ((CIRCLE / 12) / dist)
+                                     - ((hex_i * (CIRCLE / 6)) / dist);
+    int32_t right_angle_uncorrected =   left_angle_uncorrected
+                                      - (CIRCLE / (6 * dist));
+    uint32_t left_angle  = correct_angle(left_angle_uncorrected);
+    uint32_t right_angle = correct_angle(right_angle_uncorrected);
+    uint32_t right_angle_1st = right_angle > left_angle ? 0 : right_angle;
+    uint16_t pos_in_map = yx_to_map_pos(test_pos);
+    set_shadow(left_angle, right_angle_1st, shadows, pos_in_map, fov_map);
+    if (right_angle_1st != right_angle)
+    {
+        left_angle = CIRCLE;
+        set_shadow(left_angle, right_angle, shadows, pos_in_map, fov_map);
     }
 }
 
@@ -560,36 +339,39 @@ static void set_view_of_cell_and_shadows(struct yx_uint8 * yx_cell,
 extern uint8_t * build_fov_map(struct Thing * eye)
 {
     char * f_name = "build_fov_map()";
-    uint8_t radius = 2 * world.map.length;
     uint32_t map_size = world.map.length * world.map.length;
-    struct yx_uint8 yx = eye->pos;
     uint8_t * fov_map = try_malloc(map_size, f_name);
-    memset(fov_map, 0, map_size);
-    draw_border_circle(yx, radius, fov_map);
-    fov_map[yx_to_map_pos(&yx)] = VISIBLE;
-    uint8_t dist;
-    for (dist = 1; dist <= radius; dist++)
+    memset(fov_map, VISIBLE, map_size);
+    struct yx_uint8 test_pos = eye->pos;
+    struct shadow_angle * shadows = NULL;
+    char * circle_dirs = "xswedc";
+    uint16_t dist;
+    uint8_t first_round, circle_on_map;
+    for (first_round = 1, dist = 1, circle_on_map = 1; circle_on_map; dist++)
     {
-        uint8_t first_round = 1;
-        char dir;
-        next_circle_dir(1, dist);
-        while ('\0' != (dir = next_circle_dir(0, 0)))
+        if (!first_round)
         {
-            char i_dir = first_round ? 'e' : dir;
-            first_round = 0;
-            if (mv_yx_in_dir_legal(i_dir, &yx))
+            mv_yx_in_dir_legal('c', &test_pos);
+        }
+        char dir = 'd';
+        uint8_t i_dir = first_round = circle_on_map = 0;
+        uint16_t i_dist, hex_i;
+        for (hex_i = 0, i_dist = 1; hex_i < 6 * dist; i_dist++, hex_i++)
+        {
+            if (mv_yx_in_dir_legal(dir, &test_pos))
             {
-                set_view_of_cell_and_shadows(&yx, &eye->pos, fov_map);
+                eval_position(dist, hex_i, fov_map, &test_pos, &shadows);
+                circle_on_map = 1;
+            }
+            dir = circle_dirs[i_dir];
+            if (dist == i_dist)
+            {
+                i_dist = 0;
+                i_dir++;
             }
         }
     }
-    uint16_t i;
-    for (i = 0; i < world.map.length * world.map.length; i++)
-    {
-        if (fov_map[i] & HIDE_LATER)
-        {
-              fov_map[i] = fov_map[i] ^ (fov_map[i] & VISIBLE);
-        }
-    }
+    mv_yx_in_dir_wrap(0, NULL, 1);
+    free_angles(shadows);
     return fov_map;
 }

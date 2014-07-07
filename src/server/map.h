@@ -16,7 +16,8 @@
  * a sea of one land cell in the middle, then going into a cycle of repeatedly
  * selecting a random sea cell and transforming it into land if it is neighbor
  * to land; the cycle ends when a land cell is due to be created right at the
- * border of the map. Lots of 'X' cells representing trees are put on the island.
+ * border of the map. Lots of 'X' cells representing trees are put on the
+ * island.
  */
 extern void remake_map();
 
