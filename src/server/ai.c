@@ -88,7 +88,8 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
 static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
 {
     uint32_t map_size = world.map.length * world.map.length;
-    uint16_t pos, i_scans, neighbors[N_DIRS], min_neighbor;
+    uint32_t pos;
+    uint16_t i_scans, neighbors[N_DIRS], min_neighbor;
     uint8_t scores_still_changing = 1;
     uint8_t i_dirs;
     for (i_scans = 0; scores_still_changing; i_scans++)
