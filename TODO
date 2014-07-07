@@ -28,3 +28,5 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
+
+- do something about a growing log slowing down the client
