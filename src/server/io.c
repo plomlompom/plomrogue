@@ -248,7 +248,7 @@ static char * build_visible_map(struct Thing * player)
     memset(visible_map, ' ', map_size);
     if (player->fov_map) /* May fail if player thing was created / positioned */
     {                    /* by god command after turning off FOV building.    */
-        uint16_t pos_i;
+        uint32_t pos_i;
         for (pos_i = 0; pos_i < map_size; pos_i++)
         {
             if (player->fov_map[pos_i] & VISIBLE)

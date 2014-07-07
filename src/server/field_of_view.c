@@ -13,8 +13,11 @@
 
 
 
-/* Number of degrees a circle is divided into. */
-#define CIRCLE 36000000
+/* Number of degrees a circle is divided into. The greater it is, the greater
+ * the angle precision. But make it one whole zero larger and bizarre FOV bugs
+ * appear on large maps, probably due to value overflows.
+ */
+#define CIRCLE 3600000
 
 
 

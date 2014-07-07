@@ -23,8 +23,6 @@ SERVER:
 
 - ensure atomic re-writing of savefile
 
-- FOV algorithm is buggy in large maps
-
 CLIENT:
 
 - enable toggling of window borders
