@@ -30,5 +30,3 @@ CLIENT:
 - make log scrollable
 
 - do something about a growing log slowing down the client
-
-- enable auto-focus of map view on player
