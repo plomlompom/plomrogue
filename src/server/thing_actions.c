@@ -19,7 +19,18 @@
 
 
 
-/* Append "text" to game log, or a "." if "text" is the same as the last one. */
+/* How many previous characters of the game log to keep on adding new text */
+#define MAX_BACKLOG_CHARS 3000
+
+
+
+/* If "text" is equal "log"'s last line, return 1, else 0. */
+static uint8_t text_equals_log_end(char * log, char * text);
+
+/* Append "text" to game log shortened to MAX_BACKLOG_CHARS characters, or
+ * continuation period if "text" is the same as the (shortened) log's last line
+ * minus continuation periods.
+ */
 static void update_log(char * text);
 
 /* One actor "wounds" another actor, decrementing his lifepoints and, if they
@@ -40,41 +51,59 @@ static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing);
 
 
 
+static uint8_t text_equals_log_end(char * log, char * text)
+{
+    uint16_t len_old = strlen(log);
+    uint16_t last_nl = len_old - 1;
+    while (last_nl != 0)
+    {
+        if ('\n' == log[last_nl])
+        {
+            break;
+        }
+        last_nl--;
+    }
+    uint16_t last_stop = len_old - 1;
+    while (last_stop != 0)
+    {
+        if ('.' == log[last_stop] && '.' != log[last_stop - 1])
+        {
+            break;
+        }
+        last_stop--;
+    }
+    if (   (last_stop + 1) - last_nl == (uint16_t) strlen(text)
+        && 0 == strncmp(log + last_nl, text, strlen(text)))
+    {
+        return 1;
+    }
+    return 0;
+}
+
+
+
 static void update_log(char * text)
 {
     char * f_name = "update_log()";
     uint16_t len_new = strlen(text);
     uint16_t len_old = 0;
+    uint16_t offset = 0;
     if (world.log)
     {
         len_old = strlen(world.log);
-        uint16_t last_nl = len_old - 1;
-        while (last_nl != 0)
+        if (len_old > MAX_BACKLOG_CHARS)
         {
-            if ('\n' == world.log[last_nl])
-            {
-                break;
-            }
-            last_nl--;
+            offset = len_old - MAX_BACKLOG_CHARS;
+            len_old = MAX_BACKLOG_CHARS;
         }
-        uint16_t last_stop = len_old - 1;
-        while (last_stop != 0)
-        {
-            if ('.' == world.log[last_stop] && '.' != world.log[last_stop - 1])
-            {
-                break;
-            }
-            last_stop--;
-        }
-        if (   (last_stop + 1) - last_nl == (uint16_t) strlen(text)
-            && 0 == strncmp(world.log + last_nl, text, strlen(text)))
+        if (text_equals_log_end(world.log + offset, text))
         {
             text = ".";
         }
     }
     uint16_t len_whole = len_old + len_new + 1;
     char * new_text = try_malloc(len_whole, f_name);
-    memcpy(new_text, world.log, len_old);
+    memcpy(new_text, world.log + offset, len_old);
     sprintf(new_text + len_old, "%s", text);
     free(world.log);
     world.log = new_text;
