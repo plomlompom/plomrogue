@@ -26,6 +26,7 @@ KEY 119 move_w
 KEY 46 map_c
 KEY 68 drop
 KEY 117 use
+KEY 70 to_autofocus
 
 KEYBINDINGS 'wingeom'
 KEY 258 shift_f

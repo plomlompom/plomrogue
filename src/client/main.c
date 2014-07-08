@@ -52,6 +52,7 @@ int main(int argc, char * argv[])
     keypad(world.winDB.t_screen, TRUE);
     init_command_db();      /* The command DB needs to be initialized before  */
     load_interface_conf();  /* the interface, whose keybindings depend on it. */
+    world.focus_each_turn = 1;
 
     /* Set handler for terminal window resizing. */
     struct sigaction act;

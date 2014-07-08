@@ -68,8 +68,8 @@ static FILE * changed_worldstate_file(char * path);
  * out file wasn't read for supposedly not having changed since a last
  * read_world() call.
  *
- * map_center() is triggered by the first successful read_world() or on turn 1,
- * so the client focuses the map window on the player on client and world start.
+ * map_center() is triggered by either, the first successful read_world() (thus
+ * on client start), or on turn 1 (thus on world start).
  */
 static uint8_t read_world();
 
@@ -281,6 +281,7 @@ extern char * io_loop()
     world.halfdelay = 1;            /* Ensures read_world() is only called 10 */
     halfdelay(world.halfdelay);     /* times a second during user inactivity. */
     uint8_t change_in_client = 0;
+    uint16_t last_focused_turn = world.turn;
     time_t last_server_answer_time = time(0);
     while (1)
     {
@@ -292,8 +293,13 @@ extern char * io_loop()
             world.winch = 0;
             change_in_client++;
         }
-        if (read_world() || change_in_client)
+        if (change_in_client || read_world())
         {
+            if (world.turn != last_focused_turn && world.focus_each_turn)
+            {
+                last_focused_turn = world.turn;
+                map_center();
+            }
             draw_all_wins();
         }
         change_in_client = 0;

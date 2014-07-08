@@ -25,7 +25,8 @@ extern void send(char * msg);
  * loop ends regularly (due to the user sending a quit command), return an
  * appropriate quit message to write to stdout when the client winds down. Call
  * reset_windows() on receiving a SIGWINCH. Abort on assumed server death if the
- * server's out file does not get updated, even on PING requests.
+ * server's out file does not get updated, even on PING requests. Re-focus map
+ * view on player if world.focus_each_turn is set.
  */
 extern char * io_loop();
 

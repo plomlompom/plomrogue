@@ -38,6 +38,7 @@ struct World
     uint8_t player_inventory_select; /* index of selected item in inventory */
     uint8_t player_lifepoints; /* how alive the player is */
     uint8_t winch; /* if set, SIGWINCH was registered; trigger reset_windows()*/
+    uint8_t focus_each_turn; /* if !0, re-focus map on player each new turn */
 };
 
 

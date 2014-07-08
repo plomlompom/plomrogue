@@ -179,3 +179,6 @@ DESCRIPTION 'window geometry keys'
 
 COMMAND to_wk_keywin
 DESCRIPTION 'window keybinding keys'
+
+COMMAND to_autofocus
+DESCRIPTION 'toggle auto map center'

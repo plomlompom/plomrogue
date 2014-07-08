@@ -45,3 +45,10 @@ extern void map_center()
     win_map->center.y = world.player_pos.y;
     win_map->center.x = world.player_pos.x * 2;
 }
+
+
+
+extern void toggle_autofocus()
+{
+    world.focus_each_turn = world.focus_each_turn ? 0 : 1;
+}
