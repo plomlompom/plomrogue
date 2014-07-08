@@ -43,7 +43,7 @@ extern void map_center()
 {
     struct Win * win_map = get_win_by_id('m');
     win_map->center.y = world.player_pos.y;
-    win_map->center.x = world.player_pos.x * 2;
+    win_map->center.x = world.player_pos.x * 2 + (world.player_pos.y % 2);
 }
 
 
