@@ -5,7 +5,7 @@
 #include <stdint.h> /* uint8_t, uint16_t, UINT8_MAX, UINT16_MAX */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strlen() */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "map.h" /* is_passable() */
@@ -192,7 +192,7 @@ extern struct ThingType * get_thing_type(uint8_t id)
     char * err_intro = "Requested thing type of unused ID ";
     uint16_t size = strlen(err_intro) + 3 + 1 + 1;
     char * err = try_malloc(size, f_name);
-    sprintf(err, "%s%d.", err_intro, id);
+    exit_trouble(sprintf(err, "%s%d.", err_intro, id) < 0, f_name, "sprintf()");
     exit_err(NULL == tt, err);
     free(err);
     return tt;

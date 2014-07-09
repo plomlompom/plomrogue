@@ -15,7 +15,7 @@
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_width(),
                                   * try_fgets(), try_fwrite()
                                   */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "field_of_view.h" /* build_fov_map() */
@@ -100,7 +100,8 @@ extern void setup_server_io()
     exit_trouble(test && EEXIST != errno, f_name, "mkdir()");
     world.file_out = try_fopen(s[PATH_OUT], "w", f_name);
     world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, f_name);
-    sprintf(world.server_test, "%d %d\n", getpid(), (int) time(0));
+    test = sprintf(world.server_test, "%d %d\n", getpid(), (int) time(0));
+    exit_trouble(test < 0, f_name, "sprintf()");
     try_fwrite(world.server_test, strlen(world.server_test), 1,
                world.file_out, f_name);
     fflush(world.file_out);
@@ -186,7 +187,8 @@ extern void run_game()
     {
         char * command = s[CMD_MAKE_WORLD];
         char * msg = try_malloc(strlen(command) + 1 + 11 + 1, f_name);
-        sprintf(msg, "%s %d", command, (int) time(NULL));
+        int test = sprintf(msg, "%s %d", command, (int) time(NULL));
+        exit_trouble(test < 0, f_name, "sprintf()");
         obey_msg(msg, 1);
         free(msg);
     }

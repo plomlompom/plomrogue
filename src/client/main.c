@@ -72,6 +72,6 @@ int main(int argc, char * argv[])
 
     /* Leave properly. */
     cleanup();
-    printf("%s\n", quit_msg);
+    exit_trouble(printf("%s\n", quit_msg) < 0, f_name, "printf()");
     exit(EXIT_SUCCESS);
 }

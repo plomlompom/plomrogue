@@ -2,8 +2,6 @@ Next planned steps in plomrogue development:
 
 IN GENERAL:
 
-- check for return values of *printf()
-
 - expand use of hardcoded_strings module(s)
 
 BOTH SERVER/CLIENT:

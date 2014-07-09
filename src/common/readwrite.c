@@ -24,7 +24,8 @@ extern FILE * try_fopen(char * path, char * mode, char * f)
     uint16_t size = strlen(msg1) + strlen(msg2) + strlen(msg3) + strlen(msg4)
                     + strlen(f) + strlen(path) + strlen(mode) + 1;
     char * msg = try_malloc(size, f_name);
-    sprintf(msg, "%s%s%s%s%s%s%s", msg1, f, msg2, mode, msg3, path, msg4);
+    int test = sprintf(msg, "%s%s%s%s%s%s%s", msg1,f,msg2,mode,msg3,path,msg4);
+    exit_trouble(test < 0, f_name, "sprintf()");
     FILE * file_p = fopen(path, mode);
     exit_err(NULL == file_p, msg);
     free(msg);
@@ -87,7 +88,8 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
         uint16_t size = strlen(msg1) + strlen(msg2) + strlen(msg4)
                         + strlen(f) + strlen(p2) + 1;
         char * msg = try_malloc(size, f_name);
-        sprintf(msg, "%s%s%s%s%s", msg1, f, msg2, p2, msg4);
+        int test = sprintf(msg, "%s%s%s%s%s", msg1, f, msg2, p2, msg4);
+        exit_trouble(test < 0, f_name, "sprintf()");
         exit_err(unlink(p2), msg);
         free(msg);
     }
@@ -96,7 +98,8 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
     uint16_t size = strlen(msg1) + strlen(f) + strlen(msg2) + strlen(p1)
                     + strlen(msg3) + strlen(p2) + strlen(msg4) + 1;
     char * msg = try_malloc(size, f_name);
-    sprintf(msg, "%s%s%s%s%s%s%s", msg1, f, msg2, p1, msg3, p2, msg4);
+    int test = sprintf(msg, "%s%s%s%s%s%s%s", msg1,f,msg2,p1,msg3,p2,msg4);
+    exit_trouble(test < 0, f_name, "sprintf()");
     exit_err(rename(p1, p2), msg);
     free(msg);
 }

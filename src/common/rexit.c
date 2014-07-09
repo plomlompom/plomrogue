@@ -51,7 +51,8 @@ extern void exit_trouble(int err, char * parent, char * child)
     uint16_t size = strlen(p1) + strlen(parent) + strlen(p2) + strlen(child)
                     + strlen(p3) + 1;
     char * msg = try_malloc(size, f_name);
-    sprintf(msg, "%s%s%s%s%s", p1, parent, p2, child, p3);
+    int test = sprintf(msg, "%s%s%s%s%s", p1, parent, p2, child, p3);
+    exit_err(test < 0, "Trouble in exit_trouble() with sprintf()");
     exit_err(err, msg);
     free(msg);
 }

@@ -8,7 +8,7 @@
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strchr(), strdup/(), strlen() */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "keybindings.h" /* struct KeyBindingDB, get_keyname_to_keycode() */
 #include "windows.h" /* yx_uint16, Win, get_win_by_id() */
@@ -185,7 +185,8 @@ static void add_line_compact(struct Win * win, char * line, attr_t attri,
     char * separator = last ? "" : " / ";
     uint32_t len_line_new = len_line + strlen(separator);
     char * line_new = try_malloc(len_line_new, f_name);
-    sprintf(line_new, "%s%s", line, separator);
+    int test = sprintf(line_new, "%s%s", line, separator);
+    exit_trouble(test < 0, f_name, "sprintf()");
     uint16_t x = 0;
     uint16_t y;
     uint32_t z;
@@ -263,7 +264,8 @@ static char * get_kb_line(struct KeyBinding * kb)
     char * keyname = get_keyname_to_keycode(kb->keycode);
     uint16_t size = strlen(keyname) + 3 + strlen(kb->command->dsc_long) + 1;
     char * kb_line = try_malloc(size, f_name);
-    sprintf(kb_line, "%s - %s", keyname, kb->command->dsc_long);
+    int test = sprintf(kb_line, "%s - %s", keyname, kb->command->dsc_long);
+    exit_trouble(test < 0, f_name, "sprintf()");
     free(keyname);
     return kb_line;
 }
@@ -362,8 +364,9 @@ extern void draw_win_info(struct Win * win)
     char * dsc_hitpoints = "\nHitpoints: ";
     uint16_t maxl = strlen(dsc_turn) + 5 + strlen(dsc_hitpoints) + 3;
     char * text = try_malloc(maxl + 1, f_name);
-    sprintf(text, "%s%d%s%d",
-            dsc_turn, world.turn, dsc_hitpoints, world.player_lifepoints);
+    int test = sprintf(text, "%s%d%s%d", dsc_turn, world.turn, dsc_hitpoints,
+                                         world.player_lifepoints);
+    exit_trouble(test < 0, f_name, "sprintf()");
     add_text_with_linebreaks(win, text);
     free(text);
 }
@@ -463,13 +466,15 @@ extern void draw_winconf_geometry(struct Win * win)
     char * title = "Window's geometry:\n\n";
     char * h_title = "Height to save: ";
     char h_value[6 + 1];                       /* 6: int16_t value max strlen */
-    sprintf(h_value, "%d", win->target_height);
+    int test = sprintf(h_value, "%d", win->target_height);
+    exit_trouble(test < 0, f_name, "sprintf()");
     char * h_plus = " (width in cells)\n\n";
     char * h_minus = " (negative diff: cells to screen width)\n\n";
     char * h_type = (1 == win->target_height_type) ? h_minus : h_plus;
     char * w_title = "Width to save: ";
     char w_value[6 + 1];
-    sprintf(w_value, "%d", win->target_width);
+    test = sprintf(w_value, "%d", win->target_width);
+    exit_trouble(test < 0, f_name, "sprintf()");
     char * w_plus = "(height in cells)\n\n";
     char * w_minus = " (negative diff: cells to screen height)\n\n";
     char * w_type = (1 == win->target_width_type)  ? w_minus : w_plus;
@@ -481,8 +486,9 @@ extern void draw_winconf_geometry(struct Win * win)
                          + strlen(w_title) + strlen(w_value) + strlen(w_type)
                          + strlen(breaks_title) + strlen(breaks_type);
     char * text = try_malloc(text_size + 1, f_name);
-    sprintf(text, "%s%s%s%s%s%s%s%s%s", title, h_title, h_value, h_type,
-            w_title, w_value, w_type, breaks_title, breaks_type);
+    test = sprintf(text, "%s%s%s%s%s%s%s%s%s", title, h_title, h_value, h_type,
+                        w_title, w_value, w_type, breaks_title, breaks_type);
+    exit_trouble(test < 0, f_name, "sprintf()");
     add_text_with_linebreaks(win, text);
     free(text);
 }

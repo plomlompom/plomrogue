@@ -106,7 +106,8 @@ static void read_inventory(char * read_buf, uint32_t linemax, FILE * file)
         int new_size = strlen(read_buf);
         char * new_inventory = try_malloc(old_size + new_size + 1, f_name);
         memcpy(new_inventory, world.player_inventory, old_size);
-        sprintf(new_inventory + old_size, "%s", read_buf);
+        int test = sprintf(new_inventory + old_size, "%s", read_buf);
+        exit_trouble(test < 0, f_name, "sprintf()");
         free(world.player_inventory);
         world.player_inventory = new_inventory;
     }
@@ -150,7 +151,8 @@ static void read_log(char * read_buf, uint32_t linemax, FILE * file)
         int new_size = strlen(read_buf);
         char * new_log = try_malloc(old_size + new_size + 1, f_name);
         memcpy(new_log, world.log, old_size);
-        sprintf(new_log + old_size, "%s", read_buf);
+        int test = sprintf(new_log + old_size, "%s", read_buf);
+        exit_trouble(test < 0, f_name, "sprintf()");
         free(world.log);
         world.log = new_log;
     }

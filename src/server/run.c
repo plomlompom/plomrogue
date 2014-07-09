@@ -4,7 +4,7 @@
 #include "run.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include <stdio.h> /* FILE, sprintf(), fflush() */
+#include <stdio.h> /* FILE, printf(), sprintf(), fflush() */
 #include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* strlen(), strcmp() strncmp(), strdup() */
 #include <unistd.h> /* access() */
@@ -311,7 +311,8 @@ static void record_msg(char * msg)
     char * f_name = "record_msg()";
     uint16_t size = strlen(s[PATH_RECORD]) + strlen(s[PATH_SUFFIX_TMP]) + 1;
     char * path_tmp = try_malloc(size, f_name);
-    sprintf(path_tmp, "%s%s", s[PATH_RECORD], s[PATH_SUFFIX_TMP]);
+    int test = sprintf(path_tmp, "%s%s", s[PATH_RECORD], s[PATH_SUFFIX_TMP]);
+    exit_trouble(test < 0, f_name, "sprintf()");
     FILE * file_tmp  = try_fopen(path_tmp, "w", f_name);
     if (!access(s[PATH_RECORD], F_OK))
     {

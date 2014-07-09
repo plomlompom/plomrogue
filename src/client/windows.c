@@ -147,6 +147,8 @@ static char get_next_win_id()
 static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
                         char * unit, struct yx_uint16 start)
 {
+    char * f_name = "sprintf()";
+
     /* Decide on alignment (vertical/horizontal?), thereby hint text space. */
     char * more = "more";
     uint16_t dsc_space = fsize.x;
@@ -155,8 +157,9 @@ static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
         dsc_space = fsize.y;
     }                                  /* vv-- 10 = max strlen for uint16_t */
     uint16_t size = 1 + strlen(more) + 1 + 10 + 1 + strlen(unit) + 1 + 1;
-    char * scrolldsc = try_malloc(size, "scroll_hint()");
-    sprintf(scrolldsc, " %d %s %s ", dist, more, unit);
+    char * scrolldsc = try_malloc(size, f_name);
+    int test = sprintf(scrolldsc, " %d %s %s ", dist, more, unit);
+    exit_trouble(test < 0, f_name, "sprintf()");
 
     /* Decide on offset of the description text inside the scroll hint line. */
     uint16_t dsc_offset = 1;
@@ -210,8 +213,6 @@ static void winscroll_hint(struct Win * w, char dir, uint16_t dist)
 
 static void draw_win_borderlines(struct Win * w)
 {
-    char * f_name = "draw_win_borderlines()";
-
     /* Draw vertical and horizontal border lines. */
     uint16_t y, x;
     for (y = w->start.y; y <= w->start.y + w->frame_size.y; y++)
@@ -235,7 +236,7 @@ static void draw_win_borderlines(struct Win * w)
             offset = (w->frame_size.x - (strlen(w->title) + 2)) / 2;
         }                                    /* +2 is for padding/decoration */
         uint16_t length_visible = strnlen(w->title, w->frame_size.x - 2);
-        char * title = try_malloc(length_visible + 3, f_name);
+        char * title = try_malloc(length_visible + 3, "draw_win_borderlines()");
         char decoration = ' ';
         if (w->id == world.winDB.active)
         {
@@ -441,7 +442,8 @@ extern void reset_windows_on_winch()
     endwin();  /* "[S]tandard way" to recalibrate ncurses post SIGWINCH, says */
     refresh(); /* <http://invisible-island.net/ncurses/ncurses-intro.html>.   */
     char * tmp_order = try_malloc(strlen(world.winDB.order) + 1, f_name);
-    sprintf(tmp_order, "%s", world.winDB.order);
+    int test = sprintf(tmp_order, "%s", world.winDB.order);
+    exit_trouble(test < 0, f_name, "sprintf()");
     uint8_t i;
     char tmp_active = world.winDB.active;
     for (i = 0; i < strlen(tmp_order); toggle_window(tmp_order[i]), i++);

@@ -7,7 +7,7 @@
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memcpy(), memset(), strchr(), strlen() */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "windows.h" /* Win,yx_uint16, get_win_by_id(),get_win_pos_in_order() */
 #include "world.h" /* global world */
@@ -200,7 +200,8 @@ static void suspend_win(struct Win * w)
     char next_char = world.winDB.order[i + 1];
     world.winDB.order[i] = '\0';
     char * second_part = &world.winDB.order[i + 1];
-    sprintf(new_order, "%s%s", world.winDB.order, second_part);
+    int test = sprintf(new_order, "%s%s", world.winDB.order, second_part);
+    exit_trouble(test < 0, f_name, "sprintf()");
     free(world.winDB.order);
     world.winDB.order = new_order;
     world.winDB.active = world.winDB.order[i];

@@ -6,7 +6,7 @@
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), strcmp(), memcpy(), strncmp() */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "field_of_view.h" /* build_fov_map() */
@@ -104,7 +104,8 @@ static void update_log(char * text)
     uint16_t len_whole = len_old + len_new + 1;
     char * new_text = try_malloc(len_whole, f_name);
     memcpy(new_text, world.log + offset, len_old);
-    sprintf(new_text + len_old, "%s", text);
+    int test = sprintf(new_text + len_old, "%s", text);
+    exit_trouble(test < 0, f_name, "sprintf()");
     free(world.log);
     world.log = new_text;
 }
@@ -131,7 +132,8 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
     }
     uint8_t len = 1 + strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
     char * msg = try_malloc(len, f_name);
-    sprintf(msg, "\n%s %s %s.", msg1, msg2, msg3);
+    int test = sprintf(msg, "\n%s %s %s.", msg1, msg2, msg3);
+    exit_trouble(test < 0, f_name, "sprintf()");
     update_log(msg);
     free(msg);
     hitted->lifepoints--;
@@ -186,7 +188,8 @@ static void playerbonus_move(char d, uint8_t passable)
         dsc_move = "You fail to move ";
     }
     char * msg = try_malloc(strlen(dsc_move) + strlen (dsc_dir) + 3, f_name);
-    sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
+    int test = sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
+    exit_trouble(test < 0, f_name, "sprintf()");
     update_log(msg);
     free(msg);
 }

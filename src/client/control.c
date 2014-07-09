@@ -5,7 +5,7 @@
 #include <stdlib.h> /* free() */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen() */
-#include "../common/rexit.h" /* exit_err() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "interface_conf.h" /* reload_interface_conf(), save_interface_conf() */
 #include "io.h" /* send() */
@@ -169,7 +169,8 @@ static uint8_t try_server_commands(struct Command * command)
         uint8_t command_size = strlen(command->server_msg);
         uint8_t arg_size = 3;
         char * msg = try_malloc(command_size + 1 + arg_size + 1, f_name);
-        sprintf(msg, "%s %d", command->server_msg, arg);
+        int test = sprintf(msg, "%s %d", command->server_msg, arg);
+        exit_trouble(test < 0, f_name, "sprintf()");
         send(msg);
         free(msg);
         return 1;

@@ -182,7 +182,8 @@ static void update_worldstate_file()
     char * f_name = "update_worldstate_file()";
     uint16_t size = strlen(s[PATH_WORLDSTATE]) + strlen(s[PATH_SUFFIX_TMP]) + 1;
     char * path_tmp = try_malloc(size, f_name);
-    sprintf(path_tmp, "%s%s", s[PATH_WORLDSTATE], s[PATH_SUFFIX_TMP]);
+    int test = sprintf(path_tmp, "%s%s", s[PATH_WORLDSTATE],s[PATH_SUFFIX_TMP]);
+    exit_trouble(test < 0, f_name, "sprintf()");
     FILE * file = try_fopen(path_tmp, "w", f_name);
     struct Thing * player = get_player();
     write_value_as_line(world.turn, file);
@@ -210,7 +211,7 @@ static void write_value_as_line(uint32_t value, FILE * file)
 {
     char * f_name = "write_value_as_line()";
     char write_buf[12];     /* Holds 10 digits of uint32_t maximum + \n + \0. */
-    sprintf(write_buf, "%u\n", value);
+    exit_trouble(sprintf(write_buf, "%u\n", value) < 0, f_name, "sprintf()");
     try_fwrite(write_buf, strlen(write_buf), 1, file, f_name);
 }
 
