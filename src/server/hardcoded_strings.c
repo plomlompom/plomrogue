@@ -4,7 +4,7 @@
 
 
 
-char * s[27];
+char * s[26];
 
 
 
@@ -15,7 +15,6 @@ extern void init_strings()
     s[S_PATH_OUT] = "server/out";
     s[S_PATH_IN] = "server/in";
     s[S_PATH_RECORD] = "record";
-    s[S_PATH_SUFFIX_TMP] = "_tmp";
     s[S_PATH_SAVE] = "savefile";
     s[S_CMD_MAKE_WORLD] = "MAKE_WORLD";
     s[S_CMD_DO_FOV] = "BUILD_FOVS";

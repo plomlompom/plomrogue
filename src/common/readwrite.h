@@ -29,12 +29,16 @@ extern void try_fputc(uint8_t c, FILE * file, char * f);
 extern int try_fgetc(FILE * file, char * f);
 extern char * try_fgets(char * line, int size, FILE * file, char * f);
 
-/* Wrapper to successive call of fclose() from function called "f" on "file",
- * then unlink() on file at path "p2" if it exists, then rename() from path "p1"
- * to "p2". Used for handling atomic saving of files via temp files.
+/* Write to "path_tmp" "path" + "_tmp" and return a new file at that "path_tmp"
+ * open for writing. "path_tmp" is malloc()'d, must be freed externally.
+*/
+extern FILE * atomic_write_start(char * path, char ** path_tmp);
+
+/* Finish atomic writing started in atomic_write_start(). Wraps successive calls
+ * of fclose() on "file", then unlink() on file at path "path" if it exists,
+ * then rename() from "path_tmp" to "path", then free() on "path_tmp".
  */
-extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
-                                     char * f);
+extern void atomic_write_finish(FILE * file, char * path, char * path_tmp);
 
 /* Return largest line length from "file" (including  newline chars). */
 extern uint32_t textfile_width(FILE * file);

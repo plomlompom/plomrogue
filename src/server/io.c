@@ -11,7 +11,7 @@
 #include <string.h> /* strlen(), memcpy(), memset() */
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time(), nanosleep() */
-#include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
+#include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish(),
                                   * try_fwrite(), try_fputc(), try_fgetc()
                                   */
 #include "../common/rexit.h" /* exit_trouble() */
@@ -180,11 +180,8 @@ static void read_file_into_queue()
 static void update_worldstate_file()
 {
     char * f_name = "update_worldstate_file()";
-    uint16_t size = strlen(s[S_PATH_WORLDSTATE])+strlen(s[S_PATH_SUFFIX_TMP])+1;
-    char * path_tmp = try_malloc(size, f_name);
-    int test=sprintf(path_tmp,"%s%s",s[S_PATH_WORLDSTATE],s[S_PATH_SUFFIX_TMP]);
-    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
-    FILE * file = try_fopen(path_tmp, "w", f_name);
+    char * path_tmp;
+    FILE * file = atomic_write_start(s[S_PATH_WORLDSTATE], &path_tmp);
     struct Thing * player = get_player();
     write_value_as_line(world.turn, file);
     write_value_as_line(player->lifepoints, file);
@@ -197,8 +194,7 @@ static void update_worldstate_file()
     {
         try_fwrite(world.log, strlen(world.log), 1, file, f_name);
     }
-    try_fclose_unlink_rename(file, path_tmp, s[S_PATH_WORLDSTATE], f_name);
-    free(path_tmp);
+    atomic_write_finish(file, s[S_PATH_WORLDSTATE], path_tmp);
     set_cleanup_flag(CLEANUP_WORLDSTATE);
     char * dot = ".\n";;
     try_fwrite(dot, strlen(dot), 1, world.file_out, f_name);
@@ -331,11 +327,8 @@ extern char * io_round()
 extern void save_world()
 {
     char * f_name = "save_world()";
-    uint16_t size = strlen(s[S_PATH_SAVE]) + strlen(s[S_PATH_SUFFIX_TMP]) + 1;
-    char * path_tmp = try_malloc(size, f_name);
-    int test=sprintf(path_tmp,"%s%s",s[S_PATH_SAVE], s[S_PATH_SUFFIX_TMP]);
-    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
-    FILE * file = try_fopen(path_tmp, "w", f_name);
+    char * path_tmp;
+    FILE * file = atomic_write_start(s[S_PATH_SAVE], &path_tmp);
     write_key_value(file, s[S_CMD_DO_FOV], 0);
     try_fputc('\n', file, f_name);
     write_key_value(file, s[S_CMD_SEED_MAP], world.seed_map);
@@ -348,6 +341,5 @@ extern void save_world()
         write_thing(file, t);
     }
     write_key_value(file, s[S_CMD_DO_FOV], 1);
-    try_fclose_unlink_rename(file, path_tmp, s[S_PATH_SAVE], f_name);
-    free(path_tmp);
+    atomic_write_finish(file, s[S_PATH_SAVE], path_tmp);
 }

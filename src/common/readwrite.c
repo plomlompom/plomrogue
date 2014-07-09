@@ -75,33 +75,48 @@ extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 
 
 
-extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
-                                     char * f)
+extern FILE * atomic_write_start(char * path, char ** path_tmp)
 {
-    char * f_name = "try_fclose_unlink_rename()";
-    try_fclose(file, f);
+    char * f_name = "atomic_write_start()";
+    char * suffix_tmp = "_tmp";
+    uint16_t size = strlen(path) + strlen(suffix_tmp) + 1;
+    *path_tmp = try_malloc(size, f_name);
+    int test = sprintf(*path_tmp, "%s%s", path, suffix_tmp);
+    exit_trouble(test < 0, f_name, "sprintf()");
+    return try_fopen(*path_tmp, "w", f_name);
+}
+
+
+
+extern void atomic_write_finish(FILE * file, char * path, char * path_tmp)
+{
+    char * f_name = "atomic_write_finish()";
+    try_fclose(file, f_name);
     char * msg1 = "Trouble in ";
     char * msg4 = "'.";
-    if (!access(p2, F_OK))
+    if (!access(path, F_OK))
     {
         char * msg2 = " with unlink() on path '";
         uint16_t size = strlen(msg1) + strlen(msg2) + strlen(msg4)
-                        + strlen(f) + strlen(p2) + 1;
+                        + strlen(f_name) + strlen(path) + 1;
         char * msg = try_malloc(size, f_name);
-        int test = sprintf(msg, "%s%s%s%s%s", msg1, f, msg2, p2, msg4);
+        int test = sprintf(msg, "%s%s%s%s%s", msg1, f_name, msg2, path, msg4);
         exit_trouble(test < 0, f_name, "sprintf()");
-        exit_err(unlink(p2), msg);
+        exit_err(unlink(path), msg);
         free(msg);
     }
     char * msg2 = " with rename() from '";
     char * msg3 = "' to '";
-    uint16_t size = strlen(msg1) + strlen(f) + strlen(msg2) + strlen(p1)
-                    + strlen(msg3) + strlen(p2) + strlen(msg4) + 1;
+    uint16_t size =   strlen(msg1) + strlen(f_name) + strlen(msg2) +
+                    + strlen(path_tmp) + strlen(msg3) + strlen(path)
+                    + strlen(msg4) + 1;
     char * msg = try_malloc(size, f_name);
-    int test = sprintf(msg, "%s%s%s%s%s%s%s", msg1,f,msg2,p1,msg3,p2,msg4);
+    int test = sprintf(msg, "%s%s%s%s%s%s%s",
+                            msg1, f_name, msg2, path_tmp, msg3, path, msg4);
     exit_trouble(test < 0, f_name, "sprintf()");
-    exit_err(rename(p1, p2), msg);
+    exit_err(rename(path_tmp, path), msg);
     free(msg);
+    free(path_tmp);
 }
 
 

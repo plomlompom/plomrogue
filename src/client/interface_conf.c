@@ -16,7 +16,7 @@
                                    * parsetest_too_many_values(),
                                    * parse_id_uniq(), parse_init_entry()
                                    */
-#include "../common/readwrite.h" /* try_fopen(), try_fclose_unlink_rename(),
+#include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish()
                                   * try_fwrite()
                                   */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
@@ -401,13 +401,8 @@ extern void obey_argv(int argc, char * argv[])
 
 extern void save_interface_conf()
 {
-    char * f_name = "save_interface_conf()";
-    char * path = world.path_interface;
-    size_t size = strlen(path) + 4 + 1;
-    char * path_tmp = try_malloc(size, f_name);
-    int test = snprintf(path_tmp, size, "%s_tmp", path);
-    exit_trouble(test < 0, f_name, "snprintf()");
-    FILE * file = try_fopen(path_tmp, "w", f_name);
+    char * path_tmp;
+    FILE * file = atomic_write_start(world.path_interface, &path_tmp);
     char * str_keybs = "\nKEYBINDINGS ";
     write_def(file, str_keybs, 1, "global", 's');
     write_keybindings(file, &world.kb_global);
@@ -431,8 +426,7 @@ extern void save_interface_conf()
         write_def(file, "HEIGHT ", 0, (char *) &win->target_height, 'i');
         write_keybindings(file, &win->kb);
     }
-    try_fclose_unlink_rename(file, path_tmp, path, f_name);
-    free(path_tmp);
+    atomic_write_finish(file, world.path_interface, path_tmp);
 }
 
 

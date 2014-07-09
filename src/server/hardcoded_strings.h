@@ -15,7 +15,6 @@ enum string_num
     S_PATH_OUT,
     S_PATH_IN,
     S_PATH_RECORD,
-    S_PATH_SUFFIX_TMP,
     S_PATH_SAVE,
     S_CMD_MAKE_WORLD,
     S_CMD_DO_FOV,
@@ -41,7 +40,7 @@ enum string_num
 
 extern void init_strings();
 
-extern char * s[27];
+extern char * s[26];
 
 
 

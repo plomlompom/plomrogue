@@ -4,7 +4,7 @@
 #include "run.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include <stdio.h> /* FILE, printf(), sprintf(), fflush() */
+#include <stdio.h> /* FILE, printf(), fflush() */
 #include <stdlib.h> /* free(), atoi() */
 #include <string.h> /* strlen(), strcmp() strncmp(), strdup() */
 #include <unistd.h> /* access() */
@@ -12,8 +12,7 @@
                                    * err_line()
                                    */
 #include "../common/readwrite.h" /* try_fopen(), try_fcose(), try_fwrite(),
-                                  * try_fgets(), try_fclose_unlink_rename(),
-                                  * textfile_width(), try_fputc()
+                                  * try_fgets(), textfile_width(), try_fputc()
                                   */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -309,11 +308,8 @@ static void turn_over()
 static void record_msg(char * msg)
 {
     char * f_name = "record_msg()";
-    uint16_t size = strlen(s[S_PATH_RECORD]) + strlen(s[S_PATH_SUFFIX_TMP]) + 1;
-    char * path_tmp = try_malloc(size, f_name);
-    int test = sprintf(path_tmp, "%s%s", s[S_PATH_RECORD],s[S_PATH_SUFFIX_TMP]);
-    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
-    FILE * file_tmp  = try_fopen(path_tmp, "w", f_name);
+    char * path_tmp;
+    FILE * file_tmp = atomic_write_start(s[S_PATH_RECORD], &path_tmp);
     if (!access(s[S_PATH_RECORD], F_OK))
     {
         FILE * file_read = try_fopen(s[S_PATH_RECORD], "r", f_name);
@@ -328,8 +324,7 @@ static void record_msg(char * msg)
     }
     try_fwrite(msg, strlen(msg), 1, file_tmp, f_name);
     try_fputc('\n', file_tmp, f_name);
-    try_fclose_unlink_rename(file_tmp, path_tmp, s[S_PATH_RECORD], f_name);
-    free(path_tmp);
+    atomic_write_finish(file_tmp, s[S_PATH_RECORD], path_tmp);
 }
 
 
