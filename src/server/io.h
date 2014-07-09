@@ -26,8 +26,8 @@
  */
 extern char * io_round();
 
-/* Write to savefile god commands (one per line) to rebuild the current world
- * state.
+/* Write to savefile (atomically) god commands (one per line) to rebuild the
+ * current world state.
  */
 extern void save_world();
 

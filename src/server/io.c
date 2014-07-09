@@ -331,8 +331,11 @@ extern char * io_round()
 extern void save_world()
 {
     char * f_name = "save_world()";
-    char * path = s[S_PATH_SAVE];
-    FILE * file = try_fopen(path, "w", f_name);
+    uint16_t size = strlen(s[S_PATH_SAVE]) + strlen(s[S_PATH_SUFFIX_TMP]) + 1;
+    char * path_tmp = try_malloc(size, f_name);
+    int test=sprintf(path_tmp,"%s%s",s[S_PATH_SAVE], s[S_PATH_SUFFIX_TMP]);
+    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
+    FILE * file = try_fopen(path_tmp, "w", f_name);
     write_key_value(file, s[S_CMD_DO_FOV], 0);
     try_fputc('\n', file, f_name);
     write_key_value(file, s[S_CMD_SEED_MAP], world.seed_map);
@@ -345,5 +348,5 @@ extern void save_world()
         write_thing(file, t);
     }
     write_key_value(file, s[S_CMD_DO_FOV], 1);
-    try_fclose(file, f_name);
+    try_fclose_unlink_rename(file, path_tmp, s[S_PATH_SAVE], f_name);
 }

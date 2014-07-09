@@ -9,6 +9,8 @@ BOTH SERVER/CLIENT:
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
 
+- on start, alarm about _tmp files (savefile/record) to avoid gameplay data loss
+
 SERVER:
 
 - consider
@@ -16,8 +18,6 @@ SERVER:
 
 - save confserver/world data in record and save file, too; handle them like god
   commands
-
-- ensure atomic re-writing of savefile
 
 CLIENT:
 
