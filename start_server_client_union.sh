@@ -3,6 +3,18 @@
 # Abort the script on error.
 set -e
 
+# Give helpful message to players that want to start without compiling first.
+if [ ! -e ./roguelike-server ]
+then
+    echo 'No ./roguelike-server file found to execute. Try "make" first?'
+    false
+fi
+if [ ! -e ./roguelike-client ]
+then
+    echo 'No ./roguelike-client file found to execute. Try "make" first?'
+    false
+fi
+
 # Use shell script's arguments for server and pipe server output to log file.
 # This script's wrapper script will read it out on exit.
 ./roguelike-server "$@" > log 2>&1 &
