@@ -11,8 +11,6 @@ BOTH SERVER/CLIENT:
 
 SERVER:
 
-- bug: -v works, and -vs, but not -sv – why?
-
 - consider
   <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=TheCreationOfSpace#comment_0>
 
