@@ -8,6 +8,7 @@
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
+#include "hardcoded_strings.h" /* s */
 #include "map.h" /* is_passable() */
 #include "rrand.h" /* rrand() */
 #include "world.h" /* global world */
@@ -192,7 +193,7 @@ extern struct ThingType * get_thing_type(uint8_t id)
     char * err_intro = "Requested thing type of unused ID ";
     uint16_t size = strlen(err_intro) + 3 + 1 + 1;
     char * err = try_malloc(size, f_name);
-    exit_trouble(sprintf(err, "%s%d.", err_intro, id) < 0, f_name, "sprintf()");
+    exit_trouble(sprintf(err,"%s%d.",err_intro,id) < 0,f_name,s[S_FCN_SPRINTF]);
     exit_err(NULL == tt, err);
     free(err);
     return tt;

@@ -35,12 +35,13 @@ enum string_num
     S_CMD_MOVE,
     S_CMD_PICKUP,
     S_CMD_DROP,
-    S_CMD_USE
+    S_CMD_USE,
+    S_FCN_SPRINTF
 };
 
 extern void init_strings();
 
-extern char * s[26];
+extern char * s[27];
 
 
 

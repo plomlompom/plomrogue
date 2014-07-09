@@ -4,7 +4,7 @@
 
 
 
-char * s[26];
+char * s[27];
 
 
 
@@ -36,4 +36,5 @@ extern void init_strings()
     s[S_CMD_PICKUP] = "pick_up";
     s[S_CMD_DROP] = "drop";
     s[S_CMD_USE] = "use";
+    s[S_FCN_SPRINTF] = "sprintf()";
 }

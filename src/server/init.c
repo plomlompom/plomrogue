@@ -101,7 +101,7 @@ extern void setup_server_io()
     world.file_out = try_fopen(s[S_PATH_OUT], "w", f_name);
     world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, f_name);
     test = sprintf(world.server_test, "%d %d\n", getpid(), (int) time(0));
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
     try_fwrite(world.server_test, strlen(world.server_test), 1,
                world.file_out, f_name);
     fflush(world.file_out);
@@ -188,7 +188,7 @@ extern void run_game()
         char * command = s[S_CMD_MAKE_WORLD];
         char * msg = try_malloc(strlen(command) + 1 + 11 + 1, f_name);
         int test = sprintf(msg, "%s %d", command, (int) time(NULL));
-        exit_trouble(test < 0, f_name, "sprintf()");
+        exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
         obey_msg(msg, 1);
         free(msg);
     }

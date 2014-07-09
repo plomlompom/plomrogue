@@ -312,7 +312,7 @@ static void record_msg(char * msg)
     uint16_t size = strlen(s[S_PATH_RECORD]) + strlen(s[S_PATH_SUFFIX_TMP]) + 1;
     char * path_tmp = try_malloc(size, f_name);
     int test = sprintf(path_tmp, "%s%s", s[S_PATH_RECORD],s[S_PATH_SUFFIX_TMP]);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
     FILE * file_tmp  = try_fopen(path_tmp, "w", f_name);
     if (!access(s[S_PATH_RECORD], F_OK))
     {

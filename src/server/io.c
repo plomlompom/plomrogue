@@ -72,7 +72,7 @@ static void write_key_value(FILE * file, char * key, uint32_t value)
     try_fwrite(key, strlen(key), 1, file, f_name);
     try_fputc(' ', file, f_name);
     char * line = try_malloc(11, f_name);
-    exit_trouble(-1 == sprintf(line, "%u", value), f_name, "sprintf()");
+    exit_trouble(-1 == sprintf(line, "%u", value), f_name, s[S_FCN_SPRINTF]);
     try_fwrite(line, strlen(line), 1, file, f_name);
     free(line);
     try_fputc('\n', file, f_name);
@@ -183,7 +183,7 @@ static void update_worldstate_file()
     uint16_t size = strlen(s[S_PATH_WORLDSTATE])+strlen(s[S_PATH_SUFFIX_TMP])+1;
     char * path_tmp = try_malloc(size, f_name);
     int test=sprintf(path_tmp,"%s%s",s[S_PATH_WORLDSTATE],s[S_PATH_SUFFIX_TMP]);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
     FILE * file = try_fopen(path_tmp, "w", f_name);
     struct Thing * player = get_player();
     write_value_as_line(world.turn, file);
@@ -211,7 +211,7 @@ static void write_value_as_line(uint32_t value, FILE * file)
 {
     char * f_name = "write_value_as_line()";
     char write_buf[12];     /* Holds 10 digits of uint32_t maximum + \n + \0. */
-    exit_trouble(sprintf(write_buf, "%u\n", value) < 0, f_name, "sprintf()");
+    exit_trouble(sprintf(write_buf, "%u\n",value) < 0, f_name,s[S_FCN_SPRINTF]);
     try_fwrite(write_buf, strlen(write_buf), 1, file, f_name);
 }
 
