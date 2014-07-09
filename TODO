@@ -4,16 +4,14 @@ IN GENERAL:
 
 - expand use of hardcoded_strings module(s)
 
-ROGUELIKE SKRIPT
-
-- do something about the invisibility of error messages
-
 BOTH SERVER/CLIENT:
 
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
 
 SERVER:
+
+- bug: -v works, and -vs, but not -sv – why?
 
 - consider
   <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=TheCreationOfSpace#comment_0>
