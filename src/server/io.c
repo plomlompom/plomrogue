@@ -349,4 +349,5 @@ extern void save_world()
     }
     write_key_value(file, s[S_CMD_DO_FOV], 1);
     try_fclose_unlink_rename(file, path_tmp, s[S_PATH_SAVE], f_name);
+    free(path_tmp);
 }
