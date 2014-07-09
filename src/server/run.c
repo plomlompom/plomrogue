@@ -78,7 +78,7 @@ static uint8_t do_fov = 0;
 static uint8_t parse_carry(char * tok0, char * tok1, struct Thing * t)
 {
     uint8_t id;
-    if (parse_val(tok0, tok1, s[CMD_CARRIES], '8', (char *) &id))
+    if (parse_val(tok0, tok1, s[S_CMD_CARRIES], '8', (char *) &id))
     {
         if (!err_line(id == t->id, "Thing cannot carry itself."))
         {
@@ -99,11 +99,11 @@ static uint8_t parse_carry(char * tok0, char * tok1, struct Thing * t)
 static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t)
 {
     char axis = 0;
-    if      (!strcmp(tok0, s[CMD_POS_Y]))
+    if      (!strcmp(tok0, s[S_CMD_POS_Y]))
     {
         axis = 'y';
     }
-    else if (!strcmp(tok0, s[CMD_POS_X]))
+    else if (!strcmp(tok0, s[S_CMD_POS_X]))
     {
         axis = 'x';
     }
@@ -134,7 +134,7 @@ static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t)
 static uint8_t parse_thing_type(char * tok0, char * tok1, struct Thing * t)
 {
     uint8_t type;
-    if (parse_val(tok0, tok1, s[CMD_TYPE], '8', (char *) &type))
+    if (parse_val(tok0, tok1, s[S_CMD_TYPE], '8', (char *) &type))
     {
         struct ThingType * tt = world.thing_types;
         for (; NULL != tt && type != tt->id; tt = tt->next);
@@ -152,7 +152,7 @@ static uint8_t parse_thing_type(char * tok0, char * tok1, struct Thing * t)
 static uint8_t parse_thing_command(char * tok0, char * tok1, struct Thing * t)
 {
     uint8_t command;
-    if (parse_val(tok0, tok1, s[CMD_COMMAND], '8', (char *) &command))
+    if (parse_val(tok0, tok1, s[S_CMD_COMMAND], '8', (char *) &command))
     {
         if (!command)
         {
@@ -174,7 +174,7 @@ static uint8_t parse_thing_command(char * tok0, char * tok1, struct Thing * t)
 
 static uint8_t parse_do_fov(char * tok0, char * tok1)
 {
-    if (parse_val(tok0, tok1, s[CMD_DO_FOV], '8', (char *) &do_fov))
+    if (parse_val(tok0, tok1, s[S_CMD_DO_FOV], '8', (char *) &do_fov))
     {
         if (do_fov)
         {
@@ -197,13 +197,13 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
     static struct Thing * t = NULL;
     if (t && (   parse_thing_type(tok0, tok1, t)
               || parse_thing_command(tok0, tok1, t)
-              || parse_val(tok0, tok1, s[CMD_ARGUMENT], '8', (char *)&t->arg)
-              || parse_val(tok0, tok1, s[CMD_PROGRESS],'8',(char *)&t->progress)
-              || parse_val(tok0, tok1, s[CMD_LIFEPOINTS],'8',
+              || parse_val(tok0, tok1, s[S_CMD_ARGUMENT], '8', (char *)&t->arg)
+              || parse_val(tok0,tok1,s[S_CMD_PROGRESS],'8',(char *)&t->progress)
+              || parse_val(tok0, tok1, s[S_CMD_LIFEPOINTS], '8',
                                                         (char *) &t->lifepoints)
               || parse_position(tok0, tok1, t)
               || parse_carry(tok0, tok1, t)));
-    else if (parse_val(tok0, tok1, s[CMD_THING], '8', (char *) &id))
+    else if (parse_val(tok0, tok1, s[S_CMD_THING], '8', (char *) &id))
     {
         t = get_thing(world.things, id, 1);
         if (!t)
@@ -225,11 +225,11 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
 static uint8_t parse_player_command(char * tok0, char * tok1)
 {
     struct Thing * player = get_player();
-    if (   parse_val(tok0, tok1, s[CMD_WAIT], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[CMD_MOVE], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[CMD_PICKUP], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[CMD_DROP], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[CMD_USE], '8', (char *) &player->arg))
+    if (   parse_val(tok0, tok1, s[S_CMD_WAIT], '8', (char *) &player->arg)
+        || parse_val(tok0, tok1, s[S_CMD_MOVE], '8', (char *) &player->arg)
+        || parse_val(tok0, tok1, s[S_CMD_PICKUP], '8', (char *) &player->arg)
+        || parse_val(tok0, tok1, s[S_CMD_DROP], '8', (char *) &player->arg)
+        || parse_val(tok0, tok1, s[S_CMD_USE], '8', (char *) &player->arg))
     {
         player->command = get_thing_action_id_by_name(tok0);
         turn_over();
@@ -247,7 +247,7 @@ static void server_test()
 {
     char * f_name = "server_test()";
     char test[10 + 1 + 10 + 1 + 1];
-    FILE * file = try_fopen(s[PATH_OUT], "r", f_name);
+    FILE * file = try_fopen(s[S_PATH_OUT], "r", f_name);
     try_fgets(test, 10 + 10 + 1 + 1, file, f_name);
     try_fclose(file, f_name);
     if (strcmp(test, world.server_test))
@@ -309,14 +309,14 @@ static void turn_over()
 static void record_msg(char * msg)
 {
     char * f_name = "record_msg()";
-    uint16_t size = strlen(s[PATH_RECORD]) + strlen(s[PATH_SUFFIX_TMP]) + 1;
+    uint16_t size = strlen(s[S_PATH_RECORD]) + strlen(s[S_PATH_SUFFIX_TMP]) + 1;
     char * path_tmp = try_malloc(size, f_name);
-    int test = sprintf(path_tmp, "%s%s", s[PATH_RECORD], s[PATH_SUFFIX_TMP]);
+    int test = sprintf(path_tmp, "%s%s", s[S_PATH_RECORD],s[S_PATH_SUFFIX_TMP]);
     exit_trouble(test < 0, f_name, "sprintf()");
     FILE * file_tmp  = try_fopen(path_tmp, "w", f_name);
-    if (!access(s[PATH_RECORD], F_OK))
+    if (!access(s[S_PATH_RECORD], F_OK))
     {
-        FILE * file_read = try_fopen(s[PATH_RECORD], "r", f_name);
+        FILE * file_read = try_fopen(s[S_PATH_RECORD], "r", f_name);
         uint32_t linemax = textfile_width(file_read);
         char * line = try_malloc(linemax + 1, f_name);
         while (try_fgets(line, linemax + 1, file_read, f_name))
@@ -328,7 +328,7 @@ static void record_msg(char * msg)
     }
     try_fwrite(msg, strlen(msg), 1, file_tmp, f_name);
     try_fputc('\n', file_tmp, f_name);
-    try_fclose_unlink_rename(file_tmp, path_tmp, s[PATH_RECORD], f_name);
+    try_fclose_unlink_rename(file_tmp, path_tmp, s[S_PATH_RECORD], f_name);
     free(path_tmp);
 }
 
@@ -347,15 +347,15 @@ extern void obey_msg(char * msg, uint8_t do_record)
     }
     if (   parse_thing_manipulation(tok0, tok1)
         || parse_player_command(tok0, tok1)
-        || parse_val(tok0, tok1, s[CMD_SEED_RAND], 'U', (char *) &world.seed)
-        || parse_val(tok0, tok1, s[CMD_TURN], 'u', (char *) &world.turn)
+        || parse_val(tok0, tok1, s[S_CMD_SEED_RAND], 'U', (char *) &world.seed)
+        || parse_val(tok0, tok1, s[S_CMD_TURN], 'u', (char *) &world.turn)
         || parse_do_fov(tok0, tok1));
-    else if (parse_val(tok0, tok1, s[CMD_SEED_MAP],'U',(char *)&world.seed_map))
+    else if (parse_val(tok0,tok1,s[S_CMD_SEED_MAP],'U',(char *)&world.seed_map))
 
     {
         remake_map();
     }
-    else if (parse_val(tok0, tok1, s[CMD_MAKE_WORLD],'U', (char *) &world.seed))
+    else if (parse_val(tok0, tok1, s[S_CMD_MAKE_WORLD],'U',(char *)&world.seed))
     {
         remake_world();
     }

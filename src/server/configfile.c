@@ -257,10 +257,10 @@ static uint8_t set_members(char * token0, char * token1, uint8_t * thing_flags,
         && parse_flagval(token0, token1, "NAME", action_flags,
                          NAME_SET, 's', (char *) &ta->name))
     {
-        if (!(   try_func_name(ta, s[CMD_MOVE], actor_move)
-              || try_func_name(ta, s[CMD_PICKUP], actor_pick)
-              || try_func_name(ta, s[CMD_DROP], actor_drop)
-              || try_func_name(ta, s[CMD_USE], actor_use)))
+        if (!(   try_func_name(ta, s[S_CMD_MOVE], actor_move)
+              || try_func_name(ta, s[S_CMD_PICKUP], actor_pick)
+              || try_func_name(ta, s[S_CMD_DROP], actor_drop)
+              || try_func_name(ta, s[S_CMD_USE], actor_use)))
         {
             ta->func = actor_wait;
         }
@@ -304,7 +304,7 @@ static uint8_t try_func_name(struct ThingAction * ta, char * name,
 
 extern void read_config_file()
 {
-    parse_file(s[PATH_CONFIG], tokens_into_entries);
+    parse_file(s[S_PATH_CONFIG], tokens_into_entries);
     exit_err(!world.map.length, "Map size not defined in config file.");
     uint8_t player_type_is_valid = 0;
     struct ThingType * tt;

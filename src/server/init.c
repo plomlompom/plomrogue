@@ -40,8 +40,8 @@ static void replay_game();
 static void replay_game()
 {
     char * f_name = "replay_game()";
-    exit_err(access(s[PATH_RECORD], F_OK), "No record found to replay.");
-    FILE * file = try_fopen(s[PATH_RECORD], "r", f_name);
+    exit_err(access(s[S_PATH_RECORD], F_OK), "No record found to replay.");
+    FILE * file = try_fopen(s[S_PATH_RECORD], "r", f_name);
     uint32_t linemax = textfile_width(file);
     char * line = try_malloc(linemax + 1, f_name);
     while (   world.turn < world.replay
@@ -98,7 +98,7 @@ extern void setup_server_io()
     char * f_name = "setup_server_io()";
     int test = mkdir("server", 0700);
     exit_trouble(test && EEXIST != errno, f_name, "mkdir()");
-    world.file_out = try_fopen(s[PATH_OUT], "w", f_name);
+    world.file_out = try_fopen(s[S_PATH_OUT], "w", f_name);
     world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, f_name);
     test = sprintf(world.server_test, "%d %d\n", getpid(), (int) time(0));
     exit_trouble(test < 0, f_name, "sprintf()");
@@ -106,7 +106,7 @@ extern void setup_server_io()
                world.file_out, f_name);
     fflush(world.file_out);
     set_cleanup_flag(CLEANUP_OUT);
-    char * path_in = s[PATH_IN];
+    char * path_in = s[S_PATH_IN];
     if (!access(path_in, F_OK))        /* This keeps out input from old input */
     {                                  /* file streams of clients             */
         unlink(path_in)   ;            /* communicating with server processes */
@@ -150,9 +150,9 @@ extern void remake_world()
     {
         t->fov_map = t->lifepoints ? build_fov_map(t) : NULL;
     }
-    if (!world.replay && !access(s[PATH_RECORD], F_OK))
+    if (!world.replay && !access(s[S_PATH_RECORD], F_OK))
     {
-        exit_trouble(unlink(s[PATH_RECORD]), f_name, "unlink()");
+        exit_trouble(unlink(s[S_PATH_RECORD]), f_name, "unlink()");
     }
     world.turn = 1;
 }
@@ -167,7 +167,7 @@ extern void run_game()
         replay_game();
         return;
     }
-    char * path_savefile = s[PATH_SAVE];
+    char * path_savefile = s[S_PATH_SAVE];
     if (!access(path_savefile, F_OK))
     {
         FILE * file = try_fopen(path_savefile, "r", f_name);
@@ -185,7 +185,7 @@ extern void run_game()
     }
     else
     {
-        char * command = s[CMD_MAKE_WORLD];
+        char * command = s[S_CMD_MAKE_WORLD];
         char * msg = try_malloc(strlen(command) + 1 + 11 + 1, f_name);
         int test = sprintf(msg, "%s %d", command, (int) time(NULL));
         exit_trouble(test < 0, f_name, "sprintf()");

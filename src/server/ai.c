@@ -170,11 +170,11 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
 
 extern void ai(struct Thing * t)
 {
-    t->command = get_thing_action_id_by_name(s[CMD_WAIT]);
+    t->command = get_thing_action_id_by_name(s[S_CMD_WAIT]);
     char sel = t->fov_map ? get_dir_to_nearest_enemy(t) : 0;/* t->fov_map may */
     if (0 != sel)                                           /* be absent due  */
     {                                                       /* to god command.*/
-        t->command = get_thing_action_id_by_name(s[CMD_MOVE]);
+        t->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
         t->arg = sel;
     }
 }

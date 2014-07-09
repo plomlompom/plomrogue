@@ -26,7 +26,7 @@ extern void cleanup()
     free(world.map.cells);
     if (cleanup_flags & CLEANUP_WORLDSTATE)
     {
-        unlink(s[PATH_WORLDSTATE]);
+        unlink(s[S_PATH_WORLDSTATE]);
     }
     if (cleanup_flags & CLEANUP_THINGS)
     {
@@ -43,13 +43,13 @@ extern void cleanup()
     if (cleanup_flags & CLEANUP_IN)
     {
         try_fclose(world.file_in, f_name);
-        unlink(s[PATH_IN]);
+        unlink(s[S_PATH_IN]);
     }
     if (cleanup_flags & CLEANUP_OUT)
     {
         try_fclose(world.file_out, f_name);
         free(world.server_test);
-        unlink(s[PATH_OUT]);
+        unlink(s[S_PATH_OUT]);
     }
 }
 

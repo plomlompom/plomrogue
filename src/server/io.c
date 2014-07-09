@@ -88,17 +88,17 @@ static void write_thing(FILE * file, struct Thing * t)
     {
         write_thing(file, o);
     }
-    write_key_value(file, s[CMD_THING], t->id);
-    write_key_value(file, s[CMD_TYPE], t->type);
-    write_key_value(file, s[CMD_POS_Y], t->pos.y);
-    write_key_value(file, s[CMD_POS_X], t->pos.x);
-    write_key_value(file, s[CMD_COMMAND], t->command);
-    write_key_value(file, s[CMD_ARGUMENT], t->arg);
-    write_key_value(file, s[CMD_PROGRESS], t->progress);
-    write_key_value(file, s[CMD_LIFEPOINTS], t->lifepoints);
+    write_key_value(file, s[S_CMD_THING], t->id);
+    write_key_value(file, s[S_CMD_TYPE], t->type);
+    write_key_value(file, s[S_CMD_POS_Y], t->pos.y);
+    write_key_value(file, s[S_CMD_POS_X], t->pos.x);
+    write_key_value(file, s[S_CMD_COMMAND], t->command);
+    write_key_value(file, s[S_CMD_ARGUMENT], t->arg);
+    write_key_value(file, s[S_CMD_PROGRESS], t->progress);
+    write_key_value(file, s[S_CMD_LIFEPOINTS], t->lifepoints);
     for (o = t->owns; o; o = o->next)
     {
-        write_key_value(file, s[CMD_CARRIES], o->id);
+        write_key_value(file, s[S_CMD_CARRIES], o->id);
     }
     try_fputc('\n', file, f_name);
 }
@@ -180,9 +180,9 @@ static void read_file_into_queue()
 static void update_worldstate_file()
 {
     char * f_name = "update_worldstate_file()";
-    uint16_t size = strlen(s[PATH_WORLDSTATE]) + strlen(s[PATH_SUFFIX_TMP]) + 1;
+    uint16_t size = strlen(s[S_PATH_WORLDSTATE])+strlen(s[S_PATH_SUFFIX_TMP])+1;
     char * path_tmp = try_malloc(size, f_name);
-    int test = sprintf(path_tmp, "%s%s", s[PATH_WORLDSTATE],s[PATH_SUFFIX_TMP]);
+    int test=sprintf(path_tmp,"%s%s",s[S_PATH_WORLDSTATE],s[S_PATH_SUFFIX_TMP]);
     exit_trouble(test < 0, f_name, "sprintf()");
     FILE * file = try_fopen(path_tmp, "w", f_name);
     struct Thing * player = get_player();
@@ -197,7 +197,7 @@ static void update_worldstate_file()
     {
         try_fwrite(world.log, strlen(world.log), 1, file, f_name);
     }
-    try_fclose_unlink_rename(file, path_tmp, s[PATH_WORLDSTATE], f_name);
+    try_fclose_unlink_rename(file, path_tmp, s[S_PATH_WORLDSTATE], f_name);
     free(path_tmp);
     set_cleanup_flag(CLEANUP_WORLDSTATE);
     char * dot = ".\n";;
@@ -331,19 +331,19 @@ extern char * io_round()
 extern void save_world()
 {
     char * f_name = "save_world()";
-    char * path = s[PATH_SAVE];
+    char * path = s[S_PATH_SAVE];
     FILE * file = try_fopen(path, "w", f_name);
-    write_key_value(file, s[CMD_DO_FOV], 0);
+    write_key_value(file, s[S_CMD_DO_FOV], 0);
     try_fputc('\n', file, f_name);
-    write_key_value(file, s[CMD_SEED_MAP], world.seed_map);
-    write_key_value(file, s[CMD_SEED_RAND], world.seed);
-    write_key_value(file, s[CMD_TURN], world.turn);
+    write_key_value(file, s[S_CMD_SEED_MAP], world.seed_map);
+    write_key_value(file, s[S_CMD_SEED_RAND], world.seed);
+    write_key_value(file, s[S_CMD_TURN], world.turn);
     try_fputc('\n', file, f_name);
     struct Thing * t;
     for (t = world.things; t; t = t->next)
     {
         write_thing(file, t);
     }
-    write_key_value(file, s[CMD_DO_FOV], 1);
+    write_key_value(file, s[S_CMD_DO_FOV], 1);
     try_fclose(file, f_name);
 }
