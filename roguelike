@@ -3,4 +3,7 @@
 # Wrapper to the script so that its suppressed server messages get read on exit.
 ./start_server_client_union.sh "$@"
 sync
-cat log
+if [ -e ./log ]
+then
+    cat log
+fi

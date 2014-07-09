@@ -3,6 +3,12 @@
 # Abort the script on error.
 set -e
 
+# Don't let any log leftovers from before interfere.
+if [ -e ./log ]
+then
+    rm log
+fi
+
 # Give helpful message to players that want to start without compiling first.
 if [ ! -e ./roguelike-server ]
 then
@@ -18,8 +24,6 @@ fi
 # Use shell script's arguments for server and pipe server output to log file.
 # This script's wrapper script will read it out on exit.
 ./roguelike-server "$@" > log 2>&1 &
-
-echo TEST >> log
 
 # Give server some time to start up and exit on error.
 sleep 0.01
