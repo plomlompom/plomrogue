@@ -13,6 +13,7 @@
 #include <stdlib.h> /* free() */
 #include <string.h> /* memcpy(), strlen(), strnlen(), memset() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
+#include "../common/try_malloc.h" /* try_malloc() */
 #include "draw_wins.h" /* draw_winconf_geometry(), draw_winconf_keybindings(),
                         * draw_win_inventory(), draw_win_info(), draw_win_log(),
                         * draw_win_available_keybindings(), draw_win_map(),
@@ -153,7 +154,8 @@ static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
     {
         dsc_space = fsize.y;
     }                                  /* vv-- 10 = max strlen for uint16_t */
-    char scrolldsc[1 + strlen(more) + 1 + 10 + 1 + strlen(unit) + 1 + 1];
+    uint16_t size = 1 + strlen(more) + 1 + 10 + 1 + strlen(unit) + 1 + 1;
+    char * scrolldsc = try_malloc(size, "scroll_hint()");
     sprintf(scrolldsc, " %d %s %s ", dist, more, unit);
 
     /* Decide on offset of the description text inside the scroll hint line. */
@@ -188,6 +190,7 @@ static void scroll_hint(struct yx_uint16 fsize, char dir, uint16_t dist,
         }
         mvwaddch(world.winDB.v_screen, start.y + draw_offset, start.x + q, c);
     }
+    free(scrolldsc);
 }
 
 
@@ -207,6 +210,8 @@ static void winscroll_hint(struct Win * w, char dir, uint16_t dist)
 
 static void draw_win_borderlines(struct Win * w)
 {
+    char * f_name = "draw_win_borderlines()";
+
     /* Draw vertical and horizontal border lines. */
     uint16_t y, x;
     for (y = w->start.y; y <= w->start.y + w->frame_size.y; y++)
@@ -230,7 +235,7 @@ static void draw_win_borderlines(struct Win * w)
             offset = (w->frame_size.x - (strlen(w->title) + 2)) / 2;
         }                                    /* +2 is for padding/decoration */
         uint16_t length_visible = strnlen(w->title, w->frame_size.x - 2);
-        char title[length_visible + 3];
+        char * title = try_malloc(length_visible + 3, f_name);
         char decoration = ' ';
         if (w->id == world.winDB.active)
         {
@@ -240,6 +245,7 @@ static void draw_win_borderlines(struct Win * w)
         title[0] = title[length_visible + 1] = decoration;
         title[length_visible + 2] = '\0';
         mvwaddstr(world.winDB.v_screen, w->start.y-1, w->start.x+offset, title);
+        free(title);
     }
 }
 
@@ -431,9 +437,10 @@ extern void winch_called()
 
 extern void reset_windows_on_winch()
 {
+    char * f_name = "reset_windows_on_winch()";
     endwin();  /* "[S]tandard way" to recalibrate ncurses post SIGWINCH, says */
     refresh(); /* <http://invisible-island.net/ncurses/ncurses-intro.html>.   */
-    char tmp_order[strlen(world.winDB.order) + 1];
+    char * tmp_order = try_malloc(strlen(world.winDB.order) + 1, f_name);
     sprintf(tmp_order, "%s", world.winDB.order);
     uint8_t i;
     char tmp_active = world.winDB.active;
@@ -441,6 +448,7 @@ extern void reset_windows_on_winch()
     delwin(world.winDB.v_screen);
     make_v_screen_and_init_win_sizes();
     for (i = 0; i < strlen(tmp_order); toggle_window(tmp_order[i]), i++);
+    free(tmp_order);
     world.winDB.active = tmp_active;
 }
 

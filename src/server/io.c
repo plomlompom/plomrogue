@@ -180,7 +180,8 @@ static void read_file_into_queue()
 static void update_worldstate_file()
 {
     char * f_name = "update_worldstate_file()";
-    char path_tmp[strlen(s[PATH_WORLDSTATE]) + strlen(s[PATH_SUFFIX_TMP]) + 1];
+    uint16_t size = strlen(s[PATH_WORLDSTATE]) + strlen(s[PATH_SUFFIX_TMP]) + 1;
+    char * path_tmp = try_malloc(size, f_name);
     sprintf(path_tmp, "%s%s", s[PATH_WORLDSTATE], s[PATH_SUFFIX_TMP]);
     FILE * file = try_fopen(path_tmp, "w", f_name);
     struct Thing * player = get_player();
@@ -196,6 +197,7 @@ static void update_worldstate_file()
         try_fwrite(world.log, strlen(world.log), 1, file, f_name);
     }
     try_fclose_unlink_rename(file, path_tmp, s[PATH_WORLDSTATE], f_name);
+    free(path_tmp);
     set_cleanup_flag(CLEANUP_WORLDSTATE);
     char * dot = ".\n";;
     try_fwrite(dot, strlen(dot), 1, world.file_out, f_name);

@@ -2,22 +2,24 @@
 
 #include "control.h"
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
+#include <stdlib.h> /* free() */
 #include <stdio.h> /* sprintf() */
 #include <string.h> /* strlen() */
 #include "../common/rexit.h" /* exit_err() */
+#include "../common/try_malloc.h" /* try_malloc() */
 #include "interface_conf.h" /* reload_interface_conf(), save_interface_conf() */
 #include "io.h" /* send() */
 #include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
                           * mod_selected_keyb(), move_keyb_selection()
                           */
-#include "map.h" /* for map_scroll(), map_center(), toggle_autofocus() */
+#include "map.h" /* map_scroll(), map_center(), toggle_autofocus() */
 #include "wincontrol.h" /* shift_active_win(), resize_active_win(),
                          * toggle_win_size_type(), toggle_window(),
                          * cycle_active_win(), scroll_v_screen(),
                          * toggle_linebreak_type(), toggle_winconfig()
                          */
 #include "windows.h" /* get_win_by_id() */
-#include "world.h" /* for global world */
+#include "world.h" /* world */
 
 
 
@@ -156,6 +158,7 @@ static uint8_t try_client_commands(struct Command * command)
 
 static uint8_t try_server_commands(struct Command * command)
 {
+    char * f_name = "try_server_commands()";
     if (command->server_msg)
     {
         uint8_t arg = (uint8_t) command->arg;
@@ -165,9 +168,10 @@ static uint8_t try_server_commands(struct Command * command)
         }
         uint8_t command_size = strlen(command->server_msg);
         uint8_t arg_size = 3;
-        char msg[command_size + 1 + arg_size + 1];
+        char * msg = try_malloc(command_size + 1 + arg_size + 1, f_name);
         sprintf(msg, "%s %d", command->server_msg, arg);
         send(msg);
+        free(msg);
         return 1;
     }
     return 0;

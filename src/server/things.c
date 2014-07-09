@@ -186,12 +186,15 @@ extern struct Thing * get_player()
 
 extern struct ThingType * get_thing_type(uint8_t id)
 {
+    char * f_name = "get_thing_type()";
     struct ThingType * tt = world.thing_types;
     for (; NULL != tt && id != tt->id; tt = tt->next);
     char * err_intro = "Requested thing type of unused ID ";
-    char err[strlen(err_intro) + 3 + 1 + 1];
+    uint16_t size = strlen(err_intro) + 3 + 1 + 1;
+    char * err = try_malloc(size, f_name);
     sprintf(err, "%s%d.", err_intro, id);
     exit_err(NULL == tt, err);
+    free(err);
     return tt;
 }
 

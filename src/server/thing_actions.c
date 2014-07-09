@@ -113,6 +113,7 @@ static void update_log(char * text)
 
 static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
 {
+    char * f_name = "actor_hits_actor()";
     struct ThingType * tt_hitter = get_thing_type(hitter->type);
     struct ThingType * tt_hitted = get_thing_type(hitted->type);
     struct Thing * player = get_player();
@@ -129,9 +130,10 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
         msg3 = tt_hitted->name;
     }
     uint8_t len = 1 + strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
-    char msg[len];
+    char * msg = try_malloc(len, f_name);
     sprintf(msg, "\n%s %s %s.", msg1, msg2, msg3);
     update_log(msg);
+    free(msg);
     hitted->lifepoints--;
     if (0 == hitted->lifepoints)
     {
@@ -168,6 +170,7 @@ static uint8_t match_dir(char d, char ** dsc_d, char match, char * dsc_match)
 
 static void playerbonus_move(char d, uint8_t passable)
 {
+    char * f_name = "playerbonus_move()";
     char * dsc_dir = "north-east";
     if (   match_dir(d, &dsc_dir, 'd', "east")
         || match_dir(d, &dsc_dir, 'c', "south-east")
@@ -182,9 +185,10 @@ static void playerbonus_move(char d, uint8_t passable)
     {
         dsc_move = "You fail to move ";
     }
-    char msg[strlen(dsc_move) + strlen (dsc_dir) + 3];
+    char * msg = try_malloc(strlen(dsc_move) + strlen (dsc_dir) + 3, f_name);
     sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
     update_log(msg);
+    free(msg);
 }
 
 

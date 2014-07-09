@@ -6,24 +6,28 @@
 #include <stdio.h> /* FILE, fseek(), sprintf(), fgets(), fgetc(), ferror(),
                     * fputc(), fwrite(), fclose(), fopen(), clearerr()
                     */
+#include <stdlib.h> /* free() */
 #include <string.h> /* strlen() */
-#include <unistd.h> /* for access(), unlink() */
+#include <unistd.h> /* access(), unlink() */
 #include "rexit.h" /* exit_err(), exit_trouble() */
+#include "try_malloc.h" /* try_malloc() */
 
 
 
 extern FILE * try_fopen(char * path, char * mode, char * f)
 {
+    char * f_name = "try_fopen()";
     char * msg1 = "Trouble in ";
     char * msg2 = " with fopen() (mode '";
     char * msg3 = "') on path '";
     char * msg4 = "'.";
     uint16_t size = strlen(msg1) + strlen(msg2) + strlen(msg3) + strlen(msg4)
                     + strlen(f) + strlen(path) + strlen(mode) + 1;
-    char msg[size];
+    char * msg = try_malloc(size, f_name);
     sprintf(msg, "%s%s%s%s%s%s%s", msg1, f, msg2, mode, msg3, path, msg4);
     FILE * file_p = fopen(path, mode);
     exit_err(NULL == file_p, msg);
+    free(msg);
     return file_p;
 }
 
@@ -73,6 +77,7 @@ extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
                                      char * f)
 {
+    char * f_name = "try_fclose_unlink_rename()";
     try_fclose(file, f);
     char * msg1 = "Trouble in ";
     char * msg4 = "'.";
@@ -81,17 +86,19 @@ extern void try_fclose_unlink_rename(FILE * file, char * p1, char * p2,
         char * msg2 = " with unlink() on path '";
         uint16_t size = strlen(msg1) + strlen(msg2) + strlen(msg4)
                         + strlen(f) + strlen(p2) + 1;
-        char msg[size];
+        char * msg = try_malloc(size, f_name);
         sprintf(msg, "%s%s%s%s%s", msg1, f, msg2, p2, msg4);
         exit_err(unlink(p2), msg);
+        free(msg);
     }
     char * msg2 = " with rename() from '";
     char * msg3 = "' to '";
     uint16_t size = strlen(msg1) + strlen(f) + strlen(msg2) + strlen(p1)
                     + strlen(msg3) + strlen(p2) + strlen(msg4) + 1;
-    char msg[size];
+    char * msg = try_malloc(size, f_name);
     sprintf(msg, "%s%s%s%s%s%s%s", msg1, f, msg2, p1, msg3, p2, msg4);
     exit_err(rename(p1, p2), msg);
+    free(msg);
 }
 
 

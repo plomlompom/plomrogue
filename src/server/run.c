@@ -16,6 +16,7 @@
                                   * textfile_width(), try_fputc()
                                   */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
+#include "../common/try_malloc.h" /* try_malloc() */
 #include "ai.h" /* ai() */
 #include "cleanup.h" /* set_cleanup_flag(), unset_cleanup_flag() */
 #include "field_of_view.h" /* build_fov_map() */
@@ -198,7 +199,6 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
               || parse_thing_command(tok0, tok1, t)
               || parse_val(tok0, tok1, s[CMD_ARGUMENT], '8', (char *)&t->arg)
               || parse_val(tok0, tok1, s[CMD_PROGRESS],'8',(char *)&t->progress)
-
               || parse_val(tok0, tok1, s[CMD_LIFEPOINTS],'8',
                                                         (char *) &t->lifepoints)
               || parse_position(tok0, tok1, t)
@@ -309,23 +309,26 @@ static void turn_over()
 static void record_msg(char * msg)
 {
     char * f_name = "record_msg()";
-    char path_tmp[strlen(s[PATH_RECORD]) + strlen(s[PATH_SUFFIX_TMP]) + 1];
+    uint16_t size = strlen(s[PATH_RECORD]) + strlen(s[PATH_SUFFIX_TMP]) + 1;
+    char * path_tmp = try_malloc(size, f_name);
     sprintf(path_tmp, "%s%s", s[PATH_RECORD], s[PATH_SUFFIX_TMP]);
     FILE * file_tmp  = try_fopen(path_tmp, "w", f_name);
     if (!access(s[PATH_RECORD], F_OK))
     {
         FILE * file_read = try_fopen(s[PATH_RECORD], "r", f_name);
         uint32_t linemax = textfile_width(file_read);
-        char line[linemax + 1];
+        char * line = try_malloc(linemax + 1, f_name);
         while (try_fgets(line, linemax + 1, file_read, f_name))
         {
             try_fwrite(line, strlen(line), 1, file_tmp, f_name);
         }
+        free(line);
         try_fclose(file_read, f_name);
     }
     try_fwrite(msg, strlen(msg), 1, file_tmp, f_name);
     try_fputc('\n', file_tmp, f_name);
     try_fclose_unlink_rename(file_tmp, path_tmp, s[PATH_RECORD], f_name);
+    free(path_tmp);
 }
 
 

@@ -43,7 +43,7 @@ static void replay_game()
     exit_err(access(s[PATH_RECORD], F_OK), "No record found to replay.");
     FILE * file = try_fopen(s[PATH_RECORD], "r", f_name);
     uint32_t linemax = textfile_width(file);
-    char line[linemax + 1];
+    char * line = try_malloc(linemax + 1, f_name);
     while (   world.turn < world.replay
            && NULL != try_fgets(line, linemax + 1, file, f_name))
     {
@@ -61,6 +61,7 @@ static void replay_game()
             }
         }
     }
+    free(line);
     try_fclose(file, f_name);
 }
 
@@ -170,7 +171,7 @@ extern void run_game()
     {
         FILE * file = try_fopen(path_savefile, "r", f_name);
         uint32_t linemax = textfile_width(file);
-        char line[linemax + 1];
+        char * line = try_malloc(linemax + 1, f_name);
         while (NULL != try_fgets(line, linemax + 1, file, f_name))
         {
             if (strlen(line) && strcmp("\n", line))
@@ -178,14 +179,16 @@ extern void run_game()
                 obey_msg(line, 0);
             }
         }
+        free(line);
         try_fclose(file, f_name);
     }
     else
     {
         char * command = s[CMD_MAKE_WORLD];
-        char msg[strlen(command) + 1 + 11 + 1];
+        char * msg = try_malloc(strlen(command) + 1 + 11 + 1, f_name);
         sprintf(msg, "%s %d", command, (int) time(NULL));
         obey_msg(msg, 1);
+        free(msg);
     }
     io_loop();
 }

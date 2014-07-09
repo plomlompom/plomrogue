@@ -4,8 +4,6 @@ IN GENERAL:
 
 - check for return values of *printf()
 
-- be more strict and humble when allocating memory from the stack
-
 - expand use of hardcoded_strings module(s)
 
 BOTH SERVER/CLIENT:

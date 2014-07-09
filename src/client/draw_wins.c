@@ -178,12 +178,13 @@ static void add_line_long(struct Win * win, char * line, attr_t attri)
 static void add_line_compact(struct Win * win, char * line, attr_t attri,
                              uint16_t * offset, uint8_t last)
 {
+    char * f_name = "add_line_compact()";
     uint16_t y_start = win->winmap_size.y - (win->winmap_size.y > 0);
     try_resize_winmap(win, y_start + 1, win->frame_size.x);
     uint16_t len_line = strlen(line);
     char * separator = last ? "" : " / ";
     uint32_t len_line_new = len_line + strlen(separator);
-    char line_new[len_line_new];
+    char * line_new = try_malloc(len_line_new, f_name);
     sprintf(line_new, "%s%s", line, separator);
     uint16_t x = 0;
     uint16_t y;
@@ -204,6 +205,7 @@ static void add_line_compact(struct Win * win, char * line, attr_t attri,
             try_resize_winmap(win, y + 1 + 1, win->winmap_size.x);
         }
     }
+    free(line_new);
     *offset = x;
 }
 
@@ -355,13 +357,15 @@ extern void draw_win_map(struct Win * win)
 
 extern void draw_win_info(struct Win * win)
 {
+    char * f_name = "draw_win_info()";
     char * dsc_turn      = "Turn: ";
     char * dsc_hitpoints = "\nHitpoints: ";
     uint16_t maxl = strlen(dsc_turn) + 5 + strlen(dsc_hitpoints) + 3;
-    char text[maxl + 1];
+    char * text = try_malloc(maxl + 1, f_name);
     sprintf(text, "%s%d%s%d",
             dsc_turn, world.turn, dsc_hitpoints, world.player_lifepoints);
     add_text_with_linebreaks(win, text);
+    free(text);
 }
 
 
@@ -455,6 +459,7 @@ extern void draw_winconf_keybindings(struct Win * win)
 
 extern void draw_winconf_geometry(struct Win * win)
 {
+    char * f_name = "draw_winconf_geometry()";
     char * title = "Window's geometry:\n\n";
     char * h_title = "Height to save: ";
     char h_value[6 + 1];                       /* 6: int16_t value max strlen */
@@ -475,8 +480,9 @@ extern void draw_winconf_geometry(struct Win * win)
                          + strlen(h_title) + strlen(h_value) + strlen(h_type)
                          + strlen(w_title) + strlen(w_value) + strlen(w_type)
                          + strlen(breaks_title) + strlen(breaks_type);
-    char text[text_size + 1];
+    char * text = try_malloc(text_size + 1, f_name);
     sprintf(text, "%s%s%s%s%s%s%s%s%s", title, h_title, h_value, h_type,
             w_title, w_value, w_type, breaks_title, breaks_type);
     add_text_with_linebreaks(win, text);
+    free(text);
 }

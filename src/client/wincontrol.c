@@ -328,10 +328,11 @@ extern void resize_active_win(char change)
 
 extern void shift_active_win(char dir)
 {
+    char * f_name = "shift_active_win()";
     uint8_t len_order = strlen(world.winDB.order);
     if (1 < len_order)
     {
-        char tmp[len_order + 1];
+        char * tmp = try_malloc(len_order + 1, f_name);
         tmp[len_order] = '\0';
         uint8_t pos = get_win_pos_in_order(world.winDB.active);
         if ('f' == dir)
@@ -362,6 +363,7 @@ extern void shift_active_win(char dir)
                 world.winDB.order[pos - 1] = world.winDB.active;
             }
         }
+        free(tmp);
         update_wins(get_win_by_id(world.winDB.order[0]));
     }
 }
