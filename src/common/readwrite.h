@@ -40,6 +40,9 @@ extern FILE * atomic_write_start(char * path, char ** path_tmp);
  */
 extern void atomic_write_finish(FILE * file, char * path, char * path_tmp);
 
+/* Check for temp file leftover of atomic writing of "path", abort if found. */
+extern void detect_atomic_leftover(char * path);
+
 /* Return largest line length from "file" (including  newline chars). */
 extern uint32_t textfile_width(FILE * file);
 

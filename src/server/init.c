@@ -13,7 +13,8 @@
 #include <time.h> /* time() */
 #include <unistd.h> /* optarg, getopt(), access(), unlink(), getpid() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_width(),
-                                  * try_fgets(), try_fwrite()
+                                  * try_fgets(), try_fwrite(),
+                                  * detect_atomic_leftover()
                                   */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -162,6 +163,8 @@ extern void remake_world()
 extern void run_game()
 {
     char * f_name = "run_game()";
+    detect_atomic_leftover(s[S_PATH_SAVE]);
+    detect_atomic_leftover(s[S_PATH_RECORD]);
     if (world.replay)
     {
         replay_game();

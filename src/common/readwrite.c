@@ -14,6 +14,24 @@
 
 
 
+/* Return "path" + suffix "_tmp". Value is malloc'd, must be free externally. */
+static char * build_temp_path(char * path);
+
+
+
+static char * build_temp_path(char * path)
+{
+    char * f_name = "build_temp_path";
+    char * suffix_tmp = "_tmp";
+    uint16_t size = strlen(path) + strlen(suffix_tmp) + 1;
+    char * path_tmp = try_malloc(size, f_name);
+    int test = sprintf(path_tmp, "%s%s", path, suffix_tmp);
+    exit_trouble(test < 0, f_name, "sprintf()");
+    return path_tmp;
+}
+
+
+
 extern FILE * try_fopen(char * path, char * mode, char * f)
 {
     char * f_name = "try_fopen()";
@@ -78,11 +96,7 @@ extern char * try_fgets(char * line, int linemax, FILE * file, char * f)
 extern FILE * atomic_write_start(char * path, char ** path_tmp)
 {
     char * f_name = "atomic_write_start()";
-    char * suffix_tmp = "_tmp";
-    uint16_t size = strlen(path) + strlen(suffix_tmp) + 1;
-    *path_tmp = try_malloc(size, f_name);
-    int test = sprintf(*path_tmp, "%s%s", path, suffix_tmp);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    *path_tmp = build_temp_path(path);
     return try_fopen(*path_tmp, "w", f_name);
 }
 
@@ -115,6 +129,26 @@ extern void atomic_write_finish(FILE * file, char * path, char * path_tmp)
                             msg1, f_name, msg2, path_tmp, msg3, path, msg4);
     exit_trouble(test < 0, f_name, "sprintf()");
     exit_err(rename(path_tmp, path), msg);
+    free(msg);
+    free(path_tmp);
+}
+
+
+
+extern void detect_atomic_leftover(char * path)
+{
+    char * f_name = "detect_atomic_leftover()";
+    char * path_tmp = build_temp_path(path);
+    char * part1 = "Found file '";
+    char * part2 = "' that may be a leftover from an aborted previous attempt "
+                   "to write '";
+    char * part3 = "'. Aborting until the matter is solved by (re-)moving it.";
+    uint32_t size =   strlen(part1) + strlen(path_tmp) + strlen(part2)
+                    + strlen(path) + strlen(part3) + 1;
+    char * msg = try_malloc(size, f_name);
+    int test = sprintf(msg, "%s%s%s%s%s", part1, path_tmp, part2, path, part3);
+    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_err(!access(path_tmp, F_OK), msg);
     free(msg);
     free(path_tmp);
 }

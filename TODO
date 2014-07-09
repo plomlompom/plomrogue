@@ -4,12 +4,14 @@ IN GENERAL:
 
 - expand use of hardcoded_strings module(s)
 
+ROGUELIKE SKRIPT
+
+- do something about the invisibility of error messages
+
 BOTH SERVER/CLIENT:
 
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
-
-- on start, alarm about _tmp files (savefile/record) to avoid gameplay data loss
 
 SERVER:
 

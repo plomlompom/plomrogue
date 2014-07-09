@@ -16,8 +16,8 @@
                                    * parsetest_too_many_values(),
                                    * parse_id_uniq(), parse_init_entry()
                                    */
-#include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish()
-                                  * try_fwrite()
+#include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish(),
+                                  * detect_atomic_leftover(), try_fwrite()
                                   */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -440,6 +440,7 @@ extern void load_interface_conf()
     tmp_order    = try_malloc(1, f_name);
     tmp_order[0] = '\0';
     tmp_active   = '\0';
+    detect_atomic_leftover(world.path_interface);
     parse_file(world.path_interface, tokens_into_entries);
     char * err = "Not all expected windows defined in config file.";
     exit_err(strlen(world.winDB.legal_ids) != strlen(world.winDB.ids), err);
