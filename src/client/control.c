@@ -42,7 +42,8 @@ static uint8_t try_client_commands(struct Command * command);
 
 /* Try out "command" as one for server messaging; sending is .server_msg,
  * followed by either a string representing "command"'s .arg, or, if .arg is
- * 'i', world.player_inventory_select. Return 1 on success, 0 on failure.
+ * 'i', world.player_inventory_select, or, if .arg is '0', nothing. Return 1 on
+ * success, 0 on failure.
  */
 static uint8_t try_server_commands(struct Command * command);
 
@@ -162,17 +163,24 @@ static uint8_t try_server_commands(struct Command * command)
     if (command->server_msg)
     {
         uint8_t arg = (uint8_t) command->arg;
-        if ('i' == arg)
+        if ('0' == arg)
         {
-            arg = world.player_inventory_select;
+            send(command->server_msg);
         }
-        uint8_t command_size = strlen(command->server_msg);
-        uint8_t arg_size = 3;
-        char * msg = try_malloc(command_size + 1 + arg_size + 1, f_name);
-        int test = sprintf(msg, "%s %d", command->server_msg, arg);
-        exit_trouble(test < 0, f_name, "sprintf()");
-        send(msg);
-        free(msg);
+        else
+        {
+            if ('i' == arg)
+            {
+                arg = world.player_inventory_select;
+            }
+            uint8_t command_size = strlen(command->server_msg);
+            uint8_t arg_size = 3;
+            char * msg = try_malloc(command_size + 1 + arg_size + 1, f_name);
+            int test = sprintf(msg, "%s %d", command->server_msg, arg);
+            exit_trouble(test < 0, f_name, "sprintf()");
+            send(msg);
+            free(msg);
+        }
         return 1;
     }
     return 0;

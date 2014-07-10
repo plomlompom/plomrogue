@@ -17,7 +17,7 @@ struct Command
     char * dsc_short; /* short name of command to be used internally */
     char * dsc_long; /* long description of command to be shown to the user */
     char * server_msg; /* optionally start string of message to send to server*/
-    char arg; /* defines server message suffix by player_control() convention */
+    char arg; /* defines server message suffix by try_server_commands() rules */
 };
 
 struct CommandDB

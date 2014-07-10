@@ -9,6 +9,8 @@ BOTH SERVER/CLIENT:
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
 
+- beautify form of command arguments (strings instead of numbers for directions)
+
 SERVER:
 
 - consider
@@ -24,5 +26,3 @@ CLIENT:
 - enable toggling of window borders
 
 - make log scrollable
-
-- send zero-argument player commands without argument
