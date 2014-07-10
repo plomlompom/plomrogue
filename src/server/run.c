@@ -27,7 +27,7 @@
 #include "things.h" /* Thing, get_thing(), own_thing(), add_thing(),
                      * get_thing_action_id_by_name(), get_player()
                      */
-#include "world.h" /* global world */
+#include "world.h" /* world */
 
 
 
@@ -52,8 +52,19 @@ static uint8_t parse_do_fov(char * tok0, char * tok1);
 /* Parse/apply god command in "tok0"/"tok1" manipulating a thing's state. */
 static uint8_t parse_thing_manipulation(char * tok0, char * tok1);
 
-/* Parse player command in "tok0"/"tok1" to action in player thing. */
-static uint8_t parse_player_command(char * tok0, char * tok1);
+/* Parse player command "tok0" with one arguments "tok1" to player action. */
+static uint8_t parse_player_command_0arg(char * tok0, char * tok1);
+
+/* Parse player command "tok0" with no argument to player action, comment on
+ * invalidity of non-zero "tok1" (but do not abort in that case).
+ */
+static uint8_t parse_player_command_1arg(char * tok0, char * tok1);
+
+/* Parse/apply commadn "tok0" with argument "tok1" and test the line for further
+ * tokens, commenting on their invalidity (but don't abort on findingthem).
+ */
+static uint8_t parse_command_1arg(char * tok0, char * tok1);
+
 
 /* Compares first line of server out file to world.server_test, aborts if they
  * don't match, but not before unsetting the flags deleting files in the server
@@ -221,12 +232,26 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
 
 
 
-static uint8_t parse_player_command(char * tok0, char * tok1)
+static uint8_t parse_player_command_0arg(char * tok0, char * tok1)
 {
     struct Thing * player = get_player();
-    if (   parse_val(tok0, tok1, s[S_CMD_WAIT], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[S_CMD_MOVE], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[S_CMD_PICKUP], '8', (char *) &player->arg)
+    if (!strcmp(tok0, s[S_CMD_WAIT]) || !strcmp(tok0, s[S_CMD_PICKUP]))
+    {
+        player->command = get_thing_action_id_by_name(tok0);
+        player->arg = 0;
+        turn_over();
+        err_line (NULL != tok1, "No arguments expected, ignoring arguments.");
+        return 1;
+    }
+    return 0;
+}
+
+
+
+static uint8_t parse_player_command_1arg(char * tok0, char * tok1)
+{
+    struct Thing * player = get_player();
+    if (   parse_val(tok0, tok1, s[S_CMD_MOVE], '8', (char *) &player->arg)
         || parse_val(tok0, tok1, s[S_CMD_DROP], '8', (char *) &player->arg)
         || parse_val(tok0, tok1, s[S_CMD_USE], '8', (char *) &player->arg))
     {
@@ -237,6 +262,34 @@ static uint8_t parse_player_command(char * tok0, char * tok1)
     {
         return 0;
     }
+    return 1;
+}
+
+
+
+static uint8_t parse_command_1arg(char * tok0, char * tok1)
+{
+    char * tok2 = token_from_line(NULL);
+    if (   parse_thing_manipulation(tok0, tok1)
+        || parse_player_command_1arg(tok0, tok1)
+        || parse_val(tok0, tok1, s[S_CMD_SEED_RAND], 'U', (char *) &world.seed)
+        || parse_val(tok0, tok1, s[S_CMD_TURN], 'u', (char *) &world.turn)
+        || parse_do_fov(tok0, tok1));
+    else if (parse_val(tok0,tok1,s[S_CMD_SEED_MAP],'U',(char *)&world.seed_map))
+
+    {
+        remake_map();
+    }
+    else if (parse_val(tok0, tok1, s[S_CMD_MAKE_WORLD],'U',(char *)&world.seed))
+    {
+        remake_world();
+    }
+    else
+    {
+        return 0;
+    }
+    char * err = "But one argument expected, ignoring further arguments.";
+    err_line (NULL != tok2, err);
     return 1;
 }
 
@@ -334,39 +387,24 @@ extern void obey_msg(char * msg, uint8_t do_record)
     set_err_line_options("Trouble with message: ", msg, 0, 0);
     char * msg_copy = strdup(msg);
     char * tok0 = token_from_line(msg_copy);
-    char * tok1 = token_from_line(NULL);
-    char * tok2 = token_from_line(NULL);
-    if (err_line(!(tok0 && tok1) || tok2, "Bad number of tokens."))
+    if (NULL != tok0)
     {
-        return;
+        char * tok1 = token_from_line(NULL);
+        if (    parse_player_command_0arg(tok0, tok1)
+            || (tok1 && parse_command_1arg(tok0, tok1)))
+        {
+            world.do_update = 1;
+            if (do_record)
+            {
+                save_world();
+                record_msg(msg);
+            }
+            free(msg_copy);
+            return;
+        }
     }
-    if (   parse_thing_manipulation(tok0, tok1)
-        || parse_player_command(tok0, tok1)
-        || parse_val(tok0, tok1, s[S_CMD_SEED_RAND], 'U', (char *) &world.seed)
-        || parse_val(tok0, tok1, s[S_CMD_TURN], 'u', (char *) &world.turn)
-        || parse_do_fov(tok0, tok1));
-    else if (parse_val(tok0,tok1,s[S_CMD_SEED_MAP],'U',(char *)&world.seed_map))
-
-    {
-        remake_map();
-    }
-    else if (parse_val(tok0, tok1, s[S_CMD_MAKE_WORLD],'U',(char *)&world.seed))
-    {
-        remake_world();
-    }
-    else
-    {
-        err_line(1, "Unknown command.");
-        free(msg_copy);
-        return;
-    }
-    world.do_update = 1;
+    err_line(1, "Unknown command or bad number of tokens.");
     free(msg_copy);
-    if (do_record)
-    {
-        save_world();
-        record_msg(msg);
-    }
 }
 
 
