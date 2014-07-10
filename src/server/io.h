@@ -10,10 +10,9 @@
 
 
 /* Return single \0-terminated string read from input queue (world.queue); or,
- * if queue is empty and world.turn is unequal world.last_update_turn, update
- * world state file (and world.last_update_turn) and write a single dot line to
- * server out file, then read server in file for the next load of bytes to put
- * onto the input queue.
+ * if queue is empty and world.do_update is set, update world state file (and
+ * unset world.do_update) and write a single dot line to server out file, then
+ * read server in file for the next load of bytes to put onto the input queue.
  *
  * Reading the server in file may put many \0-terminated strings on the queue at
  * once. Successive calls of io_round() will make these available one by one.

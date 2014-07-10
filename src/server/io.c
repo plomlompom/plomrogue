@@ -304,10 +304,10 @@ extern char * io_round()
     {
         return get_message_from_queue();
     }
-    if (world.turn != world.last_update_turn)
+    if (world.do_update)
     {
         update_worldstate_file();
-        world.last_update_turn = world.turn;
+        world.do_update = 0;
     }
     read_file_into_queue();
     if (world.queue_size && '\0' != world.queue[world.queue_size - 1])

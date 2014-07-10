@@ -127,7 +127,7 @@ extern void remake_world()
     world.log = NULL;      /* thing_actions.c's update_log() checks for this. */
     world.seed_map = world.seed;
     free_things(world.things);
-    world.last_update_turn = 0;
+    world.do_update = 1;
     remake_map();
     struct ThingType * tt;
     for (tt = world.thing_types; NULL != tt; tt = tt->next)

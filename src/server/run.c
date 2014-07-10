@@ -360,7 +360,7 @@ extern void obey_msg(char * msg, uint8_t do_record)
         free(msg_copy);
         return;
     }
-    world.last_update_turn = 0;
+    world.do_update = 1;
     free(msg_copy);
     if (do_record)
     {

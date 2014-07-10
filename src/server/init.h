@@ -20,9 +20,8 @@ extern void setup_server_io();
  * Unlinks any pre-existing record file.
  *
  * Thing (action) definitions read in from server config directory are not
- * affected. The map is populated accordingly. world.last_update_turn is set to
- * 0 and world.turn to 1, so that io_round()'s criteria for updating the output
- * file are triggered even when this function is called during a round 1.
+ * affected. The map is populated accordingly. world.turn is set to 1, as is
+ * world.do_update, so that io_round() is told to update the worldstate file.
  */
 extern void remake_world();
 
