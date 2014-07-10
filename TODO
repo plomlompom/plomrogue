@@ -17,8 +17,12 @@ SERVER:
 - save confserver/world data in record and save file, too; handle them like god
   commands
 
+- rectify the mentioning of line counts in command reading error messages
+
 CLIENT:
 
 - enable toggling of window borders
 
 - make log scrollable
+
+- send zero-argument player commands without argument
