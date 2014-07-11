@@ -52,12 +52,16 @@ static uint8_t parse_do_fov(char * tok0, char * tok1);
 /* Parse/apply god command in "tok0"/"tok1" manipulating a thing's state. */
 static uint8_t parse_thing_manipulation(char * tok0, char * tok1);
 
-/* Parse player command "tok0" with one arguments "tok1" to player action. */
-static uint8_t parse_player_command_0arg(char * tok0, char * tok1);
-
 /* Parse player command "tok0" with no argument to player action, comment on
  * invalidity of non-zero "tok1" (but do not abort in that case).
  */
+static uint8_t parse_player_command_0arg(char * tok0, char * tok1);
+
+/* If "string" and "comparand" match in string, set "c_to_set" to value."  */
+static uint8_t set_char_by_string_comparison(char * string, char * comparand,
+                                             char * c_to_set, char value);
+
+/* Parse player command "tok0" with one argument "tok1" to player action. */
 static uint8_t parse_player_command_1arg(char * tok0, char * tok1);
 
 /* Parse/apply commadn "tok0" with argument "tok1" and test the line for further
@@ -248,13 +252,42 @@ static uint8_t parse_player_command_0arg(char * tok0, char * tok1)
 
 
 
+static uint8_t set_char_by_string_comparison(char * string, char * comparand,
+                                             char * c_to_set, char value)
+{
+    if (!strcmp(string, comparand))
+    {
+        * c_to_set = value;
+        return 1;
+    }
+    return 0;
+}
+
+
+
 static uint8_t parse_player_command_1arg(char * tok0, char * tok1)
 {
     struct Thing * player = get_player();
-    if (   parse_val(tok0, tok1, s[S_CMD_MOVE], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[S_CMD_DROP], '8', (char *) &player->arg)
+    if (
+           parse_val(tok0, tok1, s[S_CMD_DROP], '8', (char *) &player->arg)
         || parse_val(tok0, tok1, s[S_CMD_USE], '8', (char *) &player->arg))
     {
+        player->command = get_thing_action_id_by_name(tok0);
+        turn_over();
+    }
+    else if (!strcmp(tok0, s[S_CMD_MOVE]))
+    {
+        char dir = '\0';
+        if (!(   set_char_by_string_comparison(tok1, "east",       &dir, 'd')
+              || set_char_by_string_comparison(tok1, "south-east", &dir, 'c')
+              || set_char_by_string_comparison(tok1, "south-west", &dir, 'x')
+              || set_char_by_string_comparison(tok1, "west",       &dir, 's')
+              || set_char_by_string_comparison(tok1, "north-west", &dir, 'w')
+              || set_char_by_string_comparison(tok1, "north-east", &dir, 'e')))
+        {
+            return 0;
+        }
+        player->arg = dir;
         player->command = get_thing_action_id_by_name(tok0);
         turn_over();
     }

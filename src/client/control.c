@@ -40,6 +40,13 @@ static uint8_t try_2args(struct Command * command, char * match,
  */
 static uint8_t try_client_commands(struct Command * command);
 
+/* If c == c_to_match, set "string" to "string_to_set". */
+static uint8_t set_string_if_char_match(char c, char c_to_match,
+                                        char ** string, char * string_to_set);
+
+/* Transform "command" to server command + argument string (free externally). */
+static char * build_server_message_with_argument(struct Command * command);
+
 /* Try out "command" as one for server messaging; sending is .server_msg,
  * followed by either a string representing "command"'s .arg, or, if .arg is
  * 'i', world.player_inventory_select, or, if .arg is '0', nothing. Return 1 on
@@ -157,27 +164,68 @@ static uint8_t try_client_commands(struct Command * command)
 
 
 
+static uint8_t set_string_if_char_match(char c, char c_to_match,
+                                        char ** string, char * string_to_set)
+{
+    if (c == c_to_match)
+    {
+        *string = string_to_set;
+        return 1;
+    }
+    return 0;
+}
+
+
+
+static char * build_server_message_with_argument(struct Command * cmd)
+{
+    char * f_name = "build_server_message_with_argument()";
+    uint8_t command_size = strlen(cmd->server_msg);
+    char * arg_str;
+    uint8_t arg_size;
+    if ('i' == cmd->arg)
+    {
+        arg_size = 3;
+        arg_str = try_malloc(arg_size + 1, f_name);
+        int test = sprintf(arg_str, "%d",world.player_inventory_select);
+        exit_trouble(test < 0, f_name, "sprintf()");
+    }
+    else if (   set_string_if_char_match(cmd->arg, 'd', &arg_str, "east")
+             || set_string_if_char_match(cmd->arg, 'c', &arg_str, "south-east")
+             || set_string_if_char_match(cmd->arg, 'x', &arg_str, "south-west")
+             || set_string_if_char_match(cmd->arg, 's', &arg_str, "west")
+             || set_string_if_char_match(cmd->arg, 'w', &arg_str, "north-west")
+             || set_string_if_char_match(cmd->arg, 'e', &arg_str, "north-east"))
+    {
+        arg_size = strlen(arg_str);
+    }
+    else
+    {
+        exit_err(1, "Illegal server command argument.");
+    }
+    char * msg = try_malloc(command_size + 1 + arg_size + 1, f_name);
+    int test = sprintf(msg, "%s %s", cmd->server_msg, arg_str);
+    exit_trouble(test < 0, f_name, "sprintf()");
+    if ('i' == cmd->arg)
+    {
+        free(arg_str);
+    }
+    return msg;
+}
+
+
+
 static uint8_t try_server_commands(struct Command * command)
 {
-    char * f_name = "try_server_commands()";
     if (command->server_msg)
     {
-        uint8_t arg = (uint8_t) command->arg;
-        if ('0' == arg)
+        if ('0' == command->arg)
         {
             send(command->server_msg);
         }
         else
         {
-            if ('i' == arg)
-            {
-                arg = world.player_inventory_select;
-            }
-            uint8_t command_size = strlen(command->server_msg);
-            uint8_t arg_size = 3;
-            char * msg = try_malloc(command_size + 1 + arg_size + 1, f_name);
-            int test = sprintf(msg, "%s %d", command->server_msg, arg);
-            exit_trouble(test < 0, f_name, "sprintf()");
+            char * msg = build_server_message_with_argument(command);
             send(msg);
             free(msg);
         }
