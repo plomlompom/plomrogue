@@ -16,11 +16,6 @@ SERVER:
 - consider
   <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=TheCreationOfSpace#comment_0>
 
-- save confserver/world data in record and save file, too; handle them like god
-  commands
-
-- rectify the mentioning of line counts in command reading error messages
-
 CLIENT:
 
 - enable toggling of window borders
