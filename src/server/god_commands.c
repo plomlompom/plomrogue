@@ -133,8 +133,8 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
         return 1;
     }
     uint8_t id;
-    if      (parse_val(tok0, tok1, s[S_CMD_TA_EFFORT],'8',(char *) &ta->effort));
-    else if (parse_val(tok0, tok1, s[S_CMD_TA_NAME], 's', (char *) &ta->name))
+    if      (parse_val(tok0, tok1, s[S_CMD_TA_EFFORT],'8',(char *)&ta->effort));
+    else if (parse_val(tok0, tok1, s[S_CMD_TA_NAME], 's', (char *)&ta->name))
     {
         if (!(   try_func_name(ta, s[S_CMD_MOVE], actor_move)
               || try_func_name(ta, s[S_CMD_PICKUP], actor_pick)

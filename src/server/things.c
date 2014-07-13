@@ -112,7 +112,7 @@ extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x)
 {
     struct Thing * t;
     t = (struct Thing *) add_to_struct_list(sizeof(struct Thing), 0, id, 0,
-                                            (struct NextAndId **) &world.things);
+                                            (struct NextAndId **)&world.things);
     struct ThingType * tt = get_thing_type(type);
     set_cleanup_flag(CLEANUP_THINGS);
     t->type       = tt->id;

@@ -39,7 +39,6 @@ extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
     while (try_fgets(errline_line, linemax + 1, file, f_name))
     {
         err_line_inc();
-        // err_line(UINT32_MAX == err_line_count, "Line reaches max lines limit.");
         char * line_copy = strdup(errline_line);
         token0 = token_from_line(line_copy);
         if (token0)
