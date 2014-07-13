@@ -31,7 +31,8 @@ struct World
     uint32_t seed_map; /* Map seed. */
     uint16_t replay; /* Turn up to which to replay game. No replay if zero. */
     uint16_t turn; /* Current game turn. */
-    uint16_t do_update; /* Update worldstate file if !0. */
+    uint8_t do_update; /* Update worldstate file if !0. */
+    uint8_t exists; /* If !0, remake_world() has been run successfully. */
     uint8_t player_type; /* Thing type that player will start as. */
     uint8_t is_verbose; /* Should server send debugging info to stdout? */
 };

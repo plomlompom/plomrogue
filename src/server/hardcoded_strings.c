@@ -4,7 +4,7 @@
 
 
 
-char * s[26];
+char * s[38];
 
 
 
@@ -17,23 +17,35 @@ extern void init_strings()
     s[S_PATH_RECORD] = "record";
     s[S_PATH_SAVE] = "savefile";
     s[S_CMD_MAKE_WORLD] = "MAKE_WORLD";
-    s[S_CMD_DO_FOV] = "BUILD_FOVS";
+    s[S_CMD_WORLD_ACTIVE] = "WORLD_ACTIVE";
     s[S_CMD_SEED_MAP] = "SEED_MAP";
     s[S_CMD_SEED_RAND] = "SEED_RANDOMNESS";
     s[S_CMD_TURN] = "TURN";
     s[S_CMD_THING] = "THING";
-    s[S_CMD_TYPE] = "TYPE";
-    s[S_CMD_POS_Y] = "POS_Y";
-    s[S_CMD_POS_X] = "POS_X";
-    s[S_CMD_COMMAND] =  "COMMAND";
-    s[S_CMD_ARGUMENT] = "ARGUMENT";
-    s[S_CMD_PROGRESS] = "PROGRESS";
-    s[S_CMD_LIFEPOINTS] = "LIFEPOINTS";
-    s[S_CMD_CARRIES] = "CARRIES";
+    s[S_CMD_T_TYPE] = "T_TYPE";
+    s[S_CMD_T_POSY] = "T_POSY";
+    s[S_CMD_T_POSX] = "T_POSX";
+    s[S_CMD_T_COMMAND] =  "T_COMMAND";
+    s[S_CMD_T_ARGUMENT] = "T_ARGUMENT";
+    s[S_CMD_T_PROGRESS] = "T_PROGRESS";
+    s[S_CMD_T_HP] = "T_LIFEPOINTS";
+    s[S_CMD_T_CARRIES] = "T_CARRIES";
     s[S_CMD_WAIT] = "wait";
     s[S_CMD_MOVE] = "move";
     s[S_CMD_PICKUP] = "pick_up";
     s[S_CMD_DROP] = "drop";
     s[S_CMD_USE] = "use";
     s[S_FCN_SPRINTF] = "sprintf()";
+    s[S_CMD_THINGTYPE] = "THING_TYPE";
+    s[S_CMD_TT_CONSUM] = "TT_CONSUMABLE";
+    s[S_CMD_TT_STARTN] = "TT_START_NUMBER";
+    s[S_CMD_TT_HP] = "TT_LIFEPOINTS";
+    s[S_CMD_TT_SYMB] = "TT_SYMBOL";
+    s[S_CMD_TT_NAME] = "TT_NAME";
+    s[S_CMD_TT_CORPS] = "TT_CORPSE_ID";
+    s[S_CMD_THINGACTION] = "THING_ACTION";
+    s[S_CMD_TA_EFFORT] = "TA_EFFORT";
+    s[S_CMD_TA_NAME] = "TA_NAME";
+    s[S_CMD_MAPLENGTH] = "MAP_LENGTH";
+    s[S_CMD_PLAYTYPE] = "PLAYER_TYPE";
 }

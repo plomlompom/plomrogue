@@ -8,27 +8,9 @@
 #ifndef THING_ACTIONS_H
 #define THING_ACTIONS_H
 
-#include <stdint.h> /* uint8_t */
 struct Thing;
 
 
-
-struct ThingAction
-{
-    uint8_t id; /* identifies action in Thing.command; therefore must be >0 */
-    struct ThingAction * next;
-    void (* func) (struct Thing *); /* function called after .effort turns */
-    char * name; /* human-readable identifier */
-    uint8_t effort; /* how many turns the action takes */
-};
-
-
-
-/* Free ThingAction * chain starting at "ta". */
-extern void free_thing_actions(struct ThingAction * ta);
-
-/* Return world.thing_actions ThingAction.id for "name". */
-extern uint8_t get_thing_action_id_by_name(char * name);
 
 /* Actor "t" does nothing. */
 extern void actor_wait(struct Thing * t);

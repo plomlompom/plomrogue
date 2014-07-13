@@ -5,13 +5,13 @@
 #include <stdint.h> /* uint8_t, uint16_t */
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen(), strcmp(), memcpy(), strncmp() */
-#include "../common/rexit.h" /* exit_err(), exit_trouble() */
+#include <string.h> /* strlen(), memcpy(), strncmp() */
+#include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "field_of_view.h" /* build_fov_map() */
 #include "hardcoded_strings.h" /* s */
-#include "things.h" /* structs Thing, ThingType, get_player(), own_thing(),
+#include "things.h" /* Thing, ThingType, get_player(), own_thing(),
                      * set_thing_position(), get_thing_type()
                      */
 #include "map.h" /* is_passable() */
@@ -234,36 +234,6 @@ static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing)
         return;
     }
     update_log("\nYou consume MAGIC MEAT.");
-}
-
-
-
-extern void free_thing_actions(struct ThingAction * ta)
-{
-    if (NULL == ta)
-    {
-        return;
-    }
-    free(ta->name);
-    free_thing_actions(ta->next);
-    free(ta);
-}
-
-
-
-extern uint8_t get_thing_action_id_by_name(char * name)
-{
-    struct ThingAction * ta = world.thing_actions;
-    while (NULL != ta)
-    {
-        if (0 == strcmp(ta->name, name))
-        {
-            break;
-        }
-        ta = ta->next;
-    }
-    exit_err(NULL == ta, "get_thing_action_id_by_name() did not find action.");
-    return ta->id;
 }
 
 

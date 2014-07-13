@@ -9,13 +9,7 @@
 #include <stdio.h> /* FILE, sprintf() */
 #include <string.h> /* strchr(), strcmp(), strdup(), strlen() */
 #include <unistd.h> /* optarg, getopt() */
-#include "../common/parse_file.h" /* EDIT_STARTED, parse_file(),parse_flagval(),
-                                   * token_from_line(), parsetest_singlechar(),
-                                   * parse_and_reduce_to_readyflag(),
-                                   * parsetest_defcontext(),parse_unknown_arg(),
-                                   * parsetest_too_many_values(),
-                                   * parse_id_uniq(), parse_init_entry()
-                                   */
+#include "../common/parse_file.h" /* token_from_line(),parsetset_singlechar() */
 #include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish(),
                                   * detect_atomic_leftover(), try_fwrite()
                                   */
@@ -26,6 +20,11 @@
 #include "command_db.h" /* get_command() */
 #include "keybindings.h" /* KeyBinding, KeyBindingDB, get_command_to_keycode()*/
 #include "map.h" /* map_center() */
+#include "parse.h" /* EDIT_STARTED, parse_file(), parse_flagval(),
+                    * parse_and_reduce_to_readyflag(), parse_id_uniq()
+                    * parsetest_defcontext(), parse_unknown_arg(),
+                    * parsetest_too_many_values(), parse_init_entry()
+                    */
 #include "wincontrol.h" /* toggle_window() */
 #include "windows.h" /* Win, free_winDB(), make_v_screen_and_init_win_sizes() */
 #include "world.h" /* global world */

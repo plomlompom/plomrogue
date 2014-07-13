@@ -11,7 +11,8 @@
 #include <sys/stat.h> /* mkdir() */
 #include <sys/types.h> /* defines pid_t, time_t */
 #include <time.h> /* time() */
-#include <unistd.h> /* optarg, getopt(), access(), unlink(), getpid() */
+#include <unistd.h> /* optarg, getopt(), access(), getpid() */
+#include "../common/parse_file.h" /* err_line_zero(), err_line_inc() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), textfile_width(),
                                   * try_fgets(), try_fwrite(),
                                   * detect_atomic_leftover()
@@ -23,7 +24,7 @@
 #include "hardcoded_strings.h" /* s */
 #include "map.h" /* remake_map() */
 #include "things.h" /* Thing, ThingType, free_things(), add_things(),
-                     * get_player()
+                     * get_thing_id_action_id_by_name()
                      */
 #include "run.h" /* obey_msg(), io_loop() */
 #include "world.h" /* global world */
@@ -31,10 +32,49 @@
 
 
 
+/* Pass to obey_msg() lines from file at "path", on "record" write to same. Do
+ * not pass lines that consist only of a newline character. Transform newline
+ * in the line passed to \0.
+ */
+static void obey_lines_from_file(char * path, uint8_t record);
+
 /* Replay game from record file up to the turn named in world.replay, then turn
  * over to manual replay via io_loop().
  */
 static void replay_game();
+
+/* Return 1 if the type defined by world.player_type has a .start_n of 0.
+ * Return 2 if no thing action with .name of s[S_CMD_WAIT] is defined.
+ * Else, return 0.
+ */
+static uint8_t world_cannot_be_made();
+
+
+static void obey_lines_from_file(char * path, uint8_t record)
+{
+    char * f_name = "obey_lines_from_file()";
+    FILE * file = try_fopen(path, "r", f_name);
+    uint32_t linemax = textfile_width(file);
+    char * line = try_malloc(linemax + 1, f_name);
+    while (NULL != try_fgets(line, linemax + 1, file, f_name))
+    {
+        if (strlen(line))
+        {
+            if (strcmp("\n", line))
+            {
+                char * nl = strchr(line, '\n');
+                if (nl)
+                {
+                    *nl = '\0';
+                }
+                obey_msg(line, record, 1);
+            }
+            err_line_inc();
+        }
+    }
+    free(line);
+    try_fclose(file, f_name);
+}
 
 
 
@@ -48,7 +88,8 @@ static void replay_game()
     while (   world.turn < world.replay
            && NULL != try_fgets(line, linemax + 1, file, f_name))
     {
-        obey_msg(line, 0);
+        obey_msg(line, 0, 1);
+        err_line_inc();
     }
     uint8_t end = 0;
     while (!io_loop())
@@ -58,12 +99,38 @@ static void replay_game()
             end = (NULL == try_fgets(line, linemax + 1, file, f_name));
             if (!end)
             {
-                obey_msg(line, 0);
+                obey_msg(line, 0, 1);
+                err_line_inc();
             }
         }
     }
     free(line);
     try_fclose(file, f_name);
+}
+
+
+
+static uint8_t world_cannot_be_made()
+{
+    uint8_t player_will_be_generated = 0;
+    struct ThingType * tt;
+    for (tt = world.thing_types; NULL != tt; tt = tt->next)
+    {
+        if (world.player_type == tt->id)
+        {
+            player_will_be_generated = 0 < tt->start_n;
+            break;
+        }
+    }
+    if (!player_will_be_generated)
+    {
+        return 1;
+    }
+    if (!get_thing_action_id_by_name(s[S_CMD_WAIT]))
+    {
+        return 2;
+    }
+    return 0;
 }
 
 
@@ -120,14 +187,17 @@ extern void setup_server_io()
 
 
 
-extern void remake_world()
+extern uint8_t remake_world()
 {
-    char * f_name = "remake_world()";
+    uint8_t test = world_cannot_be_made();
+    if (test)
+    {
+        return test;
+    }
     free(world.log);
     world.log = NULL;      /* thing_actions.c's update_log() checks for this. */
     world.seed_map = world.seed;
     free_things(world.things);
-    world.do_update = 1;
     remake_map();
     struct ThingType * tt;
     for (tt = world.thing_types; NULL != tt; tt = tt->next)
@@ -145,17 +215,15 @@ extern void remake_world()
             add_things(tt->id, tt->start_n);
         }
     }
-    set_cleanup_flag(CLEANUP_THINGS);
     struct Thing * t;
     for (t = world.things; NULL != t; t = t->next)
     {
         t->fov_map = t->lifepoints ? build_fov_map(t) : NULL;
     }
-    if (!world.replay && !access(s[S_PATH_RECORD], F_OK))
-    {
-        exit_trouble(unlink(s[S_PATH_RECORD]), f_name, "unlink()");
-    }
     world.turn = 1;
+    world.do_update = 1;
+    world.exists = 1;
+    return 0;
 }
 
 
@@ -165,35 +233,29 @@ extern void run_game()
     char * f_name = "run_game()";
     detect_atomic_leftover(s[S_PATH_SAVE]);
     detect_atomic_leftover(s[S_PATH_RECORD]);
+    err_line_zero();
     if (world.replay)
     {
         replay_game();
         return;
     }
-    char * path_savefile = s[S_PATH_SAVE];
-    if (!access(path_savefile, F_OK))
+    if (!access(s[S_PATH_SAVE], F_OK))
     {
-        FILE * file = try_fopen(path_savefile, "r", f_name);
-        uint32_t linemax = textfile_width(file);
-        char * line = try_malloc(linemax + 1, f_name);
-        while (NULL != try_fgets(line, linemax + 1, file, f_name))
-        {
-            if (strlen(line) && strcmp("\n", line))
-            {
-                obey_msg(line, 0);
-            }
-        }
-        free(line);
-        try_fclose(file, f_name);
+        obey_lines_from_file(s[S_PATH_SAVE], 0);
     }
     else
     {
+        char * err = "No world config file from which to start a new world.";
+        exit_err(access(s[S_PATH_CONFIG], F_OK), err);
+        obey_lines_from_file(s[S_PATH_CONFIG], 1);
+        err_line_zero();
         char * command = s[S_CMD_MAKE_WORLD];
         char * msg = try_malloc(strlen(command) + 1 + 11 + 1, f_name);
         int test = sprintf(msg, "%s %d", command, (int) time(NULL));
         exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
-        obey_msg(msg, 1);
+        obey_msg(msg, 1, 1);
         free(msg);
     }
+    err_line_zero();
     io_loop();
 }

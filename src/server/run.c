@@ -5,11 +5,11 @@
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* FILE, printf(), fflush() */
-#include <stdlib.h> /* free(), atoi() */
-#include <string.h> /* strlen(), strcmp() strncmp(), strdup() */
+#include <stdlib.h> /* free() */
+#include <string.h> /* strlen(), strcmp(), strncmp(), strdup() */
 #include <unistd.h> /* access() */
 #include "../common/parse_file.h" /* set_err_line_options(), token_from_line(),
-                                   * err_line()
+                                   * err_line(), err_line_inc(), parse_val()
                                    */
 #include "../common/readwrite.h" /* try_fopen(), try_fcose(), try_fwrite(),
                                   * try_fgets(), textfile_width(), try_fputc()
@@ -17,55 +17,32 @@
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "ai.h" /* ai() */
-#include "cleanup.h" /* set_cleanup_flag(), unset_cleanup_flag() */
-#include "field_of_view.h" /* build_fov_map() */
+#include "cleanup.h" /* unset_cleanup_flag() */
+#include "god_commands.h" /* parse_god_command_1arg() */
 #include "hardcoded_strings.h" /* s */
-#include "init.h" /* remake_world() */
 #include "io.h" /* io_round(), save_world() */
-#include "map.h" /* remake_map() */
-#include "thing_actions.h" /* ThingAction */
-#include "things.h" /* Thing, get_thing(), own_thing(), add_thing(),
-                     * get_thing_action_id_by_name(), get_player()
-                     */
+#include "things.h" /* Thing, get_thing_action_id_by_name(), get_player() */
 #include "world.h" /* world */
 
 
 
-/* Parse/apply god command in "tok0"/"tok1" on "t" owning another thing. */
-static uint8_t parse_carry(char * tok0, char * tok1, struct Thing * t);
+/* If "string" and "comparand" match in string, set "c_to_set" to value."  */
+static uint8_t set_char_by_string_comparison(char * string, char * comparand,
+                                             char * c_to_set, char value);
 
-/* Parse/apply god commansd in "tok0"/"tok1" on positioning a thing "t". */
-static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t);
-
-/* Parse/apply god command in "tok0"/"tok1" oo setting "t"'s thing type. */
-static uint8_t parse_thing_type(char * tok0, char * tok1, struct Thing * t);
-
-/* Parse/apply god command in "tok0"/"tok1" on setting up thing "t". */
-static uint8_t parse_thing_command(char * tok0, char * tok1, struct Thing * t);
-
-/* Parse/apply god command on enabling/disabling generation of fields of view on
- * god commands that may affect them, via static global "do_fov". On enabling,
- * (re-)generate all animate things' fields of view.
- */
-static uint8_t parse_do_fov(char * tok0, char * tok1);
-
-/* Parse/apply god command in "tok0"/"tok1" manipulating a thing's state. */
-static uint8_t parse_thing_manipulation(char * tok0, char * tok1);
+/* Return 1 on world.exists, else 0 and err_line() appropriate error message. */
+static uint8_t player_commands_allowed();
 
 /* Parse player command "tok0" with no argument to player action, comment on
  * invalidity of non-zero "tok1" (but do not abort in that case).
  */
 static uint8_t parse_player_command_0arg(char * tok0, char * tok1);
 
-/* If "string" and "comparand" match in string, set "c_to_set" to value."  */
-static uint8_t set_char_by_string_comparison(char * string, char * comparand,
-                                             char * c_to_set, char value);
-
 /* Parse player command "tok0" with one argument "tok1" to player action. */
 static uint8_t parse_player_command_1arg(char * tok0, char * tok1);
 
-/* Parse/apply commadn "tok0" with argument "tok1" and test the line for further
- * tokens, commenting on their invalidity (but don't abort on findingthem).
+/* Parse/apply command "tok0" with argument "tok1" and test the line for further
+ * tokens, commenting on their invalidity (but don't abort on finding them).
  */
 static uint8_t parse_command_1arg(char * tok0, char * tok1);
 
@@ -84,173 +61,6 @@ static void turn_over();
 
 
 
-/* Do god commands to create / position things generate their fields of view? */
-static uint8_t do_fov = 0;
-
-
-
-static uint8_t parse_carry(char * tok0, char * tok1, struct Thing * t)
-{
-    uint8_t id;
-    if (parse_val(tok0, tok1, s[S_CMD_CARRIES], '8', (char *) &id))
-    {
-        if (!err_line(id == t->id, "Thing cannot carry itself."))
-        {
-            struct Thing * o = get_thing(world.things, id, 0);
-            if (!err_line(!o, "Thing cannot carry thing that does not exist."))
-            {
-                own_thing(&(t->owns), &world.things, id);
-                o->pos = t->pos;
-            }
-        }
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t)
-{
-    char axis = 0;
-    if      (!strcmp(tok0, s[S_CMD_POS_Y]))
-    {
-        axis = 'y';
-    }
-    else if (!strcmp(tok0, s[S_CMD_POS_X]))
-    {
-        axis = 'x';
-    }
-    if (axis && !parsetest_int(tok1, '8'))
-    {
-        uint8_t length = atoi(tok1);
-        char * err = "Position is outside of map.";
-        if (!err_line(length >= world.map.length, err))
-        {
-            if      ('y' == axis)
-            {
-                t->pos.y = length;
-            }
-            else if ('x' == axis)
-            {
-                t->pos.x = length;
-            }
-            free(t->fov_map);
-            t->fov_map= do_fov && t->lifepoints ? build_fov_map(t) : t->fov_map;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t parse_thing_type(char * tok0, char * tok1, struct Thing * t)
-{
-    uint8_t type;
-    if (parse_val(tok0, tok1, s[S_CMD_TYPE], '8', (char *) &type))
-    {
-        struct ThingType * tt = world.thing_types;
-        for (; NULL != tt && type != tt->id; tt = tt->next);
-        if (!err_line(!tt, "Thing type does not exist."))
-        {
-            t->type = type;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t parse_thing_command(char * tok0, char * tok1, struct Thing * t)
-{
-    uint8_t command;
-    if (parse_val(tok0, tok1, s[S_CMD_COMMAND], '8', (char *) &command))
-    {
-        if (!command)
-        {
-            t->command = command;
-            return 1;
-        }
-        struct ThingAction * ta = world.thing_actions;
-        for (; NULL != ta && command != ta->id; ta = ta->next);
-        if (!err_line(!ta, "Thing action does not exist."))
-        {
-            t->command = command;
-        }
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t parse_do_fov(char * tok0, char * tok1)
-{
-    if (parse_val(tok0, tok1, s[S_CMD_DO_FOV], '8', (char *) &do_fov))
-    {
-        if (do_fov)
-        {
-            struct Thing * ti;
-            for (ti = world.things; ti; ti = ti->next)
-            {
-                ti->fov_map = ti->lifepoints ? build_fov_map(ti) : ti->fov_map;
-            }
-        }
-        return 1;
-    }
-    return 0;
-}
-
-
-
-static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
-{
-    uint8_t id;
-    static struct Thing * t = NULL;
-    if (t && (   parse_thing_type(tok0, tok1, t)
-              || parse_thing_command(tok0, tok1, t)
-              || parse_val(tok0, tok1, s[S_CMD_ARGUMENT], '8', (char *)&t->arg)
-              || parse_val(tok0,tok1,s[S_CMD_PROGRESS],'8',(char *)&t->progress)
-              || parse_val(tok0, tok1, s[S_CMD_LIFEPOINTS], '8',
-                                                        (char *) &t->lifepoints)
-              || parse_position(tok0, tok1, t)
-              || parse_carry(tok0, tok1, t)));
-    else if (parse_val(tok0, tok1, s[S_CMD_THING], '8', (char *) &id))
-    {
-        t = get_thing(world.things, id, 1);
-        if (!t)
-        {
-            t = add_thing(id, 0, 0);
-            set_cleanup_flag(CLEANUP_THINGS);
-            t->fov_map= do_fov && t->lifepoints ? build_fov_map(t) : t->fov_map;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-    return 1;
-}
-
-
-
-static uint8_t parse_player_command_0arg(char * tok0, char * tok1)
-{
-    struct Thing * player = get_player();
-    if (!strcmp(tok0, s[S_CMD_WAIT]) || !strcmp(tok0, s[S_CMD_PICKUP]))
-    {
-        player->command = get_thing_action_id_by_name(tok0);
-        player->arg = 0;
-        turn_over();
-        err_line (NULL != tok1, "No arguments expected, ignoring arguments.");
-        return 1;
-    }
-    return 0;
-}
-
-
 
 static uint8_t set_char_by_string_comparison(char * string, char * comparand,
                                              char * c_to_set, char value)
@@ -265,17 +75,48 @@ static uint8_t set_char_by_string_comparison(char * string, char * comparand,
 
 
 
+static uint8_t player_commands_allowed()
+{
+    if (!world.exists)
+    {
+        err_line(1, "No world exists in which to run player commands.");
+        return 0;
+    }
+    return 1;
+}
+
+
+
+static uint8_t parse_player_command_0arg(char * tok0, char * tok1)
+{
+    struct Thing * player = get_player();
+    if (!strcmp(tok0, s[S_CMD_WAIT]) || !strcmp(tok0, s[S_CMD_PICKUP]))
+    {
+        if (player_commands_allowed())
+        {
+            player->command = get_thing_action_id_by_name(tok0);
+            player->arg = 0;
+            turn_over();
+            err_line (NULL != tok1, "No arguments expected, ignoring them.");
+        }
+        return 1;
+    }
+    return 0;
+}
+
+
+
 static uint8_t parse_player_command_1arg(char * tok0, char * tok1)
 {
     struct Thing * player = get_player();
-    if (
-           parse_val(tok0, tok1, s[S_CMD_DROP], '8', (char *) &player->arg)
-        || parse_val(tok0, tok1, s[S_CMD_USE], '8', (char *) &player->arg))
+    if (   (   parse_val(tok0, tok1, s[S_CMD_DROP], '8', (char *) &player->arg)
+            || parse_val(tok0, tok1, s[S_CMD_USE], '8', (char *) &player->arg))
+        && player_commands_allowed())
     {
         player->command = get_thing_action_id_by_name(tok0);
         turn_over();
     }
-    else if (!strcmp(tok0, s[S_CMD_MOVE]))
+    else if (!strcmp(tok0, s[S_CMD_MOVE]) && player_commands_allowed())
     {
         char dir = '\0';
         if (!(   set_char_by_string_comparison(tok1, "east",       &dir, 'd')
@@ -303,20 +144,8 @@ static uint8_t parse_player_command_1arg(char * tok0, char * tok1)
 static uint8_t parse_command_1arg(char * tok0, char * tok1)
 {
     char * tok2 = token_from_line(NULL);
-    if (   parse_thing_manipulation(tok0, tok1)
-        || parse_player_command_1arg(tok0, tok1)
-        || parse_val(tok0, tok1, s[S_CMD_SEED_RAND], 'U', (char *) &world.seed)
-        || parse_val(tok0, tok1, s[S_CMD_TURN], 'u', (char *) &world.turn)
-        || parse_do_fov(tok0, tok1));
-    else if (parse_val(tok0,tok1,s[S_CMD_SEED_MAP],'U',(char *)&world.seed_map))
-
-    {
-        remake_map();
-    }
-    else if (parse_val(tok0, tok1, s[S_CMD_MAKE_WORLD],'U',(char *)&world.seed))
-    {
-        remake_world();
-    }
+    if (   parse_player_command_1arg(tok0, tok1)
+        || parse_god_command_1arg(tok0, tok1));
     else
     {
         return 0;
@@ -373,11 +202,8 @@ static void turn_over()
                 ai(thing);
             }
             thing->progress++;
-            struct ThingAction * ta = world.thing_actions;
-            while (ta->id != thing->command)
-            {
-                ta = ta->next;
-            }
+
+            struct ThingAction * ta = get_thing_action(thing->command);
             if (thing->progress == ta->effort)
             {
                 ta->func(thing);
@@ -415,10 +241,20 @@ static void record_msg(char * msg)
 
 
 
-extern void obey_msg(char * msg, uint8_t do_record)
+extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
 {
-    set_err_line_options("Trouble with message: ", msg, 0, 0);
+    char * f_name = "obey_msg()";
+    if (world.is_verbose && do_verbose)
+    {
+        exit_trouble(-1 == printf("Input: %s\n", msg), f_name, "printf()");
+    }
+    set_err_line_options("Trouble with message: ", msg, 0);
     char * msg_copy = strdup(msg);
+    if (msg[0] == 'm')
+    {
+        int a = 5;
+        a = a;
+    }
     char * tok0 = token_from_line(msg_copy);
     if (NULL != tok0)
     {
@@ -426,7 +262,10 @@ extern void obey_msg(char * msg, uint8_t do_record)
         if (    parse_player_command_0arg(tok0, tok1)
             || (tok1 && parse_command_1arg(tok0, tok1)))
         {
-            world.do_update = 1;
+            if (world.exists)
+            {
+                world.do_update = 1;
+            }
             if (do_record)
             {
                 save_world();
@@ -436,7 +275,7 @@ extern void obey_msg(char * msg, uint8_t do_record)
             return;
         }
     }
-    err_line(1, "Unknown command or bad number of tokens.");
+    err_line(1, "Unknown command/argument or bad number of tokens.");
     free(msg_copy);
 }
 
@@ -475,7 +314,7 @@ extern uint8_t io_loop()
             free(msg);
             return 0;
         }
-        obey_msg(msg, 1);
+        obey_msg(msg, 1, 0);
         free(msg);
     }
 }

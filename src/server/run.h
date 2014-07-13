@@ -11,9 +11,10 @@
 
 
 /* Try parsing "msg" into a command to apply, and apply it. Record commands to
- * the file at world.path_record if "do_record" is set.
+ * the file at world.path_record if "do_record" is set, and output them to
+ * stdout if "do_verbose" and world.is_verbose are set.
  */
-extern void obey_msg(char * msg, uint8_t do_record);
+extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose);
 
 /* Loop for receiving commands via io_round() and acting on them. Exits with 1
  * on "QUIT" command. In replay mode, exits with 0 on each non-"QUIT" command.

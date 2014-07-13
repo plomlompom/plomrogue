@@ -6,9 +6,9 @@
 #include <limits.h> /* PIPE_BUF */
 #include <stddef.h> /* size_t, NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
-#include <stdio.h> /* defines EOF, FILE, sprintf() */
+#include <stdio.h> /* defines EOF, FILE, sprintf(), fprintf() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen(), memcpy(), memset() */
+#include <string.h> /* strlen(), memcpy(), memset(), strchr() */
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time(), nanosleep() */
 #include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish(),
@@ -20,13 +20,16 @@
 #include "field_of_view.h" /* VISIBLE */
 #include "hardcoded_strings.h" /* s */
 #include "map.h" /* yx_to_map_pos() */
-#include "things.h" /* Thing, ThingType, get_thing_type(), get_player() */
+#include "things.h" /* Thing, ThingType, ThingAction, get_thing_type(),
+                     * get_player()
+                     */
 #include "world.h" /* global world  */
 
 
 
 /* Write to "file" god commands (one per line) to recreate thing "t". */
 static void write_key_value(FILE * file, char * key, uint32_t value);
+static void write_key_string(FILE * file, char * key, char * string);
 
 /* Write to "file" \n-delimited line of "key" + space + "value" as string. */
 static void write_thing(FILE * file, struct Thing * t);
@@ -80,6 +83,26 @@ static void write_key_value(FILE * file, char * key, uint32_t value)
 
 
 
+static void write_key_string(FILE * file, char * key, char * string)
+{
+    char * f_name = "write_key_string()";
+    try_fwrite(key, strlen(key), 1, file, f_name);
+    try_fputc(' ', file, f_name);
+    uint8_t contains_space = NULL != strchr(string, ' ');
+    if (contains_space)
+    {
+        try_fputc('\'', file, f_name);
+    }
+    try_fwrite(string, strlen(string), 1, file, f_name);
+    if (contains_space)
+    {
+        try_fputc('\'', file, f_name);
+    }
+    try_fputc('\n', file, f_name);
+}
+
+
+
 static void write_thing(FILE * file, struct Thing * t)
 {
     char * f_name = "write_thing()";
@@ -89,16 +112,16 @@ static void write_thing(FILE * file, struct Thing * t)
         write_thing(file, o);
     }
     write_key_value(file, s[S_CMD_THING], t->id);
-    write_key_value(file, s[S_CMD_TYPE], t->type);
-    write_key_value(file, s[S_CMD_POS_Y], t->pos.y);
-    write_key_value(file, s[S_CMD_POS_X], t->pos.x);
-    write_key_value(file, s[S_CMD_COMMAND], t->command);
-    write_key_value(file, s[S_CMD_ARGUMENT], t->arg);
-    write_key_value(file, s[S_CMD_PROGRESS], t->progress);
-    write_key_value(file, s[S_CMD_LIFEPOINTS], t->lifepoints);
+    write_key_value(file, s[S_CMD_T_TYPE], t->type);
+    write_key_value(file, s[S_CMD_T_POSY], t->pos.y);
+    write_key_value(file, s[S_CMD_T_POSX], t->pos.x);
+    write_key_value(file, s[S_CMD_T_COMMAND], t->command);
+    write_key_value(file, s[S_CMD_T_ARGUMENT], t->arg);
+    write_key_value(file, s[S_CMD_T_PROGRESS], t->progress);
+    write_key_value(file, s[S_CMD_T_HP], t->lifepoints);
     for (o = t->owns; o; o = o->next)
     {
-        write_key_value(file, s[S_CMD_CARRIES], o->id);
+        write_key_value(file, s[S_CMD_T_CARRIES], o->id);
     }
     try_fputc('\n', file, f_name);
 }
@@ -196,7 +219,7 @@ static void update_worldstate_file()
     }
     atomic_write_finish(file, s[S_PATH_WORLDSTATE], path_tmp);
     set_cleanup_flag(CLEANUP_WORLDSTATE);
-    char * dot = ".\n";;
+    char * dot = ".\n";
     try_fwrite(dot, strlen(dot), 1, world.file_out, f_name);
     fflush(world.file_out);
 }
@@ -329,7 +352,34 @@ extern void save_world()
     char * f_name = "save_world()";
     char * path_tmp;
     FILE * file = atomic_write_start(s[S_PATH_SAVE], &path_tmp);
-    write_key_value(file, s[S_CMD_DO_FOV], 0);
+    write_key_value(file, s[S_CMD_MAPLENGTH], world.map.length);
+    write_key_value(file, s[S_CMD_PLAYTYPE], world.player_type);
+    try_fputc('\n', file, f_name);
+    struct ThingAction * ta;
+    for (ta = world.thing_actions; ta; ta = ta->next)
+    {
+        write_key_value(file, s[S_CMD_THINGACTION], ta->id);
+        write_key_value(file, s[S_CMD_TA_EFFORT], ta->effort);
+        write_key_string(file, s[S_CMD_TA_NAME], ta->name);
+        try_fputc('\n', file, f_name);
+    }
+    struct ThingType * tt;
+    for (tt = world.thing_types; tt; tt = tt->next)
+    {
+        write_key_value(file, s[S_CMD_THINGTYPE], tt->id);
+        write_key_value(file, s[S_CMD_TT_STARTN], tt->start_n);
+        write_key_value(file, s[S_CMD_TT_HP], tt->lifepoints);
+        int test = fprintf(file, "%s %c\n", s[S_CMD_TT_SYMB], tt->char_on_map);
+        exit_trouble(test < 0, f_name, "fprintf()");
+        write_key_string(file, s[S_CMD_TT_NAME], tt->name);
+        write_key_value(file, s[S_CMD_TT_CONSUM], tt->consumable);
+        try_fputc('\n', file, f_name);
+    }
+    for (tt = world.thing_types; tt; tt = tt->next)
+    {
+        write_key_value(file, s[S_CMD_THINGTYPE], tt->id);
+        write_key_value(file, s[S_CMD_TT_CORPS], tt->corpse_id);
+    }
     try_fputc('\n', file, f_name);
     write_key_value(file, s[S_CMD_SEED_MAP], world.seed_map);
     write_key_value(file, s[S_CMD_SEED_RAND], world.seed);
@@ -340,6 +390,6 @@ extern void save_world()
     {
         write_thing(file, t);
     }
-    write_key_value(file, s[S_CMD_DO_FOV], 1);
+    write_key_value(file, s[S_CMD_WORLD_ACTIVE], 1);
     atomic_write_finish(file, s[S_PATH_SAVE], path_tmp);
 }

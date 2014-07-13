@@ -6,13 +6,12 @@
 #include <stdint.h> /* uint8_t */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strcmp(), strdup() */
-#include "../common/parse_file.h" /* EDIT_STARTED,parse_init_entry(),
-                                   * parse_id_uniq(), parse_unknown_arg(),
-                                   * parsetest_too_many_values(), parse_file(),
-                                   * parse_and_reduce_to_readyflag(),
-                                   * parse_flagval()
-                                   */
 #include "array_append.h" /* array_append() */
+#include "parse.h" /* EDIT_STARTED, parse_init_entry(), parse_id_uniq(),
+                    * parse_unknown_arg(), parsetest_too_many_values(),
+                    * parse_file(), parse_and_reduce_to_readyflag(),
+                    * parse_flagval()
+                    */
 #include "world.h" /* global world */
 #include "cleanup.h" /* set_cleanup_flag() */
 

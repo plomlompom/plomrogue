@@ -1,39 +1,207 @@
 /* src/server/things.c */
 
+#define _POSIX_C_SOURCE 200809L /* strdup() */
 #include "things.h"
-#include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t, UINT8_MAX, UINT16_MAX */
+#include <stddef.h> /* NULL, size_t */
+#include <stdint.h> /* uint8_t, uint16_t, int16_t, UINT8_MAX, UINT16_MAX */
 #include <stdlib.h> /* free() */
-#include <string.h> /* memset(), strlen() */
-#include "../common/rexit.h" /* exit_err(), exit_trouble() */
+#include <string.h> /* memset(), strcmp(), strdup() */
+#include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
+#include "cleanup.h" /* set_cleanup_flag() */
 #include "hardcoded_strings.h" /* s */
 #include "map.h" /* is_passable() */
 #include "rrand.h" /* rrand() */
-#include "world.h" /* global world */
+#include "thing_actions.h" /* actor_wait */
+#include "world.h" /* world */
 #include "yx_uint8.h" /* yx_uint8_cmp() */
 
 
 
+/* Used to treat structs Thing, ThingType and ThingAction the same. */
+struct NextAndId
+{
+    struct NextAndId * next;
+    uint8_t id;
+};
 
-/* Return lowest unused id for new thing. */
-static uint8_t get_lowest_unused_id();
+
+
+/* Return lowest unused id for new thing ("sel"==0), thing type ("sel"==1) or
+ * thing action ("sel"==2).
+ */
+static uint8_t get_unused_id(uint8_t sel);
+
+/* To linked list of NextAndId structs (or rather structs whose start region is
+ * compatible to it) starting at "start", add newly allocated element of
+ * "n_size" and an ID that is either "id" or, if "id" is <= UINT8_MAX and >=
+ * "id_start", get ID from get_unused_id("struct_id").
+ */
+static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
+                                             int16_t id, uint8_t struct_id,
+                                             struct NextAndId ** start);
 
 
 
-static uint8_t get_lowest_unused_id()
+static uint8_t get_unused_id(uint8_t sel)
 {
     uint8_t i = 0;
     while (1)
     {
-        if (!get_thing(world.things, i, 1))
+        if (   (0 == sel && !get_thing(world.things, i, 1))
+            || (1 == sel && !get_thing_type(i))
+            || (2 == sel && !get_thing_action(i)))
         {
             return i;
         }
-        exit_err(i == UINT8_MAX, "No unused ID available to add new thing.");
+        exit_err(i == UINT8_MAX, "No unused ID available to add to ID list.");
         i++;
     }
+}
+
+
+
+static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
+                                             int16_t id, uint8_t struct_id,
+                                             struct NextAndId ** start)
+{
+    char * f_name = "add_to_struct_list()";
+    struct NextAndId * nai  = try_malloc(n_size, f_name);
+    memset(nai, 0, n_size);
+    nai->id = (start_id<=id && id<=UINT8_MAX) ? id : get_unused_id(struct_id);
+    struct NextAndId ** nai_ptr_ptr = start;
+    for (; NULL != * nai_ptr_ptr; nai_ptr_ptr = &(*nai_ptr_ptr)->next);
+    *nai_ptr_ptr = nai;
+    return nai;
+}
+
+
+
+extern struct ThingAction * add_thing_action(int16_t id)
+{
+    struct ThingAction * ta;
+    ta = (struct ThingAction *) add_to_struct_list(sizeof(struct ThingAction),
+                                                   1, id, 2,
+                                                   (struct NextAndId **)
+                                                   &world.thing_actions);
+    set_cleanup_flag(CLEANUP_THING_ACTIONS);
+    ta->name = strdup(s[S_CMD_WAIT]);
+    ta->effort = 1;
+    ta->func = actor_wait;
+    return ta;
+}
+
+
+
+extern struct ThingType * add_thing_type(int16_t id)
+{
+    struct ThingType * tt;
+    tt = (struct ThingType *) add_to_struct_list(sizeof(struct ThingType),
+                                                 0, id, 1,
+                                                 (struct NextAndId **)
+                                                 &world.thing_types);
+    set_cleanup_flag(CLEANUP_THING_TYPES);
+    tt->name = strdup("(none)");
+    return tt;
+}
+
+
+
+extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x)
+{
+    struct Thing * t;
+    t = (struct Thing *) add_to_struct_list(sizeof(struct Thing), 0, id, 0,
+                                            (struct NextAndId **) &world.things);
+    struct ThingType * tt = get_thing_type(type);
+    set_cleanup_flag(CLEANUP_THINGS);
+    t->type       = tt->id;
+    t->lifepoints = tt->lifepoints;
+    t->pos.y      = y;
+    t->pos.x      = x;
+    return t;
+}
+
+
+
+extern void free_thing_actions(struct ThingAction * ta)
+{
+    if (NULL == ta)
+    {
+        return;
+    }
+    free_thing_actions(ta->next);
+    free(ta->name);
+    free(ta);
+}
+
+
+
+extern void free_thing_types(struct ThingType * tt)
+{
+    if (NULL == tt)
+    {
+        return;
+    }
+    free_thing_types(tt->next);
+    free(tt->name);
+    free(tt);
+}
+
+
+
+extern void free_things(struct Thing * t)
+{
+    if (NULL == t)
+    {
+        return;
+    }
+    free_things(t->owns);
+    free_things(t->next);
+    free(t->fov_map);
+    free(t);
+    if (t == world.things)         /* So add_things()' NULL-delimited thing   */
+    {                              /* iteration loop does not iterate over    */
+        world.things = NULL;       /* freed memory when called the first time */
+    }                              /* after world re-seeding.                 */
+}
+
+
+
+extern struct ThingAction * get_thing_action(uint8_t id)
+{
+    struct ThingAction * ta = world.thing_actions;
+    for (; NULL != ta && id != ta->id; ta = ta->next);
+    return ta;
+}
+
+
+
+extern struct ThingType * get_thing_type(uint8_t id)
+{
+    struct ThingType * tt = world.thing_types;
+    for (; NULL != tt && id != tt->id; tt = tt->next);
+    return tt;
+}
+
+
+
+extern uint8_t get_thing_action_id_by_name(char * name)
+{
+    struct ThingAction * ta = world.thing_actions;
+    while (NULL != ta)
+    {
+        if (0 == strcmp(ta->name, name))
+        {
+            break;
+        }
+        ta = ta->next;
+    }
+    if (!ta)
+    {
+        return 0;
+    }
+    return ta->id;
 }
 
 
@@ -60,60 +228,9 @@ extern struct Thing * get_thing(struct Thing * ptr, uint8_t id, uint8_t deep)
 
 
 
-extern void free_thing_types(struct ThingType * tt_start)
+extern struct Thing * get_player()
 {
-    if (NULL == tt_start)
-    {
-        return;
-    }
-    free_thing_types(tt_start->next);
-    free(tt_start->name);
-    free(tt_start);
-}
-
-
-
-extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t find_pos)
-{
-    char * f_name = "add_thing()";
-    struct ThingType * tt = get_thing_type(type);
-    struct Thing *     t  = try_malloc(sizeof(struct Thing), f_name);
-    memset(t, 0, sizeof(struct Thing));
-    t->id = (0 <= id && id <= UINT8_MAX) ? id : get_lowest_unused_id();
-    t->type       = tt->id;
-    t->lifepoints = tt->lifepoints;
-    char * err = "Space to put thing on too hard to find. Map too small?";
-    uint16_t i = 0;
-    memset(&(t->pos), 0, sizeof(struct yx_uint8));
-    while (find_pos)
-    {
-        struct yx_uint8 pos;
-        for (pos.y = pos.x = 0; 0 == is_passable(pos); i++)
-        {
-            exit_err(UINT16_MAX == i, err);
-            pos.y = rrand() % world.map.length;
-            pos.x = rrand() % world.map.length;
-        }
-        struct Thing * t_ptr;
-        uint8_t clear = 1;
-        for (t_ptr = world.things; t_ptr != NULL; t_ptr = t_ptr->next)
-        {
-            if (yx_uint8_cmp(&pos, &t_ptr->pos) && 0 != t_ptr->lifepoints)
-            {
-                clear = 0;
-                break;
-            }
-        }
-        if (1 == clear)
-        {
-            t->pos = pos;
-            break;
-        }
-    }
-    struct Thing ** t_ptr_ptr = &world.things;
-    for (; NULL != * t_ptr_ptr; t_ptr_ptr = &(*t_ptr_ptr)->next);
-    * t_ptr_ptr = t;
-    return t;
+    return get_thing(world.things, 0, 0);
 }
 
 
@@ -123,26 +240,35 @@ extern void add_things(uint8_t type, uint8_t n)
     uint8_t i;
     for (i = 0; i < n; i++)
     {
-        add_thing(-1, type, 1);
+        struct yx_uint8 pos;
+        while (1)
+        {
+            char * err = "Space to put thing on too hard to find."
+                         "Map too small?";
+            uint16_t i_pos = 0;
+            for (pos.y = pos.x = 0; 0 == is_passable(pos); i_pos++)
+            {
+                exit_err(UINT16_MAX == i_pos, err);
+                pos.y = rrand() % world.map.length;
+                pos.x = rrand() % world.map.length;
+            }
+            struct Thing * t;
+            uint8_t clear = 1;
+            for (t = world.things; t; t = t->next)
+            {
+                if (yx_uint8_cmp(&pos, &t->pos) && 0 != t->lifepoints)
+                {
+                    clear = 0;
+                    break;
+                }
+            }
+            if (1 == clear)
+            {
+                break;
+            }
+        }
+        add_thing(-1, type, pos.y, pos.x);
     }
-}
-
-
-
-extern void free_things(struct Thing * t_start)
-{
-    if (NULL == t_start)
-    {
-        return;
-    }
-    free_things(t_start->owns);
-    free_things(t_start->next);
-    free(t_start->fov_map);
-    free(t_start);
-    if (t_start == world.things)   /* So add_things()' NULL-delimited thing   */
-    {                              /* iteration loop does not iterate over    */
-        world.things = NULL;       /* freed memory when called the first time */
-    }                              /* after world re-seeding.                 */
 }
 
 
@@ -174,29 +300,6 @@ extern void own_thing(struct Thing ** target, struct Thing ** source,
     for (; NULL != * t_ptr_ptr; t_ptr_ptr = &(*t_ptr_ptr)->next);
     * t_ptr_ptr = t;
     t->next = NULL;
-}
-
-
-
-extern struct Thing * get_player()
-{
-    return get_thing(world.things, 0, 1);
-}
-
-
-
-extern struct ThingType * get_thing_type(uint8_t id)
-{
-    char * f_name = "get_thing_type()";
-    struct ThingType * tt = world.thing_types;
-    for (; NULL != tt && id != tt->id; tt = tt->next);
-    char * err_intro = "Requested thing type of unused ID ";
-    uint16_t size = strlen(err_intro) + 3 + 1 + 1;
-    char * err = try_malloc(size, f_name);
-    exit_trouble(sprintf(err,"%s%d.",err_intro,id) < 0,f_name,s[S_FCN_SPRINTF]);
-    exit_err(NULL == tt, err);
-    free(err);
-    return tt;
 }
 
 

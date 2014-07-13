@@ -181,8 +181,8 @@ static char * build_server_message_with_argument(struct Command * cmd)
 {
     char * f_name = "build_server_message_with_argument()";
     uint8_t command_size = strlen(cmd->server_msg);
-    char * arg_str;
-    uint8_t arg_size;
+    char * arg_str = "";
+    uint8_t arg_size = 0;
     if ('i' == cmd->arg)
     {
         arg_size = 3;
