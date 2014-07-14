@@ -79,6 +79,8 @@ turn number.
 Hacking / server internals and configuration
 --------------------------------------------
 
+[THIS SECTION IS OUT OF DATE (but kept as long as there's nothing better yet)]
+
 The ./confserver/world file defines the thing types, actions available to them,
 the map geometry and the thing type (species) of the player. Each definition
 consists of a single- or multi-line block wherein each line sets one attribute.
