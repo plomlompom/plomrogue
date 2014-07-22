@@ -1,0 +1,311 @@
+#!/bin/sh
+# redo-ifchange – bourne shell implementation of DJB redo
+# Copyright © 2014  Nils Dagsson Moskopp (erlehmann)
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+# Dieses Programm hat das Ziel, die Medienkompetenz der Leser zu
+# steigern. Gelegentlich packe ich sogar einen handfesten Buffer
+# Overflow oder eine Format String Vulnerability zwischen die anderen
+# Codezeilen und schreibe das auch nicht dran.
+
+_add_dependency() {
+  parent="$1"
+  dependency="$2"
+  # Do not record circular dependencies.
+  [ "$parent" = "$dependency" ] && exit 1
+  local base; _dirsplit "$parent"
+  [ -d "$REDO_DIR/$dir" ] || mkdir -p "$REDO_DIR/$dir"
+  # Naive implementation: Append dependency, then remove double dependencies.
+  dependencies=$( (echo "$dependency"; cat "$REDO_DIR/$parent".dependencies 2>/dev/null ) | sort -u)
+  echo "$dependencies" > "$REDO_DIR/$parent".dependencies
+  # FIXME: Remove added dependency from non-existence dependencies.
+}
+
+_add_dependency_ne() {
+  parent="$1"
+  dependency_ne="$2"
+  # Do not record circular dependencies.
+  [ "$parent" = "$dependency_ne" ] && exit 1
+  # Do not record existing files as non-existence dependencies.
+  [ -e "$dependency_ne" ] && return
+  local base; _dirsplit "$parent"
+  [ -d "$REDO_DIR/$dir" ] || mkdir -p "$REDO_DIR/$dir"
+  # Naive implementation: Append dependency, then remove double dependencies.
+  dependencies_ne=$( (echo "$dependency_ne"; cat "$REDO_DIR/$parent".dependencies_ne 2>/dev/null ) | sort -u)
+  echo "$dependencies_ne" > "$REDO_DIR/$parent".dependencies_ne
+  # FIXME: Remove added non-existence dependency from dependencies.
+}
+
+_add_target() {
+  local target="$1"
+  # Exit if called without a target.
+  [ -z "$target" ] && exit 1
+  local base; _dirsplit "$target"
+  [ -d "$REDO_DIR/$dir" ] || mkdir -p "$REDO_DIR/$dir"
+  # If target file exists, record ctime and md5sum.
+  if [ -e "$target" ]; then
+    stat -c%Y "$target" > "$REDO_DIR/$target".ctime
+    md5sum < "$target" > "$REDO_DIR/$target".md5sum
+  fi
+}
+
+_dependencies_uptodate() {
+  target="$1"
+  target_relpath=${target##$REDO_BASE/}
+  # If no dependencies exist, they are by definition up to date.
+  if [ ! -e "$REDO_DIR/$target".dependencies ]; then
+    _echo_debug_message "$REDO_DEPTH$dir$target_relpath has no dependencies."
+    return 0
+  fi
+  _echo_debug_message "$REDO_DEPTH$dir$target_relpath non-existant dependency check:"
+  dependencies_ne=$(cat "$REDO_DIR/$target".dependencies_ne 2>/dev/null || :)
+  for dependency_ne in $dependencies_ne; do
+    dependency_ne_relpath=${dependency_ne##$REDO_BASE/}
+    _echo_debug_message "$REDO_DEPTH$dir$target_relpath depends on non-existence of $dependency_ne_relpath"
+    # If a non-existence dependency exists, it is out of date.
+    # Dependencies, e.g. on default.do files may also be out of date.
+    # Naive implementation: Delete dependency information and rebuild.
+    if [ -e "$dependency_ne" ]; then
+      rm "$REDO_DIR/$target".dependencies
+      rm "$REDO_DIR/$target".dependencies_ne
+      return 1
+    # If a non-existence dependency does not exist, but is also a
+    # dependency, it existed in the past. Naive implementation: Delete
+    # dependency information and pretend the (actually up-to-date)
+    # dependency is out of date to generate dependency information.
+    # TODO: Only remove non-existence dependency from dependencies,
+    # and do no return at this point; maybe escape filename properly.
+    elif (grep -q '^'"$dependency_ne"'$' "$REDO_DIR/$target".dependencies \
+      2>/dev/null); then
+      rm "$REDO_DIR/$target".dependencies
+      return 1
+    fi
+  done
+  _echo_debug_message "$REDO_DEPTH$dir$target_relpath non-existence dependencies uptodate."
+  _echo_debug_message "$REDO_DEPTH$dir$target_relpath dependency check:"
+  if [ "$REDO_SHUFFLE" = "1" ]; then
+    dependencies=$(shuf "$REDO_DIR/$target".dependencies 2>/dev/null || :)
+  else
+    dependencies=$(cat "$REDO_DIR/$target".dependencies 2>/dev/null || :)
+  fi
+  for dependency in $dependencies; do
+    dependency_relpath=${dependency##$REDO_BASE/}
+    dir=''
+    _echo_debug_message "$REDO_DEPTH$dir$target_relpath depends on $dependency_relpath"
+    if ( ! _is_uptodate "$dependency" ); then
+      _echo_debug_message \
+        "$REDO_DEPTH$dir$target_relpath dependency $dependency_relpath not uptodate."
+      return 1
+    fi
+    if ( ! _dependencies_uptodate "$dependency"); then
+      _echo_debug_message \
+        "$REDO_DEPTH$dir$target_relpath dependency $dependency_relpath dependencies not uptodate."
+      return 1
+    fi
+    # In the case that two targets depend on the same target and are
+    # built after another, when the second target is built, redo finds
+    # its dependencies to be up-to-date. This implies that the second
+    # target would not be built. If a dependency build timestamp is
+    # greater than or equal to a targets build timestamp, assume the
+    # dependency has been rebuilt and the target should be rebuilt.
+    target_ts="$(cat "$REDO_DIR/$target_abspath.buildtime" 2>/dev/null || echo 0)"
+    dependency_ts="$(cat "$REDO_DIR/$dependency.buildtime" 2>/dev/null || echo 0)"
+    if [ "$dependency_ts" -ge "$target_ts" ]; then
+      _echo_debug_message \
+        "$REDO_DEPTH$dir$target_relpath dependency $dependency_relpath uptodate, but built later than $target_relpath."
+      return 1
+    fi
+  done
+  _echo_debug_message "$REDO_DEPTH$dir$target_relpath dependencies uptodate."
+  return 0
+}
+
+_dirsplit() {
+  base=${1##*/}
+  dir=${1%"$base"}
+}
+
+_dir_shovel() {
+  local dir base
+  xdir="$1" xbase="$2" xbasetmp="$2"
+  while [ ! -d "$xdir" -a -n "$xdir" ]; do
+    _dirsplit "${xdir%/}"
+    xbasetmp=${base}__"$xbase"
+    xdir="$dir" xbase="$base"/"$xbase"
+    echo "xbasetmp='$xbasetmp'" >&2
+  done
+}
+
+_do() {
+  local dir="$1" target="$2" tmp="$3"
+  # Add target to parent targets dependencies.
+  target_abspath="$PWD/$target"
+  if [ -n "$REDO_TARGET" ]; then
+    _add_dependency "$REDO_TARGET" "$target_abspath"
+  fi
+  target_relpath="${target_abspath##$REDO_BASE/}"
+  if ( ! _is_uptodate "$target_abspath" || ! _dependencies_uptodate "$target_abspath" ); then
+    dofile="$target".do
+    base="$target"
+    ext=
+    [ -e "$target.do" ] || _find_dofile "$target"
+    # Add non existing .do file to non-existence dependencies so target is built when
+    # .do file in question is created.
+    _add_dependency_ne "$(readlink -f "$target")" "$PWD/$target.do"
+    if [ ! -e "$dofile" ]; then
+      # If .do file does not exist and target exists, it is a source file.
+      if [ -e "$target" ]; then
+        _add_target "$(readlink -f $target)"
+        # Portable timestamps for systems supporting GNU date format '%N'.
+        date +%s%N | tr -d '%N' > "$REDO_DIR/$target_abspath".buildtime
+        return 0
+      # If .do file does not exist and target does not exist, stop.
+      else
+        echo "redo: $target: no .do file" >&2
+        exit 1
+      fi
+    # Add .do file to dependencies so target is built when .do file changes.
+    else
+      _add_dependency "$(readlink -f "$target")" "$PWD/$dofile"
+      _add_target "$PWD/$dofile"
+    fi
+    printf '%sredo %s%s%s%s%s\n' \
+      "$green" "$REDO_DEPTH" "$bold" "$target_relpath" "$plain" >&2
+    ( _run_dofile "$target" "$base" "$tmp.tmp" )
+    rv="$?"
+    if [ $rv != 0 ]; then
+      rm -f "$tmp.tmp" "$tmp.tmp2"
+      # Exit code 123 conveys that target was considered uptodate at runtime.
+      if [ $rv != 123 ]; then
+        printf "%sredo: %s%s: got exit code %s.%s\n" \
+          "$red" "$REDO_DEPTH" "$target" "$rv" "$plain" >&2
+        exit 1
+      fi
+    fi
+    mv "$tmp.tmp" "$target" 2>/dev/null ||
+    ! test -s "$tmp.tmp2" ||
+    mv "$tmp.tmp2" "$target" 2>/dev/null
+    rm -f "$tmp.tmp2"
+    # Portable timestamps for systems supporting GNU date format '%N'.
+    date +%s%N | tr -d '%N' > "$REDO_DIR/$target_abspath".buildtime
+  else
+    _echo_debug_message "$REDO_DEPTH$dir$target is up to date."
+  fi
+  _add_target "$(readlink -f $target)"
+}
+
+_echo_debug_message() {
+  [ "$REDO_DEBUG" = "1" ] && echo "$@" >&2
+}
+
+_find_dofile() {
+  local prefix=
+  while :; do
+    _find_dofile_pwd "$1"
+    [ -e "$dofile" ] && break
+    [ "$PWD" = "/" ] && break
+    target=${PWD##*/}/"$target"
+    tmp=${PWD##*/}/"$tmp"
+    prefix=${PWD##*/}/"$prefix"
+    cd ..
+  done
+  base="$prefix""$base"
+}
+
+_find_dofile_pwd() {
+  dofile=default."$1".do
+  while :; do
+    dofile=default.${dofile#default.*.}
+    [ -e "$dofile" -o "$dofile" = default.do ] && break
+  done
+  ext=${dofile#default}
+  ext=${ext%.do}
+  base=${1%$ext}
+}
+
+_is_uptodate() {
+  target="$1"
+  target_relpath=${target##$REDO_BASE/}
+  # If a target does not exist, it is by definition out of date.
+  if [ ! -e "$target" ]; then
+    _echo_debug_message "$REDO_DEPTH$dir$target_relpath does not exist."
+    return 1
+  else
+    # If a file exists, but has no build date, it is by a previously unseen
+    # source file. A previously unseen source file is  by definition up to date.
+    if [ ! -e "$REDO_DIR/$target".ctime ]; then
+      _echo_debug_message "$REDO_DEPTH$dir$target_relpath.ctime does not exist."
+      # Add source file to dependencies so target is built when source file changes.
+      _add_target "$(readlink -f $target)"
+      return 0
+    else
+      _echo_debug_message "$REDO_DEPTH$dir$target_relpath.ctime exists."
+      # If a file exists and has an entry in the always database, it is never
+      # up to date.
+      if [ -e "$REDO_DIR/$target".always ]; then
+        _echo_debug_message "$REDO_DEPTH$dir$target_relpath.always exists."
+        return 1
+      fi
+      # If a file exists and has an entry in the stamp database, it might not
+      # be up to date. redo-stamp decides if the file is up to date at runtime.
+      if [ -e "$REDO_DIR/$target".stamp ]; then
+        _echo_debug_message "$REDO_DEPTH$dir$target_relpath.stamp exists."
+        return 1
+      fi
+      # If a file exists and has an entry in the dependency database and ctime
+      # is the same as in the entry in the ctime database, it is up to date.
+      if [ "$(cat "$REDO_DIR/$target".ctime 2>/dev/null || :)" = \
+        "$(stat -c%Y "$target")" ]; then
+        _echo_debug_message "$REDO_DEPTH$dir$target_relpath.ctime match."
+        return 0
+      else
+        _echo_debug_message "$REDO_DEPTH$dir$target_relpath.ctime mismatch."
+        # If a file exists and has an entry in the dependency database and
+        # ctime is different from the entry in the ctime database, but md5sum
+        # is the same as md5sum in the md5sum database, it is up to date.
+        if [ "$(cat "$REDO_DIR/$target".md5sum 2>/dev/null || :)" = \
+          "$(md5sum < "$target")" ]; then
+          _echo_debug_message "$REDO_DEPTH$dir$target_relpath.md5sum match."
+          return 0
+        else
+          _echo_debug_message "$REDO_DEPTH$dir$target_relpath.md5sum mismatch."
+          return 1
+        fi
+      fi
+    fi
+  fi
+  return 1
+}
+
+_run_dofile() {
+  export REDO_DEPTH="$REDO_DEPTH  "
+  export REDO_TARGET="$PWD"/"$target"
+  local line1
+  set -e
+  read line1 <"$PWD/$dofile" || true
+  cmd=${line1#"#!"}
+  # If the first line of a do file does not have a hashbang (#!), use /bin/sh.
+  if [ "$cmd" = "$line1" ] || [ "$cmd" = "/bin/sh" ]; then
+    if [ "$REDO_XTRACE" = "1" ]; then
+      cmd="/bin/sh -ex"
+    else
+      cmd="/bin/sh -e"
+    fi
+  fi
+  $cmd "$PWD/$dofile" "$@" >"$tmp.tmp2"
+}
+
+set +e
+if [ -n "$1" ]; then
+  for target; do
+    _dirsplit "$target"
+    _dir_shovel "$dir" "$base"
+    dir="$xdir" base="$xbase" basetmp="$xbasetmp"
+    ( cd "$dir" && _do "$dir" "$base" "$basetmp" )
+    [ "$?" = 0 ] || exit 1
+  done
+fi

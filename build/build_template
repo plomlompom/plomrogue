@@ -1,0 +1,9 @@
+redo-ifchange build/compiler_flags
+. ./build/compiler_flags
+mkdir -p build/$TARGET
+mkdir -p build/common
+for file in src/${TARGET}/*.c src/common/*.c; do
+  file=build/${file#src/}
+  redo-ifchange ${file%.*}.o
+done
+gcc $CFLAGS -o $3 -g build/${TARGET}/*.o build/common/*.o $LIBRARY_LINKS

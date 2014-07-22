@@ -1,0 +1,66 @@
+#!/bin/sh
+# redo – bourne shell implementation of DJB redo
+# Copyright © 2014  Nils Dagsson Moskopp (erlehmann)
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+# Dieses Programm hat das Ziel, die Medienkompetenz der Leser zu
+# steigern. Gelegentlich packe ich sogar einen handfesten Buffer
+# Overflow oder eine Format String Vulnerability zwischen die anderen
+# Codezeilen und schreibe das auch nicht dran.
+
+set +e
+
+bold=""
+green=""
+plain=""
+red=""
+if [ -n "$TERM" -a "$TERM" != "dumb" ] && tty <&2 >/dev/null 2>&1; then
+  bold="$(printf '\033[1m')"
+  green="$(printf '\033[32m')"
+  plain="$(printf '\033[m')"
+  red="$(printf '\033[31m')"
+fi
+export bold green plain red
+
+for argument; do
+  if [ "$argument" = "-d" ] || [ "$argument" = "--debug" ]; then
+    export REDO_DEBUG='1'
+  elif [ "$argument" = "-h" ] || [ "$argument" = "--help" ]; then
+    cat <<EOF >&2
+Usage: redo [OPTIONS] [TARGETS...]
+
+  -d, --debug          print dependency checks as they happen
+  -h, --help           print usage instructions and exit
+  -x, --xtrace         print commands as they are executed (variables expanded)
+
+Report bugs to <nils+redo@dieweltistgarnichtso.net>.
+EOF
+    exit 0
+  elif [ "$argument" = "-s" ] || [ "$argument" = "--shuffle" ]; then
+    export REDO_SHUFFLE='1'
+  elif [ "$argument" = "-x" ] || [ "$argument" = "--xtrace" ]; then
+    export REDO_XTRACE='1'
+  else
+    REDO_HAS_TARGETS='1'
+    export REDO_TARGET=''
+    # If this is build directory, create .redo database directory.
+    if [ -z "$REDO_BASE" ]; then
+      export REDO_BASE="$(pwd)"
+      export REDO_DIR="$REDO_BASE/.redo"
+      mkdir -p $REDO_DIR
+    fi
+    argument_abspath="$(readlink -f "$argument")"
+    (
+      echo '0' > "$REDO_DIR/$argument_abspath".ctime
+      echo '0' > "$REDO_DIR/$argument_abspath".md5sum
+    ) 2>/dev/null
+    redo-ifchange "$argument"
+    [ "$?" = 0 ] || exit 1
+  fi
+done
+
+[ "$REDO_HAS_TARGETS" = "1" ] || exec redo all

@@ -1,0 +1,18 @@
+#!/bin/sh
+# 
+# The purpose of this script is to step in if no version of the "redo" build
+# system is installed on your system to interpret the files that (Makefile-like)
+# build the PlomRogue system: ./all.do, ./roguelike-client.do and
+# ./roguelike-server.do.
+# 
+# If a version of "redo" is installed on your system and in your $PATH, just run
+# "redo roguelike-client", "redo roguelike-server" or plain "redo" (to build
+# both via all.do). Otherwise, run this very script with the very same
+# arguments. It uses parts of a basic "redo" implementation written by Nils
+# Dagsson Moskopp a.k.a. erlehmann, snapshots of which are stored in
+# build/redo_scripts/. For details on this version, see:
+# - <http://news.dieweltistgarnichtso.net/bin/redo.html>
+# - <http://news.dieweltistgarnichtso.net/bin/redo-ifchange.html>
+
+export PATH=$PATH:$PWD/build/redo_scripts
+redo "$@"

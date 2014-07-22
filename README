@@ -23,16 +23,20 @@ System requirements / installation / running the game
 -----------------------------------------------------
 
 The game is expected to run on Linux systems that contain the ncurses library.
-Do the following steps:
+(It may also work on other Unix-like systems with ncurses, who knows.) Do the
+following steps:
 
 $ git clone https://github.com/plomlompom/plomrogue
 $ cd plomrogue
-$ make
+$ ./redo
 $ ./roguelike
 
-(It may also work on other Unix-like systems with ncurses, who knows.)
+(If you got a redo build system installed and in your $PATH, you could also do a
+simple "redo" instead of "./redo". The ./redo script calls a simple partial
+shell script implementation of redo stored below build/redo_scripts/, written by
+Nils Dagsson Moskopp a.k.a. erlehmann.)
 
-Make generates two executables ./roguelike-server and ./roguelike-client.
+./redo generates two executables ./roguelike-server and ./roguelike-client.
 ./roguelike is a pre-existing shell script that merely executes both of them,
 with the server as a background job. You can also ignore the script and start
 the two by hand.

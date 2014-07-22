@@ -12,12 +12,12 @@ fi
 # Give helpful message to players that want to start without compiling first.
 if [ ! -e ./roguelike-server ]
 then
-    echo 'No ./roguelike-server file found to execute. Try "make" first?'
+    echo 'No ./roguelike-server file found to execute. Try "./redo" first?'
     false
 fi
 if [ ! -e ./roguelike-client ]
 then
-    echo 'No ./roguelike-client file found to execute. Try "make" first?'
+    echo 'No ./roguelike-client file found to execute. Try "./redo" first?'
     false
 fi
 

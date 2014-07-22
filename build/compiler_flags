@@ -1,0 +1,1 @@
+CFLAGS='-std=c11 -pedantic-errors -Wall -Werror -Wextra -Wformat-security -g'
