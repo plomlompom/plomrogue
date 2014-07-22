@@ -11,6 +11,10 @@ BOTH SERVER/CLIENT:
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
 
+SERVER
+
+- document server commands
+
 CLIENT:
 
 - enable toggling of window borders
