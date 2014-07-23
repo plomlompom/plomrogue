@@ -332,7 +332,6 @@ static uint8_t world_may_be_set_active()
 
 static uint8_t parse_world_active(char * tok0, char * tok1)
 {
-    char * f_name = "parse_world_active()";
     if (!strcmp(tok0, s[S_CMD_WORLD_ACTIVE]) && !parsetest_int(tok1, '8'))
     {
         if (!parsetest_int(tok1, '8'))
@@ -343,7 +342,7 @@ static uint8_t parse_world_active(char * tok0, char * tok1)
                 if (!access(s[S_PATH_WORLDSTATE], F_OK))
                 {
                     int test = unlink(s[S_PATH_WORLDSTATE]);
-                    exit_trouble(-1 == test, f_name, "unlink()");
+                    exit_trouble(-1 == test, __func__, "unlink");
                 }
                 world.exists = 0;
             }

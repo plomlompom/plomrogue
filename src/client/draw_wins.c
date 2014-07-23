@@ -69,7 +69,6 @@ static void draw_titled_keybinding_list(char * title, struct Win * win,
 
 static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
 {
-    char * f_name = "try_resize_winmap()";
     if (win->winmap_size.y >= new_size_y && win->winmap_size.x >= new_size_x)
     {
         return;
@@ -84,7 +83,7 @@ static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
     }
     chtype * old_winmap = win->winmap;
     uint32_t new_size = sizeof(chtype) * new_size_y * new_size_x;
-    win->winmap = try_malloc(new_size, f_name);
+    win->winmap = try_malloc(new_size, __func__);
     uint16_t y, x;
     for (y = 0; y < new_size_y; y++)
     {
@@ -178,15 +177,14 @@ static void add_line_long(struct Win * win, char * line, attr_t attri)
 static void add_line_compact(struct Win * win, char * line, attr_t attri,
                              uint16_t * offset, uint8_t last)
 {
-    char * f_name = "add_line_compact()";
     uint16_t y_start = win->winmap_size.y - (win->winmap_size.y > 0);
     try_resize_winmap(win, y_start + 1, win->frame_size.x);
     uint16_t len_line = strlen(line);
     char * separator = last ? "" : " / ";
     uint32_t len_line_new = len_line + strlen(separator);
-    char * line_new = try_malloc(len_line_new, f_name);
+    char * line_new = try_malloc(len_line_new, __func__);
     int test = sprintf(line_new, "%s%s", line, separator);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     uint16_t x = 0;
     uint16_t y;
     uint32_t z;
@@ -260,12 +258,11 @@ static void draw_text_from_bottom(struct Win * win, char * text)
 
 static char * get_kb_line(struct KeyBinding * kb)
 {
-    char * f_name = "get_kb_line()";
     char * keyname = get_keyname_to_keycode(kb->keycode);
     uint16_t size = strlen(keyname) + 3 + strlen(kb->command->dsc_long) + 1;
-    char * kb_line = try_malloc(size, f_name);
+    char * kb_line = try_malloc(size, __func__);
     int test = sprintf(kb_line, "%s - %s", keyname, kb->command->dsc_long);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     free(keyname);
     return kb_line;
 }
@@ -359,14 +356,13 @@ extern void draw_win_map(struct Win * win)
 
 extern void draw_win_info(struct Win * win)
 {
-    char * f_name = "draw_win_info()";
     char * dsc_turn      = "Turn: ";
     char * dsc_hitpoints = "\nHitpoints: ";
     uint16_t maxl = strlen(dsc_turn) + 5 + strlen(dsc_hitpoints) + 3;
-    char * text = try_malloc(maxl + 1, f_name);
+    char * text = try_malloc(maxl + 1, __func__);
     int test = sprintf(text, "%s%d%s%d", dsc_turn, world.turn, dsc_hitpoints,
                                          world.player_lifepoints);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     add_text_with_linebreaks(win, text);
     free(text);
 }
@@ -462,19 +458,18 @@ extern void draw_winconf_keybindings(struct Win * win)
 
 extern void draw_winconf_geometry(struct Win * win)
 {
-    char * f_name = "draw_winconf_geometry()";
     char * title = "Window's geometry:\n\n";
     char * h_title = "Height to save: ";
     char h_value[6 + 1];                       /* 6: int16_t value max strlen */
     int test = sprintf(h_value, "%d", win->target_height);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     char * h_plus = " (width in cells)\n\n";
     char * h_minus = " (negative diff: cells to screen width)\n\n";
     char * h_type = (1 == win->target_height_type) ? h_minus : h_plus;
     char * w_title = "Width to save: ";
     char w_value[6 + 1];
     test = sprintf(w_value, "%d", win->target_width);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     char * w_plus = "(height in cells)\n\n";
     char * w_minus = " (negative diff: cells to screen height)\n\n";
     char * w_type = (1 == win->target_width_type)  ? w_minus : w_plus;
@@ -485,10 +480,10 @@ extern void draw_winconf_geometry(struct Win * win)
                          + strlen(h_title) + strlen(h_value) + strlen(h_type)
                          + strlen(w_title) + strlen(w_value) + strlen(w_type)
                          + strlen(breaks_title) + strlen(breaks_type);
-    char * text = try_malloc(text_size + 1, f_name);
+    char * text = try_malloc(text_size + 1, __func__);
     test = sprintf(text, "%s%s%s%s%s%s%s%s%s", title, h_title, h_value, h_type,
                         w_title, w_value, w_type, breaks_title, breaks_type);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     add_text_with_linebreaks(win, text);
     free(text);
 }

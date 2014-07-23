@@ -25,8 +25,6 @@ struct World world;
 
 int main(int argc, char * argv[])
 {
-    char * f_name = "main()";
-
     /* Declare hard-coded paths and values here. */
     world.path_commands    = "confclient/commands";
     world.path_interface   = "confclient/interface_conf";
@@ -58,13 +56,13 @@ int main(int argc, char * argv[])
     struct sigaction act;
     memset(&act, 0, sizeof(act));
     act.sa_handler = &winch_called;
-    exit_trouble(sigaction(SIGWINCH, &act, NULL), f_name, "sigaction()");
+    exit_trouble(sigaction(SIGWINCH, &act, NULL), __func__, "sigaction");
 
     /* Open file streams for communicating with the server. */
     exit_err(access(path_server_in, F_OK), "No server input file found.");
-    world.file_server_in = try_fopen(path_server_in, "a", f_name);
+    world.file_server_in = try_fopen(path_server_in, "a", __func__);
     set_cleanup_flag(CLEANUP_SERVER_IN);
-    world.file_server_out = try_fopen(path_server_out, "r", f_name);
+    world.file_server_out = try_fopen(path_server_out, "r", __func__);
     set_cleanup_flag(CLEANUP_SERVER_OUT);
 
     /* This is where most everything happens. */
@@ -72,6 +70,6 @@ int main(int argc, char * argv[])
 
     /* Leave properly. */
     cleanup();
-    exit_trouble(printf("%s\n", quit_msg) < 0, f_name, "printf()");
+    exit_trouble(printf("%s\n", quit_msg) < 0, __func__, "printf");
     exit(EXIT_SUCCESS);
 }

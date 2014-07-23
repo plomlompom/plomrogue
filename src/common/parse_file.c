@@ -77,22 +77,21 @@ extern uint8_t err_line(uint8_t test, char * msg)
     {
         return 0;
     }
-    char * f_name = "err_line()";
     char * prefix = " Offending line ";
     char * affix = ": ";
     size_t size =   strlen(err_line_intro) + strlen(msg) + strlen(prefix)
                   + 10                 /* strlen for uint32_t representations */
                   + strlen(affix) + strlen(err_line_line) + 1;
-    char * err = try_malloc(size, f_name);
+    char * err = try_malloc(size, __func__);
     int ret = snprintf(err, size, "%s%s%s%d%s%s", err_line_intro, msg, prefix,
                        err_line_count, affix, err_line_line);
-    exit_trouble(ret < 0, f_name, "snprintf()");
+    exit_trouble(ret < 0, __func__, "snprintf");
     if (err_line_exit)
     {
         exit_err(1, err);
     }
-    exit_trouble(0 > printf("%s\n", err), f_name, "printf()");
-    exit_trouble(EOF == fflush(stdout), f_name, "fflush()");
+    exit_trouble(0 > printf("%s\n", err), __func__, "printf");
+    exit_trouble(EOF == fflush(stdout), __func__, "fflush");
     free(err);
     return 1;
 }

@@ -11,7 +11,7 @@
 
 
 /* Call malloc("size") from function called "f"; exit_trouble() on error. */
-extern void * try_malloc(size_t size, char * f);
+extern void * try_malloc(size_t size, const char * f);
 
 
 

@@ -139,9 +139,8 @@ static void make_trees()
 
 extern void remake_map()
 {
-    char * f_name = "init_map()";
     free(world.map.cells);
-    world.map.cells = try_malloc(world.map.length * world.map.length, f_name);
+    world.map.cells = try_malloc(world.map.length * world.map.length, __func__);
     uint32_t store_seed = world.seed;
     world.seed = world.seed_map;
     make_sea();

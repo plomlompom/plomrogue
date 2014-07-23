@@ -118,7 +118,6 @@ static void set_keybindings(char * token1, uint8_t flags,
 
 static void write_keybindings(FILE * file, struct KeyBindingDB * kbdb)
 {
-    char * f_name = "write_keybindings()";
     char * sep = " ";
     char * tok0 = "KEY";
     uint8_t i_kb;
@@ -126,12 +125,12 @@ static void write_keybindings(FILE * file, struct KeyBindingDB * kbdb)
     {
         size_t size = strlen(tok0) + strlen(sep) + 3 + strlen(sep)
                       + strlen(kbdb->kbs[i_kb].command->dsc_short) + 1 + 1;
-        char * line = try_malloc(size, f_name);
+        char * line = try_malloc(size, __func__);
         int test = snprintf(line, size, "%s%s%d%s%s\n",
                              tok0, sep, kbdb->kbs[i_kb].keycode, sep,
                              kbdb->kbs[i_kb].command->dsc_short);
-        exit_trouble(test < 0, f_name, "snprintf()");
-        try_fwrite(line, sizeof(char), strlen(line), file, f_name);
+        exit_trouble(test < 0, __func__, "snprintf");
+        try_fwrite(line, sizeof(char), strlen(line), file, __func__);
         free(line);
     }
 }
@@ -141,7 +140,6 @@ static void write_keybindings(FILE * file, struct KeyBindingDB * kbdb)
 static void write_def(FILE * file, char * prefix, uint8_t quotes, char * val,
                       char type)
 {
-    char * f_name = "write_def()";
     char * val_str = NULL;
     int test_val_str = 1;
     if      ('s' == type)
@@ -151,26 +149,26 @@ static void write_def(FILE * file, char * prefix, uint8_t quotes, char * val,
     if      ('i' == type)
     {
         size_t size_val_str = 6 + 1;
-        val_str = try_malloc(size_val_str, f_name);
+        val_str = try_malloc(size_val_str, __func__);
         test_val_str = snprintf(val_str, size_val_str, "%d", (int16_t) *val);
     }
     else if ('c' == type)
     {
         size_t size_val_str = 1 + 1;
-        val_str = try_malloc(size_val_str, f_name);
+        val_str = try_malloc(size_val_str, __func__);
         test_val_str = snprintf(val_str, size_val_str, "%c", * val);
     }
-    exit_trouble(test_val_str < 0, f_name, "snprintf()");
+    exit_trouble(test_val_str < 0, __func__, "snprintf");
     char * quote = quotes ? "'": "";
     char * affix = "\n";
     size_t size =   strlen(prefix) + strlen(val_str) + (2 * strlen(quote))
                   + strlen(affix) + 1;
-    char * line = try_malloc(size, f_name);
+    char * line = try_malloc(size, __func__);
     int test = snprintf(line, size, "%s%s%s%s%s",
                         prefix, quote, val_str, quote, affix);
-    exit_trouble(test < 0, f_name, "snprintf()");
+    exit_trouble(test < 0, __func__, "snprintf");
     free(val_str);
-    try_fwrite(line, sizeof(char), strlen(line), file, f_name);
+    try_fwrite(line, sizeof(char), strlen(line), file, __func__);
     free(line);
 }
 
@@ -216,16 +214,15 @@ static void tokens_into_entries(char * token0, char * token1)
 
 static void write_if_win(struct Win ** win)
 {
-    char * f_name = "write_if_win()";
     if (*win)
     {
         (*win)->target_height_type = (0 >= (*win)->target_height);
         (*win)->target_width_type = (0 >= (*win)->target_width);;
         size_t old_ids_size = strlen(world.winDB.ids);
         size_t new_size = old_ids_size + 1 + 1;
-        char * new_ids = try_malloc(new_size, f_name);
+        char * new_ids = try_malloc(new_size, __func__);
         int test = snprintf(new_ids,new_size,"%s%c",world.winDB.ids,(*win)->id);
-        exit_trouble(test < 0, f_name, "snprintf()");
+        exit_trouble(test < 0, __func__, "snprintf");
         free(world.winDB.ids);
         world.winDB.ids = new_ids;
         array_append(old_ids_size, sizeof(struct Win), *win,
@@ -432,11 +429,10 @@ extern void save_interface_conf()
 
 extern void load_interface_conf()
 {
-    char * f_name = "load_interface_conf()";
-    world.winDB.ids    = try_malloc(1, f_name);
+    world.winDB.ids    = try_malloc(1, __func__);
     world.winDB.ids[0] = '\0';
     world.winDB.wins = NULL;
-    tmp_order    = try_malloc(1, f_name);
+    tmp_order    = try_malloc(1, __func__);
     tmp_order[0] = '\0';
     tmp_active   = '\0';
     detect_atomic_leftover(world.path_interface);
@@ -444,7 +440,7 @@ extern void load_interface_conf()
     char * err = "Not all expected windows defined in config file.";
     exit_err(strlen(world.winDB.legal_ids) != strlen(world.winDB.ids), err);
     make_v_screen_and_init_win_sizes();
-    world.winDB.order = try_malloc(1, f_name);
+    world.winDB.order = try_malloc(1, __func__);
     world.winDB.order[0] = '\0';
     uint8_t i;
     for (i = 0; i < strlen(tmp_order); toggle_window(tmp_order[i]), i++);

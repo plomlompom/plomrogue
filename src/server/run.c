@@ -159,11 +159,10 @@ static uint8_t parse_command_1arg(char * tok0, char * tok1)
 
 static void server_test()
 {
-    char * f_name = "server_test()";
     char test[10 + 1 + 10 + 1 + 1];
-    FILE * file = try_fopen(s[S_PATH_OUT], "r", f_name);
-    try_fgets(test, 10 + 10 + 1 + 1, file, f_name);
-    try_fclose(file, f_name);
+    FILE * file = try_fopen(s[S_PATH_OUT], "r", __func__);
+    try_fgets(test, 10 + 10 + 1 + 1, file, __func__);
+    try_fclose(file, __func__);
     if (strcmp(test, world.server_test))
     {
         unset_cleanup_flag(CLEANUP_WORLDSTATE);
@@ -219,23 +218,22 @@ static void turn_over()
 
 static void record_msg(char * msg)
 {
-    char * f_name = "record_msg()";
     char * path_tmp;
     FILE * file_tmp = atomic_write_start(s[S_PATH_RECORD], &path_tmp);
     if (!access(s[S_PATH_RECORD], F_OK))
     {
-        FILE * file_read = try_fopen(s[S_PATH_RECORD], "r", f_name);
+        FILE * file_read = try_fopen(s[S_PATH_RECORD], "r", __func__);
         uint32_t linemax = textfile_width(file_read);
-        char * line = try_malloc(linemax + 1, f_name);
-        while (try_fgets(line, linemax + 1, file_read, f_name))
+        char * line = try_malloc(linemax + 1, __func__);
+        while (try_fgets(line, linemax + 1, file_read, __func__))
         {
-            try_fwrite(line, strlen(line), 1, file_tmp, f_name);
+            try_fwrite(line, strlen(line), 1, file_tmp, __func__);
         }
         free(line);
-        try_fclose(file_read, f_name);
+        try_fclose(file_read, __func__);
     }
-    try_fwrite(msg, strlen(msg), 1, file_tmp, f_name);
-    try_fputc('\n', file_tmp, f_name);
+    try_fwrite(msg, strlen(msg), 1, file_tmp, __func__);
+    try_fputc('\n', file_tmp, __func__);
     atomic_write_finish(file_tmp, s[S_PATH_RECORD], path_tmp);
 }
 
@@ -243,10 +241,9 @@ static void record_msg(char * msg)
 
 extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
 {
-    char * f_name = "obey_msg()";
     if (world.is_verbose && do_verbose)
     {
-        exit_trouble(-1 == printf("Input: %s\n", msg), f_name, "printf()");
+        exit_trouble(-1 == printf("Input: %s\n", msg), __func__, "printf");
     }
     set_err_line_options("Trouble with message: ", msg, 0);
     char * msg_copy = strdup(msg);
@@ -283,7 +280,6 @@ extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
 
 extern uint8_t io_loop()
 {
-    char * f_name = "io_loop()";
     while (1)
     {
         server_test();
@@ -294,7 +290,7 @@ extern uint8_t io_loop()
         }
         if (world.is_verbose)
         {
-            exit_trouble(-1 == printf("Input: %s\n", msg), f_name, "printf()");
+            exit_trouble(-1 == printf("Input: %s\n", msg), __func__, "printf");
         }
         if (!strcmp("QUIT", msg))
         {
@@ -305,7 +301,7 @@ extern uint8_t io_loop()
         {
             free(msg);
             char * pong = "PONG\n";
-            try_fwrite(pong, strlen(pong), 1, world.file_out, f_name);
+            try_fwrite(pong, strlen(pong), 1, world.file_out, __func__);
             fflush(world.file_out);
             continue;
         }

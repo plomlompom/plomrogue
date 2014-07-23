@@ -35,7 +35,7 @@ extern void init_strings()
     s[S_CMD_PICKUP] = "pick_up";
     s[S_CMD_DROP] = "drop";
     s[S_CMD_USE] = "use";
-    s[S_FCN_SPRINTF] = "sprintf()";
+    s[S_FCN_SPRINTF] = "sprintf";
     s[S_CMD_THINGTYPE] = "THING_TYPE";
     s[S_CMD_TT_CONSUM] = "TT_CONSUMABLE";
     s[S_CMD_TT_STARTN] = "TT_START_NUMBER";

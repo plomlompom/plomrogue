@@ -19,24 +19,23 @@
 
 extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
 {
-    char * f_name = "read_new_config_file()";
     char * prefix = "Failed reading config file: \"";
     char * affix = "\". ";
     size_t size = strlen(prefix) + strlen(path) + strlen(affix) + 1;
-    char * errline_intro = try_malloc(size, f_name);
+    char * errline_intro = try_malloc(size, __func__);
     int test = snprintf(errline_intro, size, "%s%s%s", prefix, path, affix);
-    exit_trouble(test < 0, f_name, "snprintf()");
+    exit_trouble(test < 0, __func__, "snprintf");
     exit_err(access(path, F_OK), errline_intro);
-    FILE * file = try_fopen(path, "r", f_name);
+    FILE * file = try_fopen(path, "r", __func__);
     uint32_t linemax = textfile_width(file);
-    char * errline_line = try_malloc(linemax + 1, f_name);
+    char * errline_line = try_malloc(linemax + 1, __func__);
     set_err_line_options(errline_intro, errline_line, 1);
     err_line_zero();
     err_line(0 == linemax, "File is empty.");
     char * token0 = NULL; /* For final token_to_entry() if while() stagnates. */
     char * token1 = NULL;
     char * err_val = "No value given.";
-    while (try_fgets(errline_line, linemax + 1, file, f_name))
+    while (try_fgets(errline_line, linemax + 1, file, __func__))
     {
         err_line_inc();
         char * line_copy = strdup(errline_line);
@@ -50,7 +49,7 @@ extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
         free(line_copy);
     }
     token_to_entry(token0, token1);
-    try_fclose(file, f_name);
+    try_fclose(file, __func__);
     free(errline_line);
     free(errline_intro);
 }
@@ -87,9 +86,8 @@ extern void parse_unknown_arg()
 
 extern char * parse_init_entry(uint8_t * flags, size_t size)
 {
-    char * f_name = "parse_init_entry()";
     *flags = EDIT_STARTED;
-    char * p = try_malloc(size, f_name);
+    char * p = try_malloc(size, __func__);
     memset(p, 0, size);
     return p;
 }

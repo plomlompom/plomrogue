@@ -87,13 +87,12 @@ static void test_server_activity(time_t * last_server_answer_time);
 
 static void read_inventory(char * read_buf, uint32_t linemax, FILE * file)
 {
-    char * f_name = "read_inventory()";
     char * delimiter = "%\n";
     free(world.player_inventory);
     world.player_inventory = NULL;          /* Avoids illegal strlen() below. */
     while (1)
     {
-        try_fgets(read_buf, linemax + 1, file, f_name);
+        try_fgets(read_buf, linemax + 1, file, __func__);
         if (!(strcmp(read_buf, delimiter)))
         {
             break;
@@ -104,10 +103,10 @@ static void read_inventory(char * read_buf, uint32_t linemax, FILE * file)
             old_size = strlen(world.player_inventory);
         }
         int new_size = strlen(read_buf);
-        char * new_inventory = try_malloc(old_size + new_size + 1, f_name);
+        char * new_inventory = try_malloc(old_size + new_size + 1, __func__);
         memcpy(new_inventory, world.player_inventory, old_size);
         int test = sprintf(new_inventory + old_size, "%s", read_buf);
-        exit_trouble(test < 0, f_name, "sprintf()");
+        exit_trouble(test < 0, __func__, "sprintf");
         free(world.player_inventory);
         world.player_inventory = new_inventory;
     }
@@ -119,18 +118,17 @@ static void read_inventory(char * read_buf, uint32_t linemax, FILE * file)
 
 static void read_map_cells(FILE * file)
 {
-    char * f_name = "read_map_cells()";
     free(world.map.cells);
-    world.map.cells = try_malloc(world.map.length * world.map.length, f_name);
+    world.map.cells = try_malloc(world.map.length * world.map.length, __func__);
     uint16_t y, x;
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            char c = try_fgetc(file, f_name);
+            char c = try_fgetc(file, __func__);
             world.map.cells[(y * world.map.length) + x] = c;
         }
-        try_fgetc(file, f_name);
+        try_fgetc(file, __func__);
     }
 }
 
@@ -138,10 +136,9 @@ static void read_map_cells(FILE * file)
 
 static void read_log(char * read_buf, uint32_t linemax, FILE * file)
 {
-    char * f_name = "read_log()";
     free(world.log);
     world.log = NULL;
-    while (try_fgets(read_buf, linemax + 1, file, f_name))
+    while (try_fgets(read_buf, linemax + 1, file, __func__))
     {
         int old_size = 0;
         if (NULL != world.log)
@@ -149,10 +146,10 @@ static void read_log(char * read_buf, uint32_t linemax, FILE * file)
             old_size = strlen(world.log);
         }
         int new_size = strlen(read_buf);
-        char * new_log = try_malloc(old_size + new_size + 1, f_name);
+        char * new_log = try_malloc(old_size + new_size + 1, __func__);
         memcpy(new_log, world.log, old_size);
         int test = sprintf(new_log + old_size, "%s", read_buf);
-        exit_trouble(test < 0, f_name, "sprintf()");
+        exit_trouble(test < 0, __func__, "sprintf");
         free(world.log);
         world.log = new_log;
     }
@@ -163,8 +160,7 @@ static void read_log(char * read_buf, uint32_t linemax, FILE * file)
 static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
                                      FILE * file)
 {
-    char * f_name = "read_value_from_line()";
-    try_fgets(read_buf, linemax + 1, file, f_name);
+    try_fgets(read_buf, linemax + 1, file, __func__);
     return atoi(read_buf);
 }
 
@@ -172,23 +168,22 @@ static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
 
 static FILE * changed_worldstate_file(char * path)
 {
-    char * f_name = "changed_worldstate_file()";
     struct stat stat_buf;
-    exit_trouble(stat(path, &stat_buf), f_name, "stat()");
+    exit_trouble(stat(path, &stat_buf), __func__, "stat");
     if (stat_buf.st_mtime != world.last_update)
     {
         world.last_update = stat_buf.st_mtime;
-        return try_fopen(path, "r", f_name);
+        return try_fopen(path, "r", __func__);
     }
-    FILE * file = try_fopen(path, "r", f_name);
+    FILE * file = try_fopen(path, "r", __func__);
     char turn_string[6];
-    try_fgets(turn_string, 6, file, f_name);
+    try_fgets(turn_string, 6, file, __func__);
     if (world.turn == atoi(turn_string))
     {
-        try_fclose(file, f_name);
+        try_fclose(file, __func__);
         return NULL;
     }
-    exit_trouble(fseek(file, 0, SEEK_SET), f_name, "fseek()");
+    exit_trouble(fseek(file, 0, SEEK_SET), __func__, "fseek");
     return file;
 }
 
@@ -196,7 +191,6 @@ static FILE * changed_worldstate_file(char * path)
 
 static uint8_t read_world()
 {
-    char * f_name = "read_world()";
     char * path = "server/worldstate";
     char * quit_msg = "No worldstate file found to read. Server may be down.";
     static uint8_t first_read = 1;
@@ -207,7 +201,7 @@ static uint8_t read_world()
         return 0;
     }
     uint32_t linemax = textfile_width(file);
-    char * read_buf = try_malloc(linemax + 1, f_name);
+    char * read_buf = try_malloc(linemax + 1, __func__);
     world.turn = read_value_from_line(read_buf, linemax, file);
     world.player_lifepoints = read_value_from_line(read_buf, linemax, file);
     read_inventory(read_buf, linemax, file);
@@ -222,7 +216,7 @@ static uint8_t read_world()
     read_map_cells(file);
     read_log(read_buf, linemax, file);
     free(read_buf);
-    try_fclose(file, f_name);
+    try_fclose(file, __func__);
     return 1;
 }
 
@@ -249,8 +243,7 @@ static void test_ping_pong(time_t last_server_answer_time)
 
 static void test_server_activity(time_t * last_server_answer_time)
 {
-    char * f_name = "test_server_activity()";
-    int test = try_fgetc(world.file_server_out, f_name);
+    int test = try_fgetc(world.file_server_out, __func__);
     if (EOF == test)
     {
         return;
@@ -259,7 +252,7 @@ static void test_server_activity(time_t * last_server_answer_time)
     {
         ;
     }
-    while (EOF != (test = try_fgetc(world.file_server_out, f_name)));
+    while (EOF != (test = try_fgetc(world.file_server_out, __func__)));
     * last_server_answer_time = time(0);
 }
 
@@ -267,12 +260,11 @@ static void test_server_activity(time_t * last_server_answer_time)
 
 extern void send(char * msg)
 {
-    char * f_name = "send()";
     uint32_t msg_size = strlen(msg) + 1;
     char * err = "send() tries to send message larger than PIPE_BUF bytes.";
     exit_err(msg_size > PIPE_BUF, err);
-    try_fwrite(msg, strlen(msg), 1, world.file_server_in, f_name);
-    try_fputc('\n', world.file_server_in, f_name);
+    try_fwrite(msg, strlen(msg), 1, world.file_server_in, __func__);
+    try_fputc('\n', world.file_server_in, __func__);
     fflush(world.file_server_in);
 }
 

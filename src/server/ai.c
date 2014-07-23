@@ -122,15 +122,13 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
 
 static char get_dir_to_nearest_enemy(struct Thing * t_origin)
 {
-    char * f_name = "get_dir_to_nearest_enemy()";
-
     /* Calculate for each cell the distance to the visibly nearest map actor not
      * "t_origin", with movement only possible in the directions of "dir".
      * (Actors' own cells start with a distance of 0 towards themselves.)
      */
     uint32_t map_size = world.map.length * world.map.length;
     uint16_t max_score = UINT16_MAX - 1;
-    uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t), f_name);
+    uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t), __func__);
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {

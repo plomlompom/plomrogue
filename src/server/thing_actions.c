@@ -85,7 +85,6 @@ static uint8_t text_equals_log_end(char * log, char * text)
 
 static void update_log(char * text)
 {
-    char * f_name = "update_log()";
     uint16_t len_new = strlen(text);
     uint16_t len_old = 0;
     uint16_t offset = 0;
@@ -103,10 +102,10 @@ static void update_log(char * text)
         }
     }
     uint16_t len_whole = len_old + len_new + 1;
-    char * new_text = try_malloc(len_whole, f_name);
+    char * new_text = try_malloc(len_whole, __func__);
     memcpy(new_text, world.log + offset, len_old);
     int test = sprintf(new_text + len_old, "%s", text);
-    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
+    exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
     free(world.log);
     world.log = new_text;
 }
@@ -115,7 +114,6 @@ static void update_log(char * text)
 
 static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
 {
-    char * f_name = "actor_hits_actor()";
     struct ThingType * tt_hitter = get_thing_type(hitter->type);
     struct ThingType * tt_hitted = get_thing_type(hitted->type);
     struct Thing * player = get_player();
@@ -132,9 +130,9 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
         msg3 = tt_hitted->name;
     }
     uint8_t len = 1 + strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
-    char * msg = try_malloc(len, f_name);
+    char * msg = try_malloc(len, __func__);
     int test = sprintf(msg, "\n%s %s %s.", msg1, msg2, msg3);
-    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
+    exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
     update_log(msg);
     free(msg);
     hitted->lifepoints--;
@@ -173,7 +171,6 @@ static uint8_t match_dir(char d, char ** dsc_d, char match, char * dsc_match)
 
 static void playerbonus_move(char d, uint8_t passable)
 {
-    char * f_name = "playerbonus_move()";
     char * dsc_dir = "north-east";
     if (   match_dir(d, &dsc_dir, 'd', "east")
         || match_dir(d, &dsc_dir, 'c', "south-east")
@@ -188,9 +185,9 @@ static void playerbonus_move(char d, uint8_t passable)
     {
         dsc_move = "You fail to move ";
     }
-    char * msg = try_malloc(strlen(dsc_move) + strlen (dsc_dir) + 3, f_name);
+    char * msg = try_malloc(strlen(dsc_move) + strlen (dsc_dir) + 3, __func__);
     int test = sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
-    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
+    exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
     update_log(msg);
     free(msg);
 }

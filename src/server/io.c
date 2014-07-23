@@ -71,41 +71,38 @@ static void write_map(struct Thing * player, FILE * file);
 
 static void write_key_value(FILE * file, char * key, uint32_t value)
 {
-    char * f_name = "write_key_value()";
-    try_fwrite(key, strlen(key), 1, file, f_name);
-    try_fputc(' ', file, f_name);
-    char * line = try_malloc(11, f_name);
-    exit_trouble(-1 == sprintf(line, "%u", value), f_name, s[S_FCN_SPRINTF]);
-    try_fwrite(line, strlen(line), 1, file, f_name);
+    try_fwrite(key, strlen(key), 1, file, __func__);
+    try_fputc(' ', file, __func__);
+    char * line = try_malloc(11, __func__);
+    exit_trouble(-1 == sprintf(line, "%u", value), __func__, s[S_FCN_SPRINTF]);
+    try_fwrite(line, strlen(line), 1, file, __func__);
     free(line);
-    try_fputc('\n', file, f_name);
+    try_fputc('\n', file, __func__);
 }
 
 
 
 static void write_key_string(FILE * file, char * key, char * string)
 {
-    char * f_name = "write_key_string()";
-    try_fwrite(key, strlen(key), 1, file, f_name);
-    try_fputc(' ', file, f_name);
+    try_fwrite(key, strlen(key), 1, file, __func__);
+    try_fputc(' ', file, __func__);
     uint8_t contains_space = NULL != strchr(string, ' ');
     if (contains_space)
     {
-        try_fputc('\'', file, f_name);
+        try_fputc('\'', file, __func__);
     }
-    try_fwrite(string, strlen(string), 1, file, f_name);
+    try_fwrite(string, strlen(string), 1, file, __func__);
     if (contains_space)
     {
-        try_fputc('\'', file, f_name);
+        try_fputc('\'', file, __func__);
     }
-    try_fputc('\n', file, f_name);
+    try_fputc('\n', file, __func__);
 }
 
 
 
 static void write_thing(FILE * file, struct Thing * t)
 {
-    char * f_name = "write_thing()";
     struct Thing * o;
     for (o = t->owns; o; o = o->next)
     {
@@ -123,14 +120,13 @@ static void write_thing(FILE * file, struct Thing * t)
     {
         write_key_value(file, s[S_CMD_T_CARRIES], o->id);
     }
-    try_fputc('\n', file, f_name);
+    try_fputc('\n', file, __func__);
 }
 
 
 
 static char * get_message_from_queue()
 {
-    char * f_name = "get_message_from_queue()";
     char * message = NULL;
     if (world.queue_size)
     {
@@ -138,7 +134,7 @@ static char * get_message_from_queue()
         if (0 < cutout_len)
         {
             cutout_len++;
-            message = try_malloc(cutout_len, f_name);
+            message = try_malloc(cutout_len, __func__);
             memcpy(message, world.queue, cutout_len);
         }
         for (;
@@ -152,7 +148,7 @@ static char * get_message_from_queue()
         }                        /* un-allocated first. */
         else
         {
-            char * new_queue = try_malloc(world.queue_size, f_name);
+            char * new_queue = try_malloc(world.queue_size, __func__);
             memcpy(new_queue, &(world.queue[cutout_len]), world.queue_size);
             free(world.queue);
             world.queue = new_queue;
@@ -165,14 +161,13 @@ static char * get_message_from_queue()
 
 static void read_file_into_queue()
 {
-    char * f_name = "read_file_into_queue()";
     uint8_t wait_seconds = 5;
     time_t now = time(0);
     struct timespec dur;
     dur.tv_sec = 0;
     dur.tv_nsec = 33333333;
     int test;
-    while (EOF == (test = try_fgetc(world.file_in, f_name)))
+    while (EOF == (test = try_fgetc(world.file_in, __func__)))
     {
         nanosleep(&dur, NULL);
         if (time(0) > now + wait_seconds)
@@ -187,7 +182,7 @@ static void read_file_into_queue()
         {
             c = '\0';
         }
-        char * new_queue = try_malloc(world.queue_size + 1, f_name);
+        char * new_queue = try_malloc(world.queue_size + 1, __func__);
         memcpy(new_queue, world.queue, world.queue_size);
         char * new_pos = new_queue + world.queue_size;
         * new_pos = c;
@@ -195,14 +190,13 @@ static void read_file_into_queue()
         free(world.queue);
         world.queue = new_queue;
     }
-    while (EOF != (test = try_fgetc(world.file_in, f_name)));
+    while (EOF != (test = try_fgetc(world.file_in, __func__)));
 }
 
 
 
 static void update_worldstate_file()
 {
-    char * f_name = "update_worldstate_file()";
     char * path_tmp;
     FILE * file = atomic_write_start(s[S_PATH_WORLDSTATE], &path_tmp);
     struct Thing * player = get_player();
@@ -215,12 +209,12 @@ static void update_worldstate_file()
     write_map(player, file);
     if (world.log)
     {
-        try_fwrite(world.log, strlen(world.log), 1, file, f_name);
+        try_fwrite(world.log, strlen(world.log), 1, file, __func__);
     }
     atomic_write_finish(file, s[S_PATH_WORLDSTATE], path_tmp);
     set_cleanup_flag(CLEANUP_WORLDSTATE);
     char * dot = ".\n";
-    try_fwrite(dot, strlen(dot), 1, world.file_out, f_name);
+    try_fwrite(dot, strlen(dot), 1, world.file_out, __func__);
     fflush(world.file_out);
 }
 
@@ -228,22 +222,20 @@ static void update_worldstate_file()
 
 static void write_value_as_line(uint32_t value, FILE * file)
 {
-    char * f_name = "write_value_as_line()";
     char write_buf[12];     /* Holds 10 digits of uint32_t maximum + \n + \0. */
-    exit_trouble(sprintf(write_buf, "%u\n",value) < 0, f_name,s[S_FCN_SPRINTF]);
-    try_fwrite(write_buf, strlen(write_buf), 1, file, f_name);
+    exit_trouble(sprintf(write_buf,"%u\n",value) < 0,__func__,s[S_FCN_SPRINTF]);
+    try_fwrite(write_buf, strlen(write_buf), 1, file, __func__);
 }
 
 
 
 static void write_inventory(struct Thing * player, FILE * file)
 {
-    char * f_name = "write_inventory()";
     struct Thing * owned = player->owns;
     if (NULL == owned)
     {
         char * empty = "(none)\n";
-        try_fwrite(empty, strlen(empty), 1, file, f_name);
+        try_fwrite(empty, strlen(empty), 1, file, __func__);
     }
     else
     {
@@ -251,22 +243,21 @@ static void write_inventory(struct Thing * player, FILE * file)
         for (q = 0; NULL != owned; q++)
         {
             struct ThingType * tt = get_thing_type(owned->type);
-            try_fwrite(tt->name, strlen(tt->name), 1, file, f_name);
-            try_fputc('\n', file, f_name);
+            try_fwrite(tt->name, strlen(tt->name), 1, file, __func__);
+            try_fputc('\n', file, __func__);
             owned = owned->next;
         }
     }
-    try_fputc('%', file, f_name);
-    try_fputc('\n', file, f_name);
+    try_fputc('%', file, __func__);
+    try_fputc('\n', file, __func__);
 }
 
 
 
 static char * build_visible_map(struct Thing * player)
 {
-    char * f_name = "build_visible_map()";
     uint32_t map_size = world.map.length * world.map.length;
-    char * visible_map = try_malloc(map_size, f_name);
+    char * visible_map = try_malloc(map_size, __func__);
     memset(visible_map, ' ', map_size);
     if (player->fov_map) /* May fail if player thing was created / positioned */
     {                    /* by god command after turning off FOV building.    */
@@ -304,16 +295,15 @@ static char * build_visible_map(struct Thing * player)
 
 static void write_map(struct Thing * player, FILE * file)
 {
-    char * f_name = "write_map()";
     char * visible_map = build_visible_map(player);
     uint16_t x, y;
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            try_fputc(visible_map[(y * world.map.length) + x], file, f_name);
+            try_fputc(visible_map[(y * world.map.length) + x], file, __func__);
         }
-        try_fputc('\n', file, f_name);
+        try_fputc('\n', file, __func__);
     }
     free(visible_map);
 }
@@ -322,7 +312,6 @@ static void write_map(struct Thing * player, FILE * file)
 
 extern char * io_round()
 {
-    char * f_name = "io_round()";
     if (0 < world.queue_size)
     {
         return get_message_from_queue();
@@ -335,7 +324,7 @@ extern char * io_round()
     read_file_into_queue();
     if (world.queue_size && '\0' != world.queue[world.queue_size - 1])
     {
-        char * new_queue = try_malloc(world.queue_size + 1, f_name);
+        char * new_queue = try_malloc(world.queue_size + 1, __func__);
         memcpy(new_queue, world.queue, world.queue_size);
         new_queue[world.queue_size] = '\0';
         world.queue_size++;
@@ -349,19 +338,18 @@ extern char * io_round()
 
 extern void save_world()
 {
-    char * f_name = "save_world()";
     char * path_tmp;
     FILE * file = atomic_write_start(s[S_PATH_SAVE], &path_tmp);
     write_key_value(file, s[S_CMD_MAPLENGTH], world.map.length);
     write_key_value(file, s[S_CMD_PLAYTYPE], world.player_type);
-    try_fputc('\n', file, f_name);
+    try_fputc('\n', file, __func__);
     struct ThingAction * ta;
     for (ta = world.thing_actions; ta; ta = ta->next)
     {
         write_key_value(file, s[S_CMD_THINGACTION], ta->id);
         write_key_value(file, s[S_CMD_TA_EFFORT], ta->effort);
         write_key_string(file, s[S_CMD_TA_NAME], ta->name);
-        try_fputc('\n', file, f_name);
+        try_fputc('\n', file, __func__);
     }
     struct ThingType * tt;
     for (tt = world.thing_types; tt; tt = tt->next)
@@ -370,21 +358,21 @@ extern void save_world()
         write_key_value(file, s[S_CMD_TT_STARTN], tt->start_n);
         write_key_value(file, s[S_CMD_TT_HP], tt->lifepoints);
         int test = fprintf(file, "%s %c\n", s[S_CMD_TT_SYMB], tt->char_on_map);
-        exit_trouble(test < 0, f_name, "fprintf()");
+        exit_trouble(test < 0, __func__, "fprintf");
         write_key_string(file, s[S_CMD_TT_NAME], tt->name);
         write_key_value(file, s[S_CMD_TT_CONSUM], tt->consumable);
-        try_fputc('\n', file, f_name);
+        try_fputc('\n', file, __func__);
     }
     for (tt = world.thing_types; tt; tt = tt->next)
     {
         write_key_value(file, s[S_CMD_THINGTYPE], tt->id);
         write_key_value(file, s[S_CMD_TT_CORPS], tt->corpse_id);
     }
-    try_fputc('\n', file, f_name);
+    try_fputc('\n', file, __func__);
     write_key_value(file, s[S_CMD_SEED_MAP], world.seed_map);
     write_key_value(file, s[S_CMD_SEED_RAND], world.seed);
     write_key_value(file, s[S_CMD_TURN], world.turn);
-    try_fputc('\n', file, f_name);
+    try_fputc('\n', file, __func__);
     struct Thing * t;
     for (t = world.things; t; t = t->next)
     {

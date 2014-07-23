@@ -177,9 +177,8 @@ static void set_win_target_size(struct Win * w)
 
 static void append_win(struct Win * w)
 {
-    char * f_name = "append_win()";
     uint8_t old_size = strlen(world.winDB.order) + 1;
-    char * new_order = try_malloc(old_size + 1, f_name);
+    char * new_order = try_malloc(old_size + 1, __func__);
     memcpy(new_order, world.winDB.order, old_size - 1);
     new_order[old_size - 1] = w->id;
     new_order[old_size] = '\0';
@@ -193,15 +192,14 @@ static void append_win(struct Win * w)
 
 static void suspend_win(struct Win * w)
 {
-    char * f_name = "suspend_win()";
     uint8_t new_size = strlen(world.winDB.order);
-    char * new_order = try_malloc(new_size, f_name);
+    char * new_order = try_malloc(new_size, __func__);
     uint8_t i = get_win_pos_in_order(w->id);
     char next_char = world.winDB.order[i + 1];
     world.winDB.order[i] = '\0';
     char * second_part = &world.winDB.order[i + 1];
     int test = sprintf(new_order, "%s%s", world.winDB.order, second_part);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     free(world.winDB.order);
     world.winDB.order = new_order;
     world.winDB.active = world.winDB.order[i];
@@ -329,11 +327,10 @@ extern void resize_active_win(char change)
 
 extern void shift_active_win(char dir)
 {
-    char * f_name = "shift_active_win()";
     uint8_t len_order = strlen(world.winDB.order);
     if (1 < len_order)
     {
-        char * tmp = try_malloc(len_order + 1, f_name);
+        char * tmp = try_malloc(len_order + 1, __func__);
         tmp[len_order] = '\0';
         uint8_t pos = get_win_pos_in_order(world.winDB.active);
         if ('f' == dir)

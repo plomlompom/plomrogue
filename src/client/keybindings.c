@@ -50,11 +50,10 @@ static struct KeyBindingDB * char_selected_kb_db(char c)
 static uint8_t try_keycode(uint16_t keycode_given, char * keyname,
                            uint16_t keycode_match, char * keyname_match)
 {
-    char * f_name = "try_keycode()";
     if (keycode_given == keycode_match)
     {
         int test = sprintf(keyname, "%s", keyname_match);
-        exit_trouble(test < 0, f_name, "sprintf()");
+        exit_trouble(test < 0, __func__, "sprintf");
         return 1;
     }
     return 0;
@@ -80,16 +79,15 @@ extern struct Command * get_command_to_keycode(struct KeyBindingDB * kbdb,
 
 extern char * get_keyname_to_keycode(uint16_t keycode)
 {
-    char * f_name = "get_name_to_keycode()";
-    char * keyname = try_malloc(10, f_name);        /* max keyname length + 1 */
+    char * keyname = try_malloc(10, __func__);      /* max keyname length + 1 */
     if (32 < keycode && keycode < 127)
     {
-        exit_trouble(sprintf(keyname, "%c", keycode) < 0, f_name, "sprintf()");
+        exit_trouble(sprintf(keyname, "%c", keycode) < 0, __func__, "sprintf");
     }
     else if (keycode >= KEY_F0 && keycode <= KEY_F(63))
     {
         uint16_t f = keycode - KEY_F0;
-        exit_trouble(sprintf(keyname, "F%d", f) < 0, f_name, "sprintf()");;
+        exit_trouble(sprintf(keyname, "F%d", f) < 0, __func__, "sprintf");;
     }
     else if (   try_keycode(keycode, keyname, 9, "TAB")
              || try_keycode(keycode, keyname, 10, "RETURN")
@@ -111,7 +109,7 @@ extern char * get_keyname_to_keycode(uint16_t keycode)
     }
     else
     {
-        exit_trouble(sprintf(keyname, "(unknown)") < 0, f_name, "sprintf()");
+        exit_trouble(sprintf(keyname, "(unknown)") < 0, __func__, "sprintf");
     }
     return keyname;
 }

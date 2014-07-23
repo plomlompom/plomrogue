@@ -14,11 +14,11 @@
 /* Wrappers to fopen(), fclose(), fgets() and fwrite() from function called "f",
  * calling exit_err() upon error with appropriate error messages.
  */
-extern FILE * try_fopen(char * path, char * mode, char * f);
-extern void try_fclose(FILE * file, char * f);
+extern FILE * try_fopen(char * path, char * mode, const char * f);
+extern void try_fclose(FILE * file, const char * f);
 extern void try_fwrite(void * ptr, size_t size, size_t nmemb, FILE * stream,
-                       char * f);
-extern void try_fputc(uint8_t c, FILE * file, char * f);
+                       const char * f);
+extern void try_fputc(uint8_t c, FILE * file, const char * f);
 
 /* Wrapper to calling fgetc() and fgets() from function "f". The return code is
  * returned unless ferror() indicates an error (i.e. to signify an end of file,
@@ -26,8 +26,8 @@ extern void try_fputc(uint8_t c, FILE * file, char * f);
  * on "file" before fgetc(), because some Unixes fgetc() remember old EOFs and
  * only return those until explicitely cleared.
  */
-extern int try_fgetc(FILE * file, char * f);
-extern char * try_fgets(char * line, int size, FILE * file, char * f);
+extern int try_fgetc(FILE * file, const char * f);
+extern char * try_fgets(char * line, int size, FILE * file, const char * f);
 
 /* Write to "path_tmp" "path" + "_tmp" and return a new file at that "path_tmp"
  * open for writing. "path_tmp" is malloc()'d, must be freed externally.

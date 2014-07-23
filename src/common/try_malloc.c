@@ -9,14 +9,14 @@
 
 
 
-extern void * try_malloc(size_t size, char * f)
+extern void * try_malloc(size_t size, const char * f)
 {
-    char * prefix = "Trouble with malloc() in ";
+    char * prefix = "Trouble with malloc in ";
     char * msg = malloc(strlen(prefix) + strlen(f) + 1 + 1);
     exit_err(NULL == msg,
-             "Trouble in try_malloc() with malloc() for error message string.");
+             "Trouble in try_malloc with malloc for error message string.");
     int test = sprintf(msg, "%s%s.", prefix, f);
-    exit_err(test < 0, "Trouble in try_malloc() with sprintf().");
+    exit_err(test < 0, "Trouble in try_malloc with sprintf.");
     void * p = malloc(size);
     exit_err(NULL == p, msg); /* Bypass exit_trouble() calling try_malloc(). */
     free(msg);

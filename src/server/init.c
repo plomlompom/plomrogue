@@ -52,11 +52,10 @@ static uint8_t world_cannot_be_made();
 
 static void obey_lines_from_file(char * path, uint8_t record)
 {
-    char * f_name = "obey_lines_from_file()";
-    FILE * file = try_fopen(path, "r", f_name);
+    FILE * file = try_fopen(path, "r", __func__);
     uint32_t linemax = textfile_width(file);
-    char * line = try_malloc(linemax + 1, f_name);
-    while (NULL != try_fgets(line, linemax + 1, file, f_name))
+    char * line = try_malloc(linemax + 1, __func__);
+    while (NULL != try_fgets(line, linemax + 1, file, __func__))
     {
         if (strlen(line))
         {
@@ -73,20 +72,19 @@ static void obey_lines_from_file(char * path, uint8_t record)
         }
     }
     free(line);
-    try_fclose(file, f_name);
+    try_fclose(file, __func__);
 }
 
 
 
 static void replay_game()
 {
-    char * f_name = "replay_game()";
     exit_err(access(s[S_PATH_RECORD], F_OK), "No record found to replay.");
-    FILE * file = try_fopen(s[S_PATH_RECORD], "r", f_name);
+    FILE * file = try_fopen(s[S_PATH_RECORD], "r", __func__);
     uint32_t linemax = textfile_width(file);
-    char * line = try_malloc(linemax + 1, f_name);
+    char * line = try_malloc(linemax + 1, __func__);
     while (   world.turn < world.replay
-           && NULL != try_fgets(line, linemax + 1, file, f_name))
+           && NULL != try_fgets(line, linemax + 1, file, __func__))
     {
         obey_msg(line, 0, 1);
         err_line_inc();
@@ -96,7 +94,7 @@ static void replay_game()
     {
         if (!end)
         {
-            end = (NULL == try_fgets(line, linemax + 1, file, f_name));
+            end = (NULL == try_fgets(line, linemax + 1, file, __func__));
             if (!end)
             {
                 obey_msg(line, 0, 1);
@@ -105,7 +103,7 @@ static void replay_game()
         }
     }
     free(line);
-    try_fclose(file, f_name);
+    try_fclose(file, __func__);
 }
 
 
@@ -163,15 +161,14 @@ extern void obey_argv(int argc, char * argv[])
 
 extern void setup_server_io()
 {
-    char * f_name = "setup_server_io()";
     int test = mkdir("server", 0700);
-    exit_trouble(test && EEXIST != errno, f_name, "mkdir()");
-    world.file_out = try_fopen(s[S_PATH_OUT], "w", f_name);
-    world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, f_name);
+    exit_trouble(test && EEXIST != errno, __func__, "mkdir");
+    world.file_out = try_fopen(s[S_PATH_OUT], "w", __func__);
+    world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, __func__);
     test = sprintf(world.server_test, "%d %d\n", getpid(), (int) time(0));
-    exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
+    exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
     try_fwrite(world.server_test, strlen(world.server_test), 1,
-               world.file_out, f_name);
+               world.file_out, __func__);
     fflush(world.file_out);
     set_cleanup_flag(CLEANUP_OUT);
     char * path_in = s[S_PATH_IN];
@@ -179,9 +176,9 @@ extern void setup_server_io()
     {                                  /* file streams of clients             */
         unlink(path_in)   ;            /* communicating with server processes */
     }                                  /* superseded by this current one.     */
-    world.file_in = try_fopen(path_in, "w", f_name);
-    try_fclose(world.file_in, f_name);
-    world.file_in = try_fopen(path_in, "r", f_name);
+    world.file_in = try_fopen(path_in, "w", __func__);
+    try_fclose(world.file_in, __func__);
+    world.file_in = try_fopen(path_in, "r", __func__);
     set_cleanup_flag(CLEANUP_IN);
 }
 
@@ -230,7 +227,6 @@ extern uint8_t remake_world()
 
 extern void run_game()
 {
-    char * f_name = "run_game()";
     detect_atomic_leftover(s[S_PATH_SAVE]);
     detect_atomic_leftover(s[S_PATH_RECORD]);
     err_line_zero();
@@ -250,9 +246,9 @@ extern void run_game()
         obey_lines_from_file(s[S_PATH_CONFIG], 1);
         err_line_zero();
         char * command = s[S_CMD_MAKE_WORLD];
-        char * msg = try_malloc(strlen(command) + 1 + 11 + 1, f_name);
+        char * msg = try_malloc(strlen(command) + 1 + 11 + 1, __func__);
         int test = sprintf(msg, "%s %d", command, (int) time(NULL));
-        exit_trouble(test < 0, f_name, s[S_FCN_SPRINTF]);
+        exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
         obey_msg(msg, 1, 1);
         free(msg);
     }

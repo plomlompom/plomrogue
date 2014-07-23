@@ -42,8 +42,8 @@ static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx);
  */
 static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap);
 
-/* Wrapper to "mv_yx_in_dir_wrap()", returns 1 if the wrapped function moved
- * "yx" within the wrap borders and the map size, else 0.
+/* Wrapper to mv_yx_in_dir_wrap(), returns 1 if the wrapped function moved "yx"
+ * within the wrap borders and the map size, else 0.
  */
 static uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx);
 
@@ -255,7 +255,6 @@ static void set_shadow(uint32_t left_angle, uint32_t right_angle,
                        struct shadow_angle ** shadows, uint16_t pos_in_map,
                        uint8_t * fov_map)
 {
-    char * f_name = "set_shadow()";
     struct shadow_angle * shadow_i;
     if (fov_map[pos_in_map] & VISIBLE)
     {
@@ -274,7 +273,7 @@ static void set_shadow(uint32_t left_angle, uint32_t right_angle,
         if (!try_merging_angles(left_angle, right_angle, shadows))
         {
             struct shadow_angle * shadow;
-            shadow = try_malloc(sizeof(struct shadow_angle), f_name);
+            shadow = try_malloc(sizeof(struct shadow_angle), __func__);
             shadow->left_angle  = left_angle;
             shadow->right_angle = right_angle;
             shadow->next = NULL;
@@ -331,9 +330,8 @@ static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
 
 extern uint8_t * build_fov_map(struct Thing * eye)
 {
-    char * f_name = "build_fov_map()";
     uint32_t map_size = world.map.length * world.map.length;
-    uint8_t * fov_map = try_malloc(map_size, f_name);
+    uint8_t * fov_map = try_malloc(map_size, __func__);
     memset(fov_map, VISIBLE, map_size);
     struct yx_uint8 test_pos = eye->pos;
     struct shadow_angle * shadows = NULL;

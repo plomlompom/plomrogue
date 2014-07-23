@@ -20,7 +20,6 @@ static uint32_t cleanup_flags = 0x0000;
 
 extern void cleanup()
 {
-    char * f_name = "cleanup()";
     free(world.queue);
     free(world.log);
     free(world.map.cells);
@@ -42,12 +41,12 @@ extern void cleanup()
     }
     if (cleanup_flags & CLEANUP_IN)
     {
-        try_fclose(world.file_in, f_name);
+        try_fclose(world.file_in, __func__);
         unlink(s[S_PATH_IN]);
     }
     if (cleanup_flags & CLEANUP_OUT)
     {
-        try_fclose(world.file_out, f_name);
+        try_fclose(world.file_out, __func__);
         free(world.server_test);
         unlink(s[S_PATH_OUT]);
     }

@@ -21,7 +21,7 @@ extern void set_cleanup_func(void (* f)())
 
 
 
-extern void exit_err(int err, char * msg)
+extern void exit_err(int err, const char * msg)
 {
     if (0 == err)
     {
@@ -42,17 +42,16 @@ extern void exit_err(int err, char * msg)
 
 
 
-extern void exit_trouble(int err, char * parent, char * child)
+extern void exit_trouble(int err, const char * parent, const char * child)
 {
-    char * f_name = "exit_trouble()";
     char * p1 = "Trouble in ";
     char * p2 = " with ";
     char * p3 = ".";
     uint16_t size = strlen(p1) + strlen(parent) + strlen(p2) + strlen(child)
                     + strlen(p3) + 1;
-    char * msg = try_malloc(size, f_name);
+    char * msg = try_malloc(size, __func__);
     int test = sprintf(msg, "%s%s%s%s%s", p1, parent, p2, child, p3);
-    exit_err(test < 0, "Trouble in exit_trouble() with sprintf()");
+    exit_err(test < 0, "Trouble in exit_trouble with sprintf.");
     exit_err(err, msg);
     free(msg);
 }

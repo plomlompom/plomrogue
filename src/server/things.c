@@ -66,8 +66,7 @@ static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
                                              int16_t id, uint8_t struct_id,
                                              struct NextAndId ** start)
 {
-    char * f_name = "add_to_struct_list()";
-    struct NextAndId * nai  = try_malloc(n_size, f_name);
+    struct NextAndId * nai  = try_malloc(n_size, __func__);
     memset(nai, 0, n_size);
     nai->id = (start_id<=id && id<=UINT8_MAX) ? id : get_unused_id(struct_id);
     struct NextAndId ** nai_ptr_ptr = start;

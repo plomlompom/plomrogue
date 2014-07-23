@@ -179,16 +179,15 @@ static uint8_t set_string_if_char_match(char c, char c_to_match,
 
 static char * build_server_message_with_argument(struct Command * cmd)
 {
-    char * f_name = "build_server_message_with_argument()";
     uint8_t command_size = strlen(cmd->server_msg);
     char * arg_str = "";
     uint8_t arg_size = 0;
     if ('i' == cmd->arg)
     {
         arg_size = 3;
-        arg_str = try_malloc(arg_size + 1, f_name);
+        arg_str = try_malloc(arg_size + 1, __func__);
         int test = sprintf(arg_str, "%d",world.player_inventory_select);
-        exit_trouble(test < 0, f_name, "sprintf()");
+        exit_trouble(test < 0, __func__, "sprintf");
     }
     else if (   set_string_if_char_match(cmd->arg, 'd', &arg_str, "east")
              || set_string_if_char_match(cmd->arg, 'c', &arg_str, "south-east")
@@ -203,9 +202,9 @@ static char * build_server_message_with_argument(struct Command * cmd)
     {
         exit_err(1, "Illegal server command argument.");
     }
-    char * msg = try_malloc(command_size + 1 + arg_size + 1, f_name);
+    char * msg = try_malloc(command_size + 1 + arg_size + 1, __func__);
     int test = sprintf(msg, "%s %s", cmd->server_msg, arg_str);
-    exit_trouble(test < 0, f_name, "sprintf()");
+    exit_trouble(test < 0, __func__, "sprintf");
     if ('i' == cmd->arg)
     {
         free(arg_str);
