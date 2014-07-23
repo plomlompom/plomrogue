@@ -53,6 +53,9 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1);
 /* Performs parse_world_active()'s world activation legality tests. */
 static uint8_t world_may_be_set_active();
 
+/* Unlink worldstate file if it exists. */
+static void remove_worldstate_file();
+
 /* Parse/apply god command in "tok0"/"tok1" on toggling world.exists. Unset if
  * argument is 0 and unlink worldstate file, but only set it on positive
  * argument if it is not already set and a thing action of name S_CMD_WAIT, a
@@ -148,6 +151,10 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
         if (world.exists)
         {
             world.exists = 0 != get_thing_action_id_by_name(s[S_CMD_WAIT]);
+            if (!world.exists)
+            {
+                remove_worldstate_file();
+            }
         }
     }
     else if (parse_val(tok0, tok1, s[S_CMD_THINGACTION], '8', (char *) &id))
@@ -330,6 +337,17 @@ static uint8_t world_may_be_set_active()
 
 
 
+static void remove_worldstate_file()
+{
+    if (!access(s[S_PATH_WORLDSTATE], F_OK))
+    {
+        int test = unlink(s[S_PATH_WORLDSTATE]);
+        exit_trouble(-1 == test, __func__, "unlink");
+    }
+}
+
+
+
 static uint8_t parse_world_active(char * tok0, char * tok1)
 {
     if (!strcmp(tok0, s[S_CMD_WORLD_ACTIVE]) && !parsetest_int(tok1, '8'))
@@ -339,11 +357,7 @@ static uint8_t parse_world_active(char * tok0, char * tok1)
             uint8_t argument = atoi(tok1);
             if (!argument)
             {
-                if (!access(s[S_PATH_WORLDSTATE], F_OK))
-                {
-                    int test = unlink(s[S_PATH_WORLDSTATE]);
-                    exit_trouble(-1 == test, __func__, "unlink");
-                }
+                remove_worldstate_file();
                 world.exists = 0;
             }
             else if (world.exists)
@@ -385,6 +399,7 @@ static uint8_t set_map_length(char * tok0, char * tok1)
             return 1;
         }
         world.exists = 0;
+        remove_worldstate_file();
         free_things(world.things);
         free(world.map.cells);
         world.map.cells = NULL;    /* Since remake_map() runs free() on this. */
