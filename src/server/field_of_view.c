@@ -6,7 +6,6 @@
 #include <string.h> /* memset() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "map.h" /* yx_to_map_pos() */
 #include "things.h" /* Thing */
 #include "yx_uint8.h" /* yx_uint8 */
 #include "world.h" /* world  */
@@ -317,7 +316,7 @@ static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
     uint32_t left_angle  = correct_angle(left_angle_uncorrected);
     uint32_t right_angle = correct_angle(right_angle_uncorrected);
     uint32_t right_angle_1st = right_angle > left_angle ? 0 : right_angle;
-    uint16_t pos_in_map = yx_to_map_pos(test_pos);
+    uint16_t pos_in_map = test_pos->y * world.map.length + test_pos->x;
     set_shadow(left_angle, right_angle_1st, shadows, pos_in_map, fov_map);
     if (right_angle_1st != right_angle)
     {

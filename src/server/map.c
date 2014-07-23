@@ -160,10 +160,3 @@ extern uint8_t is_passable(struct yx_uint8 pos)
     }
     return passable;
 }
-
-
-
-extern uint16_t yx_to_map_pos(struct yx_uint8 * yx)
-{
-    return (yx->y * world.map.length) + yx->x;
-}

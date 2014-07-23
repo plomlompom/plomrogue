@@ -26,9 +26,6 @@ extern void remake_map();
  */
 extern uint8_t is_passable(struct yx_uint8 pos);
 
-/* Transform "yx" to an index position in the world map. */
-extern uint16_t yx_to_map_pos(struct yx_uint8 * yx);
-
 
 
 #endif

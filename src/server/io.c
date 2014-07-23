@@ -19,7 +19,6 @@
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "field_of_view.h" /* VISIBLE */
 #include "hardcoded_strings.h" /* s */
-#include "map.h" /* yx_to_map_pos() */
 #include "things.h" /* Thing, ThingType, ThingAction, get_thing_type(),
                      * get_player()
                      */
@@ -277,13 +276,14 @@ static char * build_visible_map(struct Thing * player)
         {
             for (t = world.things; t != 0; t = t->next)
             {
-                if (   player->fov_map[yx_to_map_pos(&t->pos)] & VISIBLE
+                if (   (  player->fov_map[t->pos.y * world.map.length +t->pos.x]
+                        & VISIBLE)
                     && (   (0 == i && 0 == t->lifepoints)
                         || (1 == i && 0 < t->lifepoints)))
                 {
                     tt = get_thing_type(t->type);
                     c = tt->char_on_map;
-                    visible_map[yx_to_map_pos(&t->pos)] = c;
+                    visible_map[t->pos.y * world.map.length + t->pos.x] = c;
                 }
             }
         }
