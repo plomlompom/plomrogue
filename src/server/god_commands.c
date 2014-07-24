@@ -157,7 +157,7 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
             }
         }
     }
-    else if (parse_val(tok0, tok1, s[S_CMD_THINGACTION], '8', (char *) &id))
+    else if (parse_val(tok0, tok1, s[S_CMD_THINGACTION], 'i', (char *) &id))
     {
         ta = get_thing_action(id);
         if (!ta)
@@ -286,7 +286,7 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
         return 1;
     }
     uint8_t id;
-    if (    parse_thing_type(tok0, tok1, t)
+    if (   parse_thing_type(tok0, tok1, t)
         || parse_thing_command(tok0, tok1, t)
         || parse_val(tok0,tok1, s[S_CMD_T_ARGUMENT], '8', (char *)&t->arg)
         || parse_val(tok0,tok1, s[S_CMD_T_PROGRESS], '8', (char *)&t->progress)

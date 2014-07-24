@@ -31,8 +31,8 @@ struct NextAndId
 /* To linked list of NextAndId structs (or rather structs whose start region is
  * compatible to it) starting at "start", add newly allocated element of
  * "n_size" and an ID that is either "id" or, if "id" is <= UINT8_MAX and >=
- * "id_start", get lowest ID for new thing ("struct_id"==0), thing type
- * ("struct_id"==1) or thing action ("struct_id"==2).
+ * "id_start", get lowest ID >= "start_id" and <= UINT8_MAX for new thing
+ * ("struct_id"=0), thing type ("struct_id"=1) or thing action ("struct_id"=2).
  */
 static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
                                              int16_t id, uint8_t struct_id,
@@ -99,6 +99,7 @@ extern struct ThingType * add_thing_type(int16_t id)
                                                  &world.thing_types);
     set_cleanup_flag(CLEANUP_THING_TYPES);
     tt->name = strdup("(none)");
+    tt->corpse_id = tt->id;
     return tt;
 }
 

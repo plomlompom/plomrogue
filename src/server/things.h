@@ -55,14 +55,14 @@ struct ThingAction
  */
 extern struct ThingAction * add_thing_action(uint8_t id);
 
-/* Add thing type of "id", with .corpse_id defaulting to "id" to
- * world.thing_types, .name to "(none)" and the remaining values to 0. If "id"
- * is not >= 0 and <= UINT8_MAX, use lowest unused id. Return thing type.
+/* Add thing type of "id" to world.thing_types, with .corpse_id defaulting to
+ * the new thing type's .id, .name to "(none)" and the remaining values to 0. If
+ * "id" is not >= 0 and <= UINT8_MAX, use lowest unused id. Return thing type.
  */
 extern struct ThingType * add_thing_type(int16_t id);
 
-/* Add thing of "id" and "type" on position of "y"/x" to world.things.If "id" is
- * not >= 0 and <= UINT8_MAX, use lowest unused id. Return thing.
+/* Add thing of "id" and "type" on position of "y"/x" to world.things. If "id"
+ * is not >= 0 and <= UINT8_MAX, use lowest unused id. Return thing.
  */
 extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x);
 
