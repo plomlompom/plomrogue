@@ -34,13 +34,13 @@ Command list
 ============
 
 Each command is of a single line. It consists at least of one command stringe,
-followed by an optional argument. Argument fields are described below in square
-brackets. Number ranges are described by the first legal number, followed by
-" to ", followed by the last legal number. "[string]" means any text string is
-expected, which must be enclosed in single quotes if it contains whitespaces.
-"[char]" means a single ASCII character is expected. If one of a set of
-pre-defined strings is expected, the legal strings are divided by pipe symbols
-("|").
+in some cases followed by an obligatory argument. Argument fields are described
+below in square brackets. Number ranges are described by the first legal number,
+followed by " to ", followed by the last legal number. "[string]" means any text
+string is expected, which must be enclosed in single quotes if it contains
+whitespaces. "[char]" means a single ASCII character is expected. If one of a
+set of pre-defined strings is expected, the legal strings are divided by pipe
+symbols ("|").
 
 Meta commands
 -------------
