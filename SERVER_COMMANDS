@@ -113,10 +113,11 @@ exist yet, create it with default name "wait" and default effort 1.
 TA_EFFORT [0 to 255]
 Set to argument the number of turns finishing the selected thing action takes.
 
-TA_NAME {wait|move|use|drop|pick_up}
-Set selected thing action's name (and thereby function). Legal worlds need at
-least one action of name "wait", so if this unsets the world's only "wait"
-action, the world is deactivated, and the ./server/worldstate file removed.
+TA_NAME [wait|move|use|drop|pick_up]
+Set selected thing action's name (and thereby function, equal to player
+command). Legal worlds need at least one action of name "wait", so if this
+unsets the world's only "wait" action, the world is deactivated, and the
+./server/worldstate file removed.
 
 T_ID [-32768 to 32767]
 Select thing to manipulate by argument as ID. If argument is <0 or >255, change
