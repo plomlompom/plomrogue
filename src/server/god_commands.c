@@ -81,7 +81,7 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
         err_line(1, "No thing type defined to manipulate yet.");
         return 1;
     }
-    uint8_t id;
+    int16_t id;
     if (   parse_val(tok0,tok1,s[S_CMD_TT_CONSUM],'8',(char *) &tt->consumable)
         || parse_val(tok0,tok1,s[S_CMD_TT_HP],'8',(char *) &tt->lifepoints)
         || parse_val(tok0,tok1,s[S_CMD_TT_STARTN],'8',(char *) &tt->start_n)
@@ -96,7 +96,7 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
         }
         tt->corpse_id = id;
     }
-    else if (parse_val(tok0, tok1, s[S_CMD_TT_ID], '8', (char *) &id))
+    else if (parse_val(tok0, tok1, s[S_CMD_TT_ID], 'i', (char *) &id))
     {
         tt = get_thing_type(id);
         if (!tt)
@@ -135,7 +135,7 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
         err_line(1, "No thing action defined to manipulate yet.");
         return 1;
     }
-    uint8_t id;
+    int16_t id;
     if      (parse_val(tok0, tok1, s[S_CMD_TA_EFFORT],'8',(char *)&ta->effort));
     else if (parse_val(tok0, tok1, s[S_CMD_TA_NAME], 's', (char *)&ta->name))
     {
@@ -285,7 +285,7 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
         err_line(1, "No thing defined to manipulate yet.");
         return 1;
     }
-    uint8_t id;
+    int16_t id;
     if (   parse_thing_type(tok0, tok1, t)
         || parse_thing_command(tok0, tok1, t)
         || parse_val(tok0,tok1, s[S_CMD_T_ARGUMENT], '8', (char *)&t->arg)
