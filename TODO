@@ -11,8 +11,4 @@ BOTH SERVER/CLIENT:
 
 CLIENT:
 
-- enable toggling of window borders
-
-- make log scrollable
-
 - re-work unnecessary complex command / keybinding / server message mapping
