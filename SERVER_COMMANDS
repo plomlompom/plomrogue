@@ -185,4 +185,4 @@ game log and the inventory.
 
 TT_CORPSE_ID [0-255]
 Set to argument the ID of the thing type that things of the selected type
-transform into when their change changes from animate to inanimate.
+transform into when their state changes from animate to inanimate.
