@@ -1,0 +1,187 @@
+Command reading and writing
+===========================
+
+Normal mode
+-----------
+
+In normal mode, the server on start up checks for the existence of ./savefile
+and, on success, reads all commands from it. If no savefile exists, commands
+from ./confserver/world are read instead – and written to the file ./record.
+Afterwards, the command "MAKE_WORLD" with the current Unix time as argument is
+interpreted (and also written to ./record).
+
+In any case, from then on, further commands are read in from ./server/in. New
+commands must be appended to the file – which is what the client does. All
+commands from ./server/in except meta commands are also written to ./record.
+
+At the end of each turn, ./savefile is written – with a list of all god commands
+necessary to recreate the current world state.
+
+Replay mode
+-----------
+
+In replay mode, commands from ./record are read. If a turn number is given as an
+argument, the file is read until the given turn is reached, or, if the turn
+number is higher than the last turn of the recorded play, the last turn. If no
+turn number is given as argument, the record file is replayed until turn 1 is
+reached.
+
+From then on, ./server/in is also read. Meta commands are interpreted normally,
+but any player and god command merely furthers reading of ./record by one line
+and is otherwise ignored.
+
+Command list
+============
+
+Each command is of a single line. It consists at least of one command stringe,
+followed by an optional argument. Argument fields are described below in square
+brackets. Number ranges are described by the first legal number, followed by
+" to ", followed by the last legal number. "[string]" means any text string is
+expected, which must be enclosed in single quotes if it contains whitespaces.
+"[char]" means a single ASCII character is expected. If one of a set of
+pre-defined strings is expected, the legal strings are divided by pipe symbols
+("|").
+
+Meta commands
+-------------
+
+PING
+Write "PONG" line to ./server/out file.
+
+QUIT
+Shut down server.
+
+Player commands
+---------------
+
+wait
+Make player character wait one turn.
+
+move [east|south-east|south-west|west|north-west|north-east]
+Make player character move into direction described by argument, or attack into
+that direction if there is an enemy.
+
+pick_up
+Make player character pick up topmost thing it is standing on.
+
+drop [0 to 255]
+Make player character drop to the ground item of argument's position in the
+player character's inventory.
+
+use [0 to 255]
+Make player character use item of argument's position in player character's
+inventory.
+
+God commands
+------------
+
+TURN [0 to 65535]
+Set world turn to argument. (Initial value: 0.)
+
+PLAYER_TYPE [0 to 255]
+Set to argument ID of thing type into which a new world's player character will
+be generated. (Initial value: 0.)
+
+SEED_RANDOMNESS [0 to 4294967296]
+Set randomness seed to argument. (Initial value: 0.)
+
+SEED_MAP [0 to 4294967296]
+(Re-)generate map to seed of argument and map size.
+
+MAKE_WORLD [0 to 4294967296]
+Set map seed and randomness seed to argument. Remove all things. (Re-)generate
+map. Add to map things specified in thing types table in quantity defined there
+by START_NUMBER command, with first thing (of thing ID of 0) of type defined as
+player type by PLAYER_TYPE command. Set world turn to 1. Activate world.
+
+MAP_LENGTH [1 to 256]
+Deactivate world. Remove ./server/worldstate file. Remove all things. Remove
+map. Set map edge length to argument. (Initial value: 64.)
+
+WORLD_ACTIVE [0 to 255]
+Set world activity state to argument. If 0, remove ./server/worldstate file.
+Else, if world was so far inactive, a map exists, at least one "wait" thing
+action is defined, and a thing of ID 0 (= a player character) that is not part
+of any other thing's inventory, (re-)build all animate things' fields of view and
+activate world. (Initial value: 0.)
+
+TA_ID [0 to 255]
+Select thing action to manipulate by argument as ID. If argument is 0, change it
+to the lowest unused thing action ID greater than 0. If action of ID does not
+exist yet, create it with default name "wait" and default effort 1.
+
+TA_EFFORT [0 to 255]
+Set to argument the number of turns finishing the selected thing action takes.
+
+TA_NAME {wait|move|use|drop|pick_up}
+Set selected thing action's name (and thereby function). Legal worlds need at
+least one action of name "wait", so if this unsets the world's only "wait"
+action, the world is deactivated, and the ./server/worldstate file removed.
+
+T_ID [-32768 to 32767]
+Select thing to manipulate by argument as ID. If argument is <0 or >255, change
+it to the lowest unused thing ID. If thing of ID does not exist yet, create it
+with default position of y=0/x=0, the first thing type's ID, and that type's
+lifepoints value. If world is active and the thing is animate, build its field
+of view.
+
+T_TYPE [0 to 255]
+Set selected thing's type ID to argument.
+
+T_POSY [0 to 255]
+Set selected thing's map row position to argument. Delete thing's field of view
+and, if world is active, rebuild it.
+
+T_POSX [0 to 255]
+Set selected thing's map column position to argument. Delete thing's field of
+view and, if world is active, rebuild it.
+
+T_COMMAND [0 to 255]
+Set to argument the action thing is currently performing, as identified by its
+thing action ID, if a thing action of that ID is defined. If argument is 0, the
+thing's command ID is set to that, implying that it is not performing any
+action.
+
+T_ARGUMENT [0 to 255]
+Set selected thing's action argument value to argument.
+
+T_PROGRESS [0 to 255]
+Set selected thing's action progress (number of turns already invested in
+performing the action) value to argument.
+
+T_LIFEPOINTS [0 to 255]
+Set selected thing's lifepoints to argument.
+
+T_CARRIES [0 to 255]
+Add thing of ID in argument to inventory of selected thing, if said thing is
+available for carrying and not the selected thing.
+
+TT_ID [-32768 to 32767]
+Select thing type to manipulate by argument as ID. If argument is <0 or <255,
+change it to the lowest unused thing type ID. If thing type of ID does not exist
+yet, create it with default name "(none)", corpse ID equal to the new thing
+type's ID, and remaining thing type attributes to 0.
+
+TT_CONSUMABLE [0-255]
+Set selected thing type's consumability value to argument – the number of
+lifepoints earned by consuming/using things of that type.
+
+TT_START_NUMBER [0-255]
+Set selected thing type's number of things of type to spawn on successful
+MAKE_WORLD command to argument.
+
+TT_LIFEPOINTS [0-255]
+Set selected thing type's initial lifepoints value to argument. Things of 0
+lifepoints are considered inanimate, otherwise animate.
+
+TT_SYMBOL [char]
+Set to argument symbol by which things of the selected type are represented on
+the map.
+
+TT_NAME [string]
+Set selected thing type's name to argument. This name identifies things in the
+game log and the inventory.
+
+TT_CORPSE_ID [0-255]
+Set to argument the ID of the thing type that things of the selected type
+transform into when their change changes from animate to inanimate.

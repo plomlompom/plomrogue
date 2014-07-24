@@ -83,69 +83,11 @@ turn number.
 Hacking / server internals and configuration
 --------------------------------------------
 
-[THIS SECTION IS OUT OF DATE (but kept as long as there's nothing better yet)]
-
-The ./confserver/world file defines the thing types, actions available to them,
-the map geometry and the thing type (species) of the player. Each definition
-consists of a single- or multi-line block wherein each line sets one attribute.
-
-Here's a typical action definition block:
-
-ACTION 1
-NAME move
-EFFORT 5
-
-A line of "ACTION" followed by a number starts an action definition block and
-sets the action's id (must be > 0) for internal use to 1. The number after
-"EFFORT" determines how many turns this action takes for the actor performing
-it. The string after "NAME" names the action. Furthermore, if it is one of
-"move", "pick_up", "drop" or "use", it matches internal functions described by
-these strings to this action. All other names (including "wait") currently are
-matched to a do-nothing wait function.
-
-Here's a typical thing type definition block: 
-
-THINGTYPE 2
-NAME ZOMBIE
-SYMBOL z
-LIFEPOINTS 3
-CORPSE_ID 5
-CONSUMABLE 0
-START_NUMBER 9
-
-A line of "THINGTYPE" followed by a number starts it, and the number sets the
-thing type's internal id. The number after "CONSUMABLE" defines the thing as
-consumable (and to so many hitpoints gain). The character after "SYMBOL" is the
-one shown on the map to represent to thing type. "LIFEPOINTS" is the start
-hitpoints value for this thing type and defines it as animate if it is non-zero.
-The string after "NAME" sets the thing type's name. "CORPSE_ID" sets the id of
-the thing type that things of this type degrade to if their hitpoints drop to
-zero if they start out as inanimate (what is not implemented yet: or if they are
-inanimate, but are otherwise crushed). Note that the "CORPSE_ID" must match the
-id of a thing type defined in the file (before or after, it may even be the
-same). "START_NUMBER" sets the number of things that are to appear of the
-given type on the map on game start.
-
-The map is defined by a single-line block. Its number value sets the map
-square's edge length. It must be >= 1 and <= 256:
-
-MAP_LENGTH 64
-
-The player type / species is also defined by a single line block. Its number
-value sets the player's creature's thing type by its id:
-
-PLAYER_TYPE 0
-
-All these definition block members must be present within their respective
-blocks, but only "ACTION" and "THINGTYPE" must be positioned at their respective
-blocks' first line; the others may appear in whatever order and even multiple
-times. If a thing or action definition block is finished, however, it cannot
-be re-defined by starting a new block with the same thing type or action id.
-
-Tokens in this config file are separated by whitespace. Single quotes can be
-put around string values that are to include whitespace by themslves. Note that
-all numbers must be decimal representations of unsigned 8 bit integers, i.e.
->= 0 and < 256 and sans preceding "+".
+The game world is set up and made subject to player commands by
+./roguelike-server. It's controlled by commands explained in the file …
+The server usually reads these from the files ./server/in (written to by
+./roguelike-client), ./confserver/world, ./record and ./savefile. See the file
+./SERVER_COMMANDS for details.
 
 All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v
