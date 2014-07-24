@@ -159,11 +159,6 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
     }
     else if (parse_val(tok0, tok1, s[S_CMD_THINGACTION], '8', (char *) &id))
     {
-        if (!id)
-        {
-            err_line(1, "Value must be >= 1 and <= 255.");
-            return 1;
-        }
         ta = get_thing_action(id);
         if (!ta)
         {

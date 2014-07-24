@@ -53,7 +53,7 @@ struct ThingAction
  * s[S_CMD_WAIT], .func to actor_wait() and .effort to 1. If "id" is not >= 1
  * and <= UINT8_MAX, use lowest unused id. Return thing action.
  */
-extern struct ThingAction * add_thing_action(int16_t id);
+extern struct ThingAction * add_thing_action(uint8_t id);
 
 /* Add thing type of "id", with .corpse_id defaulting to "id" to
  * world.thing_types, .name to "(none)" and the remaining values to 0. If "id"

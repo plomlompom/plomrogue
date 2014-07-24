@@ -28,37 +28,15 @@ struct NextAndId
 
 
 
-/* Return lowest unused id for new thing ("sel"==0), thing type ("sel"==1) or
- * thing action ("sel"==2).
- */
-static uint8_t get_unused_id(uint8_t sel);
-
 /* To linked list of NextAndId structs (or rather structs whose start region is
  * compatible to it) starting at "start", add newly allocated element of
  * "n_size" and an ID that is either "id" or, if "id" is <= UINT8_MAX and >=
- * "id_start", get ID from get_unused_id("struct_id").
+ * "id_start", get lowest ID for new thing ("struct_id"==0), thing type
+ * ("struct_id"==1) or thing action ("struct_id"==2).
  */
 static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
                                              int16_t id, uint8_t struct_id,
                                              struct NextAndId ** start);
-
-
-
-static uint8_t get_unused_id(uint8_t sel)
-{
-    uint8_t i = 0;
-    while (1)
-    {
-        if (   (0 == sel && !get_thing(world.things, i, 1))
-            || (1 == sel && !get_thing_type(i))
-            || (2 == sel && !get_thing_action(i)))
-        {
-            return i;
-        }
-        exit_err(i == UINT8_MAX, "No unused ID available to add to ID list.");
-        i++;
-    }
-}
 
 
 
@@ -68,7 +46,26 @@ static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
 {
     struct NextAndId * nai  = try_malloc(n_size, __func__);
     memset(nai, 0, n_size);
-    nai->id = (start_id<=id && id<=UINT8_MAX) ? id : get_unused_id(struct_id);
+    if (start_id <= id && id <= UINT8_MAX)
+    {
+        nai->id = id;
+    }
+    else
+    {
+        while (1)
+        {
+            if (   (0 == struct_id && !get_thing(world.things, start_id, 1))
+                || (1 == struct_id && !get_thing_type(start_id))
+                || (2 == struct_id && !get_thing_action(start_id)))
+            {
+                nai->id = start_id;
+                break;
+            }
+            char * err =  "No unused ID available to add to ID list.";
+            exit_err(start_id == UINT8_MAX, err);
+            start_id++;
+        }
+    }
     struct NextAndId ** nai_ptr_ptr = start;
     for (; NULL != * nai_ptr_ptr; nai_ptr_ptr = &(*nai_ptr_ptr)->next);
     *nai_ptr_ptr = nai;
@@ -77,11 +74,11 @@ static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
 
 
 
-extern struct ThingAction * add_thing_action(int16_t id)
+extern struct ThingAction * add_thing_action(uint8_t id)
 {
     struct ThingAction * ta;
     ta = (struct ThingAction *) add_to_struct_list(sizeof(struct ThingAction),
-                                                   1, id, 2,
+                                                   1, (int16_t) id, 2,
                                                    (struct NextAndId **)
                                                    &world.thing_actions);
     set_cleanup_flag(CLEANUP_THING_ACTIONS);
