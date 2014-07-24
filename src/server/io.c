@@ -107,7 +107,7 @@ static void write_thing(FILE * file, struct Thing * t)
     {
         write_thing(file, o);
     }
-    write_key_value(file, s[S_CMD_THING], t->id);
+    write_key_value(file, s[S_CMD_T_ID], t->id);
     write_key_value(file, s[S_CMD_T_TYPE], t->type);
     write_key_value(file, s[S_CMD_T_POSY], t->pos.y);
     write_key_value(file, s[S_CMD_T_POSX], t->pos.x);
@@ -346,7 +346,7 @@ extern void save_world()
     struct ThingAction * ta;
     for (ta = world.thing_actions; ta; ta = ta->next)
     {
-        write_key_value(file, s[S_CMD_THINGACTION], ta->id);
+        write_key_value(file, s[S_CMD_TA_ID], ta->id);
         write_key_value(file, s[S_CMD_TA_EFFORT], ta->effort);
         write_key_string(file, s[S_CMD_TA_NAME], ta->name);
         try_fputc('\n', file, __func__);
@@ -354,7 +354,7 @@ extern void save_world()
     struct ThingType * tt;
     for (tt = world.thing_types; tt; tt = tt->next)
     {
-        write_key_value(file, s[S_CMD_THINGTYPE], tt->id);
+        write_key_value(file, s[S_CMD_TT_ID], tt->id);
         write_key_value(file, s[S_CMD_TT_STARTN], tt->start_n);
         write_key_value(file, s[S_CMD_TT_HP], tt->lifepoints);
         int test = fprintf(file, "%s %c\n", s[S_CMD_TT_SYMB], tt->char_on_map);
@@ -365,7 +365,7 @@ extern void save_world()
     }
     for (tt = world.thing_types; tt; tt = tt->next)
     {
-        write_key_value(file, s[S_CMD_THINGTYPE], tt->id);
+        write_key_value(file, s[S_CMD_TT_ID], tt->id);
         write_key_value(file, s[S_CMD_TT_CORPS], tt->corpse_id);
     }
     try_fputc('\n', file, __func__);

@@ -96,7 +96,7 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
         }
         tt->corpse_id = id;
     }
-    else if (parse_val(tok0, tok1, s[S_CMD_THINGTYPE], '8', (char *) &id))
+    else if (parse_val(tok0, tok1, s[S_CMD_TT_ID], '8', (char *) &id))
     {
         tt = get_thing_type(id);
         if (!tt)
@@ -157,7 +157,7 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
             }
         }
     }
-    else if (parse_val(tok0, tok1, s[S_CMD_THINGACTION], 'i', (char *) &id))
+    else if (parse_val(tok0, tok1, s[S_CMD_TA_ID], '8', (char *) &id))
     {
         ta = get_thing_action(id);
         if (!ta)
@@ -293,7 +293,7 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
         || parse_val(tok0,tok1, s[S_CMD_T_HP], '8', (char *) &t->lifepoints)
         || parse_position(tok0, tok1, t)
         || parse_carry(tok0, tok1, t));
-    else if (parse_val(tok0, tok1, s[S_CMD_THING], 'i', (char *) &id))
+    else if (parse_val(tok0, tok1, s[S_CMD_T_ID], 'i', (char *) &id))
     {
         t = get_thing(world.things, id, 1);
         char * err = "No thing type found to initialize new thing.";
