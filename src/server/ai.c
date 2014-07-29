@@ -133,7 +133,6 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
     for (i = 0; i < map_size; i++)
     {
         score_map[i] = t_origin->fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
-
     }
     struct Thing * t = world.things;
     for (; t != NULL; t = t->next)
