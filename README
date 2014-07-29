@@ -12,8 +12,8 @@ to gain hitpoints. Note that different kinds of movements/actions take different
 numbers of turns to finish.
 
 Enemies' AI is very dumb so far: Each turn, they try to move towards their
-shortest-path-wise nearest enemy visible to them. If they see no enemy, they
-just wait.
+shortest-path-wise nearest enemy (any animate being of a different species)
+visible to them. If they see no enemy, they just wait.
 
 Every move of yours re-writes a file "savefile" that describes the new state of
 the world. Once you re-start the game, the game state is recreated from the

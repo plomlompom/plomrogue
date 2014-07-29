@@ -122,9 +122,9 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
 
 static char get_dir_to_nearest_enemy(struct Thing * t_origin)
 {
-    /* Calculate for each cell the distance to the visibly nearest map actor not
-     * "t_origin", with movement only possible in the directions of "dir".
-     * (Actors' own cells start with a distance of 0 towards themselves.)
+    /* Calculate for each cell distance to visibly nearest enemy, with movement
+     * possible in the directions or "dir". (Actor's own cells start with 0
+     * distance towards themselves. Cells of actors of own type are invisible.)
      */
     uint32_t map_size = world.map.length * world.map.length;
     uint16_t max_score = UINT16_MAX - 1;
@@ -133,6 +133,7 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
     for (i = 0; i < map_size; i++)
     {
         score_map[i] = t_origin->fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
+
     }
     struct Thing * t = world.things;
     for (; t != NULL; t = t->next)
@@ -141,7 +142,12 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
         {
             continue;
         }
-        score_map[(t->pos.y * world.map.length) + t->pos.x] = 0;
+        if (t->lifepoints && t->type == t_origin->type)
+        {
+            score_map[t->pos.y * world.map.length + t->pos.x] = UINT16_MAX;
+            continue;
+        }
+        score_map[t->pos.y * world.map.length + t->pos.x] = 0;
     }
     dijkstra_map(score_map, max_score);
 
