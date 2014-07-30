@@ -33,19 +33,14 @@ static uint8_t set_char_by_string_comparison(char * string, char * comparand,
 /* Return 1 on world.exists, else 0 and err_line() appropriate error message. */
 static uint8_t player_commands_allowed();
 
-/* Parse player command "tok0" with no argument to player action, comment on
- * invalidity of non-zero "tok1" (but do not abort in that case).
- */
-static uint8_t parse_player_command_0arg(char * tok0, char * tok1);
+/* Parse player command "tok0" with no argument to player action. */
+static uint8_t parse_player_command_0arg(char * tok0);
 
 /* Parse player command "tok0" with one argument "tok1" to player action. */
 static uint8_t parse_player_command_1arg(char * tok0, char * tok1);
 
-/* Parse/apply command "tok0" with argument "tok1" and test the line for further
- * tokens, commenting on their invalidity (but don't abort on finding them).
- */
-static uint8_t parse_command_1arg(char * tok0, char * tok1);
-
+/* Parse/apply command "tok0". */
+static uint8_t parse_command(char * tok0);
 
 /* Compares first line of server out file to world.server_test, aborts if they
  * don't match, but not before unsetting the flags deleting files in the server
@@ -87,7 +82,7 @@ static uint8_t player_commands_allowed()
 
 
 
-static uint8_t parse_player_command_0arg(char * tok0, char * tok1)
+static uint8_t parse_player_command_0arg(char * tok0)
 {
     struct Thing * player = get_player();
     if (!strcmp(tok0, s[S_CMD_WAIT]) || !strcmp(tok0, s[S_CMD_PICKUP]))
@@ -97,7 +92,6 @@ static uint8_t parse_player_command_0arg(char * tok0, char * tok1)
             player->command = get_thing_action_id_by_name(tok0);
             player->arg = 0;
             turn_over();
-            err_line (NULL != tok1, "No arguments expected, ignoring them.");
         }
         return 1;
     }
@@ -141,18 +135,22 @@ static uint8_t parse_player_command_1arg(char * tok0, char * tok1)
 
 
 
-static uint8_t parse_command_1arg(char * tok0, char * tok1)
+static uint8_t parse_command(char * tok0)
 {
-    char * tok2 = token_from_line(NULL);
-    if (   parse_player_command_1arg(tok0, tok1)
-        || parse_god_command_1arg(tok0, tok1));
+    if (parse_player_command_0arg(tok0))
+    {
+        return 1;
+    }
     else
     {
-        return 0;
+        char * tok1 = token_from_line(NULL);
+        if (tok1 && (   parse_player_command_1arg(tok0, tok1)
+                     || parse_god_command_1arg(tok0, tok1)))
+        {
+            return 1;
+        }
     }
-    char * err = "But one argument expected, ignoring further arguments.";
-    err_line (NULL != tok2, err);
-    return 1;
+    return 0;
 }
 
 
@@ -250,9 +248,8 @@ extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
     char * tok0 = token_from_line(msg_copy);
     if (NULL != tok0)
     {
-        char * tok1 = token_from_line(NULL);
-        if (    parse_player_command_0arg(tok0, tok1)
-            || (tok1 && parse_command_1arg(tok0, tok1)))
+
+        if (parse_command(tok0))
         {
             if (world.exists)
             {
@@ -263,6 +260,8 @@ extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
                 save_world();
                 record_msg(msg);
             }
+            char * tokplus = token_from_line(NULL);
+            err_line(NULL != tokplus, "Too many arguments, ignoring overflow.");
             free(msg_copy);
             return;
         }

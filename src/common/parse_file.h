@@ -24,7 +24,7 @@ extern void err_line_zero();
  */
 extern uint8_t err_line(uint8_t test, char * msg);
 
-/* Return next token from "line" or NULL if none is found. Tokens either a)
+/* Return next token from "line", or NULL if none is found. Tokens either a)
  * start at the first non-whitespace character and end before the next
  * whitespace character after that; or b) if the first non-whitespace character
  * is a single quote followed by at least one other single quote some time later
