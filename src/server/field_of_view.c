@@ -327,7 +327,7 @@ static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
 
 
 
-extern uint8_t * build_fov_map(struct Thing * eye)
+extern void build_fov_map(struct Thing * eye)
 {
     uint32_t map_size = world.map.length * world.map.length;
     uint8_t * fov_map = try_malloc(map_size, __func__);
@@ -363,5 +363,6 @@ extern uint8_t * build_fov_map(struct Thing * eye)
     }
     mv_yx_in_dir_wrap(0, NULL, 1);
     free_angles(shadows);
-    return fov_map;
+    free(eye->fov_map);
+    eye->fov_map = fov_map;
 }

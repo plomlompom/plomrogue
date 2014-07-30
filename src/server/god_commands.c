@@ -239,10 +239,9 @@ static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t)
             {
                 t->pos.x = length;
             }
-            free(t->fov_map);
             if (world.exists && t->lifepoints)
             {
-                t->fov_map = build_fov_map(t);
+                build_fov_map(t);
             }
         }
         return 1;
@@ -302,7 +301,7 @@ static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
             t = add_thing(id, world.thing_types->id, 0, 0);
             if (world.exists && t->lifepoints)
             {
-                t->fov_map = build_fov_map(t);
+                build_fov_map(t);
             }
         }
     }
@@ -371,11 +370,7 @@ static uint8_t parse_world_active(char * tok0, char * tok1)
                 {
                     if (ti->lifepoints)
                     {
-                        if (ti->fov_map)
-                        {
-                            free(ti->fov_map);
-                        }
-                        ti->fov_map = build_fov_map(ti);
+                        build_fov_map(ti);
                     }
                 }
                 world.exists = 1;

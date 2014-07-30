@@ -215,7 +215,10 @@ extern uint8_t remake_world()
     struct Thing * t;
     for (t = world.things; NULL != t; t = t->next)
     {
-        t->fov_map = t->lifepoints ? build_fov_map(t) : NULL;
+        if (t->lifepoints)
+        {
+            build_fov_map(t);
+        }
     }
     world.turn = 1;
     world.do_update = 1;

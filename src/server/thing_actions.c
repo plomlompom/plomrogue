@@ -266,8 +266,7 @@ extern void actor_move(struct Thing * t)
     if (passable)
     {
         set_thing_position(t, target);
-        free(t->fov_map);
-        t->fov_map = build_fov_map(t);
+        build_fov_map(t);
     }
     if (t == get_player())
     {

@@ -19,8 +19,8 @@ enum fov_cell_states {
     VISIBLE = 0x01
 };
 
-/* Return field of view map of the world as seen from the position of "eye". */
-extern uint8_t * build_fov_map(struct Thing * eye);
+/* Build "eye"'s field of view. */
+extern void build_fov_map(struct Thing * eye);
 
 
 
