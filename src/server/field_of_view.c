@@ -327,12 +327,12 @@ static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
 
 
 
-extern void build_fov_map(struct Thing * eye)
+extern void build_fov_map(struct Thing * t)
 {
     uint32_t map_size = world.map.length * world.map.length;
-    uint8_t * fov_map = try_malloc(map_size, __func__);
-    memset(fov_map, VISIBLE, map_size);
-    struct yx_uint8 test_pos = eye->pos;
+    t->fov_map = t->fov_map ? t->fov_map : try_malloc(map_size, __func__);
+    memset(t->fov_map, VISIBLE, map_size);
+    struct yx_uint8 test_pos = t->pos;
     struct shadow_angle * shadows = NULL;
     char * circle_dirs = "xswedc";
     uint16_t dist;
@@ -350,7 +350,7 @@ extern void build_fov_map(struct Thing * eye)
         {
             if (mv_yx_in_dir_legal(dir, &test_pos))
             {
-                eval_position(dist, hex_i, fov_map, &test_pos, &shadows);
+                eval_position(dist, hex_i, t->fov_map, &test_pos, &shadows);
                 circle_on_map = 1;
             }
             dir = circle_dirs[i_dir];
@@ -363,6 +363,4 @@ extern void build_fov_map(struct Thing * eye)
     }
     mv_yx_in_dir_wrap(0, NULL, 1);
     free_angles(shadows);
-    free(eye->fov_map);
-    eye->fov_map = fov_map;
 }
