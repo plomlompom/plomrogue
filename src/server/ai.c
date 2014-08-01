@@ -97,7 +97,7 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
         scores_still_changing = 0;
         for (pos = 0; pos < map_size; pos++)
         {
-            if ('.' == world.map.cells[pos] && score_map[pos] <= max_score)
+            if (score_map[pos] <= max_score)
             {
                 get_neighbor_scores(score_map, pos, max_score, neighbors);
                 min_neighbor = max_score;
@@ -132,7 +132,11 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
-        score_map[i] = t_origin->fov_map[i] & VISIBLE ? max_score : UINT16_MAX;
+        score_map[i] = UINT16_MAX;
+        if (t_origin->fov_map[i] & VISIBLE && world.map.cells[i] == '.')
+        {
+            score_map[i] = max_score;
+        }
     }
     struct Thing * t = world.things;
     for (; t != NULL; t = t->next)
