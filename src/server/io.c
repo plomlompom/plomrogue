@@ -1,6 +1,6 @@
 /* src/server/io.c */
 
-#define _POSIX_C_SOURCE 199309L
+#define _POSIX_C_SOURCE 200112L
 #include "io.h"
 #include <errno.h> /* global errno */
 #include <limits.h> /* PIPE_BUF */
