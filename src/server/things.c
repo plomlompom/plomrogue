@@ -156,6 +156,7 @@ extern void free_things(struct Thing * t)
     free_things(t->owns);
     free_things(t->next);
     free(t->fov_map);
+    free(t->mem_map);
     free(t);
     if (t == world.things)         /* So add_things()' NULL-delimited thing   */
     {                              /* iteration loop does not iterate over    */

@@ -84,6 +84,9 @@ static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
                           struct yx_uint8 * test_pos,
                           struct shadow_angle ** shadows);
 
+/* Update "t"'s .mem_map memory with what's in its current field of view. */
+static void update_map_memory(struct Thing * t, uint32_t map_size);
+
 
 
 static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx)
@@ -327,6 +330,25 @@ static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
 
 
 
+static void update_map_memory(struct Thing * t, uint32_t map_size)
+{
+    if (!t->mem_map)
+    {
+        t->mem_map = try_malloc(map_size, __func__);
+        memset(t->mem_map, ' ', map_size);
+    }
+    uint32_t i;
+    for (i = 0; i < map_size; i++)
+    {
+        if (' ' == t->mem_map[i] && t->fov_map[i] & VISIBLE)
+        {
+            t->mem_map[i] = world.map.cells[i];
+        }
+    }
+}
+
+
+
 extern void build_fov_map(struct Thing * t)
 {
     uint32_t map_size = world.map.length * world.map.length;
@@ -363,4 +385,5 @@ extern void build_fov_map(struct Thing * t)
     }
     mv_yx_in_dir_wrap(0, NULL, 1);
     free_angles(shadows);
+    update_map_memory(t, map_size);
 }

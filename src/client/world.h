@@ -26,12 +26,13 @@ struct World
     struct KeyBindingDB kb_global; /* globally availabe keybindings */
     struct KeyBindingDB kb_wingeom; /* Win geometry config view keybindings */
     struct KeyBindingDB kb_winkeys; /* Win keybindings config view keybindings*/
-    struct Map map; /* game map geometry and content */
+    struct Map map; /* game map geometry and content of player's map view */
     time_t last_update; /* used for comparison with worldstate file's mtime */
     char * log; /* log of player's activities */
     char * path_interface; /* path of interface configuration file */
     char * path_commands; /* path of commands config file */
     char * player_inventory; /* one-item-per-line string list of owned items */
+    char * mem_map; /* map cells of player's map memory */
     struct yx_uint8 player_pos; /* coordinates of player on map */
     uint16_t turn; /* world/game turn */
     uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */

@@ -142,7 +142,15 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
         if (player == hitted)
         {
             update_log(" You die.");
+            memset(hitted->fov_map, ' ', world.map.length * world.map.length);
             return;
+        }
+        else
+        {
+            free(hitted->fov_map);
+            hitted->fov_map = NULL;
+            free(hitted->mem_map);
+            hitted->mem_map = NULL;
         }
         update_log(" It dies.");
     }

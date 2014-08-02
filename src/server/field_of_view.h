@@ -19,7 +19,7 @@ enum fov_cell_states {
     VISIBLE = 0x01
 };
 
-/* Build "t"'s field of view. */
+/* Build "t"'s field of view and update its map memory with the result. */
 extern void build_fov_map(struct Thing * t);
 
 

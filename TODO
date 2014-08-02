@@ -4,6 +4,10 @@ IN GENERAL:
 
 - expand use of hardcoded_strings module(s)
 
+SERVER:
+
+- check whether saving every player turn slows down gameplay
+
 BOTH SERVER/CLIENT:
 
 - make server and client communicate by specific world state info requests 
@@ -12,3 +16,5 @@ BOTH SERVER/CLIENT:
 CLIENT:
 
 - re-work unnecessary complex command / keybinding / server message mapping
+
+- fix memory leakin draw_wins module

@@ -36,6 +36,7 @@ enum string_num
     S_CMD_T_PROGRESS,
     S_CMD_T_HP,
     S_CMD_T_CARRIES,
+    S_CMD_T_MEMMAP,
     S_CMD_WAIT,
     S_CMD_MOVE,
     S_CMD_PICKUP,
@@ -52,7 +53,7 @@ enum string_num
 
 extern void init_strings();
 
-extern char * s[38];
+extern char * s[39];
 
 
 

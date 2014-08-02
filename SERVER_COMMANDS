@@ -157,6 +157,10 @@ T_CARRIES [0 to 255]
 Add thing of ID in argument to inventory of selected thing, if said thing is
 available for carrying and not the selected thing.
 
+T_MEMMAP [0 to 255] [string]
+Set part of selected thing's memory of the game map to string argument: the line
+of the argument's number.
+
 TT_ID [-32768 to 32767]
 Select thing type to manipulate by argument as ID. If argument is <0 or <255,
 change it to the lowest unused thing type ID. If thing type of ID does not exist

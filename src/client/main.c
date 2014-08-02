@@ -2,7 +2,7 @@
 
 #define _POSIX_C_SOURCE 1 /* sigaction, sigaction() */
 #define _DARWIN_C_SOURCE 1 /* SIGWINCH on OS X */
-#include <ncurses.h> /* keypad() */
+#include <ncurses.h> /* keypad(), start_color() */
 #include <signal.h> /* SIGWINCH, sigaction, sigaction() */
 #include <stddef.h> /* NULL */
 #include <stdlib.h> /* exit() */
@@ -44,6 +44,7 @@ int main(int argc, char * argv[])
 
     /* Initialize the whole interface. */
     world.winDB.t_screen = initscr();
+    start_color();
     set_cleanup_flag(CLEANUP_NCURSES);
     noecho();
     curs_set(0);

@@ -5,10 +5,10 @@
 #include <errno.h> /* global errno */
 #include <limits.h> /* PIPE_BUF */
 #include <stddef.h> /* size_t, NULL */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT8_MAX */
 #include <stdio.h> /* defines EOF, FILE, sprintf(), fprintf() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen(), memcpy(), memset(), strchr() */
+#include <string.h> /* strlen(), snprintf(), memcpy(), memset(), strchr() */
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time(), nanosleep() */
 #include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish(),
@@ -26,9 +26,12 @@
 
 
 
-/* Write to "file" god commands (one per line) to recreate thing "t". */
-static void write_key_value(FILE * file, char * key, uint32_t value);
-static void write_key_string(FILE * file, char * key, char * string);
+/* Helpers to write lines of god commands to recreate thing "t". */
+static void write_key_space(FILE * file, char * key);
+static void write_value(FILE * file, uint32_t value);
+static void write_string(FILE * file, char * string);
+static void write_key_space_value(FILE * file, char * key, uint32_t value);
+static void write_key_space_string(FILE * file, char * key, char * string);
 
 /* Write to "file" \n-delimited line of "key" + space + "value" as string. */
 static void write_thing(FILE * file, struct Thing * t);
@@ -61,30 +64,34 @@ static void write_inventory(struct Thing * player, FILE * file);
  */
 static char * build_visible_map(struct Thing * player);
 
-/* Write to "file" game map as visible to "player", build_visible_map()-drawn.
- * Write one row per \n-delimited line.
+/* Write to "file" game map as visible to "player" right now, as drawn by
+ * build_visible_map(), and thereafter game map as memorized by player in its
+ * .mem_map. Write one row per \n-delimited line.
  */
 static void write_map(struct Thing * player, FILE * file);
 
 
 
-static void write_key_value(FILE * file, char * key, uint32_t value)
+static void write_key_space(FILE * file, char * key)
 {
     try_fwrite(key, strlen(key), 1, file, __func__);
     try_fputc(' ', file, __func__);
-    char * line = try_malloc(11, __func__);
-    exit_trouble(-1 == sprintf(line, "%u", value), __func__, s[S_FCN_SPRINTF]);
-    try_fwrite(line, strlen(line), 1, file, __func__);
-    free(line);
-    try_fputc('\n', file, __func__);
 }
 
 
 
-static void write_key_string(FILE * file, char * key, char * string)
+static void write_value(FILE * file, uint32_t value)
 {
-    try_fwrite(key, strlen(key), 1, file, __func__);
-    try_fputc(' ', file, __func__);
+    char * line = try_malloc(11, __func__);
+    exit_trouble(-1 == sprintf(line, "%u", value), __func__, s[S_FCN_SPRINTF]);
+    try_fwrite(line, strlen(line), 1, file, __func__);
+    free(line);
+}
+
+
+
+static void write_string(FILE * file, char * string)
+{
     uint8_t contains_space = NULL != strchr(string, ' ');
     if (contains_space)
     {
@@ -95,6 +102,23 @@ static void write_key_string(FILE * file, char * key, char * string)
     {
         try_fputc('\'', file, __func__);
     }
+}
+
+
+
+static void write_key_space_value(FILE * file, char * key, uint32_t value)
+{
+    write_key_space(file, key);
+    write_value(file, value);
+    try_fputc('\n', file, __func__);
+}
+
+
+
+static void write_key_space_string(FILE * file, char * key, char * string)
+{
+    write_key_space(file, key);
+    write_string(file, string);
     try_fputc('\n', file, __func__);
 }
 
@@ -107,17 +131,39 @@ static void write_thing(FILE * file, struct Thing * t)
     {
         write_thing(file, o);
     }
-    write_key_value(file, s[S_CMD_T_ID], t->id);
-    write_key_value(file, s[S_CMD_T_TYPE], t->type);
-    write_key_value(file, s[S_CMD_T_POSY], t->pos.y);
-    write_key_value(file, s[S_CMD_T_POSX], t->pos.x);
-    write_key_value(file, s[S_CMD_T_COMMAND], t->command);
-    write_key_value(file, s[S_CMD_T_ARGUMENT], t->arg);
-    write_key_value(file, s[S_CMD_T_PROGRESS], t->progress);
-    write_key_value(file, s[S_CMD_T_HP], t->lifepoints);
+    write_key_space_value(file, s[S_CMD_T_ID], t->id);
+    write_key_space_value(file, s[S_CMD_T_TYPE], t->type);
+    write_key_space_value(file, s[S_CMD_T_POSY], t->pos.y);
+    write_key_space_value(file, s[S_CMD_T_POSX], t->pos.x);
+    write_key_space_value(file, s[S_CMD_T_COMMAND], t->command);
+    write_key_space_value(file, s[S_CMD_T_ARGUMENT], t->arg);
+    write_key_space_value(file, s[S_CMD_T_PROGRESS], t->progress);
+    write_key_space_value(file, s[S_CMD_T_HP], t->lifepoints);
     for (o = t->owns; o; o = o->next)
     {
-        write_key_value(file, s[S_CMD_T_CARRIES], o->id);
+        write_key_space_value(file, s[S_CMD_T_CARRIES], o->id);
+    }
+    if (t->mem_map)
+    {
+        uint32_t map_size = world.map.length * world.map.length;/* snprintf() */
+        char * mem_map_copy = try_malloc(map_size + 1, __func__);/* reads one */
+        memcpy(mem_map_copy, t->mem_map, map_size);   /* byte beyond map_size */
+        mem_map_copy[map_size] = '\0';     /* if string is not \0-terminated. */
+        uint16_t y;
+        char string[UINT8_MAX + 1 + 1];
+        for (y = 0; y < world.map.length; y++)
+        {
+
+            int test = snprintf(string, world.map.length + 1, "%s",
+                                mem_map_copy + (y * world.map.length));
+            exit_trouble(test < 0, __func__, "snprintf()");
+            write_key_space(file, s[S_CMD_T_MEMMAP]);
+            write_value(file, y);
+            try_fputc(' ', file, __func__);
+            write_string(file, string);
+            try_fputc('\n', file, __func__);
+        }
+        free(mem_map_copy);
     }
     try_fputc('\n', file, __func__);
 }
@@ -301,11 +347,19 @@ static void write_map(struct Thing * player, FILE * file)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            try_fputc(visible_map[(y * world.map.length) + x], file, __func__);
+            try_fputc(visible_map[y * world.map.length + x], file, __func__);
         }
         try_fputc('\n', file, __func__);
     }
     free(visible_map);
+    for (y = 0; y < world.map.length; y++)
+    {
+        for (x = 0; x < world.map.length; x++)
+        {
+            try_fputc(player->mem_map[y * world.map.length + x], file, __func__);
+        }
+        try_fputc('\n', file, __func__);
+    }
 }
 
 
@@ -340,44 +394,44 @@ extern void save_world()
 {
     char * path_tmp;
     FILE * file = atomic_write_start(s[S_PATH_SAVE], &path_tmp);
-    write_key_value(file, s[S_CMD_MAPLENGTH], world.map.length);
-    write_key_value(file, s[S_CMD_PLAYTYPE], world.player_type);
+    write_key_space_value(file, s[S_CMD_MAPLENGTH], world.map.length);
+    write_key_space_value(file, s[S_CMD_PLAYTYPE], world.player_type);
     try_fputc('\n', file, __func__);
     struct ThingAction * ta;
     for (ta = world.thing_actions; ta; ta = ta->next)
     {
-        write_key_value(file, s[S_CMD_TA_ID], ta->id);
-        write_key_value(file, s[S_CMD_TA_EFFORT], ta->effort);
-        write_key_string(file, s[S_CMD_TA_NAME], ta->name);
+        write_key_space_value(file, s[S_CMD_TA_ID], ta->id);
+        write_key_space_value(file, s[S_CMD_TA_EFFORT], ta->effort);
+        write_key_space_string(file, s[S_CMD_TA_NAME], ta->name);
         try_fputc('\n', file, __func__);
     }
     struct ThingType * tt;
     for (tt = world.thing_types; tt; tt = tt->next)
     {
-        write_key_value(file, s[S_CMD_TT_ID], tt->id);
-        write_key_value(file, s[S_CMD_TT_STARTN], tt->start_n);
-        write_key_value(file, s[S_CMD_TT_HP], tt->lifepoints);
+        write_key_space_value(file, s[S_CMD_TT_ID], tt->id);
+        write_key_space_value(file, s[S_CMD_TT_STARTN], tt->start_n);
+        write_key_space_value(file, s[S_CMD_TT_HP], tt->lifepoints);
         int test = fprintf(file, "%s %c\n", s[S_CMD_TT_SYMB], tt->char_on_map);
         exit_trouble(test < 0, __func__, "fprintf");
-        write_key_string(file, s[S_CMD_TT_NAME], tt->name);
-        write_key_value(file, s[S_CMD_TT_CONSUM], tt->consumable);
+        write_key_space_string(file, s[S_CMD_TT_NAME], tt->name);
+        write_key_space_value(file, s[S_CMD_TT_CONSUM], tt->consumable);
         try_fputc('\n', file, __func__);
     }
     for (tt = world.thing_types; tt; tt = tt->next)
     {
-        write_key_value(file, s[S_CMD_TT_ID], tt->id);
-        write_key_value(file, s[S_CMD_TT_CORPS], tt->corpse_id);
+        write_key_space_value(file, s[S_CMD_TT_ID], tt->id);
+        write_key_space_value(file, s[S_CMD_TT_CORPS], tt->corpse_id);
     }
     try_fputc('\n', file, __func__);
-    write_key_value(file, s[S_CMD_SEED_MAP], world.seed_map);
-    write_key_value(file, s[S_CMD_SEED_RAND], world.seed);
-    write_key_value(file, s[S_CMD_TURN], world.turn);
+    write_key_space_value(file, s[S_CMD_SEED_MAP], world.seed_map);
+    write_key_space_value(file, s[S_CMD_SEED_RAND], world.seed);
+    write_key_space_value(file, s[S_CMD_TURN], world.turn);
     try_fputc('\n', file, __func__);
     struct Thing * t;
     for (t = world.things; t; t = t->next)
     {
         write_thing(file, t);
     }
-    write_key_value(file, s[S_CMD_WORLD_ACTIVE], 1);
+    write_key_space_value(file, s[S_CMD_WORLD_ACTIVE], 1);
     atomic_write_finish(file, s[S_PATH_SAVE], path_tmp);
 }

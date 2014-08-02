@@ -4,10 +4,11 @@
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t */
 #include <stdlib.h> /* atoi(), free() */
-#include <string.h> /* strcmp() */
+#include <string.h> /* strcmp(), memset(), memcpy() */
 #include <unistd.h> /* F_OK, access(), unlink() */
 #include "../common/parse_file.h" /* err_line(), parse_val(), parsetest_int() */
 #include "../common/rexit.h" /* exit_trouble() */
+#include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* unset_cleanup_flag() */
 #include "field_of_view.h" /* build_fov_map() */
 #include "hardcoded_strings.h" /* s */
@@ -48,7 +49,7 @@ static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t);
 static uint8_t parse_carry(char * tok0, char * tok1, struct Thing * t);
 
 /* Parse/apply god command in "tok0"/"tok1" to manipulate a Thing. */
-static uint8_t parse_thing_manipulation(char * tok0, char * tok1);
+static uint8_t parse_thing_manipulation_1arg(char * tok0, char * tok1);
 
 /* Performs parse_world_active()'s world activation legality tests. */
 static uint8_t world_may_be_set_active();
@@ -70,9 +71,15 @@ static uint8_t set_map_length(char * tok0, char * tok1);
 
 
 
+/* Thing, ThingType or ThingAction selected to be manipulated. */
+static struct Thing * t = NULL;
+static struct ThingType * tt = NULL;
+static struct ThingAction * ta = NULL;
+
+
+
 static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
 {
-    static struct ThingType * tt = NULL;
     if (!tt &&
         (   !strcmp(tok0, s[S_CMD_TT_CONSUM]) || !strcmp(tok0, s[S_CMD_TT_SYMB])
          || !strcmp(tok0, s[S_CMD_TT_STARTN]) || !strcmp(tok0, s[S_CMD_TT_NAME])
@@ -128,7 +135,6 @@ static uint8_t try_func_name(struct ThingAction * ta, char * name,
 
 static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
 {
-    static struct ThingAction * ta = NULL;
     if (!ta &&
         (!strcmp(tok0, s[S_CMD_TA_EFFORT]) || !strcmp(tok0, s[S_CMD_TA_NAME])))
     {
@@ -272,9 +278,8 @@ static uint8_t parse_carry(char * tok0, char * tok1, struct Thing * t)
 
 
 
-static uint8_t parse_thing_manipulation(char * tok0, char * tok1)
+static uint8_t parse_thing_manipulation_1arg(char * tok0, char * tok1)
 {
-    static struct Thing * t = NULL;
     if (!t &&
         (   !strcmp(tok0, s[S_CMD_T_PROGRESS]) || !strcmp(tok0, s[S_CMD_T_TYPE])
          || !strcmp(tok0, s[S_CMD_T_CARRIES]) || !strcmp(tok0, s[S_CMD_T_POSY])
@@ -410,7 +415,7 @@ extern uint8_t parse_god_command_1arg(char * tok0, char * tok1)
 {
     if (   parse_thingtype_manipulation(tok0, tok1)
         || parse_thingaction_manipulation(tok0, tok1)
-        || parse_thing_manipulation(tok0, tok1)
+        || parse_thing_manipulation_1arg(tok0, tok1)
         || set_map_length(tok0,tok1)
         || parse_val(tok0,tok1,s[S_CMD_SEED_RAND],'U', (char *)&world.seed)
         || parse_val(tok0,tok1,s[S_CMD_TURN],'u',(char *)&world.turn)
@@ -426,6 +431,43 @@ extern uint8_t parse_god_command_1arg(char * tok0, char * tok1)
         uint8_t test = remake_world();
         err_line(1 == test, "No player type with start number of >0 defined.");
         err_line(2 == test, "No thing action with name 'wait' defined.");
+    }
+    else
+    {
+        return 0;
+    }
+    return 1;
+}
+
+
+
+extern uint8_t parse_god_command_2arg(char * tok0, char * tok1, char * tok2)
+{
+    if (!t && !strcmp(tok0, s[S_CMD_T_MEMMAP]))
+    {
+        err_line(1, "No thing defined to manipulate yet.");
+        return 1;
+    }
+    if (!strcmp(tok0, s[S_CMD_T_MEMMAP]))
+    {
+        uint8_t y = atoi(tok1);
+        if (parsetest_int(tok1, '8') || y >= world.map.length)
+        {
+            err_line(1, "Illegal value for map line number.");
+            return 1;
+        }
+        if (strlen(tok2) != world.map.length)
+        {
+            err_line(1, "Map line length is unequal map width.");
+            return 1;
+        }
+        if (!t->mem_map)
+        {
+            uint32_t map_size = world.map.length * world.map.length;
+            t->mem_map = try_malloc(map_size, __func__);
+            memset(t->mem_map, ' ', map_size);
+        }
+        memcpy(t->mem_map + y * world.map.length, tok2, world.map.length);
     }
     else
     {

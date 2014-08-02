@@ -30,11 +30,11 @@
  */
 static void read_inventory(char * read_buf, uint32_t linemax, FILE * file);
 
-/* Read the next characters in "file" into world.map.cells. In detail: Read
+/* Read the next characters in "file" into "map". In detail: Read
  * world.map.length times world.map.length characters, followed by one ignored
  * character (that we assume is a newline).
  */
-static void read_map_cells(FILE * file);
+static void read_map_cells(FILE * file, char ** map);
 
 /* Repeatedly use try_fgets() with given arguments to read the remaining lines
  * of "file" into the world.log string.
@@ -116,17 +116,22 @@ static void read_inventory(char * read_buf, uint32_t linemax, FILE * file)
 
 
 
-static void read_map_cells(FILE * file)
+static void read_map_cells(FILE * file, char ** map)
 {
-    free(world.map.cells);
-    world.map.cells = try_malloc(world.map.length * world.map.length, __func__);
+    if (*map)
+    {
+        free(*map);
+        *map = NULL;
+    }
+    *map = try_malloc(world.map.length * world.map.length, __func__);
+    char * map_cells = *map;
     uint16_t y, x;
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
             char c = try_fgetc(file, __func__);
-            world.map.cells[(y * world.map.length) + x] = c;
+            map_cells[y * world.map.length + x] = c;
         }
         try_fgetc(file, __func__);
     }
@@ -213,7 +218,8 @@ static uint8_t read_world()
         first_read = 0;
     }
     world.map.length = read_value_from_line(read_buf, linemax, file);
-    read_map_cells(file);
+    read_map_cells(file, &world.map.cells);
+    read_map_cells(file, &world.mem_map);
     read_log(read_buf, linemax, file);
     free(read_buf);
     try_fclose(file, __func__);

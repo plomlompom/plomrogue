@@ -18,7 +18,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "ai.h" /* ai() */
 #include "cleanup.h" /* unset_cleanup_flag() */
-#include "god_commands.h" /* parse_god_command_1arg() */
+#include "god_commands.h" /* parse_god_command_1arg(),parse_god_command_2arg()*/
 #include "hardcoded_strings.h" /* s */
 #include "io.h" /* io_round(), save_world() */
 #include "things.h" /* Thing, get_thing_action_id_by_name(), get_player() */
@@ -39,7 +39,7 @@ static uint8_t parse_player_command_0arg(char * tok0);
 /* Parse player command "tok0" with one argument "tok1" to player action. */
 static uint8_t parse_player_command_1arg(char * tok0, char * tok1);
 
-/* Parse/apply command "tok0". */
+/* Parse/apply command "tok0" (read further tokens as necessary). */
 static uint8_t parse_command(char * tok0);
 
 /* Compares first line of server out file to world.server_test, aborts if they
@@ -149,6 +149,14 @@ static uint8_t parse_command(char * tok0)
         {
             return 1;
         }
+        else
+        {
+            char * tok2 = token_from_line(NULL);
+            if (tok2 && parse_god_command_2arg(tok0, tok1, tok2))
+            {
+                return 1;
+            }
+        }
     }
     return 0;
 }
@@ -199,7 +207,6 @@ static void turn_over()
                 ai(thing);
             }
             thing->progress++;
-
             struct ThingAction * ta = get_thing_action(thing->command);
             if (thing->progress == ta->effort)
             {
