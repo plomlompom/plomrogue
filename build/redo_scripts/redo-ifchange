@@ -112,8 +112,16 @@ _dependencies_uptodate() {
     # target would not be built. If a dependency build timestamp is
     # greater than or equal to a targets build timestamp, assume the
     # dependency has been rebuilt and the target should be rebuilt.
-    target_ts="$(cat "$REDO_DIR/$target_abspath.buildtime" 2>/dev/null || echo 0)"
-    dependency_ts="$(cat "$REDO_DIR/$dependency.buildtime" 2>/dev/null || echo 0)"
+    if [ -e "$REDO_DIR/$target_abspath.buildtime" ]; then \
+      read target_ts < "$REDO_DIR/$target_abspath.buildtime";
+    else
+      target_ts=0
+    fi
+    if [ -e "$REDO_DIR/$dependency.buildtime" ]; then
+      read dependency_ts < "$REDO_DIR/$dependency.buildtime"
+    else
+       dependency_ts=0
+    fi
     if [ "$dependency_ts" -ge "$target_ts" ]; then
       _echo_debug_message \
         "$REDO_DEPTH$dir$target_relpath dependency $dependency_relpath uptodate, but built later than $target_relpath."
@@ -195,7 +203,10 @@ _do() {
   else
     _echo_debug_message "$REDO_DEPTH$dir$target is up to date."
   fi
-  _add_target "$(readlink -f $target)"
+  # Some do files (like all.do) do not usually generate output.
+  if [ -e "$target" ]; then
+    _add_target "$(readlink -f $target)"
+  fi
 }
 
 _echo_debug_message() {
@@ -258,8 +269,7 @@ _is_uptodate() {
       fi
       # If a file exists and has an entry in the dependency database and ctime
       # is the same as in the entry in the ctime database, it is up to date.
-      if [ "$(cat "$REDO_DIR/$target".ctime 2>/dev/null || :)" = \
-        "$(stat -c%Y "$target")" ]; then
+      if (export LC_ALL=C; stat -c%Y "$target" | grep -Fqx -f "$REDO_DIR/$target".ctime); then
         _echo_debug_message "$REDO_DEPTH$dir$target_relpath.ctime match."
         return 0
       else
@@ -267,8 +277,7 @@ _is_uptodate() {
         # If a file exists and has an entry in the dependency database and
         # ctime is different from the entry in the ctime database, but md5sum
         # is the same as md5sum in the md5sum database, it is up to date.
-        if [ "$(cat "$REDO_DIR/$target".md5sum 2>/dev/null || :)" = \
-          "$(md5sum < "$target")" ]; then
+        if (md5sum < "$target" | grep -Fqx -f "$REDO_DIR/$target".md5sum); then
           _echo_debug_message "$REDO_DEPTH$dir$target_relpath.md5sum match."
           return 0
         else

@@ -12,3 +12,8 @@ BOTH SERVER/CLIENT:
 CLIENT:
 
 - re-work unnecessary complex command / keybinding / server message mapping
+
+BUILD PROCESS:
+
+- erlehmann's redo scripts are not OSX-compliant, see:
+  <https://github.com/plomlompom/plomrogue/issues/2>
