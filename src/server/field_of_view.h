@@ -15,7 +15,7 @@ struct Thing;
 
 /* States that cells in the field of view map may be in. */
 enum fov_cell_states {
-    HIDDEN = 0x00,
+    HIDDEN  = 0x00,
     VISIBLE = 0x01
 };
 
