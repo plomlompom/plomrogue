@@ -85,10 +85,9 @@ Hacking / server internals and configuration
 --------------------------------------------
 
 The game world is set up and made subject to player commands by
-./roguelike-server. It's controlled by commands explained in the file …
-The server usually reads these from the files ./server/in (written to by
-./roguelike-client), ./confserver/world, ./record and ./savefile. See the file
-./SERVER_COMMANDS for details.
+./roguelike-server. It's controlled by commands explained in the file
+./SERVER_COMMANDS. The server usually reads these from the files ./server/in
+(written to by ./roguelike-client), ./confserver/world, ./record and ./savefile.
 
 All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v

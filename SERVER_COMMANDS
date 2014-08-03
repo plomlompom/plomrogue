@@ -24,11 +24,11 @@ In replay mode, commands from ./record are read. If a turn number is given as an
 argument, the file is read until the given turn is reached, or, if the turn
 number is higher than the last turn of the recorded play, the last turn. If no
 turn number is given as argument, the record file is replayed until turn 1 is
-reached.
+reached. Meta commands in ./record are not understood.
 
-From then on, ./server/in is also read. Meta commands are interpreted normally,
-but any player and god command merely furthers reading of ./record by one line
-and is otherwise ignored.
+From then on, ./server/in is also read. Meta commands sent by the client are
+interpreted normally, but any player and god command merely furthers reading of
+./record by one line and is otherwise ignored.
 
 Command list
 ============
