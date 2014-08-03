@@ -29,6 +29,9 @@ extern void try_fputc(uint8_t c, FILE * file, const char * f);
 extern int try_fgetc(FILE * file, const char * f);
 extern char * try_fgets(char * line, int size, FILE * file, const char * f);
 
+/* Return "path" + suffix "_tmp". Value is malloc'd, must be freed externally.*/
+extern char * build_temp_path(char * path);
+
 /* Write to "path_tmp" "path" + "_tmp" and return a new file at that "path_tmp"
  * open for writing. "path_tmp" is malloc()'d, must be freed externally.
 */

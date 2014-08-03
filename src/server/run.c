@@ -7,12 +7,14 @@
 #include <stdio.h> /* FILE, printf(), fflush() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), strcmp(), strncmp(), strdup() */
+#include <time.h> /* time_t, time() */
 #include <unistd.h> /* access() */
 #include "../common/parse_file.h" /* set_err_line_options(), token_from_line(),
                                    * err_line(), err_line_inc(), parse_val()
                                    */
 #include "../common/readwrite.h" /* try_fopen(), try_fcose(), try_fwrite(),
-                                  * try_fgets(), textfile_width(), try_fputc()
+                                  * try_fgets(), textfile_width(), try_fputc(),
+                                  * atomic_write_finish(), build_temp_path()
                                   */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -53,7 +55,6 @@ static void server_test();
  * avatar is free to receive new commands (or is dead).
  */
 static void turn_over();
-
 
 
 
@@ -221,25 +222,40 @@ static void turn_over()
 
 
 
-static void record_msg(char * msg)
+extern void record(char * msg, uint8_t force)
 {
-    char * path_tmp;
-    FILE * file_tmp = atomic_write_start(s[S_PATH_RECORD], &path_tmp);
-    if (!access(s[S_PATH_RECORD], F_OK))
+    static FILE * file_tmp = NULL;
+    static time_t save_wait = 0;
+    static char * path_tmp;
+    if (!file_tmp)
     {
-        FILE * file_read = try_fopen(s[S_PATH_RECORD], "r", __func__);
-        uint32_t linemax = textfile_width(file_read);
-        char * line = try_malloc(linemax + 1, __func__);
-        while (try_fgets(line, linemax + 1, file_read, __func__))
+        path_tmp = build_temp_path(s[S_PATH_RECORD]);
+        file_tmp = try_fopen(path_tmp, "w", __func__);
+        if (!access(s[S_PATH_RECORD], F_OK))
         {
-            try_fwrite(line, strlen(line), 1, file_tmp, __func__);
+            FILE * file_read = try_fopen(s[S_PATH_RECORD], "r", __func__);
+            uint32_t linemax = textfile_width(file_read);
+            char * line = try_malloc(linemax + 1, __func__);
+            while (try_fgets(line, linemax + 1, file_read, __func__))
+            {
+                try_fwrite(line, strlen(line), 1, file_tmp, __func__);
+            }
+            free(line);
+            try_fclose(file_read, __func__);
         }
-        free(line);
-        try_fclose(file_read, __func__);
     }
-    try_fwrite(msg, strlen(msg), 1, file_tmp, __func__);
-    try_fputc('\n', file_tmp, __func__);
-    atomic_write_finish(file_tmp, s[S_PATH_RECORD], path_tmp);
+    if (msg)
+    {
+        try_fwrite(msg, strlen(msg), 1, file_tmp, __func__);
+        try_fputc('\n', file_tmp, __func__);
+    }
+    if (force || time(NULL) > save_wait + 15)
+    {
+        save_wait = time(NULL);
+        save_world();
+        atomic_write_finish(file_tmp, s[S_PATH_RECORD], path_tmp);
+        file_tmp = NULL;
+    }
 }
 
 
@@ -264,8 +280,7 @@ extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
             }
             if (do_record)
             {
-                save_world();
-                record_msg(msg);
+                record(msg, 0);
             }
             char * tokplus = token_from_line(NULL);
             err_line(NULL != tokplus, "Too many arguments, ignoring overflow.");
@@ -283,8 +298,8 @@ extern uint8_t io_loop()
 {
     while (1)
     {
-        server_test();
         char * msg = io_round();
+        server_test();
         if (NULL == msg)
         {
             continue;

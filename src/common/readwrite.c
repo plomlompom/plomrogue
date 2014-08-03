@@ -14,23 +14,6 @@
 
 
 
-/* Return "path" + suffix "_tmp". Value is malloc'd, must be free externally. */
-static char * build_temp_path(char * path);
-
-
-
-static char * build_temp_path(char * path)
-{
-    char * suffix_tmp = "_tmp";
-    uint16_t size = strlen(path) + strlen(suffix_tmp) + 1;
-    char * path_tmp = try_malloc(size, __func__);
-    int test = sprintf(path_tmp, "%s%s", path, suffix_tmp);
-    exit_trouble(test < 0, __func__, "sprintf");
-    return path_tmp;
-}
-
-
-
 extern FILE * try_fopen(char * path, char * mode, const char * f)
 {
     char * msg1 = "Trouble in ";
@@ -87,6 +70,18 @@ extern char * try_fgets(char * line, int linemax, FILE * file, const char * f)
     char * test = fgets(line, linemax, file);
     exit_trouble(NULL == test && ferror(file), f, "fgets");
     return test;
+}
+
+
+
+extern char * build_temp_path(char * path)
+{
+    char * suffix_tmp = "_tmp";
+    uint16_t size = strlen(path) + strlen(suffix_tmp) + 1;
+    char * path_tmp = try_malloc(size, __func__);
+    int test = sprintf(path_tmp, "%s%s", path, suffix_tmp);
+    exit_trouble(test < 0, __func__, "sprintf");
+    return path_tmp;
 }
 
 

@@ -10,9 +10,16 @@
 
 
 
-/* Try parsing "msg" into a command to apply, and apply it. Record commands to
- * the file at world.path_record if "do_record" is set, and output them to
- * stdout if "do_verbose" and world.is_verbose are set.
+/* Record save and record file data. Both are only written if "force" is set, or
+ * on the first run with unset "force", or if 15 seconds have passed since the
+ * last file writing. "msg" is appended to the record file if it is set.
+ */
+extern void record(char * msg, uint8_t force);
+
+/* Try parsing "msg" into a command to apply, and apply it. Output commands to
+ * stdout if "do_verbose" and world.is_verbose are set. If "do_record" is set,
+ * record commands to record file, and run save_world() if the last call to it
+ * via this function has not happened yet or is at least one minute in the past.
  */
 extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose);
 

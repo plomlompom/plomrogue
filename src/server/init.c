@@ -26,7 +26,7 @@
 #include "things.h" /* Thing, ThingType, free_things(), add_things(),
                      * get_thing_id_action_id_by_name()
                      */
-#include "run.h" /* obey_msg(), io_loop() */
+#include "run.h" /* obey_msg(), io_loop(), record() */
 #include "world.h" /* global world */
 
 
@@ -257,4 +257,5 @@ extern void run_game()
     }
     err_line_zero();
     io_loop();
+    record(NULL, 1);
 }
