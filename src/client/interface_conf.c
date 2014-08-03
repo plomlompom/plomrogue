@@ -1,6 +1,6 @@
 /* src/client/interface_conf.c */
 
-#define _POSIX_C_SOURCE 200809L /* getopt(), optarg, strdup() */
+#define _POSIX_C_SOURCE 200809L /* getopt(), optarg, strdup(), snprintf() */
 #include "interface_conf.h"
 #include <ncurses.h> /* delwin() */
 #include <stddef.h> /* NULL, size_t */

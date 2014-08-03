@@ -1,6 +1,6 @@
 /* src/common/parse_file.c */
 
-#define _POSIX_C_SOURCE 200809L /* strdup() */
+#define _POSIX_C_SOURCE 200809L /* strdup(), snprintf() */
 #include "parse_file.h"
 #include <stddef.h> /* size_t, NULL */
 #include <stdio.h> /* FILE, snprintf() */
