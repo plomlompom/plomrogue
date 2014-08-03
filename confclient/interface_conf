@@ -87,6 +87,7 @@ NAME 'Map'
 BREAK 0
 WIDTH -42
 HEIGHT 0
+KEY 97 ai
 KEY 112 pick
 KEY 58 wait
 KEY 101 move_e

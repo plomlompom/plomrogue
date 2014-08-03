@@ -54,6 +54,9 @@ Shut down server.
 Player commands
 ---------------
 
+ai
+Do what the AI would do.
+
 wait
 Make player character wait one turn.
 

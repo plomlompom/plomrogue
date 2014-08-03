@@ -86,12 +86,20 @@ static uint8_t player_commands_allowed()
 static uint8_t parse_player_command_0arg(char * tok0)
 {
     struct Thing * player = get_player();
-    if (!strcmp(tok0, s[S_CMD_WAIT]) || !strcmp(tok0, s[S_CMD_PICKUP]))
+    if (   !strcmp(tok0, s[S_CMD_WAIT]) || !strcmp(tok0, s[S_CMD_PICKUP])
+        || !strcmp(tok0, s[S_CMD_AI]))
     {
         if (player_commands_allowed())
         {
-            player->command = get_thing_action_id_by_name(tok0);
-            player->arg = 0;
+            if (!strcmp(tok0, s[S_CMD_AI]))
+            {
+                ai(player);
+            }
+            else
+            {
+                player->command = get_thing_action_id_by_name(tok0);
+                player->arg = 0;
+            }
             turn_over();
         }
         return 1;
