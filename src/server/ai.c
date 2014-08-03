@@ -26,13 +26,11 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
 
 /* Iterate over scored cells in "score_map" of world.map's geometry. Compare
  * each cell's score against the score of its immediate neighbors in N_DIRS
- * directions. If it's neighbors are low enough that the result would be lower
- * than the current value, re-set it to 1 point higher than its lowest-scored
+ * directions. If any neighbor's score is at least two points lower than the
+ * current cell's score, re-set it to 1 point higher than its lowest-scored
  * neighbor. Repeat this whole process until all cells have settled on their
- * final score. Ignore cells whose position in "score_map" fits cells of
- * unreachable terrain in world.map.cells or whose score is greater than
- * "max_score". Expect "max_score" to be the maximum score for cells, marking
- * them as unreachable.
+ * final score. Ignore cells whose score is greater than "max_score". Expect
+ * "max_score" to be the maximum score for cells, marking them as unreachable.
  */
 static void dijkstra_map(uint16_t * score_map, uint16_t max_score);
 
