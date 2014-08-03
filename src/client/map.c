@@ -9,6 +9,7 @@
 
 extern void map_scroll(char d)
 {
+    world.focus_each_turn = 0;
     struct Win * win = get_win_by_id('m');
     uint16_t offset;
     if (('8' == d || '2' == d) && world.map.length > win->frame_size.y)
