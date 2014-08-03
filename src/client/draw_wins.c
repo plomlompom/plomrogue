@@ -182,7 +182,7 @@ static void add_line_compact(struct Win * win, char * line, attr_t attri,
     uint16_t len_line = strlen(line);
     char * separator = last ? "" : " / ";
     uint32_t len_line_new = len_line + strlen(separator);
-    char * line_new = try_malloc(len_line_new, __func__);
+    char * line_new = try_malloc(len_line_new + 1, __func__);
     int test = sprintf(line_new, "%s%s", line, separator);
     exit_trouble(test < 0, __func__, "sprintf");
     uint16_t x = 0;
