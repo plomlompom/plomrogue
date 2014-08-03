@@ -16,8 +16,9 @@ shortest-path-wise nearest enemy (any animate being of a different species)
 visible to them. If they see no enemy, they just wait.
 
 Every move of yours re-writes a file "savefile" that describes the new state of
-the world. Once you re-start the game, the game state is recreated from the
-"savefile" file. To start over in a new world, simply delete this file.
+dthe world, if more than 15 seconds have passed since its last writing. Once you
+re-start the game, the game state is recreated from the "savefile" file. To
+start over in a new world, simply delete this file.
 
 System requirements / installation / running the game
 -----------------------------------------------------
