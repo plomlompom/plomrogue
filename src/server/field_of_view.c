@@ -63,21 +63,30 @@ static uint8_t try_merge(struct shadow_angle * shadow,
 static uint8_t try_merging_angles(uint32_t left_angle, uint32_t right_angle,
                                   struct shadow_angle ** shadows);
 
-/* If "pos_in_map" in angle between"left_angle" to "right_angle" to the viewing
- * actor is in a shadow from the shadow list "shadows", mark it as HIDDEN on the
- * "fov_map"; else, if the world map features a viewing obstacle on the world
- * map, calculate its shadow angle to the viewer and add it to "shadows".
+/* Test whether angle between "left_angle" and "right_angle", or at least
+ * "middle_angle", is captured inside one of the shadow angles in "shadows". If
+ * so, set hex in "fov_map" indexed by "pos_in_map" to HIDDEN. If the whole
+ * angle and not just "middle_angle" is captured, return 1. Any other case: 0.
  */
-static void set_shadow(uint32_t left_angle, uint32_t right_angle,
-                       struct shadow_angle ** shadows, uint16_t pos_in_map,
-                       uint8_t * fov_map);
+static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
+                         uint32_t middle_angle, struct shadow_angle ** shadows,
+                         uint16_t pos_in_map, uint8_t * fov_map);
+
+/* Test whether angle between "left_angle" and "right_angle", or at least
+ * "middle_angle", is captured inside one of the shadow angles in "shadows". If
+ * so, set hex in "fov_map" indexed by "pos_in_map" to HIDDEN. If the whole
+ * angle and not just "middle_angle" is captured, return 1. Any other case: 0.
+ */
+static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
+                         uint32_t middle_angle, struct shadow_angle ** shadows,
+                         uint16_t pos_in_map, uint8_t * fov_map);
 
 /* Free shadow angles list "angles". */
 static void free_angles(struct shadow_angle * angles);
 
 /* Evaluate map position "test_pos" in distance "dist" to the view origin, and
  * on the circle of that distance to the origin on hex "hex_i" (as counted from
- * the circle's rightmost point), for setting shaded cells in "fov_map" and
+ * the circle's rightmost point), for setting shaded hexes in "fov_map" and
  * potentially adding a new shadow to linked shadow angle list "shadows".
  */
 static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
@@ -253,9 +262,9 @@ static uint8_t try_merging_angles(uint32_t left_angle, uint32_t right_angle,
 
 
 
-static void set_shadow(uint32_t left_angle, uint32_t right_angle,
-                       struct shadow_angle ** shadows, uint16_t pos_in_map,
-                       uint8_t * fov_map)
+static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
+                         uint32_t middle_angle, struct shadow_angle ** shadows,
+                         uint16_t pos_in_map, uint8_t * fov_map)
 {
     struct shadow_angle * shadow_i;
     if (fov_map[pos_in_map] & VISIBLE)
@@ -266,32 +275,46 @@ static void set_shadow(uint32_t left_angle, uint32_t right_angle,
                 && right_angle >= shadow_i->right_angle)
             {
                 fov_map[pos_in_map] = HIDDEN;
-                return;
+                return 1;
+            }
+            if (   middle_angle < shadow_i->left_angle
+                && middle_angle > shadow_i->right_angle)
+            {
+                fov_map[pos_in_map] = HIDDEN;
             }
         }
     }
-    if ('X' == world.map.cells[pos_in_map])
+    return 0;
+}
+
+
+
+/* To "shadows", add shadow defined by "left_angle" and "right_angle", either as
+ * new entry or as part of an existing shadow (swallowed whole or extending it).
+ */
+static void set_shadow(uint32_t left_angle, uint32_t right_angle,
+                       struct shadow_angle ** shadows)
+{
+    struct shadow_angle * shadow_i;
+    if (!try_merging_angles(left_angle, right_angle, shadows))
     {
-        if (!try_merging_angles(left_angle, right_angle, shadows))
+        struct shadow_angle * shadow;
+        shadow = try_malloc(sizeof(struct shadow_angle), __func__);
+        shadow->left_angle  = left_angle;
+        shadow->right_angle = right_angle;
+        shadow->next = NULL;
+        if (*shadows)
         {
-            struct shadow_angle * shadow;
-            shadow = try_malloc(sizeof(struct shadow_angle), __func__);
-            shadow->left_angle  = left_angle;
-            shadow->right_angle = right_angle;
-            shadow->next = NULL;
-            if (*shadows)
+            for (shadow_i = *shadows; shadow_i; shadow_i = shadow_i->next)
             {
-                for (shadow_i = *shadows; shadow_i; shadow_i = shadow_i->next)
+                if (!shadow_i->next)
                 {
-                    if (!shadow_i->next)
-                    {
-                        shadow_i->next = shadow;
-                        return;
-                    }
+                    shadow_i->next = shadow;
+                    return;
                 }
             }
-            *shadows = shadow;
         }
+        *shadows = shadow;
     }
 }
 
@@ -313,18 +336,28 @@ static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
                           struct shadow_angle ** shadows)
 {
     int32_t left_angle_uncorrected =   ((CIRCLE / 12) / dist)
-                                     - ((hex_i * (CIRCLE / 6)) / dist);
+                                     - (hex_i * (CIRCLE / 6) / dist);
     int32_t right_angle_uncorrected =   left_angle_uncorrected
                                       - (CIRCLE / (6 * dist));
     uint32_t left_angle  = correct_angle(left_angle_uncorrected);
     uint32_t right_angle = correct_angle(right_angle_uncorrected);
     uint32_t right_angle_1st = right_angle > left_angle ? 0 : right_angle;
-    uint16_t pos_in_map = test_pos->y * world.map.length + test_pos->x;
-    set_shadow(left_angle, right_angle_1st, shadows, pos_in_map, fov_map);
-    if (right_angle_1st != right_angle)
+    uint32_t middle_angle = 0;
+    if (right_angle_1st)
     {
-        left_angle = CIRCLE;
-        set_shadow(left_angle, right_angle, shadows, pos_in_map, fov_map);
+        middle_angle = right_angle + ((left_angle - right_angle) / 2);
+    }
+    uint16_t pos_in_map = test_pos->y * world.map.length + test_pos->x;
+    uint8_t all_shaded = shade_hex(left_angle, right_angle_1st, middle_angle,
+                                   shadows, pos_in_map, fov_map);
+    if (!all_shaded && 'X' == world.map.cells[pos_in_map])
+    {
+        set_shadow(left_angle, right_angle_1st, shadows);
+        if (right_angle_1st != right_angle)
+        {
+            left_angle = CIRCLE;
+            set_shadow(left_angle, right_angle, shadows);
+        }
     }
 }
 
