@@ -65,21 +65,12 @@ static uint8_t try_merging_angles(uint32_t left_angle, uint32_t right_angle,
 
 /* Test whether angle between "left_angle" and "right_angle", or at least
  * "middle_angle", is captured inside one of the shadow angles in "shadows". If
- * so, set hex in "fov_map" indexed by "pos_in_map" to HIDDEN. If the whole
- * angle and not just "middle_angle" is captured, return 1. Any other case: 0.
+ * so, set hex in "fov_map" indexed by "pos_in_map" to 'H'. If the whole angle
+ * and not just "middle_angle" is captured, return 1. Any other case: 0.
  */
 static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
                          uint32_t middle_angle, struct shadow_angle ** shadows,
-                         uint16_t pos_in_map, uint8_t * fov_map);
-
-/* Test whether angle between "left_angle" and "right_angle", or at least
- * "middle_angle", is captured inside one of the shadow angles in "shadows". If
- * so, set hex in "fov_map" indexed by "pos_in_map" to HIDDEN. If the whole
- * angle and not just "middle_angle" is captured, return 1. Any other case: 0.
- */
-static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
-                         uint32_t middle_angle, struct shadow_angle ** shadows,
-                         uint16_t pos_in_map, uint8_t * fov_map);
+                         uint16_t pos_in_map, char * fov_map);
 
 /* Free shadow angles list "angles". */
 static void free_angles(struct shadow_angle * angles);
@@ -89,7 +80,7 @@ static void free_angles(struct shadow_angle * angles);
  * the circle's rightmost point), for setting shaded hexes in "fov_map" and
  * potentially adding a new shadow to linked shadow angle list "shadows".
  */
-static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
+static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
                           struct yx_uint8 * test_pos,
                           struct shadow_angle ** shadows);
 
@@ -264,23 +255,23 @@ static uint8_t try_merging_angles(uint32_t left_angle, uint32_t right_angle,
 
 static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
                          uint32_t middle_angle, struct shadow_angle ** shadows,
-                         uint16_t pos_in_map, uint8_t * fov_map)
+                         uint16_t pos_in_map, char * fov_map)
 {
     struct shadow_angle * shadow_i;
-    if (fov_map[pos_in_map] == VISIBLE)
+    if (fov_map[pos_in_map] == 'v')
     {
         for (shadow_i = *shadows; shadow_i; shadow_i = shadow_i->next)
         {
             if (   left_angle <=  shadow_i->left_angle
                 && right_angle >= shadow_i->right_angle)
             {
-                fov_map[pos_in_map] = HIDDEN;
+                fov_map[pos_in_map] = 'H';
                 return 1;
             }
             if (   middle_angle < shadow_i->left_angle
                 && middle_angle > shadow_i->right_angle)
             {
-                fov_map[pos_in_map] = HIDDEN;
+                fov_map[pos_in_map] = 'H';
             }
         }
     }
@@ -331,7 +322,7 @@ static void free_angles(struct shadow_angle * angles)
 
 
 
-static void eval_position(uint16_t dist, uint16_t hex_i, uint8_t * fov_map,
+static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
                           struct yx_uint8 * test_pos,
                           struct shadow_angle ** shadows)
 {
@@ -373,7 +364,7 @@ static void update_map_memory(struct Thing * t, uint32_t map_size)
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
-        if (' ' == t->mem_map[i] && t->fov_map[i] == VISIBLE)
+        if (' ' == t->mem_map[i] && t->fov_map[i] == 'v')
         {
             t->mem_map[i] = world.map.cells[i];
         }
@@ -386,7 +377,7 @@ extern void build_fov_map(struct Thing * t)
 {
     uint32_t map_size = world.map.length * world.map.length;
     t->fov_map = t->fov_map ? t->fov_map : try_malloc(map_size, __func__);
-    memset(t->fov_map, VISIBLE, map_size);
+    memset(t->fov_map, 'v', map_size);
     struct yx_uint8 test_pos = t->pos;
     struct shadow_angle * shadows = NULL;
     char * circle_dirs = "xswedc";

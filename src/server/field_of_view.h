@@ -13,12 +13,6 @@ struct Thing;
 
 
 
-/* States that cells in the field of view map may be in. */
-enum fov_cell_states {
-    HIDDEN  = 0x00,
-    VISIBLE = 0x01
-};
-
 /* Build "t"'s field of view and update its map memory with the result. */
 extern void build_fov_map(struct Thing * t);
 

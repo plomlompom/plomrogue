@@ -5,7 +5,6 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "field_of_view.h" /* HIDDEN */
 #include "hardcoded_strings.h" /* s */
 #include "thing_actions.h" /* get_thing_action_id_by_name() */
 #include "things.h" /* struct Thing */
@@ -140,7 +139,7 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
     for (; t != NULL; t = t->next)
     {
         if (   !t->lifepoints || t == t_origin
-            || HIDDEN == t_origin->fov_map[t->pos.y*world.map.length+t->pos.x])
+            || 'H' == t_origin->fov_map[t->pos.y * world.map.length + t->pos.x])
         {
             continue;
         }
