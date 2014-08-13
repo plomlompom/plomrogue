@@ -309,7 +309,7 @@ static char * build_visible_map(struct Thing * player)
         uint32_t pos_i;
         for (pos_i = 0; pos_i < map_size; pos_i++)
         {
-            if (player->fov_map[pos_i] & VISIBLE)
+            if (player->fov_map[pos_i] == VISIBLE)
             {
                 visible_map[pos_i] = world.map.cells[pos_i];
             }
@@ -323,7 +323,7 @@ static char * build_visible_map(struct Thing * player)
             for (t = world.things; t != 0; t = t->next)
             {
                 if (   (  player->fov_map[t->pos.y * world.map.length +t->pos.x]
-                        & VISIBLE)
+                        == VISIBLE)
                     && (   (0 == i && 0 == t->lifepoints)
                         || (1 == i && 0 < t->lifepoints)))
                 {

@@ -267,7 +267,7 @@ static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
                          uint16_t pos_in_map, uint8_t * fov_map)
 {
     struct shadow_angle * shadow_i;
-    if (fov_map[pos_in_map] & VISIBLE)
+    if (fov_map[pos_in_map] == VISIBLE)
     {
         for (shadow_i = *shadows; shadow_i; shadow_i = shadow_i->next)
         {
@@ -373,7 +373,7 @@ static void update_map_memory(struct Thing * t, uint32_t map_size)
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
-        if (' ' == t->mem_map[i] && t->fov_map[i] & VISIBLE)
+        if (' ' == t->mem_map[i] && t->fov_map[i] == VISIBLE)
         {
             t->mem_map[i] = world.map.cells[i];
         }
