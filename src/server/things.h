@@ -18,7 +18,7 @@ struct Thing
     uint8_t id;                  /* individual thing's unique identifier */
     struct Thing * owns;         /* chain of things owned / in inventory */
     struct yx_uint8 pos;         /* coordinate on map */
-    char * fov_map;              /* map of the thing's field of view */
+    char * fov_map;              /* thing's FOV map; 'v':visible, 'H':hidden */
     char * mem_map;              /* map knowledge of thing by FOV and memory */
     uint8_t type;                /* ID of appropriate thing definition */
     uint8_t lifepoints;          /* 0: thing is inanimate; >0: hitpoints */

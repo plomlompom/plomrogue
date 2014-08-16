@@ -59,7 +59,9 @@ static void write_value_as_line(uint32_t value, FILE * file);
 static void write_inventory(struct Thing * player, FILE * file);
 
 /* Return map cells sequence as visible to the "player", with invisible cells as
- * whitespace. Super-impose over visible map cells things positioned there.
+ * whitespace. Super-impose over visible map cells things positioned there,
+ * with animate things overwriting inanimate things, and inanimate consumable
+ * things overwriting inanimate non-consumable things.
  */
 static char * build_visible_map(struct Thing * player);
 
@@ -314,20 +316,22 @@ static char * build_visible_map(struct Thing * player)
             }
         }
         struct Thing * t;
-        struct ThingType * tt;
         char c;
         uint8_t i;
-        for (i = 0; i < 2; i++)
+        for (i = 0; i < 3; i++)
         {
             for (t = world.things; t != 0; t = t->next)
             {
-                if (   'v'==player->fov_map[t->pos.y*world.map.length+t->pos.x]
-                    && (   (0 == i && 0 == t->lifepoints)
-                        || (1 == i && 0 < t->lifepoints)))
+                if ('v'==player->fov_map[t->pos.y*world.map.length+t->pos.x])
                 {
-                    tt = get_thing_type(t->type);
-                    c = tt->char_on_map;
-                    visible_map[t->pos.y * world.map.length + t->pos.x] = c;
+                    struct ThingType * tt = get_thing_type(t->type);
+                    if (   (0 == i && !t->lifepoints && !tt->consumable)
+                        || (1 == i && !t->lifepoints &&  tt->consumable)
+                        || (2 == i &&  t->lifepoints))
+                    {
+                        c = tt->char_on_map;
+                        visible_map[t->pos.y * world.map.length + t->pos.x] = c;
+                    }
                 }
             }
         }
