@@ -224,7 +224,8 @@ static uint8_t standing_on_consumable(struct Thing * t_standing)
     struct Thing * t = world.things;
     for (; t != NULL; t = t->next)
     {
-        if (t->pos.y == t_standing->pos.y && t->pos.x && t_standing->pos.x)
+        if (   t_standing != t
+            && t->pos.y == t_standing->pos.y && t->pos.x == t_standing->pos.x)
         {
             struct ThingType * tt = get_thing_type(t->type);
             if (tt->consumable)
