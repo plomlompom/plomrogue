@@ -2,13 +2,13 @@
 
 #include "ai.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, int16_t, UINT16_MAX */
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "hardcoded_strings.h" /* s */
 #include "thing_actions.h" /* get_thing_action_id_by_name() */
-#include "things.h" /* struct Thing */
-#include "world.h" /* global world */
+#include "things.h" /* Thing, ThingType */
+#include "world.h" /* world */
 
 
 
@@ -39,8 +39,11 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score);
  */
 static char get_dir_to_nearest_enemy(struct Thing * thing_origin);
 
-/* Return 1 if any animate thing not "t_origin" is in its field of view. */
+/* Return 1 if any animate thing not "t_origin" is in its FOV, else 0. */
 static uint8_t seeing_enemies(struct Thing * t_origin);
+
+/* Return slot ID of strongest consumable in "t_owner"'s inventory, else -1. */
+static int16_t get_inventory_slot_to_consume(struct Thing * t_owner);
 
 
 
@@ -193,6 +196,26 @@ static uint8_t seeing_enemies(struct Thing * t_origin)
 
 
 
+static int16_t get_inventory_slot_to_consume(struct Thing * t_owner)
+{
+    uint8_t compare_consumability = 0;
+    int16_t selection = -1;
+    struct Thing * t = t_owner->owns;;
+    uint8_t i;
+    for (i = 0; t != NULL; t = t->next, i++)
+    {
+        struct ThingType * tt = get_thing_type(t->type);
+        if (tt->consumable > compare_consumability)
+        {
+            compare_consumability = tt->consumable;
+            selection = i;
+        }
+    }
+    return selection;
+}
+
+
+
 extern void ai(struct Thing * t)
 {
     t->command = get_thing_action_id_by_name(s[S_CMD_WAIT]);
@@ -203,6 +226,15 @@ extern void ai(struct Thing * t)
         {
             t->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
             t->arg = sel;
+        }
+    }
+    else
+    {
+        int16_t sel = get_inventory_slot_to_consume(t);
+        if (-1 != sel)
+        {
+            t->command = get_thing_action_id_by_name(s[S_CMD_USE]);
+            t->arg = (uint8_t) sel;
         }
     }
 }
