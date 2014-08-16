@@ -39,6 +39,9 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score);
  */
 static char get_dir_to_nearest_enemy(struct Thing * thing_origin);
 
+/* Return 1 if any animate thing not "t_origin" is in its field of view. */
+static uint8_t seeing_enemies(struct Thing * t_origin);
+
 
 
 static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
@@ -173,13 +176,33 @@ static char get_dir_to_nearest_enemy(struct Thing * t_origin)
 
 
 
+static uint8_t seeing_enemies(struct Thing * t_origin)
+{
+    struct Thing * t = world.things;
+    for (; t != NULL; t = t->next)
+    {
+        if (   t->lifepoints
+            && t != t_origin
+            && 'v' == t_origin->fov_map[t->pos.y * world.map.length + t->pos.x])
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+
 extern void ai(struct Thing * t)
 {
     t->command = get_thing_action_id_by_name(s[S_CMD_WAIT]);
-    char sel = t->fov_map ? get_dir_to_nearest_enemy(t) : 0;/* t->fov_map may */
-    if (0 != sel)                                           /* be absent due  */
-    {                                                       /* to god command.*/
-        t->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
-        t->arg = sel;
+    if (seeing_enemies(t))
+    {
+        char sel = t->fov_map ? get_dir_to_nearest_enemy(t) : 0;
+        if (0 != sel)
+        {
+            t->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
+            t->arg = sel;
+        }
     }
 }
