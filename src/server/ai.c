@@ -45,6 +45,9 @@ static uint8_t seeing_enemies(struct Thing * t_origin);
 /* Return slot ID of strongest consumable in "t_owner"'s inventory, else -1. */
 static int16_t get_inventory_slot_to_consume(struct Thing * t_owner);
 
+/* Return 1 if "t_standing" is standing on a consumable, else 0. */
+static uint8_t standing_on_consumable(struct Thing * t_standing);
+
 
 
 static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
@@ -216,6 +219,25 @@ static int16_t get_inventory_slot_to_consume(struct Thing * t_owner)
 
 
 
+static uint8_t standing_on_consumable(struct Thing * t_standing)
+{
+    struct Thing * t = world.things;
+    for (; t != NULL; t = t->next)
+    {
+        if (t->pos.y == t_standing->pos.y && t->pos.x && t_standing->pos.x)
+        {
+            struct ThingType * tt = get_thing_type(t->type);
+            if (tt->consumable)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+
+
 extern void ai(struct Thing * t)
 {
     t->command = get_thing_action_id_by_name(s[S_CMD_WAIT]);
@@ -235,6 +257,10 @@ extern void ai(struct Thing * t)
         {
             t->command = get_thing_action_id_by_name(s[S_CMD_USE]);
             t->arg = (uint8_t) sel;
+        }
+        else if (standing_on_consumable(t))
+        {
+            t->command = get_thing_action_id_by_name(s[S_CMD_PICKUP]);
         }
     }
 }
