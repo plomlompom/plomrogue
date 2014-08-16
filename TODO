@@ -9,6 +9,10 @@ BOTH SERVER/CLIENT:
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
 
+SERVER
+
+- fix: AI knows about consumables not on top of stack while player doesn't
+
 CLIENT:
 
 - re-work unnecessary complex command / keybinding / server message mapping
