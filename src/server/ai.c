@@ -189,7 +189,7 @@ static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter)
     if (seeing_thing(t_eye, filter))
     {
         uint32_t map_size = world.map.length * world.map.length;
-        uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t), __func__);
+        uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t),__func__);
         init_score_map(filter, score_map, map_size, t_eye);
         dijkstra_map(score_map, UINT16_MAX-1);
         uint16_t neighbors[N_DIRS];

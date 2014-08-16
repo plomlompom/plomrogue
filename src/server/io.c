@@ -322,7 +322,7 @@ static char * build_visible_map(struct Thing * player)
         {
             for (t = world.things; t != 0; t = t->next)
             {
-                if ('v'==player->fov_map[t->pos.y*world.map.length+t->pos.x])
+                if ('v' == player->fov_map[t->pos.y*world.map.length+t->pos.x])
                 {
                     struct ThingType * tt = get_thing_type(t->type);
                     if (   (0 == i && !t->lifepoints && !tt->consumable)
@@ -358,7 +358,7 @@ static void write_map(struct Thing * player, FILE * file)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            try_fputc(player->mem_map[y * world.map.length + x], file, __func__);
+            try_fputc(player->mem_map[y*world.map.length+x], file, __func__);
         }
         try_fputc('\n', file, __func__);
     }
