@@ -35,6 +35,7 @@ Usage: redo [OPTIONS] [TARGETS...]
 
   -d, --debug          print dependency checks as they happen
   -h, --help           print usage instructions and exit
+  -s, --shuffle        randomize build order to find dependency bugs
   -x, --xtrace         print commands as they are executed (variables expanded)
 
 Report bugs to <nils+redo@dieweltistgarnichtso.net>.

@@ -53,6 +53,12 @@ _add_target() {
   fi
 }
 
+_add_target_buildtime() {
+  [ -z "$1" ] && exit 1
+  # Portable timestamps for systems supporting GNU date format '%N'.
+  date +%s%N | tr -d '%N' > "$REDO_DIR$1".buildtime
+}
+
 _dependencies_uptodate() {
   target="$1"
   target_relpath=${target##$REDO_BASE/}
@@ -163,13 +169,12 @@ _do() {
     [ -e "$target.do" ] || _find_dofile "$target"
     # Add non existing .do file to non-existence dependencies so target is built when
     # .do file in question is created.
-    _add_dependency_ne "$(readlink -f "$target")" "$PWD/$target.do"
+    _add_dependency_ne "$target_abspath" "$PWD/$target.do"
     if [ ! -e "$dofile" ]; then
       # If .do file does not exist and target exists, it is a source file.
       if [ -e "$target" ]; then
-        _add_target "$(readlink -f $target)"
-        # Portable timestamps for systems supporting GNU date format '%N'.
-        date +%s%N | tr -d '%N' > "$REDO_DIR/$target_abspath".buildtime
+        _add_target "$target_abspath"
+        _add_target_buildtime "$target_abspath"
         return 0
       # If .do file does not exist and target does not exist, stop.
       else
@@ -178,7 +183,7 @@ _do() {
       fi
     # Add .do file to dependencies so target is built when .do file changes.
     else
-      _add_dependency "$(readlink -f "$target")" "$PWD/$dofile"
+      _add_dependency "$target_abspath" "$PWD/$dofile"
       _add_target "$PWD/$dofile"
     fi
     printf '%sredo %s%s%s%s%s\n' \
@@ -198,14 +203,13 @@ _do() {
     ! test -s "$tmp.tmp2" ||
     mv "$tmp.tmp2" "$target" 2>/dev/null
     rm -f "$tmp.tmp2"
-    # Portable timestamps for systems supporting GNU date format '%N'.
-    date +%s%N | tr -d '%N' > "$REDO_DIR/$target_abspath".buildtime
+    _add_target_buildtime "$target_abspath"
   else
     _echo_debug_message "$REDO_DEPTH$dir$target is up to date."
   fi
   # Some do files (like all.do) do not usually generate output.
   if [ -e "$target" ]; then
-    _add_target "$(readlink -f $target)"
+    _add_target "$target_abspath"
   fi
 }
 
@@ -251,7 +255,7 @@ _is_uptodate() {
     if [ ! -e "$REDO_DIR/$target".ctime ]; then
       _echo_debug_message "$REDO_DEPTH$dir$target_relpath.ctime does not exist."
       # Add source file to dependencies so target is built when source file changes.
-      _add_target "$(readlink -f $target)"
+      _add_target "$target_abspath"
       return 0
     else
       _echo_debug_message "$REDO_DEPTH$dir$target_relpath.ctime exists."
@@ -310,7 +314,9 @@ _run_dofile() {
 
 set +e
 if [ -n "$1" ]; then
-  for target; do
+  targets="$@"
+  [ "$REDO_SHUFFLE" = "1" ] && targets=$(shuf -e "$@")
+  for target in $targets; do
     _dirsplit "$target"
     _dir_shovel "$dir" "$base"
     dir="$xdir" base="$xbase" basetmp="$xbasetmp"
