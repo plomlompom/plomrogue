@@ -28,9 +28,6 @@ struct NextAndId
 
 
 
-/* Free ThingsInMemory chain starting at "tm". */
-static void free_things_in_memory(struct ThingInMemory * tm);
-
 /* To linked list of NextAndId structs (or rather structs whose start region is
  * compatible to it) starting at "start", add newly allocated element of
  * "n_size" and an ID that is either "id" or, if "id" is <= UINT8_MAX and >=
@@ -40,18 +37,6 @@ static void free_things_in_memory(struct ThingInMemory * tm);
 static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
                                              int16_t id, uint8_t struct_id,
                                              struct NextAndId ** start);
-
-
-
-static void free_things_in_memory(struct ThingInMemory * tm)
-{
-    if (!tm)
-    {
-        return;
-    }
-    free_things_in_memory(tm->next);
-    free(tm);
-}
 
 
 
@@ -191,6 +176,18 @@ extern void free_things(struct Thing * t)
     {                              /* iteration loop does not iterate over    */
         world.things = NULL;       /* freed memory when called the first time */
     }                              /* after world re-seeding.                 */
+}
+
+
+
+extern void free_things_in_memory(struct ThingInMemory * tm)
+{
+    if (!tm)
+    {
+        return;
+    }
+    free_things_in_memory(tm->next);
+    free(tm);
 }
 
 

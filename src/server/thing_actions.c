@@ -12,7 +12,8 @@
 #include "field_of_view.h" /* build_fov_map() */
 #include "hardcoded_strings.h" /* s */
 #include "things.h" /* Thing, ThingType, get_player(), own_thing(),
-                     * set_thing_position(), get_thing_type()
+                     * set_thing_position(), get_thing_type(),
+                     * free_things_in_memory()
                      */
 #include "map.h" /* is_passable() */
 #include "yx_uint8.h" /* mv_yx_in_dir(), yx_uint8_cmp() */
@@ -151,6 +152,8 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
             hitted->fov_map = NULL;
             free(hitted->mem_map);
             hitted->mem_map = NULL;
+            free_things_in_memory(hitted->t_mem);
+            hitted->t_mem = NULL;
         }
         update_log(" It dies.");
     }

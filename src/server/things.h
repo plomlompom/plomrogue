@@ -79,10 +79,13 @@ extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x);
 extern void add_thing_to_memory_map(struct Thing * t, uint8_t type,
                                     uint8_t y, uint8_t x);
 
-/* Free ThingAction/ThingType/Thing chain starting at "ta"/"tt"/"t". */
+/* Free ThingAction / ThingType / Thing / ThingInMemory chain starting at "ta" /
+ * "tt" / "t" / "tm".
+ */
 extern void free_thing_actions(struct ThingAction * ta);
 extern void free_thing_types(struct ThingType * tt);
 extern void free_things(struct Thing * t);
+extern void free_things_in_memory(struct ThingInMemory * tm);
 
 /* Return pointer to ThingAction/ThingType of "id", or NULL if none found. */
 extern struct ThingAction * get_thing_action(uint8_t id);
