@@ -64,7 +64,7 @@ static void tokens_into_entries(char * token0, char * token1)
             cmd = (struct Command *) parse_init_entry(&cmd_flags,
                                                       sizeof(struct Command));
             cmd->dsc_short = strdup(token1);
-            parse_id_uniq(NULL != get_command(cmd->dsc_short));
+            parse_id_uniq(!(!get_command(cmd->dsc_short)));
         }
         else if (!(   parse_flagval(token0, token1, "DESCRIPTION", &cmd_flags,
                                     DESC_SET, 's', (char *) &cmd->dsc_long)

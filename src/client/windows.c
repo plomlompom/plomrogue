@@ -400,7 +400,7 @@ extern void make_v_screen_and_init_win_sizes()
     world.winDB.v_screen_size.y = maxy_test;
     world.winDB.v_screen_size.x = maxx_test;
     world.winDB.v_screen = newpad(world.winDB.v_screen_size.y, 1);
-    exit_trouble(NULL == world.winDB.v_screen, __func__, err_m);
+    exit_trouble(!world.winDB.v_screen, __func__, err_m);
     char id;
     while (0 != (id = get_next_win_id()))
     {

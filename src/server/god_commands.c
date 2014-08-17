@@ -301,7 +301,7 @@ static uint8_t parse_thing_manipulation_1arg(char * tok0, char * tok1)
     {
         t = get_thing(world.things, id, 1);
         char * err = "No thing type found to initialize new thing.";
-        if (!t && !err_line(NULL == world.thing_types, err))
+        if (!t && !err_line(!world.thing_types, err))
         {
             t = add_thing(id, world.thing_types->id, 0, 0);
             if (world.exists && t->lifepoints)

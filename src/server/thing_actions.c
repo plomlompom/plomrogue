@@ -286,7 +286,7 @@ extern void actor_move(struct Thing * t)
 
 extern void actor_drop(struct Thing * t)
 {
-    uint8_t owns_none = (NULL == t->owns);
+    uint8_t owns_none = (!t->owns);
     if (!owns_none)
     {
         uint8_t select = t->arg;
@@ -307,21 +307,21 @@ extern void actor_pick(struct Thing * t)
 {
     struct Thing * picked = NULL;
     struct Thing * t_i;
-    for (t_i = world.things; NULL != t_i; t_i = t_i->next)
+    for (t_i = world.things; t_i; t_i = t_i->next)
     {
         if (t_i != t && yx_uint8_cmp(&t_i->pos, &t->pos))
         {
             picked = t_i;
         }
     }
-    if (NULL != picked)
+    if (picked)
     {
         own_thing(&t->owns, &world.things, picked->id);
         set_thing_position(picked, t->pos);
     }
     if (t == get_player())
     {
-        playerbonus_pick(NULL != picked);
+        playerbonus_pick(!(!picked));
     }
 }
 
@@ -330,7 +330,7 @@ extern void actor_pick(struct Thing * t)
 extern void actor_use(struct Thing * t)
 {
     uint8_t wrong_thing = 1;
-    uint8_t no_thing = (NULL == t->owns);
+    uint8_t no_thing = (!t->owns);
     if (!no_thing)
     {
         uint8_t select = t->arg;

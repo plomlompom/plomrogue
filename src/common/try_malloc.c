@@ -13,12 +13,12 @@ extern void * try_malloc(size_t size, const char * f)
 {
     char * prefix = "Trouble with malloc in ";
     char * msg = malloc(strlen(prefix) + strlen(f) + 1 + 1);
-    exit_err(NULL == msg,
+    exit_err(!msg,
              "Trouble in try_malloc with malloc for error message string.");
     int test = sprintf(msg, "%s%s.", prefix, f);
     exit_err(test < 0, "Trouble in try_malloc with sprintf.");
     void * p = malloc(size);
-    exit_err(NULL == p, msg); /* Bypass exit_trouble() calling try_malloc(). */
+    exit_err(!p, msg);         /* Bypass exit_trouble() calling try_malloc(). */
     free(msg);
     return p;
 }

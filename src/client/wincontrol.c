@@ -220,7 +220,7 @@ static void suspend_win(struct Win * w)
 extern void toggle_window(char id)
 {
     struct Win * win = get_win_by_id(id);
-    if (NULL == strchr(world.winDB.order, id))
+    if (!strchr(world.winDB.order, id))
     {
         append_win(win);
         return;

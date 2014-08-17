@@ -1,7 +1,6 @@
 /* src/server/ai.c */
 
 #include "ai.h"
-#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, int16_t, UINT16_MAX */
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -268,7 +267,7 @@ static int16_t get_inventory_slot_to_consume(struct Thing * t_owner)
     int16_t selection = -1;
     struct Thing * t = t_owner->owns;;
     uint8_t i;
-    for (i = 0; t != NULL; t = t->next, i++)
+    for (i = 0; t; t = t->next, i++)
     {
         struct ThingType * tt = get_thing_type(t->type);
         if (tt->consumable > compare_consumability)
@@ -285,7 +284,7 @@ static int16_t get_inventory_slot_to_consume(struct Thing * t_owner)
 static uint8_t standing_on_consumable(struct Thing * t_standing)
 {
     struct Thing * t = world.things;
-    for (; t != NULL; t = t->next)
+    for (; t; t = t->next)
     {
         if (   t != t_standing
             && t->pos.y == t_standing->pos.y && t->pos.x == t_standing->pos.x)

@@ -243,7 +243,7 @@ static uint8_t start_win(char * token0, char * token1, char * str_win,
     }
     *win = (struct Win *) parse_init_entry(win_flags, sizeof(struct Win));
     parsetest_singlechar(token1);
-    parse_id_uniq(world.winDB.ids && (NULL!=strchr(world.winDB.ids,token1[0])));
+    parse_id_uniq(world.winDB.ids && strchr(world.winDB.ids,token1[0]));
     (*win)->id = token1[0];
     return 1;
 }
@@ -367,7 +367,7 @@ static void set_keybindings(char * token1, uint8_t flags,
     }
     kb.keycode = atoi(token1);
     char * err_uniq = "Binding to key already defined.";
-    err_line(NULL != get_command_to_keycode(kbdb, kb.keycode), err_uniq);
+    err_line(!(!get_command_to_keycode(kbdb, kb.keycode)), err_uniq);
     kb.command = get_command(token2);
     err_line(!(kb.command), "No such command in command DB.");
     array_append(kbdb->n_of_kbs, sizeof(struct KeyBinding), (void *) &kb,

@@ -98,7 +98,7 @@ static void read_inventory(char * read_buf, uint32_t linemax, FILE * file)
             break;
         }
         int old_size = 0;
-        if (NULL != world.player_inventory)
+        if (world.player_inventory)
         {
             old_size = strlen(world.player_inventory);
         }
@@ -146,7 +146,7 @@ static void read_log(char * read_buf, uint32_t linemax, FILE * file)
     while (try_fgets(read_buf, linemax + 1, file, __func__))
     {
         int old_size = 0;
-        if (NULL != world.log)
+        if (world.log)
         {
             old_size = strlen(world.log);
         }

@@ -208,7 +208,7 @@ static void turn_over()
     while (    0 < player->lifepoints
            || (0 == player->lifepoints && start_turn == world.turn))
     {
-        if (NULL == thing)
+        if (!thing)
         {
             world.turn++;
             thing = world.things;
@@ -285,7 +285,7 @@ extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
     set_err_line_options("Trouble with message: ", msg, 0);
     char * msg_copy = strdup(msg);
     char * tok0 = token_from_line(msg_copy);
-    if (NULL != tok0)
+    if (tok0)
     {
 
         if (parse_command(tok0))
@@ -299,7 +299,7 @@ extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
                 record(msg, 0);
             }
             char * tokplus = token_from_line(NULL);
-            err_line(NULL != tokplus, "Too many arguments, ignoring overflow.");
+            err_line(!(!tokplus), "Too many arguments, ignoring overflow.");
             free(msg_copy);
             return;
         }
@@ -316,7 +316,7 @@ extern uint8_t io_loop()
     {
         char * msg = io_round();
         server_test();
-        if (NULL == msg)
+        if (!msg)
         {
             continue;
         }

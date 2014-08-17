@@ -55,7 +55,7 @@ static void obey_lines_from_file(char * path, uint8_t record)
     FILE * file = try_fopen(path, "r", __func__);
     uint32_t linemax = textfile_width(file);
     char * line = try_malloc(linemax + 1, __func__);
-    while (NULL != try_fgets(line, linemax + 1, file, __func__))
+    while (try_fgets(line, linemax + 1, file, __func__))
     {
         if (strlen(line))
         {
@@ -84,7 +84,7 @@ static void replay_game()
     uint32_t linemax = textfile_width(file);
     char * line = try_malloc(linemax + 1, __func__);
     while (   world.turn < world.replay
-           && NULL != try_fgets(line, linemax + 1, file, __func__))
+           && try_fgets(line, linemax + 1, file, __func__))
     {
         obey_msg(line, 0, 1);
         err_line_inc();
@@ -112,7 +112,7 @@ static uint8_t world_cannot_be_made()
 {
     uint8_t player_will_be_generated = 0;
     struct ThingType * tt;
-    for (tt = world.thing_types; NULL != tt; tt = tt->next)
+    for (tt = world.thing_types; tt; tt = tt->next)
     {
         if (world.player_type == tt->id)
         {
@@ -197,7 +197,7 @@ extern uint8_t remake_world()
     free_things(world.things);
     remake_map();
     struct ThingType * tt;
-    for (tt = world.thing_types; NULL != tt; tt = tt->next)
+    for (tt = world.thing_types; tt; tt = tt->next)
     {
         if (world.player_type == tt->id)
         {
@@ -205,7 +205,7 @@ extern uint8_t remake_world()
             break;
         }
     }
-    for (tt = world.thing_types; NULL != tt; tt = tt->next)
+    for (tt = world.thing_types; tt; tt = tt->next)
     {
         if (world.player_type != tt->id)
         {
@@ -213,7 +213,7 @@ extern uint8_t remake_world()
         }
     }
     struct Thing * t;
-    for (t = world.things; NULL != t; t = t->next)
+    for (t = world.things; t; t = t->next)
     {
         if (t->lifepoints)
         {

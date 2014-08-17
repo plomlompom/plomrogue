@@ -374,7 +374,7 @@ static void update_map_memory(struct Thing * t_eye, uint32_t map_size)
     struct ThingInMemory * tm = t_eye->t_mem;
     struct ThingInMemory * tm_prev = NULL;
     struct ThingInMemory * tm_next = NULL;
-    for (; tm != NULL; tm = tm_next)
+    for (; tm; tm = tm_next)
     {
         tm_next = tm->next;
         if ('v' == t_eye->fov_map[tm->pos.y * world.map.length + tm->pos.x])
@@ -393,7 +393,7 @@ static void update_map_memory(struct Thing * t_eye, uint32_t map_size)
         tm_prev = tm;
     }
     struct Thing * t = world.things;
-    for (; t != NULL; t = t->next)
+    for (; t; t = t->next)
     {
         if (   !t->lifepoints
             && 'v' == t_eye->fov_map[t->pos.y * world.map.length + t->pos.x])

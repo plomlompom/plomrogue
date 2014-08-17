@@ -289,7 +289,7 @@ static void write_value_as_line(uint32_t value, FILE * file)
 static void write_inventory(struct Thing * player, FILE * file)
 {
     struct Thing * owned = player->owns;
-    if (NULL == owned)
+    if (!owned)
     {
         char * empty = "(none)\n";
         try_fwrite(empty, strlen(empty), 1, file, __func__);
@@ -297,7 +297,7 @@ static void write_inventory(struct Thing * player, FILE * file)
     else
     {
         uint8_t q;
-        for (q = 0; NULL != owned; q++)
+        for (q = 0; owned; q++)
         {
             struct ThingType * tt = get_thing_type(owned->type);
             try_fwrite(tt->name, strlen(tt->name), 1, file, __func__);
@@ -372,7 +372,7 @@ static void write_map(struct Thing * player, FILE * file)
     struct ThingInMemory * tm;
     for (i = 0; i < 2; i++)
     {
-        for (tm = player->t_mem; tm != NULL; tm = tm->next)
+        for (tm = player->t_mem; tm; tm = tm->next)
         {
             if (' ' != player->mem_map[tm->pos.y*world.map.length+tm->pos.x])
             {

@@ -45,7 +45,7 @@ static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
 
 static void free_things_in_memory(struct ThingInMemory * tm)
 {
-    if (NULL == tm)
+    if (!tm)
     {
         return;
     }
@@ -82,7 +82,7 @@ static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
         }
     }
     struct NextAndId ** nai_ptr_ptr = start;
-    for (; NULL != * nai_ptr_ptr; nai_ptr_ptr = &(*nai_ptr_ptr)->next);
+    for (; * nai_ptr_ptr; nai_ptr_ptr = &(*nai_ptr_ptr)->next);
     *nai_ptr_ptr = nai;
     return nai;
 }
@@ -151,7 +151,7 @@ extern void add_thing_to_memory_map(struct Thing * t, uint8_t type,
 
 extern void free_thing_actions(struct ThingAction * ta)
 {
-    if (NULL == ta)
+    if (!ta)
     {
         return;
     }
@@ -164,7 +164,7 @@ extern void free_thing_actions(struct ThingAction * ta)
 
 extern void free_thing_types(struct ThingType * tt)
 {
-    if (NULL == tt)
+    if (!tt)
     {
         return;
     }
@@ -177,7 +177,7 @@ extern void free_thing_types(struct ThingType * tt)
 
 extern void free_things(struct Thing * t)
 {
-    if (NULL == t)
+    if (!t)
     {
         return;
     }
@@ -198,7 +198,7 @@ extern void free_things(struct Thing * t)
 extern struct ThingAction * get_thing_action(uint8_t id)
 {
     struct ThingAction * ta = world.thing_actions;
-    for (; NULL != ta && id != ta->id; ta = ta->next);
+    for (; ta && id != ta->id; ta = ta->next);
     return ta;
 }
 
@@ -207,7 +207,7 @@ extern struct ThingAction * get_thing_action(uint8_t id)
 extern struct ThingType * get_thing_type(uint8_t id)
 {
     struct ThingType * tt = world.thing_types;
-    for (; NULL != tt && id != tt->id; tt = tt->next);
+    for (; tt && id != tt->id; tt = tt->next);
     return tt;
 }
 
@@ -216,7 +216,7 @@ extern struct ThingType * get_thing_type(uint8_t id)
 extern uint8_t get_thing_action_id_by_name(char * name)
 {
     struct ThingAction * ta = world.thing_actions;
-    while (NULL != ta)
+    while (ta)
     {
         if (0 == strcmp(ta->name, name))
         {
@@ -237,14 +237,14 @@ extern struct Thing * get_thing(struct Thing * ptr, uint8_t id, uint8_t deep)
 {
     while (1)
     {
-        if (NULL == ptr || id == ptr->id)
+        if (!ptr || id == ptr->id)
         {
             return ptr;
         }
         if (deep)
         {
             struct Thing * owned_thing = get_thing(ptr->owns, id, 1);
-            if (NULL != owned_thing)
+            if (owned_thing)
             {
                 return ptr;
             }
@@ -324,7 +324,7 @@ extern void own_thing(struct Thing ** target, struct Thing ** source,
         penult->next = t->next;
     }
     struct Thing ** t_ptr_ptr = target;
-    for (; NULL != * t_ptr_ptr; t_ptr_ptr = &(*t_ptr_ptr)->next);
+    for (; * t_ptr_ptr; t_ptr_ptr = &(*t_ptr_ptr)->next);
     * t_ptr_ptr = t;
     t->next = NULL;
 }
@@ -335,5 +335,5 @@ extern void set_thing_position(struct Thing * t, struct yx_uint8 pos)
 {
     t->pos = pos;
     struct Thing * owned = t->owns;
-    for (; owned != NULL; set_thing_position(owned, pos), owned = owned->next);
+    for (; owned; set_thing_position(owned, pos), owned = owned->next);
 }

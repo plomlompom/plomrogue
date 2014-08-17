@@ -31,7 +31,7 @@ extern void parse_file(char * path, void (* token_to_entry) (char *, char *))
     char * errline_line = try_malloc(linemax + 1, __func__);
     set_err_line_options(errline_intro, errline_line, 1);
     err_line_zero();
-    err_line(0 == linemax, "File is empty.");
+    err_line(!linemax, "File is empty.");
     char * token0 = NULL; /* For final token_to_entry() if while() stagnates. */
     char * token1 = NULL;
     char * err_val = "No value given.";
@@ -65,7 +65,7 @@ extern void parsetest_defcontext(uint8_t flags)
 
 extern void parsetest_too_many_values()
 {
-    err_line(NULL != token_from_line(NULL), "Too many values.");
+    err_line(!(!token_from_line(NULL)), "Too many values.");
 }
 
 

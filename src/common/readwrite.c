@@ -26,7 +26,7 @@ extern FILE * try_fopen(char * path, char * mode, const char * f)
     int test = sprintf(msg, "%s%s%s%s%s%s%s", msg1,f,msg2,mode,msg3,path,msg4);
     exit_trouble(test < 0, __func__, "sprintf");
     FILE * file_p = fopen(path, mode);
-    exit_err(NULL == file_p, msg);
+    exit_err(!file_p, msg);
     free(msg);
     return file_p;
 }
@@ -68,7 +68,7 @@ extern int try_fgetc(FILE * file, const char * f)
 extern char * try_fgets(char * line, int linemax, FILE * file, const char * f)
 {
     char * test = fgets(line, linemax, file);
-    exit_trouble(NULL == test && ferror(file), f, "fgets");
+    exit_trouble(!test && ferror(file), f, "fgets");
     return test;
 }
 

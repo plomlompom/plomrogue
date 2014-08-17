@@ -28,7 +28,7 @@ extern void exit_err(int err, const char * msg)
         return;
     }
     cleanup_func();
-    if (NULL == msg)
+    if (!msg)
     {
         msg = "Details unknown.";
     }
