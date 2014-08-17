@@ -6,7 +6,7 @@
 #include <string.h> /* memset() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "things.h" /* Thing */
+#include "things.h" /* Thing, ThingInMemory, add_thing_to_memory_map() */
 #include "yx_uint8.h" /* yx_uint8 */
 #include "world.h" /* world  */
 
@@ -84,7 +84,9 @@ static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
                           struct yx_uint8 * test_pos,
                           struct shadow_angle ** shadows);
 
-/* Update "t"'s .mem_map memory with what's in its current field of view. */
+/* Update "t"'s .mem_map memory with what's in its current FOV, remove from its
+ * .t_mem all memorized things in FOV and add inanimiate things in FOV to it.
+ */
 static void update_map_memory(struct Thing * t, uint32_t map_size);
 
 
@@ -354,19 +356,49 @@ static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
 
 
 
-static void update_map_memory(struct Thing * t, uint32_t map_size)
+static void update_map_memory(struct Thing * t_eye, uint32_t map_size)
 {
-    if (!t->mem_map)
+    if (!t_eye->mem_map)
     {
-        t->mem_map = try_malloc(map_size, __func__);
-        memset(t->mem_map, ' ', map_size);
+        t_eye->mem_map = try_malloc(map_size, __func__);
+        memset(t_eye->mem_map, ' ', map_size);
     }
     uint32_t i;
     for (i = 0; i < map_size; i++)
     {
-        if (' ' == t->mem_map[i] && t->fov_map[i] == 'v')
+        if (' ' == t_eye->mem_map[i] && t_eye->fov_map[i] == 'v')
         {
-            t->mem_map[i] = world.map.cells[i];
+            t_eye->mem_map[i] = world.map.cells[i];
+        }
+    }
+    struct ThingInMemory * tm = t_eye->t_mem;
+    struct ThingInMemory * tm_prev = NULL;
+    struct ThingInMemory * tm_next = NULL;
+    for (; tm != NULL; tm = tm_next)
+    {
+        tm_next = tm->next;
+        if ('v' == t_eye->fov_map[tm->pos.y * world.map.length + tm->pos.x])
+        {
+            if (tm_prev)
+            {
+                tm_prev->next = tm->next;
+            }
+            else
+            {
+                t_eye->t_mem = tm->next;
+            }
+            free(tm);
+            continue;
+        }
+        tm_prev = tm;
+    }
+    struct Thing * t = world.things;
+    for (; t != NULL; t = t->next)
+    {
+        if (   !t->lifepoints
+            && 'v' == t_eye->fov_map[t->pos.y * world.map.length + t->pos.x])
+        {
+            add_thing_to_memory_map(t_eye, t->type, t->pos.y, t->pos.x);
         }
     }
 }

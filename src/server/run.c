@@ -20,7 +20,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "ai.h" /* ai() */
 #include "cleanup.h" /* unset_cleanup_flag() */
-#include "god_commands.h" /* parse_god_command_1arg(),parse_god_command_2arg()*/
+#include "god_commands.h" /* parse_god_command_(1|2|3)arg() */
 #include "hardcoded_strings.h" /* s */
 #include "io.h" /* io_round(), save_world() */
 #include "things.h" /* Thing, get_thing_action_id_by_name(), get_player() */
@@ -164,6 +164,14 @@ static uint8_t parse_command(char * tok0)
             if (tok2 && parse_god_command_2arg(tok0, tok1, tok2))
             {
                 return 1;
+            }
+            else
+            {
+                char * tok3 = token_from_line(NULL);
+                if (tok2 && parse_god_command_3arg(tok0, tok1, tok2, tok3))
+                {
+                    return 1;
+                }
             }
         }
     }

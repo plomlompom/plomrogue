@@ -7,7 +7,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "hardcoded_strings.h" /* s */
 #include "thing_actions.h" /* get_thing_action_id_by_name() */
-#include "things.h" /* Thing, ThingType */
+#include "things.h" /* Thing, ThingType, ThingInMemory */
 #include "world.h" /* world */
 
 
@@ -39,18 +39,18 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
                            struct Thing * t_eye);
 
 /* Set (if possible) as "t_eye"'s command a move to the path to the path-wise
- * nearest thing that is in "t_eye"'s field of view and not "t_eye" and fits
- * criteria set by "filter". On success, return 1, else 0. Values for "filter":
- * "e": thing searched for animate, but not of "t_eye"'s thing type; build
- *      path as avoiding things of "t_eye"'s type
- * "c": thing searched for is consumable.
+ * nearest thing that is not "t_eye" and fits criteria set by "filter". On
+ * success, return 1, else 0. Values for "filter":
+ * "e": thing in FOV is animate, but not of "t_eye"'s thing type; build path as
+ *      avoiding things of "t_eye"'s type
+ * "c": thing in memorized map is consumable.
  */
 static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter);
 
-/* Return 1 if any thing not "t_eye" is in its FOV and fulfills some criterion
- * defined by "filter", else 0. Values for "filter":
- * "e": thing searched for is animate, but not of "t_eye"'s thing type
- * "c": thing searched for is consumable
+/* Return 1 if any thing not "t_eye" is known and fulfills some criteria defined
+ * by "filter", else 0. Values for "filter":
+ * "e": thing in FOV is animate, but not of "t_eye"'s thing type
+ * "c": thing in memorized map is consumable
  */
 static uint8_t seeing_thing(struct Thing * t_eye, char filter);
 
@@ -150,16 +150,13 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
             score_map[i] = UINT16_MAX-1;
         }
     }
-    struct Thing * t = world.things;
-    for (; t != NULL; t = t->next)
+    if      ('e' == filter)
     {
-        if (t==t_eye || 'H'==t_eye->fov_map[t->pos.y*world.map.length+t->pos.x])
+        struct Thing * t = world.things;
+        for (; t; t = t->next)
         {
-            continue;
-        }
-        if      ('e' == filter)
-        {
-            if (!t->lifepoints)
+            if (   t==t_eye || !t->lifepoints
+                || 'H' == t_eye->fov_map[t->pos.y*world.map.length + t->pos.x])
             {
                 continue;
             }
@@ -168,16 +165,25 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
                 score_map[t->pos.y * world.map.length + t->pos.x] = UINT16_MAX;
                 continue;
             }
+            score_map[t->pos.y * world.map.length + t->pos.x] = 0;
         }
-        else if ('c' == filter)
+    }
+    else if ('c' == filter)
+    {
+        struct ThingInMemory * tm = t_eye->t_mem;
+        for (; tm; tm = tm->next)
         {
-            struct ThingType * tt = get_thing_type(t->type);
+            if (' ' == t_eye->mem_map[tm->pos.y * world.map.length + tm->pos.x])
+            {
+                continue;
+            }
+            struct ThingType * tt = get_thing_type(tm->type);
             if (!tt->consumable)
             {
                 continue;
             }
+            score_map[tm->pos.y * world.map.length + tm->pos.x] = 0;
         }
-        score_map[t->pos.y * world.map.length + t->pos.x] = 0;
     }
 }
 
@@ -221,25 +227,32 @@ static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter)
 
 static uint8_t seeing_thing(struct Thing * t_eye, char filter)
 {
-    if (t_eye->fov_map)
+    if (t_eye->fov_map && 'e' == filter)
     {
         struct Thing * t = world.things;
-        for (; t != NULL; t = t->next)
+        for (; t; t = t->next)
         {
             if (   t != t_eye
                 && 'v' == t_eye->fov_map[t->pos.y*world.map.length + t->pos.x])
             {
-                if ('e' == filter && t->lifepoints && t->type != t_eye->type)
+                if (t->lifepoints && t->type != t_eye->type)
                 {
                     return 1;
                 }
-                else if ('c' == filter)
+            }
+        }
+    }
+    else if (t_eye->mem_map && 'c' == filter)
+    {
+        struct ThingInMemory * tm = t_eye->t_mem;
+        for (; tm; tm = tm->next)
+        {
+            if (' ' != t_eye->mem_map[tm->pos.y * world.map.length + tm->pos.x])
+            {
+                struct ThingType * tt = get_thing_type(tm->type);
+                if (tt->consumable)
                 {
-                    struct ThingType * tt = get_thing_type(t->type);
-                    if (tt->consumable)
-                    {
-                        return 1;
-                    }
+                    return 1;
                 }
             }
         }

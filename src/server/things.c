@@ -28,6 +28,9 @@ struct NextAndId
 
 
 
+/* Free ThingsInMemory chain starting at "tm". */
+static void free_things_in_memory(struct ThingInMemory * tm);
+
 /* To linked list of NextAndId structs (or rather structs whose start region is
  * compatible to it) starting at "start", add newly allocated element of
  * "n_size" and an ID that is either "id" or, if "id" is <= UINT8_MAX and >=
@@ -37,6 +40,18 @@ struct NextAndId
 static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
                                              int16_t id, uint8_t struct_id,
                                              struct NextAndId ** start);
+
+
+
+static void free_things_in_memory(struct ThingInMemory * tm)
+{
+    if (NULL == tm)
+    {
+        return;
+    }
+    free_things_in_memory(tm->next);
+    free(tm);
+}
 
 
 
@@ -121,6 +136,19 @@ extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x)
 
 
 
+extern void add_thing_to_memory_map(struct Thing * t, uint8_t type,
+                                    uint8_t y, uint8_t x)
+{
+    struct ThingInMemory * tm=try_malloc(sizeof(struct ThingInMemory),__func__);
+    tm->type = type;
+    tm->pos.y = y;
+    tm->pos.x = x;
+    tm->next = t->t_mem;
+    t->t_mem = tm;
+}
+
+
+
 extern void free_thing_actions(struct ThingAction * ta)
 {
     if (NULL == ta)
@@ -157,6 +185,7 @@ extern void free_things(struct Thing * t)
     free_things(t->next);
     free(t->fov_map);
     free(t->mem_map);
+    free_things_in_memory(t->t_mem);
     free(t);
     if (t == world.things)         /* So add_things()' NULL-delimited thing   */
     {                              /* iteration loop does not iterate over    */

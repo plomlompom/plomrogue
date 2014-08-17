@@ -15,16 +15,24 @@
 struct Thing
 {
     struct Thing * next;
-    uint8_t id;                  /* individual thing's unique identifier */
-    struct Thing * owns;         /* chain of things owned / in inventory */
-    struct yx_uint8 pos;         /* coordinate on map */
-    char * fov_map;              /* thing's FOV map; 'v':visible, 'H':hidden */
-    char * mem_map;              /* map knowledge of thing by FOV and memory */
-    uint8_t type;                /* ID of appropriate thing definition */
-    uint8_t lifepoints;          /* 0: thing is inanimate; >0: hitpoints */
-    uint8_t command;             /* thing's current action; 0 if none */
-    uint8_t arg;                 /* optional field for .command argument */
-    uint8_t progress;            /* turns already passed to realize .command */
+    uint8_t id;                   /* individual thing's unique identifier */
+    struct Thing * owns;          /* chain of things owned / in inventory */
+    struct ThingInMemory * t_mem; /* chain of things remembered */
+    struct yx_uint8 pos;          /* coordinate on map */
+    char * fov_map;               /* thing's FOV map; 'v':visible, 'H':hidden */
+    char * mem_map;               /* map knowledge of thing by FOV and memory */
+    uint8_t type;                 /* ID of appropriate thing definition */
+    uint8_t lifepoints;           /* 0: thing is inanimate; >0: hitpoints */
+    uint8_t command;              /* thing's current action; 0 if none */
+    uint8_t arg;                  /* optional field for .command argument */
+    uint8_t progress;             /* turns already passed to realize .command */
+};
+
+struct ThingInMemory
+{
+    struct ThingInMemory * next;
+    struct yx_uint8 pos;                             /* position on memorized */
+    uint8_t type;                                    /* thing type identifier */
 };
 
 struct ThingType
@@ -67,7 +75,11 @@ extern struct ThingType * add_thing_type(int16_t id);
  */
 extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x);
 
-/* Free ThingAction/ThingType/Thing * chain starting at "ta"/"tt"/"t". */
+/* Add to thing memory of "t" thing of type id "type" and position "y"/"x". */
+extern void add_thing_to_memory_map(struct Thing * t, uint8_t type,
+                                    uint8_t y, uint8_t x);
+
+/* Free ThingAction/ThingType/Thing chain starting at "ta"/"tt"/"t". */
 extern void free_thing_actions(struct ThingAction * ta);
 extern void free_thing_types(struct ThingType * tt);
 extern void free_things(struct Thing * t);

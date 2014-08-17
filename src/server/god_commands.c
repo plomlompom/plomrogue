@@ -18,7 +18,7 @@
                             * actor_use(), actor_pickup(), actor_drop()
                             */
 #include "things.h" /* Thing, ThingType, add_thing(), get_thing(), own_thing(),
-                     * free_things()
+                     * free_things(), add_thing_to_memory_map(),get_thing_type()
                      */
 #include "world.h" /* world */
 
@@ -468,6 +468,37 @@ extern uint8_t parse_god_command_2arg(char * tok0, char * tok1, char * tok2)
             memset(t->mem_map, ' ', map_size);
         }
         memcpy(t->mem_map + y * world.map.length, tok2, world.map.length);
+    }
+    else
+    {
+        return 0;
+    }
+    return 1;
+}
+
+
+
+extern uint8_t parse_god_command_3arg(char * tok0, char * tok1, char * tok2,
+                                      char * tok3)
+{
+    if (!t && !strcmp(tok0, s[S_CMD_T_MEMTHING]))
+    {
+        err_line(1, "No thing defined to manipulate yet.");
+        return 1;
+    }
+    if (!strcmp(tok0, s[S_CMD_T_MEMTHING]))
+    {
+        uint8_t id = atoi(tok1);
+        uint8_t y  = atoi(tok2);
+        uint8_t x  = atoi(tok3);
+        if (   parsetest_int(tok1, '8') || !get_thing_type(id)
+            || parsetest_int(tok2, '8') || y >= world.map.length
+            || parsetest_int(tok3, '8') || x >= world.map.length)
+        {
+            err_line(1, "Illegal value for thing type or position.");
+            return 1;
+        }
+        add_thing_to_memory_map(t, id, y, x);
     }
     else
     {

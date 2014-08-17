@@ -164,6 +164,10 @@ T_MEMMAP [0 to 255] [string]
 Set part of selected thing's memory of the game map to string argument: the line
 of the argument's number.
 
+T_MEMTHING [0 to 255] [0 to 255] [0 to 255]
+Add to selected thing's memory of things on map thing of ID of first argument,
+y position of second argument and x position of third argument.
+
 TT_ID [-32768 to 32767]
 Select thing type to manipulate by argument as ID. If argument is <0 or <255,
 change it to the lowest unused thing type ID. If thing type of ID does not exist

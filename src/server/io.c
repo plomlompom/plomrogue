@@ -18,8 +18,8 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "hardcoded_strings.h" /* s */
-#include "things.h" /* Thing, ThingType, ThingAction, get_thing_type(),
-                     * get_player()
+#include "things.h" /* Thing, ThingType, ThingInMemory, ThingAction,
+                     * get_thing_type(), get_player()
                      */
 #include "world.h" /* global world  */
 
@@ -67,7 +67,7 @@ static char * build_visible_map(struct Thing * player);
 
 /* Write to "file" game map as visible to "player" right now, as drawn by
  * build_visible_map(), and thereafter game map as memorized by player in its
- * .mem_map. Write one row per \n-delimited line.
+ * .mem_map and .t_mem. Write one row per \n-delimited line.
  */
 static void write_map(struct Thing * player, FILE * file);
 
@@ -165,6 +165,17 @@ static void write_thing(FILE * file, struct Thing * t)
             try_fputc('\n', file, __func__);
         }
         free(mem_map_copy);
+        struct ThingInMemory * tm = t->t_mem;
+        for (; tm; tm = tm->next)
+        {
+            write_key_space(file, s[S_CMD_T_MEMTHING]);
+            write_value(file, tm->type);
+            try_fputc(' ', file, __func__);
+            write_value(file, tm->pos.y);
+            try_fputc(' ', file, __func__);
+            write_value(file, tm->pos.x);
+            try_fputc('\n', file, __func__);
+        }
     }
     try_fputc('\n', file, __func__);
 }
@@ -354,14 +365,36 @@ static void write_map(struct Thing * player, FILE * file)
         try_fputc('\n', file, __func__);
     }
     free(visible_map);
+    uint32_t map_size = world.map.length * world.map.length;
+    char * mem_map = try_malloc(map_size, __func__);
+    memcpy(mem_map, player->mem_map, map_size);
+    uint8_t i;
+    struct ThingInMemory * tm;
+    for (i = 0; i < 2; i++)
+    {
+        for (tm = player->t_mem; tm != NULL; tm = tm->next)
+        {
+            if (' ' != player->mem_map[tm->pos.y*world.map.length+tm->pos.x])
+            {
+                struct ThingType * tt = get_thing_type(tm->type);
+                if (   (0 == i && !tt->consumable)
+                    || (1 == i &&  tt->consumable))
+                {
+                    char c = tt->char_on_map;
+                    mem_map[tm->pos.y * world.map.length + tm->pos.x] = c;
+                }
+            }
+        }
+    }
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            try_fputc(player->mem_map[y*world.map.length+x], file, __func__);
+            try_fputc(mem_map[y * world.map.length + x], file, __func__);
         }
         try_fputc('\n', file, __func__);
     }
+    free(mem_map);
 }
 
 

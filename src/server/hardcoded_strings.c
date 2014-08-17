@@ -4,7 +4,7 @@
 
 
 
-char * s[40];
+char * s[41];
 
 
 
@@ -37,6 +37,7 @@ extern void init_strings()
     s[S_CMD_T_HP] = "T_LIFEPOINTS";
     s[S_CMD_T_CARRIES] = "T_CARRIES";
     s[S_CMD_T_MEMMAP] = "T_MEMMAP";
+    s[S_CMD_T_MEMTHING] = "T_MEMTHINGß";
     s[S_CMD_AI] = "ai";
     s[S_CMD_WAIT] = "wait";
     s[S_CMD_MOVE] = "move";
