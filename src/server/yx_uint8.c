@@ -46,17 +46,6 @@ static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx)
 
 
 
-extern uint8_t yx_uint8_cmp(struct yx_uint8 * a, struct yx_uint8 * b)
-{
-    if (a->y == b->y && a->x == b->x)
-    {
-        return 1;
-    }
-    return 0;
-}
-
-
-
 extern uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
 {
     static int8_t wrap_west_east   = 0;

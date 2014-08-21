@@ -16,7 +16,7 @@
                      * free_things_in_memory()
                      */
 #include "map.h" /* mv_yx_in_dir_legal() */
-#include "yx_uint8.h" /* mv_yx_in_dir_wrap(), yx_uint8_cmp() */
+#include "yx_uint8.h" /* mv_yx_in_dir_wrap() */
 #include "world.h" /* global world */
 
 
@@ -271,9 +271,9 @@ extern void actor_move(struct Thing * t)
             {
                 continue;
             }
-            if (yx_uint8_cmp(&target, &other_t->pos))
+            if (target.y == other_t->pos.y && target.x == other_t->pos.x)
             {
-                actor_hits_actor(t, other_t);
+               actor_hits_actor(t, other_t);
                return;
             }
         }
@@ -318,7 +318,7 @@ extern void actor_pick(struct Thing * t)
     struct Thing * t_i;
     for (t_i = world.things; t_i; t_i = t_i->next)
     {
-        if (t_i != t && yx_uint8_cmp(&t_i->pos, &t->pos))
+        if (t_i != t && t_i->pos.y == t->pos.y && t_i->pos.x == t->pos.x)
         {
             picked = t_i;
         }

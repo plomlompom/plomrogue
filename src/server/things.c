@@ -14,7 +14,6 @@
 #include "rrand.h" /* rrand() */
 #include "thing_actions.h" /* actor_wait */
 #include "world.h" /* world */
-#include "yx_uint8.h" /* yx_uint8_cmp() */
 
 
 
@@ -280,7 +279,7 @@ extern void add_things(uint8_t type, uint8_t n)
             uint8_t clear = 1;
             for (t = world.things; t; t = t->next)
             {
-                if (yx_uint8_cmp(&pos, &t->pos) && 0 != t->lifepoints)
+                if (0 != t->lifepoints && pos.y==t->pos.y && pos.x==t->pos.x)
                 {
                     clear = 0;
                     break;

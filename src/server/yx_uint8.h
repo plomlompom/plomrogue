@@ -11,9 +11,6 @@
 
 
 
-/* Return 1 if two yx_uint8 coordinates at "a" and "b" are equal, else 0. */
-extern uint8_t yx_uint8_cmp(struct yx_uint8 * a, struct yx_uint8 * b);
-
 /* Move "yx" into hex direction "d". If this moves "yx" beyond the minimal (0)
  * or maximal (UINT8_MAX) column or row, it wraps to the opposite side. Such
  * wrapping is returned as a wraps enum value and stored, so that further calls
