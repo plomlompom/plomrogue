@@ -410,19 +410,19 @@ extern void build_fov_map(struct Thing * t)
     uint32_t map_size = world.map.length * world.map.length;
     t->fov_map = t->fov_map ? t->fov_map : try_malloc(map_size, __func__);
     memset(t->fov_map, 'v', map_size);
-    struct yx_uint8 test_pos = t->pos;
     struct shadow_angle * shadows = NULL;
+    struct yx_uint8 test_pos = t->pos;
     char * circle_dirs = "xswedc";
     uint16_t dist;
-    uint8_t first_round, circle_on_map;
-    for (first_round = 1, dist = 1, circle_on_map = 1; circle_on_map; dist++)
+    uint8_t circle_on_map;
+    for (dist = 1, circle_on_map = 1; circle_on_map; dist++)
     {
-        if (!first_round)
+        if (1 != dist)
         {
             mv_yx_in_dir_legal('c', &test_pos);
         }
         char dir = 'd';
-        uint8_t i_dir = first_round = circle_on_map = 0;
+        uint8_t i_dir = circle_on_map = 0;
         uint16_t i_dist, hex_i;
         for (hex_i = 0, i_dist = 1; hex_i < 6 * dist; i_dist++, hex_i++)
         {
