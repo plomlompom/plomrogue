@@ -21,11 +21,6 @@
  */
 extern void remake_map();
 
-/* Check if coordinate "pos" on (or beyond) world.map is accessible to thing
- * movement.
- */
-extern uint8_t is_passable(struct yx_uint8 pos);
-
 /* Wrapper to mv_yx_in_dir_wrap(), returns 1 if the wrapped function moved "yx"
  * within the wrap borders and the map size, else 0.
  */

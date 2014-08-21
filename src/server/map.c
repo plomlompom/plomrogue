@@ -152,18 +152,6 @@ extern void remake_map()
 
 
 
-extern uint8_t is_passable(struct yx_uint8 pos)
-{
-    uint8_t passable = 0;
-    if (pos.x < world.map.length && pos.y < world.map.length)
-    {
-        passable = ('.' == world.map.cells[(pos.y * world.map.length) + pos.x]);
-    }
-    return passable;
-}
-
-
-
 extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
 {
     uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx, 0);

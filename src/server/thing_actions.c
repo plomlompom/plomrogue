@@ -15,7 +15,7 @@
                      * set_thing_position(), get_thing_type(),
                      * free_things_in_memory()
                      */
-#include "map.h" /* mv_yx_in_dir_legal(), is_passable() */
+#include "map.h" /* mv_yx_in_dir_legal() */
 #include "yx_uint8.h" /* mv_yx_in_dir_wrap(), yx_uint8_cmp() */
 #include "world.h" /* global world */
 
@@ -278,7 +278,8 @@ extern void actor_move(struct Thing * t)
             }
         }
     }
-    uint8_t passable = legal_move && is_passable(target);
+    char target_cell = world.map.cells[target.y * world.map.length + target.x];
+    uint8_t passable = legal_move && '.' == target_cell;
     if (passable)
     {
         set_thing_position(t, target);

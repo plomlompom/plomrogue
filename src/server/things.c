@@ -11,7 +11,6 @@
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "hardcoded_strings.h" /* s */
-#include "map.h" /* is_passable() */
 #include "rrand.h" /* rrand() */
 #include "thing_actions.h" /* actor_wait */
 #include "world.h" /* world */
@@ -267,10 +266,11 @@ extern void add_things(uint8_t type, uint8_t n)
         struct yx_uint8 pos;
         while (1)
         {
-            char * err = "Space to put thing on too hard to find."
-                         "Map too small?";
+            char * err="Space to put thing on too hard to find. Map too small?";
             uint16_t i_pos = 0;
-            for (pos.y = pos.x = 0; 0 == is_passable(pos); i_pos++)
+            for (pos.y = pos.x = 0;
+                 '.' != world.map.cells[pos.y * world.map.length + pos.x];
+                 i_pos++)
             {
                 exit_err(UINT16_MAX == i_pos, err);
                 pos.y = rrand() % world.map.length;
