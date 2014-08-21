@@ -4,6 +4,10 @@ IN GENERAL:
 
 - expand use of hardcoded_strings module(s)
 
+SERVER:
+
+- handle case of actors hitting the map edge
+
 BOTH SERVER/CLIENT:
 
 - make server and client communicate by specific world state info requests 

@@ -19,7 +19,7 @@ extern uint8_t yx_uint8_cmp(struct yx_uint8 * a, struct yx_uint8 * b)
 
 extern struct yx_uint8 mv_yx_in_dir(char d, struct yx_uint8 yx)
 {
-    if     (d == 'e' && yx.y > 0         && (yx.x < UINT8_MAX || !(yx.y % 2)))
+    if      (d == 'e' && yx.y > 0        && (yx.x < UINT8_MAX || !(yx.y % 2)))
     {
         yx.x = yx.x + (yx.y % 2);
         yx.y--;
