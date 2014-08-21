@@ -6,8 +6,8 @@
 #ifndef MAP_H_SERVER
 #define MAP_H_SERVER
 
-#include <stdint.h> /* uint8_t, uint16_t */
-#include "../common/yx_uint8.h" /* yx_uint8 struct */
+#include <stdint.h> /* uint8_t */
+#include "../common/yx_uint8.h" /* yx_uint8 */
 
 
 
@@ -26,6 +26,10 @@ extern void remake_map();
  */
 extern uint8_t is_passable(struct yx_uint8 pos);
 
+/* Wrapper to mv_yx_in_dir_wrap(), returns 1 if the wrapped function moved "yx"
+ * within the wrap borders and the map size, else 0.
+ */
+extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx);
 
 
 #endif

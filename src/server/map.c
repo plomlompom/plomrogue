@@ -7,6 +7,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* struct yx_uint8 */
 #include "rrand.h" /* rrand() */
+#include "yx_uint8.h" /* mv_yx_in_dir_wrap() */
 #include "world.h" /* global world */
 
 
@@ -159,4 +160,16 @@ extern uint8_t is_passable(struct yx_uint8 pos)
         passable = ('.' == world.map.cells[(pos.y * world.map.length) + pos.x]);
     }
     return passable;
+}
+
+
+
+extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
+{
+    uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx, 0);
+    if (!wraptest && yx->x < world.map.length && yx->y < world.map.length)
+    {
+        return 1;
+    }
+    return 0;
 }

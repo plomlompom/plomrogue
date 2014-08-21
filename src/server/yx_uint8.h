@@ -7,19 +7,22 @@
 #define YX_UINT8_H_SERVER
 
 #include <stdint.h> /* uint8_t */
-#include "../common/yx_uint8.h" /* yx_uint8 struct */
+#include "../common/yx_uint8.h" /* yx_uint8 */
 
 
 
 /* Return 1 if two yx_uint8 coordinates at "a" and "b" are equal, else 0. */
 extern uint8_t yx_uint8_cmp(struct yx_uint8 * a, struct yx_uint8 * b);
 
-/* Return yx_uint8 coordinate one step from "yx" in direction "dir" ('e':
- * northeast, 'd': east, 'c': south-east, 'x': south-west, 's': west, ' 'w':
- * north-west). If "dir" is invalid or would wrap the move around the edge of a
- * 2^8x2^8 cells field, "yx" remains unchanged.
+/* Move "yx" into hex direction "d". If this moves "yx" beyond the minimal (0)
+ * or maximal (UINT8_MAX) column or row, it wraps to the opposite side. Such
+ * wrapping is returned as a wraps enum value and stored, so that further calls
+ * to move "yx" back into the opposite direction may unwrap it again. Pass an
+ * "unwrap" of !0 to re-set the internal wrap memory to 0.
+ * Hex direction values for "d": 'e' (north-east), 'd' (east), 'c' (south-east),
+ * 'x' (south-west), 's' (west), 'w' (north-west)
  */
-extern struct yx_uint8 mv_yx_in_dir(char dir, struct yx_uint8 yx);
+extern uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap);
 
 
 

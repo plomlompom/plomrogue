@@ -6,8 +6,9 @@
 #include <string.h> /* memset() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
+#include "map.h" /* mv_yx_in_dir_legal() */
 #include "things.h" /* Thing, ThingInMemory, add_thing_to_memory_map() */
-#include "yx_uint8.h" /* yx_uint8 */
+#include "yx_uint8.h" /* yx_uint8, mv_yx_in_hex_dir(), mv_yx_in_dir_wrap(), */
 #include "world.h" /* world  */
 
 
@@ -29,22 +30,6 @@ struct shadow_angle
 };
 
 
-
-/* Move "yx" into hex direction "d". */
-static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx);
-
-/* Move "yx" into hex direction "d". If this moves "yx" beyond the minimal (0)
- * or maximal (UINT8_MAX) column or row, it wraps to the opposite side. Such
- * wrapping is returned as a wraps enum value and stored, so that further calls
- * to move "yx" back into the opposite direction may unwrap it again. Pass an
- * "unwrap" of !0 to re-set the internal wrap memory to 0.
- */
-static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap);
-
-/* Wrapper to mv_yx_in_dir_wrap(), returns 1 if the wrapped function moved "yx"
- * within the wrap borders and the map size, else 0.
- */
-static uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx);
 
 /* Recalculate angle < 0 or > CIRCLE to a value between these two limits. */
 static uint32_t correct_angle(int32_t angle);
@@ -88,86 +73,6 @@ static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
  * .t_mem all memorized things in FOV and add inanimiate things in FOV to it.
  */
 static void update_map_memory(struct Thing * t, uint32_t map_size);
-
-
-
-static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx)
-{
-    if     (d == 'e')
-    {
-        yx->x = yx->x + (yx->y % 2);
-        yx->y--;
-    }
-    else if (d == 'd')
-    {
-        yx->x++;
-    }
-    else if (d == 'c')
-    {
-        yx->x = yx->x + (yx->y % 2);
-        yx->y++;
-    }
-    else if (d == 'x')
-    {
-        yx->x = yx->x - !(yx->y % 2);
-        yx->y++;
-    }
-    else if (d == 's')
-    {
-        yx->x--;
-    }
-    else if (d == 'w')
-    {
-        yx->x = yx->x - !(yx->y % 2);
-        yx->y--;
-    }
-}
-
-
-
-static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx, uint8_t unwrap)
-{
-    static int8_t wrap_west_east   = 0;
-    static int8_t wrap_north_south = 0;
-    if (unwrap)
-    {
-        wrap_west_east = wrap_north_south = 0;
-        return 0;
-    }
-    struct yx_uint8 original;
-    original.y = yx->y;
-    original.x = yx->x;
-    mv_yx_in_hex_dir(d, yx);
-    if      (strchr("edc", d) && yx->x < original.x)
-    {
-        wrap_west_east++;
-    }
-    else if (strchr("xsw", d) && yx->x > original.x)
-    {
-        wrap_west_east--;
-    }
-    if      (strchr("we", d) && yx->y > original.y)
-    {
-        wrap_north_south--;
-    }
-    else if (strchr("xc", d) && yx->y < original.y)
-    {
-        wrap_north_south++;
-    }
-    return (wrap_west_east != 0) + (wrap_north_south != 0);
-}
-
-
-
-static uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
-{
-    uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx, 0);
-    if (!wraptest && yx->x < world.map.length && yx->y < world.map.length)
-    {
-        return 1;
-    }
-    return 0;
-}
 
 
 

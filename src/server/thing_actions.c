@@ -15,8 +15,8 @@
                      * set_thing_position(), get_thing_type(),
                      * free_things_in_memory()
                      */
-#include "map.h" /* is_passable() */
-#include "yx_uint8.h" /* mv_yx_in_dir(), yx_uint8_cmp() */
+#include "map.h" /* mv_yx_in_dir_legal(), is_passable() */
+#include "yx_uint8.h" /* mv_yx_in_dir_wrap(), yx_uint8_cmp() */
 #include "world.h" /* global world */
 
 
@@ -259,21 +259,26 @@ extern void actor_wait(struct Thing * t)
 extern void actor_move(struct Thing * t)
 {
     char d = t->arg;
-    struct yx_uint8 target = mv_yx_in_dir(d, t->pos);
     struct Thing * other_t;
-    for (other_t = world.things; other_t != 0; other_t = other_t->next)
+    struct yx_uint8 target = t->pos;
+    uint8_t legal_move = mv_yx_in_dir_legal(d, &target);
+    mv_yx_in_dir_wrap(0, NULL, 1);
+    if (legal_move)
     {
-        if (0 == other_t->lifepoints || other_t == t)
+        for (other_t = world.things; other_t != 0; other_t = other_t->next)
         {
-            continue;
-        }
-        if (yx_uint8_cmp(&target, &other_t->pos))
-        {
-            actor_hits_actor(t, other_t);
-            return;
+            if (0 == other_t->lifepoints || other_t == t)
+            {
+                continue;
+            }
+            if (yx_uint8_cmp(&target, &other_t->pos))
+            {
+                actor_hits_actor(t, other_t);
+               return;
+            }
         }
     }
-    uint8_t passable = is_passable(target);
+    uint8_t passable = legal_move && is_passable(target);
     if (passable)
     {
         set_thing_position(t, target);
