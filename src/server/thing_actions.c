@@ -262,8 +262,10 @@ extern void actor_move(struct Thing * t)
     struct yx_uint8 target = t->pos;
     uint8_t legal_move = mv_yx_in_dir_legal(d, &target);
     mv_yx_in_dir_legal(0, NULL);
+    uint8_t passable = 0;
     if (legal_move)
     {
+        passable = '.' == world.map.cells[target.y*world.map.length + target.x];
         for (other_t = world.things; other_t != 0; other_t = other_t->next)
         {
             if (0 == other_t->lifepoints || other_t == t)
@@ -277,8 +279,6 @@ extern void actor_move(struct Thing * t)
             }
         }
     }
-    char target_cell = world.map.cells[target.y * world.map.length + target.x];
-    uint8_t passable = legal_move && '.' == target_cell;
     if (passable)
     {
         set_thing_position(t, target);
