@@ -75,8 +75,7 @@ static uint8_t player_commands_allowed()
 {
     if (!world.exists)
     {
-        err_line(1, "No world exists in which to run player commands.");
-        return 0;
+        return !err_line(1, "No world exists in which to run player commands.");
     }
     return 1;
 }

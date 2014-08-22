@@ -85,8 +85,7 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
          || !strcmp(tok0, s[S_CMD_TT_STARTN]) || !strcmp(tok0, s[S_CMD_TT_NAME])
          || !strcmp(tok0, s[S_CMD_TT_CORPS]) || !strcmp(tok0, s[S_CMD_TT_HP])))
     {
-        err_line(1, "No thing type defined to manipulate yet.");
-        return 1;
+        return err_line(1, "No thing type defined to manipulate yet.");
     }
     int16_t id;
     if (   parse_val(tok0,tok1,s[S_CMD_TT_CONSUM],'8',(char *) &tt->consumable)
@@ -98,8 +97,7 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
     {
         if (!get_thing_type(id))
         {
-            err_line(1, "Corpse ID belongs to no known thing type.");
-            return 1;
+            return err_line(1, "Corpse ID belongs to no known thing type.");
         }
         tt->corpse_id = id;
     }
@@ -138,8 +136,7 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
     if (!ta &&
         (!strcmp(tok0, s[S_CMD_TA_EFFORT]) || !strcmp(tok0, s[S_CMD_TA_NAME])))
     {
-        err_line(1, "No thing action defined to manipulate yet.");
-        return 1;
+        return err_line(1, "No thing action defined to manipulate yet.");
     }
     int16_t id;
     if      (parse_val(tok0, tok1, s[S_CMD_TA_EFFORT],'8',(char *)&ta->effort));
@@ -151,11 +148,10 @@ static uint8_t parse_thingaction_manipulation(char * tok0, char * tok1)
               || try_func_name(ta, s[S_CMD_DROP], actor_drop)
               || try_func_name(ta, s[S_CMD_USE], actor_use)))
         {
-            err_line(1, "Invalid action function name.");
-            return 1;
-        }         /* Legal worlds have at least one thing action for waiting. */
+            return err_line(1, "Invalid action function name.");
+        }
         if (world.exists)
-        {
+        {         /* Legal worlds have at least one thing action for waiting. */
             world.exists = 0 != get_thing_action_id_by_name(s[S_CMD_WAIT]);
             if (!world.exists)
             {
@@ -286,8 +282,7 @@ static uint8_t parse_thing_manipulation_1arg(char * tok0, char * tok1)
          || !strcmp(tok0, s[S_CMD_T_POSY]) || !strcmp(tok0, s[S_CMD_T_ARGUMENT])
          || !strcmp(tok0, s[S_CMD_T_HP]) || !strcmp(tok0, s[S_CMD_T_COMMAND])))
     {
-        err_line(1, "No thing defined to manipulate yet.");
-        return 1;
+        return err_line(1, "No thing defined to manipulate yet.");
     }
     int16_t id;
     if (   parse_thing_type(tok0, tok1, t)
@@ -395,8 +390,7 @@ static uint8_t set_map_length(char * tok0, char * tok1)
         uint16_t argument = atoi(tok1);
         if (argument < 1 || argument > 256)
         {
-            err_line(1, "Value must be >= 1 and <= 256.");
-            return 1;
+            return err_line(1, "Value must be >= 1 and <= 256.");
         }
         world.exists = 0;
         remove_worldstate_file();
@@ -445,21 +439,18 @@ extern uint8_t parse_god_command_2arg(char * tok0, char * tok1, char * tok2)
 {
     if (!t && !strcmp(tok0, s[S_CMD_T_MEMMAP]))
     {
-        err_line(1, "No thing defined to manipulate yet.");
-        return 1;
+        return err_line(1, "No thing defined to manipulate yet.");
     }
     if (!strcmp(tok0, s[S_CMD_T_MEMMAP]))
     {
         uint8_t y = atoi(tok1);
         if (parsetest_int(tok1, '8') || y >= world.map.length)
         {
-            err_line(1, "Illegal value for map line number.");
-            return 1;
+            return err_line(1, "Illegal value for map line number.");
         }
         if (strlen(tok2) != world.map.length)
         {
-            err_line(1, "Map line length is unequal map width.");
-            return 1;
+            return err_line(1, "Map line length is unequal map width.");
         }
         if (!t->mem_map)
         {
@@ -483,8 +474,7 @@ extern uint8_t parse_god_command_3arg(char * tok0, char * tok1, char * tok2,
 {
     if (!t && !strcmp(tok0, s[S_CMD_T_MEMTHING]))
     {
-        err_line(1, "No thing defined to manipulate yet.");
-        return 1;
+        return err_line(1, "No thing defined to manipulate yet.");
     }
     if (!strcmp(tok0, s[S_CMD_T_MEMTHING]))
     {
@@ -495,8 +485,7 @@ extern uint8_t parse_god_command_3arg(char * tok0, char * tok1, char * tok2,
             || parsetest_int(tok2, '8') || y >= world.map.length
             || parsetest_int(tok3, '8') || x >= world.map.length)
         {
-            err_line(1, "Illegal value for thing type or position.");
-            return 1;
+            return err_line(1, "Illegal value for thing type or position.");
         }
         add_thing_to_memory_map(t, id, y, x);
     }
