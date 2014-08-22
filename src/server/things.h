@@ -8,7 +8,7 @@
 #define THINGS_H
 
 #include <stdint.h> /* uint8_t, int16_t */
-#include "../common/yx_uint8.h" /* yx_uint8 structs */
+#include "../common/yx_uint8.h" /* yx_uint8 */
 
 
 

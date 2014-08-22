@@ -5,7 +5,7 @@
 #include <stdlib.h> /* free() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "../common/yx_uint8.h" /* struct yx_uint8 */
+#include "../common/yx_uint8.h" /* yx_uint8 */
 #include "rrand.h" /* rrand() */
 #include "yx_uint8.h" /* mv_yx_in_dir_wrap() */
 #include "world.h" /* global world */

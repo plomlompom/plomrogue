@@ -8,7 +8,7 @@
 #include <string.h> /* strlen(), memcpy(), strncmp() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
-#include "../common/yx_uint8.h" /* struct yx_uint8 */
+#include "../common/yx_uint8.h" /* yx_uint8 */
 #include "field_of_view.h" /* build_fov_map() */
 #include "hardcoded_strings.h" /* s */
 #include "things.h" /* Thing, ThingType, get_player(), own_thing(),

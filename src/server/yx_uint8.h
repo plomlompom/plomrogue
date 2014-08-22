@@ -7,7 +7,7 @@
 #define YX_UINT8_H_SERVER
 
 #include <stdint.h> /* uint8_t */
-#include "../common/yx_uint8.h" /* yx_uint8 */
+struct yx_uint8;
 
 
 
