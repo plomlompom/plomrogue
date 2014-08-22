@@ -21,10 +21,21 @@ struct yx_uint8;
  */
 extern void remake_map();
 
-/* Wrapper to mv_yx_in_dir_wrap(), returns 1 if the wrapped function moved "yx"
- * within the wrap borders and the map size, else 0.
+/* Move "yx" into hex direction "dir". Available hex directions are: 'e'
+ * (north-east), 'd' (east), 'c' (south-east), 'x' (south-west), 's' (west), 'w'
+ * (north-west). Returns 1 if the move was legal, else 0.
+ *
+ * A move is legal if "yx" ends up in the confines of the map and the original
+ * wrap space. The latter is left to a neighbor wrap space if "yx" moves beyond
+ * the minimal (0) or maximal (UINT8_MAX) column or row of possible map space –
+ * in which case "yx".y or "yx".x will snap to the respective opposite side. The
+ * current wrapping state is kept between successive calls until a "yx" of NULL
+ * is passed, in which case the function does nothing but zero the wrap state.
+ * Successive wrapping may move "yx" several wrap spaces into either direction,
+ * or return it into the original wrap space.
  */
 extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx);
+
 
 
 #endif

@@ -1,16 +1,24 @@
 /* src/server/map.c */
 
 #include "map.h"
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
+#include <stdint.h> /* uint8_t, int8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdlib.h> /* free() */
+#include <string.h> /* strchr() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "rrand.h" /* rrand() */
-#include "yx_uint8.h" /* mv_yx_in_dir_wrap() */
 #include "world.h" /* global world */
 
 
+
+/* Helper to mv_yx_in_dir_legal(). Move "yx" into hex direction "d". */
+static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx);
+
+/* Helper to mv_yx_in_dir_legal(). Move "yx" into hex direction "d", do wrapping
+ * logic, return 1 if "yx" ends outside of the original wrap space, else 0.
+ */
+static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx);
 
 /* Call this too often with "init" of 0 and the game exits with an error message
  * about reaching an iteration limit. An "init" of 1 sets the iteration counter
@@ -29,6 +37,74 @@ static void make_sea();
 
 /* Put tree cells of 'X' on island. */
 static void make_trees();
+
+
+
+static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx)
+{
+    if     (d == 'e')
+    {
+        yx->x = yx->x + (yx->y % 2);
+        yx->y--;
+    }
+    else if (d == 'd')
+    {
+        yx->x++;
+    }
+    else if (d == 'c')
+    {
+        yx->x = yx->x + (yx->y % 2);
+        yx->y++;
+    }
+    else if (d == 'x')
+    {
+        yx->x = yx->x - !(yx->y % 2);
+        yx->y++;
+    }
+    else if (d == 's')
+    {
+        yx->x--;
+    }
+    else if (d == 'w')
+    {
+        yx->x = yx->x - !(yx->y % 2);
+        yx->y--;
+    }
+}
+
+
+
+static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx)
+{
+    static int8_t wrap_west_east   = 0;
+    static int8_t wrap_north_south = 0;
+    if (!yx)
+    {
+        wrap_west_east = wrap_north_south = 0;
+        return 0;
+    }
+    struct yx_uint8 original;
+    original.y = yx->y;
+    original.x = yx->x;
+    mv_yx_in_hex_dir(d, yx);
+    if      (strchr("edc", d) && yx->x < original.x)
+    {
+        wrap_west_east++;
+    }
+    else if (strchr("xsw", d) && yx->x > original.x)
+    {
+        wrap_west_east--;
+    }
+    if      (strchr("we", d) && yx->y > original.y)
+    {
+        wrap_north_south--;
+    }
+    else if (strchr("xc", d) && yx->y < original.y)
+    {
+        wrap_north_south++;
+    }
+    return (wrap_west_east != 0) + (wrap_north_south != 0);
+}
 
 
 
@@ -154,8 +230,8 @@ extern void remake_map()
 
 extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
 {
-    uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx, 0);
-    if (!wraptest && yx->x < world.map.length && yx->y < world.map.length)
+    uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx);
+    if (yx && !wraptest && yx->x < world.map.length && yx->y < world.map.length)
     {
         return 1;
     }

@@ -16,7 +16,6 @@
                      * free_things_in_memory()
                      */
 #include "map.h" /* mv_yx_in_dir_legal() */
-#include "yx_uint8.h" /* mv_yx_in_dir_wrap() */
 #include "world.h" /* global world */
 
 
@@ -262,7 +261,7 @@ extern void actor_move(struct Thing * t)
     struct Thing * other_t;
     struct yx_uint8 target = t->pos;
     uint8_t legal_move = mv_yx_in_dir_legal(d, &target);
-    mv_yx_in_dir_wrap(0, NULL, 1);
+    mv_yx_in_dir_legal(0, NULL);
     if (legal_move)
     {
         for (other_t = world.things; other_t != 0; other_t = other_t->next)

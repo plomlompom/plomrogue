@@ -9,7 +9,6 @@
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "map.h" /* mv_yx_in_dir_legal() */
 #include "things.h" /* Thing, ThingInMemory, add_thing_to_memory_map() */
-#include "yx_uint8.h" /* mv_yx_in_dir_wrap(), */
 #include "world.h" /* world  */
 
 
@@ -345,7 +344,7 @@ extern void build_fov_map(struct Thing * t)
             }
         }
     }
-    mv_yx_in_dir_wrap(0, NULL, 1);
+    mv_yx_in_dir_legal(0, NULL);
     free_angles(shadows);
     update_map_memory(t, map_size);
 }
