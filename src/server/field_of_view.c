@@ -323,12 +323,12 @@ extern void build_fov_map(struct Thing * t)
     for (circle_i = 1, circle_is_on_map = 1; circle_is_on_map; circle_i++)
     {
         circle_is_on_map = 0;
-        if (1 != circle_i)
-        {
-            mv_yx_in_dir_legal('c', &test_pos);
-        }
-        char dir_char = 'd';
+        if (1 < circle_i)                      /* All circles but the 1st are */
+        {                                      /* moved into starting from a  */
+            mv_yx_in_dir_legal('c', &test_pos);/* previous circle's last hex, */
+        }                                      /* i.e. from the upper left.   */
         uint8_t dir_char_pos_in_circledirs_string = 0;
+        char dir_char = 'd'; /* Circle's 1st hex is entered by rightward move.*/
         uint16_t dist_i, hex_i;
         for (hex_i = 0, dist_i = 1; hex_i < 6 * circle_i; dist_i++, hex_i++)
         {
@@ -338,11 +338,11 @@ extern void build_fov_map(struct Thing * t)
                 circle_is_on_map = 1;
             }
             dir_char = circledirs_string[dir_char_pos_in_circledirs_string];
-            if (circle_i == dist_i)
-            {
-                dist_i = 0;
-                dir_char_pos_in_circledirs_string++;
-            }
+            if (circle_i == dist_i)                 /* Number of steps into   */
+            {                                       /* one direction before   */
+                dist_i = 0;                         /* direction change is    */
+                dir_char_pos_in_circledirs_string++;/* equal to distance to   */
+            }                                       /* center / circle number.*/
         }
     }
     mv_yx_in_dir_legal(0, NULL);
