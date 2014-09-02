@@ -317,30 +317,31 @@ extern void build_fov_map(struct Thing * t)
     memset(t->fov_map, 'v', map_size);
     struct shadow_angle * shadows = NULL;
     struct yx_uint8 test_pos = t->pos;
-    char * circle_dirs = "xswedc";
-    uint16_t dist;
-    uint8_t circle_on_map;
-    for (dist = 1, circle_on_map = 1; circle_on_map; dist++)
+    char * circledirs_string = "xswedc";
+    uint16_t circle_i;
+    uint8_t circle_is_on_map;
+    for (circle_i = 1, circle_is_on_map = 1; circle_is_on_map; circle_i++)
     {
-        if (1 != dist)
+        circle_is_on_map = 0;
+        if (1 != circle_i)
         {
             mv_yx_in_dir_legal('c', &test_pos);
         }
-        char dir = 'd';
-        uint8_t i_dir = circle_on_map = 0;
-        uint16_t i_dist, hex_i;
-        for (hex_i = 0, i_dist = 1; hex_i < 6 * dist; i_dist++, hex_i++)
+        char dir_char = 'd';
+        uint8_t dir_char_pos_in_circledirs_string = 0;
+        uint16_t dist_i, hex_i;
+        for (hex_i = 0, dist_i = 1; hex_i < 6 * circle_i; dist_i++, hex_i++)
         {
-            if (mv_yx_in_dir_legal(dir, &test_pos))
+            if (mv_yx_in_dir_legal(dir_char, &test_pos))
             {
-                eval_position(dist, hex_i, t->fov_map, &test_pos, &shadows);
-                circle_on_map = 1;
+                eval_position(circle_i, hex_i, t->fov_map, &test_pos, &shadows);
+                circle_is_on_map = 1;
             }
-            dir = circle_dirs[i_dir];
-            if (dist == i_dist)
+            dir_char = circledirs_string[dir_char_pos_in_circledirs_string];
+            if (circle_i == dist_i)
             {
-                i_dist = 0;
-                i_dir++;
+                dist_i = 0;
+                dir_char_pos_in_circledirs_string++;
             }
         }
     }
