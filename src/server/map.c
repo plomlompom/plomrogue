@@ -13,7 +13,7 @@
 
 
 /* Helper to mv_yx_in_dir_legal(). Move "yx" into hex direction "d". */
-static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx);
+static void mv_yx_in_dir(char d, struct yx_uint8 * yx);
 
 /* Helper to mv_yx_in_dir_legal(). Move "yx" into hex direction "d", do wrapping
  * logic, return 1 if "yx" ends outside of the original wrap space, else 0.
@@ -40,7 +40,7 @@ static void make_trees();
 
 
 
-static void mv_yx_in_hex_dir(char d, struct yx_uint8 * yx)
+static void mv_yx_in_dir(char d, struct yx_uint8 * yx)
 {
     if     (d == 'e')
     {
@@ -86,7 +86,7 @@ static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx)
     struct yx_uint8 original;
     original.y = yx->y;
     original.x = yx->x;
-    mv_yx_in_hex_dir(d, yx);
+    mv_yx_in_dir(d, yx);
     if      (strchr("edc", d) && yx->x < original.x)
     {
         wrap_west_east++;
