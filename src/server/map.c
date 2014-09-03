@@ -1,7 +1,7 @@
 /* src/server/map.c */
 
 #include "map.h"
-#include <stdint.h> /* uint8_t, int8_t, uint16_t, uint32_t, UINT16_MAX */
+#include <stdint.h> /* uint8_t, int8_t, uint16_t, uint32_t, (U)INT*_(MIN|MAX) */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strchr() */
 #include "../common/rexit.h" /* exit_err() */
@@ -42,7 +42,7 @@ static void make_trees();
 
 static void mv_yx_in_dir(char d, struct yx_uint8 * yx)
 {
-    if     (d == 'e')
+    if      (d == 'e')
     {
         yx->x = yx->x + (yx->y % 2);
         yx->y--;
@@ -78,6 +78,9 @@ static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx)
 {
     static int8_t wrap_west_east   = 0;
     static int8_t wrap_north_south = 0;
+    char * err = "Too much wrapping in mv_yx_in_dir_wrap().";
+    exit_err(INT8_MIN == wrap_west_east || INT8_MIN == wrap_north_south, err);
+    exit_err(INT8_MAX == wrap_west_east || INT8_MAX == wrap_north_south, err);
     if (!yx)
     {
         wrap_west_east = wrap_north_south = 0;
