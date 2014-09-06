@@ -220,7 +220,7 @@ extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
     {
         wrap_north_south++;
     }
-    if (   !((wrap_west_east != 0) + (wrap_north_south != 0))
+    if (   !wrap_west_east && !wrap_north_south
         && yx->x < world.map.length && yx->y < world.map.length)
     {
         return 1;
