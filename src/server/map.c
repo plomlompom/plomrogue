@@ -15,11 +15,6 @@
 /* Helper to mv_yx_in_dir_legal(). Move "yx" into hex direction "d". */
 static void mv_yx_in_dir(char d, struct yx_uint8 * yx);
 
-/* Helper to mv_yx_in_dir_legal(). Move "yx" into hex direction "d", do wrapping
- * logic, return 1 if "yx" ends outside of the original wrap space, else 0.
- */
-static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx);
-
 /* Call this too often with "init" of 0 and the game exits with an error message
  * about reaching an iteration limit. An "init" of 1 sets the iteration counter
  * to 0. Iteration limit is currently 256 * UINT16_MAX.
@@ -70,43 +65,6 @@ static void mv_yx_in_dir(char d, struct yx_uint8 * yx)
         yx->x = yx->x - !(yx->y % 2);
         yx->y--;
     }
-}
-
-
-
-static uint8_t mv_yx_in_dir_wrap(char d, struct yx_uint8 * yx)
-{
-    static int8_t wrap_west_east   = 0;
-    static int8_t wrap_north_south = 0;
-    char * err = "Too much wrapping in mv_yx_in_dir_wrap().";
-    exit_err(   INT8_MIN == wrap_west_east || INT8_MIN == wrap_north_south
-             || INT8_MAX == wrap_west_east || INT8_MAX == wrap_north_south, err);
-    if (!yx)
-    {
-        wrap_west_east = wrap_north_south = 0;
-        return 0;
-    }
-    struct yx_uint8 original;
-    original.y = yx->y;
-    original.x = yx->x;
-    mv_yx_in_dir(d, yx);
-    if      (strchr("edc", d) && yx->x < original.x)
-    {
-        wrap_west_east++;
-    }
-    else if (strchr("xsw", d) && yx->x > original.x)
-    {
-        wrap_west_east--;
-    }
-    if      (strchr("we", d) && yx->y > original.y)
-    {
-        wrap_north_south--;
-    }
-    else if (strchr("xc", d) && yx->y < original.y)
-    {
-        wrap_north_south++;
-    }
-    return (wrap_west_east != 0) + (wrap_north_south != 0);
 }
 
 
@@ -233,8 +191,38 @@ extern void remake_map()
 
 extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
 {
-    uint8_t wraptest = mv_yx_in_dir_wrap(dir, yx);
-    if (yx && !wraptest && yx->x < world.map.length && yx->y < world.map.length)
+    static int8_t wrap_west_east   = 0;
+    static int8_t wrap_north_south = 0;
+    char * err = "Too much wrapping in mv_yx_in_dir_wrap().";
+    exit_err(   INT8_MIN == wrap_west_east || INT8_MIN == wrap_north_south
+             || INT8_MAX == wrap_west_east || INT8_MAX == wrap_north_south, err);
+    if (!yx)
+    {
+        wrap_west_east = wrap_north_south = 0;
+        return 0;
+    }
+    struct yx_uint8 original;
+    original.y = yx->y;
+    original.x = yx->x;
+    mv_yx_in_dir(dir, yx);
+    if      (strchr("edc", dir) && yx->x < original.x)
+    {
+        wrap_west_east++;
+    }
+    else if (strchr("xsw", dir) && yx->x > original.x)
+    {
+        wrap_west_east--;
+    }
+    if      (strchr("we", dir) && yx->y > original.y)
+    {
+        wrap_north_south--;
+    }
+    else if (strchr("xc", dir) && yx->y < original.y)
+    {
+        wrap_north_south++;
+    }
+    if (   !((wrap_west_east != 0) + (wrap_north_south != 0))
+        && yx->x < world.map.length && yx->y < world.map.length)
     {
         return 1;
     }
