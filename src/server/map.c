@@ -200,9 +200,7 @@ extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
     char * err = "Too much wrapping in mv_yx_in_dir_legal().";
     exit_err(   INT8_MIN == wrap_west_east || INT8_MIN == wrap_north_south
              || INT8_MAX == wrap_west_east || INT8_MAX == wrap_north_south, err);
-    struct yx_uint8 original;
-    original.y = yx->y;
-    original.x = yx->x;
+    struct yx_uint8 original = *yx;
     mv_yx_in_dir(dir, yx);
     if      (('e' == dir || 'd' == dir || 'c' == dir) && yx->x < original.x)
     {
