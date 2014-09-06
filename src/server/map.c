@@ -3,7 +3,6 @@
 #include "map.h"
 #include <stdint.h> /* uint8_t, int8_t, uint16_t, uint32_t, (U)INT*_(MIN|MAX) */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strchr() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
@@ -205,19 +204,19 @@ extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
     original.y = yx->y;
     original.x = yx->x;
     mv_yx_in_dir(dir, yx);
-    if      (strchr("edc", dir) && yx->x < original.x)
+    if      (('e' == dir || 'd' == dir || 'c' == dir) && yx->x < original.x)
     {
         wrap_west_east++;
     }
-    else if (strchr("xsw", dir) && yx->x > original.x)
+    else if (('x' == dir || 's' == dir || 'w' == dir) && yx->x > original.x)
     {
         wrap_west_east--;
     }
-    if      (strchr("we", dir) && yx->y > original.y)
+    if      (('w' == dir || 'e' == dir)               && yx->y > original.y)
     {
         wrap_north_south--;
     }
-    else if (strchr("xc", dir) && yx->y < original.y)
+    else if (('x' == dir || 'c' == dir)               && yx->y < original.y)
     {
         wrap_north_south++;
     }
