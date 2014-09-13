@@ -1,7 +1,8 @@
 /* src/server/field_of_view.c */
 
 #include "field_of_view.h"
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t, int32_t */
+#include <stddef.h> /* NULL */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, int32_t, UINT8_MAX */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset() */
 #include "../common/rexit.h" /* exit_trouble() */
@@ -327,22 +328,21 @@ extern void build_fov_map(struct Thing * t)
         {                                      /* moved into starting from a  */
             mv_yx_in_dir_legal('c', &test_pos);/* previous circle's last hex, */
         }                                      /* i.e. from the upper left.   */
-        uint8_t dir_char_pos_in_circledirs_string = 0;
         char dir_char = 'd'; /* Circle's 1st hex is entered by rightward move.*/
+        uint8_t dir_char_pos_in_circledirs_string = UINT8_MAX;
         uint16_t dist_i, hex_i;
-        for (hex_i = 0, dist_i = 1; hex_i < 6 * circle_i; dist_i++, hex_i++)
+        for (hex_i=0, dist_i=circle_i; hex_i < 6 * circle_i; dist_i++, hex_i++)
         {
+            if (circle_i < dist_i)
+            {
+                dist_i = 1;
+                dir_char=circledirs_string[++dir_char_pos_in_circledirs_string];
+            }
             if (mv_yx_in_dir_legal(dir_char, &test_pos))
             {
                 eval_position(circle_i, hex_i, t->fov_map, &test_pos, &shadows);
                 circle_is_on_map = 1;
             }
-            dir_char = circledirs_string[dir_char_pos_in_circledirs_string];
-            if (circle_i == dist_i)                 /* Number of steps into   */
-            {                                       /* one direction before   */
-                dist_i = 0;                         /* direction change is    */
-                dir_char_pos_in_circledirs_string++;/* equal to distance to   */
-            }                                       /* center / circle number.*/
         }
     }
     mv_yx_in_dir_legal(0, NULL);
