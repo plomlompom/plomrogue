@@ -52,13 +52,8 @@ EOF
     if [ -z "$REDO_BASE" ]; then
       export REDO_BASE="$(pwd)"
       export REDO_DIR="$REDO_BASE/.redo"
-      mkdir -p $REDO_DIR
+      LANG=C mkdir -p $REDO_DIR
     fi
-    argument_abspath="$(readlink -f "$argument")"
-    (
-      echo '0' > "$REDO_DIR/$argument_abspath".ctime
-      echo '0' > "$REDO_DIR/$argument_abspath".md5sum
-    ) 2>/dev/null
     redo-ifchange "$argument"
     [ "$?" = 0 ] || exit 1
   fi
