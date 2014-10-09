@@ -70,6 +70,10 @@ _dependencies_ne_uptodate() {
 
 _target_uptodate() {
   target=$1
+  # If a target is a top-level target, it is not up to date.
+  if [ -z "$REDO_TARGET" ]; then
+    return 1
+  fi
   # If a target does not exist, it is not up to date.
   if [ ! -e "$target" ]; then
     _echo_debug_message "$target does not exist."
