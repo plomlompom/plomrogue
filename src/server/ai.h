@@ -14,9 +14,12 @@ struct Thing;
 
 
 
-/* Determine next non-player actor command / arguments by the actor's AI. It's
- * pretty dumb so far. Actors will try to move towards their path-wise nearest
- * neighbor. If no one else is found in the neighborhood, they will simply wait.
+/* Determine next non-player actor command / arguments by the actor's AI. Actors
+ * will look for, and move towards, enemies (animate things not of their own
+ * type); if they see none, they will consume consumables in their inventory; if
+ * there are none, they will pick up any consumables they stand on; if they
+ * stand on none, they will move towards the next consumable they see or
+ * remember on the map; if they see or remember none, they'll simply wait.
  */
 extern void ai(struct Thing * t);
 
