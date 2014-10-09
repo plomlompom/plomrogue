@@ -195,7 +195,7 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
 
 static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter)
 {
-    char dir_to_nearest_enemy = 0;
+    char dir_to_nearest_thing = 0;
     if (seeing_thing(t_eye, filter))
     {
         uint32_t map_size = world.map.length * world.map.length;
@@ -214,14 +214,14 @@ static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter)
             if (min_neighbor > neighbors[i])
             {
                 min_neighbor = neighbors[i];
-                dir_to_nearest_enemy = dirs[i];
+                dir_to_nearest_thing = dirs[i];
             }
         }
     }
-    if (dir_to_nearest_enemy)
+    if (dir_to_nearest_thing)
     {
         t_eye->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
-        t_eye->arg = dir_to_nearest_enemy;
+        t_eye->arg = dir_to_nearest_thing;
         return 1;
     }
     return 0;
