@@ -1,4 +1,9 @@
-/* src/server/map.c */
+/* src/server/map.c
+ *
+ * This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+ * or any later version. For details on its copyright, license, and warranties,
+ * see the file NOTICE in the root directory of the PlomRogue source package.
+ */
 
 #include "map.h"
 #include <stdint.h> /* uint8_t, int8_t, uint16_t, uint32_t, (U)INT*_(MIN|MAX) */

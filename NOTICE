@@ -1,0 +1,28 @@
+Information on the contained programs' copyright, licenses, and warranties
+==========================================================================
+
+redo – the scripts below ./build/redo_scripts/
+----------------------------------------------
+
+See redo files below ./build/redo_scripts/ for copyright, license, and warranty
+information. In the file ./AGPLv3 a copy of the GNU Affero Public License
+version 3 is provided.
+
+PlomRogue – the package's files that are not below ./build/redo_scripts/
+------------------------------------------------------------------------
+
+PlomRogue (C) 2013-2014 Christian Heller a.k.a. plomlompom
+
+PlomRogue is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+
+PlomRogue is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of NON-INFRINGEMENT,
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program (see file ./GPLv3).  If not, see <http://www.gnu.org/licenses/>.
+

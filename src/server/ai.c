@@ -1,4 +1,9 @@
-/* src/server/ai.c */
+/* src/server/ai.c
+ *
+ * This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+ * or any later version. For details on its copyright, license, and warranties,
+ * see the file NOTICE in the root directory of the PlomRogue source package.
+ */
 
 #include "ai.h"
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, int16_t, UINT16_MAX */

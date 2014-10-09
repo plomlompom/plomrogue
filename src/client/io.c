@@ -1,4 +1,9 @@
-/* src/client/io.c */
+/* src/client/io.c
+ *
+ * This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+ * or any later version. For details on its copyright, license, and warranties,
+ * see the file NOTICE in the root directory of the PlomRogue source package.
+ */
 
 #define _POSIX_C_SOURCE 1 /* PIPE_BUF */
 #include "io.h"

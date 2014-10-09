@@ -1,5 +1,9 @@
 /* src/client/windows.h
  *
+ * This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+ * or any later version. For details on its copyright, license, and warranties,
+ * see the file NOTICE in the root directory of the PlomRogue source package.
+ *
  * A tiled window manager for the terminal.
  *
  * It provides a virtual screen that can be scrolled horizontally and may carry

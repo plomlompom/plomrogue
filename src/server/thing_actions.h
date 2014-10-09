@@ -1,5 +1,9 @@
 /* src/server/thing_actions.h
  *
+ * This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+ * or any later version. For details on its copyright, license, and warranties,
+ * see the file NOTICE in the root directory of the PlomRogue source package.
+ *
  * Actions that can be performed by living things / "actors". Note that apart
  * from the consequences described below, each action may also trigger log
  * messages and other minor stuff if the actor is equal to the player.
