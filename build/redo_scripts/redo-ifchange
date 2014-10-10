@@ -196,7 +196,9 @@ _do() {
     [ -e "$target.do" ] || _find_dofile "$target"
     if [ ! -e "$dofile" ]; then
       # If .do file does not exist and target exists, it is a source file.
-      if [ -e "$target" ]; then
+      if [ -e "$target_abspath" ]; then
+        _add_dependency "$REDO_TARGET" "$target_abspath"
+        _add_ctime_md5sum "$target_abspath"
         return 0
       # If .do file does not exist and target does not exist, stop.
       else
@@ -235,7 +237,7 @@ _do() {
       "$REDO_DIR/$target_abspath".dependencies_ne >&2
   fi
   # Some do files (like all.do) do not usually generate output.
-  if [ -e "$target" ]; then
+  if [ -e "$target_abspath" ]; then
     # Record dependency on parent target.
     _add_dependency "$REDO_TARGET" "$target_abspath"
     _add_ctime_md5sum "$target_abspath"
