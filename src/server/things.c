@@ -294,6 +294,7 @@ extern void try_thing_proliferation(struct Thing * t)
                                 && start.y == t->pos.y && start.x == t->pos.x)
                             {
                                 drop = 1;
+                                break;
                             }
                         }
                     }
