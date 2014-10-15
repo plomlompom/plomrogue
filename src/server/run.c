@@ -8,7 +8,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "run.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, int16_t */
 #include <stdio.h> /* FILE, printf(), fflush() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), strcmp(), strncmp(), strdup() */
@@ -28,7 +28,9 @@
 #include "god_commands.h" /* parse_god_command_(1|2|3)arg() */
 #include "hardcoded_strings.h" /* s */
 #include "io.h" /* io_round(), save_world() */
-#include "things.h" /* Thing, get_thing_action_id_by_name(), get_player() */
+#include "things.h" /* Thing, get_thing_action_id_by_name(), get_player(),
+                      * try_thing_proliferation()
+                      */
 #include "world.h" /* world */
 
 
@@ -56,8 +58,16 @@ static uint8_t parse_command(char * tok0);
  */
 static void server_test();
 
+/* Return array of IDs of non-owned things in game world, ended by non-ID -1. */
+static int16_t * build_whitelist();
+
+/* Return 1 if value of "id" appears in "whitelist", else 0. */
+static uint8_t thing_in_whitelist(uint8_t id, int16_t * whitelist);
+
 /* Run the game world and its inhabitants (and their actions) until the player
- * avatar is free to receive new commands (or is dead).
+ * avatar is free to receive new commands (or is dead). Only actions and
+ * proliferations for non-owned things are performed that exist at the start of
+ * the turn jumped into, or started anew by the cycle.
  */
 static void turn_over();
 
@@ -204,40 +214,77 @@ static void server_test()
 
 
 
+static int16_t * build_whitelist()
+{
+    uint16_t i_things = NULL != world.things;
+    struct Thing * t = world.things;
+    for (; t; t = t->next, i_things++);
+    int16_t * whitelist = try_malloc(i_things * sizeof(int16_t), __func__);
+    for (i_things = 0, t = world.things; t;
+         whitelist[i_things] = t->id, t = t->next, i_things++)
+    whitelist[i_things] = -1;
+    return whitelist;
+}
+
+
+
+static uint8_t thing_in_whitelist(uint8_t id, int16_t * whitelist)
+{
+    int16_t i;
+    for (i = 0; -1 < whitelist[i]; i++)
+    {
+        if ((int16_t) id == whitelist[i])
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+
 static void turn_over()
 {
     struct Thing * player = get_player();
     struct Thing * thing = player;
     uint16_t start_turn = world.turn;
+    int16_t * whitelist = build_whitelist();
     while (    0 < player->lifepoints
            || (0 == player->lifepoints && start_turn == world.turn))
-    {
+    {             /* TODO: check meaning and refactorability of 2nd condition */
         if (!thing)
         {
             world.turn++;
             thing = world.things;
+            free(whitelist);
+            whitelist = build_whitelist();
         }
-        if (0 < thing->lifepoints)
+        if (thing_in_whitelist(thing->id, whitelist))
         {
-            if (0 == thing->command)
+            if (0 < thing->lifepoints)
             {
-                if (thing == player)
+                if (0 == thing->command)
                 {
-                    break;
+                    if (thing == player)
+                    {
+                        break;
+                    }
+                    ai(thing);
                 }
-                ai(thing);
+                thing->progress++;
+                struct ThingAction * ta = get_thing_action(thing->command);
+                if (thing->progress == ta->effort)
+                {
+                    ta->func(thing);
+                    thing->command = 0;
+                    thing->progress = 0;
+                }
             }
-            thing->progress++;
-            struct ThingAction * ta = get_thing_action(thing->command);
-            if (thing->progress == ta->effort)
-            {
-                ta->func(thing);
-                thing->command = 0;
-                thing->progress = 0;
-            }
+            try_thing_proliferation(thing);
         }
         thing = thing->next;
     }
+    free(whitelist);
 }
 
 

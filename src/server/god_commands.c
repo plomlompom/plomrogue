@@ -88,7 +88,8 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
     if (!tt &&
         (   !strcmp(tok0, s[S_CMD_TT_CONSUM]) || !strcmp(tok0, s[S_CMD_TT_SYMB])
          || !strcmp(tok0, s[S_CMD_TT_STARTN]) || !strcmp(tok0, s[S_CMD_TT_NAME])
-         || !strcmp(tok0, s[S_CMD_TT_CORPS]) || !strcmp(tok0, s[S_CMD_TT_HP])))
+         || !strcmp(tok0, s[S_CMD_TT_CORPS])  || !strcmp(tok0, s[S_CMD_TT_HP])
+         || !strcmp(tok0, s[S_CMD_TT_PROL])))
     {
         return err_line(1, "No thing type defined to manipulate yet.");
     }
@@ -97,6 +98,7 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
         || parse_val(tok0,tok1,s[S_CMD_TT_HP],'8',(char *) &tt->lifepoints)
         || parse_val(tok0,tok1,s[S_CMD_TT_STARTN],'8',(char *) &tt->start_n)
         || parse_val(tok0,tok1,s[S_CMD_TT_SYMB],'c',(char *) &tt->char_on_map)
+        || parse_val(tok0,tok1,s[S_CMD_TT_PROL],'8',(char *) &tt->proliferate)
         || parse_val(tok0,tok1,s[S_CMD_TT_NAME],'s',(char *) &tt->name));
     else if (parse_val(tok0, tok1, s[S_CMD_TT_CORPS],'8',(char *)&id))
     {
@@ -304,10 +306,6 @@ static uint8_t parse_thing_manipulation_1arg(char * tok0, char * tok1)
         if (!t && !err_line(!world.thing_types, err))
         {
             t = add_thing(id, world.thing_types->id, 0, 0);
-            if (world.exists && t->lifepoints)
-            {
-                build_fov_map(t);
-            }
         }
     }
     else

@@ -9,7 +9,7 @@
 
 
 
-char * s[41];
+char * s[42];
 
 
 
@@ -32,6 +32,7 @@ extern void init_strings()
     s[S_CMD_TT_SYMB] = "TT_SYMBOL";
     s[S_CMD_TT_NAME] = "TT_NAME";
     s[S_CMD_TT_CORPS] = "TT_CORPSE_ID";
+    s[S_CMD_TT_PROL] = "TT_PROLIFERATE";
     s[S_CMD_T_ID] = "T_ID";
     s[S_CMD_T_TYPE] = "T_TYPE";
     s[S_CMD_T_POSY] = "T_POSY";

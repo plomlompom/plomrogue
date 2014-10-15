@@ -455,6 +455,7 @@ extern void save_world()
         exit_trouble(test < 0, __func__, "fprintf");
         write_key_space_string(file, s[S_CMD_TT_NAME], tt->name);
         write_key_space_value(file, s[S_CMD_TT_CONSUM], tt->consumable);
+        write_key_space_value(file, s[S_CMD_TT_PROL], tt->proliferate);
         try_fputc('\n', file, __func__);
     }
     for (tt = world.thing_types; tt; tt = tt->next)

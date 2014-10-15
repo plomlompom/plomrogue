@@ -126,7 +126,7 @@ T_ID [-32768 to 32767]
 Select thing to manipulate by argument as ID. If argument is <0 or >255, change
 it to the lowest unused thing ID. If thing of ID does not exist yet, create it
 with default position of y=0/x=0, the first thing type's ID, and that type's
-lifepoints value. If world is active and the thing is animate, build its field
+lifepoints value; if world is active and the thing is animate, build its field
 of view.
 
 T_TYPE [0 to 255]
@@ -197,3 +197,9 @@ game log and the inventory.
 TT_CORPSE_ID [0-255]
 Set to argument the ID of the thing type that things of the selected type
 transform into when their state changes from animate to inanimate.
+
+TT_PROLIFERATE [0-255]
+If non-zero, there is a chance of 1 divided by the given value each turn for any
+thing of the selected type to emit an offspring to a random neighbor cell if one
+passable is available (and, if the thing is of an animate type, not inhabited by
+another animate thing).

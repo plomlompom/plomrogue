@@ -10,12 +10,14 @@
 #include <stddef.h> /* NULL, size_t */
 #include <stdint.h> /* uint8_t, uint16_t, int16_t, UINT8_MAX, UINT16_MAX */
 #include <stdlib.h> /* free() */
-#include <string.h> /* memset(), strcmp(), strdup() */
+#include <string.h> /* memset(), strcmp(), strdup(), strlen() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "hardcoded_strings.h" /* s */
+#include "field_of_view.h" /* build_fov_map() */
+#include "map.h" /* mv_yx_in_dir_legal() */
 #include "rrand.h" /* rrand() */
 #include "thing_actions.h" /* actor_wait */
 #include "world.h" /* world */
@@ -119,6 +121,10 @@ extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x)
     t->lifepoints = tt->lifepoints;
     t->pos.y      = y;
     t->pos.x      = x;
+    if (t->lifepoints && world.exists)
+    {
+        build_fov_map(t);
+    }
     return t;
 }
 
@@ -258,6 +264,54 @@ extern struct Thing * get_thing(struct Thing * ptr, uint8_t id, uint8_t deep)
 extern struct Thing * get_player()
 {
     return get_thing(world.things, 0, 0);
+}
+
+
+
+extern void try_thing_proliferation(struct Thing * t)
+{
+    struct ThingType * tt = get_thing_type(t->type);
+    if (tt->proliferate)
+    {
+        if (1 == tt->proliferate || 1 == (rrand() % tt->proliferate))
+        {
+            struct yx_uint8 candidates[6];
+            uint8_t n_candidates = 0;
+            char dirs[7] = "dxswed";
+            struct yx_uint8 start = t->pos;
+            uint8_t i;
+            for (i = 0; i < strlen(dirs); i++)
+            {
+                if (   mv_yx_in_dir_legal(dirs[i], &start)
+                    && '.' == world.map.cells[start.y*world.map.length+start.x])
+                {
+                    uint8_t drop = 0;
+                    if (tt->lifepoints)
+                    {
+                        for (t = world.things; t; t = t->next)
+                        {
+                            if (   t->lifepoints
+                                && start.y == t->pos.y && start.x == t->pos.x)
+                            {
+                                drop = 1;
+                            }
+                        }
+                    }
+                    if (!drop)
+                    {
+                        candidates[n_candidates] = start;
+                        n_candidates++;
+                    }
+                }
+            }
+            if (!n_candidates)
+            {
+                return;
+            }
+            i = rrand() % n_candidates;
+            add_thing(-1, tt->id, candidates[i].y, candidates[i].x);
+        }
+    }
 }
 
 

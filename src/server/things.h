@@ -42,13 +42,14 @@ struct ThingInMemory
 struct ThingType
 {
     struct ThingType * next;
-    uint8_t id;         /* thing type identifier / sets .type */
-    char char_on_map;   /* thing symbol to appear on map */
-    char * name;        /* string to describe thing in game log */
-    uint8_t corpse_id;  /* type to change thing into upon destruction */
-    uint8_t lifepoints; /* default start value for thing's .lifepoints */
-    uint8_t consumable; /* can be eaten if !0, for so much hitpoint win */
-    uint8_t start_n;    /* how many of these does the map start with? */
+    uint8_t id;          /* thing type identifier / sets .type */
+    char char_on_map;    /* thing symbol to appear on map */
+    char * name;         /* string to describe thing in game log */
+    uint8_t corpse_id;   /* type to change thing into upon destruction */
+    uint8_t lifepoints;  /* default start value for thing's .lifepoints */
+    uint8_t consumable;  /* can be eaten if !0, for so much hitpoint win */
+    uint8_t start_n;     /* how many of these does the map start with? */
+    uint8_t proliferate; /* if >0: inverse of chance to proliferate */
 };
 
 struct ThingAction
@@ -75,7 +76,8 @@ extern struct ThingAction * add_thing_action(uint8_t id);
 extern struct ThingType * add_thing_type(int16_t id);
 
 /* Add thing of "id" and "type" on position of "y"/x" to world.things. If "id"
- * is not >= 0 and <= UINT8_MAX, use lowest unused id. Return thing.
+ * is not >= 0 and <= UINT8_MAX, use lowest unused id. Build .fov_map if
+ * world.exists is non-zero. Return thing.
  */
 extern struct Thing * add_thing(int16_t id, uint8_t type, uint8_t y, uint8_t x);
 
@@ -107,6 +109,12 @@ extern struct Thing * get_thing(struct Thing * ptr, uint8_t id, uint8_t deep);
  * if none found.
  */
 extern struct Thing * get_player();
+
+/* Try to create "t" offspring on random passable neighbor cell if available (and,
+ * if "t" is of animate thing type, not inhabited by animate thing) and "t"'s
+ * type's .proliferation is >0, with a chance of 1/.proliferation.
+ */
+extern void try_thing_proliferation(struct Thing * t);
 
 /* Add thing(s) ("n": how many?) of "type" to map on random passable
  * position(s). New animate things are never placed in the same square with
