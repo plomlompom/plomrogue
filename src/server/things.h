@@ -110,9 +110,9 @@ extern struct Thing * get_thing(struct Thing * ptr, uint8_t id, uint8_t deep);
  */
 extern struct Thing * get_player();
 
-/* Try to create "t" offspring on random passable neighbor cell if available (and,
- * if "t" is of animate thing type, not inhabited by animate thing) and "t"'s
- * type's .proliferation is >0, with a chance of 1/.proliferation.
+/* Try to create "t" offspring on random passable neighbor cell if available
+ * (and, if "t" is of animate thing type, not inhabited by animate thing) and
+ * "t"'s type's .proliferation is >0, with a chance of 1/.proliferation.
  */
 extern void try_thing_proliferation(struct Thing * t);
 
