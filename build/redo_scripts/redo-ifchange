@@ -128,8 +128,8 @@ _dependencies_uptodate() {
   _echo_debug_message "$target dependency check:"
   # If any dependency does not exist, the target is out of date.
   LANG=C stat -c%Y $(LANG=C cut -f1 "$REDO_DIR/$target".dependencies) > \
-    "$REDO_DIR/".dependencies.ctimes 2>&- || return 1
-  exec 3< "$REDO_DIR/".dependencies.ctimes
+    "$REDO_DIR/$target".dependencies.ctimes 2>&- || return 1
+  exec 3< "$REDO_DIR/$target".dependencies.ctimes
   exec 4< "$REDO_DIR/$target".dependencies
   while read ctime_actual <&3 && read dependency ctime_stored md5sum_stored <&4; do
     # If a .always file exists, the dependency is out of date.
