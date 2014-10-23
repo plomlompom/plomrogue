@@ -43,6 +43,11 @@ static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
                                              int16_t id, uint8_t struct_id,
                                              struct NextAndId ** start);
 
+/* Return 1 if cell at "test_pos" is proliferable by "t", i.e. it is passable,
+ * it is not inhabited by another thing of "t"'s type, and, if "t" is animate,
+ * neither by any other animate thing; else return 0.
+ */
+static uint8_t cell_is_proliferable(struct yx_uint8 test_pos, struct Thing * t);
 
 
 static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
@@ -75,6 +80,32 @@ static struct NextAndId * add_to_struct_list(size_t n_size, uint8_t start_id,
     for (; * nai_ptr_ptr; nai_ptr_ptr = &(*nai_ptr_ptr)->next);
     *nai_ptr_ptr = nai;
     return nai;
+}
+
+
+
+static uint8_t cell_is_proliferable(struct yx_uint8 test_pos, struct Thing * t)
+{
+    if ('.' == world.map.cells[test_pos.y * world.map.length + test_pos.x])
+    {
+        struct Thing * t_test;
+        for (t_test = world.things; t_test; t_test = t_test->next)
+        {
+            if (t_test->pos.y == test_pos.y && t_test->pos.x == test_pos.x)
+            {
+                if (t_test->type == t->type)
+                {
+                    return 0;
+                }
+                if (t_test->lifepoints && t->lifepoints)
+                {
+                    return 0;
+                }
+            }
+        }
+        return 1;
+    }
+    return 0;
 }
 
 
@@ -278,31 +309,15 @@ extern void try_thing_proliferation(struct Thing * t)
             struct yx_uint8 candidates[6];
             uint8_t n_candidates = 0;
             char dirs[7] = "dxswed";
-            struct yx_uint8 start = t->pos;
+            struct yx_uint8 test = t->pos;
             uint8_t i;
             for (i = 0; i < strlen(dirs); i++)
             {
-                if (   mv_yx_in_dir_legal(dirs[i], &start)
-                    && '.' == world.map.cells[start.y*world.map.length+start.x])
+                if (   mv_yx_in_dir_legal(dirs[i], &test)
+                    && cell_is_proliferable(test, t))
                 {
-                    uint8_t drop = 0;
-                    if (tt->lifepoints)
-                    {
-                        for (t = world.things; t; t = t->next)
-                        {
-                            if (   t->lifepoints
-                                && start.y == t->pos.y && start.x == t->pos.x)
-                            {
-                                drop = 1;
-                                break;
-                            }
-                        }
-                    }
-                    if (!drop)
-                    {
-                        candidates[n_candidates] = start;
+                        candidates[n_candidates] = test;
                         n_candidates++;
-                    }
                 }
             }
             if (!n_candidates)
