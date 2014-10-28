@@ -5,7 +5,7 @@
  * see the file NOTICE in the root directory of the PlomRogue source package.
  */
 
-#define _POSIX_C_SOURCE 200809L
+#define _POSIX_C_SOURCE 200809L /* strdup() */
 #include "run.h"
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, int16_t */
@@ -28,9 +28,9 @@
 #include "god_commands.h" /* parse_god_command_(1|2|3)arg() */
 #include "hardcoded_strings.h" /* s */
 #include "io.h" /* io_round(), save_world() */
-#include "things.h" /* Thing, get_thing_action_id_by_name(), get_player(),
-                      * try_thing_proliferation()
-                      */
+#include "things.h" /* Thing, ThingType, get_thing_action_id_by_name(),
+                     * get_player(), try_thing_proliferation()
+                     */
 #include "world.h" /* world */
 
 
@@ -70,6 +70,12 @@ static uint8_t thing_in_whitelist(uint8_t id, int16_t * whitelist);
  * the turn jumped into, or started anew by the cycle.
  */
 static void turn_over();
+
+/* Append "answer" to server output file, with instant fflush(). */
+static void answer_query(char * answer);
+
+/* Try to read "msg" as meta command, act accordingly; on success, free it. */
+static uint8_t meta_commands(char * msg);
 
 
 
@@ -289,6 +295,51 @@ static void turn_over()
 
 
 
+static void answer_query(char * answer)
+{
+    try_fwrite(answer, strlen(answer), 1, world.file_out, __func__);
+    fflush(world.file_out);
+}
+
+
+
+static uint8_t meta_commands(char * msg)
+{
+    if (!strcmp("QUIT", msg))
+    {
+        free(msg);
+        return 2;
+    }
+    if (!strcmp("PING", msg))
+    {
+        free(msg);
+        answer_query("PONG\n");
+        return 1;
+    }
+    if (!strcmp("STACK", msg))
+    {
+        free(msg);
+        answer_query("THINGS_BELOW_PLAYER START\n");
+        struct Thing * player = get_player();
+        struct Thing * t;
+        for (t = world.things; t; t = t->next)
+        {
+            if (   t->pos.y == player->pos.y && t->pos.x == player->pos.x
+                && t != player)
+            {
+                struct ThingType * tt = get_thing_type(t->type);
+                answer_query(tt->name);
+                answer_query("\n");
+            }
+        }
+        answer_query("THINGS_BELOW_PLAYER END\n");
+        return 1;
+    }
+    return 0;
+}
+
+
+
 extern void record(char * msg, uint8_t force)
 {
     static FILE * file_tmp = NULL;
@@ -375,17 +426,13 @@ extern uint8_t io_loop()
         {
             exit_trouble(-1 == printf("Input: %s\n", msg), __func__, "printf");
         }
-        if (!strcmp("QUIT", msg))
+        uint8_t test = meta_commands(msg);
+        if (test)
         {
-            free(msg);
-            return 1;
-        }
-        if (!strcmp("PING", msg))
-        {
-            free(msg);
-            char * pong = "PONG\n";
-            try_fwrite(pong, strlen(pong), 1, world.file_out, __func__);
-            fflush(world.file_out);
+            if (2 == test)
+            {
+                return 1;
+            }
             continue;
         }
         if (world.replay)

@@ -11,6 +11,9 @@ BOTH SERVER/CLIENT:
 
 CLIENT:
 
+- split Available keys window in two (Global keys (maybe drop that, replace it
+  by F6 window), Active window's keys)
+
 - re-work unnecessary complex command / keybinding / server message mapping
 
 BUILD PROCESS:
