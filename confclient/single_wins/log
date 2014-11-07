@@ -41,9 +41,9 @@ KEY 121 to_height_t
 KEY 120 to_width_t
 
 KEYBINDINGS 'winkeys'
-KEY 258 w_keys_d
-KEY 259 w_keys_u
-KEY 10 w_keys_m
+KEY 258 keyb_dw
+KEY 259 keyb_uw
+KEY 10 keyb_mw
 
 WIN_ORDER 'l'
 WIN_FOCUS 'l'
@@ -54,23 +54,32 @@ BREAK 0
 WIDTH 0
 HEIGHT 0
 
+WINDOW 0
+NAME 'Set global keys'
+BREAK 0
+WIDTH 22
+HEIGHT 7
+KEY 258 keyb_dG
+KEY 259 keyb_uG
+KEY 10 keyb_mG
+
 WINDOW 1
 NAME 'Set window geometry keys'
 BREAK 0
 WIDTH 29
 HEIGHT 9
-KEY 258 wg_keys_d
-KEY 259 wg_keys_u
-KEY 10 wg_keys_m
+KEY 258 keyb_dg
+KEY 259 keyb_ug
+KEY 10 keyb_mg
 
 WINDOW 2
 NAME 'Set window keybinding keys'
 BREAK 0
 WIDTH 29
 HEIGHT 3
-KEY 258 wk_keys_d
-KEY 259 wk_keys_u
-KEY 10 wk_keys_m
+KEY 258 keyb_dk
+KEY 259 keyb_uk
+KEY 10 keyb_mk
 
 WINDOW c
 NAME 'Inventory'
@@ -108,15 +117,6 @@ KEY 260 map_l
 KEY 261 map_r
 KEY 46 map_c
 KEY 70 to_autofocus
-
-WINDOW 0
-NAME 'Set global keys'
-BREAK 0
-WIDTH 22
-HEIGHT 7
-KEY 258 g_keys_d
-KEY 259 g_keys_u
-KEY 10 g_keys_m
 
 WINDOW a
 NAME 'Active window`s keys'

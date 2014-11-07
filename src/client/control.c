@@ -9,7 +9,7 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
 #include <stdlib.h> /* free() */
 #include <stdio.h> /* sprintf() */
-#include <string.h> /* strlen() */
+#include <string.h> /* strlen(), strcmp(), strncmp() */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "interface_conf.h" /* reload_interface_conf(), save_interface_conf() */
@@ -37,8 +37,12 @@ static void nav_inventory(char dir);
 static uint8_t try_0args(struct Command * command, char * match, void (* f) ());
 static uint8_t try_1args(struct Command * command, char * match,
                          void (* f) (char), char c);
-static uint8_t try_2args(struct Command * command, char * match,
-                         void (* f) (char, char), char c1, char c2);
+
+/* If "command" fits pattern "keyb_XY" with Y a proper keybinding list ID char
+ * and X one of "u" (for "up"), "d" (for "down") or "m" (for "modify"), move up
+ * or down or modify entry in the selected keybinding list.
+ */
+static uint8_t try_kb_manip(char * command);
 
 /* Try if "command" matches a hard-coded list of client-only commands and, if
  * successful, execute the match and return 1. Else, return 0.
@@ -106,12 +110,23 @@ static uint8_t try_1args(struct Command * command, char * match,
 
 
 
-static uint8_t try_2args(struct Command * command, char * match,
-                             void (* f) (char, char), char c1, char c2)
+/* If "command" fits pattern "keyb_XY" with Y a proper keybinding list ID char
+ * and X one of "u" (for "up"), "d" (for "down") or "m" (for "modify"), move up
+ * or down or modify entry in the selected keybinding list.
+ */
+static uint8_t try_kb_manip(char * command)
 {
-    if (!strcmp(command->dsc_short, match))
+    char * cmp = "keyb_";
+    if (strlen(command) == strlen(cmp)+2 && !strncmp(command, cmp, strlen(cmp)))
     {
-        f(c1, c2);
+        if ('m' == command[strlen(cmp)])
+        {
+            mod_selected_keyb(command[strlen(cmp) + 1]);
+        }
+        else if ('u' == command[strlen(cmp)] || 'd' == command[strlen(cmp)])
+        {
+            move_keyb_selection(command[strlen(cmp) + 1], command[strlen(cmp)]);
+        }
         return 1;
     }
     return 0;
@@ -153,18 +168,7 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "shift_b", shift_active_win, 'b')
             || try_0args(command, "reload_conf", reload_interface_conf)
             || try_0args(command, "save_conf", save_interface_conf)
-            || try_1args(command, "g_keys_m", mod_selected_keyb, 'G')
-            || try_2args(command, "g_keys_u", move_keyb_selection, 'G', 'u')
-            || try_2args(command, "g_keys_d", move_keyb_selection, 'G', 'd')
-            || try_1args(command, "w_keys_m", mod_selected_keyb, 'w')
-            || try_2args(command, "w_keys_u", move_keyb_selection, 'w', 'u')
-            || try_2args(command, "w_keys_d", move_keyb_selection, 'w', 'd')
-            || try_1args(command, "wg_keys_m", mod_selected_keyb, 'g')
-            || try_2args(command, "wg_keys_u", move_keyb_selection, 'g', 'u')
-            || try_2args(command, "wg_keys_d", move_keyb_selection, 'g', 'd')
-            || try_1args(command, "wk_keys_m", mod_selected_keyb, 'k')
-            || try_2args(command, "wk_keys_u", move_keyb_selection, 'k', 'u')
-            || try_2args(command, "wk_keys_d", move_keyb_selection, 'k', 'd'));
+            || try_kb_manip(command->dsc_short));
 }
 
 

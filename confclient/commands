@@ -74,13 +74,13 @@ DESCRIPTION 'scroll pad left'
 COMMAND scrl_r
 DESCRIPTION 'scroll pad right'
 
-COMMAND g_keys_d
+COMMAND keyb_dG
 DESCRIPTION 'nav down global keys'
 
-COMMAND g_keys_u
+COMMAND keyb_uG
 DESCRIPTION 'nav up global keys'
 
-COMMAND g_keys_m
+COMMAND keyb_mG
 DESCRIPTION 'mod global keys'
 
 COMMAND winconf
@@ -113,31 +113,31 @@ DESCRIPTION 'nav down object'
 COMMAND inv_u
 DESCRIPTION 'nav up object'
 
-COMMAND w_keys_d
+COMMAND keyb_dw
 DESCRIPTION 'nav down window keys'
 
-COMMAND w_keys_u
+COMMAND keyb_uw
 DESCRIPTION 'nav up window nav'
 
-COMMAND w_keys_m
+COMMAND keyb_mw
 DESCRIPTION 'mod window key'
 
-COMMAND wg_keys_d
+COMMAND keyb_dg
 DESCRIPTION 'nav down win geometry config keys'
 
-COMMAND wg_keys_u
+COMMAND keyb_ug
 DESCRIPTION 'nav up win geometry config keys'
 
-COMMAND wg_keys_m
+COMMAND keyb_mg
 DESCRIPTION 'mod win geometry config keys'
 
-COMMAND wk_keys_d
+COMMAND keyb_dk
 DESCRIPTION 'nav down win keys config keys'
 
-COMMAND wk_keys_u
+COMMAND keyb_uk
 DESCRIPTION 'nav up win keys config keys'
 
-COMMAND wk_keys_m
+COMMAND keyb_mk
 DESCRIPTION 'mod win keys config keys'
 
 COMMAND reload_conf

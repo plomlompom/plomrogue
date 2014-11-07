@@ -60,7 +60,7 @@ struct Win
     struct yx_uint16 target_center; /* saves .center when toggling .view */
     struct yx_uint16 frame_size; /* size of window/frame to see winmap through*/
     struct yx_uint16 start; /* upper left corner of window in v_screen */
-    struct yx_uint16 center; /* winnap cell to center frame on if < winmap */
+    struct yx_uint16 center; /* winmap cell to center frame on if < winmap */
     struct yx_uint16 winmap_size; /* delimits .winmap, sorts it into lines */
     chtype * winmap; /* window content in sequence of chtype's to write */
     int16_t target_height; /* window size / .frame_size description in config */
