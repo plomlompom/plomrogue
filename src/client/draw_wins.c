@@ -12,7 +12,7 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* memset(), strchr(), strdup/(), strlen() */
+#include <string.h> /* memset(), strcmp(), strchr(), strdup/(), strlen() */
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "keybindings.h" /* struct KeyBindingDB, get_keyname_to_keycode() */
