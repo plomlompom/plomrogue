@@ -466,15 +466,15 @@ extern void draw_winconf_geometry(struct Win * win)
     char h_value[6 + 1];                       /* 6: int16_t value max strlen */
     int test = sprintf(h_value, "%d", win->target_height);
     exit_trouble(test < 0, __func__, "sprintf");
-    char * h_plus = " (width in cells)\n\n";
-    char * h_minus = " (negative diff: cells to screen width)\n\n";
+    char * h_plus = " (height in cells)\n\n";
+    char * h_minus = " (non-positive diff: cells to screen height)\n\n";
     char * h_type = (1 == win->target_height_type) ? h_minus : h_plus;
     char * w_title = "Width to save: ";
     char w_value[6 + 1];
     test = sprintf(w_value, "%d", win->target_width);
     exit_trouble(test < 0, __func__, "sprintf");
-    char * w_plus = " (height in cells)\n\n";
-    char * w_minus = " (negative diff: cells to screen height)\n\n";
+    char * w_plus = " (width in cells)\n\n";
+    char * w_minus = " (non-positive diff: cells to screen width)\n\n";
     char * w_type = (1 == win->target_width_type)  ? w_minus : w_plus;
     char * breaks_title = "Linebreak type: ";
     char * breaks_type = (1 == win->linebreak) ? "wide" : "long";
