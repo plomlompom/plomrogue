@@ -1,6 +1,5 @@
 KEYBINDINGS 'global'
 KEY 81 quit
-KEY 265 to_a_keywin
 KEY 266 to_mapwin
 KEY 267 to_infowin
 KEY 268 to_inv
@@ -8,6 +7,8 @@ KEY 269 to_logwin
 KEY 270 to_g_keywin
 KEY 271 to_wg_keywin
 KEY 272 to_wk_keywin
+KEY 273 to_A_keywin
+KEY 274 to_G_keywin
 KEY 87 winconf
 KEY 62 cyc_win_f
 KEY 60 cyc_win_b
@@ -49,7 +50,7 @@ WIN_ORDER 'c'
 WIN_FOCUS 'c'
 
 WINDOW 1
-NAME 'Window geometry keys'
+NAME 'Set window geometry keys'
 BREAK 0
 WIDTH 29
 HEIGHT 8
@@ -58,7 +59,7 @@ KEY 259 wg_keys_u
 KEY 10 wg_keys_m
 
 WINDOW 2
-NAME 'Window keybinding keys'
+NAME 'Set window keybinding keys'
 BREAK 0
 WIDTH 29
 HEIGHT 3
@@ -80,12 +81,6 @@ BREAK 2
 WIDTH 28
 HEIGHT 1
 
-WINDOW k
-NAME 'Available keys'
-BREAK 1
-WIDTH 29
-HEIGHT 0
-
 WINDOW l
 NAME 'Log'
 BREAK 0
@@ -103,10 +98,22 @@ KEY 260 map_l
 KEY 261 map_r
 
 WINDOW 0
-NAME 'Global keys'
+NAME 'Set global keys'
 BREAK 0
 WIDTH 29
 HEIGHT -13
 KEY 258 g_keys_d
 KEY 259 g_keys_u
 KEY 10 g_keys_m
+
+WINDOW a
+NAME 'Active window´s keys'
+BREAK 0
+WIDTH 27
+HEIGHT -19
+
+WINDOW g
+NAME 'Global keys'
+BREAK 0
+WIDTH 27
+HEIGHT 18

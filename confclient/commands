@@ -161,8 +161,11 @@ DESCRIPTION 'map right'
 COMMAND map_c
 DESCRIPTION 'map center player'
 
-COMMAND to_a_keywin
-DESCRIPTION 'window available keys'
+COMMAND to_A_keywin
+DESCRIPTION 'window keys of active window'
+
+COMMAND to_G_keywin
+DESCRIPTION 'window global keys'
 
 COMMAND to_inv
 DESCRIPTION 'window inventory'

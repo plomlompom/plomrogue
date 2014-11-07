@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
     /* Declare hard-coded paths and values here. */
     world.path_commands    = "confclient/commands";
     world.path_interface   = "confclient/interface_conf";
-    world.winDB.legal_ids  = "012ciklm";
+    world.winDB.legal_ids  = "012cilmag";
     char * path_server_in  = "server/in";
     char * path_server_out = "server/out";
 

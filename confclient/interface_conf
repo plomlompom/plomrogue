@@ -8,7 +8,6 @@ KEY 262 scrl_l
 KEY 360 scrl_r
 KEY 82 reload_conf
 KEY 67 save_conf
-KEY 265 to_a_keywin
 KEY 266 to_mapwin
 KEY 267 to_infowin
 KEY 268 to_inv
@@ -16,6 +15,8 @@ KEY 269 to_logwin
 KEY 270 to_g_keywin
 KEY 271 to_wg_keywin
 KEY 272 to_wk_keywin
+KEY 273 to_A_keywin
+KEY 274 to_G_keywin
 
 KEYBINDINGS 'wingeom'
 KEY 258 shift_f
@@ -33,20 +34,20 @@ KEY 258 w_keys_d
 KEY 259 w_keys_u
 KEY 10 w_keys_m
 
-WIN_ORDER 'kmicl'
+WIN_ORDER 'gamicl'
 WIN_FOCUS 'm'
 
 WINDOW 1
-NAME 'Window geometry keys'
+NAME 'Set window geometry keys'
 BREAK 0
 WIDTH 29
-HEIGHT 8
+HEIGHT 9
 KEY 258 wg_keys_d
 KEY 259 wg_keys_u
 KEY 10 wg_keys_m
 
 WINDOW 2
-NAME 'Window keybinding keys'
+NAME 'Set window keybinding keys'
 BREAK 0
 WIDTH 29
 HEIGHT 3
@@ -69,12 +70,6 @@ NAME 'Info'
 BREAK 0
 WIDTH 13
 HEIGHT 2
-
-WINDOW k
-NAME 'Available keys'
-BREAK 0
-WIDTH 27
-HEIGHT 0
 
 WINDOW l
 NAME 'Log'
@@ -104,10 +99,22 @@ KEY 46 map_c
 KEY 70 to_autofocus
 
 WINDOW 0
-NAME 'Global keys'
+NAME 'Set global keys'
 BREAK 0
 WIDTH 29
 HEIGHT -13
 KEY 258 g_keys_d
 KEY 259 g_keys_u
 KEY 10 g_keys_m
+
+WINDOW a
+NAME 'Active window`s keys'
+BREAK 0
+WIDTH 27
+HEIGHT -19
+
+WINDOW g
+NAME 'Global keys'
+BREAK 0
+WIDTH 27
+HEIGHT 18

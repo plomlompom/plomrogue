@@ -63,11 +63,8 @@ static char * get_kb_line(struct KeyBinding * kb);
 static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
                                    uint16_t offset);
 
-/* Draw into window "w" from line "start" on a "title" followed by an empty
- * line followed by a list of all keybindings starting in "kbdb".
- */
-static void draw_titled_keybinding_list(char * title, struct Win * win,
-                                        uint16_t * offset, uint8_t last,
+/* Draw into window "w" list of all the keybindings that start at "kbdb". */
+static void draw_titled_keybinding_list(struct Win * win,
                                         struct KeyBindingDB * kbdb);
 
 
@@ -303,29 +300,21 @@ static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
 
 
 
-static void draw_titled_keybinding_list(char * title, struct Win * win,
-                                        uint16_t * offset, uint8_t last,
+static void draw_titled_keybinding_list(struct Win * win,
                                         struct KeyBindingDB * kbdb)
 {
-    uint8_t state = 0;
-    uint8_t kb_n = 0;
-    while (0 == state || kb_n < kbdb->n_of_kbs)
+    uint16_t offset = 0;
+    if (0 == kbdb->n_of_kbs)
     {
-        if (0 == state)
-        {
-            add_line(win, title, 0, offset, 0);
-            add_line(win, " ", 0, offset, 0);
-            state = 1 + (0 == kbdb->n_of_kbs);
-            continue;
-        }
-        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
-        add_line(win, kb_line, 0, offset, (last * kbdb->n_of_kbs == kb_n + 1));
-        free(kb_line);
-        kb_n++;
+        add_line(win, "(none)", 0, &offset, 0);
+        return;
     }
-    if (2 == state)
+    uint8_t kb_n;
+    for (kb_n = 0; kb_n < kbdb->n_of_kbs; kb_n++)
     {
-        add_line(win, "(none)", 0, offset, last);
+        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
+        add_line(win, kb_line, 0, &offset, (0 == kb_n + 1));
+        free(kb_line);
     }
 }
 
@@ -429,9 +418,15 @@ extern void draw_win_inventory(struct Win * win)
 
 
 
-extern void draw_win_available_keybindings(struct Win * win)
+extern void draw_win_global_keys(struct Win * win)
 {
-    char * title = "Active window's keys:";
+    draw_titled_keybinding_list(win, &world.kb_global);
+}
+
+
+
+extern void draw_win_active_windows_keys(struct Win * win)
+{
     struct Win * win_active = get_win_by_id(world.winDB.active);
     struct KeyBindingDB * kbdb = &win_active->kb;
     if      (1 == win_active->view)
@@ -442,13 +437,8 @@ extern void draw_win_available_keybindings(struct Win * win)
     {
         kbdb = &world.kb_winkeys;
     }
-    uint16_t offset = 0;
-    draw_titled_keybinding_list(title, win, &offset, 0, kbdb);
-    add_line(win, " ", 0, &offset, 0);
-    title = "Global keys:";
-    draw_titled_keybinding_list(title, win, &offset, 1, &world.kb_global);
+    draw_titled_keybinding_list(win, kbdb);
 }
-
 
 
 
@@ -501,7 +491,7 @@ extern void draw_winconf_geometry(struct Win * win)
     char w_value[6 + 1];
     test = sprintf(w_value, "%d", win->target_width);
     exit_trouble(test < 0, __func__, "sprintf");
-    char * w_plus = "(height in cells)\n\n";
+    char * w_plus = " (height in cells)\n\n";
     char * w_minus = " (negative diff: cells to screen height)\n\n";
     char * w_type = (1 == win->target_width_type)  ? w_minus : w_plus;
     char * breaks_title = "Linebreak type: ";
