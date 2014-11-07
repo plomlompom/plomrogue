@@ -63,6 +63,11 @@ static char * get_kb_line(struct KeyBinding * kb);
 static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
                                    uint16_t offset);
 
+/* String building helper functions to draw_winconf_geometry(). */
+static char * get_keyname_to_command(char * command_name);
+static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
+                                  char * newlines, char * value_prefix);
+
 
 
 static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
@@ -296,6 +301,51 @@ static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
 
 
 
+static char * get_keyname_to_command(char * command_name)
+{
+    uint8_t i = 0;
+    for (i = 0; i < world.kb_wingeom.n_of_kbs; i++)
+    {
+        if (!strcmp(world.kb_wingeom.kbs[i].command->dsc_short, command_name))
+        {
+            return get_keyname_to_keycode(world.kb_wingeom.kbs[i].keycode);
+        }
+    }
+    return "UNDEFINED";
+}
+
+
+
+static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
+                                  char * newlines, char * value_prefix)
+{
+    char * p0 = 'v'==axis? "Height" : "Width";
+    char * p1 = " to save (grow/shrink/toggle positivity with ";
+    char * p2 = get_keyname_to_command('v'==axis? "grow_v" : "grow_h");
+    char * p4 = get_keyname_to_command('v'==axis? "shri_v" : "shri_v");
+    char * p6 = get_keyname_to_command('v'==axis? "to_height_t" : "to_width_t");
+    char p8[6 + 1];                            /* 6: int16_t value max strlen */
+    int test = sprintf(p8,"%d", 'v'==axis?win->target_height:win->target_width);
+    exit_trouble(test < 0, __func__, "sprintf");
+    char * p9 = " (";
+    char * p10 = "in_cells";
+    if (1 == ('v'==axis? win->target_height_type : win->target_width_type))
+    {
+        p10 = "non-positive diff: cells to screen maximum";
+    }
+    char * p11 = ")";
+    uint8_t size =   strlen(p0) + strlen(p1) + strlen(p2) + strlen(sep)
+                   + strlen(p4) + strlen(sep) + strlen(p6) + strlen(value_prefix)
+                   + strlen(p8) + strlen(p9) + strlen(p10) + strlen(p11)
+                   + strlen(newlines);
+    char * msg = try_malloc(size, __func__);
+    sprintf(msg, "%s%s%s%s%s%s%s%s%s%s%s%s%s", p0, p1, p2, sep, p4, sep, p6,
+            value_prefix, p8, p9, p10, p11, newlines);
+    return msg;
+}
+
+
+
 extern void draw_win_log(struct Win * win)
 {
     if (!world.log)
@@ -461,31 +511,32 @@ extern void draw_winconf_keybindings(struct Win * win)
 
 extern void draw_winconf_geometry(struct Win * win)
 {
-    char * title = "Window's geometry:\n\n";
-    char * h_title = "Height to save: ";
-    char h_value[6 + 1];                       /* 6: int16_t value max strlen */
-    int test = sprintf(h_value, "%d", win->target_height);
-    exit_trouble(test < 0, __func__, "sprintf");
-    char * h_plus = " (height in cells)\n\n";
-    char * h_minus = " (non-positive diff: cells to screen height)\n\n";
-    char * h_type = (1 == win->target_height_type) ? h_minus : h_plus;
-    char * w_title = "Width to save: ";
-    char w_value[6 + 1];
-    test = sprintf(w_value, "%d", win->target_width);
-    exit_trouble(test < 0, __func__, "sprintf");
-    char * w_plus = " (width in cells)\n\n";
-    char * w_minus = " (non-positive diff: cells to screen width)\n\n";
-    char * w_type = (1 == win->target_width_type)  ? w_minus : w_plus;
-    char * breaks_title = "Linebreak type: ";
-    char * breaks_type = (1 == win->linebreak) ? "wide" : "long";
-    breaks_type        = (2 == win->linebreak) ? "compact" : breaks_type;
-    uint16_t text_size =   strlen(title)
-                         + strlen(h_title) + strlen(h_value) + strlen(h_type)
-                         + strlen(w_title) + strlen(w_value) + strlen(w_type)
-                         + strlen(breaks_title) + strlen(breaks_type);
+    char * sep = "/";
+    char * newlines = "\n\n";
+    char * value_prefix = "): ";
+    char * title = "Window's geometry:\n\nShift up/down with ";
+    char * key_shift_b = get_keyname_to_command("shift_b");
+    char * key_shift_f = get_keyname_to_command("shift_f");
+    char * height = winconf_geom_helper(win, 'v', sep, newlines, value_prefix);
+    char * width = winconf_geom_helper(win, 'h', sep, newlines, value_prefix);
+    char * breaks_title = "Linebreak type (toggle with ";
+    char * key_to_break = get_keyname_to_command("to_break");
+    char * breaks_type = "long";
+    if (win->linebreak)
+    {
+        breaks_type = (1 == win->linebreak) ? "wide" : "compact";
+    }
+    uint16_t text_size =   strlen(title) + strlen(key_shift_b) + strlen(sep)
+                         + strlen(key_shift_f) + strlen(newlines)
+                         + strlen(height) + strlen(width)
+                         + strlen(breaks_title) + strlen(key_to_break)
+                         + strlen(value_prefix) + strlen(breaks_type);
     char * text = try_malloc(text_size + 1, __func__);
-    test = sprintf(text, "%s%s%s%s%s%s%s%s%s", title, h_title, h_value, h_type,
-                        w_title, w_value, w_type, breaks_title, breaks_type);
+    int test = sprintf(text, "%s%s%s%s%s%s%s%s%s%s%s", title, key_shift_b, sep,
+                       key_shift_f, newlines, height, width, breaks_title,
+                       key_to_break, value_prefix, breaks_type);
+    free(height);
+    free(width);
     exit_trouble(test < 0, __func__, "sprintf");
     add_text_with_linebreaks(win, text);
     free(text);
