@@ -97,6 +97,8 @@ static uint8_t try_0args(struct Command * command, char * match, void (* f) ())
     return 0;
 }
 
+
+
 static uint8_t try_1args(struct Command * command, char * match,
                              void (* f) (char), char c)
 {
@@ -110,10 +112,6 @@ static uint8_t try_1args(struct Command * command, char * match,
 
 
 
-/* If "command" fits pattern "keyb_XY" with Y a proper keybinding list ID char
- * and X one of "u" (for "up"), "d" (for "down") or "m" (for "modify"), move up
- * or down or modify entry in the selected keybinding list.
- */
 static uint8_t try_kb_manip(char * command)
 {
     char * cmp = "keyb_";
