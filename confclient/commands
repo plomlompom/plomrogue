@@ -84,7 +84,7 @@ COMMAND g_keys_m
 DESCRIPTION 'mod global keys'
 
 COMMAND winconf
-DESCRIPTION 'toggle win config view'
+DESCRIPTION 'toggle win config'
 
 COMMAND grow_h
 DESCRIPTION 'grow window width'
@@ -161,11 +161,8 @@ DESCRIPTION 'map right'
 COMMAND map_c
 DESCRIPTION 'map center player'
 
-COMMAND to_A_keywin
+COMMAND to_a_keywin
 DESCRIPTION 'window keys of active window'
-
-COMMAND to_G_keywin
-DESCRIPTION 'window global keys'
 
 COMMAND to_inv
 DESCRIPTION 'window inventory'
@@ -189,4 +186,4 @@ COMMAND to_wk_keywin
 DESCRIPTION 'window keybinding keys'
 
 COMMAND to_autofocus
-DESCRIPTION 'toggle auto map center'
+DESCRIPTION 'toggle auto-center'

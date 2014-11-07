@@ -63,10 +63,6 @@ static char * get_kb_line(struct KeyBinding * kb);
 static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
                                    uint16_t offset);
 
-/* Draw into window "w" list of all the keybindings that start at "kbdb". */
-static void draw_titled_keybinding_list(struct Win * win,
-                                        struct KeyBindingDB * kbdb);
-
 
 
 static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
@@ -300,26 +296,6 @@ static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
 
 
 
-static void draw_titled_keybinding_list(struct Win * win,
-                                        struct KeyBindingDB * kbdb)
-{
-    uint16_t offset = 0;
-    if (0 == kbdb->n_of_kbs)
-    {
-        add_line(win, "(none)", 0, &offset, 0);
-        return;
-    }
-    uint8_t kb_n;
-    for (kb_n = 0; kb_n < kbdb->n_of_kbs; kb_n++)
-    {
-        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
-        add_line(win, kb_line, 0, &offset, (0 == kb_n + 1));
-        free(kb_line);
-    }
-}
-
-
-
 extern void draw_win_log(struct Win * win)
 {
     if (!world.log)
@@ -418,13 +394,6 @@ extern void draw_win_inventory(struct Win * win)
 
 
 
-extern void draw_win_global_keys(struct Win * win)
-{
-    draw_titled_keybinding_list(win, &world.kb_global);
-}
-
-
-
 extern void draw_win_active_windows_keys(struct Win * win)
 {
     struct Win * win_active = get_win_by_id(world.winDB.active);
@@ -437,7 +406,20 @@ extern void draw_win_active_windows_keys(struct Win * win)
     {
         kbdb = &world.kb_winkeys;
     }
-    draw_titled_keybinding_list(win, kbdb);
+    uint16_t offset = 0;
+    if (0 == kbdb->n_of_kbs)
+    {
+        add_line(win, "(none)", 0, &offset, 0);
+        return;
+    }
+    uint8_t kb_n;
+    for (kb_n = 0; kb_n < kbdb->n_of_kbs; kb_n++)
+    {
+        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
+        add_line(win, kb_line, 0, &offset, (0 == kb_n + 1));
+        free(kb_line);
+    }
+
 }
 
 

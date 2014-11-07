@@ -8,15 +8,14 @@ KEY 262 scrl_l
 KEY 360 scrl_r
 KEY 82 reload_conf
 KEY 67 save_conf
-KEY 266 to_mapwin
-KEY 267 to_infowin
-KEY 268 to_inv
-KEY 269 to_logwin
-KEY 270 to_g_keywin
-KEY 271 to_wg_keywin
-KEY 272 to_wk_keywin
-KEY 273 to_A_keywin
-KEY 274 to_G_keywin
+KEY 265 to_mapwin
+KEY 266 to_infowin
+KEY 267 to_inv
+KEY 268 to_logwin
+KEY 269 to_g_keywin
+KEY 270 to_wg_keywin
+KEY 271 to_wk_keywin
+KEY 272 to_a_keywin
 
 KEYBINDINGS 'wingeom'
 KEY 258 shift_f
@@ -34,7 +33,7 @@ KEY 258 w_keys_d
 KEY 259 w_keys_u
 KEY 10 w_keys_m
 
-WIN_ORDER 'gamicl'
+WIN_ORDER 'micl0a'
 WIN_FOCUS 'm'
 
 WINDOW 1
@@ -80,7 +79,7 @@ HEIGHT -8
 WINDOW m
 NAME 'Map'
 BREAK 0
-WIDTH -42
+WIDTH -37
 HEIGHT 0
 KEY 97 ai
 KEY 112 pick
@@ -101,8 +100,8 @@ KEY 70 to_autofocus
 WINDOW 0
 NAME 'Set global keys'
 BREAK 0
-WIDTH 29
-HEIGHT -13
+WIDTH 22
+HEIGHT 7
 KEY 258 g_keys_d
 KEY 259 g_keys_u
 KEY 10 g_keys_m
@@ -110,11 +109,5 @@ KEY 10 g_keys_m
 WINDOW a
 NAME 'Active window`s keys'
 BREAK 0
-WIDTH 27
-HEIGHT -19
-
-WINDOW g
-NAME 'Global keys'
-BREAK 0
-WIDTH 27
-HEIGHT 18
+WIDTH 22
+HEIGHT -8
