@@ -4,10 +4,6 @@ IN GENERAL:
 
 - expand use of hardcoded_strings module(s)
 
-SERVER:
-
-- critical bug: replay and exit game state don't match
-
 BOTH SERVER/CLIENT:
 
 - make server and client communicate by specific world state info requests 

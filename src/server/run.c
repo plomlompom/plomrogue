@@ -227,7 +227,7 @@ static int16_t * build_whitelist()
     for (; t; t = t->next, i_things++);
     int16_t * whitelist = try_malloc(i_things * sizeof(int16_t), __func__);
     for (i_things = 0, t = world.things; t;
-         whitelist[i_things] = t->id, t = t->next, i_things++)
+         whitelist[i_things] = t->id, t = t->next, i_things++);
     whitelist[i_things] = -1;
     return whitelist;
 }
@@ -263,8 +263,8 @@ static void turn_over()
             world.turn++;
             thing = world.things;
             free(whitelist);
-            whitelist = build_whitelist();
-        }
+            whitelist = build_whitelist();/* The whitelist excludes things    */
+        }                                 /* that appear only during the turn.*/
         if (thing_in_whitelist(thing->id, whitelist))
         {
             if (0 < thing->lifepoints)
