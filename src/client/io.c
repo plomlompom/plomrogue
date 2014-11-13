@@ -52,7 +52,7 @@ static void read_log(char * read_buf, uint32_t linemax, FILE * file);
 static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
                                      FILE * file);
 
-/* If the server's worldstate file has changed since the last read_world(),
+/* If the server's worldstate file has changed since the last read_worldstate(),
  * return a pointer to its file descriptor; else, return NULL.
  *
  * Two tests are performed to check for a file change. The file's last data
@@ -69,14 +69,14 @@ static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
 static FILE * changed_worldstate_file(char * path);
 
 /* Attempt to read the server's worldstate file as representation of the game
- * world in a hard-coded serialization format. Returns 1 on success and 0 if the
+ * world in a hard-coded serialization format. Returns 1 on success, or 0 if the
  * out file wasn't read for supposedly not having changed since a last
- * read_world() call.
+ * read_worldstate() call.
  *
- * map_center() is triggered by either, the first successful read_world() (thus
- * on client start), or on turn 1 (thus on world start).
+ * map_center() is triggered by either, the first successful read_worldstate()
+ * (thus on client start), or on turn 1 (thus on world start).
  */
-static uint8_t read_world();
+static uint8_t read_worldstate();
 
 /* If "last_server_answer_time" is too old, send a PING to the server; or, if a
  * previous PING has not sparked any answer after a while, abort the client.
@@ -199,7 +199,7 @@ static FILE * changed_worldstate_file(char * path)
 
 
 
-static uint8_t read_world()
+static uint8_t read_worldstate()
 {
     char * path = "server/worldstate";
     char * quit_msg = "No worldstate file found to read. Server may be down.";
@@ -273,7 +273,7 @@ static void test_server_activity(time_t * last_server_answer_time)
 extern void send(char * msg)
 {
     uint32_t msg_size = strlen(msg) + 1;
-    char * err = "send() tries to send message larger than PIPE_BUF bytes.";
+    char * err = "send() tried to send message larger than PIPE_BUF bytes.";
     exit_err(msg_size > PIPE_BUF, err);
     try_fwrite(msg, strlen(msg), 1, world.file_server_in, __func__);
     try_fputc('\n', world.file_server_in, __func__);
@@ -284,8 +284,8 @@ extern void send(char * msg)
 
 extern char * io_loop()
 {
-    world.halfdelay = 1;            /* Ensures read_world() is only called 10 */
-    halfdelay(world.halfdelay);     /* times a second during user inactivity. */
+    world.halfdelay = 1;         /* Ensures read_worldstate() is only called  */
+    halfdelay(world.halfdelay);  /* 10 times a second during user inactivity. */
     uint8_t change_in_client = 0;
     uint16_t last_focused_turn = world.turn;
     time_t last_server_answer_time = time(0);
@@ -299,7 +299,7 @@ extern char * io_loop()
             world.winch = 0;
             change_in_client++;
         }
-        if (change_in_client || read_world())
+        if (change_in_client || read_worldstate())
         {
             if (world.turn != last_focused_turn && world.focus_each_turn)
             {
