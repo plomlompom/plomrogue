@@ -253,11 +253,9 @@ static void turn_over()
 {
     struct Thing * player = get_player();
     struct Thing * thing = player;
-    uint16_t start_turn = world.turn;
     int16_t * whitelist = build_whitelist();
-    while (    0 < player->lifepoints
-           || (0 == player->lifepoints && start_turn == world.turn))
-    {             /* TODO: check meaning and refactorability of 2nd condition */
+    while (0 < player->lifepoints)
+    {
         if (!thing)
         {
             world.turn++;
