@@ -43,12 +43,12 @@ static void write_thing(FILE * file, struct Thing * t);
 /* Cut out and return first \0-terminated string from world.queue and
  * appropriately reduce world.queue_size. Return NULL if queue is empty.
  * Superfluous \0 bytes after the string are also cut out. Should the queue
- * start with \0 bytes, those are cut out, but NULL is returned instead of "".
-*/
+ * start with \0 bytes, those are cut out before returning anything after them.
+ */
 static char * get_message_from_queue();
 
 /* Poll input file for world.queue input. Wait a few seconds until giving up;
- * poll only every 0.03 seconds.. Translate '\n' chars in input file into '\0'.
+ * poll only every 0.03 seconds. Translate '\n' chars in input file into '\0'.
  */
 static void read_file_into_queue();
 
@@ -193,6 +193,7 @@ static char * get_message_from_queue()
     if (world.queue_size)
     {
         size_t cutout_len = strlen(world.queue);
+        uint8_t is_nullbyte_chunk = !cutout_len;
         if (0 < cutout_len)
         {
             cutout_len++;
@@ -214,6 +215,10 @@ static char * get_message_from_queue()
             memcpy(new_queue, &(world.queue[cutout_len]), world.queue_size);
             free(world.queue);
             world.queue = new_queue;
+            if (is_nullbyte_chunk)
+            {
+                return get_message_from_queue();
+            }
         }
     }
     return message;
