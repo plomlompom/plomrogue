@@ -20,7 +20,7 @@
  */
 extern void send(char * msg);
 
-/* Keep checking for user input, a changed worldstate file and the server's
+/* Keep checking for user input, a changed worldstate file, and the server's
  * wakefulness. Update client's world representation on worldstate file changes.
  * Manipulate the client and send commands to server based on the user input as
  * interpreted by the control.h library.

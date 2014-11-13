@@ -237,9 +237,10 @@ static void test_ping_pong(time_t last_server_answer_time)
 {
     static uint8_t ping_sent = 0;
     time_t now = time(0);
-    if (ping_sent && last_server_answer_time > now - 3)
-    {
-        ping_sent = 0;
+    if (ping_sent && last_server_answer_time > now - 3)  /* Re-set if last    */
+    {                                                    /* ping was answered */
+        ping_sent = 0;                                   /* with server       */
+        return;                                          /* activity.         */
     }
     if (!ping_sent && last_server_answer_time < now - 3)
     {
