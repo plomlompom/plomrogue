@@ -325,7 +325,7 @@ static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
     }
     char * p11 = ")";
     uint8_t size =   strlen(p0) + strlen(p1) + strlen(p2) + strlen(sep)
-                   + strlen(p4) + strlen(sep) + strlen(p6) + strlen(value_prefix)
+                   + strlen(p4) + strlen(sep) + strlen(p6) +strlen(value_prefix)
                    + strlen(p8) + strlen(p9) + strlen(p10) + strlen(p11)
                    + strlen(newlines);
     char * msg = try_malloc(size, __func__);

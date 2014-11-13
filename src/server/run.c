@@ -236,7 +236,7 @@ static int16_t * build_whitelist()
 
 static uint8_t thing_in_whitelist(uint8_t id, int16_t * whitelist)
 {
-    int16_t i;
+    uint16_t i;
     for (i = 0; -1 < whitelist[i]; i++)
     {
         if ((int16_t) id == whitelist[i])
