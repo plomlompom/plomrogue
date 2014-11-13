@@ -81,12 +81,12 @@ static uint8_t read_worldstate();
 /* If "last_server_answer_time" is too old, send a PING to the server; or, if a
  * previous PING has not sparked any answer after a while, abort the client.
  */
-static void test_ping_pong(time_t last_server_answer_time);
+static void ping_pong_test(time_t last_server_answer_time);
 
 /* Update "last_server_answer_time" if new stuff has been written to the
  * server's out file.
  */
-static void test_server_activity(time_t * last_server_answer_time);
+static void server_activity_test(time_t * last_server_answer_time);
 
 
 
@@ -233,7 +233,7 @@ static uint8_t read_worldstate()
 
 
 
-static void test_ping_pong(time_t last_server_answer_time)
+static void ping_pong_test(time_t last_server_answer_time)
 {
     static uint8_t ping_sent = 0;
     time_t now = time(0);
@@ -253,7 +253,7 @@ static void test_ping_pong(time_t last_server_answer_time)
 
 
 
-static void test_server_activity(time_t * last_server_answer_time)
+static void server_activity_test(time_t * last_server_answer_time)
 {
     int test = try_fgetc(world.file_server_out, __func__);
     if (EOF == test)
@@ -291,8 +291,8 @@ extern char * io_loop()
     time_t last_server_answer_time = time(0);
     while (1)
     {
-        test_server_activity(&last_server_answer_time);
-        test_ping_pong(last_server_answer_time);
+        server_activity_test(&last_server_answer_time);
+        ping_pong_test(last_server_answer_time);
         if (world.winch)
         {
             reset_windows_on_winch();
