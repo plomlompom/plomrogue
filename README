@@ -46,18 +46,20 @@ the two by hand.
 Client's keybindings and window management
 ------------------------------------------
 
-In the client's default window configuration, the window appearing on the left
-sports a list of keybindings available globally, and additionally via the window
-selected as active.
+Multiple windows may fill the screen. One of these will be selected as "active"
+– identified by dollar signs enclosing its title. Active windows may come with
+window-specific keybindings. Furthermore, global keybindings are available no
+matter what window is selected.
 
-Hit "W" (per default keybindings) to switch the "active" window to a view that
-allows changing its geometry. One more hit on "W" switches the window to a view
-that allows changing its window-specific keybindings. The global keybindings can
-be changed in the "Global keys" window, those of the window geometry
-configuration in the "Window geometry keys" window, and those of the
-window-specific keybindings configuration in the "Window keybinding keys"
-window; by default, these three windows are not visible, but may be turned on by
-(per default keybindings) hitting the "F6", "F7" and "F8" keys.
+Hit "W" (per default global keybindings) to switch the active window to a view
+that allows changing its geometry. One more hit on "W" switches the window to a
+view that sports (and allows changing its) window-specific keybindings. (One
+further "W" will return the window to its default, "normal" view.) The global
+keybindings are visible (and can be changed) in the "Set global keys" window,
+those of the window geometry configuration in the "Set window geometry keys"
+window, and those of the window-specific keybindings configuration in the "Set
+window keybinding keys" window; by default, the latter two are not visible, but
+may be turned on by (per default keybindings) hitting the keys "F6" and "F7".
 
 Keybindings and default window selection / visibilities / geometries are read
 from the textfile ./confclient/interface_conf by default, or by another one

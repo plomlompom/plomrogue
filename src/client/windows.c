@@ -21,10 +21,9 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "draw_wins.h" /* draw_winconf_geometry(), draw_winconf_keybindings(),
                         * draw_win_inventory(), draw_win_info(), draw_win_log(),
-                        * draw_win_active_windows_keys(), draw_win_map(),
                         * draw_win_keybindings_winconf_keybindings(),
                         * draw_win_keybindings_winconf_geometry(),
-                        * draw_win_keybindings_global()
+                        * draw_win_keybindings_global(), draw_win_map()
                         */
 #include "wincontrol.h" /* toggle_window() */
 #include "world.h" /* world */
@@ -121,7 +120,6 @@ static void (* get_drawfunc_by_char(char c)) ()
     if (   match_func(c, &f, 'c', draw_win_inventory)
         || match_func(c, &f, 'i', draw_win_info)
         || match_func(c, &f, 'l', draw_win_log)
-        || match_func(c, &f, 'a', draw_win_active_windows_keys)
         || match_func(c, &f, 'm', draw_win_map)
         || match_func(c, &f, '0', draw_win_keybindings_global)
         || match_func(c, &f, '1', draw_win_keybindings_winconf_geometry)

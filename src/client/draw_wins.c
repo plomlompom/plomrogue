@@ -16,7 +16,7 @@
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "keybindings.h" /* struct KeyBindingDB, get_keyname_to_keycode() */
-#include "windows.h" /* yx_uint16, Win, get_win_by_id() */
+#include "windows.h" /* yx_uint16, Win */
 #include "world.h" /* global world */
 
 
@@ -55,9 +55,6 @@ static void add_line_compact(struct Win * win, char * line, attr_t attri,
  */
 static void add_text_with_linebreaks(struct Win * win, char * text);
 static void draw_text_from_bottom(struct Win * win, char * text);
-
-/* Return a properly formatted keybinding list line for "kb". */
-static char * get_kb_line(struct KeyBinding * kb);
 
 /* Draw from line "start" on config view for keybindings defined at "kb". */
 static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
@@ -259,19 +256,6 @@ static void draw_text_from_bottom(struct Win * win, char * text)
 
 
 
-static char * get_kb_line(struct KeyBinding * kb)
-{
-    char * keyname = get_keyname_to_keycode(kb->keycode);
-    uint16_t size = strlen(keyname) + 3 + strlen(kb->command->dsc_long) + 1;
-    char * kb_line = try_malloc(size, __func__);
-    int test = sprintf(kb_line, "%s - %s", keyname, kb->command->dsc_long);
-    exit_trouble(test < 0, __func__, "sprintf");
-    free(keyname);
-    return kb_line;
-}
-
-
-
 static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
                                    uint16_t offset)
 {
@@ -293,7 +277,13 @@ static void draw_keybinding_config(struct Win * win, struct KeyBindingDB * kbdb,
             }
             win->center.y = win->winmap_size.y;
         }
-        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
+        struct KeyBinding kb = kbdb->kbs[kb_n];
+        char * keyname = get_keyname_to_keycode(kb.keycode);
+        uint16_t size = strlen(keyname) + 3 + strlen(kb.command->dsc_long) + 1;
+        char * kb_line = try_malloc(size, __func__);
+        int test = sprintf(kb_line, "%s - %s", keyname, kb.command->dsc_long);
+        exit_trouble(test < 0, __func__, "sprintf");
+        free(keyname);
         add_line(win, kb_line, attri, &offset, (kbdb->n_of_kbs == kb_n + 1));
         free(kb_line);
     }
@@ -440,36 +430,6 @@ extern void draw_win_inventory(struct Win * win)
     win->center.y = !found_selection ? win->winmap_size.y : win->center.y;
     add_line(win, start, !found_selection * A_REVERSE, &offset, 1);
     free(text_copy);
-}
-
-
-
-extern void draw_win_active_windows_keys(struct Win * win)
-{
-    struct Win * win_active = get_win_by_id(world.winDB.active);
-    struct KeyBindingDB * kbdb = &win_active->kb;
-    if      (1 == win_active->view)
-    {
-        kbdb = &world.kb_wingeom;
-    }
-    else if (2 == win_active->view)
-    {
-        kbdb = &world.kb_winkeys;
-    }
-    uint16_t offset = 0;
-    if (0 == kbdb->n_of_kbs)
-    {
-        add_line(win, "(none)", 0, &offset, 0);
-        return;
-    }
-    uint8_t kb_n;
-    for (kb_n = 0; kb_n < kbdb->n_of_kbs; kb_n++)
-    {
-        char * kb_line = get_kb_line(&kbdb->kbs[kb_n]);
-        add_line(win, kb_line, 0, &offset, (0 == kb_n + 1));
-        free(kb_line);
-    }
-
 }
 
 
