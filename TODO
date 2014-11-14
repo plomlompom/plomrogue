@@ -13,8 +13,6 @@ CLIENT:
 
 - re-work unnecessary complex command / keybinding / server message mapping
 
-- unify ping_pong_test() and try_growing_queue()
-
 BUILD PROCESS:
 
 - erlehmann's redo scripts are not OSX-compliant, see:

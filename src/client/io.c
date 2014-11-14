@@ -75,15 +75,10 @@ static FILE * changed_worldstate_file(char * path);
  */
 static uint8_t read_worldstate();
 
-/* If "last_server_answer_time" is too old, send a PING to the server; or, if a
- * previous PING has not sparked any answer after a while, abort the client.
+/* Poll server for queue input. If no new input, send ping, or, if ping already
+ * sent but unanswered for some time, abort.
  */
-static void ping_pong_test(time_t last_server_answer_time);
-
-/* Read server's out file into queue, update "last_server_answer_time" if new
- * stuff is found there.
- */
-static void try_growing_queue(time_t * last_server_answer_time);
+static void test_and_poll_server();
 
 /* Read server out file for messages, act on them (i.e. derive log messages). */
 static uint8_t read_outfile();
@@ -209,9 +204,15 @@ static uint8_t read_worldstate()
 
 
 
-static void ping_pong_test(time_t last_server_answer_time)
+static void test_and_poll_server()
 {
+    static time_t last_server_answer_time = 0;
     static uint8_t ping_sent = 0;
+    if (read_file_into_queue(world.file_server_out, &world.queue))
+    {
+        last_server_answer_time = time(0);
+        return;
+    }
     time_t now = time(0);
     if (ping_sent && last_server_answer_time > now - 3)  /* Re-set if last    */
     {                                                    /* ping was answered */
@@ -225,16 +226,6 @@ static void ping_pong_test(time_t last_server_answer_time)
         return;
     }
     exit_err(last_server_answer_time < now - 6, "Server not answering.");
-}
-
-
-
-static void try_growing_queue(time_t * last_server_answer_time)
-{
-    if (read_file_into_queue(world.file_server_out, &world.queue))
-    {
-        * last_server_answer_time = time(0);
-    }
 }
 
 
@@ -284,15 +275,13 @@ extern void send(char * msg)
 
 extern char * io_loop()
 {
-    world.halfdelay = 1;         /* Ensures read_worldstate() is only called  */
-    halfdelay(world.halfdelay);  /* 10 times a second during user inactivity. */
+    world.halfdelay = 1;             /* Ensure server is polled only 10 times */
+    halfdelay(world.halfdelay);      /* a second during user inactivity.      */
     uint8_t change_in_client = 0;
     uint16_t last_focused_turn = world.turn;
-    time_t last_server_answer_time = time(0);
     while (1)
     {
-        try_growing_queue(&last_server_answer_time);
-        ping_pong_test(last_server_answer_time);
+        test_and_poll_server();
         if (world.winch)
         {
             reset_windows_on_winch();
