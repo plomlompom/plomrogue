@@ -17,6 +17,8 @@
  * if queue is empty and world.do_update is set, update world state file (and
  * unset world.do_update) and write a single dot line to server out file, then
  * read server in file for the next load of bytes to put onto the input queue.
+ * (Queueing ensures only complete messages are interpreted, and io_loop()'s
+ * server tests only happening in a multi-second interval.)
  */
 extern char * io_round();
 

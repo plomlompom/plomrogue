@@ -33,7 +33,7 @@ extern void send(char * msg);
  * view on player if world.focus_each_turn is set. Messages from the out file
  * are put together on the queue first, from which only complete (\n-delimited)
  * messages are read. Queues of messages are worked through completely / emptied
- * before any re-drawing happens.
+ * before any re-drawing or further server polling happens.
  */
 extern char * io_loop();
 
