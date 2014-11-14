@@ -26,7 +26,6 @@ static uint32_t cleanup_flags = 0x0000;
 extern void cleanup()
 {
     free(world.queue);
-    free(world.log);
     free(world.map.cells);
     if (cleanup_flags & CLEANUP_WORLDSTATE)
     {

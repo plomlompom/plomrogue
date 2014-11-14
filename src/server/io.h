@@ -17,15 +17,6 @@
  * if queue is empty and world.do_update is set, update world state file (and
  * unset world.do_update) and write a single dot line to server out file, then
  * read server in file for the next load of bytes to put onto the input queue.
- *
- * Reading the server in file may put many \0-terminated strings on the queue at
- * once. Successive calls of io_round() will make these available one by one.
- * Each such call cuts off bytes from the beginning of world.queue, up to and
- * including the last \0 byte that is followed by a non-\0 byte or ends the
- * queue. If the queue starts with a \0 byte, it and its \0 followers are cut
- * before returning anything after them. Reading from the input file stops only
- * at its end or when one or more byte were read and the next read returns 0
- * bytes. If the re-filled queue doesn't end in \0, a \0 byte is appended to it.
  */
 extern char * io_round();
 

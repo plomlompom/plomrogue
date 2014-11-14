@@ -7,36 +7,25 @@
 
 #include "thing_actions.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t */
+#include <stdint.h> /* uint8_t */
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen(), memcpy(), strncmp() */
+#include <string.h> /* strlen() */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "field_of_view.h" /* build_fov_map() */
 #include "hardcoded_strings.h" /* s */
-#include "things.h" /* Thing, ThingType, get_player(), own_thing(),
-                     * set_thing_position(), get_thing_type(),
-                     * free_things_in_memory()
+#include "things.h" /* Thing, ThingType, get_player(), free_things_in_memory(),
+                     * own_thing(), set_thing_position(), get_thing_type(),
                      */
 #include "map.h" /* mv_yx_in_dir_legal() */
+#include "run.h" /* send_to_outfile() */
 #include "world.h" /* global world */
 
 
 
-/* How many previous characters of the game log to keep on adding new text */
-#define MAX_BACKLOG_CHARS 3000
-
-
-
-/* If "text" is equal "log"'s last line, return 1, else 0. */
-static uint8_t text_equals_log_end(char * log, char * text);
-
-/* Append "text" to game log shortened to MAX_BACKLOG_CHARS characters, or
- * continuation period if "text" is the same as the (shortened) log's last line
- * minus continuation periods.
- */
+/* Send "text" as log message to server out file. */
 static void update_log(char * text);
 
 /* One actor "wounds" another actor, decrementing his lifepoints and, if they
@@ -57,62 +46,11 @@ static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing);
 
 
 
-static uint8_t text_equals_log_end(char * log, char * text)
-{
-    uint16_t len_old = strlen(log);
-    uint16_t last_nl = len_old - 1;
-    while (last_nl != 0)
-    {
-        if ('\n' == log[last_nl])
-        {
-            break;
-        }
-        last_nl--;
-    }
-    uint16_t last_stop = len_old - 1;
-    while (last_stop != 0)
-    {
-        if ('.' == log[last_stop] && '.' != log[last_stop - 1])
-        {
-            break;
-        }
-        last_stop--;
-    }
-    if (   (last_stop + 1) - last_nl == (uint16_t) strlen(text)
-        && 0 == strncmp(log + last_nl, text, strlen(text)))
-    {
-        return 1;
-    }
-    return 0;
-}
-
-
-
 static void update_log(char * text)
 {
-    uint16_t len_new = strlen(text);
-    uint16_t len_old = 0;
-    uint16_t offset = 0;
-    if (world.log)
-    {
-        len_old = strlen(world.log);
-        if (len_old > MAX_BACKLOG_CHARS)
-        {
-            offset = len_old - MAX_BACKLOG_CHARS;
-            len_old = MAX_BACKLOG_CHARS;
-        }
-        if (text_equals_log_end(world.log + offset, text))
-        {
-            text = ".";
-        }
-    }
-    uint16_t len_whole = len_old + len_new + 1;
-    char * new_text = try_malloc(len_whole, __func__);
-    memcpy(new_text, world.log + offset, len_old);
-    int test = sprintf(new_text + len_old, "%s", text);
-    exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
-    free(world.log);
-    world.log = new_text;
+    send_to_outfile("LOG ");
+    send_to_outfile(text);
+    send_to_outfile("\n");
 }
 
 
@@ -134,9 +72,9 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
     {
         msg3 = tt_hitted->name;
     }
-    uint8_t len = 1 + strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
+    uint8_t len = strlen(msg1) + 1 + strlen(msg2) + 1 + strlen(msg3) + 2;
     char * msg = try_malloc(len, __func__);
-    int test = sprintf(msg, "\n%s %s %s.", msg1, msg2, msg3);
+    int test = sprintf(msg, "%s %s %s.", msg1, msg2, msg3);
     exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
     update_log(msg);
     free(msg);
@@ -146,7 +84,7 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
         hitted->type = tt_hitted->corpse_id;
         if (player == hitted)
         {
-            update_log(" You die.");
+            update_log("You die.");
             memset(hitted->fov_map, ' ', world.map.length * world.map.length);
             return;
         }
@@ -159,7 +97,7 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
             free_things_in_memory(hitted->t_mem);
             hitted->t_mem = NULL;
         }
-        update_log(" It dies.");
+        update_log("It dies.");
     }
 }
 
@@ -167,7 +105,7 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
 
 static void playerbonus_wait()
 {
-        update_log("\nYou wait.");
+        update_log("You wait.");
 }
 
 
@@ -200,8 +138,8 @@ static void playerbonus_move(char d, uint8_t passable)
     {
         dsc_move = "You fail to move ";
     }
-    char * msg = try_malloc(strlen(dsc_move) + strlen (dsc_dir) + 3, __func__);
-    int test = sprintf(msg, "\n%s%s.", dsc_move, dsc_dir);
+    char * msg = try_malloc(strlen(dsc_move) + strlen (dsc_dir) + 2, __func__);
+    int test = sprintf(msg, "%s%s.", dsc_move, dsc_dir);
     exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
     update_log(msg);
     free(msg);
@@ -213,10 +151,10 @@ static void playerbonus_drop(uint8_t owns_none)
 {
     if (0 != owns_none)
     {
-        update_log("\nYou try to drop an object, but you own none.");
+        update_log("You try to drop an object, but you own none.");
         return;
     }
-    update_log("\nYou drop an object.");
+    update_log("You drop an object.");
 }
 
 
@@ -225,10 +163,10 @@ static void playerbonus_pick(uint8_t picked)
 {
     if (picked)
     {
-        update_log("\nYou pick up an object.");
+        update_log("You pick up an object.");
         return;
     }
-    update_log("\nYou try to pick up an object, but there is none.");
+    update_log("You try to pick up an object, but there is none.");
 }
 
 
@@ -237,15 +175,15 @@ static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing)
 {
     if      (no_thing)
     {
-        update_log("\nYou try to use an object, but you own none.");
+        update_log("You try to use an object, but you own none.");
         return;
     }
     else if (wrong_thing)
     {
-        update_log("\nYou try to use this object, but fail.");
+        update_log("You try to use this object, but fail.");
         return;
     }
-    update_log("\nYou consume MAGIC MEAT.");
+    update_log("You consume MAGIC MEAT.");
 }
 
 

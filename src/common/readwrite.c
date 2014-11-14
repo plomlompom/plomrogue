@@ -6,13 +6,13 @@
  */
 
 #include "readwrite.h"
-#include <stddef.h> /* size_t */
+#include <stddef.h> /* NULL, size_t */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
 #include <stdio.h> /* FILE, fseek(), sprintf(), fgets(), fgetc(), ferror(),
                     * fputc(), fwrite(), fclose(), fopen(), clearerr()
                     */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen() */
+#include <string.h> /* strlen(), memcpy() */
 #include <unistd.h> /* access(), unlink() */
 #include "rexit.h" /* exit_err(), exit_trouble() */
 #include "try_malloc.h" /* try_malloc() */
@@ -179,4 +179,81 @@ extern uint32_t textfile_width(FILE * file)
    }
    exit_trouble(-1 == fseek(file, 0, SEEK_SET), __func__, "fseek");
    return linemax;
+}
+
+
+
+extern uint8_t read_file_into_queue(FILE * file, char ** queue,
+                                    uint32_t * queue_size)
+{
+    int test = try_fgetc(file, __func__);
+    if (EOF != test)
+    {
+        do
+        {
+            char c = (char) test;
+            if ('\n' == c)
+            {
+                c = '\0';
+            }
+            char * new_queue = try_malloc(*queue_size + 1, __func__);
+            memcpy(new_queue, *queue, *queue_size);
+            char * new_pos = new_queue + *queue_size;
+            * new_pos = c;
+            *queue_size = *queue_size + 1;
+            free(*queue);
+            *queue = new_queue;
+        }
+        while (EOF != (test = try_fgetc(file, __func__)));
+        if (*queue_size && '\0' != (*queue)[*queue_size - 1])
+        {
+            char * new_queue = try_malloc(*queue_size + 1, __func__);
+            memcpy(new_queue, *queue, *queue_size);
+            new_queue[*queue_size] = '\0';
+            *queue_size = *queue_size + 1;
+            free(*queue);
+            *queue = new_queue;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+
+
+extern char * get_message_from_queue(char ** queue, uint32_t * queue_size)
+{
+    char * message = NULL;
+    if (*queue_size)
+    {
+        size_t cutout_len = strlen(*queue);
+        uint8_t is_nullbyte_chunk = !cutout_len;
+        if (0 < cutout_len)
+        {
+            cutout_len++;
+            message = try_malloc(cutout_len, __func__);
+            memcpy(message, *queue, cutout_len);
+        }
+        for (;
+             cutout_len != *queue_size && '\0' == (*queue)[cutout_len];
+             cutout_len++);
+        *queue_size = *queue_size - cutout_len;
+        if (0 == *queue_size)
+        {
+            free(*queue);            /* NULL so read_file_into_queue() and    */
+            *queue = NULL;           /* cleanup() may free() this every time, */
+        }                            /* even when it's un-allocated.          */
+        else
+        {
+            char * new_queue = try_malloc(*queue_size, __func__);
+            memcpy(new_queue, &((*queue)[cutout_len]), *queue_size);
+            free(*queue);
+            *queue = new_queue;
+            if (is_nullbyte_chunk)
+            {
+                return get_message_from_queue(queue, queue_size);
+            }
+        }
+    }
+    return message;
 }

@@ -14,6 +14,9 @@
 
 
 
+/* Append "answer" to server output file, with instant fflush(). */
+extern void send_to_outfile(char * answer);
+
 /* Record save and record file data. Both are only written if "force" is set, or
  * on the first run with unset "force", or if 15 seconds have passed since the
  * last file writing. "msg" is appended to the record file if it is set.

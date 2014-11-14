@@ -71,9 +71,6 @@ static uint8_t thing_in_whitelist(uint8_t id, int16_t * whitelist);
  */
 static void turn_over();
 
-/* Append "answer" to server output file, with instant fflush(). */
-static void answer_query(char * answer);
-
 /* Try to read "msg" as meta command, act accordingly; on success, free it. */
 static uint8_t meta_commands(char * msg);
 
@@ -293,14 +290,6 @@ static void turn_over()
 
 
 
-static void answer_query(char * answer)
-{
-    try_fwrite(answer, strlen(answer), 1, world.file_out, __func__);
-    fflush(world.file_out);
-}
-
-
-
 static uint8_t meta_commands(char * msg)
 {
     if (!strcmp("QUIT", msg))
@@ -311,13 +300,13 @@ static uint8_t meta_commands(char * msg)
     if (!strcmp("PING", msg))
     {
         free(msg);
-        answer_query("PONG\n");
+        send_to_outfile("PONG\n");
         return 1;
     }
     if (!strcmp("STACK", msg))
     {
         free(msg);
-        answer_query("THINGS_BELOW_PLAYER START\n");
+        send_to_outfile("THINGS_BELOW_PLAYER START\n");
         struct Thing * player = get_player();
         struct Thing * t;
         for (t = world.things; t; t = t->next)
@@ -326,14 +315,22 @@ static uint8_t meta_commands(char * msg)
                 && t != player)
             {
                 struct ThingType * tt = get_thing_type(t->type);
-                answer_query(tt->name);
-                answer_query("\n");
+                send_to_outfile(tt->name);
+                send_to_outfile("\n");
             }
         }
-        answer_query("THINGS_BELOW_PLAYER END\n");
+        send_to_outfile("THINGS_BELOW_PLAYER END\n");
         return 1;
     }
     return 0;
+}
+
+
+
+extern void send_to_outfile(char * answer)
+{
+    try_fwrite(answer, strlen(answer), 1, world.file_out, __func__);
+    fflush(world.file_out);
 }
 
 

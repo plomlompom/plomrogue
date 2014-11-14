@@ -9,15 +9,16 @@
 #include "io.h"
 #include <errno.h> /* global errno */
 #include <limits.h> /* PIPE_BUF */
-#include <stddef.h> /* size_t, NULL */
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT8_MAX */
-#include <stdio.h> /* defines EOF, FILE, sprintf(), fprintf() */
+#include <stdio.h> /* defines FILE, sprintf(), fprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), snprintf(), memcpy(), memset(), strchr() */
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time(), nanosleep() */
 #include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish(),
-                                  * try_fwrite(), try_fputc(), try_fgetc()
+                                  * get_message_from_queue(), try_fwrite(),
+                                  * read_file_into_queue(), try_fputc()
                                   */
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
@@ -40,17 +41,10 @@ static void write_key_space_string(FILE * file, char * key, char * string);
 /* Write to "file" \n-delimited line of "key" + space + "value" as string. */
 static void write_thing(FILE * file, struct Thing * t);
 
-/* Cut out and return first \0-terminated string from world.queue and
- * appropriately reduce world.queue_size. Return NULL if queue is empty.
- * Superfluous \0 bytes after the string are also cut out. Should the queue
- * start with \0 bytes, those are cut out before returning anything after them.
- */
-static char * get_message_from_queue();
-
 /* Poll input file for world.queue input. Wait a few seconds until giving up;
  * poll only every 0.03 seconds. Translate '\n' chars in input file into '\0'.
  */
-static void read_file_into_queue();
+static void try_growing_queue();
 
 /* Write world state as visible to clients to its file. Write single dot line to
  * server output file to satisfy client ping mechanisms.
@@ -187,77 +181,25 @@ static void write_thing(FILE * file, struct Thing * t)
 
 
 
-static char * get_message_from_queue()
-{
-    char * message = NULL;
-    if (world.queue_size)
-    {
-        size_t cutout_len = strlen(world.queue);
-        uint8_t is_nullbyte_chunk = !cutout_len;
-        if (0 < cutout_len)
-        {
-            cutout_len++;
-            message = try_malloc(cutout_len, __func__);
-            memcpy(message, world.queue, cutout_len);
-        }
-        for (;
-             cutout_len != world.queue_size && '\0' == world.queue[cutout_len];
-             cutout_len++);
-        world.queue_size = world.queue_size - cutout_len;
-        if (0 == world.queue_size)
-        {
-            free(world.queue);   /* NULL so read_file_into_queue() may free() */
-            world.queue = NULL;  /* this every time, even when it's           */
-        }                        /* un-allocated first. */
-        else
-        {
-            char * new_queue = try_malloc(world.queue_size, __func__);
-            memcpy(new_queue, &(world.queue[cutout_len]), world.queue_size);
-            free(world.queue);
-            world.queue = new_queue;
-            if (is_nullbyte_chunk)
-            {
-                return get_message_from_queue();
-            }
-        }
-    }
-    return message;
-}
-
-
-
-static void read_file_into_queue()
+static void try_growing_queue()
 {
     uint8_t wait_seconds = 5;
     time_t now = time(0);
     struct timespec dur;
     dur.tv_sec = 0;
     dur.tv_nsec = 33333333;
-    int test;
-    while (EOF == (test = try_fgetc(world.file_in, __func__)))
+    while (1)
     {
+        if (read_file_into_queue(world.file_in, &world.queue,&world.queue_size))
+        {
+            return;
+        }
         nanosleep(&dur, NULL);
         if (time(0) > now + wait_seconds)
         {
             return;
         }
     }
-    do
-    {
-        char c = (char) test;
-        if ('\n' == c)
-        {
-            c = '\0';
-        }
-        char * new_queue = try_malloc(world.queue_size + 1, __func__);
-        memcpy(new_queue, world.queue, world.queue_size);
-        char * new_pos = new_queue + world.queue_size;
-        * new_pos = c;
-        world.queue_size++;
-        free(world.queue);
-        world.queue = new_queue;
-    }
-    while (EOF != (test = try_fgetc(world.file_in, __func__)));
 }
 
 
@@ -274,10 +216,6 @@ static void update_worldstate_file()
     write_value_as_line(player->pos.x, file);
     write_value_as_line(world.map.length, file);
     write_map(player, file);
-    if (world.log)
-    {
-        try_fwrite(world.log, strlen(world.log), 1, file, __func__);
-    }
     atomic_write_finish(file, s[S_PATH_WORLDSTATE], path_tmp);
     set_cleanup_flag(CLEANUP_WORLDSTATE);
     char * dot = ".\n";
@@ -413,24 +351,15 @@ extern char * io_round()
 {
     if (0 < world.queue_size)
     {
-        return get_message_from_queue();
+        return get_message_from_queue(&world.queue, &world.queue_size);
     }
     if (world.do_update)
     {
         update_worldstate_file();
         world.do_update = 0;
     }
-    read_file_into_queue();
-    if (world.queue_size && '\0' != world.queue[world.queue_size - 1])
-    {
-        char * new_queue = try_malloc(world.queue_size + 1, __func__);
-        memcpy(new_queue, world.queue, world.queue_size);
-        new_queue[world.queue_size] = '\0';
-        world.queue_size++;
-        free(world.queue);
-        world.queue = new_queue;
-    }
-    return get_message_from_queue();
+    try_growing_queue();
+    return get_message_from_queue(&world.queue, &world.queue_size);
 }
 
 

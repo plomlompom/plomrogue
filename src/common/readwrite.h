@@ -53,6 +53,21 @@ extern void detect_atomic_leftover(char * path);
 /* Return largest line length from "file" (including  newline chars). */
 extern uint32_t textfile_width(FILE * file);
 
+/* Read "file" for load of bytes to put onto "queue" of "queue_size" (growing
+ * that size). May put many \0-terminated strings on the queue at once. \n chars
+ * are replaced with \0 chars. If the queue doesn't end in \0, a \o byte is
+ * appended to it. Returns 1 if reading succeeds, 0 if nothing is read.
+ */
+extern uint8_t read_file_into_queue(FILE * file, char ** queue,
+                                    uint32_t * queue_size);
+
+/* Cut out and return first \0-terminated string from "queue" and appropriately
+ * reduce "queue_size". Return NULL if queue is empty. Superfluous \0 bytes
+ * after the string are also cut out. Should the queue start with \0 bytes,
+ * those are cut out before returning anything after them.
+ */
+extern char * get_message_from_queue(char ** queue, uint32_t * queue_size);
+
 
 
 #endif

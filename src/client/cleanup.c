@@ -26,6 +26,7 @@ extern void cleanup()
     free(world.map.cells);
     free(world.mem_map);
     free(world.log);
+    free(world.queue);
     free(world.player_inventory);
     if (cleanup_flags & CLEANUP_INTERFACE)
     {

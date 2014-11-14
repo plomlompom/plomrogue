@@ -196,8 +196,6 @@ extern uint8_t remake_world()
     {
         return test;
     }
-    free(world.log);
-    world.log = NULL;      /* thing_actions.c's update_log() checks for this. */
     world.seed_map = world.seed;
     free_things(world.things);
     remake_map();

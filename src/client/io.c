@@ -21,7 +21,9 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/rexit.h" /* exit_trouble(), exit_err() */
 #include "../common/readwrite.h" /* try_fopen(), try_fclose(), try_fgets(),
-                                  * try_fgetc(), textfile_width(), try_fputc()
+                                  * try_fgetc(), textfile_width(), try_fputc(),
+                                  * read_file_into_queue(),
+                                  * get_message_from_queue(),
                                   */
 #include "control.h" /* try_key() */
 #include "map.h" /* map_center() */
@@ -40,11 +42,6 @@ static void read_inventory(char * read_buf, uint32_t linemax, FILE * file);
  * character (that we assume is a newline).
  */
 static void read_map_cells(FILE * file, char ** map);
-
-/* Repeatedly use try_fgets() with given arguments to read the remaining lines
- * of "file" into the world.log string.
- */
-static void read_log(char * read_buf, uint32_t linemax, FILE * file);
 
 /* Return value seen by atoi() in next line of "file" when passed to try_fgets()
  * with the given arguments.
@@ -83,10 +80,13 @@ static uint8_t read_worldstate();
  */
 static void ping_pong_test(time_t last_server_answer_time);
 
-/* Update "last_server_answer_time" if new stuff has been written to the
- * server's out file.
+/* Read server's out file into queue, update "last_server_answer_time" if new
+ * stuff is found there.
  */
-static void server_activity_test(time_t * last_server_answer_time);
+static void try_growing_queue(time_t * last_server_answer_time);
+
+/* Read server out file for messages, act on them (i.e. derive log messages). */
+static uint8_t read_outfile();
 
 
 
@@ -139,29 +139,6 @@ static void read_map_cells(FILE * file, char ** map)
             map_cells[y * world.map.length + x] = c;
         }
         try_fgetc(file, __func__);
-    }
-}
-
-
-
-static void read_log(char * read_buf, uint32_t linemax, FILE * file)
-{
-    free(world.log);
-    world.log = NULL;
-    while (try_fgets(read_buf, linemax + 1, file, __func__))
-    {
-        int old_size = 0;
-        if (world.log)
-        {
-            old_size = strlen(world.log);
-        }
-        int new_size = strlen(read_buf);
-        char * new_log = try_malloc(old_size + new_size + 1, __func__);
-        memcpy(new_log, world.log, old_size);
-        int test = sprintf(new_log + old_size, "%s", read_buf);
-        exit_trouble(test < 0, __func__, "sprintf");
-        free(world.log);
-        world.log = new_log;
     }
 }
 
@@ -225,7 +202,6 @@ static uint8_t read_worldstate()
     world.map.length = read_value_from_line(read_buf, linemax, file);
     read_map_cells(file, &world.map.cells);
     read_map_cells(file, &world.mem_map);
-    read_log(read_buf, linemax, file);
     free(read_buf);
     try_fclose(file, __func__);
     return 1;
@@ -253,19 +229,44 @@ static void ping_pong_test(time_t last_server_answer_time)
 
 
 
-static void server_activity_test(time_t * last_server_answer_time)
+static void try_growing_queue(time_t * last_server_answer_time)
 {
-    int test = try_fgetc(world.file_server_out, __func__);
-    if (EOF == test)
+    if (read_file_into_queue(world.file_server_out, &world.queue,
+                             &world.queue_size))
     {
-        return;
+        * last_server_answer_time = time(0);
     }
-    do
+}
+
+
+
+static uint8_t read_outfile()
+{
+    uint8_t ret = 0;
+    char * msg;
+    while (NULL != (msg=get_message_from_queue(&world.queue,&world.queue_size)))
     {
-        ;
+        char * log_prefix = "LOG ";
+        if (!strncmp(msg, log_prefix, strlen(log_prefix)))
+        {
+            ret = 1;
+            char * log_msg = msg + strlen(log_prefix);
+            int old_size = 0;
+            if (world.log)
+            {
+                old_size = strlen(world.log);
+            }
+            int new_size = strlen(log_msg);
+            char * new_log = try_malloc(old_size + 1 + new_size + 1, __func__);
+            memcpy(new_log, world.log, old_size);
+            int test = sprintf(new_log + old_size, "\n%s", log_msg);
+            exit_trouble(test < 0, __func__, "sprintf");
+            free(world.log);
+            world.log = new_log;
+        }
+        free(msg);
     }
-    while (EOF != (test = try_fgetc(world.file_server_out, __func__)));
-    * last_server_answer_time = time(0);
+    return ret;
 }
 
 
@@ -291,7 +292,7 @@ extern char * io_loop()
     time_t last_server_answer_time = time(0);
     while (1)
     {
-        server_activity_test(&last_server_answer_time);
+        try_growing_queue(&last_server_answer_time);
         ping_pong_test(last_server_answer_time);
         if (world.winch)
         {
@@ -299,7 +300,7 @@ extern char * io_loop()
             world.winch = 0;
             change_in_client++;
         }
-        if (change_in_client || read_worldstate())
+        if (change_in_client || read_worldstate() || read_outfile())
         {
             if (world.turn != last_focused_turn && world.focus_each_turn)
             {

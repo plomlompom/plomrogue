@@ -27,7 +27,6 @@ struct World
     struct ThingType * thing_types; /* Thing type definitions. */
     struct ThingAction * thing_actions; /* Thing action definitions. */
     struct Thing * things; /* All physical things of the game world. */
-    char * log; /* Logs the game events from the player's view. */
     char * server_test; /* String uniquely identifying server process. */
     char * queue; /* Stores un-processed messages read from the input file. */
     uint32_t queue_size;/* Length of .queue sequence of \0-terminated strings.*/
