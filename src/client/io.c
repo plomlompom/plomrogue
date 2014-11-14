@@ -80,8 +80,8 @@ static uint8_t read_worldstate();
  */
 static void test_and_poll_server();
 
-/* Read server out file for messages, act on them (i.e. derive log messages). */
-static uint8_t read_outfile();
+/* Read queue, act on them (as of right now only: derive log messages). */
+static uint8_t read_queue();
 
 
 
@@ -230,7 +230,7 @@ static void test_and_poll_server()
 
 
 
-static uint8_t read_outfile()
+static uint8_t read_queue()
 {
     uint8_t ret = 0;
     char * msg;
@@ -288,7 +288,7 @@ extern char * io_loop()
             world.winch = 0;
             change_in_client++;
         }
-        if (change_in_client || read_worldstate() || read_outfile())
+        if (change_in_client || read_worldstate() || read_queue())
         {
             if (world.turn != last_focused_turn && world.focus_each_turn)
             {
