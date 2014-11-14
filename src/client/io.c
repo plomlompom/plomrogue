@@ -231,8 +231,7 @@ static void ping_pong_test(time_t last_server_answer_time)
 
 static void try_growing_queue(time_t * last_server_answer_time)
 {
-    if (read_file_into_queue(world.file_server_out, &world.queue,
-                             &world.queue_size))
+    if (read_file_into_queue(world.file_server_out, &world.queue))
     {
         * last_server_answer_time = time(0);
     }
@@ -244,7 +243,7 @@ static uint8_t read_outfile()
 {
     uint8_t ret = 0;
     char * msg;
-    while (NULL != (msg=get_message_from_queue(&world.queue,&world.queue_size)))
+    while (NULL != (msg = get_message_from_queue(&world.queue)))
     {
         char * log_prefix = "LOG ";
         if (!strncmp(msg, log_prefix, strlen(log_prefix)))

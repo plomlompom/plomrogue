@@ -29,7 +29,6 @@ struct World
     struct Thing * things; /* All physical things of the game world. */
     char * server_test; /* String uniquely identifying server process. */
     char * queue; /* Stores un-processed messages read from the input file. */
-    uint32_t queue_size;/* Length of .queue sequence of \0-terminated strings.*/
     uint32_t seed; /* Randomness seed. */
     uint32_t seed_map; /* Map seed. */
     uint16_t replay; /* Turn up to which to replay game. No replay if zero. */

@@ -190,7 +190,7 @@ static void try_growing_queue()
     dur.tv_nsec = 33333333;
     while (1)
     {
-        if (read_file_into_queue(world.file_in, &world.queue,&world.queue_size))
+        if (read_file_into_queue(world.file_in, &world.queue))
         {
             return;
         }
@@ -349,9 +349,9 @@ static void write_map(struct Thing * player, FILE * file)
 
 extern char * io_round()
 {
-    if (0 < world.queue_size)
+    if (world.queue && strlen(world.queue))
     {
-        return get_message_from_queue(&world.queue, &world.queue_size);
+        return get_message_from_queue(&world.queue);
     }
     if (world.do_update)
     {
@@ -359,7 +359,7 @@ extern char * io_round()
         world.do_update = 0;
     }
     try_growing_queue();
-    return get_message_from_queue(&world.queue, &world.queue_size);
+    return get_message_from_queue(&world.queue);
 }
 
 

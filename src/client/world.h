@@ -38,7 +38,6 @@ struct World
     char * player_inventory; /* one-item-per-line string list of owned items */
     char * mem_map; /* map cells of player's map memory */
     char * queue; /* Stores un-processed messages read from the input file. */
-    uint32_t queue_size;/* Length of .queue sequence of \0-terminated strings.*/
     struct yx_uint8 player_pos; /* coordinates of player on map */
     uint16_t turn; /* world/game turn */
     uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */
