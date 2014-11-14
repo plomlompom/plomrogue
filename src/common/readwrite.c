@@ -189,6 +189,7 @@ extern uint8_t read_file_into_queue(FILE * file, char ** queue,
     int test = try_fgetc(file, __func__);
     if (EOF != test)
     {
+        char * err_size = "Queue growing too large.";
         do
         {
             char c = (char) test;
@@ -200,6 +201,7 @@ extern uint8_t read_file_into_queue(FILE * file, char ** queue,
             memcpy(new_queue, *queue, *queue_size);
             char * new_pos = new_queue + *queue_size;
             * new_pos = c;
+            exit_err(*queue_size == UINT32_MAX, err_size);
             *queue_size = *queue_size + 1;
             free(*queue);
             *queue = new_queue;
@@ -210,6 +212,7 @@ extern uint8_t read_file_into_queue(FILE * file, char ** queue,
             char * new_queue = try_malloc(*queue_size + 1, __func__);
             memcpy(new_queue, *queue, *queue_size);
             new_queue[*queue_size] = '\0';
+            exit_err(*queue_size == UINT32_MAX, err_size);
             *queue_size = *queue_size + 1;
             free(*queue);
             *queue = new_queue;
