@@ -9,8 +9,6 @@ BOTH SERVER/CLIENT:
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
 
-- in message reading/queueing, handle case of unfinished nl-delimited messages
-
 CLIENT:
 
 - re-work unnecessary complex command / keybinding / server message mapping
