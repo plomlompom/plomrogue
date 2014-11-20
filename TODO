@@ -1,13 +1,13 @@
 Next planned steps in plomrogue development:
 
-IN GENERAL:
+BOTH SERVER/CLIENT:
 
 - expand use of hardcoded_strings module(s)
 
-BOTH SERVER/CLIENT:
-
 - make server and client communicate by specific world state info requests 
   in server/out, replacing server/worldstate
+
+- quote escaping in token_from_line()
 
 CLIENT:
 
