@@ -9,6 +9,10 @@ BOTH SERVER/CLIENT:
 
 - quote escaping in token_from_line()
 
+SERVER:
+
+- fix hardcoded MAGIC MEAT eating message in thing_actions.c
+
 CLIENT:
 
 - re-work unnecessary complex command / keybinding / server message mapping
