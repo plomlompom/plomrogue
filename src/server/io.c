@@ -357,7 +357,7 @@ extern char * io_round()
     if (world.do_update)
     {
         update_worldstate_file();
-        send_to_outfile("WORLD_UDPATED\n", 1);
+        send_to_outfile("WORLD_UPDATED\n", 1);
         world.do_update = 0;
     }
     try_growing_queue();
