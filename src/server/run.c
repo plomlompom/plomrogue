@@ -300,13 +300,13 @@ static uint8_t meta_commands(char * msg)
     if (!strcmp("PING", msg))
     {
         free(msg);
-        send_to_outfile("PONG\n");
+        send_to_outfile("PONG\n", 1);
         return 1;
     }
     if (!strcmp("STACK", msg))
     {
         free(msg);
-        send_to_outfile("THINGS_BELOW_PLAYER START\n");
+        send_to_outfile("THINGS_BELOW_PLAYER START\n", 1);
         struct Thing * player = get_player();
         struct Thing * t;
         for (t = world.things; t; t = t->next)
@@ -315,11 +315,11 @@ static uint8_t meta_commands(char * msg)
                 && t != player)
             {
                 struct ThingType * tt = get_thing_type(t->type);
-                send_to_outfile(tt->name);
-                send_to_outfile("\n");
+                send_to_outfile(tt->name, 0);
+                send_to_outfile("\n", 1);
             }
         }
-        send_to_outfile("THINGS_BELOW_PLAYER END\n");
+        send_to_outfile("THINGS_BELOW_PLAYER END\n", 1);
         return 1;
     }
     return 0;
@@ -327,10 +327,13 @@ static uint8_t meta_commands(char * msg)
 
 
 
-extern void send_to_outfile(char * answer)
+extern void send_to_outfile(char * answer, uint8_t flush)
 {
     try_fwrite(answer, strlen(answer), 1, world.file_out, __func__);
-    fflush(world.file_out);
+    if (flush)
+    {
+        fflush(world.file_out);
+    }
 }
 
 

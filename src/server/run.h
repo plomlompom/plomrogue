@@ -14,8 +14,8 @@
 
 
 
-/* Append "answer" to server output file, with instant fflush(). */
-extern void send_to_outfile(char * answer);
+/* Append "answer" to server output file, with instant fflush() if "flush". */
+extern void send_to_outfile(char * answer, uint8_t flush);
 
 /* Record save and record file data. Both are only written if "force" is set, or
  * on the first run with unset "force", or if 15 seconds have passed since the

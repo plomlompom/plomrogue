@@ -48,9 +48,9 @@ static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing);
 
 static void update_log(char * text)
 {
-    send_to_outfile("LOG ");
-    send_to_outfile(text);
-    send_to_outfile("\n");
+    send_to_outfile("LOG ", 0);
+    send_to_outfile(text, 0);
+    send_to_outfile("\n", 1);
 }
 
 

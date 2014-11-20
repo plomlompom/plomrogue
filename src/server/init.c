@@ -226,7 +226,7 @@ extern uint8_t remake_world()
     world.turn = 1;
     world.do_update = 1;
     world.exists = 1;
-    send_to_outfile("NEW_WORLD\n");
+    send_to_outfile("NEW_WORLD\n", 1);
     return 0;
 }
 
