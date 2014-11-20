@@ -24,6 +24,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "hardcoded_strings.h" /* s */
+#include "run.h" /* send_to_outfile() */
 #include "things.h" /* Thing, ThingType, ThingInMemory, ThingAction,
                      * get_thing_type(), get_player()
                      */
@@ -356,6 +357,7 @@ extern char * io_round()
     if (world.do_update)
     {
         update_worldstate_file();
+        send_to_outfile("WORLD_UDPATED\n", 1);
         world.do_update = 0;
     }
     try_growing_queue();
