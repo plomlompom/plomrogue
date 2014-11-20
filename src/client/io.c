@@ -80,7 +80,7 @@ static uint8_t read_worldstate();
  */
 static void test_and_poll_server();
 
-/* Read queue, act on them (as of right now only: derive log messages). */
+/* Read messages from queue, act on them. */
 static uint8_t read_queue();
 
 
@@ -237,7 +237,14 @@ static uint8_t read_queue()
     while (NULL != (msg = get_message_from_queue(&world.queue)))
     {
         char * log_prefix = "LOG ";
-        if (!strncmp(msg, log_prefix, strlen(log_prefix)))
+        char * new_world = "NEW_WORLD";
+        if (!strcmp(msg, new_world))
+        {
+            ret = 1;
+            free(world.log);
+            world.log = NULL;
+        }
+        else if (!strncmp(msg, log_prefix, strlen(log_prefix)))
         {
             ret = 1;
             char * log_msg = msg + strlen(log_prefix);

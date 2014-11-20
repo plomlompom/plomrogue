@@ -99,7 +99,8 @@ MAKE_WORLD [0 to 4294967296]
 Set map seed and randomness seed to argument. Remove all things. (Re-)generate
 map. Add to map things specified in thing types table in quantity defined there
 by START_NUMBER command, with first thing (of thing ID of 0) of type defined as
-player type by PLAYER_TYPE command. Set world turn to 1. Activate world.
+player type by PLAYER_TYPE command. Set world turn to 1. Activate world. Answer
+with 'NEW_WORLD' message in ./server/out file.
 
 MAP_LENGTH [1 to 256]
 Deactivate world. Remove ./server/worldstate file. Remove all things. Remove

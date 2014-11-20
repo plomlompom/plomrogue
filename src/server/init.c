@@ -31,7 +31,7 @@
 #include "things.h" /* Thing, ThingType, free_things(), add_things(),
                      * get_thing_id_action_id_by_name()
                      */
-#include "run.h" /* obey_msg(), io_loop(), record() */
+#include "run.h" /* obey_msg(), io_loop(), record(), send_to_outfile() */
 #include "world.h" /* global world */
 
 
@@ -226,6 +226,7 @@ extern uint8_t remake_world()
     world.turn = 1;
     world.do_update = 1;
     world.exists = 1;
+    send_to_outfile("NEW_WORLD\n");
     return 0;
 }
 
