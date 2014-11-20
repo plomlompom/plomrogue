@@ -237,8 +237,7 @@ static uint8_t read_queue()
     while (NULL != (msg = get_message_from_queue(&world.queue)))
     {
         char * log_prefix = "LOG ";
-        char * new_world = "NEW_WORLD";
-        if (!strcmp(msg, new_world))
+        if (!strcmp(msg, "NEW_WORLD"))
         {
             ret = 1;
             free(world.log);
