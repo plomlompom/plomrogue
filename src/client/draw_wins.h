@@ -20,7 +20,6 @@ extern void draw_win_map(struct Win * win);
 extern void draw_win_info(struct Win * win);
 extern void draw_win_inventory(struct Win * win);
 extern void draw_win_terrain_stack(struct Win * win);
-extern void draw_win_active_windows_keys(struct Win * win);
 extern void draw_win_keybindings_global(struct Win * win);
 extern void draw_win_keybindings_winconf_geometry(struct Win * win);
 extern void draw_win_keybindings_winconf_keybindings(struct Win * win);
