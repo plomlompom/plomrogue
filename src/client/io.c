@@ -275,6 +275,10 @@ static uint8_t read_queue()
         else if (!strcmp(msg, "THINGS_BELOW_PLAYER END"))
         {
             things_below_player_parsing = 0;
+            if (!world.things_below_player)
+            {
+                nl_append_string("(nothing)", &world.things_below_player);
+            }
         }
         else if (things_below_player_parsing)
         {
@@ -294,6 +298,8 @@ static uint8_t read_queue()
         }
         else if (!strcmp(msg, "WORLD_UPDATED"))
         {
+            free(world.things_below_player);
+            world.things_below_player = NULL;
             send("STACK");
         }
         free(msg);
