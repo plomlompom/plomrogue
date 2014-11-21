@@ -14,8 +14,10 @@ In any case, from then on, further commands are read in from ./server/in. New
 commands must be appended to the file – which is what the client does. All
 commands from ./server/in except meta commands are also written to ./record.
 
-At the end of each turn, ./savefile is written – with a list of all god commands
-necessary to recreate the current world state.
+Every fifteen seconds, if any turns have passed, ./savefile is written – with a
+list of all god commands necessary to recreate the current world state. On each
+world state change, ./server/worldstate is updated and a message "WORLD_UPDATED"
+written to ./server/out.
 
 Replay mode
 -----------
