@@ -3,10 +3,11 @@ KEY 81 quit
 KEY 265 to_mapwin
 KEY 266 to_infowin
 KEY 267 to_inv
-KEY 268 to_logwin
-KEY 269 to_g_keywin
-KEY 270 to_wg_keywin
-KEY 271 to_wk_keywin
+KEY 268 to_terrain
+KEY 269 to_logwin
+KEY 270 to_g_keywin
+KEY 271 to_wg_keywin
+KEY 272 to_wk_keywin
 KEY 87 winconf
 KEY 62 cyc_win_f
 KEY 60 cyc_win_b
@@ -89,6 +90,12 @@ KEY 68 drop
 KEY 259 inv_u
 KEY 258 inv_d
 KEY 117 use
+
+WINDOW s
+NAME 'Standing on'
+BREAK 1
+WIDTH 14
+HEIGHT -12
 
 WINDOW l
 NAME 'Log'

@@ -434,6 +434,16 @@ extern void draw_win_inventory(struct Win * win)
 
 
 
+extern void draw_win_terrain_stack(struct Win * win)
+{
+    if (world.things_below_player)
+    {
+        add_text_with_linebreaks(win, world.things_below_player);
+    }
+}
+
+
+
 extern void draw_win_keybindings_global(struct Win * win)
 {
     win->center.y = world.kb_global.select;

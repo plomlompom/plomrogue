@@ -33,11 +33,12 @@ struct World
     struct Map map; /* game map geometry and content of player's map view */
     time_t last_update; /* used for comparison with worldstate file's mtime */
     char * log; /* log of player's activities */
+    char * things_below_player; /* list of things below the player */
     char * path_interface; /* path of interface configuration file */
     char * path_commands; /* path of commands config file */
     char * player_inventory; /* one-item-per-line string list of owned items */
     char * mem_map; /* map cells of player's map memory */
-    char * queue; /* Stores un-processed messages read from the input file. */
+    char * queue; /* stores un-processed messages read from the input file */
     struct yx_uint8 player_pos; /* coordinates of player on map */
     uint16_t turn; /* world/game turn */
     uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */

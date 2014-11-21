@@ -1,3 +1,4 @@
+
 KEYBINDINGS 'global'
 KEY 81 quit
 KEY 87 winconf
@@ -10,10 +11,11 @@ KEY 67 save_conf
 KEY 265 to_mapwin
 KEY 266 to_infowin
 KEY 267 to_inv
-KEY 268 to_logwin
-KEY 269 to_g_keywin
-KEY 270 to_wg_keywin
-KEY 271 to_wk_keywin
+KEY 268 to_terrain
+KEY 269 to_logwin
+KEY 270 to_g_keywin
+KEY 271 to_wg_keywin
+KEY 272 to_wk_keywin
 
 KEYBINDINGS 'wingeom'
 KEY 258 shift_f
@@ -31,7 +33,7 @@ KEY 258 keyb_dw
 KEY 259 keyb_uw
 KEY 10 keyb_mw
 
-WIN_ORDER 'lc0im'
+WIN_ORDER 'l0csim'
 WIN_FOCUS 'm'
 
 WINDOW 0
@@ -65,11 +67,17 @@ WINDOW c
 NAME 'Inventory'
 BREAK 1
 WIDTH 14
-HEIGHT 7
+HEIGHT 11
 KEY 68 drop
 KEY 259 inv_u
 KEY 258 inv_d
 KEY 117 use
+
+WINDOW s
+NAME 'Standing on'
+BREAK 1
+WIDTH 14
+HEIGHT -12
 
 WINDOW i
 NAME 'Info'
@@ -80,7 +88,7 @@ HEIGHT 1
 WINDOW l
 NAME 'Log'
 BREAK 0
-WIDTH 37
+WIDTH 22
 HEIGHT -8
 
 WINDOW m

@@ -10,7 +10,7 @@
 #include <limits.h> /* PIPE_BUF */
 #include <ncurses.h> /* halfdelay(), getch() */
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
 #include <stdio.h> /* FILE, sprintf(), fseek(), fflush() */
 #include <string.h> /* strcmp(), strlen(), memcpy() */
 #include <stdlib.h> /* free(), atoi() */
@@ -79,6 +79,9 @@ static uint8_t read_worldstate();
  * sent but unanswered for some time, abort.
  */
 static void test_and_poll_server();
+
+/* If "string", append \n-prefixed "append", else write "append" as "string". */
+static void nl_append_string(char * append, char ** string);
 
 /* Read messages from queue, act on them. */
 static uint8_t read_queue();
@@ -230,35 +233,68 @@ static void test_and_poll_server()
 
 
 
+static void nl_append_string(char * append, char ** string)
+{
+    char * err = "too large sizes";
+    exit_trouble(UINT32_MAX < strlen(append), __func__, err);
+    uint32_t new_size = strlen(append);
+    uint32_t old_size = 0;
+    uint8_t add_nl = 0;
+    if (*string)
+    {
+        exit_trouble(UINT32_MAX < new_size + strlen(*string), __func__, err);
+        old_size = strlen(*string);
+        add_nl = 1;
+    }
+    char * new_string = try_malloc(old_size + add_nl + new_size + 1, __func__);
+    memcpy(new_string, *string, old_size);
+    char * pattern = add_nl ? "\n%s" : "%s";
+    int test = sprintf(new_string + old_size, pattern, append);
+    exit_trouble(test < 0, __func__, "sprintf");
+    free(*string);
+    *string = new_string;
+}
+
+
+
 static uint8_t read_queue()
 {
+    static uint8_t things_below_player_parsing = 0;
     uint8_t ret = 0;
     char * msg;
     while (NULL != (msg = get_message_from_queue(&world.queue)))
     {
         char * log_prefix = "LOG ";
-        if (!strcmp(msg, "NEW_WORLD"))
+        if      (!strcmp(msg, "THINGS_BELOW_PLAYER START"))
+        {
+            ret = 1;
+            things_below_player_parsing = 1;
+            free(world.things_below_player);
+            world.things_below_player = NULL;
+        }
+        else if (!strcmp(msg, "THINGS_BELOW_PLAYER END"))
+        {
+            things_below_player_parsing = 0;
+        }
+        else if (things_below_player_parsing)
+        {
+            ret = 1;
+            nl_append_string(msg, &world.things_below_player);
+        }
+        else if (!strncmp(msg, log_prefix, strlen(log_prefix)))
+        {
+            ret = 1;
+            nl_append_string(msg + strlen(log_prefix), &world.log);
+        }
+        else if (!strcmp(msg, "NEW_WORLD"))
         {
             ret = 1;
             free(world.log);
             world.log = NULL;
         }
-        else if (!strncmp(msg, log_prefix, strlen(log_prefix)))
+        else if (!strcmp(msg, "WORLD_UPDATED"))
         {
-            ret = 1;
-            char * log_msg = msg + strlen(log_prefix);
-            int old_size = 0;
-            if (world.log)
-            {
-                old_size = strlen(world.log);
-            }
-            int new_size = strlen(log_msg);
-            char * new_log = try_malloc(old_size + 1 + new_size + 1, __func__);
-            memcpy(new_log, world.log, old_size);
-            int test = sprintf(new_log + old_size, "\n%s", log_msg);
-            exit_trouble(test < 0, __func__, "sprintf");
-            free(world.log);
-            world.log = new_log;
+            send("STACK");
         }
         free(msg);
     }

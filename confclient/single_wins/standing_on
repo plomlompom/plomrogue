@@ -1,3 +1,4 @@
+
 KEYBINDINGS 'global'
 KEY 81 quit
 KEY 265 to_mapwin
@@ -45,16 +46,8 @@ KEY 258 keyb_dw
 KEY 259 keyb_uw
 KEY 10 keyb_mw
 
-WIN_ORDER 'c'
-WIN_FOCUS 'c'
-
-WINDOW c
-NAME 'Inventory'
-BREAK 2
-WIDTH 0
-HEIGHT 0
-KEY 259 inv_u
-KEY 258 inv_d
+WIN_ORDER 's'
+WIN_FOCUS 's'
 
 WINDOW 0
 NAME 'Set global keys'
@@ -83,29 +76,39 @@ KEY 258 keyb_dk
 KEY 259 keyb_uk
 KEY 10 keyb_mk
 
+WINDOW c
+NAME 'Inventory'
+BREAK 1
+WIDTH 14
+HEIGHT 11
+KEY 68 drop
+KEY 259 inv_u
+KEY 258 inv_d
+KEY 117 use
+
 WINDOW s
 NAME 'Standing on'
 BREAK 1
-WIDTH 14
-HEIGHT -12
+WIDTH 0
+HEIGHT 0
 
 WINDOW i
 NAME 'Info'
-BREAK 0
-WIDTH 13
-HEIGHT 2
+BREAK 2
+WIDTH -38
+HEIGHT 1
 
 WINDOW l
 NAME 'Log'
 BREAK 0
-WIDTH 13
+WIDTH 22
 HEIGHT -8
 
 WINDOW m
 NAME 'Map'
 BREAK 0
-WIDTH -37
-HEIGHT 0
+WIDTH -38
+HEIGHT -2
 KEY 97 ai
 KEY 112 pick
 KEY 58 wait

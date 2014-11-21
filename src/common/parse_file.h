@@ -36,7 +36,7 @@ extern uint8_t err_line(uint8_t test, char * msg);
  * the second, with the next token_from_line() call starting its token search
  * after that second quote. The only way to return an empty string (instead of
  * NULL) as a token is to delimit the token by two succeeding single quotes.
- * */
+ */
 extern char * token_from_line(char * line);
 
 /* Test for "string" to represent proper int16 (type: "i"), uint8 ("8"), uint16
