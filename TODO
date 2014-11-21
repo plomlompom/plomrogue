@@ -17,6 +17,8 @@ CLIENT:
 
 - re-work unnecessary complex command / keybinding / server message mapping
 
+- only send "STACK" message to server when the dependent window is open
+
 BUILD PROCESS:
 
 - erlehmann's redo scripts are not OSX-compliant, see:
