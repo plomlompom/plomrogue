@@ -116,9 +116,5 @@ KEY 99 move_c
 KEY 120 move_x
 KEY 115 move_s
 KEY 119 move_w
-KEY 259 map_u
-KEY 258 map_d
-KEY 260 map_l
-KEY 261 map_r
 KEY 46 map_c
 KEY 70 to_autofocus

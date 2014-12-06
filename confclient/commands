@@ -146,18 +146,6 @@ DESCRIPTION 'reload interface config'
 COMMAND save_conf
 DESCRIPTION 'save interface config'
 
-COMMAND map_u
-DESCRIPTION 'map up'
-
-COMMAND map_d
-DESCRIPTION 'map down'
-
-COMMAND map_l
-DESCRIPTION 'map left'
-
-COMMAND map_r
-DESCRIPTION 'map right'
-
 COMMAND to_inv
 DESCRIPTION 'window inventory'
 

@@ -13,11 +13,6 @@
 #include <stdint.h> /* uint8_t */
 
 
-/* Try changing map window's focus into direction "d" (north = "N" etc.). Unset
- * world.focus_each_turn.
- */
-extern void map_scroll(char d);
-
 /* Toggle world.look (moving look cursor instead of player over map). */
 extern void toggle_lookmode();
 

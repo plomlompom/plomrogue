@@ -51,10 +51,6 @@ NAME 'Map'
 BREAK 0
 WIDTH 0
 HEIGHT 0
-KEY 259 map_u
-KEY 258 map_d
-KEY 260 map_l
-KEY 261 map_r
 
 WINDOW 0
 NAME 'Set global keys'
