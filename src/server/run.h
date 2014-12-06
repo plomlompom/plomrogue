@@ -23,20 +23,23 @@ extern void send_to_outfile(char * answer, uint8_t flush);
  */
 extern void record(char * msg, uint8_t force);
 
-/* Try parsing "msg" into a command to apply, and apply it. Output commands to
- * stdout if "do_verbose" and world.is_verbose are set. If "do_record" is set,
- * record commands to record file, and run save_world() if the last call to it
- * via this function has not happened yet or is at least one minute in the past.
+/* Try parsing "msg" into a command to apply. Output "msg" if world.is_verbose.
+ * If "obey_state" is > 1 and world.replay is set, any non-meta command message
+ * is not executed, but merely returns 3. The QUIT meta command (if well-formed)
+ * always returns 2. Other meta commands and (with "obey_state" < 2) non-meta
+ * commands return 1 if well-formed. Malformed or empty command messages return
+ * 0. If "obey_state" is 1, "msg" is recorded via a non-forced record(). If a
+ * non-meta command is executed and world.exists, world.do_update is set.
  */
-extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose);
+extern uint8_t obey_msg(char * msg, uint8_t obey_state);
 
-/* Loop for receiving commands via io_round(), and acting on them. Exits with 1
- * on "QUIT" command. In replay mode, exits with 0 on each non-"QUIT" command.
- * In play mode, processes incomming god and player commands via obey_msg().
- * Compares the first line of the server out file with world.server_test to
- * ensure that the current server process has not been superseded by a new one.
+/* Loop to read commands via io_round() and call obey_msg() with "obey_state"
+ * set on them. If latter returns 2 and world.replay is not set, or returns > 1
+ * and world.replay is set, abort loop to return that result. After io_round(),
+ * compares 1st line of the server out file is compared with world.server_test
+ * to ensure the server process hasn't been superseded by a new one.
  */
-extern uint8_t io_loop();
+extern uint8_t io_loop(uint8_t obey_state);
 
 
 

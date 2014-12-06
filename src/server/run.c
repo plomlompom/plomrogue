@@ -42,19 +42,21 @@ static uint8_t set_char_by_string_comparison(char * string, char * comparand,
 /* Return 1 on world.exists, else 0 and err_line() appropriate error message. */
 static uint8_t player_commands_allowed();
 
-/* Parse player command "tok0" with no argument to player action. */
+/* Parse player commands "tok0" with optional argument "tok1" to player action.
+ * Return 1 on success, 0 on failure.
+ */
 static uint8_t parse_player_command_0arg(char * tok0);
-
-/* Parse player command "tok0" with one argument "tok1" to player action. */
 static uint8_t parse_player_command_1arg(char * tok0, char * tok1);
 
-/* Parse/apply command "tok0" (read further tokens as necessary). */
-static uint8_t parse_command(char * tok0);
+/* Parse/apply (non-)meta command "tok0" (read further tokens as necessary).
+ * Return 0 on failure, 1 on success, 2 on QUIT meta command.
+ */
+static uint8_t parse_command_nonmeta(char * tok0);
+static uint8_t parse_command_meta(char * tok0);
 
-/* Compares first line of server out file to world.server_test, aborts if they
- * don't match, but not before unsetting the flags deleting files in the server
- * directory, for in that case those must be assumed to belong to another server
- * process.
+/* Compare 1st line of server out file to world.server_test, abort if they don't
+ * match, but not before unsetting flags deleting files in the server directory,
+ * for in that case those must be assumed to belong to another server process.
  */
 static void server_test();
 
@@ -70,9 +72,6 @@ static uint8_t thing_in_whitelist(uint8_t id, int16_t * whitelist);
  * the turn jumped into, or started anew by the cycle.
  */
 static void turn_over();
-
-/* Try to read "msg" as meta command, act accordingly; on success, free it. */
-static uint8_t meta_commands(char * msg);
 
 
 
@@ -161,7 +160,7 @@ static uint8_t parse_player_command_1arg(char * tok0, char * tok1)
 
 
 
-static uint8_t parse_command(char * tok0)
+static uint8_t parse_command_nonmeta(char * tok0)
 {
     if (parse_player_command_0arg(tok0))
     {
@@ -191,6 +190,40 @@ static uint8_t parse_command(char * tok0)
                 }
             }
         }
+    }
+    return 0;
+}
+
+
+
+static uint8_t parse_command_meta(char * tok0)
+{
+    if (!strcmp("QUIT", tok0))
+    {
+        return 2;
+    }
+    if (!strcmp("PING", tok0))
+    {
+        send_to_outfile("PONG\n", 1);
+        return 1;
+    }
+    if (!strcmp("STACK", tok0))
+    {
+        send_to_outfile("THINGS_BELOW_PLAYER START\n", 1);
+        struct Thing * player = get_player();
+        struct Thing * t;
+        for (t = world.things; t; t = t->next)
+        {
+            if (   t->pos.y == player->pos.y && t->pos.x == player->pos.x
+                && t != player)
+            {
+                struct ThingType * tt = get_thing_type(t->type);
+                send_to_outfile(tt->name, 0);
+                send_to_outfile("\n", 1);
+            }
+        }
+        send_to_outfile("THINGS_BELOW_PLAYER END\n", 1);
+        return 1;
     }
     return 0;
 }
@@ -290,43 +323,6 @@ static void turn_over()
 
 
 
-static uint8_t meta_commands(char * msg)
-{
-    if (!strcmp("QUIT", msg))
-    {
-        free(msg);
-        return 2;
-    }
-    if (!strcmp("PING", msg))
-    {
-        free(msg);
-        send_to_outfile("PONG\n", 1);
-        return 1;
-    }
-    if (!strcmp("STACK", msg))
-    {
-        free(msg);
-        send_to_outfile("THINGS_BELOW_PLAYER START\n", 1);
-        struct Thing * player = get_player();
-        struct Thing * t;
-        for (t = world.things; t; t = t->next)
-        {
-            if (   t->pos.y == player->pos.y && t->pos.x == player->pos.x
-                && t != player)
-            {
-                struct ThingType * tt = get_thing_type(t->type);
-                send_to_outfile(tt->name, 0);
-                send_to_outfile("\n", 1);
-            }
-        }
-        send_to_outfile("THINGS_BELOW_PLAYER END\n", 1);
-        return 1;
-    }
-    return 0;
-}
-
-
-
 extern void send_to_outfile(char * answer, uint8_t flush)
 {
     try_fwrite(answer, strlen(answer), 1, world.file_out, __func__);
@@ -376,69 +372,65 @@ extern void record(char * msg, uint8_t force)
 
 
 
-extern void obey_msg(char * msg, uint8_t do_record, uint8_t do_verbose)
+extern uint8_t obey_msg(char * msg, uint8_t obey_state)
 {
-    if (world.is_verbose && do_verbose)
+    if (world.is_verbose)
     {
         exit_trouble(-1 == printf("Input: %s\n", msg), __func__, "printf");
     }
     set_err_line_options("Trouble with message: ", msg, 0);
     char * msg_copy = strdup(msg);
     char * tok0 = token_from_line(msg_copy);
+    uint8_t ret = 0;
     if (tok0)
     {
-
-        if (parse_command(tok0))
+        ret = parse_command_meta(tok0);
+        if (ret || (obey_state < 2 && parse_command_nonmeta(tok0)))
         {
-            if (world.exists)
+            if (!ret)
             {
-                world.do_update = 1;
-            }
-            if (do_record)
-            {
-                record(msg, 0);
+                if (world.exists)
+                {
+                    world.do_update = 1;
+                }
+                if (1 == obey_state)
+                {
+                   record(msg, 0);
+                }
             }
             char * tokplus = token_from_line(NULL);
             err_line(!(!tokplus), "Too many arguments, ignoring overflow.");
-            free(msg_copy);
-            return;
+        }
+        else if (world.replay)
+        {
+            ret = 3;
+        }
+        else if (!world.replay)
+        {
+            err_line(1, "Unknown command/argument or bad number of tokens.");
         }
     }
-    err_line(1, "Unknown command/argument or bad number of tokens.");
     free(msg_copy);
+    return ret;
 }
 
 
 
-extern uint8_t io_loop()
+extern uint8_t io_loop(uint8_t obey_state)
 {
     while (1)
     {
         char * msg = io_round();
         server_test();
-        if (!msg)
+        if (msg)
         {
-            continue;
-        }
-        if (world.is_verbose)
-        {
-            exit_trouble(-1 == printf("Input: %s\n", msg), __func__, "printf");
-        }
-        uint8_t test = meta_commands(msg);
-        if (test)
-        {
-            if (2 == test)
-            {
-                return 1;
-            }
-            continue;
-        }
-        if (world.replay)
-        {
+            uint8_t ret = obey_msg(msg, obey_state);
             free(msg);
-            return 0;
+            if (   (!world.replay && 2 == ret)
+                || ( world.replay && 2 <= ret))
+            {
+                return ret;
+            }
         }
-        obey_msg(msg, 1, 0);
-        free(msg);
     }
 }

@@ -71,7 +71,7 @@ static void obey_lines_from_file(char * path, uint8_t record)
                 {
                     *nl = '\0';
                 }
-                obey_msg(line, record, 1);
+                obey_msg(line, record);
             }
             err_line_inc();
         }
@@ -91,18 +91,18 @@ static void replay_game()
     while (   world.turn < world.replay
            && try_fgets(line, linemax + 1, file, __func__))
     {
-        obey_msg(line, 0, 1);
+        obey_msg(line, 0);
         err_line_inc();
     }
     uint8_t end = 0;
-    while (!io_loop())
+    while (3 == io_loop(2))
     {
         if (!end)
         {
             end = (NULL == try_fgets(line, linemax + 1, file, __func__));
             if (!end)
             {
-                obey_msg(line, 0, 1);
+                obey_msg(line, 0);
                 err_line_inc();
             }
         }
@@ -256,10 +256,10 @@ extern void run_game()
         char * msg = try_malloc(strlen(command) + 1 + 11 + 1, __func__);
         int test = sprintf(msg, "%s %d", command, (int) time(NULL));
         exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
-        obey_msg(msg, 1, 1);
+        obey_msg(msg, 1);
         free(msg);
     }
     err_line_zero();
-    io_loop();
+    io_loop(1);
     record(NULL, 1);
 }
