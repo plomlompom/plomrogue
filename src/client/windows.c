@@ -309,7 +309,7 @@ static void draw_wins(struct Win * w)
         {
             chtype ch = w->winmap[(y * w->winmap_size.x) + x];
             mvwaddch(world.winDB.v_screen, w->start.y + (y - offset_y),
-                                      w->start.x + (x - offset_x), ch);
+                     w->start.x + (x - offset_x), ch);
         }
     }
     free(w->winmap); /* NULL so draw_wins.c's try_resize_winmap() may always  */

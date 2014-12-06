@@ -65,9 +65,6 @@ static char * get_keyname_to_command(char * command_name);
 static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
                                   char * newlines, char * value_prefix);
 
-/* Draw map cell "c" into win "w" at position "y"/"x" with attribute "a". */
-static void draw_mapcell(struct Win * w, char c, uint8_t y, uint8_t x,attr_t a);
-
 
 
 static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
@@ -339,17 +336,6 @@ static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
 
 
 
-static void draw_mapcell(struct Win * w, char c, uint8_t y, uint8_t x, attr_t a)
-{
-    set_ch_on_yx(w, y, x * 2 + (y % 2), c | a);
-    if (x + (y % 2) < world.map.length)
-    {
-        set_ch_on_yx(w, y, x * 2 + (y % 2) + 1, ' ' | a);
-    }
-}
-
-
-
 extern void draw_win_log(struct Win * win)
 {
     if (!world.log)
@@ -368,14 +354,15 @@ extern void draw_win_map(struct Win * win)
     init_pair(2, COLOR_BLUE, COLOR_BLACK);
     attr_t attr_mem = COLOR_PAIR(2);
     attr_t attr_sha = COLOR_PAIR(1);
-    try_resize_winmap(win, world.map.length, world.map.length * 2);
+    try_resize_winmap(win, world.map.length, world.map.length * 2 + 1);
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
             attr_t a=' '==world.mem_map[y*world.map.length+x]?attr_sha:attr_mem;
             char c = world.mem_map[y*world.map.length + x];
-            draw_mapcell(win, c, y, x, a);
+            set_ch_on_yx(win, y, x * 2 + (y % 2),     c   | a);
+            set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | a);
         }
     }
     for (y = 0; y < world.map.length; y++)
@@ -385,7 +372,8 @@ extern void draw_win_map(struct Win * win)
             if (' ' != world.map.cells[y*world.map.length + x])
             {
                 char c = world.map.cells[y*world.map.length + x];
-                draw_mapcell(win, c, y, x, 0);
+                set_ch_on_yx(win, y, x * 2 + (y % 2),     c);
+                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ');
             }
         }
     }
@@ -395,7 +383,8 @@ extern void draw_win_map(struct Win * win)
         x = world.look_pos.x;
         char c = world.map.cells[y * world.map.length + x];
         c = ' ' == c ? world.mem_map[y * world.map.length + x] : c;
-        draw_mapcell(win, c, y, x, A_REVERSE);
+        set_ch_on_yx(win, y, x * 2 + (y % 2),     c   | A_REVERSE);
+        set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | A_REVERSE);
     }
 }
 
