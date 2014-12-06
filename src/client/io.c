@@ -330,9 +330,12 @@ extern char * io_loop()
         if (change_in_client || read_worldstate() || read_queue())
         {
             struct Win * win_map = get_win_by_id('m');
-            struct yx_uint8 pos = world.look? world.look_pos : world.player_pos;
-            win_map->center.y = pos.y;
-            win_map->center.x = pos.x * 2 + (pos.y % 2);
+            if (0 == win_map->view)   /* So the map window's winconfig views  */
+            {                         /* don't get confused by the centering. */
+                struct yx_uint8 pos=world.look?world.look_pos:world.player_pos;
+                win_map->center.y = pos.y;
+                win_map->center.x = pos.x * 2 + (pos.y % 2);
+            }
             draw_all_wins();
         }
         change_in_client = 0;
