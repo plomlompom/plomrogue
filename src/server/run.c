@@ -10,12 +10,13 @@
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, int16_t */
 #include <stdio.h> /* FILE, printf(), fflush() */
-#include <stdlib.h> /* free() */
+#include <stdlib.h> /* atoi(), free() */
 #include <string.h> /* strlen(), strcmp(), strncmp(), strdup() */
 #include <time.h> /* time_t, time() */
 #include <unistd.h> /* access() */
 #include "../common/parse_file.h" /* set_err_line_options(), token_from_line(),
-                                   * err_line(), err_line_inc(), parse_val()
+                                   * err_line(), err_line_inc(), parse_val(),
+                                   * parestest_int()
                                    */
 #include "../common/readwrite.h" /* try_fopen(), try_fcose(), try_fwrite(),
                                   * try_fgets(), textfile_width(), try_fputc(),
@@ -207,23 +208,26 @@ static uint8_t parse_command_meta(char * tok0)
         send_to_outfile("PONG\n", 1);
         return 1;
     }
-    if (!strcmp("STACK", tok0))
+    if (!strcmp("THINGS_HERE", tok0))
     {
-        send_to_outfile("THINGS_BELOW_PLAYER START\n", 1);
-        struct Thing * player = get_player();
-        struct Thing * t;
-        for (t = world.things; t; t = t->next)
+        char * tok1 = token_from_line(NULL);
+        char * tok2 = token_from_line(NULL);
+        if (!parsetest_int(tok1, '8') && !parsetest_int(tok2, '8'))
         {
-            if (   t->pos.y == player->pos.y && t->pos.x == player->pos.x
-                && t != player)
+            send_to_outfile("THINGS_HERE START\n", 1);
+            struct Thing * t;
+            for (t = world.things; t; t = t->next)
             {
-                struct ThingType * tt = get_thing_type(t->type);
-                send_to_outfile(tt->name, 0);
-                send_to_outfile("\n", 1);
+                if (t->pos.y == atoi(tok1) && t->pos.x == atoi(tok2))
+                {
+                    struct ThingType * tt = get_thing_type(t->type);
+                    send_to_outfile(tt->name, 0);
+                    send_to_outfile("\n", 1);
+                }
             }
+            send_to_outfile("THINGS_HERE END\n", 1);
+            return 1;
         }
-        send_to_outfile("THINGS_BELOW_PLAYER END\n", 1);
-        return 1;
     }
     return 0;
 }

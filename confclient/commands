@@ -187,3 +187,6 @@ DESCRIPTION 'window keybinding keys'
 
 COMMAND to_autofocus
 DESCRIPTION 'toggle auto-center'
+
+COMMAND to_look
+DESCRIPTION 'toggle look mode'

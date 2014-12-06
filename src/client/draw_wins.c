@@ -65,6 +65,9 @@ static char * get_keyname_to_command(char * command_name);
 static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
                                   char * newlines, char * value_prefix);
 
+/* Draw map cell "c" into win "w" at position "y"/"x" with attribute "a". */
+static void draw_mapcell(struct Win * w, char c, uint8_t y, uint8_t x,attr_t a);
+
 
 
 static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
@@ -336,6 +339,17 @@ static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
 
 
 
+static void draw_mapcell(struct Win * w, char c, uint8_t y, uint8_t x, attr_t a)
+{
+    set_ch_on_yx(w, y, x * 2 + (y % 2), c | a);
+    if (x + (y % 2) < world.map.length)
+    {
+        set_ch_on_yx(w, y, x * 2 + (y % 2) + 1, ' ' | a);
+    }
+}
+
+
+
 extern void draw_win_log(struct Win * win)
 {
     if (!world.log)
@@ -349,42 +363,39 @@ extern void draw_win_log(struct Win * win)
 
 extern void draw_win_map(struct Win * win)
 {
+    uint16_t x, y;
     init_pair(1, COLOR_WHITE, COLOR_BLUE);
     init_pair(2, COLOR_BLUE, COLOR_BLACK);
-    attr_t attr_fov = 0;
     attr_t attr_mem = COLOR_PAIR(2);
     attr_t attr_sha = COLOR_PAIR(1);
     try_resize_winmap(win, world.map.length, world.map.length * 2);
-    uint16_t x, y, z;
-    for (y = 0, z = 0; y < world.map.length; y++)
+    for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            attr_t attr_c = ' ' == world.mem_map[z] ? attr_sha : attr_mem;
-            chtype c = world.mem_map[z] | attr_c;
-            set_ch_on_yx(win, y, x * 2 + (y % 2), c);
-            if (x + (y % 2) < world.map.length)
-            {
-                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | attr_c);
-            }
-            z++;
+            attr_t a=' '==world.mem_map[y*world.map.length+x]?attr_sha:attr_mem;
+            char c = world.mem_map[y*world.map.length + x];
+            draw_mapcell(win, c, y, x, a);
         }
     }
-    for (y = 0, z = 0; y < world.map.length; y++)
+    for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            if (' ' != world.map.cells[z])
+            if (' ' != world.map.cells[y*world.map.length + x])
             {
-                chtype c = world.map.cells[z] | attr_fov;
-                set_ch_on_yx(win, y, x * 2 + (y % 2), c);
-                if (x + (y % 2) < world.map.length)
-                {
-                    set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | attr_fov);
-                }
+                char c = world.map.cells[y*world.map.length + x];
+                draw_mapcell(win, c, y, x, 0);
             }
-            z++;
         }
+    }
+    if (world.look)
+    {
+        y = world.look_pos.y;
+        x = world.look_pos.x;
+        char c = world.map.cells[y * world.map.length + x];
+        c = ' ' == c ? world.mem_map[y * world.map.length + x] : c;
+        draw_mapcell(win, c, y, x, A_REVERSE);
     }
 }
 
@@ -436,9 +447,9 @@ extern void draw_win_inventory(struct Win * win)
 
 extern void draw_win_terrain_stack(struct Win * win)
 {
-    if (world.things_below_player)
+    if (world.things_here)
     {
-        add_text_with_linebreaks(win, world.things_below_player);
+        add_text_with_linebreaks(win, world.things_here);
     }
 }
 

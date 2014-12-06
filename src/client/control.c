@@ -17,7 +17,9 @@
 #include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
                           * mod_selected_keyb(), move_keyb_selection()
                           */
-#include "map.h" /* map_scroll(), map_center(), toggle_autofocus() */
+#include "map.h" /* map_scroll(), map_center(), toggle_autofocus(),
+                  * toggle_lookmode(), lookmode_nav()
+                  */
 #include "wincontrol.h" /* shift_active_win(), resize_active_win(),
                          * toggle_win_size_type(), toggle_window(),
                          * cycle_active_win(), scroll_v_screen(),
@@ -166,6 +168,7 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "shift_b", shift_active_win, 'b')
             || try_0args(command, "reload_conf", reload_interface_conf)
             || try_0args(command, "save_conf", save_interface_conf)
+            || try_0args(command, "to_look", toggle_lookmode)
             || try_kb_manip(command->dsc_short));
 }
 
@@ -263,11 +266,15 @@ extern uint8_t try_key(uint16_t key)
     }
     if (command)
     {
-        if      (try_server_commands(command))
+        if (world.look && lookmode_nav(command->dsc_short))
         {
             return 1;
         }
         else if (try_client_commands(command))
+        {
+            return 1;
+        }
+        else if (try_server_commands(command))
         {
             return 1;
         }

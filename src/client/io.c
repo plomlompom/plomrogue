@@ -259,31 +259,31 @@ static void nl_append_string(char * append, char ** string)
 
 static uint8_t read_queue()
 {
-    static uint8_t things_below_player_parsing = 0;
+    static uint8_t things_here_parsing = 0;
     uint8_t ret = 0;
     char * msg;
     while (NULL != (msg = get_message_from_queue(&world.queue)))
     {
         char * log_prefix = "LOG ";
-        if      (!strcmp(msg, "THINGS_BELOW_PLAYER START"))
+        if      (!strcmp(msg, "THINGS_HERE START"))
         {
             ret = 1;
-            things_below_player_parsing = 1;
-            free(world.things_below_player);
-            world.things_below_player = NULL;
+            things_here_parsing = 1;
+            free(world.things_here);
+            world.things_here = NULL;
         }
-        else if (!strcmp(msg, "THINGS_BELOW_PLAYER END"))
+        else if (!strcmp(msg, "THINGS_HERE END"))
         {
-            things_below_player_parsing = 0;
-            if (!world.things_below_player)
+            things_here_parsing = 0;
+            if (!world.things_here)
             {
-                nl_append_string("(nothing)", &world.things_below_player);
+                nl_append_string("(none known)", &world.things_here);
             }
         }
-        else if (things_below_player_parsing)
+        else if (things_here_parsing)
         {
             ret = 1;
-            nl_append_string(msg, &world.things_below_player);
+            nl_append_string(msg, &world.things_here);
         }
         else if (!strncmp(msg, log_prefix, strlen(log_prefix)))
         {
@@ -298,9 +298,7 @@ static uint8_t read_queue()
         }
         else if (!strcmp(msg, "WORLD_UPDATED"))
         {
-            free(world.things_below_player);
-            world.things_below_player = NULL;
-            send("STACK");
+            query_mapcell();
         }
         free(msg);
     }
@@ -338,7 +336,7 @@ extern char * io_loop()
         }
         if (change_in_client || read_worldstate() || read_queue())
         {
-            if (world.turn != last_focused_turn && world.focus_each_turn)
+            if (world.turn != last_focused_turn && world.autofocus)
             {
                 last_focused_turn = world.turn;
                 map_center();

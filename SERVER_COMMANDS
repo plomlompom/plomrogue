@@ -53,9 +53,10 @@ Write "PONG" line to ./server/out file.
 QUIT
 Shut down server.
 
-STACK
-Write line-by-line list of items the player stands on into ./server/out file,
-enclosed by two lines "THINGS_BELOW_PLAYER START" and "THINGS_BELOW_PLAYER END".
+THINGS_HERE [0 to 255] [0 to 255]
+Write line-by-line list of items at y position of first argument, x position of
+second argument into ./server/out file, enclosed by two lines "THINGS_HERE START"
+and "THINGS_HERE END".
 
 Player commands
 ---------------

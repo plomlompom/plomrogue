@@ -33,19 +33,21 @@ struct World
     struct Map map; /* game map geometry and content of player's map view */
     time_t last_update; /* used for comparison with worldstate file's mtime */
     char * log; /* log of player's activities */
-    char * things_below_player; /* list of things below the player */
+    char * things_here; /* list of things below the player */
     char * path_interface; /* path of interface configuration file */
     char * path_commands; /* path of commands config file */
     char * player_inventory; /* one-item-per-line string list of owned items */
     char * mem_map; /* map cells of player's map memory */
     char * queue; /* stores un-processed messages read from the input file */
     struct yx_uint8 player_pos; /* coordinates of player on map */
+    struct yx_uint8 look_pos; /* coordinates of look cursor */
     uint16_t turn; /* world/game turn */
     uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */
     uint8_t player_inventory_select; /* index of selected item in inventory */
     uint8_t player_lifepoints; /* how alive the player is */
     uint8_t winch; /* if set, SIGWINCH was registered; trigger reset_windows()*/
-    uint8_t focus_each_turn; /* if !0, re-focus map on player each new turn */
+    uint8_t autofocus; /* if !0, re-focus map each new turn / look focus move */
+    uint8_t look; /* if set, move look cursor over map intead of player */
 };
 
 

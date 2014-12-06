@@ -84,7 +84,7 @@ KEY 259 keyb_uk
 KEY 10 keyb_mk
 
 WINDOW s
-NAME 'Standing on'
+NAME 'Things here'
 BREAK 1
 WIDTH 14
 HEIGHT -12

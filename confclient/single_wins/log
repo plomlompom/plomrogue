@@ -92,7 +92,7 @@ KEY 258 inv_d
 KEY 117 use
 
 WINDOW s
-NAME 'Standing on'
+NAME 'Things here'
 BREAK 1
 WIDTH 14
 HEIGHT -12
