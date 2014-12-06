@@ -19,8 +19,7 @@ extern void obey_argv(int argc, char * argv[]);
  * data, world.wins.pad (initialized before opening any windows to the height of
  * the terminal screen and a width of 1) and window chains.
  *
- * Note that reload_interface_conf() also calls map_center() and re-sets
- * world.winDB.v_screen_offset to zero.
+ * reload_interface_conf() also re-sets world.winDB.v_screen_offset to zero.
  */
 extern void save_interface_conf();
 extern void load_interface_conf();

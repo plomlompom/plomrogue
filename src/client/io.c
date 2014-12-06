@@ -25,9 +25,12 @@
                                   * read_file_into_queue(),
                                   * get_message_from_queue(),
                                   */
+#include "../common/yx_uint8.h" /* yx_uint8 */
 #include "control.h" /* try_key() */
-#include "map.h" /* map_center() */
-#include "windows.h" /* reset_windows_on_winch(), draw_all_wins() */
+#include "map.h" /* query_mapcell() */
+#include "windows.h" /* Win, reset_windows_on_winch(), draw_all_wins(),
+                      * get_win_by_id()
+                      */
 #include "world.h" /* world global */
 
 
@@ -69,9 +72,6 @@ static FILE * changed_worldstate_file(char * path);
  * world in a hard-coded serialization format. Returns 1 on success, or 0 if the
  * out file wasn't read for supposedly not having changed since a last
  * read_worldstate() call.
- *
- * map_center() is triggered by either, the first successful read_worldstate()
- * (thus on client start), or on turn 1 (thus on world start).
  */
 static uint8_t read_worldstate();
 
@@ -178,7 +178,6 @@ static uint8_t read_worldstate()
 {
     char * path = "server/worldstate";
     char * quit_msg = "No worldstate file found to read. Server may be down.";
-    static uint8_t first_read = 1;
     exit_err(access(path, F_OK), quit_msg);
     FILE * file = changed_worldstate_file(path);
     if (!file)
@@ -192,11 +191,6 @@ static uint8_t read_worldstate()
     read_inventory(read_buf, linemax, file);
     world.player_pos.y = read_value_from_line(read_buf, linemax, file);
     world.player_pos.x = read_value_from_line(read_buf, linemax, file);
-    if (1 == world.turn || first_read)
-    {
-        map_center();
-        first_read = 0;
-    }
     world.map.length = read_value_from_line(read_buf, linemax, file);
     read_map_cells(file, &world.map.cells);
     read_map_cells(file, &world.mem_map);
@@ -324,7 +318,6 @@ extern char * io_loop()
     world.halfdelay = 1;             /* Ensure server is polled only 10 times */
     halfdelay(world.halfdelay);      /* a second during user inactivity.      */
     uint8_t change_in_client = 0;
-    uint16_t last_focused_turn = world.turn;
     while (1)
     {
         test_and_poll_server();
@@ -336,11 +329,10 @@ extern char * io_loop()
         }
         if (change_in_client || read_worldstate() || read_queue())
         {
-            if (world.turn != last_focused_turn && world.autofocus)
-            {
-                last_focused_turn = world.turn;
-                map_center();
-            }
+            struct Win * win_map = get_win_by_id('m');
+            struct yx_uint8 pos = world.look? world.look_pos : world.player_pos;
+            win_map->center.y = pos.y;
+            win_map->center.x = pos.x * 2 + (pos.y % 2);
             draw_all_wins();
         }
         change_in_client = 0;

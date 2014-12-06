@@ -24,7 +24,6 @@
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "command_db.h" /* get_command() */
 #include "keybindings.h" /* KeyBinding, KeyBindingDB, get_command_to_keycode()*/
-#include "map.h" /* map_center() */
 #include "parse.h" /* EDIT_STARTED, parse_file(), parse_flagval(),
                     * parse_and_reduce_to_readyflag(), parse_id_uniq()
                     * parsetest_defcontext(), parse_unknown_arg(),
@@ -481,6 +480,5 @@ extern void reload_interface_conf()
 {
     unload_interface_conf();
     load_interface_conf();
-    map_center();
     world.winDB.v_screen_offset = 0;
 }

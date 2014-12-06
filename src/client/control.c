@@ -17,9 +17,7 @@
 #include "keybindings.h" /* get_command_to_keycode(), get_keycode_to_command(),
                           * mod_selected_keyb(), move_keyb_selection()
                           */
-#include "map.h" /* map_scroll(), map_center(), toggle_autofocus(),
-                  * toggle_lookmode(), lookmode_nav()
-                  */
+#include "map.h" /* map_scroll(),toggle_lookmode(),lookmode_nav()*/
 #include "wincontrol.h" /* shift_active_win(), resize_active_win(),
                          * toggle_win_size_type(), toggle_window(),
                          * cycle_active_win(), scroll_v_screen(),
@@ -136,9 +134,7 @@ static uint8_t try_kb_manip(char * command)
 
 static uint8_t try_client_commands(struct Command * command)
 {
-    return (   try_0args(command, "map_c", map_center)
-            || try_0args(command, "to_autofocus", toggle_autofocus)
-            || try_1args(command, "map_u", map_scroll, '8')
+    return (   try_1args(command, "map_u", map_scroll, '8')
             || try_1args(command, "map_d", map_scroll, '2')
             || try_1args(command, "map_r", map_scroll, '6')
             || try_1args(command, "map_l", map_scroll, '4')

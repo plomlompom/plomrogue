@@ -30,10 +30,10 @@ extern void send(char * msg);
  * appropriate quit message to write to stdout when the client winds down. Call
  * reset_windows() on receiving a SIGWINCH. Abort on assumed server death if the
  * server's out file does not get updated, even on PING requests. Re-focus map
- * view on player if world.autofocus is set. Messages from the out file are put
- * together on the queue first, from which only complete (\n-delimited) messages
- * are read. Queues of messages are worked through completely / emptied before
- * any re-drawing or further server polling happens.
+ * view on player. Messages from the out file are put together on the queue
+ * first, from which only complete (\n-delimited) messages are read. Queues of
+ * messages are worked through completely / emptied before any re-drawing or
+ * further server polling happens.
  */
 extern char * io_loop();
 

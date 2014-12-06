@@ -12,7 +12,7 @@
 #include <string.h> /* strlen(), strncmp() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/rexit.h" /* exit_trouble() */
-#include "../common/yx_uint8.h" /* yx_uint8 */
+//#include "../common/yx_uint8.h" /* yx_uint8 */
 #include "io.h" /* send() */
 #include "windows.h" /* struct Win, center_offset(), get_win_by_id() */
 #include "world.h" /* for global world */
@@ -21,7 +21,6 @@
 
 extern void map_scroll(char d)
 {
-    world.autofocus = 0;
     struct Win * win = get_win_by_id('m');
     uint16_t offset;
     if (('8' == d || '2' == d) && world.map.length > win->frame_size.y)
@@ -48,23 +47,6 @@ extern void map_scroll(char d)
         }
         win->center.x = win->center.x - ('4' == d && win->center.x > 0);
     }
-}
-
-
-
-extern void map_center()
-{
-    struct Win * win_map = get_win_by_id('m');
-    struct yx_uint8 pos = world.look ? world.look_pos : world.player_pos;
-    win_map->center.y = pos.y;
-    win_map->center.x = pos.x * 2 + (pos.y % 2);
-}
-
-
-
-extern void toggle_autofocus()
-{
-    world.autofocus = world.autofocus ? 0 : 1;
 }
 
 
@@ -128,7 +110,6 @@ extern uint8_t lookmode_nav(char * command)
         {
             return 0;
         }
-        map_center();
         query_mapcell();
         return 1;
     }

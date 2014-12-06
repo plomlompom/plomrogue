@@ -158,9 +158,6 @@ DESCRIPTION 'map left'
 COMMAND map_r
 DESCRIPTION 'map right'
 
-COMMAND map_c
-DESCRIPTION 'map center player'
-
 COMMAND to_inv
 DESCRIPTION 'window inventory'
 
@@ -184,9 +181,6 @@ DESCRIPTION 'window geometry keys'
 
 COMMAND to_wk_keywin
 DESCRIPTION 'window keybinding keys'
-
-COMMAND to_autofocus
-DESCRIPTION 'toggle auto-center'
 
 COMMAND to_look
 DESCRIPTION 'toggle look mode'

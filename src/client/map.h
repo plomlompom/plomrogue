@@ -18,12 +18,6 @@
  */
 extern void map_scroll(char d);
 
-/* Center map window on player (even if it is non-visible). */
-extern void map_center();
-
-/* Toggle world.focus_each_turn (auto-centering of map on player each turn). */
-extern void toggle_autofocus();
-
 /* Toggle world.look (moving look cursor instead of player over map). */
 extern void toggle_lookmode();
 
