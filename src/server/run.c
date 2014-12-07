@@ -212,7 +212,7 @@ static uint8_t parse_command_meta(char * tok0)
     {
         char * tok1 = token_from_line(NULL);
         char * tok2 = token_from_line(NULL);
-        if (!parsetest_int(tok1, '8') && !parsetest_int(tok2, '8'))
+        if (tok1&&tok2 && !parsetest_int(tok1, '8')&&!parsetest_int(tok2, '8'))
         {
             send_to_outfile("THINGS_HERE START\n", 1);
             struct Thing * t;
