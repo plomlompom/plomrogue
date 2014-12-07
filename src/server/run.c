@@ -214,6 +214,11 @@ static uint8_t parse_command_meta(char * tok0)
         char * tok2 = token_from_line(NULL);
         if (tok1&&tok2 && !parsetest_int(tok1, '8')&&!parsetest_int(tok2, '8'))
         {
+            if (!world.exists)
+            {
+                err_line(1, "Command only works on existing worlds.");
+                return 0;
+            }
             send_to_outfile("THINGS_HERE START\n", 1);
             struct Thing * t;
             for (t = world.things; t; t = t->next)
@@ -411,7 +416,7 @@ extern uint8_t obey_msg(char * msg, uint8_t obey_state)
         }
         else if (!world.replay)
         {
-            err_line(1, "Unknown command/argument or bad number of tokens.");
+            err_line(1, "Invalid command/argument or bad number of tokens.");
         }
     }
     free(msg_copy);
