@@ -234,14 +234,17 @@ static uint8_t parse_command_meta(char * tok0)
                     }
                 }
             }
-            struct ThingInMemory * t_mem;
-            for (t_mem = player->t_mem; t_mem; t_mem = t_mem->next)
+            else
             {
-                if (t_mem->pos.y == atoi(tok1) && t_mem->pos.x == atoi(tok2))
+                struct ThingInMemory * t_mem;
+                for (t_mem = player->t_mem; t_mem; t_mem = t_mem->next)
                 {
-                    struct ThingType * tt = get_thing_type(t_mem->type);
-                    send_to_outfile(tt->name, 0);
-                    send_to_outfile("\n", 1);
+                    if (t_mem->pos.y == atoi(tok1) && t_mem->pos.x == atoi(tok2))
+                    {
+                        struct ThingType * tt = get_thing_type(t_mem->type);
+                        send_to_outfile(tt->name, 0);
+                        send_to_outfile("\n", 1);
+                    }
                 }
             }
             send_to_outfile("THINGS_HERE END\n", 1);
