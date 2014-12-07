@@ -54,9 +54,9 @@ QUIT
 Shut down server.
 
 THINGS_HERE [0 to 255] [0 to 255]
-If world exists, write line-by-line list of things at y position of first
-argument, x position of second argument of map into ./server/out file, enclosed
-by two lines "THINGS_HERE START" and "THINGS_HERE END".
+If world exists, write line-by-line list of things in memory at y position of
+first argument, x position of second argument of map into ./server/out file,
+enclosed by two lines "THINGS_HERE START" and "THINGS_HERE END".
 
 Player commands
 ---------------

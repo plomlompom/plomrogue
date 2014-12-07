@@ -29,8 +29,8 @@
 #include "god_commands.h" /* parse_god_command_(1|2|3)arg() */
 #include "hardcoded_strings.h" /* s */
 #include "io.h" /* io_round(), save_world() */
-#include "things.h" /* Thing, ThingType, get_thing_action_id_by_name(),
-                     * get_player(), try_thing_proliferation()
+#include "things.h" /* Thing, ThingType, ThingInMemory, get_player(),
+                     * get_thing_action_id_by_name(), try_thing_proliferation()
                      */
 #include "world.h" /* world */
 
@@ -220,8 +220,9 @@ static uint8_t parse_command_meta(char * tok0)
                 return 0;
             }
             send_to_outfile("THINGS_HERE START\n", 1);
-            struct Thing * t;
-            for (t = world.things; t; t = t->next)
+            struct Thing * player = get_player();
+            struct ThingInMemory * t;
+            for (t = player->t_mem; t; t = t->next)
             {
                 if (t->pos.y == atoi(tok1) && t->pos.x == atoi(tok2))
                 {
