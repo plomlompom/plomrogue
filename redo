@@ -13,6 +13,10 @@
 # build/redo_scripts/. For details on this version, see:
 # - <http://news.dieweltistgarnichtso.net/bin/redo.html>
 # - <http://news.dieweltistgarnichtso.net/bin/redo-ifchange.html>
+#
+# This "redo" implementation may experience trouble on OS X systems, see
+# <https://github.com/plomlompom/plomrogue/issues/2#issuecomment-50972436> for a
+# workaround.
 
 export PATH=$PATH:$PWD/build/redo_scripts
 redo "$@"

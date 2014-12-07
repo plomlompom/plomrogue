@@ -25,8 +25,9 @@ System requirements / installation / running the game
 -----------------------------------------------------
 
 The game is expected to run on Linux systems that contain the ncurses library.
-(It may also work on other Unix-like systems with ncurses, who knows.) Do the
-following steps:
+(It may also work on other Unix-like systems with ncurses, who knows. See
+<https://github.com/plomlompom/plomrogue/issues/2#issuecomment-50972436> for OS
+X compatibility.) Do the following steps:
 
 $ git clone https://github.com/plomlompom/plomrogue
 $ cd plomrogue
