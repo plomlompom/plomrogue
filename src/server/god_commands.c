@@ -15,7 +15,7 @@
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* unset_cleanup_flag() */
-#include "field_of_view.h" /* build_fov_map() */
+#include "field_of_view.h" /* build_fov_map(), update_map_memory() */
 #include "hardcoded_strings.h" /* s */
 #include "init.h" /* remake_world() */
 #include "map.h" /* remake_map() */
@@ -23,7 +23,8 @@
                             * actor_use(), actor_pickup(), actor_drop()
                             */
 #include "things.h" /* Thing, ThingType, add_thing(), get_thing(), own_thing(),
-                     * free_things(), add_thing_to_memory_map(),get_thing_type()
+                     * free_things(), add_thing_to_memory_map(),get_thing_type(),
+                     * get_player()
                      */
 #include "world.h" /* world */
 
@@ -251,6 +252,10 @@ static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t)
             if (world.exists && t->lifepoints)
             {
                 build_fov_map(t);
+                if (t == get_player())
+                {
+                    update_map_memory(t);
+                }
             }
         }
         return 1;
@@ -374,6 +379,10 @@ static uint8_t parse_world_active(char * tok0, char * tok1)
                     if (ti->lifepoints)
                     {
                         build_fov_map(ti);
+                        if (ti == get_player())
+                        {
+                            update_map_memory(ti);
+                        }
                     }
                 }
                 world.exists = 1;

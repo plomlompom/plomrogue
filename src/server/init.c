@@ -25,11 +25,11 @@
 #include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
-#include "field_of_view.h" /* build_fov_map() */
+#include "field_of_view.h" /* update_map_memory() */
 #include "hardcoded_strings.h" /* s */
 #include "map.h" /* remake_map() */
 #include "things.h" /* Thing, ThingType, free_things(), add_things(),
-                     * get_thing_id_action_id_by_name()
+                     * get_thing_id_action_id_by_name(), get_player()
                      */
 #include "run.h" /* obey_msg(), io_loop(), record(), send_to_outfile() */
 #include "world.h" /* global world */
@@ -199,6 +199,7 @@ extern uint8_t remake_world()
     world.seed_map = world.seed;
     free_things(world.things);
     remake_map();
+    world.exists = 1;
     struct ThingType * tt;
     for (tt = world.thing_types; tt; tt = tt->next)
     {
@@ -208,6 +209,7 @@ extern uint8_t remake_world()
             break;
         }
     }
+    update_map_memory(get_player());
     for (tt = world.thing_types; tt; tt = tt->next)
     {
         if (world.player_type != tt->id)
@@ -215,16 +217,7 @@ extern uint8_t remake_world()
             add_things(tt->id, tt->start_n);
         }
     }
-    struct Thing * t;
-    for (t = world.things; t; t = t->next)
-    {
-        if (t->lifepoints)
-        {
-            build_fov_map(t);
-        }
-    }
     world.turn = 1;
-    world.exists = 1;
     send_to_outfile("NEW_WORLD\n", 1);
     return 0;
 }

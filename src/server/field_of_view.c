@@ -75,11 +75,6 @@ static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
                           struct yx_uint8 * test_pos,
                           struct shadow_angle ** shadows);
 
-/* Update "t"'s .mem_map memory with what's in its current FOV, remove from its
- * .t_mem all memorized things in FOV and add inanimiate things in FOV to it.
- */
-static void update_map_memory(struct Thing * t, uint32_t map_size);
-
 
 
 static uint32_t correct_angle(int32_t angle)
@@ -267,15 +262,15 @@ static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
 
 
 
-static void update_map_memory(struct Thing * t_eye, uint32_t map_size)
+extern void update_map_memory(struct Thing * t_eye)
 {
     if (!t_eye->mem_map)
     {
-        t_eye->mem_map = try_malloc(map_size, __func__);
-        memset(t_eye->mem_map, ' ', map_size);
+        t_eye->mem_map = try_malloc(world.map.length*world.map.length,__func__);
+        memset(t_eye->mem_map, ' ', world.map.length * world.map.length);
     }
     uint32_t i;
-    for (i = 0; i < map_size; i++)
+    for (i = 0; i < (uint32_t) (world.map.length * world.map.length); i++)
     {
         if (' ' == t_eye->mem_map[i] && t_eye->fov_map[i] == 'v')
         {
@@ -352,5 +347,4 @@ extern void build_fov_map(struct Thing * t)
     }
     mv_yx_in_dir_legal(0, NULL);
     free_angles(shadows);
-    update_map_memory(t, map_size);
 }

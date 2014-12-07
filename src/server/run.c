@@ -26,6 +26,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "ai.h" /* ai() */
 #include "cleanup.h" /* unset_cleanup_flag() */
+#include "field_of_view.h" /* update_map_memory() */
 #include "god_commands.h" /* parse_god_command_(1|2|3)arg() */
 #include "hardcoded_strings.h" /* s */
 #include "io.h" /* io_round(), save_world() */
@@ -325,6 +326,7 @@ static void turn_over()
             {
                 if (0 == thing->command)
                 {
+                    update_map_memory(thing);
                     if (thing == player)
                     {
                         break;

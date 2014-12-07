@@ -114,8 +114,8 @@ WORLD_ACTIVE [0 to 255]
 Set world activity state to argument. If 0, remove ./server/worldstate file.
 Else, if world was so far inactive, a map exists, at least one "wait" thing
 action is defined, and a thing of ID 0 (= a player character) that is not part
-of any other thing's inventory, (re-)build all animate things' fields of view and
-activate world. (Initial value: 0.)
+of any other thing's inventory, (re-)build all animate things' fields of view,
+and activate world. (Initial value: 0.)
 
 TA_ID [0 to 255]
 Select thing action to manipulate by argument as ID. If argument is 0, change it

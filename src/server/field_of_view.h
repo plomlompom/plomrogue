@@ -10,12 +10,17 @@
 #ifndef FIELD_OF_VIEW_H
 #define FIELD_OF_VIEW_H
 
-#include <stdint.h> /* uint8_t */
+#include <stdint.h> /* uint8_t, uint32_t */
 struct Thing;
 
 
 
-/* Build "t"'s field of view and update its map memory with the result. */
+/* Update "t"'s .mem_map memory with what's in its current FOV, remove from its
+ * .t_mem all memorized things in FOV and add inanimiate things in FOV to it.
+ */
+extern void update_map_memory(struct Thing * t_eye);
+
+/* Build "t"'s field of view. */
 extern void build_fov_map(struct Thing * t);
 
 
