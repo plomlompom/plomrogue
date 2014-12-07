@@ -42,7 +42,6 @@ struct World
     struct yx_uint8 player_pos; /* coordinates of player on map */
     struct yx_uint8 look_pos; /* coordinates of look cursor */
     uint16_t turn; /* world/game turn */
-    uint8_t halfdelay; /* how long to wait for getch() input in io_loop() */
     uint8_t player_inventory_select; /* index of selected item in inventory */
     uint8_t player_lifepoints; /* how alive the player is */
     uint8_t winch; /* if set, SIGWINCH was registered; trigger reset_windows()*/

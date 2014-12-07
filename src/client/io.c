@@ -8,7 +8,7 @@
 #define _POSIX_C_SOURCE 1 /* PIPE_BUF */
 #include "io.h"
 #include <limits.h> /* PIPE_BUF */
-#include <ncurses.h> /* halfdelay(), getch() */
+#include <ncurses.h> /* timeout(), getch() */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT32_MAX */
 #include <stdio.h> /* FILE, sprintf(), fseek(), fflush() */
@@ -211,12 +211,12 @@ static void test_and_poll_server()
         return;
     }
     time_t now = time(0);
-    if (ping_sent && last_server_answer_time > now - 3)  /* Re-set if last    */
+    if (ping_sent && last_server_answer_time > now - 5)  /* Re-set if last    */
     {                                                    /* ping was answered */
         ping_sent = 0;                                   /* with server       */
         return;                                          /* activity.         */
     }
-    if (!ping_sent && last_server_answer_time < now - 3)
+    if (!ping_sent && last_server_answer_time < now - 5)
     {
         send("PING");
         ping_sent = 1;
@@ -315,11 +315,12 @@ extern void send(char * msg)
 
 extern char * io_loop()
 {
-    world.halfdelay = 1;             /* Ensure server is polled only 10 times */
-    halfdelay(world.halfdelay);      /* a second during user inactivity.      */
+    uint16_t delay = 1; /* Greater delay: less redundant server files reading.*/
     uint8_t change_in_client = 0;
     while (1)
     {
+        timeout(delay);
+        delay = delay < 1000 ? delay * 2 : delay;
         test_and_poll_server();
         if (world.winch)
         {
@@ -329,6 +330,7 @@ extern char * io_loop()
         }
         if (change_in_client || read_worldstate() || read_queue())
         {
+            delay = 1;       /* Keep client alert even if it's not getch()'d. */
             struct Win * win_map = get_win_by_id('m');
             if (0 == win_map->view)   /* So the map window's winconfig views  */
             {                         /* don't get confused by the centering. */
@@ -342,6 +344,7 @@ extern char * io_loop()
         int key = getch();
         if (ERR != key)
         {
+            delay = 1;                     /* Alert client if it's getch()'d. */
             change_in_client = try_key((uint16_t) key);
             if (2 == change_in_client)
             {

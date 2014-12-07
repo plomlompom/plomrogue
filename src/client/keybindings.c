@@ -6,7 +6,7 @@
  */
 
 #include "keybindings.h"
-#include <ncurses.h> /* keycode defines, cbreak(), halfdelay(), getch() */
+#include <ncurses.h> /* keycode defines, cbreak(), getch(), timeout() */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t */
 #include <stdio.h> /* FILE, sprintf() */
@@ -127,8 +127,9 @@ extern void mod_selected_keyb(char kb_c)
     kbdb->edit = 1;
     draw_all_wins();
     cbreak();
+    timeout(-1);
     int keycode = getch();
-    halfdelay(world.halfdelay);
+    timeout(0);
     if (keycode < 1000)
     {
         kbdb->kbs[kbdb->select].keycode = keycode;
