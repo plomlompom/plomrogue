@@ -75,7 +75,7 @@ KEY 117 use
 
 WINDOW s
 NAME 'Things here'
-BREAK 1
+BREAK 0
 WIDTH 14
 HEIGHT -12
 

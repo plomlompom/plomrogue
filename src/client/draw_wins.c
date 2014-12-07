@@ -436,10 +436,9 @@ extern void draw_win_inventory(struct Win * win)
 
 extern void draw_win_terrain_stack(struct Win * win)
 {
-    if (world.things_here)
-    {
-        add_text_with_linebreaks(win, world.things_here);
-    }
+    char * wait_response = "(waiting for server response)";
+    char * text = world.things_here ? world.things_here : wait_response;
+    add_text_with_linebreaks(win, text);
 }
 
 
