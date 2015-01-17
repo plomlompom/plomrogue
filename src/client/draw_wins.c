@@ -9,7 +9,7 @@
 #include "draw_wins.h"
 #include <ncurses.h> /* attr_t, chtype, init_pair(), A_REVERSE, COLOR_PAIR() */
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT16_MAX, UINT32_MAX */
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* memset(), strcmp(), strchr(), strdup/(), strlen() */
@@ -67,6 +67,14 @@ static char * winconf_geom_helper(struct Win * win, char axis, char * sep,
 
 
 
+/* try_resize_winmap() only realloc's Win->winmap if this is set. Use this to
+ * skip inflationary malloc's by successive try_resize_winmap() calls when the
+ * memory needed can be pre-calculated.
+ */
+static uint8_t do_realloc_winmap = 1;
+
+
+
 static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
 {
     if (win->winmap_size.y >= new_size_y && win->winmap_size.x >= new_size_x)
@@ -81,23 +89,26 @@ static void try_resize_winmap(struct Win * win, int new_size_y, int new_size_x)
     {
         new_size_x = win->winmap_size.x;
     }
-    chtype * old_winmap = win->winmap;
-    uint32_t new_size = sizeof(chtype) * new_size_y * new_size_x;
-    win->winmap = try_malloc(new_size, __func__);
-    uint16_t y, x;
-    for (y = 0; y < new_size_y; y++)
+    if (do_realloc_winmap)
     {
-        for (x = 0; y < win->winmap_size.y && x < win->winmap_size.x; x++)
+        chtype * old_winmap = win->winmap;
+        uint32_t new_size = sizeof(chtype) * new_size_y * new_size_x;
+        win->winmap = try_malloc(new_size, __func__);
+        uint16_t y, x;
+        for (y = 0; y < new_size_y; y++)
         {
-            chtype ch = old_winmap[(y * win->winmap_size.x) + x];
-            win->winmap[(y * new_size_x) + x] = ch;
+            for (x = 0; y < win->winmap_size.y && x < win->winmap_size.x; x++)
+            {
+                chtype ch = old_winmap[(y * win->winmap_size.x) + x];
+                win->winmap[(y * new_size_x) + x] = ch;
+            }
+            for (; x < new_size_x; x++)
+            {
+                win->winmap[(y * new_size_x) + x] = ' ';
+            }
         }
-        for (; x < new_size_x; x++)
-        {
-            win->winmap[(y * new_size_x) + x] = ' ';
-        }
+        free(old_winmap);
     }
-    free(old_winmap);
     win->winmap_size.y = new_size_y;
     win->winmap_size.x = new_size_x;
 }
@@ -247,7 +258,7 @@ static void draw_text_from_bottom(struct Win * win, char * text)
         }
         while (new_y_start > win->winmap_size.y);
         if (2 == win->linebreak) /* add_text_with_linebreaks() will start not */
-        {                        /* not after, but within the last line then. */
+        {                        /* after, but within the last line then.     */
             add_line_wide(win, " ", 0);
         }
         add_text_with_linebreaks(win, text);
@@ -340,6 +351,25 @@ extern void draw_win_log(struct Win * win)
 {
     if (!world.log)
     {
+        return;
+    }
+    uint32_t x, i, n_postbreak_lines;
+    for (i = 0, x = 0, n_postbreak_lines = 0; i < strlen(world.log); i++)
+    {
+        exit_err(i == UINT32_MAX, "Log too large.");
+        x++;
+        n_postbreak_lines = n_postbreak_lines + (x == win->frame_size.x);
+        n_postbreak_lines = n_postbreak_lines + ('\n' == world.log[i]);
+        x = ((x == win->frame_size.x) || ('\n' == world.log[i])) ? 0 : x;
+    }
+    if (n_postbreak_lines > win->frame_size.y)
+    {
+        uint32_t size = n_postbreak_lines * (win->frame_size.x + 1);
+        win->winmap = try_malloc(sizeof(chtype) * size, __func__);
+        for (i = 0; i < size; win->winmap[i] = ' ', i++);
+        do_realloc_winmap = 0;
+        draw_text_from_bottom(win, world.log);
+        do_realloc_winmap = 1;
         return;
     }
     draw_text_from_bottom(win, world.log);
