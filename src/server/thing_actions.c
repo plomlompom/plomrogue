@@ -183,7 +183,7 @@ static void playerbonus_use(uint8_t no_thing, uint8_t wrong_thing)
         update_log("You try to use this object, but fail.");
         return;
     }
-    update_log("You consume MAGIC MEAT.");
+    update_log("You consume this object.");
 }
 
 

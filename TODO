@@ -13,8 +13,6 @@ BOTH SERVER/CLIENT:
 
 SERVER:
 
-- fix hardcoded MAGIC MEAT eating message in thing_actions.c
-
 - grow amount of possible things from UINT8_MAX to UINT16_MAX
 
 CLIENT:
