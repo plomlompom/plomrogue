@@ -18,7 +18,7 @@
 #include "field_of_view.h" /* build_fov_map(), update_map_memory() */
 #include "hardcoded_strings.h" /* s */
 #include "init.h" /* remake_world() */
-#include "map.h" /* remake_map() */
+#include "map.h" /* init_empty_map(), remake_map() */
 #include "thing_actions.h" /* ThingAction, actor_wait(), actor_move(),
                             * actor_use(), actor_pickup(), actor_drop()
                             */
@@ -466,9 +466,7 @@ extern uint8_t parse_god_command_2arg(char * tok0, char * tok1, char * tok2)
         }
         if (!t->mem_map)
         {
-            uint32_t map_size = world.map.length * world.map.length;
-            t->mem_map = try_malloc(map_size, __func__);
-            memset(t->mem_map, ' ', map_size);
+            init_empty_map(&(t->mem_map));
         }
         memcpy(t->mem_map + y * world.map.length, tok2, world.map.length);
     }

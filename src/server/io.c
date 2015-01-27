@@ -13,7 +13,7 @@
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT8_MAX */
 #include <stdio.h> /* defines FILE, sprintf(), fprintf() */
 #include <stdlib.h> /* free() */
-#include <string.h> /* strlen(), snprintf(), memcpy(), memset(), strchr() */
+#include <string.h> /* strlen(), snprintf(), memcpy(), strchr() */
 #include <sys/types.h> /* time_t */
 #include <time.h> /* time(), nanosleep() */
 #include "../common/readwrite.h" /* atomic_write_start(), atomic_write_finish(),
@@ -24,6 +24,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "cleanup.h" /* set_cleanup_flag() */
 #include "hardcoded_strings.h" /* s */
+#include "map.h" /* init_empty_map() */
 #include "run.h" /* send_to_outfile() */
 #include "things.h" /* Thing, ThingType, ThingInMemory, ThingAction,
                      * get_thing_type(), get_player()
@@ -262,13 +263,12 @@ static void write_inventory(struct Thing * player, FILE * file)
 
 static char * build_visible_map(struct Thing * player)
 {
-    uint32_t map_size = world.map.length * world.map.length;
-    char * visible_map = try_malloc(map_size, __func__);
-    memset(visible_map, ' ', map_size);
+    char * visible_map;
+    init_empty_map(&visible_map);
     if (player->fov_map) /* May fail if player thing was created / positioned */
     {                    /* by god command after turning off FOV building.    */
-        uint32_t pos_i;
-        for (pos_i = 0; pos_i < map_size; pos_i++)
+        uint32_t pos_i = 0;
+        for (; pos_i < (uint32_t) world.map.length * world.map.length; pos_i++)
         {
             if (player->fov_map[pos_i] == 'v')
             {

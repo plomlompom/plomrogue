@@ -40,6 +40,8 @@ extern void remake_map();
  */
 extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx);
 
+/* Initialize (empty) map array at "map". */
+extern void init_empty_map(char ** map);
 
 
 #endif

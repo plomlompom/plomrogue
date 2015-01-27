@@ -13,7 +13,7 @@
 #include "../common/rexit.h" /* exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
-#include "map.h" /* mv_yx_in_dir_legal() */
+#include "map.h" /* mv_yx_in_dir_legal(), init_empty_map() */
 #include "things.h" /* Thing, ThingInMemory, add_thing_to_memory_map() */
 #include "world.h" /* world  */
 
@@ -266,8 +266,7 @@ extern void update_map_memory(struct Thing * t_eye)
 {
     if (!t_eye->mem_map)
     {
-        t_eye->mem_map = try_malloc(world.map.length*world.map.length,__func__);
-        memset(t_eye->mem_map, ' ', world.map.length * world.map.length);
+        init_empty_map(&(t_eye->mem_map));
     }
     uint32_t i;
     for (i = 0; i < (uint32_t) (world.map.length * world.map.length); i++)

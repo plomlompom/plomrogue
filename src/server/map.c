@@ -8,6 +8,7 @@
 #include "map.h"
 #include <stdint.h> /* uint8_t, int8_t, uint16_t, uint32_t, (U)INT*_(MIN|MAX) */
 #include <stdlib.h> /* free() */
+#include <string.h> /* memset() */
 #include "../common/rexit.h" /* exit_err() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
@@ -229,4 +230,12 @@ extern uint8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
         return 1;
     }
     return 0;
+}
+
+
+
+extern void init_empty_map(char ** map)
+{
+    *map = try_malloc(world.map.length * world.map.length, __func__);
+    memset(*map, ' ', world.map.length * world.map.length);
 }

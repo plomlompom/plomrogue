@@ -16,7 +16,7 @@ struct Thing;
 
 
 /* Update "t"'s .mem_map memory with what's in its current FOV, remove from its
- * .t_mem all memorized things in FOV and add inanimiate things in FOV to it.
+ * .t_mem all memorized things in FOV and add inanimate things in FOV to it.
  */
 extern void update_map_memory(struct Thing * t_eye);
 
