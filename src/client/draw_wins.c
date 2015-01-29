@@ -354,13 +354,15 @@ extern void draw_win_log(struct Win * win)
         return;
     }
     uint32_t x, i, n_postbreak_lines;
-    for (i = 0, x = 0, n_postbreak_lines = 0; i < strlen(world.log); i++)
+    for (i = 0, x = 0, n_postbreak_lines = 1; i < strlen(world.log); i++)
     {
         exit_err(i == UINT32_MAX, "Log too large.");
         x++;
-        n_postbreak_lines = n_postbreak_lines + (x == win->frame_size.x);
-        n_postbreak_lines = n_postbreak_lines + ('\n' == world.log[i]);
-        x = ((x == win->frame_size.x) || ('\n' == world.log[i])) ? 0 : x;
+        if (x > win->frame_size.x || '\n' == world.log[i])
+        {
+            n_postbreak_lines++;
+            x = 0;
+        }
     }
     if (n_postbreak_lines > win->frame_size.y)
     {
