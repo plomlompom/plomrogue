@@ -6,6 +6,7 @@
  */
 
 #include "field_of_view.h"
+#include <math.h> /* pow() */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, int32_t, UINT8_MAX */
 #include <stdlib.h> /* free() */
@@ -14,6 +15,7 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "map.h" /* mv_yx_in_dir_legal(), init_empty_map() */
+#include "rrand.h" /* rrand() */
 #include "things.h" /* Thing, ThingInMemory, add_thing_to_memory_map() */
 #include "world.h" /* world  */
 
@@ -74,6 +76,11 @@ static void free_angles(struct shadow_angle * angles);
 static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
                           struct yx_uint8 * test_pos,
                           struct shadow_angle ** shadows);
+
+/* Update "t_eye"'s things-on-map memory by removing from its .t_mem all
+ * memorized thing in FOV, and adding inanimate things in FOV to it.
+ */
+static void add_things_to_map_memory(struct Thing * t_eye);
 
 
 
@@ -262,20 +269,8 @@ static void eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
 
 
 
-extern void update_map_memory(struct Thing * t_eye)
+static void add_things_to_map_memory(struct Thing * t_eye)
 {
-    if (!t_eye->mem_map)
-    {
-        init_empty_map(&(t_eye->mem_map));
-    }
-    uint32_t i;
-    for (i = 0; i < (uint32_t) (world.map.length * world.map.length); i++)
-    {
-        if (' ' == t_eye->mem_map[i] && t_eye->fov_map[i] == 'v')
-        {
-            t_eye->mem_map[i] = world.map.cells[i];
-        }
-    }
     struct ThingInMemory * tm = t_eye->t_mem;
     struct ThingInMemory * tm_prev = NULL;
     struct ThingInMemory * tm_next = NULL;
@@ -306,6 +301,39 @@ extern void update_map_memory(struct Thing * t_eye)
             add_thing_to_memory_map(t_eye, t->type, t->pos.y, t->pos.x);
         }
     }
+}
+
+
+
+extern void update_map_memory(struct Thing * t_eye)
+{
+    if (!t_eye->mem_map)
+    {
+        init_empty_map(&(t_eye->mem_map));
+    }
+    if (!t_eye->mem_depth_map)
+    {
+        init_empty_map(&(t_eye->mem_depth_map));
+    }
+    uint32_t i;
+    for (i = 0; i < (uint32_t) (world.map.length * world.map.length); i++)
+    {
+        if ('v' == t_eye->fov_map[i])
+        {
+            t_eye->mem_depth_map[i] = '0';
+            if (' ' == t_eye->mem_map[i])
+            {
+                t_eye->mem_map[i] = world.map.cells[i];
+            }
+            continue;
+        }
+        if (   '0' <= t_eye->mem_depth_map[i] && '9' > t_eye->mem_depth_map[i]
+            && !(rrand() % (uint16_t) pow(2, t_eye->mem_depth_map[i] - 48)))
+        {
+            t_eye->mem_depth_map[i]++;
+        }
+    }
+    add_things_to_map_memory(t_eye);
 }
 
 

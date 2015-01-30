@@ -6,4 +6,5 @@
 
 redo-ifchange build/build_template
 TARGET=server
+LIBRARY_LINKS=-lm
 . ./build/build_template

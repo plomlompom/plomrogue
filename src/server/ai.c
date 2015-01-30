@@ -38,18 +38,19 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
  */
 static void dijkstra_map(uint16_t * score_map, uint16_t max_score);
 
-/* get_dir_to_nearest_thing() helper: Prepare "score_map" for dijkstra_map(). */
+/* get_dir_to_nearest_target() helper: Prepare "score_map" for dijkstra_map(). */
 static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
                            struct Thing * t_eye);
 
 /* Set (if possible) as "t_eye"'s command a move to the path to the path-wise
- * nearest thing that is not "t_eye" and fits criteria set by "filter". On
- * success, return 1, else 0. Values for "filter":
+ * nearest target that is not "t_eye" and fits criteria set by "filter". On
+ * success, return !0, else 0. Values for "filter":
  * "e": thing in FOV is animate, but not of "t_eye"'s thing type; build path as
  *      avoiding things of "t_eye"'s type
- * "c": thing in memorized map is consumable.
+ * "c": thing in memorized map is consumable
+ * "s": memory map cell with greatest-reachable degree of unexploredness
  */
-static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter);
+static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter);
 
 /* Return 1 if any thing not "t_eye" is known and fulfills some criteria defined
  * by "filter", else 0. Values for "filter":
@@ -189,18 +190,31 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
             score_map[tm->pos.y * world.map.length + tm->pos.x] = 0;
         }
     }
+    else if (('0' < filter && '9' >= filter) || ' ' == filter)
+    {
+        uint32_t i;
+        for (i = 0; i < (uint32_t) (world.map.length * world.map.length); i++)
+        {
+            score_map[i] = filter == t_eye->mem_depth_map[i] ? 0 : score_map[i];
+        }
+    }
 }
 
 
 
-static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter)
+static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter)
 {
-    char dir_to_nearest_thing = 0;
-    if (seeing_thing(t_eye, filter))
+    char dir_to_nearest_target = 0;
+    uint8_t run_i = 9 /* maximum mem depth age below never-explored */ + 1;
+    uint8_t mem_depth_char = ' ';
+    while (run_i && ('s' == filter || seeing_thing(t_eye, filter)))
     {
+        run_i = 's' != filter ? 0 : run_i - 1;
         uint32_t map_size = world.map.length * world.map.length;
         uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t),__func__);
-        init_score_map(filter, score_map, map_size, t_eye);
+        init_score_map('s' == filter ? mem_depth_char : filter,
+                       score_map, map_size, t_eye);
+        mem_depth_char = ' ' == mem_depth_char ? '9' : mem_depth_char - 1;
         dijkstra_map(score_map, UINT16_MAX-1);
         uint16_t neighbors[N_DIRS];
         uint16_t pos_i = (t_eye->pos.y * world.map.length) + t_eye->pos.x;
@@ -214,17 +228,17 @@ static uint8_t get_dir_to_nearest_thing(struct Thing * t_eye, char filter)
             if (min_neighbor > neighbors[i])
             {
                 min_neighbor = neighbors[i];
-                dir_to_nearest_thing = dirs[i];
+                dir_to_nearest_target = dirs[i];
             }
         }
+        if (dir_to_nearest_target)
+        {
+            t_eye->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
+            t_eye->arg = dir_to_nearest_target;
+            run_i = 0;
+        }
     }
-    if (dir_to_nearest_thing)
-    {
-        t_eye->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
-        t_eye->arg = dir_to_nearest_thing;
-        return 1;
-    }
-    return 0;
+    return dir_to_nearest_target;
 }
 
 
@@ -309,7 +323,7 @@ static uint8_t standing_on_consumable(struct Thing * t_standing)
 extern void ai(struct Thing * t)
 {
     t->command = get_thing_action_id_by_name(s[S_CMD_WAIT]);
-    if (!get_dir_to_nearest_thing(t, 'e'))
+    if (!get_dir_to_nearest_target(t, 'e'))
     {
         int16_t sel = get_inventory_slot_to_consume(t);
         if (-1 != sel)
@@ -321,9 +335,9 @@ extern void ai(struct Thing * t)
         {
             t->command = get_thing_action_id_by_name(s[S_CMD_PICKUP]);
         }
-        else
+        else if (!get_dir_to_nearest_target(t, 'c'))
         {
-            get_dir_to_nearest_thing(t, 'c');
+            get_dir_to_nearest_target(t, 's');
         }
     }
 }

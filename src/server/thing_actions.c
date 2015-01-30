@@ -94,6 +94,8 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
             hitted->fov_map = NULL;
             free(hitted->mem_map);
             hitted->mem_map = NULL;
+            free(hitted->mem_depth_map);
+            hitted->mem_depth_map = NULL;
             free_things_in_memory(hitted->t_mem);
             hitted->t_mem = NULL;
         }

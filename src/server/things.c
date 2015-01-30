@@ -210,6 +210,7 @@ extern void free_things(struct Thing * t)
     free_things(t->next);
     free(t->fov_map);
     free(t->mem_map);
+    free(t->mem_depth_map);
     free_things_in_memory(t->t_mem);
     free(t);
     if (t == world.things)         /* So add_things()' NULL-delimited thing   */

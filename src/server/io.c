@@ -40,6 +40,9 @@ static void write_string(FILE * file, char * string);
 static void write_key_space_value(FILE * file, char * key, uint32_t value);
 static void write_key_space_string(FILE * file, char * key, char * string);
 
+/* Write to "file" game-map-sized "map" in "command"-prefixed numbered lines. */
+static void write_mem_map(FILE * file, char * map, char * command);
+
 /* Write to "file" \n-delimited line of "key" + space + "value" as string. */
 static void write_thing(FILE * file, struct Thing * t);
 
@@ -126,6 +129,33 @@ static void write_key_space_string(FILE * file, char * key, char * string)
 
 
 
+static void write_mem_map(FILE * file, char * map, char * command)
+{
+    if (map)
+    {
+        uint32_t map_size = world.map.length * world.map.length;/* snprintf() */
+        char * map_copy = try_malloc(map_size + 1, __func__);    /* reads one */
+        memcpy(map_copy, map, map_size);              /* byte beyond map_size */
+        map_copy[map_size] = '\0';         /* if string is not \0-terminated. */
+        uint16_t y;
+        char string[UINT8_MAX + 1 + 1];
+        for (y = 0; y < world.map.length; y++)
+        {
+            int test = snprintf(string, world.map.length + 1, "%s",
+                                map_copy + (y * world.map.length));
+            exit_trouble(test < 0, __func__, "snprintf()");
+            write_key_space(file, command);
+            write_value(file, y);
+            try_fputc(' ', file, __func__);
+            write_string(file, string);
+            try_fputc('\n', file, __func__);
+        }
+        free(map_copy);
+    }
+}
+
+
+
 static void write_thing(FILE * file, struct Thing * t)
 {
     struct Thing * o;
@@ -145,38 +175,18 @@ static void write_thing(FILE * file, struct Thing * t)
     {
         write_key_space_value(file, s[S_CMD_T_CARRIES], o->id);
     }
-    if (t->mem_map)
+    write_mem_map(file, t->mem_depth_map, s[S_CMD_T_MEMDEPTHMAP]);
+    write_mem_map(file, t->mem_map, s[S_CMD_T_MEMMAP]);
+    struct ThingInMemory * tm = t->t_mem;
+    for (; tm; tm = tm->next)
     {
-        uint32_t map_size = world.map.length * world.map.length;/* snprintf() */
-        char * mem_map_copy = try_malloc(map_size + 1, __func__);/* reads one */
-        memcpy(mem_map_copy, t->mem_map, map_size);   /* byte beyond map_size */
-        mem_map_copy[map_size] = '\0';     /* if string is not \0-terminated. */
-        uint16_t y;
-        char string[UINT8_MAX + 1 + 1];
-        for (y = 0; y < world.map.length; y++)
-        {
-
-            int test = snprintf(string, world.map.length + 1, "%s",
-                                mem_map_copy + (y * world.map.length));
-            exit_trouble(test < 0, __func__, "snprintf()");
-            write_key_space(file, s[S_CMD_T_MEMMAP]);
-            write_value(file, y);
-            try_fputc(' ', file, __func__);
-            write_string(file, string);
-            try_fputc('\n', file, __func__);
-        }
-        free(mem_map_copy);
-        struct ThingInMemory * tm = t->t_mem;
-        for (; tm; tm = tm->next)
-        {
-            write_key_space(file, s[S_CMD_T_MEMTHING]);
-            write_value(file, tm->type);
-            try_fputc(' ', file, __func__);
-            write_value(file, tm->pos.y);
-            try_fputc(' ', file, __func__);
-            write_value(file, tm->pos.x);
-            try_fputc('\n', file, __func__);
-        }
+        write_key_space(file, s[S_CMD_T_MEMTHING]);
+        write_value(file, tm->type);
+        try_fputc(' ', file, __func__);
+        write_value(file, tm->pos.y);
+        try_fputc(' ', file, __func__);
+        write_value(file, tm->pos.x);
+        try_fputc('\n', file, __func__);
     }
     try_fputc('\n', file, __func__);
 }

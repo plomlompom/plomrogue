@@ -15,8 +15,8 @@ struct Thing;
 
 
 
-/* Update "t"'s .mem_map memory with what's in its current FOV, remove from its
- * .t_mem all memorized things in FOV and add inanimate things in FOV to it.
+/* Update "t_eye"'s .mem_map memory with what's in its current FOV, and update
+ * and age the .mem_depth_map.
  */
 extern void update_map_memory(struct Thing * t_eye);
 

@@ -25,6 +25,7 @@ struct Thing
     struct yx_uint8 pos;          /* coordinate on map */
     char * fov_map;               /* thing's FOV map; 'v':visible, 'H':hidden */
     char * mem_map;               /* map knowledge of thing by FOV and memory */
+    char * mem_depth_map;         /* map of map memory up-to-dateness */
     uint8_t type;                 /* ID of appropriate thing definition */
     uint8_t lifepoints;           /* 0: thing is inanimate; >0: hitpoints */
     uint8_t command;              /* thing's current action; 0 if none */

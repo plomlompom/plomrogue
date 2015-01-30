@@ -449,11 +449,12 @@ extern uint8_t parse_god_command_1arg(char * tok0, char * tok1)
 
 extern uint8_t parse_god_command_2arg(char * tok0, char * tok1, char * tok2)
 {
-    if (!t && !strcmp(tok0, s[S_CMD_T_MEMMAP]))
+    if (!t && (   !strcmp(tok0, s[S_CMD_T_MEMMAP])
+               || !strcmp(tok0, s[S_CMD_T_MEMDEPTHMAP])))
     {
         return err_line(1, "No thing defined to manipulate yet.");
     }
-    if (!strcmp(tok0, s[S_CMD_T_MEMMAP]))
+    if (!strcmp(tok0,s[S_CMD_T_MEMMAP]) || !strcmp(tok0,s[S_CMD_T_MEMDEPTHMAP]))
     {
         uint8_t y = atoi(tok1);
         if (parsetest_int(tok1, '8') || y >= world.map.length)
@@ -464,11 +465,22 @@ extern uint8_t parse_god_command_2arg(char * tok0, char * tok1, char * tok2)
         {
             return err_line(1, "Map line length is unequal map width.");
         }
-        if (!t->mem_map)
+        if (!strcmp(tok0,s[S_CMD_T_MEMMAP]))
         {
-            init_empty_map(&(t->mem_map));
+            if (!t->mem_map)
+            {
+                init_empty_map(&(t->mem_map));
+            }
+            memcpy(t->mem_map + y * world.map.length, tok2, world.map.length);
         }
-        memcpy(t->mem_map + y * world.map.length, tok2, world.map.length);
+        else
+        {
+            if (!t->mem_depth_map)
+            {
+                init_empty_map(&(t->mem_depth_map));
+            }
+            memcpy(t->mem_depth_map+y*world.map.length, tok2, world.map.length);
+        }
     }
     else
     {
