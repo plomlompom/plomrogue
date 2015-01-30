@@ -11,9 +11,13 @@ BOTH SERVER/CLIENT:
 
 - do something about common crashes caused by server/client miscommunication
 
+- think about refactoring occurrences of "free(...); ... = NULL;"
+
 SERVER:
 
 - grow amount of possible things from UINT8_MAX to UINT16_MAX
+
+- refactor occurrences of "if(...) { init_empty_map(...); }"
 
 CLIENT:
 
