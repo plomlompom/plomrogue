@@ -205,11 +205,12 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
 static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter)
 {
     char dir_to_nearest_target = 0;
-    uint8_t run_i = 9 /* maximum mem depth age below never-explored */ + 1;
     uint8_t mem_depth_char = ' ';
-    while (run_i && ('s' == filter || seeing_thing(t_eye, filter)))
+    uint8_t run_i = 's' == filter ? 9 /* max explored mem depth age */ + 1 : 1;
+    while (    run_i && !dir_to_nearest_target
+           && ('s' == filter || seeing_thing(t_eye, filter)))
     {
-        run_i = 's' != filter ? 0 : run_i - 1;
+        run_i--;
         uint32_t map_size = world.map.length * world.map.length;
         uint16_t * score_map = try_malloc(map_size * sizeof(uint16_t),__func__);
         init_score_map('s' == filter ? mem_depth_char : filter,
@@ -235,7 +236,6 @@ static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter)
         {
             t_eye->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
             t_eye->arg = dir_to_nearest_target;
-            run_i = 0;
         }
     }
     return dir_to_nearest_target;
