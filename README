@@ -12,9 +12,10 @@ to gain hitpoints (if allowed to lie on the ground for a while it may even
 multiply ...). Note that different kinds of movements/actions take different
 numbers of turns to finish.
 
-Enemies' AI is very dumb so far: Each turn, they try to move towards their
-shortest-path-wise nearest enemy (any animate being of a different species)
-visible to them. If they see no enemy, they search for and consume "magic meat".
+Enemies' AI is very dumb so far: Each turn, they look out for actors of
+different species to flee from (if their type starts out with more hitpoints
+than they have) or (if the opposite is the case) move towards for purposes of
+attack. If they see no enemy, they search for and consume "magic meat".
 
 Every move of yours re-writes a file "savefile" that describes the new state of
 dthe world, if more than 15 seconds have passed since its last writing. Once you
