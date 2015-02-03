@@ -11,22 +11,26 @@
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "hardcoded_strings.h" /* s */
 #include "thing_actions.h" /* get_thing_action_id_by_name() */
-#include "things.h" /* Thing, ThingType, ThingInMemory */
+#include "things.h" /* Thing, ThingType, ThingInMemory, get_thing_type() */
 #include "world.h" /* world */
-
-
 
 #define N_DIRS 6
 
 
 
+/* Return "score_map"["pos"] unless "check_inhabitant" and cell is inhabited. */
+static uint16_t set_neighbor_val(uint16_t * score_map, uint8_t check_inhabitant,
+                                 uint16_t kill_score, uint16_t pos);
+
 /* Write into "neighbors" scores of the N_DIRS immediate neighbors of the
  * "score_map" cell at "pos_i" (array index), as found in the directions
- * north-east, east, south-east etc. (clockwise order). Use "max_score" for
- * illegal neighborhoods (i.e. if direction would lead beyond the map's border).
+ * north-east, east, south-east etc. (clockwise order). Use "kill_score" for
+ * illegal neighborhoods (i.e. if direction would lead beyond the map's border,
+ * or, if "check_inhabitants" is non-zero, into animate-inhabited cell).
  */
 static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
-                                uint16_t max_score, uint16_t * neighbors);
+                                uint16_t kill_score, uint16_t * neighbors,
+                                uint8_t check_inhabitants);
 
 /* Iterate over scored cells in "score_map" of world.map's geometry. Compare
  * each cell's score against the score of its immediate neighbors in N_DIRS
@@ -38,15 +42,35 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
  */
 static void dijkstra_map(uint16_t * score_map, uint16_t max_score);
 
+/* Helpers to init_score_map(), realizing individual filters. */
+static uint8_t score_map_filter_attack(uint8_t filter, uint16_t * score_map,
+                                       struct Thing * t_eye);
+static uint8_t score_map_filter_flee(uint8_t filter, uint16_t * score_map,
+                                     struct Thing * t_eye);
+static uint8_t score_map_filter_consume(uint8_t filter, uint16_t * score_map,
+                                        struct Thing * t_eye);
+static uint8_t score_map_filter_search(uint8_t filter, uint16_t * score_map,
+                                       struct Thing * t_eye);
+
 /* get_dir_to_nearest_target() helper: Prepare "score_map" for dijkstra_map(). */
 static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
                            struct Thing * t_eye);
 
+/* Helper to get_dir_to_nearest_target(). */
+static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
+                                   uint16_t * score_map);
+
 /* Set (if possible) as "t_eye"'s command a move to the path to the path-wise
  * nearest target that is not "t_eye" and fits criteria set by "filter". On
  * success, return !0, else 0. Values for "filter":
- * "e": thing in FOV is animate, but not of "t_eye"'s thing type; build path as
- *      avoiding things of "t_eye"'s type
+ * "a": thing in FOV is animate, but of a type that is not "t_eye"'s, and
+ *      starts out weaker than it is; build path as avoiding things of "t_eye"'s
+ *      type
+ * "f": neighbor cell (not inhabited by any animate thing) further away from
+ *      animate thing not further than x steps away and in FOV and of a type
+ *      that is not "t_eye"'s, and starts out stronger or as strong as "t_eye"
+ *      is currently; or (cornered), if no such flight cell, but thing of above
+ *      criteria is in neighbor cell, that cell
  * "c": thing in memorized map is consumable
  * "s": memory map cell with greatest-reachable degree of unexploredness
  */
@@ -54,8 +78,9 @@ static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter);
 
 /* Return 1 if any thing not "t_eye" is known and fulfills some criteria defined
  * by "filter", else 0. Values for "filter":
- * "e": thing in FOV is animate, but not of "t_eye"'s thing type
- * "c": thing in memorized map is consumable
+ * "a" or "f": thing in FOV is animate, but of type that not that of "t_eye",
+ *             and starts out weaker ("a") / stronger ("f") than "t_eye" is
+ * "c"       : thing in memorized map is consumable
  */
 static uint8_t seeing_thing(struct Thing * t_eye, char filter);
 
@@ -67,12 +92,30 @@ static uint8_t standing_on_consumable(struct Thing * t_standing);
 
 
 
+static uint16_t set_neighbor_val(uint16_t * score_map, uint8_t check_inhabitant,
+                                 uint16_t kill_score, uint16_t pos)
+{
+    if (check_inhabitant)
+    {
+        struct Thing * t = world.things;
+        for (; t; t = t->next)
+        {
+            if (t->lifepoints && pos == t->pos.y * world.map.length + t->pos.x)
+            {
+                return kill_score;
+            }
+        }
+    }
+    return score_map[pos];
+}
+
+
+
 static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
-                                uint16_t max_score, uint16_t * neighbors)
+                                uint16_t kill_score, uint16_t * neighbors,
+                                uint8_t check_inhabitants)
 {
     uint32_t map_size = world.map.length * world.map.length;
-    uint8_t i_dir;
-    for (i_dir = 0; i_dir < N_DIRS; neighbors[i_dir] = max_score, i_dir++);
     uint8_t open_north     = pos_i >= world.map.length;
     uint8_t open_east      = pos_i + 1 % world.map.length;
     uint8_t open_south     = pos_i + world.map.length < map_size;
@@ -80,30 +123,24 @@ static void get_neighbor_scores(uint16_t * score_map, uint16_t pos_i,
     uint8_t is_indented    = (pos_i / world.map.length) % 2;
     uint8_t open_diag_west = is_indented || open_west;
     uint8_t open_diag_east = !is_indented || open_east;
-    if (open_north && open_diag_east)
-    {
-        neighbors[0] = score_map[pos_i - world.map.length + is_indented];
-    }
-    if (open_east)
-    {
-        neighbors[1] = score_map[pos_i + 1];
-    }
-    if (open_south && open_diag_east)
-    {
-        neighbors[2] = score_map[pos_i + world.map.length + is_indented];
-    }
-    if (open_south && open_diag_west)
-    {
-        neighbors[3] = score_map[pos_i + world.map.length - !is_indented];
-    }
-    if (open_west)
-    {
-        neighbors[4] = score_map[pos_i - 1];
-    }
-    if (open_north && open_diag_west)
-    {
-        neighbors[5] = score_map[pos_i - world.map.length - !is_indented];
-    }
+    neighbors[0] = !(open_north && open_diag_east) ? kill_score :
+                   set_neighbor_val(score_map, check_inhabitants, kill_score,
+                                    pos_i - world.map.length + is_indented);
+    neighbors[1] = !(open_east) ? kill_score :
+                   set_neighbor_val(score_map, check_inhabitants, kill_score,
+                                    pos_i + 1);
+    neighbors[2] = !(open_south && open_diag_east) ? kill_score :
+                   set_neighbor_val(score_map, check_inhabitants, kill_score,
+                                    pos_i + world.map.length + is_indented);
+    neighbors[3] = !(open_south && open_diag_west) ? kill_score :
+                   set_neighbor_val(score_map, check_inhabitants, kill_score,
+                                    pos_i + world.map.length - !is_indented);
+    neighbors[4] = !(open_west) ? kill_score :
+                   set_neighbor_val(score_map, check_inhabitants, kill_score,
+                                    pos_i - 1);
+    neighbors[5] = !(open_north && open_diag_west) ? kill_score :
+                   set_neighbor_val(score_map, check_inhabitants, kill_score,
+                                    pos_i - world.map.length - !is_indented);
 }
 
 
@@ -122,7 +159,7 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
         {
             if (score_map[pos] <= max_score)
             {
-                get_neighbor_scores(score_map, pos, max_score, neighbors);
+                get_neighbor_scores(score_map, pos, max_score, neighbors, 0);
                 min_neighbor = max_score;
                 for (i_dirs = 0; i_dirs < N_DIRS; i_dirs++)
                 {
@@ -143,6 +180,92 @@ static void dijkstra_map(uint16_t * score_map, uint16_t max_score)
 
 
 
+static uint8_t score_map_filter_attack(uint8_t filter, uint16_t * score_map,
+                                       struct Thing * t_eye)
+{
+    if ('a' != filter)
+    {
+        return 0;
+    }
+    struct Thing * t = world.things;
+    for (; t; t = t->next)
+    {
+        if (   t != t_eye && t->lifepoints && t->type != t_eye->type
+            && 'v' == t_eye->fov_map[t->pos.y*world.map.length + t->pos.x]
+            && get_thing_type(t->type)->lifepoints < t_eye->lifepoints)
+        {
+            score_map[t->pos.y * world.map.length + t->pos.x] = 0;
+        }
+        else if (t->type == t_eye->type)
+        {
+            score_map[t->pos.y * world.map.length + t->pos.x] = UINT16_MAX;
+        }
+    }
+    return 1;
+}
+
+
+
+static uint8_t score_map_filter_flee(uint8_t filter, uint16_t * score_map,
+                                     struct Thing * t_eye)
+{
+    if ('f' != filter)
+    {
+        return 0;
+    }
+    struct Thing * t = world.things;
+    for (; t; t = t->next)
+    {
+        if (   t->lifepoints && t->type != t_eye->type
+            && 'v' == t_eye->fov_map[t->pos.y*world.map.length + t->pos.x]
+            && get_thing_type(t->type)->lifepoints >= t_eye->lifepoints)
+        {
+            score_map[t->pos.y * world.map.length + t->pos.x] = 0;
+        }
+    }
+    return 1;
+}
+
+
+
+static uint8_t score_map_filter_consume(uint8_t filter, uint16_t * score_map,
+                                        struct Thing * t_eye)
+{
+    if ('c' != filter)
+    {
+        return 0;
+    }
+    struct ThingInMemory * tm = t_eye->t_mem;
+    for (; tm; tm = tm->next)
+    {
+        if (   ' ' != t_eye->mem_map[tm->pos.y * world.map.length + tm->pos.x]
+            && get_thing_type(tm->type)->consumable)
+        {
+            score_map[tm->pos.y * world.map.length + tm->pos.x] = 0;
+        }
+    }
+    return 1;
+}
+
+
+
+static uint8_t score_map_filter_search(uint8_t filter, uint16_t * score_map,
+                                       struct Thing * t_eye)
+{
+    if (!(('0' < filter && '9' >= filter) || ' ' == filter))
+    {
+        return 0;
+    }
+    uint32_t i;
+    for (i = 0; i < (uint32_t) (world.map.length * world.map.length); i++)
+    {
+        score_map[i] = filter == t_eye->mem_depth_map[i] ? 0 : score_map[i];
+    }
+    return 1;
+}
+
+
+
 static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
                            struct Thing * t_eye)
 {
@@ -155,49 +278,55 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
             score_map[i] = UINT16_MAX-1;
         }
     }
-    if      ('e' == filter)
+    if (   score_map_filter_attack(filter, score_map, t_eye)
+        || score_map_filter_flee(filter, score_map, t_eye)
+        || score_map_filter_consume(filter, score_map, t_eye)
+        || score_map_filter_search(filter, score_map, t_eye))
     {
-        struct Thing * t = world.things;
-        for (; t; t = t->next)
+    }
+}
+
+
+static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
+                                   uint16_t * score_map)
+{
+    char dir_to_nearest_target = 0;
+    uint16_t pos_i = (t_eye->pos.y * world.map.length) + t_eye->pos.x;
+    char * dirs = "edcxsw";   /* get_neighbor_scores()'s clockwise dir order. */
+    uint16_t neighbors[N_DIRS];
+    get_neighbor_scores(score_map, pos_i, UINT16_MAX, neighbors, 'f'==filter);
+    uint16_t minmax_neighbor = 'f' == filter ? 0 : UINT16_MAX-1;
+    uint8_t i;
+    for (i = 0; i < N_DIRS; i++)
+    {
+        if (   (   'f' == filter && score_map[pos_i] < neighbors[i]
+                && minmax_neighbor < neighbors[i] && UINT16_MAX != neighbors[i])
+            || ('f' != filter && minmax_neighbor > neighbors[i]))
         {
-            if (   t==t_eye || !t->lifepoints
-                || 'H' == t_eye->fov_map[t->pos.y*world.map.length + t->pos.x])
-            {
-                continue;
-            }
-            else if (t->lifepoints && t->type == t_eye->type)
-            {
-                score_map[t->pos.y * world.map.length + t->pos.x] = UINT16_MAX;
-                continue;
-            }
-            score_map[t->pos.y * world.map.length + t->pos.x] = 0;
+            minmax_neighbor = neighbors[i];
+            dir_to_nearest_target = dirs[i];
         }
     }
-    else if ('c' == filter)
+    if ('f' == filter)
     {
-        struct ThingInMemory * tm = t_eye->t_mem;
-        for (; tm; tm = tm->next)
+        if (!dir_to_nearest_target && 1 == score_map[pos_i])
         {
-            if (' ' == t_eye->mem_map[tm->pos.y * world.map.length + tm->pos.x])
+            get_neighbor_scores(score_map, pos_i, UINT16_MAX, neighbors, 0);
+            for (i = 0; i < N_DIRS; i++)
             {
-                continue;
+                if (!neighbors[i])
+                {
+                    dir_to_nearest_target = dirs[i];
+                    break;
+                }
             }
-            struct ThingType * tt = get_thing_type(tm->type);
-            if (!tt->consumable)
-            {
-                continue;
-            }
-            score_map[tm->pos.y * world.map.length + tm->pos.x] = 0;
+        }
+        else if (dir_to_nearest_target && minmax_neighbor > 3)
+        {
+            dir_to_nearest_target = 0;
         }
     }
-    else if (('0' < filter && '9' >= filter) || ' ' == filter)
-    {
-        uint32_t i;
-        for (i = 0; i < (uint32_t) (world.map.length * world.map.length); i++)
-        {
-            score_map[i] = filter == t_eye->mem_depth_map[i] ? 0 : score_map[i];
-        }
-    }
+    return dir_to_nearest_target;
 }
 
 
@@ -217,21 +346,8 @@ static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter)
                        score_map, map_size, t_eye);
         mem_depth_char = ' ' == mem_depth_char ? '9' : mem_depth_char - 1;
         dijkstra_map(score_map, UINT16_MAX-1);
-        uint16_t neighbors[N_DIRS];
-        uint16_t pos_i = (t_eye->pos.y * world.map.length) + t_eye->pos.x;
-        get_neighbor_scores(score_map, pos_i, UINT16_MAX-1, neighbors);
+        dir_to_nearest_target = get_dir_from_neighbors(filter,t_eye,score_map);
         free(score_map);
-        uint16_t min_neighbor = UINT16_MAX-1;
-        char * dirs = "edcxsw";/* get_neighbor_scores()'s clockwise dir order.*/
-        uint8_t i;
-        for (i = 0; i < N_DIRS; i++)
-        {
-            if (min_neighbor > neighbors[i])
-            {
-                min_neighbor = neighbors[i];
-                dir_to_nearest_target = dirs[i];
-            }
-        }
         if (dir_to_nearest_target)
         {
             t_eye->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
@@ -245,15 +361,17 @@ static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter)
 
 static uint8_t seeing_thing(struct Thing * t_eye, char filter)
 {
-    if (t_eye->fov_map && 'e' == filter)
+    if (t_eye->fov_map && ('a' == filter || 'f' == filter))
     {
         struct Thing * t = world.things;
         for (; t; t = t->next)
         {
-            if (   t != t_eye
+            if (   t != t_eye && t->lifepoints && t->type != t_eye->type
                 && 'v' == t_eye->fov_map[t->pos.y*world.map.length + t->pos.x])
             {
-                if (t->lifepoints && t->type != t_eye->type)
+                struct ThingType * tt = get_thing_type(t->type);
+                if (   ('f' == filter && tt->lifepoints >= t_eye->lifepoints)
+                    || ('a' == filter && tt->lifepoints <  t_eye->lifepoints))
                 {
                     return 1;
                 }
@@ -265,13 +383,10 @@ static uint8_t seeing_thing(struct Thing * t_eye, char filter)
         struct ThingInMemory * tm = t_eye->t_mem;
         for (; tm; tm = tm->next)
         {
-            if (' ' != t_eye->mem_map[tm->pos.y * world.map.length + tm->pos.x])
+            if (     ' ' != t_eye->mem_map[tm->pos.y*world.map.length+tm->pos.x]
+                && get_thing_type(tm->type)->consumable)
             {
-                struct ThingType * tt = get_thing_type(tm->type);
-                if (tt->consumable)
-                {
-                    return 1;
-                }
+                return 1;
             }
         }
     }
@@ -306,13 +421,10 @@ static uint8_t standing_on_consumable(struct Thing * t_standing)
     for (; t; t = t->next)
     {
         if (   t != t_standing
-            && t->pos.y == t_standing->pos.y && t->pos.x == t_standing->pos.x)
+            && t->pos.y == t_standing->pos.y && t->pos.x == t_standing->pos.x
+            && get_thing_type(t->type)->consumable)
         {
-            struct ThingType * tt = get_thing_type(t->type);
-            if (tt->consumable)
-            {
-                return 1;
-            }
+            return 1;
         }
     }
     return 0;
@@ -323,7 +435,7 @@ static uint8_t standing_on_consumable(struct Thing * t_standing)
 extern void ai(struct Thing * t)
 {
     t->command = get_thing_action_id_by_name(s[S_CMD_WAIT]);
-    if (!get_dir_to_nearest_target(t, 'e'))
+    if (!get_dir_to_nearest_target(t, 'f'))
     {
         int16_t sel = get_inventory_slot_to_consume(t);
         if (-1 != sel)
@@ -335,7 +447,8 @@ extern void ai(struct Thing * t)
         {
             t->command = get_thing_action_id_by_name(s[S_CMD_PICKUP]);
         }
-        else if (!get_dir_to_nearest_target(t, 'c'))
+        else if (   !get_dir_to_nearest_target(t, 'c')
+                 && !get_dir_to_nearest_target(t, 'a'))
         {
             get_dir_to_nearest_target(t, 's');
         }
