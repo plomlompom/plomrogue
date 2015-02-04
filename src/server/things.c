@@ -309,7 +309,7 @@ extern void try_thing_proliferation(struct Thing * t)
         {
             struct yx_uint8 candidates[6];
             uint8_t n_candidates = 0;
-            char dirs[7] = "dxswed";
+            char dirs[7] = "cxswed";
             struct yx_uint8 test = t->pos;
             uint8_t i;
             for (i = 0; i < strlen(dirs); i++)
