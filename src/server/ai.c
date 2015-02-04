@@ -10,6 +10,7 @@
 #include <stdlib.h> /* free() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "hardcoded_strings.h" /* s */
+#include "rrand.h" /* rrand() */
 #include "thing_actions.h" /* get_thing_action_id_by_name() */
 #include "things.h" /* Thing, ThingType, ThingInMemory, get_thing_type() */
 #include "world.h" /* world */
@@ -55,6 +56,9 @@ static uint8_t score_map_filter_search(uint8_t filter, uint16_t * score_map,
 /* get_dir_to_nearest_target() helper: Prepare "score_map" for dijkstra_map(). */
 static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
                            struct Thing * t_eye);
+
+/* From "targets" select random "cmp" match as directory by order in "dirs". */
+static char rand_target_dir(char * dirs, uint16_t cmp, uint16_t * targets);
 
 /* Helper to get_dir_to_nearest_target(). */
 static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
@@ -287,6 +291,24 @@ static void init_score_map(char filter, uint16_t * score_map, uint32_t map_size,
 }
 
 
+static char rand_target_dir(char * dirs, uint16_t cmp, uint16_t * targets)
+{
+    char candidates[N_DIRS];
+    uint8_t n_candidates = 0;
+    uint8_t i;
+    for (i = 0; i < N_DIRS; i++)
+    {
+        if (cmp == targets[i])
+        {
+            candidates[n_candidates] = dirs[i];
+            n_candidates++;
+        }
+    }
+    return n_candidates ? candidates[rrand() % n_candidates] : 0;
+}
+
+
+
 static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
                                    uint16_t * score_map)
 {
@@ -295,7 +317,8 @@ static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
     char * dirs = "edcxsw";   /* get_neighbor_scores()'s clockwise dir order. */
     uint16_t neighbors[N_DIRS];
     get_neighbor_scores(score_map, pos_i, UINT16_MAX, neighbors, 'f'==filter);
-    uint16_t minmax_neighbor = 'f' == filter ? 0 : UINT16_MAX-1;
+    uint16_t minmax_start = 'f' == filter ? 0 : UINT16_MAX-1;
+    uint16_t minmax_neighbor = minmax_start;
     uint8_t i;
     for (i = 0; i < N_DIRS; i++)
     {
@@ -304,22 +327,17 @@ static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
             || ('f' != filter && minmax_neighbor > neighbors[i]))
         {
             minmax_neighbor = neighbors[i];
-            dir_to_nearest_target = dirs[i];
         }
+    }
+    if (minmax_neighbor != minmax_start)
+    {
+        dir_to_nearest_target = rand_target_dir(dirs,minmax_neighbor,neighbors);
     }
     if ('f' == filter)
     {
         if (!dir_to_nearest_target && 1 == score_map[pos_i])
         {
-            get_neighbor_scores(score_map, pos_i, UINT16_MAX, neighbors, 0);
-            for (i = 0; i < N_DIRS; i++)
-            {
-                if (!neighbors[i])
-                {
-                    dir_to_nearest_target = dirs[i];
-                    break;
-                }
-            }
+            dir_to_nearest_target = rand_target_dir(dirs, 0, neighbors);
         }
         else if (dir_to_nearest_target && minmax_neighbor > 3)
         {
