@@ -222,7 +222,8 @@ static uint8_t parse_command_meta(char * tok0)
             }
             send_to_outfile("THINGS_HERE START\n", 1);
             struct Thing * player = get_player();
-            if ('v' == player->fov_map[atoi(tok1)*world.map.length+atoi(tok2)])
+            if (player->fov_map &&
+                'v' == player->fov_map[atoi(tok1)*world.map.length+atoi(tok2)])
             {
                 struct Thing * t;
                 for (t = world.things; t; t = t->next)
