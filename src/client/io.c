@@ -204,6 +204,7 @@ static uint8_t read_worldstate()
 static void test_and_poll_server()
 {
     static time_t last_server_answer_time = 0;
+    static time_t last_pong_time = 0;
     static uint8_t ping_sent = 0;
     if (read_file_into_queue(world.file_server_out, &world.queue))
     {
@@ -220,9 +221,10 @@ static void test_and_poll_server()
     {
         send("PING");
         ping_sent = 1;
+        last_pong_time = now;
         return;
     }
-    exit_err(last_server_answer_time < now - 6, "Server not answering.");
+    exit_err(ping_sent && last_pong_time < now - 5, "Server not answering.");
 }
 
 
