@@ -100,7 +100,11 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
         || parse_val(tok0,tok1,s[S_CMD_TT_STARTN],'8',(char *) &tt->start_n)
         || parse_val(tok0,tok1,s[S_CMD_TT_SYMB],'c',(char *) &tt->char_on_map)
         || parse_val(tok0,tok1,s[S_CMD_TT_PROL],'8',(char *) &tt->proliferate)
-        || parse_val(tok0,tok1,s[S_CMD_TT_NAME],'s',(char *) &tt->name));
+        || parse_val(tok0,tok1,s[S_CMD_TT_STOMACH], 'u', (char *) &tt->stomach)
+        || parse_val(tok0,tok1,s[S_CMD_TT_NAME],'s',(char *) &tt->name))
+    {
+        ;
+    }
     else if (parse_val(tok0, tok1, s[S_CMD_TT_CORPS],'8',(char *)&id))
     {
         if (!get_thing_type(id))
@@ -292,7 +296,8 @@ static uint8_t parse_thing_manipulation_1arg(char * tok0, char * tok1)
         (   !strcmp(tok0, s[S_CMD_T_PROGRESS]) || !strcmp(tok0, s[S_CMD_T_TYPE])
          || !strcmp(tok0, s[S_CMD_T_CARRIES]) || !strcmp(tok0, s[S_CMD_T_POSY])
          || !strcmp(tok0, s[S_CMD_T_POSY]) || !strcmp(tok0, s[S_CMD_T_ARGUMENT])
-         || !strcmp(tok0, s[S_CMD_T_HP]) || !strcmp(tok0, s[S_CMD_T_COMMAND])))
+         || !strcmp(tok0, s[S_CMD_T_HP]) || !strcmp(tok0, s[S_CMD_T_COMMAND])
+         || !strcmp(tok0, s[S_CMD_T_SATIATION])))
     {
         return err_line(1, "No thing defined to manipulate yet.");
     }
@@ -302,6 +307,7 @@ static uint8_t parse_thing_manipulation_1arg(char * tok0, char * tok1)
         || parse_val(tok0,tok1, s[S_CMD_T_ARGUMENT], '8', (char *)&t->arg)
         || parse_val(tok0,tok1, s[S_CMD_T_PROGRESS], '8', (char *)&t->progress)
         || parse_val(tok0,tok1, s[S_CMD_T_HP], '8', (char *) &t->lifepoints)
+        || parse_val(tok0,tok1, s[S_CMD_T_SATIATION], 'i',(char *)&t->satiation)
         || parse_position(tok0, tok1, t)
         || parse_carry(tok0, tok1, t));
     else if (parse_val(tok0, tok1, s[S_CMD_T_ID], 'i', (char *) &id))

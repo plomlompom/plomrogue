@@ -49,8 +49,7 @@ static void read_map_cells(FILE * file, char ** map);
 /* Return value seen by atoi() in next line of "file" when passed to try_fgets()
  * with the given arguments.
  */
-static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
-                                     FILE * file);
+static int32_t read_value_from_line(char* read_buf,int32_t linemax,FILE* file);
 
 /* If the server's worldstate file has changed since the last read_worldstate(),
  * return a pointer to its file descriptor; else, return NULL.
@@ -142,8 +141,7 @@ static void read_map_cells(FILE * file, char ** map)
 
 
 
-static uint16_t read_value_from_line(char * read_buf, uint32_t linemax,
-                                     FILE * file)
+static int32_t read_value_from_line(char * read_buf,int32_t linemax,FILE * file)
 {
     try_fgets(read_buf, linemax + 1, file, __func__);
     return atoi(read_buf);
@@ -186,12 +184,15 @@ static uint8_t read_worldstate()
     }
     uint32_t linemax = textfile_width(file);
     char * read_buf = try_malloc(linemax + 1, __func__);
-    world.turn = read_value_from_line(read_buf, linemax, file);
-    world.player_lifepoints = read_value_from_line(read_buf, linemax, file);
+    world.turn = (uint16_t) read_value_from_line(read_buf, linemax, file);
+    world.player_lifepoints = (uint16_t) read_value_from_line(read_buf, linemax,
+                                                              file);
+    world.player_satiation = (int16_t) read_value_from_line(read_buf, linemax,
+                                                            file);
     read_inventory(read_buf, linemax, file);
-    world.player_pos.y = read_value_from_line(read_buf, linemax, file);
-    world.player_pos.x = read_value_from_line(read_buf, linemax, file);
-    world.map.length = read_value_from_line(read_buf, linemax, file);
+    world.player_pos.y = (uint8_t) read_value_from_line(read_buf,linemax,file);
+    world.player_pos.x = (uint8_t) read_value_from_line(read_buf,linemax,file);
+    world.map.length = (uint16_t) read_value_from_line(read_buf, linemax, file);
     read_map_cells(file, &world.map.cells);
     read_map_cells(file, &world.mem_map);
     free(read_buf);

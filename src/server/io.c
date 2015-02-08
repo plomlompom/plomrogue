@@ -10,7 +10,7 @@
 #include <errno.h> /* global errno */
 #include <limits.h> /* PIPE_BUF */
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t, UINT8_MAX */
+#include <stdint.h> /* uint8_t, uint16_t, uint32_t, int32_t, UINT8_MAX */
 #include <stdio.h> /* defines FILE, sprintf(), fprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen(), snprintf(), memcpy(), strchr() */
@@ -35,9 +35,10 @@
 
 /* Helpers to write lines of god commands to recreate thing "t". */
 static void write_key_space(FILE * file, char * key);
-static void write_value(FILE * file, uint32_t value);
+static void write_uvalue(FILE * file, uint32_t value);
 static void write_string(FILE * file, char * string);
-static void write_key_space_value(FILE * file, char * key, uint32_t value);
+static void write_key_space_uvalue(FILE * file, char * key, uint32_t value);
+static void write_key_space_svalue(FILE * file, char * key, int32_t value);
 static void write_key_space_string(FILE * file, char * key, char * string);
 
 /* Write to "file" game-map-sized "map" in "command"-prefixed numbered lines. */
@@ -57,7 +58,7 @@ static void try_growing_queue();
 static void update_worldstate_file();
 
 /* Write "value" to new \n-delimited line of "file". */
-static void write_value_as_line(uint32_t value, FILE * file);
+static void write_value_as_line(int32_t value, FILE * file);
 
 /* Write to "file" player's inventory, one item name per line. End in "%\n". */
 static void write_inventory(struct Thing * player, FILE * file);
@@ -85,7 +86,7 @@ static void write_key_space(FILE * file, char * key)
 
 
 
-static void write_value(FILE * file, uint32_t value)
+static void write_uvalue(FILE * file, uint32_t value)
 {
     char * line = try_malloc(11, __func__);
     exit_trouble(-1 == sprintf(line, "%u", value), __func__, s[S_FCN_SPRINTF]);
@@ -111,10 +112,22 @@ static void write_string(FILE * file, char * string)
 
 
 
-static void write_key_space_value(FILE * file, char * key, uint32_t value)
+static void write_key_space_uvalue(FILE * file, char * key, uint32_t value)
 {
     write_key_space(file, key);
-    write_value(file, value);
+    write_uvalue(file, value);
+    try_fputc('\n', file, __func__);
+}
+
+
+
+static void write_key_space_svalue(FILE * file, char * key, int32_t value)
+{
+    write_key_space(file, key);
+    char * line = try_malloc(11, __func__);
+    exit_trouble(-1 == sprintf(line, "%d", value), __func__, s[S_FCN_SPRINTF]);
+    try_fwrite(line, strlen(line), 1, file, __func__);
+    free(line);
     try_fputc('\n', file, __func__);
 }
 
@@ -145,7 +158,7 @@ static void write_mem_map(FILE * file, char * map, char * command)
                                 map_copy + (y * world.map.length));
             exit_trouble(test < 0, __func__, "snprintf()");
             write_key_space(file, command);
-            write_value(file, y);
+            write_uvalue(file, y);
             try_fputc(' ', file, __func__);
             write_string(file, string);
             try_fputc('\n', file, __func__);
@@ -163,17 +176,18 @@ static void write_thing(FILE * file, struct Thing * t)
     {
         write_thing(file, o);
     }
-    write_key_space_value(file, s[S_CMD_T_ID], t->id);
-    write_key_space_value(file, s[S_CMD_T_TYPE], t->type);
-    write_key_space_value(file, s[S_CMD_T_POSY], t->pos.y);
-    write_key_space_value(file, s[S_CMD_T_POSX], t->pos.x);
-    write_key_space_value(file, s[S_CMD_T_COMMAND], t->command);
-    write_key_space_value(file, s[S_CMD_T_ARGUMENT], t->arg);
-    write_key_space_value(file, s[S_CMD_T_PROGRESS], t->progress);
-    write_key_space_value(file, s[S_CMD_T_HP], t->lifepoints);
+    write_key_space_uvalue(file, s[S_CMD_T_ID], t->id);
+    write_key_space_uvalue(file, s[S_CMD_T_TYPE], t->type);
+    write_key_space_uvalue(file, s[S_CMD_T_POSY], t->pos.y);
+    write_key_space_uvalue(file, s[S_CMD_T_POSX], t->pos.x);
+    write_key_space_uvalue(file, s[S_CMD_T_COMMAND], t->command);
+    write_key_space_uvalue(file, s[S_CMD_T_ARGUMENT], t->arg);
+    write_key_space_uvalue(file, s[S_CMD_T_PROGRESS], t->progress);
+    write_key_space_uvalue(file, s[S_CMD_T_HP], t->lifepoints);
+    write_key_space_svalue(file, s[S_CMD_T_SATIATION], t->satiation);
     for (o = t->owns; o; o = o->next)
     {
-        write_key_space_value(file, s[S_CMD_T_CARRIES], o->id);
+        write_key_space_uvalue(file, s[S_CMD_T_CARRIES], o->id);
     }
     write_mem_map(file, t->mem_depth_map, s[S_CMD_T_MEMDEPTHMAP]);
     write_mem_map(file, t->mem_map, s[S_CMD_T_MEMMAP]);
@@ -181,11 +195,11 @@ static void write_thing(FILE * file, struct Thing * t)
     for (; tm; tm = tm->next)
     {
         write_key_space(file, s[S_CMD_T_MEMTHING]);
-        write_value(file, tm->type);
+        write_uvalue(file, tm->type);
         try_fputc(' ', file, __func__);
-        write_value(file, tm->pos.y);
+        write_uvalue(file, tm->pos.y);
         try_fputc(' ', file, __func__);
-        write_value(file, tm->pos.x);
+        write_uvalue(file, tm->pos.x);
         try_fputc('\n', file, __func__);
     }
     try_fputc('\n', file, __func__);
@@ -223,6 +237,7 @@ static void update_worldstate_file()
     struct Thing * player = get_player();
     write_value_as_line(world.turn, file);
     write_value_as_line(player->lifepoints, file);
+    write_value_as_line(player->satiation, file);
     write_inventory(player, file);
     write_value_as_line(player->pos.y, file);
     write_value_as_line(player->pos.x, file);
@@ -237,9 +252,9 @@ static void update_worldstate_file()
 
 
 
-static void write_value_as_line(uint32_t value, FILE * file)
+static void write_value_as_line(int32_t value, FILE * file)
 {
-    char write_buf[12];     /* Holds 10 digits of uint32_t maximum + \n + \0. */
+    char write_buf[13]; /* Hold "+"/"-" + 10 digits of int32_t max + \n + \0. */
     exit_trouble(sprintf(write_buf,"%u\n",value) < 0,__func__,s[S_FCN_SPRINTF]);
     try_fwrite(write_buf, strlen(write_buf), 1, file, __func__);
 }
@@ -380,45 +395,46 @@ extern void save_world()
 {
     char * path_tmp;
     FILE * file = atomic_write_start(s[S_PATH_SAVE], &path_tmp);
-    write_key_space_value(file, s[S_CMD_MAPLENGTH], world.map.length);
-    write_key_space_value(file, s[S_CMD_PLAYTYPE], world.player_type);
+    write_key_space_uvalue(file, s[S_CMD_MAPLENGTH], world.map.length);
+    write_key_space_uvalue(file, s[S_CMD_PLAYTYPE], world.player_type);
     try_fputc('\n', file, __func__);
     struct ThingAction * ta;
     for (ta = world.thing_actions; ta; ta = ta->next)
     {
-        write_key_space_value(file, s[S_CMD_TA_ID], ta->id);
-        write_key_space_value(file, s[S_CMD_TA_EFFORT], ta->effort);
+        write_key_space_uvalue(file, s[S_CMD_TA_ID], ta->id);
+        write_key_space_uvalue(file, s[S_CMD_TA_EFFORT], ta->effort);
         write_key_space_string(file, s[S_CMD_TA_NAME], ta->name);
         try_fputc('\n', file, __func__);
     }
     struct ThingType * tt;
     for (tt = world.thing_types; tt; tt = tt->next)
     {
-        write_key_space_value(file, s[S_CMD_TT_ID], tt->id);
-        write_key_space_value(file, s[S_CMD_TT_STARTN], tt->start_n);
-        write_key_space_value(file, s[S_CMD_TT_HP], tt->lifepoints);
+        write_key_space_uvalue(file, s[S_CMD_TT_ID], tt->id);
+        write_key_space_uvalue(file, s[S_CMD_TT_STARTN], tt->start_n);
+        write_key_space_uvalue(file, s[S_CMD_TT_HP], tt->lifepoints);
         int test = fprintf(file, "%s %c\n", s[S_CMD_TT_SYMB], tt->char_on_map);
         exit_trouble(test < 0, __func__, "fprintf");
         write_key_space_string(file, s[S_CMD_TT_NAME], tt->name);
-        write_key_space_value(file, s[S_CMD_TT_CONSUM], tt->consumable);
-        write_key_space_value(file, s[S_CMD_TT_PROL], tt->proliferate);
+        write_key_space_uvalue(file, s[S_CMD_TT_CONSUM], tt->consumable);
+        write_key_space_uvalue(file, s[S_CMD_TT_PROL], tt->proliferate);
+        write_key_space_uvalue(file, s[S_CMD_TT_STOMACH], tt->stomach);
         try_fputc('\n', file, __func__);
     }
     for (tt = world.thing_types; tt; tt = tt->next)
     {
-        write_key_space_value(file, s[S_CMD_TT_ID], tt->id);
-        write_key_space_value(file, s[S_CMD_TT_CORPS], tt->corpse_id);
+        write_key_space_uvalue(file, s[S_CMD_TT_ID], tt->id);
+        write_key_space_uvalue(file, s[S_CMD_TT_CORPS], tt->corpse_id);
     }
     try_fputc('\n', file, __func__);
-    write_key_space_value(file, s[S_CMD_SEED_MAP], world.seed_map);
-    write_key_space_value(file, s[S_CMD_SEED_RAND], world.seed);
-    write_key_space_value(file, s[S_CMD_TURN], world.turn);
+    write_key_space_uvalue(file, s[S_CMD_SEED_MAP], world.seed_map);
+    write_key_space_uvalue(file, s[S_CMD_SEED_RAND], world.seed);
+    write_key_space_uvalue(file, s[S_CMD_TURN], world.turn);
     try_fputc('\n', file, __func__);
     struct Thing * t;
     for (t = world.things; t; t = t->next)
     {
         write_thing(file, t);
     }
-    write_key_space_value(file, s[S_CMD_WORLD_ACTIVE], 1);
+    write_key_space_uvalue(file, s[S_CMD_WORLD_ACTIVE], 1);
     atomic_write_finish(file, s[S_PATH_SAVE], path_tmp);
 }

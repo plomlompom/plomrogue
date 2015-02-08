@@ -11,7 +11,7 @@
 #ifndef THINGS_H
 #define THINGS_H
 
-#include <stdint.h> /* uint8_t, int16_t */
+#include <stdint.h> /* uint8_t, int16_t, uint16_t */
 #include "../common/yx_uint8.h" /* yx_uint8 */
 
 
@@ -26,6 +26,7 @@ struct Thing
     char * fov_map;               /* thing's FOV map; 'v':visible, 'H':hidden */
     char * mem_map;               /* map knowledge of thing by FOV and memory */
     char * mem_depth_map;         /* map of map memory up-to-dateness */
+    int16_t satiation;            /* negative: hungry; positive: over-fed */
     uint8_t type;                 /* ID of appropriate thing definition */
     uint8_t lifepoints;           /* 0: thing is inanimate; >0: hitpoints */
     uint8_t command;              /* thing's current action; 0 if none */
@@ -46,6 +47,7 @@ struct ThingType
     uint8_t id;          /* thing type identifier / sets .type */
     char char_on_map;    /* thing symbol to appear on map */
     char * name;         /* string to describe thing in game log */
+    uint16_t stomach;    /* if >0, defines onset & chance of hunger suffering */
     uint8_t corpse_id;   /* type to change thing into upon destruction */
     uint8_t lifepoints;  /* default start value for thing's .lifepoints */
     uint8_t consumable;  /* can be eaten if !0, for so much hitpoint win */

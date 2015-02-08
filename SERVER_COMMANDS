@@ -165,6 +165,9 @@ performing the action) value to argument.
 T_LIFEPOINTS [0 to 255]
 Set selected thing's lifepoints to argument.
 
+T_SATIATION [-32768 to 32767]
+Set selected thing's satiation score. 
+
 T_CARRIES [0 to 255]
 Add thing of ID in argument to inventory of selected thing, if said thing is
 available for carrying and not the selected thing.
@@ -216,3 +219,11 @@ If non-zero, there is a chance of 1 divided by the given value each turn for any
 thing of the selected type to emit an offspring to a random neighbor cell if one
 is available that is passable and not inhabited by a thing of the same same type
 or, if the proliferating thing is animate, any other animate thing.
+
+TT_STOMACH [0-32767]
+Set degree to which things of the selected type suffer from hunger or
+over-satiation: If 0, not at all. Else, each turn a thing of the given type may
+suffer a lifepoint decrement to the chance of the rounded down quotient of the
+satiation score's absolute value by the given value, then again divided by the
+latter. This means that the chance is always zero when the absolute value of the
+satiation score is lower than the given value.

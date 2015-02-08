@@ -38,6 +38,11 @@ extern void actor_pick(struct Thing * t);
  */
 extern void actor_use(struct Thing * t);
 
+/* Decrement "t"'s satiation and trigger a chance (dependent on over-/under-
+ * satiation value) of lifepoint decrement, when its type's .stomach is >0.
+ */
+extern void hunger(struct Thing * t);
+
 
 
 #endif

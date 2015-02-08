@@ -426,10 +426,13 @@ extern void draw_win_info(struct Win * win)
 {
     char * dsc_turn      = "Turn: ";
     char * dsc_hitpoints = "\nHitpoints: ";
-    uint16_t maxl = strlen(dsc_turn) + 5 + strlen(dsc_hitpoints) + 3;
+    char * dsc_satiation = "\nSatiation: ";
+    uint16_t maxl =   strlen(dsc_turn) + 5 + strlen(dsc_hitpoints)
+                    + strlen(dsc_satiation) + 6 + 3;
     char * text = try_malloc(maxl + 1, __func__);
-    int test = sprintf(text, "%s%d%s%d", dsc_turn, world.turn, dsc_hitpoints,
-                                         world.player_lifepoints);
+    int test = sprintf(text, "%s%d%s%d%s%d", dsc_turn, world.turn, dsc_hitpoints,
+                       world.player_lifepoints, dsc_satiation,
+                       world.player_satiation);
     exit_trouble(test < 0, __func__, "sprintf");
     add_text_with_linebreaks(win, text);
     free(text);

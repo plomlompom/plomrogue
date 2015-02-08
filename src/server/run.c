@@ -30,6 +30,7 @@
 #include "god_commands.h" /* parse_god_command_(1|2|3)arg() */
 #include "hardcoded_strings.h" /* s */
 #include "io.h" /* io_round(), save_world() */
+#include "thing_actions.h" /* hunger() */
 #include "things.h" /* Thing, ThingType, ThingInMemory, get_player(),
                      * get_thing_action_id_by_name(), try_thing_proliferation()
                      */
@@ -342,6 +343,7 @@ static void turn_over()
                     thing->command = 0;
                     thing->progress = 0;
                 }
+                hunger(thing);
             }
             try_thing_proliferation(thing);
         }

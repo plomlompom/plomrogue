@@ -7,7 +7,7 @@
 
 #include "thing_actions.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t */
+#include <stdint.h> /* uint8_t, INT16_MIN */
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen() */
@@ -20,6 +20,7 @@
                      * own_thing(), set_thing_position(), get_thing_type(),
                      */
 #include "map.h" /* mv_yx_in_dir_legal() */
+#include "rrand.h" /* rrand() */
 #include "run.h" /* send_to_outfile() */
 #include "world.h" /* global world */
 
@@ -28,9 +29,10 @@
 /* Send "text" as log message to server out file. */
 static void update_log(char * text);
 
-/* One actor "wounds" another actor, decrementing his lifepoints and, if they
- * reach zero in the process, killing it. Generates appropriate log message.
- */
+/* Decrement "t"'s lifepoints, and if to zero, kill it with log update. */
+static void decrement_lifepoints(struct Thing * t);
+
+/* One actor "wounds" another actor, decrementing his lifepoints. */
 static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted);
 
 /* Bonus stuff to actor_*() to happen if actor==player. Mostly writing of log
@@ -51,6 +53,36 @@ static void update_log(char * text)
     send_to_outfile("LOG ", 0);
     send_to_outfile(text, 0);
     send_to_outfile("\n", 1);
+}
+
+
+
+static void decrement_lifepoints(struct Thing * t)
+{
+    struct Thing * player = get_player();
+    t->lifepoints--;
+    if (0 == t->lifepoints)
+    {
+        t->type = get_thing_type(t->type)->corpse_id;
+        if (player == t)
+        {
+            update_log("You die.");
+            memset(t->fov_map, ' ', world.map.length * world.map.length);
+            return;
+        }
+        else
+        {
+            free(t->fov_map);
+            t->fov_map = NULL;
+            free(t->mem_map);
+            t->mem_map = NULL;
+            free(t->mem_depth_map);
+            t->mem_depth_map = NULL;
+            free_things_in_memory(t->t_mem);
+            t->t_mem = NULL;
+        }
+        update_log("It dies.");
+    }
 }
 
 
@@ -78,29 +110,7 @@ static void actor_hits_actor(struct Thing * hitter, struct Thing * hitted)
     exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
     update_log(msg);
     free(msg);
-    hitted->lifepoints--;
-    if (0 == hitted->lifepoints)
-    {
-        hitted->type = tt_hitted->corpse_id;
-        if (player == hitted)
-        {
-            update_log("You die.");
-            memset(hitted->fov_map, ' ', world.map.length * world.map.length);
-            return;
-        }
-        else
-        {
-            free(hitted->fov_map);
-            hitted->fov_map = NULL;
-            free(hitted->mem_map);
-            hitted->mem_map = NULL;
-            free(hitted->mem_depth_map);
-            hitted->mem_depth_map = NULL;
-            free_things_in_memory(hitted->t_mem);
-            hitted->t_mem = NULL;
-        }
-        update_log("It dies.");
-    }
+    decrement_lifepoints(hitted);
 }
 
 
@@ -313,5 +323,40 @@ extern void actor_use(struct Thing * t)
     if (t == get_player())
     {
         playerbonus_use(no_thing, wrong_thing);
+    }
+}
+
+
+
+extern void hunger(struct Thing * t)
+{
+    struct ThingType * tt = get_thing_type(t->type);
+    if (!(tt->stomach))
+    {
+        return;
+    }
+    if (t->satiation > INT16_MIN)
+    {
+        t->satiation--;
+    }
+    uint16_t testbase = t->satiation < 0 ? -(t->satiation) : t->satiation;
+    uint16_t endurance = tt->stomach;
+    if ((testbase / endurance) / ((rrand() % endurance) + 1))
+    {
+        if (get_player() == t)
+        {
+            update_log("You suffer from hunger.");
+        }
+        else
+        {
+            char * msg_part = " suffers from hunger.";
+            uint8_t len = strlen(tt->name) + strlen(msg_part) + 1;
+            char * msg = try_malloc(len, __func__);
+            int test = sprintf(msg, "%s%s", tt->name, msg_part);
+            exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
+            update_log(msg);
+            free(msg);
+        }
+        decrement_lifepoints(t);
     }
 }

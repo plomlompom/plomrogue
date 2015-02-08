@@ -9,7 +9,7 @@
 
 
 
-char * s[43];
+char * s[45];
 
 
 
@@ -33,6 +33,7 @@ extern void init_strings()
     s[S_CMD_TT_NAME] = "TT_NAME";
     s[S_CMD_TT_CORPS] = "TT_CORPSE_ID";
     s[S_CMD_TT_PROL] = "TT_PROLIFERATE";
+    s[S_CMD_TT_STOMACH] = "TT_STOMACH";
     s[S_CMD_T_ID] = "T_ID";
     s[S_CMD_T_TYPE] = "T_TYPE";
     s[S_CMD_T_POSY] = "T_POSY";
@@ -41,6 +42,7 @@ extern void init_strings()
     s[S_CMD_T_ARGUMENT] = "T_ARGUMENT";
     s[S_CMD_T_PROGRESS] = "T_PROGRESS";
     s[S_CMD_T_HP] = "T_LIFEPOINTS";
+    s[S_CMD_T_SATIATION] = "T_SATIATION";
     s[S_CMD_T_CARRIES] = "T_CARRIES";
     s[S_CMD_T_MEMMAP] = "T_MEMMAP";
     s[S_CMD_T_MEMDEPTHMAP] = "T_MEMDEPTHMAP";
