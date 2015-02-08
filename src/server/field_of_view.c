@@ -65,6 +65,12 @@ static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
                          uint32_t middle_angle, struct shadow_angle ** shadows,
                          uint16_t pos_in_map, char * fov_map);
 
+/* To "shadows", add shadow defined by "left_angle" and "right_angle", either as
+ * new entry or as part of an existing shadow (swallowed whole or extending it).
+ */
+static void set_shadow(uint32_t left_angle, uint32_t right_angle,
+                       struct shadow_angle ** shadows);
+
 /* Free shadow angles list "angles". */
 static void free_angles(struct shadow_angle * angles);
 
@@ -195,9 +201,6 @@ static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
 
 
 
-/* To "shadows", add shadow defined by "left_angle" and "right_angle", either as
- * new entry or as part of an existing shadow (swallowed whole or extending it).
- */
 static void set_shadow(uint32_t left_angle, uint32_t right_angle,
                        struct shadow_angle ** shadows)
 {
