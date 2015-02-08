@@ -417,7 +417,6 @@ extern void save_world()
         write_key_space_string(file, s[S_CMD_TT_NAME], tt->name);
         write_key_space_uvalue(file, s[S_CMD_TT_CONSUM], tt->consumable);
         write_key_space_uvalue(file, s[S_CMD_TT_PROL], tt->proliferate);
-        write_key_space_uvalue(file, s[S_CMD_TT_STOMACH], tt->stomach);
         try_fputc('\n', file, __func__);
     }
     for (tt = world.thing_types; tt; tt = tt->next)

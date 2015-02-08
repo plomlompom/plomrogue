@@ -200,7 +200,14 @@ MAKE_WORLD command to argument.
 
 TT_LIFEPOINTS [0-255]
 Set selected thing type's initial lifepoints value to argument. Things of 0
-lifepoints are considered inanimate, otherwise animate.
+lifepoints are considered inanimate, otherwise animate. This value also sets the
+degree to which the selected type's things suffer from under- or over-satiation:
+If 0, not at all. Else, it defines a stomach size value of 32767 divided by it.
+Each turn a thing of the given tpe may then suffer a lifepoint decrement to the
+change of the rounded down quotient of its satiation score's absolute value by
+its stomach size value, then again divided by the latter. (This means that the
+change is always zero when the absolute value of the satiation score is lower
+than the stomach size value.)
 
 TT_SYMBOL [char]
 Set to argument symbol by which things of the selected type are represented on
@@ -219,11 +226,3 @@ If non-zero, there is a chance of 1 divided by the given value each turn for any
 thing of the selected type to emit an offspring to a random neighbor cell if one
 is available that is passable and not inhabited by a thing of the same same type
 or, if the proliferating thing is animate, any other animate thing.
-
-TT_STOMACH [0-32767]
-Set degree to which things of the selected type suffer from hunger or
-over-satiation: If 0, not at all. Else, each turn a thing of the given type may
-suffer a lifepoint decrement to the chance of the rounded down quotient of the
-satiation score's absolute value by the given value, then again divided by the
-latter. This means that the chance is always zero when the absolute value of the
-satiation score is lower than the given value.

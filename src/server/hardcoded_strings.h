@@ -32,7 +32,6 @@ enum string_num
     S_CMD_TT_NAME,
     S_CMD_TT_CORPS,
     S_CMD_TT_PROL,
-    S_CMD_TT_STOMACH,
     S_CMD_T_ID,
     S_CMD_T_TYPE,
     S_CMD_T_POSY,
@@ -63,7 +62,7 @@ enum string_num
 
 extern void init_strings();
 
-extern char * s[45];
+extern char * s[44];
 
 
 

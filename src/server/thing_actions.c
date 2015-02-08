@@ -7,11 +7,11 @@
 
 #include "thing_actions.h"
 #include <stddef.h> /* NULL */
-#include <stdint.h> /* uint8_t, INT16_MIN */
+#include <stdint.h> /* uint8_t, INT16_MIN, INT16_MAX */
 #include <stdio.h> /* sprintf() */
 #include <stdlib.h> /* free() */
 #include <string.h> /* strlen() */
-#include "../common/rexit.h" /* exit_trouble() */
+#include "../common/rexit.h" /* exit_err(), exit_trouble() */
 #include "../common/try_malloc.h" /* try_malloc() */
 #include "../common/yx_uint8.h" /* yx_uint8 */
 #include "field_of_view.h" /* build_fov_map() */
@@ -332,17 +332,14 @@ extern void actor_use(struct Thing * t)
 
 extern void hunger(struct Thing * t)
 {
-    struct ThingType * tt = get_thing_type(t->type);
-    if (!(tt->stomach))
-    {
-        return;
-    }
     if (t->satiation > INT16_MIN)
     {
         t->satiation--;
     }
+    struct ThingType * tt = get_thing_type(t->type);
     uint16_t testbase = t->satiation < 0 ? -(t->satiation) : t->satiation;
-    uint16_t endurance = tt->stomach;
+    exit_err(!(tt->lifepoints), "A thing that should not hunger is hungering.");
+    uint16_t endurance = INT16_MAX / tt->lifepoints;
     if ((testbase / endurance) / ((rrand() % endurance) + 1))
     {
         if (get_player() == t)

@@ -100,7 +100,6 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
         || parse_val(tok0,tok1,s[S_CMD_TT_STARTN],'8',(char *) &tt->start_n)
         || parse_val(tok0,tok1,s[S_CMD_TT_SYMB],'c',(char *) &tt->char_on_map)
         || parse_val(tok0,tok1,s[S_CMD_TT_PROL],'8',(char *) &tt->proliferate)
-        || parse_val(tok0,tok1,s[S_CMD_TT_STOMACH], 'u', (char *) &tt->stomach)
         || parse_val(tok0,tok1,s[S_CMD_TT_NAME],'s',(char *) &tt->name))
     {
         ;
