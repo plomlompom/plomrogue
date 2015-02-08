@@ -95,7 +95,7 @@ static uint8_t parse_thingtype_manipulation(char * tok0, char * tok1)
         return err_line(1, "No thing type defined to manipulate yet.");
     }
     int16_t id;
-    if (   parse_val(tok0,tok1,s[S_CMD_TT_CONSUM],'8',(char *) &tt->consumable)
+    if (   parse_val(tok0,tok1,s[S_CMD_TT_CONSUM],'u',(char *) &tt->consumable)
         || parse_val(tok0,tok1,s[S_CMD_TT_HP],'8',(char *) &tt->lifepoints)
         || parse_val(tok0,tok1,s[S_CMD_TT_STARTN],'8',(char *) &tt->start_n)
         || parse_val(tok0,tok1,s[S_CMD_TT_SYMB],'c',(char *) &tt->char_on_map)

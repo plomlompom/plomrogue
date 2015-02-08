@@ -6,11 +6,11 @@ plomlompom has insanely ambitious long-term plans).
 
 You can move around a player on an island and meet different enemies. You have 5
 hitpoints to lose before death. Enemies start with different amounts of
-hitpoints, depending on their species. Dead enemies become dirt, skeletons or
-"magic meat" -- such objects can be collected, and "magic meat" can be consumed
-to gain hitpoints (if allowed to lie on the ground for a while it may even
-multiply ...). Note that different kinds of movements/actions take different
-numbers of turns to finish.
+hitpoints, depending on their species. Dead enemies become dirt, skeletons, or
+food to consume (each turn reduces one's "satiation", and the lower it is, the
+stronger the chance of suffering from hunger and thereby losing hitpoints). Note
+that different kinds of movements/actions take different numbers of turns to
+finish.
 
 Enemies' AI is very dumb so far: Each turn, they look out for actors of
 different species to flee from (if their type starts out with more hitpoints

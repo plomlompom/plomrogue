@@ -48,9 +48,9 @@ struct ThingType
     char char_on_map;    /* thing symbol to appear on map */
     char * name;         /* string to describe thing in game log */
     uint16_t stomach;    /* if >0, defines onset & chance of hunger suffering */
+    uint16_t consumable; /* can be eaten if !0, for so much .satiation win */
     uint8_t corpse_id;   /* type to change thing into upon destruction */
     uint8_t lifepoints;  /* default start value for thing's .lifepoints */
-    uint8_t consumable;  /* can be eaten if !0, for so much hitpoint win */
     uint8_t start_n;     /* how many of these does the map start with? */
     uint8_t proliferate; /* if >0: inverse of chance to proliferate */
 };
