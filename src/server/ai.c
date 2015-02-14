@@ -74,7 +74,7 @@ static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
  *      animate thing not further than x steps away and in FOV and of a type
  *      that is not "t_eye"'s, and starts out stronger or as strong as "t_eye"
  *      is currently; or (cornered), if no such flight cell, but thing of above
- *      criteria is in neighbor cell, that cell
+ *      criteria is too near, a cell closer to it, or, if less near, just wait
  * "c": thing in memorized map is consumable
  * "s": memory map cell with greatest-reachable degree of unexploredness
  */
@@ -335,14 +335,22 @@ static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
     }
     if ('f' == filter)
     {
-        if (!dir_to_nearest_target && 1 == score_map[pos_i])
+        if (!dir_to_nearest_target)
         {
-            dir_to_nearest_target = rand_target_dir(dirs, 0, neighbors);
+            if (1 == score_map[pos_i])     /* Attack if cornered too closely. */
+            {
+                dir_to_nearest_target = rand_target_dir(dirs, 0, neighbors);
+            }
+            else if (3 >= score_map[pos_i])    /* If less closely, just wait. */
+            {
+                t_eye->command = get_thing_action_id_by_name(s[S_CMD_WAIT]);
+                return 1;
+            }
         }
-        else if (dir_to_nearest_target && minmax_neighbor > 3)
-        {
-            dir_to_nearest_target = 0;
-        }
+        else if (dir_to_nearest_target && 3 < score_map[pos_i]) /* Don't flee */
+        {                                                       /* enemy of   */
+            dir_to_nearest_target = 0;                          /* a certain  */
+        }                                                       /* distance.  */
     }
     return dir_to_nearest_target;
 }
