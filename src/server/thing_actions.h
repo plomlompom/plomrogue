@@ -38,6 +38,12 @@ extern void actor_pick(struct Thing * t);
  */
 extern void actor_use(struct Thing * t);
 
+/* Increment "t"'s lifepoints to a 1/32 chance if its .satiation is positive,
+ * its lifepoints are below "t"'s type's .lifepoints, and "t"'s .command is the
+ * ID of the waiting action. On success, also decrement .satiation by by 32.
+ */
+extern void try_healing(struct Thing * t);
+
 /* Decrement "t"'s satiation and trigger a chance (dependent on over-/under-
  * satiation value) of lifepoint decrement.
  */

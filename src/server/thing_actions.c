@@ -330,6 +330,34 @@ extern void actor_use(struct Thing * t)
 
 
 
+extern void try_healing(struct Thing * t)
+{
+    struct ThingType * tt = get_thing_type(t->type);
+    if (   t->satiation > 0 && t->lifepoints < tt->lifepoints
+        && 0 == (rrand() % 31)
+        && get_thing_action_id_by_name(s[S_CMD_WAIT]) == t->command)
+    {
+        t->lifepoints++;
+        t->satiation = t->satiation - 32;
+        if (get_player() == t)
+        {
+            update_log("You heal.");
+        }
+        else
+        {
+            char * msg_part = " heals.";
+            uint8_t len = strlen(tt->name) + strlen(msg_part) + 1;
+            char * msg = try_malloc(len, __func__);
+            int test = sprintf(msg, "%s%s", tt->name, msg_part);
+            exit_trouble(test < 0, __func__, s[S_FCN_SPRINTF]);
+            update_log(msg);
+            free(msg);
+        }
+    }
+}
+
+
+
 extern void hunger(struct Thing * t)
 {
     if (t->satiation > INT16_MIN)
