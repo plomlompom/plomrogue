@@ -67,9 +67,9 @@ static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
 /* Set (if possible) as "t_eye"'s command a move to the path to the path-wise
  * nearest target that is not "t_eye" and fits criteria set by "filter". On
  * success, return !0, else 0. Values for "filter":
- * "a": thing in FOV is animate, but of a type that is not "t_eye"'s, and
- *      starts out weaker than it is; build path as avoiding things of "t_eye"'s
- *      type
+ * "a": thing in FOV is below a certain distance, animate, but of a type that is
+ *      not "t_eye"'s, and starts out weaker than it is; build path as avoiding
+ *      things of "t_eye"'s type
  * "f": neighbor cell (not inhabited by any animate thing) further away from
  *      animate thing not further than x steps away and in FOV and of a type
  *      that is not "t_eye"'s, and starts out stronger or as strong as "t_eye"
@@ -351,6 +351,10 @@ static char get_dir_from_neighbors(char filter, struct Thing * t_eye,
         {                                                       /* enemy of   */
             dir_to_nearest_target = 0;                          /* a certain  */
         }                                                       /* distance.  */
+    }
+    else if ('a' == filter && 10 <= score_map[pos_i])
+    {
+        dir_to_nearest_target = 0;
     }
     return dir_to_nearest_target;
 }
