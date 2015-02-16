@@ -17,7 +17,6 @@ def setup_server_io(io_db):
     os.makedirs(io_dir, exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
     io_db["file_out"].write(io_db["teststring"] + "\n")
-    io_db["file_out"].flush()                         # TODO: Explain necessity.
     if os.access(io_db["path_in"], os.F_OK):
         os.remove(io_db["path_in"])
     io_db["file_in"] = open(io_db["path_in"], "w")
