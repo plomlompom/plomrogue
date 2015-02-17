@@ -35,15 +35,16 @@ def setup_server_io(io_db):
 
 
 def cleanup_server_io(io_db):
-    """Close and remove all files in IO files DB."""
-    io_db["file_out"].close()
-    os.remove(io_db["path_out"])
-    io_db["file_in"].close()
-    os.remove(io_db["path_in"])
-    if "file_worldstate" in io_db:                    # This file's only set up
-        io_db["file_worldstate"].close()              # properly when the game
-    if os.access(io_db["path_worldstate"], os.F_OK):  # world is active, which
-        os.remove(io_db["path_worldstate"])           # is not guaranteed.
+    """Close and remove all files open in IO files DB."""
+    if "file_out" in io_db:
+        io_db["file_out"].close()
+        os.remove(io_db["path_out"])
+    if "file_in" in io_db:
+        io_db["file_in"].close()
+        os.remove(io_db["path_in"])
+    if "file_worldstate" in io_db:
+        io_db["file_worldstate"].close()
+        os.remove(io_db["path_worldstate"])
 
 
 def detect_atomic_leftover(path):
@@ -58,15 +59,15 @@ def detect_atomic_leftover(path):
 
 io_db = {}
 try:
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = argparse.ArgumentParser()
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
     args, unknown = parser.parse_known_args()
     print("Replay: " + str(args.replay))
-    print("DUMMY: Obey command-line arguments.")
-    print("DUMMY: Open files.")
+    # print("DUMMY: Obey command-line arguments.")
+    # print("DUMMY: Open files.")
     setup_server_io(io_db)
-    print("DUMMY: Run game.")
+    # print("DUMMY: Run game.")
     path_recordfile = "recordfile"
     path_savefile = "savefile"
     detect_atomic_leftover(path_savefile)
@@ -76,6 +77,8 @@ try:
     else:
         msg = "MAKE_WORLD " + str(int(time.time()))
         print(msg)
+except SystemExit:
+    pass
 except HandledException as exception:
     print("Error:")
     print(exception.args[0])
@@ -84,4 +87,4 @@ except:
     raise
 finally:
     cleanup_server_io(io_db)
-    print("DUMMY: (Clean up C heap.)")
+    # print("DUMMY: (Clean up C heap.)")
