@@ -61,7 +61,7 @@ def obey(msg):
 
 
 def tokenize(string):
-    """Divide string by " ", \t and quotes (that also group). Escape with \."""
+    """Divide string by ' ', \t & " quotes (that also group). Escape with \."""
     charlist_A = list(string)
     i = 0
     for c in charlist_A:
