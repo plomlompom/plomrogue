@@ -55,6 +55,11 @@ def detect_atomic_leftover(path):
         raise HandledException(msg)
 
 
+def obey(msg):
+    """"""
+    print("Input: " + msg)
+
+
 io_db = {}
 try:
     parser = argparse.ArgumentParser()
@@ -75,7 +80,7 @@ try:
         print(open(path_savefile, "r").read())
     else:
         msg = "MAKE_WORLD " + str(int(time.time()))
-        print(msg)
+        obey(msg)
 except SystemExit:
     pass
 except HandledException as exception:
