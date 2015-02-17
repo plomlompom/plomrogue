@@ -61,16 +61,17 @@ try:
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
     args, unknown = parser.parse_known_args()
-    print("Replay: " + str(args.replay))
+    replay = args.replay
     # print("DUMMY: Obey command-line arguments.")
-    # print("DUMMY: Open files.")
     setup_server_io(io_db)
     # print("DUMMY: Run game.")
     path_recordfile = "recordfile"
     path_savefile = "savefile"
     detect_atomic_leftover(path_savefile)
     detect_atomic_leftover(path_recordfile)
-    if os.access(path_savefile, os.F_OK):
+    if replay:
+        print("Replaying")
+    elif os.access(path_savefile, os.F_OK):
         print(open(path_savefile, "r").read())
     else:
         msg = "MAKE_WORLD " + str(int(time.time()))
