@@ -66,7 +66,6 @@ try:
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
     opts, unknown = parser.parse_known_args()
-    print(opts)
     setup_server_io(io_db)
     # print("DUMMY: Run game.")
     path_recordfile = "recordfile"
@@ -78,6 +77,8 @@ try:
             opts.replay = 1
         print("Replay mode. Auto-replaying up to turn " + str(opts.replay) +
               " (if so late  a turn is to be found).")
+        if not os.access(path_savefile, os.F_OK):
+            raise HandledException("No record file found to replay.")
     elif os.access(path_savefile, os.F_OK):
         print(open(path_savefile, "r").read())
     else:
@@ -86,8 +87,7 @@ try:
 except SystemExit:
     pass
 except HandledException as exception:
-    print("Error:")
-    print(exception.args[0])
+    print("ABORTING: " + exception.args[0])
 except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
