@@ -74,7 +74,7 @@ except HandledException as exception:
     print("Error:")
     print(exception.args[0])
 except:
-    print("SOMETHING WENT WRONG\n")
+    print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
 finally:
     cleanup_server_io(io_db)
