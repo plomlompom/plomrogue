@@ -1,3 +1,4 @@
+import argparse
 import errno
 import os
 import time
@@ -57,6 +58,11 @@ def detect_atomic_leftover(path):
 
 io_db = {}
 try:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
+                        action='store')
+    args, unknown = parser.parse_known_args()
+    print("Replay: " + str(args.replay))
     print("DUMMY: Obey command-line arguments.")
     print("DUMMY: Open files.")
     setup_server_io(io_db)
