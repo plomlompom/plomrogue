@@ -65,17 +65,19 @@ try:
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
-    args, unknown = parser.parse_known_args()
-    replay = args.replay
-    # print("DUMMY: Obey command-line arguments.")
+    opts, unknown = parser.parse_known_args()
+    print(opts)
     setup_server_io(io_db)
     # print("DUMMY: Run game.")
     path_recordfile = "recordfile"
     path_savefile = "savefile"
     detect_atomic_leftover(path_savefile)
     detect_atomic_leftover(path_recordfile)
-    if replay:
-        print("Replaying")
+    if None != opts.replay:
+        if opts.replay < 1:
+            opts.replay = 1
+        print("Replay mode. Auto-replaying up to turn " + str(opts.replay) +
+              " (if so late  a turn is to be found).")
     elif os.access(path_savefile, os.F_OK):
         print(open(path_savefile, "r").read())
     else:
