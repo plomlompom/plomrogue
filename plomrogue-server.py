@@ -1,4 +1,7 @@
-import errno, os, time
+import errno
+import os
+import time
+
 
 def setup_server_io(io_db):
     """Fill IO files DB with proper file( path)s. Write process IO test string.
@@ -23,16 +26,17 @@ def setup_server_io(io_db):
     io_db["file_in"].close()
     io_db["file_in"] = open(io_db["path_in"], "r")
 
+
 def cleanup_server_io(io_db):
     """Close and remove all files in IO files DB."""
     io_db["file_out"].close()
     os.remove(io_db["path_out"])
     io_db["file_in"].close()
     os.remove(io_db["path_in"])
-    if "file_worldstate" in io_db:                   # This file is only set up 
-        io_db["file_worldstate"].close()             # properly when the game 
-    if os.access(io_db["path_worldstate"], os.F_OK): # world is active, which is
-        os.remove(io_db["path_worldstate"])          # not guaranteed.
+    if "file_worldstate" in io_db:                    # This file's only set up
+        io_db["file_worldstate"].close()              # properly when the game
+    if os.access(io_db["path_worldstate"], os.F_OK):  # world is active, which
+        os.remove(io_db["path_worldstate"])           # is not guaranteed.
 
 io_db = {}
 try:
