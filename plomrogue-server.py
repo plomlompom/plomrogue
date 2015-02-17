@@ -36,15 +36,13 @@ def setup_server_io(io_db):
 
 def cleanup_server_io(io_db):
     """Close and remove all files open in IO files DB."""
-    if "file_out" in io_db:
-        io_db["file_out"].close()
-        os.remove(io_db["path_out"])
-    if "file_in" in io_db:
-        io_db["file_in"].close()
-        os.remove(io_db["path_in"])
-    if "file_worldstate" in io_db:
-        io_db["file_worldstate"].close()
-        os.remove(io_db["path_worldstate"])
+    def helper(file_key, path_key):
+        if file_key in io_db:
+            io_db[file_key].close()
+            os.remove(io_db[path_key])
+    helper("file_out", "path_out")
+    helper("file_in", "path_in")
+    helper("file_worldstate", "path_worldstate")
 
 
 def detect_atomic_leftover(path):
