@@ -53,7 +53,11 @@ def detect_atomic_leftover(path):
 def obey(cmd, io_db, path_recordfile):
     """"""
     print("Input: " + cmd)
-    tokens = shlex.split(cmd, comments=True)
+    try:
+        tokens = shlex.split(cmd, comments=True)
+    except ValueError as err:
+        print("Can't tokenize command string: " + str(err) + ".")
+        return
     if 0 == len(tokens):
         pass
     elif "PING" == tokens[0] and 1 == len(tokens):
