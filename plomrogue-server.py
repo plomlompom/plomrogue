@@ -41,7 +41,7 @@ def cleanup_server_io(io_db):
 
 
 def detect_atomic_leftover(path):
-    """Raise explained HandledException if file is found at path + "_tmp"."""
+    """Raise explained SystemExit if file is found at path + "_tmp"."""
     path_tmp = path + "_tmp"
     msg = "Found file '" + path_tmp + "' that may be a leftover from an " \
           "aborted previous attempt to write '" + path + "'. Aborting until " \
