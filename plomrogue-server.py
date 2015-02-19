@@ -1,6 +1,7 @@
 import argparse
 import errno
 import os
+import shlex
 import time
 
 
@@ -52,44 +53,7 @@ def detect_atomic_leftover(path):
 def obey(msg):
     """"""
     print("Input: " + msg)
-
-
-def tokenize(string):
-    """Divide string by ' ', \t & " quotes (that also group). Escape with \."""
-    charlist_A = list(string)
-    i = 0
-    for c in charlist_A:
-        if "\\" == c and i < len(charlist_A) - 1:
-            charlist_A[i] = "remove"
-            charlist_A[i + 1] = charlist_A[i + 1] + "_escaped"
-        i = i + 1
-    charlist_B = []
-    for c in charlist_A:
-        if "remove" != c:
-            charlist_B.append(c)
-    in_quotes = 0
-    i = 0
-    for c in charlist_B:
-        if "\"" == c:
-            in_quotes = 0 if in_quotes else 1
-            if i < len(charlist_B) - 1:
-                charlist_B[i] = "separator"
-        elif (not in_quotes) and (" " == c or "\t" == c):
-            charlist_B[i] = "separator"
-        i = i + 1
-    list_of_charlists = [[]]
-    i = 0
-    for c in charlist_B:
-        if "separator" == c:
-            if [] != list_of_charlists[-1]:
-                list_of_charlists.append([])
-                i = i + 1
-        else:
-            list_of_charlists[i].append(c[0])
-    tokens = []
-    for charlist in list_of_charlists:
-        tokens.append("".join(charlist))
-    return tokens
+    print(shlex.split(msg))
 
 
 io_db = {}
