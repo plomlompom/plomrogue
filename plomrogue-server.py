@@ -50,7 +50,7 @@ def detect_atomic_leftover(path):
         raise SystemExit(msg)
 
 
-def obey(cmd):
+def obey(cmd, io_db, path_recordfile):
     """"""
     print("Input: " + cmd)
     tokens = shlex.split(cmd)
@@ -60,8 +60,17 @@ def obey(cmd):
         io_db["file_out"].write("PONG\n")
     elif "MAKE_WORLD" == tokens[0] and 2 == len(tokens):
         print("I would generate a new world now, if only I knew how.")
+        record(cmd, path_recordfile)
     else:
         print("Invalid command/argument, or bad number of tokens.")
+
+
+def record(cmd, path_recordfile):
+    """Append cmd string plus newline to file at path_recordfile."""
+    file = open(path_recordfile, "a")
+    file.write(cmd + "\n")
+    file.close()
+
 
 
 io_db = {}
@@ -86,7 +95,7 @@ try:
     elif os.access(path_savefile, os.F_OK):
         print(open(path_savefile, "r").read())
     else:
-        obey("MAKE_WORLD " + str(int(time.time())))
+        obey("MAKE_WORLD " + str(int(time.time())), io_db, path_recordfile)
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
