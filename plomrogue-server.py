@@ -102,6 +102,14 @@ try:
     elif os.access(path_savefile, os.F_OK):
         print(open(path_savefile, "r").read())
     else:
+        path_worldconfig = "confserver/world"
+        if not os.access(path_worldconfig, os.F_OK):
+            msg = "No world config file from which to start a new world."
+            raise SystemExit(msg)
+        file = open(path_worldconfig)
+        for line in file.readlines():
+            obey(line.rstrip(), io_db, path_recordfile)
+        file.close()
         obey("MAKE_WORLD " + str(int(time.time())), io_db, path_recordfile)
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
