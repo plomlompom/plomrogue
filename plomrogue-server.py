@@ -59,7 +59,7 @@ def obey(cmd, io_db, path_recordfile):
     elif "PING" == tokens[0] and 1 == len(tokens):
         io_db["file_out"].write("PONG\n")
     elif "QUIT" == tokens[0] and 1 == len(tokens):
-        record("#" + cmd, path_recordfile)
+        record("# " + cmd, path_recordfile)
         raise SystemExit("received QUIT command")
     elif "MAKE_WORLD" == tokens[0] and 2 == len(tokens):
         print("I would generate a new world now, if only I knew how.")
