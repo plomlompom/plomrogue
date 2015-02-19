@@ -4,12 +4,6 @@ import os
 import time
 
 
-class HandledException(Exception):
-    """Feature-less Exception child. Use for expected operational errors."""
-
-    pass
-
-
 def setup_server_io(io_db):
     """Fill IO files DB with proper file( path)s. Write process IO test string.
 
@@ -52,7 +46,7 @@ def detect_atomic_leftover(path):
           "aborted previous attempt to write '" + path + "'. Aborting until " \
           "the matter is resolved by removing it from its current path."
     if os.access(path_tmp, os.F_OK):
-        raise HandledException(msg)
+        raise SystemExit(msg)
 
 
 def obey(msg):
@@ -114,18 +108,16 @@ try:
         if opts.replay < 1:
             opts.replay = 1
         print("Replay mode. Auto-replaying up to turn " + str(opts.replay) +
-              " (if so late  a turn is to be found).")
-        if not os.access(path_savefile, os.F_OK):
-            raise HandledException("No record file found to replay.")
+              " (if so late a turn is to be found).")
+        if not os.access(path_recordfile, os.F_OK):
+            raise SystemExit("No record file found to replay.")
     elif os.access(path_savefile, os.F_OK):
         print(open(path_savefile, "r").read())
     else:
         msg = "MAKE_WORLD " + str(int(time.time()))
         obey(msg)
-except SystemExit:
-    pass
-except HandledException as exception:
-    print("ABORTING: " + exception.args[0])
+except SystemExit as exit:
+    print("ABORTING: " + exit.args[0])
 except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
