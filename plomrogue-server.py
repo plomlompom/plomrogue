@@ -100,26 +100,14 @@ def record(cmd, io_db):
     os.rename(path_tmp, io_db["path_record"])
 
 
-def obey_lines_in_file(path, name, break_test=None):
-    """Call obey() on each line of path's file, use name in input prefix.
-
-    If break_test function is set, only read the file until it returns True.
-    """
+def obey_lines_in_file(path, name):
+    """Call obey() on each line of path's file, use name in input prefix."""
     file = open(path, "r")
     line_n = 1
     for line in file.readlines():
-        if None != break_test and break_test():
-            break
         obey(line.rstrip(), io_db, name + "file line " + str(line_n))
         line_n = line_n + 1
     file.close()
-
-
-def make_turn_tester(turn_to_compare, world_db):
-    """Return tester whether world_db["turn"] greater/equal turn_to_compare."""
-    def turn_tester():
-        return world_db["turn"] >= turn_to_compare
-    return turn_tester
 
 
 def parse_command_line_arguments():
@@ -163,9 +151,17 @@ try:
         if not os.access(io_db["path_record"], os.F_OK):
             raise SystemExit("No record file found to replay.")
         world_db["turn"] = 0
-        break_tester = make_turn_tester(opts.replay, world_db)
-        obey_lines_in_file(io_db["path_record"], "record ", break_tester)
+        file = open(io_db["path_record"], "r")
+        line_n = 1
+        for line in file.readlines():
+            if world_db["turn"] >= opts.replay:
+                break
+            obey(line.rstrip(), io_db, "record file line " + str(line_n))
+            line_n = line_n + 1
+        while 1:
+            server_test(io_db)
         # what to do next?
+        file.close()
     else:
         if os.access(io_db["path_save"], os.F_OK):
             obey_lines_in_file(io_db["path_save"], "save")
