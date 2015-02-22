@@ -9,14 +9,16 @@ import time
 def setup_server_io(io_db):
     """Fill IO files DB with proper file( path)s. Write process IO test string.
 
-    Decide file paths. Ensure IO files directory at server/. Remove any old in
-    file if found. Set up new in file (io_db["file_in"]) for reading at
-    io_db["path_in"], and new out file (io_db["file_out"]) for writing at
-    io_db["path_out"]. Start out file with process hash line of format PID +
-    " " + floated UNIX time (io_db["teststring"]). Run detect_atomic_leftover
-    on io_db["path_record"] and io_db["path_save"].
+    Set io_db["kicked_by_rival"] to False. Decide file paths. Ensure IO files
+    directory at server/. Remove any old in file if found. Set up new in file
+    (io_db["file_in"]) for reading at io_db["path_in"], and new out file
+    (io_db["file_out"]) for writing at io_db["path_out"]. Start out file with
+    process hash line of format PID + " " + floated UNIX time
+    (io_db["teststring"]). Run detect_atomic_leftover on io_db["path_record"]
+    and io_db["path_save"].
     """
     io_dir = "server/"
+    io_db["kicked_by_rival"] = False
     io_db["path_in"] = io_dir + "in"
     io_db["path_out"] = io_dir + "out"
     io_db["path_worldstate"] = io_dir + "worldstate"
