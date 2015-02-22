@@ -39,11 +39,12 @@ def setup_server_io(io_db):
 
 
 def cleanup_server_io(io_db):
-    """Close and remove all files open in IO files DB."""
+    """Close and (if io_db["kicked_by_rival"] false) remove files in io_db."""
     def helper(file_key, path_key):
         if file_key in io_db:
             io_db[file_key].close()
-            os.remove(io_db[path_key])
+            if not io_db["kicked_by_rival"]:
+                os.remove(io_db[path_key])
     helper("file_out", "path_out")
     helper("file_in", "path_in")
     helper("file_worldstate", "path_worldstate")
@@ -131,18 +132,22 @@ def parse_command_line_arguments():
 
 
 def server_test(io_db):
-    """Check for valid server out file belonging to current process."""
+    """Ensure valid server out file belonging to current process.
+
+    On failure, set io_db["kicked_by_rival"] and raise SystemExit.
+    """
     if not os.access(io_db["path_out"], os.F_OK):
         raise SystemExit("Server output file has disappeared.")
     file = open(io_db["path_out"], "r")
     test = file.readline().rstrip("\n")
     file.close()
-    print(str(test) + " == " + io_db["teststring"] + " ?")
     if test != io_db["teststring"]:
+        io_db["kicked_by_rival"] = True
         msg = "Server test string in server output file does not match. This" \
               " indicates that the current server process has been " \
               "superseded by another one."
         raise SystemExit(msg)
+
 
 io_db = {}
 world_db = {}
@@ -170,6 +175,8 @@ try:
                 raise SystemExit(msg)
             obey_lines_in_file(io_db["path_worldconf"], "world config ")
             obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file")
+        while 1:
+            server_test(io_db)
         # print("DUMMY: Run io_loop().")
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
