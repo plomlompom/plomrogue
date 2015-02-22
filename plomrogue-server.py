@@ -77,6 +77,7 @@ def obey(cmd, io_db, prefix):
 
 def record(cmd, path_recordfile):
     """Append cmd string plus newline to file at path_recordfile."""
+    # Doesn't yet replace old record() fully.
     file = open(path_recordfile, "a")
     file.write(cmd + "\n")
     file.close()
