@@ -8,16 +8,19 @@ import time
 def setup_server_io(io_db):
     """Fill IO files DB with proper file( path)s. Write process IO test string.
 
-    Ensure IO files directory at server/. Remove any old in file if found. Set
-    up new in file (io_db["file_in"]) for reading at io_db["path_in"], and new
-    out file (io_db["file_out"]) for writing at io_db["path_out"]. Start out
-    file with process hash line of format PID + " " + floated UNIX time
-    (io_db["teststring"]). Set worldstate file path io_db["path_worldstate"].
+    Decide file paths. Ensure IO files directory at server/. Remove any old in
+    file if found. Set up new in file (io_db["file_in"]) for reading at
+    io_db["path_in"], and new out file (io_db["file_out"]) for writing at
+    io_db["path_out"]. Start out file with process hash line of format PID +
+    " " + floated UNIX time (io_db["teststring"]).
     """
     io_dir = "server/"
     io_db["path_in"] = io_dir + "in"
     io_db["path_out"] = io_dir + "out"
     io_db["path_worldstate"] = io_dir + "worldstate"
+    io_db["path_record"] = "record"
+    io_db["path_save"] = "save"
+    io_db["path_worldconf"] = "confserver/world"
     io_db["teststring"] = str(os.getpid()) + " " + str(time.time())
     os.makedirs(io_dir, exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
@@ -50,7 +53,7 @@ def detect_atomic_leftover(path):
         raise SystemExit(msg)
 
 
-def obey(cmd, io_db, path_recordfile):
+def obey(cmd, io_db): #, path_recordfile):
     """"""
     print("Input: " + cmd)
     try:
@@ -67,7 +70,7 @@ def obey(cmd, io_db, path_recordfile):
         raise SystemExit("received QUIT command")
     elif "MAKE_WORLD" == tokens[0] and 2 == len(tokens):
         print("I would generate a new world now, if only I knew how.")
-        record(cmd, path_recordfile)
+        record(cmd, io_db["path_record"])
     else:
         print("Invalid command/argument, or bad number of tokens.")
 
@@ -85,32 +88,29 @@ try:
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
-    opts, unknown = parser.parse_known_args()
     setup_server_io(io_db)
     # print("DUMMY: Run game.")
-    path_recordfile = "recordfile"
-    path_savefile = "savefile"
-    detect_atomic_leftover(path_savefile)
-    detect_atomic_leftover(path_recordfile)
+    detect_atomic_leftover(io_db["path_save"])
+    detect_atomic_leftover(io_db["path_record"])
+    opts, unknown = parser.parse_known_args()
     if None != opts.replay:
         if opts.replay < 1:
             opts.replay = 1
         print("Replay mode. Auto-replaying up to turn " + str(opts.replay) +
               " (if so late a turn is to be found).")
-        if not os.access(path_recordfile, os.F_OK):
+        if not os.access(io_db["path_record"], os.F_OK):
             raise SystemExit("No record file found to replay.")
-    elif os.access(path_savefile, os.F_OK):
-        print(open(path_savefile, "r").read())
+    elif os.access(io_db["path_save"], os.F_OK):
+        print(open(io_db["path_save"], "r").read())
     else:
-        path_worldconfig = "confserver/world"
-        if not os.access(path_worldconfig, os.F_OK):
+        if not os.access(io_db["path_worldconf"], os.F_OK):
             msg = "No world config file from which to start a new world."
             raise SystemExit(msg)
-        file = open(path_worldconfig)
+        file = open(io_db["path_worldconf"])
         for line in file.readlines():
-            obey(line.rstrip(), io_db, path_recordfile)
+            obey(line.rstrip(), io_db)
         file.close()
-        obey("MAKE_WORLD " + str(int(time.time())), io_db, path_recordfile)
+        obey("MAKE_WORLD " + str(int(time.time())), io_db)
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
