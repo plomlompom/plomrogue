@@ -13,7 +13,8 @@ def setup_server_io(io_db):
     file if found. Set up new in file (io_db["file_in"]) for reading at
     io_db["path_in"], and new out file (io_db["file_out"]) for writing at
     io_db["path_out"]. Start out file with process hash line of format PID +
-    " " + floated UNIX time (io_db["teststring"]).
+    " " + floated UNIX time (io_db["teststring"]). Run detect_atomic_leftover
+    on io_db["path_record"] and io_db["path_save"].
     """
     io_dir = "server/"
     io_db["path_in"] = io_dir + "in"
@@ -32,6 +33,8 @@ def setup_server_io(io_db):
     io_db["file_in"] = open(io_db["path_in"], "w")
     io_db["file_in"].close()
     io_db["file_in"] = open(io_db["path_in"], "r")
+    detect_atomic_leftover(io_db["path_save"], io_db["tmp_suffix"])
+    detect_atomic_leftover(io_db["path_record"], io_db["tmp_suffix"])
 
 
 def cleanup_server_io(io_db):
@@ -125,8 +128,6 @@ try:
                         action='store')
     setup_server_io(io_db)
     # print("DUMMY: Run game.")
-    detect_atomic_leftover(io_db["path_save"], io_db["tmp_suffix"])
-    detect_atomic_leftover(io_db["path_record"], io_db["tmp_suffix"])
     opts, unknown = parser.parse_known_args()
     if None != opts.replay:
         if opts.replay < 1:
