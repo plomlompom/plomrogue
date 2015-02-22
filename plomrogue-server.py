@@ -53,9 +53,9 @@ def detect_atomic_leftover(path):
         raise SystemExit(msg)
 
 
-def obey(cmd, io_db): #, path_recordfile):
+def obey(cmd, io_db, prefix):
     """"""
-    print("Input: " + cmd)
+    print("input " + prefix + ": " + cmd)
     try:
         tokens = shlex.split(cmd, comments=True)
     except ValueError as err:
@@ -82,7 +82,6 @@ def record(cmd, path_recordfile):
     file.close()
 
 
-
 io_db = {}
 try:
     parser = argparse.ArgumentParser()
@@ -107,10 +106,12 @@ try:
             msg = "No world config file from which to start a new world."
             raise SystemExit(msg)
         file = open(io_db["path_worldconf"])
+        line_n = 1
         for line in file.readlines():
-            obey(line.rstrip(), io_db)
+            obey(line.rstrip(), io_db, "worldconfig file line " + str(line_n))
+            line_n = line_n + 1
         file.close()
-        obey("MAKE_WORLD " + str(int(time.time())), io_db)
+        obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file")
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
