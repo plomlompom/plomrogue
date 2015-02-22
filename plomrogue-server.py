@@ -137,6 +137,10 @@ def server_test(io_db):
         raise SystemExit(msg)
 
 
+def io_loop ():
+    return False
+
+
 io_db = {}
 world_db = {}
 try:
@@ -152,15 +156,17 @@ try:
             raise SystemExit("No record file found to replay.")
         world_db["turn"] = 0
         file = open(io_db["path_record"], "r")
+        prefix = "record file line "
         line_n = 1
-        for line in file.readlines():
-            if world_db["turn"] >= opts.replay:
-                break
-            obey(line.rstrip(), io_db, "record file line " + str(line_n))
-            line_n = line_n + 1
-        while 1:
+        while world_db["turn"] < opts.replay:
             server_test(io_db)
-        # what to do next?
+            obey(file.readline().rstrip(), io_db, prefix + str(line_n))
+            line_n = line_n + 1
+            world_db["turn"] = world_db["turn"] + 1
+        while io_loop():
+            server_test(io_db)
+            obey(file.readline().rstrip(), io_db, prefix + str(line_n))
+            line_n = line_n + 1
         file.close()
     else:
         if os.access(io_db["path_save"], os.F_OK):
@@ -171,9 +177,9 @@ try:
                 raise SystemExit(msg)
             obey_lines_in_file(io_db["path_worldconf"], "world config ")
             obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file")
-        while 1:
+        while io_loop():
             server_test(io_db)
-        # print("DUMMY: Run io_loop().")
+            # more?
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
