@@ -83,6 +83,15 @@ def record(cmd, path_recordfile):
     file.close()
 
 
+def obey_lines_in_file(path, name):
+    """Call obey() on each line of path's file, use name in input prefix."""
+    file = open(io_db["path_worldconf"], "r")
+    line_n = 1
+    for line in file.readlines():
+        obey(line.rstrip(), io_db, name + "file line " + str(line_n))
+        line_n = line_n + 1
+    file.close()
+
 io_db = {}
 try:
     parser = argparse.ArgumentParser()
@@ -102,17 +111,12 @@ try:
             raise SystemExit("No record file found to replay.")
     else:
         if os.access(io_db["path_save"], os.F_OK):
-            print(open(io_db["path_save"], "r").read())
+            obey_lines_in_file(io_db["path_save"], "save")
         else:
             if not os.access(io_db["path_worldconf"], os.F_OK):
                 msg = "No world config file from which to start a new world."
                 raise SystemExit(msg)
-            file = open(io_db["path_worldconf"])
-            line_n = 1
-            for line in file.readlines():
-                obey(line.rstrip(), io_db, "worldconfig line " + str(line_n))
-                line_n = line_n + 1
-            file.close()
+            obey_lines_in_file(io_db["path_worldconf"], "world config ")
             obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file")
         # print("DUMMY: Run io_loop().")
 except SystemExit as exit:
