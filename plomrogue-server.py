@@ -2,6 +2,7 @@ import argparse
 import errno
 import os
 import shlex
+import shutil
 import time
 
 
@@ -71,17 +72,23 @@ def obey(cmd, io_db, prefix):
         raise SystemExit("received QUIT command")
     elif "MAKE_WORLD" == tokens[0] and 2 == len(tokens):
         print("I would generate a new world now, if only I knew how.")
-        record(cmd, io_db["path_record"])
+        record(cmd, io_db)
     else:
         print("Invalid command/argument, or bad number of tokens.")
 
 
-def record(cmd, path_recordfile):
+def record(cmd, io_db):
     """Append cmd string plus newline to file at path_recordfile."""
     # Doesn't yet replace old record() fully.
-    file = open(path_recordfile, "a")
+    path_tmp = io_db["path_record"] + io_db["tmp_suffix"]
+    if os.access(io_db["path_record"], os.F_OK):
+        shutil.copyfile(io_db["path_record"], path_tmp)
+    file = open(path_tmp, "a")
     file.write(cmd + "\n")
+    file.flush()
+    os.fsync(file.fileno())
     file.close()
+    os.rename(path_tmp, io_db["path_record"])
 
 
 def obey_lines_in_file(path, name):
