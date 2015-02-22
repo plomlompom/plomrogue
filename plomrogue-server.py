@@ -78,8 +78,10 @@ def obey(cmd, io_db, prefix):
 
 
 def record(cmd, io_db):
-    """Append cmd string plus newline to file at path_recordfile."""
-    # Doesn't yet replace old record() fully.
+    """Append cmd string plus newline to file at path_recordfile. (Atomic.)"""
+    # This misses some optimizations from the original record(), namely only
+    # finishing the atomic write with flush() and fsync() every 15 seconds
+    # unless explicitely forced. Implement as needed.
     path_tmp = io_db["path_record"] + io_db["tmp_suffix"]
     if os.access(io_db["path_record"], os.F_OK):
         shutil.copyfile(io_db["path_record"], path_tmp)
@@ -88,6 +90,8 @@ def record(cmd, io_db):
     file.flush()
     os.fsync(file.fileno())
     file.close()
+    if os.access(io_db["path_record"], os.F_OK):
+        os.remove(io_db["path_record"])
     os.rename(path_tmp, io_db["path_record"])
 
 
