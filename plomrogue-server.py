@@ -28,6 +28,7 @@ def setup_server_io(io_db):
     os.makedirs(io_dir, exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
     io_db["file_out"].write(io_db["teststring"] + "\n")
+    io_db["file_out"].flush()
     if os.access(io_db["path_in"], os.F_OK):
         os.remove(io_db["path_in"])
     io_db["file_in"] = open(io_db["path_in"], "w")
@@ -128,6 +129,20 @@ def parse_command_line_arguments():
     opts, unknown = parser.parse_known_args()
     return opts
 
+
+def server_test(io_db):
+    """Check for valid server out file belonging to current process."""
+    if not os.access(io_db["path_out"], os.F_OK):
+        raise SystemExit("Server output file has disappeared.")
+    file = open(io_db["path_out"], "r")
+    test = file.readline().rstrip("\n")
+    file.close()
+    print(str(test) + " == " + io_db["teststring"] + " ?")
+    if test != io_db["teststring"]:
+        msg = "Server test string in server output file does not match. This" \
+              " indicates that the current server process has been " \
+              "superseded by another one."
+        raise SystemExit(msg)
 
 io_db = {}
 world_db = {}
