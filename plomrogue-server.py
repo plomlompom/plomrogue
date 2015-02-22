@@ -45,7 +45,8 @@ def cleanup_server_io(io_db):
     def helper(file_key, path_key):
         if file_key in io_db:
             io_db[file_key].close()
-            if not io_db["kicked_by_rival"]:
+            if not io_db["kicked_by_rival"] \
+               and os.access(io_db[path_key], os.F_OK):
                 os.remove(io_db[path_key])
     helper("file_out", "path_out")
     helper("file_in", "path_in")
@@ -64,6 +65,7 @@ def detect_atomic_leftover(path, tmp_suffix):
 
 def obey(cmd, io_db, prefix):
     """"""
+    server_test(io_db)
     print("input " + prefix + ": " + cmd)
     try:
         tokens = shlex.split(cmd, comments=True)
@@ -139,7 +141,7 @@ def server_test(io_db):
         raise SystemExit(msg)
 
 
-def io_loop ():
+def io_loop():
     return False
 
 
@@ -161,11 +163,9 @@ try:
         prefix = "record file line "
         line_n = 1
         while world_db["turn"] < opts.replay:
-            server_test(io_db)
             obey(file.readline().rstrip(), io_db, prefix + str(line_n))
             line_n = line_n + 1
         while io_loop():
-            server_test(io_db)
             obey(file.readline().rstrip(), io_db, prefix + str(line_n))
             line_n = line_n + 1
         file.close()
