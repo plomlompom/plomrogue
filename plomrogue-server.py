@@ -98,7 +98,7 @@ def record(cmd, io_db):
     os.rename(path_tmp, io_db["path_record"])
 
 
-def obey_lines_in_file(path, name, break_test = None):
+def obey_lines_in_file(path, name, break_test=None):
     """Call obey() on each line of path's file, use name in input prefix.
 
     If break_test function is set, only read the file until it returns True.
@@ -118,7 +118,6 @@ def make_turn_tester(turn_to_compare, world_db):
     def turn_tester():
         return world_db["turn"] >= turn_to_compare
     return turn_tester
-
 
 
 def parse_command_line_arguments():
