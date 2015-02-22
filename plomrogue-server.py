@@ -21,6 +21,7 @@ def setup_server_io(io_db):
     io_db["path_record"] = "record"
     io_db["path_save"] = "save"
     io_db["path_worldconf"] = "confserver/world"
+    io_db["tmp_suffix"] = "_tmp"
     io_db["teststring"] = str(os.getpid()) + " " + str(time.time())
     os.makedirs(io_dir, exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
@@ -43,9 +44,9 @@ def cleanup_server_io(io_db):
     helper("file_worldstate", "path_worldstate")
 
 
-def detect_atomic_leftover(path):
-    """Raise explained SystemExit if file is found at path + "_tmp"."""
-    path_tmp = path + "_tmp"
+def detect_atomic_leftover(path, tmp_suffix):
+    """Raise explained SystemExit if file is found at path + tmp_suffix."""
+    path_tmp = path + tmp_suffix
     msg = "Found file '" + path_tmp + "' that may be a leftover from an " \
           "aborted previous attempt to write '" + path + "'. Aborting until " \
           "the matter is resolved by removing it from its current path."
@@ -92,6 +93,7 @@ def obey_lines_in_file(path, name):
         line_n = line_n + 1
     file.close()
 
+
 io_db = {}
 try:
     parser = argparse.ArgumentParser()
@@ -99,8 +101,8 @@ try:
                         action='store')
     setup_server_io(io_db)
     # print("DUMMY: Run game.")
-    detect_atomic_leftover(io_db["path_save"])
-    detect_atomic_leftover(io_db["path_record"])
+    detect_atomic_leftover(io_db["path_save"], io_db["tmp_suffix"])
+    detect_atomic_leftover(io_db["path_record"], io_db["tmp_suffix"])
     opts, unknown = parser.parse_known_args()
     if None != opts.replay:
         if opts.replay < 1:
