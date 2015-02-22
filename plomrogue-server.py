@@ -120,15 +120,22 @@ def make_turn_tester(turn_to_compare, world_db):
     return turn_tester
 
 
-io_db = {}
-world_db = {}
-try:
+
+def parse_command_line_arguments():
+    """Return settings values read from command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
+    opts, unknown = parser.parse_known_args()
+    return opts
+
+
+io_db = {}
+world_db = {}
+try:
+    opts = parse_command_line_arguments()
     setup_server_io(io_db)
     # print("DUMMY: Run game.")
-    opts, unknown = parser.parse_known_args()
     if None != opts.replay:
         if opts.replay < 1:
             opts.replay = 1
@@ -139,6 +146,7 @@ try:
         world_db["turn"] = 0
         break_tester = make_turn_tester(opts.replay, world_db)
         obey_lines_in_file(io_db["path_record"], "record ", break_tester)
+        # what to do next?
     else:
         if os.access(io_db["path_save"], os.F_OK):
             obey_lines_in_file(io_db["path_save"], "save")
