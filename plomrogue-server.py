@@ -100,19 +100,21 @@ try:
               " (if so late a turn is to be found).")
         if not os.access(io_db["path_record"], os.F_OK):
             raise SystemExit("No record file found to replay.")
-    elif os.access(io_db["path_save"], os.F_OK):
-        print(open(io_db["path_save"], "r").read())
     else:
-        if not os.access(io_db["path_worldconf"], os.F_OK):
-            msg = "No world config file from which to start a new world."
-            raise SystemExit(msg)
-        file = open(io_db["path_worldconf"])
-        line_n = 1
-        for line in file.readlines():
-            obey(line.rstrip(), io_db, "worldconfig file line " + str(line_n))
-            line_n = line_n + 1
-        file.close()
-        obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file")
+        if os.access(io_db["path_save"], os.F_OK):
+            print(open(io_db["path_save"], "r").read())
+        else:
+            if not os.access(io_db["path_worldconf"], os.F_OK):
+                msg = "No world config file from which to start a new world."
+                raise SystemExit(msg)
+            file = open(io_db["path_worldconf"])
+            line_n = 1
+            for line in file.readlines():
+                obey(line.rstrip(), io_db, "worldconfig line " + str(line_n))
+                line_n = line_n + 1
+            file.close()
+            obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file")
+        # print("DUMMY: Run io_loop().")
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
