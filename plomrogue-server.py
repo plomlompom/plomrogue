@@ -164,7 +164,6 @@ try:
             server_test(io_db)
             obey(file.readline().rstrip(), io_db, prefix + str(line_n))
             line_n = line_n + 1
-            world_db["turn"] = world_db["turn"] + 1
         while io_loop():
             server_test(io_db)
             obey(file.readline().rstrip(), io_db, prefix + str(line_n))
