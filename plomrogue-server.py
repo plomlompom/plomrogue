@@ -76,6 +76,7 @@ def obey(cmd, io_db, prefix, replay_file=None, do_record=False):
         pass
     elif "PING" == tokens[0] and 1 == len(tokens):
         io_db["file_out"].write("PONG\n")
+        io_db["file_out"].flush()
     elif "QUIT" == tokens[0] and 1 == len(tokens):
         if do_record:
             record("# " + cmd, io_db)
