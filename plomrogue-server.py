@@ -157,7 +157,7 @@ def read_command():
     max_wait = 5
     now = time.time()
     command = ""
-    while 1:
+    while True:
         add = io_db["file_in"].readline()
         if len(add) > 0:
             command = command + add
@@ -170,6 +170,53 @@ def read_command():
                 server_test()
                 now = time.time()
     return command
+
+
+def replay_game():
+    """Replay game from record file.
+
+    Use opts.replay as breakpoint turn to which to replay automatically before
+    switching to manual input by non-meta commands in server input file
+    triggering further reads of record file. Ensure opts.replay is at least 1.
+    """
+    if opts.replay < 1:
+        opts.replay = 1
+    print("Replay mode. Auto-replaying up to turn " + str(opts.replay) +
+          " (if so late a turn is to be found).")
+    if not os.access(io_db["path_record"], os.F_OK):
+        raise SystemExit("No record file found to replay.")
+    io_db["file_record"] = open(io_db["path_record"], "r")
+    io_db["file_record"].prefix = "recod file line "
+    io_db["file_record"].line_n = 1
+    while world_db["turn"] < opts.replay:
+        line = io_db["file_record"].readline()
+        if "" == line:
+            break
+        obey(line.rstrip(), io_db["file_record"].prefix
+             + str(io_db["file_record"].line_n))
+        io_db["file_record"].line_n = io_db["file_record"].line_n + 1
+    while True:
+        obey(read_command(), "in file", replay=True)
+
+
+def play_game():
+    """Play game by server input file commands. Before, load save file found.
+
+    If no save file is found, a new world is generated from the commands in the
+    world config plus a 'MAKE WORLD [current Unix timestamp]'. Record this
+    command and all that follow via the server input file.
+    """
+    if os.access(io_db["path_save"], os.F_OK):
+        obey_lines_in_file(io_db["path_save"], "save")
+    else:
+        if not os.access(io_db["path_worldconf"], os.F_OK):
+            msg = "No world config file from which to start a new world."
+            raise SystemExit(msg)
+        obey_lines_in_file(io_db["path_worldconf"], "world config ",
+                           do_record=True)
+        obey("MAKE_WORLD " + str(int(time.time())), "in file", do_record=True)
+    while True:
+        obey(read_command(), "in file", do_record=True)
 
 
 def command_makeworld():
@@ -227,37 +274,9 @@ try:
     setup_server_io()
     # print("DUMMY: Run game.")
     if None != opts.replay:
-        if opts.replay < 1:
-            opts.replay = 1
-        print("Replay mode. Auto-replaying up to turn " + str(opts.replay) +
-              " (if so late a turn is to be found).")
-        if not os.access(io_db["path_record"], os.F_OK):
-            raise SystemExit("No record file found to replay.")
-        io_db["file_record"] = open(io_db["path_record"], "r")
-        io_db["file_record"].prefix = "recod file line "
-        io_db["file_record"].line_n = 1
-        while world_db["turn"] < opts.replay:
-            line = io_db["file_record"].readline()
-            if "" == line:
-                break
-            obey(line.rstrip(), io_db["file_record"].prefix
-                 + str(io_db["file_record"].line_n))
-            io_db["file_record"].line_n = io_db["file_record"].line_n + 1
-        while True:
-            obey(read_command(), "in file", replay=True)
+        replay_game()
     else:
-        if os.access(io_db["path_save"], os.F_OK):
-            obey_lines_in_file(io_db["path_save"], "save")
-        else:
-            if not os.access(io_db["path_worldconf"], os.F_OK):
-                msg = "No world config file from which to start a new world."
-                raise SystemExit(msg)
-            obey_lines_in_file(io_db["path_worldconf"], "world config ",
-                               do_record=True)
-            obey("MAKE_WORLD " + str(int(time.time())), "in file",
-                 do_record=True)
-        while True:
-            obey(read_command(), "in file", do_record=True)
+        play_game()
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
