@@ -9,25 +9,21 @@ import time
 def setup_server_io():
     """Fill IO files DB with proper file( path)s. Write process IO test string.
 
-    Set io_db["kicked_by_rival"] to False. Decide file paths. Ensure IO files
-    directory at server/. Remove any old in file if found. Set up new in file
-    (io_db["file_in"]) for reading at io_db["path_in"], and new out file
-    (io_db["file_out"]) for writing at io_db["path_out"]. Start out file with
-    process hash line of format PID + " " + floated UNIX time
-    (io_db["teststring"]). Run detect_atomic_leftover on io_db["path_record"]
-    and io_db["path_save"].
+    Ensure IO files directory at server/. Remove any old input file if found.
+    Set up new input file for reading, and new output file for writing. Start
+    output file with process hash line of format PID + " " + floated UNIX time
+    (io_db["teststring"]). Raise SystemExit if file is found at path of either
+    record or save file plus io_db["tmp_suffix"].
     """
-    io_dir = "server/"
-    io_db["kicked_by_rival"] = False
-    io_db["path_in"] = io_dir + "in"
-    io_db["path_out"] = io_dir + "out"
-    io_db["path_worldstate"] = io_dir + "worldstate"
-    io_db["path_record"] = "record"
-    io_db["path_save"] = "save"
-    io_db["path_worldconf"] = "confserver/world"
-    io_db["tmp_suffix"] = "_tmp"
+    def detect_atomic_leftover(path, tmp_suffix):
+        path_tmp = path + tmp_suffix
+        msg = "Found file '" + path_tmp + "' that may be a leftover from an " \
+              "aborted previous attempt to write '" + path + "'. Aborting " \
+             "until matter is resolved by removing it from its current path."
+        if os.access(path_tmp, os.F_OK):
+            raise SystemExit(msg)
     io_db["teststring"] = str(os.getpid()) + " " + str(time.time())
-    os.makedirs(io_dir, exist_ok=True)
+    os.makedirs(io_db["path_server"], exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
     io_db["file_out"].write(io_db["teststring"] + "\n")
     io_db["file_out"].flush()
@@ -53,16 +49,6 @@ def cleanup_server_io():
     helper("file_worldstate", "path_worldstate")
     if "file_record" in io_db:
         io_db["file_record"].close()
-
-
-def detect_atomic_leftover(path, tmp_suffix):
-    """Raise explained SystemExit if file is found at path + tmp_suffix."""
-    path_tmp = path + tmp_suffix
-    msg = "Found file '" + path_tmp + "' that may be a leftover from an " \
-          "aborted previous attempt to write '" + path + "'. Aborting until " \
-          "the matter is resolved by removing it from its current path."
-    if os.access(path_tmp, os.F_OK):
-        raise SystemExit(msg)
 
 
 def obey(command, prefix, replay=False, do_record=False):
@@ -144,7 +130,9 @@ def parse_command_line_arguments():
 def server_test():
     """Ensure valid server out file belonging to current process.
 
-    On failure, set io_db["kicked_by_rival"] and raise SystemExit.
+    This is done by comparing io_db["teststring"] to what's found at the start
+    of the current file at io_db["path_out"]. On failure, set
+    io_db["kicked_by_rival"] and raise SystemExit.
     """
     if not os.access(io_db["path_out"], os.F_OK):
         raise SystemExit("Server output file has disappeared.")
@@ -213,8 +201,27 @@ commands_db = {
     "MAKE_WORLD": (1, False, command_makeworld)
 }
 
-io_db = {}
-world_db = {}
+
+"""World state database,"""
+world_db = {
+    "turn": 0
+}
+
+
+"""File IO database."""
+io_db = {
+    "path_save": "save",
+    "path_record": "record",
+    "path_worldconf": "confserver/world",
+    "path_server": "server/",
+    "path_in": "server/in",
+    "path_out": "server/out",
+    "path_worldstate": "server/worldstate",
+    "tmp_suffix": "_tmp",
+    "kicked_by_rival": False
+}
+
+
 try:
     opts = parse_command_line_arguments()
     setup_server_io()
@@ -226,7 +233,6 @@ try:
               " (if so late a turn is to be found).")
         if not os.access(io_db["path_record"], os.F_OK):
             raise SystemExit("No record file found to replay.")
-        world_db["turn"] = 0
         io_db["file_record"] = open(io_db["path_record"], "r")
         io_db["file_record"].prefix = "recod file line "
         io_db["file_record"].line_n = 1
