@@ -6,7 +6,7 @@ import shutil
 import time
 
 
-def setup_server_io(io_db):
+def setup_server_io():
     """Fill IO files DB with proper file( path)s. Write process IO test string.
 
     Set io_db["kicked_by_rival"] to False. Decide file paths. Ensure IO files
@@ -40,7 +40,7 @@ def setup_server_io(io_db):
     detect_atomic_leftover(io_db["path_record"], io_db["tmp_suffix"])
 
 
-def cleanup_server_io(io_db):
+def cleanup_server_io():
     """Close and (if io_db["kicked_by_rival"] false) remove files in io_db."""
     def helper(file_key, path_key):
         if file_key in io_db:
@@ -65,44 +65,46 @@ def detect_atomic_leftover(path, tmp_suffix):
         raise SystemExit(msg)
 
 
-def obey(cmd, io_db, prefix, replay=False, do_record=False):
-    """"""
-    server_test(io_db)
-    print("input " + prefix + ": " + cmd)
+def obey(command, prefix, replay=False, do_record=False):
+    """Call function from commands_db mapped to command's first token.
+
+    The command string is tokenized by shlex.split(comments=True). If replay is
+    set, a non-meta command from the commands_db merely triggers obey() on the
+    next command from the records file. Non-meta commands are recorded in
+    non-replay mode if do_record is set. The prefix string is inserted into the
+    server's input message between its beginning 'input ' and ':'. All activity
+    is preceded by a call to server_test().
+    """
+    server_test()
+    print("input " + prefix + ": " + command)
     try:
-        tokens = shlex.split(cmd, comments=True)
+        tokens = shlex.split(command, comments=True)
     except ValueError as err:
         print("Can't tokenize command string: " + str(err) + ".")
         return
-    if 0 == len(tokens):
-        pass
-    elif "PING" == tokens[0] and 1 == len(tokens):
-        io_db["file_out"].write("PONG\n")
-        io_db["file_out"].flush()
-    elif "QUIT" == tokens[0] and 1 == len(tokens):
-        if do_record:
-            record("# " + cmd, io_db)
-        raise SystemExit("received QUIT command")
-    elif "MAKE_WORLD" == tokens[0] and 2 == len(tokens):
-        if replay:
+    if len(tokens) > 0 and tokens[0] in commands \
+       and len(tokens) >= commands[tokens[0]][0] + 1:
+        if commands[tokens[0]][1]:
+            commands[tokens[0]][2]()
+        elif replay:
             print("Due to replay mode, reading command as 'go on in record'.")
             line = io_db["file_record"].readline()
             if len(line) > 0:
-                obey(line.rstrip(), io_db, io_db["file_record"].prefix
+                obey(line.rstrip(), io_db["file_record"].prefix
                      + str(io_db["file_record"].line_n))
                 io_db["file_record"].line_n = io_db["file_record"].line_n + 1
             else:
                 print("Reached end of record file.")
         else:
-            print("I would generate a new world now, if only I knew how.")
+            commands[tokens[0]][2]()
             if do_record:
-                record(cmd, io_db)
+                record(command)
     else:
         print("Invalid command/argument, or bad number of tokens.")
 
 
-def record(cmd, io_db):
-    """Append cmd string plus newline to file at path_recordfile. (Atomic.)"""
+def record(command):
+    """Append command string plus newline to record file. (Atomic.)"""
     # This misses some optimizations from the original record(), namely only
     # finishing the atomic write with expensive flush() and fsync() every 15
     # seconds unless explicitely forced. Implement as needed.
@@ -110,7 +112,7 @@ def record(cmd, io_db):
     if os.access(io_db["path_record"], os.F_OK):
         shutil.copyfile(io_db["path_record"], path_tmp)
     file = open(path_tmp, "a")
-    file.write(cmd + "\n")
+    file.write(command + "\n")
     file.flush()
     os.fsync(file.fileno())
     file.close()
@@ -124,7 +126,7 @@ def obey_lines_in_file(path, name, do_record=False):
     file = open(path, "r")
     line_n = 1
     for line in file.readlines():
-        obey(line.rstrip(), io_db, name + "file line " + str(line_n),
+        obey(line.rstrip(), name + "file line " + str(line_n),
              do_record=do_record)
         line_n = line_n + 1
     file.close()
@@ -139,7 +141,7 @@ def parse_command_line_arguments():
     return opts
 
 
-def server_test(io_db):
+def server_test():
     """Ensure valid server out file belonging to current process.
 
     On failure, set io_db["kicked_by_rival"] and raise SystemExit.
@@ -157,7 +159,7 @@ def server_test(io_db):
         raise SystemExit(msg)
 
 
-def read_command(io_db):
+def read_command():
     """Return next newline-delimited command from server in file.
 
     Keep building return string until a newline is encountered. Pause between
@@ -177,16 +179,45 @@ def read_command(io_db):
         else:
             time.sleep(wait_on_fail)
             if now + max_wait < time.time():
-                server_test(io_db)
+                server_test()
                 now = time.time()
     return command
 
+
+def command_makeworld():
+    """Mere dummy so far."""
+    print("I would build a whole world now if only I knew how.")
+
+
+def command_ping():
+    """Send PONG line to server output file."""
+    io_db["file_out"].write("PONG\n")
+    io_db["file_out"].flush()
+
+
+def command_quit():
+    """Abort server process."""
+    raise SystemExit("received QUIT command")
+
+
+"""Commands database.
+
+Map command start tokens to ([0]) minimum number of expected command arguments,
+([1]) the command's meta-ness (i.e. is it to be written to the record file, is
+it to be ignored in replay mode if read from server input file), and ([2]) a
+function to be called on it.
+"""
+commands_db = {
+    "QUIT": (0, True, command_quit),
+    "PING": (0, True, command_ping),
+    "MAKE_WORLD": (1, False, command_makeworld)
+}
 
 io_db = {}
 world_db = {}
 try:
     opts = parse_command_line_arguments()
-    setup_server_io(io_db)
+    setup_server_io()
     # print("DUMMY: Run game.")
     if None != opts.replay:
         if opts.replay < 1:
@@ -203,11 +234,11 @@ try:
             line = io_db["file_record"].readline()
             if "" == line:
                 break
-            obey(line.rstrip(), io_db, io_db["file_record"].prefix
+            obey(line.rstrip(), io_db["file_record"].prefix
                  + str(io_db["file_record"].line_n))
             io_db["file_record"].line_n = io_db["file_record"].line_n + 1
         while True:
-            obey(read_command(io_db), io_db, "in file", replay=True)
+            obey(read_command(), "in file", replay=True)
     else:
         if os.access(io_db["path_save"], os.F_OK):
             obey_lines_in_file(io_db["path_save"], "save")
@@ -217,15 +248,15 @@ try:
                 raise SystemExit(msg)
             obey_lines_in_file(io_db["path_worldconf"], "world config ",
                                do_record=True)
-            obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file",
+            obey("MAKE_WORLD " + str(int(time.time())), "in file",
                  do_record=True)
         while True:
-            obey(read_command(io_db), io_db, "in file", do_record=True)
+            obey(read_command(), "in file", do_record=True)
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
 finally:
-    cleanup_server_io(io_db)
+    cleanup_server_io()
     # print("DUMMY: (Clean up C heap.)")
