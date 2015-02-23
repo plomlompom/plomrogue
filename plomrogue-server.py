@@ -51,6 +51,8 @@ def cleanup_server_io(io_db):
     helper("file_out", "path_out")
     helper("file_in", "path_in")
     helper("file_worldstate", "path_worldstate")
+    if "file_record" in io_db:
+        io_db["file_record"].close()
 
 
 def detect_atomic_leftover(path, tmp_suffix):
@@ -63,7 +65,7 @@ def detect_atomic_leftover(path, tmp_suffix):
         raise SystemExit(msg)
 
 
-def obey(cmd, io_db, prefix, replay_file=None, do_record=False):
+def obey(cmd, io_db, prefix, replay=False, do_record=False):
     """"""
     server_test(io_db)
     print("input " + prefix + ": " + cmd)
@@ -82,13 +84,13 @@ def obey(cmd, io_db, prefix, replay_file=None, do_record=False):
             record("# " + cmd, io_db)
         raise SystemExit("received QUIT command")
     elif "MAKE_WORLD" == tokens[0] and 2 == len(tokens):
-        if replay_file:
+        if replay:
             print("Due to replay mode, reading command as 'go on in record'.")
-            line = replay_file.readline()
+            line = io_db["file_record"].readline()
             if len(line) > 0:
-                obey(line.rstrip(), io_db,
-                     replay_file.prefix + str(file.line_n))
-                file.line_n = file.line_n + 1
+                obey(line.rstrip(), io_db, io_db["file_record"].prefix
+                     + str(io_db["file_record"].line_n))
+                io_db["file_record"].line_n = io_db["file_record"].line_n + 1
             else:
                 print("Reached end of record file.")
         else:
@@ -194,19 +196,18 @@ try:
         if not os.access(io_db["path_record"], os.F_OK):
             raise SystemExit("No record file found to replay.")
         world_db["turn"] = 0
-        file = open(io_db["path_record"], "r")
-        file.prefix = "recod file line "
-        file.line_n = 1
+        io_db["file_record"] = open(io_db["path_record"], "r")
+        io_db["file_record"].prefix = "recod file line "
+        io_db["file_record"].line_n = 1
         while world_db["turn"] < opts.replay:
-            obey(file.readline().rstrip(), io_db,
-                 file.prefix + str(file.line_n))
-            file.line_n = file.line_n + 1
-        try:
-            while 1:
-                obey(read_command(io_db), io_db, "in file", replay_file=file)
-        except SystemExit:
-            file.close()
-            raise
+            line = io_db["file_record"].readline()
+            if "" == line:
+                break
+            obey(line.rstrip(), io_db, io_db["file_record"].prefix
+                 + str(io_db["file_record"].line_n))
+            io_db["file_record"].line_n = io_db["file_record"].line_n + 1
+        while True:
+            obey(read_command(io_db), io_db, "in file", replay=True)
     else:
         if os.access(io_db["path_save"], os.F_OK):
             obey_lines_in_file(io_db["path_save"], "save")
@@ -218,7 +219,7 @@ try:
                                do_record=True)
             obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file",
                  do_record=True)
-        while 1:
+        while True:
             obey(read_command(io_db), io_db, "in file", do_record=True)
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
