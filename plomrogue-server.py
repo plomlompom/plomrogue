@@ -63,7 +63,7 @@ def detect_atomic_leftover(path, tmp_suffix):
         raise SystemExit(msg)
 
 
-def obey(cmd, io_db, prefix):
+def obey(cmd, io_db, prefix, replay_file=None, do_record=False):
     """"""
     server_test(io_db)
     print("input " + prefix + ": " + cmd)
@@ -77,11 +77,23 @@ def obey(cmd, io_db, prefix):
     elif "PING" == tokens[0] and 1 == len(tokens):
         io_db["file_out"].write("PONG\n")
     elif "QUIT" == tokens[0] and 1 == len(tokens):
-        record("# " + cmd, path_recordfile)
+        if do_record:
+            record("# " + cmd, io_db)
         raise SystemExit("received QUIT command")
     elif "MAKE_WORLD" == tokens[0] and 2 == len(tokens):
-        print("I would generate a new world now, if only I knew how.")
-        record(cmd, io_db)
+        if replay_file:
+            print("Due to replay mode, reading command as 'go on in record'.")
+            line = replay_file.readline()
+            if len(line) > 0:
+                obey(line.rstrip(), io_db,
+                     replay_file.prefix + str(file.line_n))
+                file.line_n = file.line_n + 1
+            else:
+                print("Reached end of record file.")
+        else:
+            print("I would generate a new world now, if only I knew how.")
+            if do_record:
+                record(cmd, io_db)
     else:
         print("Invalid command/argument, or bad number of tokens.")
 
@@ -104,12 +116,13 @@ def record(cmd, io_db):
     os.rename(path_tmp, io_db["path_record"])
 
 
-def obey_lines_in_file(path, name):
+def obey_lines_in_file(path, name, do_record=False):
     """Call obey() on each line of path's file, use name in input prefix."""
     file = open(path, "r")
     line_n = 1
     for line in file.readlines():
-        obey(line.rstrip(), io_db, name + "file line " + str(line_n))
+        obey(line.rstrip(), io_db, name + "file line " + str(line_n),
+             do_record=do_record)
         line_n = line_n + 1
     file.close()
 
@@ -141,8 +154,29 @@ def server_test(io_db):
         raise SystemExit(msg)
 
 
-def io_loop():
-    return False
+def read_command(io_db):
+    """Return next newline-delimited command from server in file.
+
+    Keep building return string until a newline is encountered. Pause between
+    unsuccessful reads, and after too much waiting, run server_test().
+    """
+    wait_on_fail = 1
+    max_wait = 5
+    now = time.time()
+    command = ""
+    while 1:
+        add = io_db["file_in"].readline()
+        if len(add) > 0:
+            command = command + add
+            if len(command) > 0 and "\n" == command[-1]:
+                command = command[:-1]
+                break
+        else:
+            time.sleep(wait_on_fail)
+            if now + max_wait < time.time():
+                server_test(io_db)
+                now = time.time()
+    return command
 
 
 io_db = {}
@@ -160,15 +194,18 @@ try:
             raise SystemExit("No record file found to replay.")
         world_db["turn"] = 0
         file = open(io_db["path_record"], "r")
-        prefix = "record file line "
-        line_n = 1
+        file.prefix = "recod file line "
+        file.line_n = 1
         while world_db["turn"] < opts.replay:
-            obey(file.readline().rstrip(), io_db, prefix + str(line_n))
-            line_n = line_n + 1
-        while io_loop():
-            obey(file.readline().rstrip(), io_db, prefix + str(line_n))
-            line_n = line_n + 1
-        file.close()
+            obey(file.readline().rstrip(), io_db,
+                 file.prefix + str(file.line_n))
+            file.line_n = file.line_n + 1
+        try:
+            while 1:
+                obey(read_command(io_db), io_db, "in file", replay_file=file)
+        except SystemExit:
+            file.close()
+            raise
     else:
         if os.access(io_db["path_save"], os.F_OK):
             obey_lines_in_file(io_db["path_save"], "save")
@@ -176,11 +213,12 @@ try:
             if not os.access(io_db["path_worldconf"], os.F_OK):
                 msg = "No world config file from which to start a new world."
                 raise SystemExit(msg)
-            obey_lines_in_file(io_db["path_worldconf"], "world config ")
-            obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file")
-        while io_loop():
-            server_test(io_db)
-            # more?
+            obey_lines_in_file(io_db["path_worldconf"], "world config ",
+                               do_record=True)
+            obey("MAKE_WORLD " + str(int(time.time())), io_db, "in file",
+                 do_record=True)
+        while 1:
+            obey(read_command(io_db), io_db, "in file", do_record=True)
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
 except:
