@@ -82,10 +82,10 @@ def obey(command, prefix, replay=False, do_record=False):
     except ValueError as err:
         print("Can't tokenize command string: " + str(err) + ".")
         return
-    if len(tokens) > 0 and tokens[0] in commands \
-       and len(tokens) >= commands[tokens[0]][0] + 1:
-        if commands[tokens[0]][1]:
-            commands[tokens[0]][2]()
+    if len(tokens) > 0 and tokens[0] in commands_db \
+       and len(tokens) >= commands_db[tokens[0]][0] + 1:
+        if commands_db[tokens[0]][1]:
+            commands_db[tokens[0]][2]()
         elif replay:
             print("Due to replay mode, reading command as 'go on in record'.")
             line = io_db["file_record"].readline()
@@ -96,7 +96,7 @@ def obey(command, prefix, replay=False, do_record=False):
             else:
                 print("Reached end of record file.")
         else:
-            commands[tokens[0]][2]()
+            commands_db[tokens[0]][2]()
             if do_record:
                 record(command)
     else:
