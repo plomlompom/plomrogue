@@ -56,10 +56,10 @@ def obey(command, prefix, replay=False, do_record=False):
 
     The command string is tokenized by shlex.split(comments=True). If replay is
     set, a non-meta command from the commands_db merely triggers obey() on the
-    next command from the records file. Non-meta commands are recorded in
-    non-replay mode if do_record is set. The prefix string is inserted into the
-    server's input message between its beginning 'input ' and ':'. All activity
-    is preceded by a call to server_test().
+    next command from the records file. If not, and do do_record is set,
+    non-meta commands are recorded via record(), and save_world() is called.
+    The prefix string is inserted into the server's input message between its
+    beginning 'input ' & ':'. All activity is preceded by a server_test() call.
     """
     server_test()
     print("input " + prefix + ": " + command)
@@ -85,8 +85,27 @@ def obey(command, prefix, replay=False, do_record=False):
             commands_db[tokens[0]][2]()
             if do_record:
                 record(command)
+                save_world()
     else:
         print("Invalid command/argument, or bad number of tokens.")
+
+
+def atomic_write(path, text, do_append=False):
+    """Atomic write of text to file at path, appended if do_append is set."""
+    path_tmp = path + io_db["tmp_suffix"]
+    mode = "w"
+    if do_append:
+        mode = "a"
+        if os.access(path, os.F_OK):
+            shutil.copyfile(path, path_tmp)
+    file = open(path_tmp, mode)
+    file.write(text)
+    file.flush()
+    os.fsync(file.fileno())
+    file.close()
+    if os.access(path, os.F_OK):
+        os.remove(path)
+    os.rename(path_tmp, path)
 
 
 def record(command):
@@ -94,17 +113,13 @@ def record(command):
     # This misses some optimizations from the original record(), namely only
     # finishing the atomic write with expensive flush() and fsync() every 15
     # seconds unless explicitely forced. Implement as needed.
-    path_tmp = io_db["path_record"] + io_db["tmp_suffix"]
-    if os.access(io_db["path_record"], os.F_OK):
-        shutil.copyfile(io_db["path_record"], path_tmp)
-    file = open(path_tmp, "a")
-    file.write(command + "\n")
-    file.flush()
-    os.fsync(file.fileno())
-    file.close()
-    if os.access(io_db["path_record"], os.F_OK):
-        os.remove(io_db["path_record"])
-    os.rename(path_tmp, io_db["path_record"])
+    atomic_write(io_db["path_record"], command + "\n", do_append=True)
+
+
+def save_world():
+    # Dummy for saving all commands to reconstruct current world state.
+    # Misses same optimizations as record() from the original record().
+    atomic_write(io_db["path_save"], "bla\n")
 
 
 def obey_lines_in_file(path, name, do_record=False):
@@ -186,7 +201,7 @@ def replay_game():
     if not os.access(io_db["path_record"], os.F_OK):
         raise SystemExit("No record file found to replay.")
     io_db["file_record"] = open(io_db["path_record"], "r")
-    io_db["file_record"].prefix = "recod file line "
+    io_db["file_record"].prefix = "record file line "
     io_db["file_record"].line_n = 1
     while world_db["turn"] < opts.replay:
         line = io_db["file_record"].readline()
