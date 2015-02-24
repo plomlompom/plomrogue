@@ -206,7 +206,7 @@ def replay_game():
     io_db["file_record"] = open(io_db["path_record"], "r")
     io_db["file_record"].prefix = "record file line "
     io_db["file_record"].line_n = 1
-    while world_db["turn"] < opts.replay:
+    while world_db["TURN"] < opts.replay:
         line = io_db["file_record"].readline()
         if "" == line:
             break
