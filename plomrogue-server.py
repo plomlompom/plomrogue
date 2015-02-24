@@ -120,6 +120,7 @@ def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
     atomic_write(io_db["path_save"],
+                 "MAP_LENGTH " + str(world_db["MAP_LENGTH"]) + "\n" +
                  "PLAYER_TYPE " + str(world_db["PLAYER_TYPE"]) + "\n" +
                  "TURN " + str(world_db["TURN"]) + "\n" +
                  "SEED_RANDOMNESS " + str(world_db["SEED_RANDOMNESS"]) + "\n" +
@@ -275,9 +276,14 @@ def command_seedmap(seed_string):
 
 
 def command_makeworld(seed_string):
-    # Mere dummy so far.
+    # DUMMY.
     worlddb_value_setter("SEED_MAP", 0, 4294967295)(seed_string)
     worlddb_value_setter("SEED_RANDOMNESS", 0, 4294967295)(seed_string)
+
+
+def command_maplength(maplength_string):
+    # DUMMY.
+    worlddb_value_setter("MAP_LENGTH", 1, 256)(maplength_string)
 
 
 """Commands database.
@@ -295,7 +301,8 @@ commands_db = {
     "SEED_RANDOMNESS": (1, False, worlddb_value_setter("SEED_RANDOMNESS", 0,
                                                        4294967295)),
     "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535)),
-    "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255))
+    "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255)),
+    "MAP_LENGTH": (1, False, command_maplength)
 }
 
 
@@ -304,7 +311,8 @@ world_db = {
     "TURN": 0,
     "SEED_MAP": 0,
     "SEED_RANDOMNESS": 0,
-    "PLAYER_TYPE": 0
+    "PLAYER_TYPE": 0,
+    "MAP_LENGTH": 64
 }
 
 
