@@ -238,6 +238,11 @@ def play_game():
         obey(read_command(), "in file", do_record=True)
 
 
+def remake_map():
+    # DUMMY.
+    print("I'd (re-)make the map now, if only I knew how.")
+
+
 def worlddb_value_setter(key, min, max):
     """Generate: Set world_db[key] to int(val_string) if >= min and <= max."""
     def func(val_string):
@@ -263,6 +268,12 @@ def command_quit():
     raise SystemExit("received QUIT command")
 
 
+def command_seedmap(seed_string):
+    """Set world_db["SEED_MAP"] to int(seed_string), then (re-)make map."""
+    worlddb_value_setter("SEED_MAP", 0, 4294967295)(seed_string)
+    remake_map()
+
+
 def command_makeworld(seed_string):
     # Mere dummy so far.
     worlddb_value_setter("SEED_MAP", 0, 4294967295)(seed_string)
@@ -280,7 +291,7 @@ commands_db = {
     "QUIT": (0, True, command_quit),
     "PING": (0, True, command_ping),
     "MAKE_WORLD": (1, False, command_makeworld),
-    "SEED_MAP": (1, False, worlddb_value_setter("SEED_MAP", 0, 4294967295)),
+    "SEED_MAP": (1, False, command_seedmap),
     "SEED_RANDOMNESS": (1, False, worlddb_value_setter("SEED_RANDOMNESS", 0,
                                                        4294967295)),
     "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535)),
