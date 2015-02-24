@@ -248,33 +248,38 @@ def command_quit():
     raise SystemExit("received QUIT command")
 
 
-def command_turn(turn_string):
-    """Set turn to what's described in turn_string."""
-    min = 0
-    max = 65535
+def set_world_db_integer_value(key, val_string, min, max):
+    """Set world_db[key] to int(val_string) if legal value >= min & <= max."""
     try:
-        turn = int(turn_string)
-        if turn < min or turn > max:
+        val = int(val_string)
+        if val < min or val > max:
             raise ValueError
-        world_db["TURN"] = turn
+        world_db[key] = val
     except ValueError:
         print("Ignoring: Please use integer >= " + str(min) + " and <= " +
               "str(max)+ '.")
 
 
+def command_turn(turn_string):
+    """Set turn to what's described in turn_string."""
+    set_world_db_integer_value("TURN", turn_string, 0, 65535)
+
+
+def command_seedmap(mapseed_string):
+    """Set map seed to what's described in mapseed_string."""
+    set_world_db_integer_value("SEED_MAP", mapseed_string, 0, 4294967295)
+
+
+def command_seedrandomness(randseed_string):
+    """Set randomness seed to what's described in randseed_string."""
+    set_world_db_integer_value("SEED_RANDOMNESS", randseed_string, 0,
+                               4294967295)
+
+
 def command_makeworld(seed_string):
     # Mere dummy so far.
-    min = 0
-    max = 4294967295
-    try:
-        seed = int(seed_string)
-        if seed < min or seed > max:
-            raise ValueError
-        world_db["SEED_RANDOMNESS"] = seed
-        world_db["SEED_MAP"] = seed
-    except ValueError:
-        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
-               "str(max) '.")
+    set_world_db_integer_value("SEED_MAP", seed_string, 0, 4294967295)
+    set_world_db_integer_value("SEED_RANDOMNESS", seed_string, 0, 4294967295)
 
 
 """Commands database.
@@ -288,6 +293,8 @@ commands_db = {
     "QUIT": (0, True, command_quit),
     "PING": (0, True, command_ping),
     "MAKE_WORLD": (1, False, command_makeworld),
+    "SEED_MAP": (1, False, command_seedmap),
+    "SEED_RANDOMNESS": (1, False, command_seedrandomness),
     "TURN": (1, False, command_turn)
 }
 
