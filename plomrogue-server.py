@@ -250,10 +250,10 @@ def command_quit():
 
 def command_turn(turn_string):
     """Set turn to what's described in turn_string."""
+    min = 0
+    max = 65535
     try:
         turn = int(turn_string)
-        min = 0
-        max = 65535
         if turn < min or turn > max:
             raise ValueError
         world_db["TURN"] = turn
@@ -264,10 +264,10 @@ def command_turn(turn_string):
 
 def command_makeworld(seed_string):
     # Mere dummy so far.
+    min = 0
+    max = 4294967295
     try:
         seed = int(seed_string)
-        min = 0
-        max = 4294967295
         if seed < min or seed > max:
             raise ValueError
         world_db["SEED_RANDOMNESS"] = seed
