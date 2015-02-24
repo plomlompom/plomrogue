@@ -252,7 +252,13 @@ def command_quit():
 
 def command_turn(turn_string):
     """Set turn to what's described in turn_string."""
-    world_db["TURN"] = int(turn_string)
+    try:
+        turn = int(turn_string)
+        if turn < 0 or turn > 65535:
+            raise ValueError
+        world_db["TURN"] = turn
+    except ValueError:
+        print("Ignoring: Argument must be integer >= 0 and <= 65535.")
 
 
 """Commands database.
