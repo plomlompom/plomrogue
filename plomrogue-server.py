@@ -119,7 +119,10 @@ def record(command):
 def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
-    atomic_write(io_db["path_save"], "TURN " + str(world_db["TURN"]) + "\n")
+    atomic_write(io_db["path_save"],
+                 "TURN " + str(world_db["TURN"]) + "\n" +
+                 "SEED_RANDOMNESS " + str(world_db["SEED_RANDOMNESS"]) + "\n" +
+                 "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n")
 
 
 def obey_lines_in_file(path, name, do_record=False):
@@ -234,11 +237,6 @@ def play_game():
         obey(read_command(), "in file", do_record=True)
 
 
-def command_makeworld(seed):
-    """Mere dummy so far."""
-    print("I would build a whole world now if only I knew how.")
-
-
 def command_ping():
     """Send PONG line to server output file."""
     io_db["file_out"].write("PONG\n")
@@ -254,11 +252,29 @@ def command_turn(turn_string):
     """Set turn to what's described in turn_string."""
     try:
         turn = int(turn_string)
-        if turn < 0 or turn > 65535:
+        min = 0
+        max = 65535
+        if turn < min or turn > max:
             raise ValueError
         world_db["TURN"] = turn
     except ValueError:
-        print("Ignoring: Argument must be integer >= 0 and <= 65535.")
+        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
+              "str(max)+ '.")
+
+
+def command_makeworld(seed_string):
+    # Mere dummy so far.
+    try:
+        seed = int(seed_string)
+        min = 0
+        max = 4294967295
+        if seed < min or seed > max:
+            raise ValueError
+        world_db["SEED_RANDOMNESS"] = seed
+        world_db["SEED_MAP"] = seed
+    except ValueError:
+        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
+               "str(max) '.")
 
 
 """Commands database.
@@ -278,7 +294,9 @@ commands_db = {
 
 """World state database,"""
 world_db = {
-    "TURN": 0
+    "TURN": 0,
+    "SEED_MAP": 0,
+    "SEED_RANDOMNESS": 0
 }
 
 
