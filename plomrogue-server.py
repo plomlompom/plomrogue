@@ -254,7 +254,7 @@ def worlddb_value_setter(key, min, max):
             world_db[key] = val
         except ValueError:
             print("Ignoring: Please use integer >= " + str(min) + " and <= " +
-                  "str(max)+ '.")
+                  str(max) + ".")
     return func
 
 
