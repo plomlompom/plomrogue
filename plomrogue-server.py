@@ -69,7 +69,7 @@ def obey(command, prefix, replay=False, do_record=False):
         print("Can't tokenize command string: " + str(err) + ".")
         return
     if len(tokens) > 0 and tokens[0] in commands_db \
-       and len(tokens) >= commands_db[tokens[0]][0] + 1:
+       and len(tokens) == commands_db[tokens[0]][0] + 1:
         if commands_db[tokens[0]][1]:
             commands_db[tokens[0]][2]()
         elif replay:
