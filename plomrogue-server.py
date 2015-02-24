@@ -120,6 +120,7 @@ def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
     atomic_write(io_db["path_save"],
+                 "PLAYER_TYPE " + str(world_db["PLAYER_TYPE"]) + "\n" +
                  "TURN " + str(world_db["TURN"]) + "\n" +
                  "SEED_RANDOMNESS " + str(world_db["SEED_RANDOMNESS"]) + "\n" +
                  "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n")
@@ -282,7 +283,8 @@ commands_db = {
     "SEED_MAP": (1, False, worlddb_value_setter("SEED_MAP", 0, 4294967295)),
     "SEED_RANDOMNESS": (1, False, worlddb_value_setter("SEED_RANDOMNESS", 0,
                                                        4294967295)),
-    "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535))
+    "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535)),
+    "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255))
 }
 
 
@@ -290,7 +292,8 @@ commands_db = {
 world_db = {
     "TURN": 0,
     "SEED_MAP": 0,
-    "SEED_RANDOMNESS": 0
+    "SEED_RANDOMNESS": 0,
+    "PLAYER_TYPE": 0
 }
 
 
