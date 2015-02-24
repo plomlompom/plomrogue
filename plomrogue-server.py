@@ -120,6 +120,7 @@ def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
     atomic_write(io_db["path_save"],
+                 "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"]) + "\n" +
                  "MAP_LENGTH " + str(world_db["MAP_LENGTH"]) + "\n" +
                  "PLAYER_TYPE " + str(world_db["PLAYER_TYPE"]) + "\n" +
                  "TURN " + str(world_db["TURN"]) + "\n" +
@@ -286,6 +287,11 @@ def command_maplength(maplength_string):
     worlddb_value_setter("MAP_LENGTH", 1, 256)(maplength_string)
 
 
+def command_worldactive(worldactive_string):
+    # DUMMY.
+    worlddb_value_setter("WORLD_ACTIVE", 0, 255)(worldactive_string)
+
+
 """Commands database.
 
 Map command start tokens to ([0]) number of expected command arguments, ([1])
@@ -302,7 +308,8 @@ commands_db = {
                                                        4294967295)),
     "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535)),
     "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255)),
-    "MAP_LENGTH": (1, False, command_maplength)
+    "MAP_LENGTH": (1, False, command_maplength),
+    "WORLD_ACTIVE": (1, False, command_worldactive)
 }
 
 
@@ -312,7 +319,8 @@ world_db = {
     "SEED_MAP": 0,
     "SEED_RANDOMNESS": 0,
     "PLAYER_TYPE": 0,
-    "MAP_LENGTH": 64
+    "MAP_LENGTH": 64,
+    "WORLD_ACTIVE": 0
 }
 
 
