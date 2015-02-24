@@ -82,7 +82,7 @@ def obey(command, prefix, replay=False, do_record=False):
             else:
                 print("Reached end of record file.")
         else:
-            commands_db[tokens[0]][2]()
+            commands_db[tokens[0]][2](*tokens[1:])
             if do_record:
                 record(command)
                 save_world()
@@ -119,7 +119,7 @@ def record(command):
 def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
-    atomic_write(io_db["path_save"], "bla\n")
+    atomic_write(io_db["path_save"], "TURN " + str(world_db["TURN"]) + "\n")
 
 
 def obey_lines_in_file(path, name, do_record=False):
@@ -234,7 +234,7 @@ def play_game():
         obey(read_command(), "in file", do_record=True)
 
 
-def command_makeworld():
+def command_makeworld(seed):
     """Mere dummy so far."""
     print("I would build a whole world now if only I knew how.")
 
@@ -250,6 +250,11 @@ def command_quit():
     raise SystemExit("received QUIT command")
 
 
+def command_turn(turn_string):
+    """Set turn to what's described in turn_string."""
+    world_db["TURN"] = int(turn_string)
+
+
 """Commands database.
 
 Map command start tokens to ([0]) minimum number of expected command arguments,
@@ -260,13 +265,14 @@ function to be called on it.
 commands_db = {
     "QUIT": (0, True, command_quit),
     "PING": (0, True, command_ping),
-    "MAKE_WORLD": (1, False, command_makeworld)
+    "MAKE_WORLD": (1, False, command_makeworld),
+    "TURN": (1, False, command_turn)
 }
 
 
 """World state database,"""
 world_db = {
-    "turn": 0
+    "TURN": 0
 }
 
 
