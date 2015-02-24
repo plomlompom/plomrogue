@@ -237,6 +237,20 @@ def play_game():
         obey(read_command(), "in file", do_record=True)
 
 
+def worlddb_value_setter(key, min, max):
+    """Generate: Set world_db[key] to int(val_string) if >= min and <= max."""
+    def func(val_string):
+        try:
+            val = int(val_string)
+            if val < min or val > max:
+                raise ValueError
+            world_db[key] = val
+        except ValueError:
+            print("Ignoring: Please use integer >= " + str(min) + " and <= " +
+                  "str(max)+ '.")
+    return func
+
+
 def command_ping():
     """Send PONG line to server output file."""
     io_db["file_out"].write("PONG\n")
@@ -248,54 +262,27 @@ def command_quit():
     raise SystemExit("received QUIT command")
 
 
-def set_world_db_integer_value(key, val_string, min, max):
-    """Set world_db[key] to int(val_string) if legal value >= min & <= max."""
-    try:
-        val = int(val_string)
-        if val < min or val > max:
-            raise ValueError
-        world_db[key] = val
-    except ValueError:
-        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
-              "str(max)+ '.")
-
-
-def command_turn(turn_string):
-    """Set turn to what's described in turn_string."""
-    set_world_db_integer_value("TURN", turn_string, 0, 65535)
-
-
-def command_seedmap(mapseed_string):
-    """Set map seed to what's described in mapseed_string."""
-    set_world_db_integer_value("SEED_MAP", mapseed_string, 0, 4294967295)
-
-
-def command_seedrandomness(randseed_string):
-    """Set randomness seed to what's described in randseed_string."""
-    set_world_db_integer_value("SEED_RANDOMNESS", randseed_string, 0,
-                               4294967295)
-
-
 def command_makeworld(seed_string):
     # Mere dummy so far.
-    set_world_db_integer_value("SEED_MAP", seed_string, 0, 4294967295)
-    set_world_db_integer_value("SEED_RANDOMNESS", seed_string, 0, 4294967295)
+    worlddb_value_setter("SEED_MAP", 0, 4294967295)(seed_string)
+    worlddb_value_setter("SEED_RANDOMNESS", 0, 4294967295)(seed_string)
 
 
 """Commands database.
 
-Map command start tokens to ([0]) minimum number of expected command arguments,
-([1]) the command's meta-ness (i.e. is it to be written to the record file, is
-it to be ignored in replay mode if read from server input file), and ([2]) a
-function to be called on it.
+Map command start tokens to ([0]) number of expected command arguments, ([1])
+the command's meta-ness (i.e. is it to be written to the record file, is it to
+be ignored in replay mode if read from server input file), and ([2]) a function
+to be called on it.
 """
 commands_db = {
     "QUIT": (0, True, command_quit),
     "PING": (0, True, command_ping),
     "MAKE_WORLD": (1, False, command_makeworld),
-    "SEED_MAP": (1, False, command_seedmap),
-    "SEED_RANDOMNESS": (1, False, command_seedrandomness),
-    "TURN": (1, False, command_turn)
+    "SEED_MAP": (1, False, worlddb_value_setter("SEED_MAP", 0, 4294967295)),
+    "SEED_RANDOMNESS": (1, False, worlddb_value_setter("SEED_RANDOMNESS", 0,
+                                                       4294967295)),
+    "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535))
 }
 
 
