@@ -324,6 +324,36 @@ def command_worldactive(worldactive_string):
             world_db["WORLD_ACTIVE"] = 1
 
 
+def command_taid(id_string):
+    # DUMMY
+    def new(id):
+        """Add new ThingAction to world_db["thing_actions"]."""
+        if 0 == id:
+            while 1:
+                id = id + 1
+                if id not in world_db["thing actions"]:
+                    break
+            if id > 255:
+                print("Ignoring: No unused ID available to add to ID list.")
+                return
+        world_db["thing actions"][id] = { "TA_EFFORT": 1, "TA_NAME": "wait" }
+    min = 0
+    max = 255
+    try:
+        id = int(id_string)
+        if id < min or id > max:
+            raise ValueError
+    except ValueError:
+        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
+              str(max) + ".")
+        return
+    if id in world_db["thing actions"]:
+        pass # TODO: Assign ID to work on in other TA_ commands …
+    else:
+        new(id)
+    print(world_db)
+
+
 """Commands database.
 
 Map command start tokens to ([0]) number of expected command arguments, ([1])
@@ -341,7 +371,8 @@ commands_db = {
     "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535)),
     "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255)),
     "MAP_LENGTH": (1, False, command_maplength),
-    "WORLD_ACTIVE": (1, False, command_worldactive)
+    "WORLD_ACTIVE": (1, False, command_worldactive),
+    "TA_ID": (1, False, command_taid)
 }
 
 
