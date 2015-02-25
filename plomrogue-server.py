@@ -387,7 +387,7 @@ def command_taname(name):
                 wait_defined = False
                 for id in world_db["ThingActions"]:
                     if "wait" == world_db["ThingActions"][id]["TA_NAME"]:
-                        wait_defined = True                        
+                        wait_defined = True
                         break
                 if not wait_defined:
                     set_world_inactive()
