@@ -247,6 +247,14 @@ def remake_map():
     print("I'd (re-)make the map now, if only I knew how.")
 
 
+def set_world_inactive():
+    """Set world_db["WORLD_ACTIVE"] to 0 and remove worldstate file."""
+    server_test()
+    if os.access(io_db["path_worldstate"], os.F_OK):
+        os.remove(io_db["path_worldstate"])
+    world_db["WORLD_ACTIVE"] = 0
+
+
 def worlddb_value_setter(key, min, max):
     """Generate: Set world_db[key] to int(val_string) if >= min and <= max."""
     def func(val_string):
@@ -282,10 +290,13 @@ def command_makeworld(seed_string):
     # DUMMY.
     worlddb_value_setter("SEED_MAP", 0, 4294967295)(seed_string)
     worlddb_value_setter("SEED_RANDOMNESS", 0, 4294967295)(seed_string)
+    # TODO: Test for existence of player thing and 'wait' thing action?
 
 
 def command_maplength(maplength_string):
     # DUMMY.
+    set_world_inactive()
+    # TODO: remove things, map
     worlddb_value_setter("MAP_LENGTH", 1, 256)(maplength_string)
 
 
@@ -299,7 +310,7 @@ def command_worldactive(worldactive_string):
         print("Ignoring: Please use integer 0 or 1.")
         return
     if 0 != world_db["WORLD_ACTIVE"] and 0 == val:
-        world_db["WORLD_ACTIVE"] = 0
+        set_world_inactive()
     elif 0 == world_db["WORLD_ACTIVE"]:
         wait_exists = False
         player_exists = False
