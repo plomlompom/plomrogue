@@ -368,6 +368,9 @@ def command_taeffort(str_int):
         val = integer_test(str_int, 0, 255)
         if val:
             world_db["thing actions"][command_taid.id]["TA_EFFORT"] = val
+    else:
+        print("No thing action defined to manipulate yet.")
+
 
 
 """Commands database.
