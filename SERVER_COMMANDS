@@ -93,13 +93,13 @@ PLAYER_TYPE [0 to 255]
 Set to argument ID of thing type into which a new world's player character will
 be generated. (Initial value: 0.)
 
-SEED_RANDOMNESS [0 to 4294967296]
+SEED_RANDOMNESS [0 to 4294967295]
 Set randomness seed to argument. (Initial value: 0.)
 
-SEED_MAP [0 to 4294967296]
+SEED_MAP [0 to 4294967295]
 (Re-)generate map to seed of argument and map size.
 
-MAKE_WORLD [0 to 4294967296]
+MAKE_WORLD [0 to 4294967295]
 Set map seed and randomness seed to argument. Remove all things. (Re-)generate
 map. Add to map things specified in thing types table in quantity defined there
 by START_NUMBER command, with first thing (of thing ID of 0) of type defined as
