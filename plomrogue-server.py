@@ -123,7 +123,8 @@ def save_world():
     for id in world_db["ThingActions"]:
         ta = world_db["ThingActions"][id]
         ta_string = ta_string + "TA_ID " + str(id) + "\n" + \
-                                "TA_EFFORT " + str(ta["TA_EFFORT"]) + "\n"
+                                "TA_EFFORT " + str(ta["TA_EFFORT"]) + "\n" + \
+                                "TA_NAME " + ta["TA_NAME"] + "\n"
     atomic_write(io_db["path_save"],
                  "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"]) + "\n" +
                  "MAP_LENGTH " + str(world_db["MAP_LENGTH"]) + "\n" +
@@ -369,8 +370,32 @@ def command_taeffort(str_int):
         if val:
             world_db["ThingActions"][command_taid.id]["TA_EFFORT"] = val
     else:
-        print("No thing action defined to manipulate yet.")
+        print("Ignoring: No thing action defined to manipulate yet.")
 
+
+def command_taname(name):
+    """Set to name name value of ThingAction of command_taid.id.
+
+    The name must match a valid thing action function. If after the name
+    setting no ThingAction with name "wait" remains, call set_world_inactive().
+    """
+    if hasattr(command_taid, "id"):
+        if name == "wait" or name == "move" or name == "use" \
+           or name == "drop" or name == "pick_up":
+            world_db["ThingActions"][command_taid.id]["TA_NAME"] = name
+            if 1 == world_db["WORLD_ACTIVE"]:
+                wait_defined = False
+                for id in world_db["ThingActions"]:
+                    if "wait" == world_db["ThingActions"][id]["TA_NAME"]:
+                        wait_defined = True                        
+                        break
+                if not wait_defined:
+                    set_world_inactive()
+        else:
+            print("Ignoring: Invalid action name.")
+    else:
+        print("No thing action defined to manipulate yet.")
+    # In contrast to the original,naming won't map a function to a ThingAction.
 
 
 """Commands database.
@@ -392,7 +417,8 @@ commands_db = {
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "TA_ID": (1, False, command_taid),
-    "TA_EFFORT": (1, False, command_taeffort)
+    "TA_EFFORT": (1, False, command_taeffort),
+    "TA_NAME": (1, False, command_taname)
 }
 
 
