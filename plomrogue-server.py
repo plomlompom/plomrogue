@@ -120,8 +120,8 @@ def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
     ta_string = ""
-    for id in world_db["thing actions"]:
-        ta = world_db["thing actions"][id]
+    for id in world_db["ThingActions"]:
+        ta = world_db["ThingActions"][id]
         ta_string = ta_string + "TA_ID " + str(id) + "\n" + \
                                 "TA_EFFORT " + str(ta["TA_EFFORT"]) + "\n"
     atomic_write(io_db["path_save"],
@@ -343,19 +343,19 @@ def command_taid(id_string):
     """
     id = integer_test(id_string, 0, 255)
     if id:
-        if id in world_db["thing actions"]:
+        if id in world_db["ThingActions"]:
             command_taid.id = id
         else:
             if 0 == id:
                 while 1:
                     id = id + 1
-                    if id not in world_db["thing actions"]:
+                    if id not in world_db["ThingActions"]:
                         break
                 if id > 255:
                     print("Ignoring: "
                           "No unused ID available to add to ID list.")
                     return
-            world_db["thing actions"][id] = {
+            world_db["ThingActions"][id] = {
                 "TA_EFFORT": 1,
                 "TA_NAME": "wait"
             }
@@ -367,7 +367,7 @@ def command_taeffort(str_int):
     if hasattr(command_taid, "id"):
         val = integer_test(str_int, 0, 255)
         if val:
-            world_db["thing actions"][command_taid.id]["TA_EFFORT"] = val
+            world_db["ThingActions"][command_taid.id]["TA_EFFORT"] = val
     else:
         print("No thing action defined to manipulate yet.")
 
@@ -404,9 +404,9 @@ world_db = {
     "PLAYER_TYPE": 0,
     "MAP_LENGTH": 64,
     "WORLD_ACTIVE": 0,
-    "thing actions": {},
-    "thing types": {},
-    "things": {}
+    "ThingActions": {},
+    "ThingTypes": {},
+    "Things": {}
 }
 
 
