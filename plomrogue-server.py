@@ -394,7 +394,7 @@ def command_taname(name):
         else:
             print("Ignoring: Invalid action name.")
     else:
-        print("No thing action defined to manipulate yet.")
+        print("Ignoring: No thing action defined to manipulate yet.")
     # In contrast to the original,naming won't map a function to a ThingAction.
 
 
