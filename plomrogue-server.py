@@ -291,7 +291,26 @@ def command_maplength(maplength_string):
 
 def command_worldactive(worldactive_string):
     # DUMMY.
-    worlddb_value_setter("WORLD_ACTIVE", 0, 255)(worldactive_string)
+    try:
+        val = int(worldactive_string)
+        if not (0 == val or 1 == val):
+            raise ValueError
+    except ValueError:
+        print("Ignoring: Please use integer 0 or 1.")
+        return
+    if 0 != world_db["WORLD_ACTIVE"] and 0 == val:
+        world_db["WORLD_ACTIVE"] = 0
+    elif 0 == world_db["WORLD_ACTIVE"]:
+        wait_exists = False
+        player_exists = False
+        map_exists = False
+        # TODO: perform tests:
+        # Is there thing action of name 'wait'?
+        # Is there a player thing?
+        # Is there a map?
+        if wait_exists and player_exists and map_exists:
+            # TODO: rebuild al things' FOVs, map memories
+            world_db["WORLD_ACTIVE"] = 1
 
 
 """Commands database.
