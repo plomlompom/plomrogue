@@ -352,7 +352,10 @@ world_db = {
     "SEED_RANDOMNESS": 0,
     "PLAYER_TYPE": 0,
     "MAP_LENGTH": 64,
-    "WORLD_ACTIVE": 0
+    "WORLD_ACTIVE": 0,
+    "thing actions": {},
+    "thing types": {},
+    "things": {}
 }
 
 
