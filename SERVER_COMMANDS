@@ -110,7 +110,7 @@ MAP_LENGTH [1 to 256]
 Deactivate world. Remove ./server/worldstate file. Remove all things. Remove
 map. Set map edge length to argument. (Initial value: 64.)
 
-WORLD_ACTIVE [0 to 255]
+WORLD_ACTIVE [0|1]
 Set world activity state to argument. If 0, remove ./server/worldstate file.
 Else, if world was so far inactive, a map exists, at least one "wait" thing
 action is defined, and a thing of ID 0 (= a player character) that is not part
