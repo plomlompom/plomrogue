@@ -119,13 +119,19 @@ def record(command):
 def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
+    ta_string = ""
+    for id in world_db["thing actions"]:
+        ta = world_db["thing actions"][id]
+        ta_string = ta_string + "TA_ID " + str(id) + "\n" + \
+                                "TA_EFFORT " + str(ta["TA_EFFORT"]) + "\n"
     atomic_write(io_db["path_save"],
                  "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"]) + "\n" +
                  "MAP_LENGTH " + str(world_db["MAP_LENGTH"]) + "\n" +
                  "PLAYER_TYPE " + str(world_db["PLAYER_TYPE"]) + "\n" +
                  "TURN " + str(world_db["TURN"]) + "\n" +
                  "SEED_RANDOMNESS " + str(world_db["SEED_RANDOMNESS"]) + "\n" +
-                 "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n")
+                 "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n" +
+                 ta_string)
     # TODO: If all this ever does is just writing down what's in world_db, some
     # loop over its entries should be all that's needed.
 
@@ -340,7 +346,6 @@ def command_taid(id_string):
         if id in world_db["thing actions"]:
             command_taid.id = id
         else:
-
             if 0 == id:
                 while 1:
                     id = id + 1
@@ -355,6 +360,14 @@ def command_taid(id_string):
                 "TA_NAME": "wait"
             }
             command_taid.id = id
+
+
+def command_taeffort(str_int):
+    """Set to int(str_int) effort value of ThingAction of command_taid.id."""
+    if hasattr(command_taid, "id"):
+        val = integer_test(str_int, 0, 255)
+        if val:
+            world_db["thing actions"][command_taid.id]["TA_EFFORT"] = val
 
 
 """Commands database.
@@ -375,7 +388,8 @@ commands_db = {
     "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255)),
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
-    "TA_ID": (1, False, command_taid)
+    "TA_ID": (1, False, command_taid),
+    "TA_EFFORT": (1, False, command_taeffort)
 }
 
 
