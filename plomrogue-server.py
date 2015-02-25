@@ -328,24 +328,33 @@ def command_worldactive(worldactive_string):
 
 
 def command_taid(id_string):
-    # DUMMY
-    def new(id):
-        """Add new ThingAction to world_db["thing_actions"]."""
-        if 0 == id:
-            while 1:
-                id = id + 1
-                if id not in world_db["thing actions"]:
-                    break
-            if id > 255:
-                print("Ignoring: No unused ID available to add to ID list.")
-                return
-        world_db["thing actions"][id] = { "TA_EFFORT": 1, "TA_NAME": "wait" }
-    val = integer_test(id_string, 0, 255)
-    if val:
+    """Set ID of ThingAction to manipulate. ID unused? Create new ThingAction.
+
+    The ID of the ThingAction to manipulate is stored as command_taid.id. If
+    the integer of the input value is valid (>= 0 and <= 255), but 0, a new ID
+    is calculated: The lowest unused ID >0 and <= 255. A new ThingAction's
+    "TA_EFFORT" defaults to 1, its "TA_NAME" to "wait".
+    """
+    id = integer_test(id_string, 0, 255)
+    if id:
         if id in world_db["thing actions"]:
-            pass # TODO: Assign ID to work on in other TA_ commands …
+            command_taid.id = id
         else:
-            new(id)
+
+            if 0 == id:
+                while 1:
+                    id = id + 1
+                    if id not in world_db["thing actions"]:
+                        break
+                if id > 255:
+                    print("Ignoring: "
+                          "No unused ID available to add to ID list.")
+                    return
+            world_db["thing actions"][id] = {
+                "TA_EFFORT": 1,
+                "TA_NAME": "wait"
+            }
+            command_taid.id = id
 
 
 """Commands database.
