@@ -126,6 +126,8 @@ def save_world():
                  "TURN " + str(world_db["TURN"]) + "\n" +
                  "SEED_RANDOMNESS " + str(world_db["SEED_RANDOMNESS"]) + "\n" +
                  "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n")
+    # TODO: If all this ever does is just writing down what's in world_db, some
+    # loop over its entries should be all that's needed.
 
 
 def obey_lines_in_file(path, name, do_record=False):
@@ -313,9 +315,9 @@ commands_db = {
 }
 
 
-"""World state database,"""
+"""World state database. With sane default values."""
 world_db = {
-    "TURN": 0,
+    "TURN": 1,
     "SEED_MAP": 0,
     "SEED_RANDOMNESS": 0,
     "PLAYER_TYPE": 0,
