@@ -255,17 +255,25 @@ def set_world_inactive():
     world_db["WORLD_ACTIVE"] = 0
 
 
+def integer_test(val_string, min, max):
+    """Return val_string if possible integer >= min and <= max, else False."""
+    try:
+        val = int(val_string)
+        if val < min or val > max:
+            raise ValueError
+        return val
+    except ValueError:
+        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
+              str(max) + ".")
+        return False
+
+
 def worlddb_value_setter(key, min, max):
     """Generate: Set world_db[key] to int(val_string) if >= min and <= max."""
     def func(val_string):
-        try:
-            val = int(val_string)
-            if val < min or val > max:
-                raise ValueError
+        val = integer_test(val_string, min, max)
+        if val:
             world_db[key] = val
-        except ValueError:
-            print("Ignoring: Please use integer >= " + str(min) + " and <= " +
-                  str(max) + ".")
     return func
 
 
@@ -302,26 +310,21 @@ def command_maplength(maplength_string):
 
 def command_worldactive(worldactive_string):
     # DUMMY.
-    try:
-        val = int(worldactive_string)
-        if not (0 == val or 1 == val):
-            raise ValueError
-    except ValueError:
-        print("Ignoring: Please use integer 0 or 1.")
-        return
-    if 0 != world_db["WORLD_ACTIVE"] and 0 == val:
-        set_world_inactive()
-    elif 0 == world_db["WORLD_ACTIVE"]:
-        wait_exists = False
-        player_exists = False
-        map_exists = False
-        # TODO: perform tests:
-        # Is there thing action of name 'wait'?
-        # Is there a player thing?
-        # Is there a map?
-        if wait_exists and player_exists and map_exists:
-            # TODO: rebuild al things' FOVs, map memories
-            world_db["WORLD_ACTIVE"] = 1
+    val = integer_test(worldactive_string, 0, 1)
+    if val:
+        if 0 != world_db["WORLD_ACTIVE"] and 0 == val:
+            set_world_inactive()
+        elif 0 == world_db["WORLD_ACTIVE"]:
+            wait_exists = False
+            player_exists = False
+            map_exists = False
+            # TODO: perform tests:
+            # Is there thing action of name 'wait'?
+            # Is there a player thing?
+            # Is there a map?
+            if wait_exists and player_exists and map_exists:
+                # TODO: rebuild al things' FOVs, map memories
+                world_db["WORLD_ACTIVE"] = 1
 
 
 def command_taid(id_string):
@@ -337,21 +340,12 @@ def command_taid(id_string):
                 print("Ignoring: No unused ID available to add to ID list.")
                 return
         world_db["thing actions"][id] = { "TA_EFFORT": 1, "TA_NAME": "wait" }
-    min = 0
-    max = 255
-    try:
-        id = int(id_string)
-        if id < min or id > max:
-            raise ValueError
-    except ValueError:
-        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
-              str(max) + ".")
-        return
-    if id in world_db["thing actions"]:
-        pass # TODO: Assign ID to work on in other TA_ commands …
-    else:
-        new(id)
-    print(world_db)
+    val = integer_test(id_string, 0, 255)
+    if val:
+        if id in world_db["thing actions"]:
+            pass # TODO: Assign ID to work on in other TA_ commands …
+        else:
+            new(id)
 
 
 """Commands database.
