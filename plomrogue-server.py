@@ -133,14 +133,17 @@ def save_world():
                                 str(tt["TT_CONSUMABLE"]) + "\n" + \
                                 "TT_LIFEPOINTS " + \
                                 str(tt["TT_LIFEPOINTS"]) + "\n" + \
-                                "TT_CORPSE_ID " + \
-                                str(tt["TT_CORPSE_ID"]) + "\n" + \
                                 "TT_PROLIFERATE " + \
                                 str(tt["TT_PROLIFERATE"]) + "\n" + \
                                 "TT_START_NUMBER " + \
                                 str(tt["TT_START_NUMBER"]) + "\n" + \
                                 "TT_NAME '" + tt["TT_NAME"] + "'\n" + \
                                 "TT_SYMBOL '" + tt["TT_SYMBOL"] + "'\n"
+    for id in world_db["ThingTypes"]:
+        tt = world_db["ThingTypes"][id]
+        tt_string = tt_string + "TT_ID " + str(id) + "\n" + \
+                                "TT_CORPSE_ID " + \
+                                str(tt["TT_CORPSE_ID"]) + "\n"
     atomic_write(io_db["path_save"],
                  "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"]) + "\n" +
                  "MAP_LENGTH " + str(world_db["MAP_LENGTH"]) + "\n" +
