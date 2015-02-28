@@ -86,7 +86,7 @@ def obey(command, prefix, replay=False, do_record=False):
             if do_record:
                 record(command)
                 save_world()
-    else:
+    elif 0 != len(tokens):
         print("Invalid command/argument, or bad number of tokens.")
 
 
