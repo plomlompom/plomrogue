@@ -119,41 +119,27 @@ def record(command):
 def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
-    ta_string = ""
+    string = ""
+    for key in world_db:
+        if dict != type(world_db[key]):
+            string = string + key + " " + str(world_db[key]) + "\n"
     for id in world_db["ThingActions"]:
-        ta = world_db["ThingActions"][id]
-        ta_string = ta_string + "TA_ID " + str(id) + "\n" + \
-                                "TA_EFFORT " + str(ta["TA_EFFORT"]) + "\n" + \
-                                "TA_NAME '" + ta["TA_NAME"] + "'\n"
-    tt_string = ""
+        string = string + "TA_ID " + str(id) + "\n"
+        for key in world_db["ThingActions"][id]:
+            val = world_db["ThingActions"][id][key]
+            argument = "'" + val + "'" if str == type(val) else str(val)
+            string = string + key + " " + argument + "\n"
     for id in world_db["ThingTypes"]:
-        tt = world_db["ThingTypes"][id]
-        tt_string = tt_string + "TT_ID " + str(id) + "\n" + \
-                                "TT_CONSUMABLE " + \
-                                str(tt["TT_CONSUMABLE"]) + "\n" + \
-                                "TT_LIFEPOINTS " + \
-                                str(tt["TT_LIFEPOINTS"]) + "\n" + \
-                                "TT_PROLIFERATE " + \
-                                str(tt["TT_PROLIFERATE"]) + "\n" + \
-                                "TT_START_NUMBER " + \
-                                str(tt["TT_START_NUMBER"]) + "\n" + \
-                                "TT_NAME '" + tt["TT_NAME"] + "'\n" + \
-                                "TT_SYMBOL '" + tt["TT_SYMBOL"] + "'\n"
+        string = string + "TT_ID " + str(id) + "\n"
+        for key in world_db["ThingTypes"][id]:
+            if not "TT_CORPSE_ID" == key:
+                val = world_db["ThingTypes"][id][key]
+                argument = "'" + val + "'" if str == type(val) else str(val)
+                string = string + key + " " + argument + "\n"
     for id in world_db["ThingTypes"]:
-        tt = world_db["ThingTypes"][id]
-        tt_string = tt_string + "TT_ID " + str(id) + "\n" + \
-                                "TT_CORPSE_ID " + \
-                                str(tt["TT_CORPSE_ID"]) + "\n"
-    atomic_write(io_db["path_save"],
-                 "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"]) + "\n" +
-                 "MAP_LENGTH " + str(world_db["MAP_LENGTH"]) + "\n" +
-                 "PLAYER_TYPE " + str(world_db["PLAYER_TYPE"]) + "\n" +
-                 "TURN " + str(world_db["TURN"]) + "\n" +
-                 "SEED_RANDOMNESS " + str(world_db["SEED_RANDOMNESS"]) + "\n" +
-                 "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n" +
-                 ta_string + tt_string)
-    # TODO: If all this ever does is just writing down what's in world_db, some
-    # loop over its entries should be all that's needed.
+        string = string + "TT_ID " + str(id) + "\n" + "TT_CORPSE_ID " + \
+                 str(world_db["ThingTypes"][id]["TT_CORPSE_ID"]) + "\n"
+    atomic_write(io_db["path_save"], string)
 
 
 def obey_lines_in_file(path, name, do_record=False):
