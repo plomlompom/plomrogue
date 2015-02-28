@@ -124,7 +124,21 @@ def save_world():
         ta = world_db["ThingActions"][id]
         ta_string = ta_string + "TA_ID " + str(id) + "\n" + \
                                 "TA_EFFORT " + str(ta["TA_EFFORT"]) + "\n" + \
-                                "TA_NAME " + ta["TA_NAME"] + "\n"
+                                "TA_NAME '" + ta["TA_NAME"] + "'\n"
+    tt_string = ""
+    for id in world_db["ThingTypes"]:
+        tt = world_db["ThingTypes"][id]
+        tt_string = tt_string + "TT_ID " + str(id) + "\n" + \
+                                "TT_CONSUMABLE " + \
+                                str(tt["TT_CONSUMABLE"]) + "\n" + \
+                                "TT_CORPSE_ID " + \
+                                str(tt["TT_CORPSE_ID"]) + "\n" + \
+                                "TT_PROLIFERATE " + \
+                                str(tt["TT_PROLIFERATE"]) + "\n" + \
+                                "TT_START_NUMBER " + \
+                                str(tt["TT_START_NUMBER"]) + "\n" + \
+                                "TT_NAME '" + tt["TT_NAME"] + "'\n" + \
+                                "TT_SYMBOL '" + tt["TT_SYMBOL"] + "'\n"
     atomic_write(io_db["path_save"],
                  "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"]) + "\n" +
                  "MAP_LENGTH " + str(world_db["MAP_LENGTH"]) + "\n" +
@@ -132,7 +146,7 @@ def save_world():
                  "TURN " + str(world_db["TURN"]) + "\n" +
                  "SEED_RANDOMNESS " + str(world_db["SEED_RANDOMNESS"]) + "\n" +
                  "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n" +
-                 ta_string)
+                 ta_string + tt_string)
     # TODO: If all this ever does is just writing down what's in world_db, some
     # loop over its entries should be all that's needed.
 
@@ -334,13 +348,97 @@ def command_worldactive(worldactive_string):
                 world_db["WORLD_ACTIVE"] = 1
 
 
+def command_ttid(id_string):
+    """Set ID of ThingType to manipulate. ID unused? Create new ThingType.
+
+    The ID of the ThingType to manipulate is stored as command_ttid.id. If
+    the integer of the input value is valid (>= -32768 and <= 32767), but <0 or
+    >255, a new ID is calculated: the lowest unused ID >=0 and <= 255.
+    """
+    id = integer_test(id_string, -32768, 32767)
+    if id:
+        if id in world_db["ThingTypes"]:
+            command_ttid.id = id
+        else:
+            if id < 0 or id > 255:
+                id = -1
+                while 1:
+                    id = id + 1
+                    if id not in world_db["ThingTypes"]:
+                        break
+                if id > 255:
+                    print("Ignoring: "
+                          "No unused ID available to add to ID list.")
+                    return
+            command_ttid.id = id
+            world_db["ThingTypes"][id] = {
+                "TT_NAME": "(none)",
+                "TT_CONSUMABLE": 0,
+                "TT_PROLIFERATE": 0,
+                "TT_START_NUMBER": 0,
+                "TT_SYMBOL": "?",
+                "TT_CORPSE_ID": id
+            }
+
+
+def test_for_id_maker(object, category):
+    """Return decorator testing for object having "id" attribute."""
+    def decorator(f):
+        def helper(*args):
+            if hasattr(object, "id"):
+                f(*args)
+            else:
+                print("Ignoring: No " + category +
+                      " defined to manipulate yet.")
+        return helper
+    return decorator
+
+
+test_ThingType_id = test_for_id_maker(command_ttid, "ThingType")
+
+
+def ThingType_value_setter(key, min, max):
+    """Build: Set selected ThingType's [key] to int(val_string) >=min/<=max."""
+    @test_ThingType_id
+    def f(val_string):
+        val = integer_test(val_string, min, max)
+        if val:
+            world_db["ThingTypes"][command_ttid.id][key] = val
+    return f
+
+
+@test_ThingType_id
+def command_ttname(name):
+    """Set to name TT_NAME of selected ThingType."""
+    world_db["ThingTypes"][command_ttid.id]["TT_NAME"] = name
+
+
+@test_ThingType_id
+def command_ttsymbol(char):
+    """Set to char TT_SYMBOL of selected ThingType. """
+    if 1 == len(char):
+        world_db["ThingTypes"][command_ttid.id]["TT_SYMBOL"] = char
+    else:
+        print("Ignoring: Argument must be single character.")
+
+
+@test_ThingType_id
+def command_ttcorpseid(str_int):
+    """Set to int(str_int) TT_CORPSE_ID of selected ThingType."""
+    val = integer_test(str_int, 0, 255)
+    if val:
+        if val in world_db["ThingTypes"]:
+            world_db["ThingTypes"][command_ttid.id]["TT_CORPSE_ID"] = val
+        else:
+            print("Corpse ID belongs to no known object type.")
+
+
 def command_taid(id_string):
     """Set ID of ThingAction to manipulate. ID unused? Create new ThingAction.
 
     The ID of the ThingAction to manipulate is stored as command_taid.id. If
     the integer of the input value is valid (>= 0 and <= 255), but 0, a new ID
-    is calculated: The lowest unused ID >0 and <= 255. A new ThingAction's
-    "TA_EFFORT" defaults to 1, its "TA_NAME" to "wait".
+    is calculated: The lowest unused ID >0 and <= 255.
     """
     id = integer_test(id_string, 0, 255)
     if id:
@@ -356,45 +454,44 @@ def command_taid(id_string):
                     print("Ignoring: "
                           "No unused ID available to add to ID list.")
                     return
+            command_taid.id = id
             world_db["ThingActions"][id] = {
                 "TA_EFFORT": 1,
                 "TA_NAME": "wait"
             }
-            command_taid.id = id
 
 
+test_ThingAction_id = test_for_id_maker(command_taid, "ThingAction")
+
+
+@test_ThingAction_id
 def command_taeffort(str_int):
-    """Set to int(str_int) effort value of ThingAction of command_taid.id."""
-    if hasattr(command_taid, "id"):
-        val = integer_test(str_int, 0, 255)
-        if val:
-            world_db["ThingActions"][command_taid.id]["TA_EFFORT"] = val
-    else:
-        print("Ignoring: No thing action defined to manipulate yet.")
+    """Set to int(str_int) TA_EFFORT of selected ThingAction."""
+    val = integer_test(str_int, 0, 255)
+    if val:
+        world_db["ThingActions"][command_taid.id]["TA_EFFORT"] = val
 
 
+@test_ThingAction_id
 def command_taname(name):
-    """Set to name name value of ThingAction of command_taid.id.
+    """Set to name TA_NAME of selected ThingAction.
 
     The name must match a valid thing action function. If after the name
     setting no ThingAction with name "wait" remains, call set_world_inactive().
     """
-    if hasattr(command_taid, "id"):
-        if name == "wait" or name == "move" or name == "use" \
-           or name == "drop" or name == "pick_up":
-            world_db["ThingActions"][command_taid.id]["TA_NAME"] = name
-            if 1 == world_db["WORLD_ACTIVE"]:
-                wait_defined = False
-                for id in world_db["ThingActions"]:
-                    if "wait" == world_db["ThingActions"][id]["TA_NAME"]:
-                        wait_defined = True
-                        break
-                if not wait_defined:
-                    set_world_inactive()
-        else:
-            print("Ignoring: Invalid action name.")
+    if name == "wait" or name == "move" or name == "use" or name == "drop" \
+       or name == "pick_up":
+        world_db["ThingActions"][command_taid.id]["TA_NAME"] = name
+        if 1 == world_db["WORLD_ACTIVE"]:
+            wait_defined = False
+            for id in world_db["ThingActions"]:
+                if "wait" == world_db["ThingActions"][id]["TA_NAME"]:
+                    wait_defined = True
+                    break
+            if not wait_defined:
+                set_world_inactive()
     else:
-        print("Ignoring: No thing action defined to manipulate yet.")
+        print("Ignoring: Invalid action name.")
     # In contrast to the original,naming won't map a function to a ThingAction.
 
 
@@ -410,15 +507,25 @@ commands_db = {
     "PING": (0, True, command_ping),
     "MAKE_WORLD": (1, False, command_makeworld),
     "SEED_MAP": (1, False, command_seedmap),
-    "SEED_RANDOMNESS": (1, False, worlddb_value_setter("SEED_RANDOMNESS", 0,
-                                                       4294967295)),
+    "SEED_RANDOMNESS": (1, False, worlddb_value_setter("SEED_RANDOMNESS",
+                                                       0, 4294967295)),
     "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535)),
     "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255)),
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, command_taeffort),
-    "TA_NAME": (1, False, command_taname)
+    "TA_NAME": (1, False, command_taname),
+    "TT_ID": (1, False, command_ttid),
+    "TT_NAME": (1, False, command_ttname),
+    "TT_SYMBOL": (1, False, command_ttsymbol),
+    "TT_CORPSE_ID": (1, False, command_ttcorpseid),
+    "TT_CONSUMABLE": (1, False, ThingType_value_setter("TT_CONSUMABLE",
+                                                       0, 65535)),
+    "TT_START_NUMBER": (1, False, ThingType_value_setter("TT_START_NUMBER",
+                                                         0, 255)),
+    "TT_PROLIFERATE": (1, False, ThingType_value_setter("TT_PROLIFERATE",
+                                                         0, 255))
 }
 
 
