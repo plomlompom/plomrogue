@@ -279,7 +279,7 @@ def set_world_inactive():
 
 
 def integer_test(val_string, min, max):
-    """Return val_string if possible integer >= min and <= max, else False."""
+    """Return val_string if possible integer >= min and <= max, else None."""
     try:
         val = int(val_string)
         if val < min or val > max:
@@ -288,7 +288,7 @@ def integer_test(val_string, min, max):
     except ValueError:
         print("Ignoring: Please use integer >= " + str(min) + " and <= " +
               str(max) + ".")
-        return False
+        return None
 
 
 def worlddb_value_setter(key, min, max):
@@ -358,7 +358,7 @@ def command_ttid(id_string):
     >255, a new ID is calculated: the lowest unused ID >=0 and <= 255.
     """
     id = integer_test(id_string, -32768, 32767)
-    if id:
+    if None != id:
         if id in world_db["ThingTypes"]:
             command_ttid.id = id
         else:
@@ -405,7 +405,7 @@ def ThingType_value_setter(key, min, max):
     @test_ThingType_id
     def f(val_string):
         val = integer_test(val_string, min, max)
-        if val:
+        if None != val:
             world_db["ThingTypes"][command_ttid.id][key] = val
     return f
 
@@ -429,7 +429,7 @@ def command_ttsymbol(char):
 def command_ttcorpseid(str_int):
     """Set to int(str_int) TT_CORPSE_ID of selected ThingType."""
     val = integer_test(str_int, 0, 255)
-    if val:
+    if None != val:
         if val in world_db["ThingTypes"]:
             world_db["ThingTypes"][command_ttid.id]["TT_CORPSE_ID"] = val
         else:
@@ -444,7 +444,7 @@ def command_taid(id_string):
     is calculated: The lowest unused ID >0 and <= 255.
     """
     id = integer_test(id_string, 0, 255)
-    if id:
+    if None != id:
         if id in world_db["ThingActions"]:
             command_taid.id = id
         else:
@@ -471,7 +471,7 @@ test_ThingAction_id = test_for_id_maker(command_taid, "ThingAction")
 def command_taeffort(str_int):
     """Set to int(str_int) TA_EFFORT of selected ThingAction."""
     val = integer_test(str_int, 0, 255)
-    if val:
+    if None != val:
         world_db["ThingActions"][command_taid.id]["TA_EFFORT"] = val
 
 
