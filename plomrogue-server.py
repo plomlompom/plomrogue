@@ -131,6 +131,8 @@ def save_world():
         tt_string = tt_string + "TT_ID " + str(id) + "\n" + \
                                 "TT_CONSUMABLE " + \
                                 str(tt["TT_CONSUMABLE"]) + "\n" + \
+                                "TT_LIFEPOINTS " + \
+                                str(tt["TT_LIFEPOINTS"]) + "\n" + \
                                 "TT_CORPSE_ID " + \
                                 str(tt["TT_CORPSE_ID"]) + "\n" + \
                                 "TT_PROLIFERATE " + \
@@ -374,6 +376,7 @@ def command_ttid(id_string):
             world_db["ThingTypes"][id] = {
                 "TT_NAME": "(none)",
                 "TT_CONSUMABLE": 0,
+                "TT_LIFEPOINTS": 0,
                 "TT_PROLIFERATE": 0,
                 "TT_START_NUMBER": 0,
                 "TT_SYMBOL": "?",
@@ -525,7 +528,9 @@ commands_db = {
     "TT_START_NUMBER": (1, False, ThingType_value_setter("TT_START_NUMBER",
                                                          0, 255)),
     "TT_PROLIFERATE": (1, False, ThingType_value_setter("TT_PROLIFERATE",
-                                                         0, 255))
+                                                        0, 255)),
+    "TT_LIFEPOINTS": (1, False, ThingType_value_setter("TT_LIFEPOINTS",
+                                                       0, 255))
 }
 
 
