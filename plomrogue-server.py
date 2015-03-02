@@ -117,7 +117,7 @@ def record(command):
 
 
 def save_world():
-    """Save all commands needed to reconstruct current world state.""" 
+    """Save all commands needed to reconstruct current world state."""
     # TODO: Misses same optimizations as record() from the original record().
 
     def quote(string):
@@ -291,8 +291,8 @@ def play_game():
 
 
 def remake_map():
-    # DUMMY.
-    print("I'd (re-)make the map now, if only I knew how.")
+    # DUMMY map creator.
+    world_db["MAP"] = bytearray(b'.' * (world_db["MAP_LENGTH"] ** 2))
 
 
 def set_world_inactive():
