@@ -382,14 +382,18 @@ def command_worldactive(worldactive_string):
             set_world_inactive()
         elif 0 == world_db["WORLD_ACTIVE"]:
             wait_exists = False
+            for ThingAction in world_db["ThingActions"]:
+                if "wait" == ThingAction["TA_NAME"]:
+                    wait_exists = True
+                    break
             player_exists = False
-            map_exists = False
-            # TODO: perform tests:
-            # Is there thing action of name 'wait'?
-            # Is there a player thing?
-            # Is there a map?
+            for Thing in world_db["Things"]:
+                if 0 == ThingAction["T_ID"]:
+                    player_exists = True
+                    break
+            map_exists = "MAP" in world_db
             if wait_exists and player_exists and map_exists:
-                # TODO: rebuild al things' FOVs, map memories
+                # TODO: rebuild all things' FOVs, map memories
                 world_db["WORLD_ACTIVE"] = 1
 
 
