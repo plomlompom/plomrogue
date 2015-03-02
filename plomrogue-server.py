@@ -119,18 +119,20 @@ def record(command):
 def save_world():
     """Save all commands needed to reconstruct current world state.""" 
     # TODO: Misses same optimizations as record() from the original record().
-    # TODO: How to handle strings that contain ' or "?
+
+    def quote(string):
+        string = string.replace("\u005C", '\u005C\u005C')
+        return '"' + string.replace('"', '\u005C"') + '"'
 
     def mapsetter(key):
         def helper(id):
             string = ""
             if world_db["Things"][id][key]:
-                memmap = world_db["Things"][id][key]
+                rmap = world_db["Things"][id][key]
                 length = world_db["MAP_LENGTH"]
                 for i in range(world_db["MAP_LENGTH"]):
-                    string = string + key + " " + str(i) + " '" + \
-                             memmap[i * length:(i * length) + length].decode() \
-                             + "'\n"
+                    line = rmap[i * length:(i * length) + length].decode()
+                    string = string + key + " " + str(i) + quote(line) + "\n"
             return string
         return helper
 
@@ -148,7 +150,7 @@ def save_world():
             for key in world_db[category][id]:
                 if not key in special_keys:
                     x = world_db[category][id][key]
-                    argument = "'" + x + "'" if str == type(x) else str(x)
+                    argument = quote(x) if str == type(x) else str(x)
                     string = string + key + " " + argument + "\n"
                 elif special_keys[key]:
                     string = string + special_keys[key](id)
