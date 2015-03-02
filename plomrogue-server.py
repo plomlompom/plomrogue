@@ -119,26 +119,60 @@ def record(command):
 def save_world():
     # Dummy for saving all commands to reconstruct current world state.
     # Misses same optimizations as record() from the original record().
+    # How to handle strings that contain ' or "?
+
+    def mapsetter(key):
+        def helper(id):
+            string = ""
+            if world_db["Things"][id][key]:
+                memmap = world_db["Things"][id][key]
+                length = world_db["MAP_LENGTH"]
+                for i in range(world_db["MAP_LENGTH"]):
+                    string = string + key + " " + str(i) + " '" + \
+                             memmap[i * length:(i * length) + length].decode() \
+                             + "'\n"
+            return string
+        return helper
+
+    def memthing(id):
+        string = ""
+        for memthing in world_db["Things"][id]["T_MEMTHING"]:
+            string = string + "T_MEMTHING " + str(memthing[0]) + " " + \
+                     str(memthing[1]) + " " + str(memthing[2]) + "\n"
+        return string
+
+    def helper(category, id_string, special_keys={}):
+        string = ""
+        for id in world_db[category]:
+            string = string + id_string + " " + str(id) + "\n"
+            for key in world_db[category][id]:
+                if not key in special_keys:
+                    x = world_db[category][id][key]
+                    argument = "'" + x + "'" if str == type(x) else str(x)
+                    string = string + key + " " + argument + "\n"
+                elif special_keys[key]:
+                    string = string + special_keys[key](id)
+        return string
+
     string = ""
     for key in world_db:
         if dict != type(world_db[key]):
             string = string + key + " " + str(world_db[key]) + "\n"
-    for id in world_db["ThingActions"]:
-        string = string + "TA_ID " + str(id) + "\n"
-        for key in world_db["ThingActions"][id]:
-            val = world_db["ThingActions"][id][key]
-            argument = "'" + val + "'" if str == type(val) else str(val)
-            string = string + key + " " + argument + "\n"
-    for id in world_db["ThingTypes"]:
-        string = string + "TT_ID " + str(id) + "\n"
-        for key in world_db["ThingTypes"][id]:
-            if not "TT_CORPSE_ID" == key:
-                val = world_db["ThingTypes"][id][key]
-                argument = "'" + val + "'" if str == type(val) else str(val)
-                string = string + key + " " + argument + "\n"
+    string = string + helper("ThingActions", "TA_ID")
+    string = string + helper("ThingTypes", "TT_ID", {"TT_CORPSE_ID": False})
     for id in world_db["ThingTypes"]:
         string = string + "TT_ID " + str(id) + "\n" + "TT_CORPSE_ID " + \
                  str(world_db["ThingTypes"][id]["TT_CORPSE_ID"]) + "\n"
+    string = string + helper("Things", "T_ID",
+                             {"T_CARRIES": False, "carried": False,
+                              "T_MEMMAP": mapsetter("T_MEMMAP"),
+                              "T_MEMTHING": memthing,
+                              "T_MEMDEPTHMAP": mapsetter("T_MEMDEPTHMAP")})
+    for id in world_db["Things"]:
+        if [] != world_db["Things"][id]["T_CARRIES"]:
+            string = string + "T_ID " + str(id) + "\n"
+            for carried_id in world_db["Things"][id]["T_CARRIES"]:
+                string = string + "T_CARRIES " + str(carried_id) + "\n"
     atomic_write(io_db["path_save"], string)
 
 
@@ -280,13 +314,30 @@ def integer_test(val_string, min, max):
         return None
 
 
-def worlddb_value_setter(key, min, max):
-    """Generate: Set world_db[key] to int(val_string) if >= min and <= max."""
-    def func(val_string):
-        val = integer_test(val_string, min, max)
-        if val:
-            world_db[key] = val
-    return func
+def setter(category, key, min, max):
+    """Build setter for world_db([category + "s"][id])[key] to >=min/<=max."""
+    if category is None:
+        def f(val_string):
+            val = integer_test(val_string, min, max)
+            if None != val:
+                world_db[key] = val
+    else:
+        if category == "Thing":
+            id_store = command_tid
+            decorator = test_Thing_id
+        elif category == "ThingType":
+            id_store = command_ttid
+            decorator = test_ThingType_id
+        elif category == "ThingAction":
+            id_store = command_taid
+            decorator = test_ThingAction_id
+
+        @decorator
+        def f(val_string):
+            val = integer_test(val_string, min, max)
+            if None != val:
+                world_db[category + "s"][id_store.id][key] = val
+    return f
 
 
 def command_ping():
@@ -302,14 +353,14 @@ def command_quit():
 
 def command_seedmap(seed_string):
     """Set world_db["SEED_MAP"] to int(seed_string), then (re-)make map."""
-    worlddb_value_setter("SEED_MAP", 0, 4294967295)(seed_string)
+    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
     remake_map()
 
 
 def command_makeworld(seed_string):
     # DUMMY.
-    worlddb_value_setter("SEED_MAP", 0, 4294967295)(seed_string)
-    worlddb_value_setter("SEED_RANDOMNESS", 0, 4294967295)(seed_string)
+    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
+    setter(None, "SEED_RANDOMNESS", 0, 4294967295)(seed_string)
     # TODO: Test for existence of player thing and 'wait' thing action?
 
 
@@ -317,7 +368,7 @@ def command_maplength(maplength_string):
     # DUMMY.
     set_world_inactive()
     # TODO: remove things, map
-    worlddb_value_setter("MAP_LENGTH", 1, 256)(maplength_string)
+    setter(None, "MAP_LENGTH", 1, 256)(maplength_string)
 
 
 def command_worldactive(worldactive_string):
@@ -339,38 +390,36 @@ def command_worldactive(worldactive_string):
                 world_db["WORLD_ACTIVE"] = 1
 
 
-def command_ttid(id_string):
-    """Set ID of ThingType to manipulate. ID unused? Create new ThingType.
+def id_setter(id_string, category, id_store, start_at_1=False):
+    """Set ID of object of category to manipulate ID unused? Create new one.
 
-    The ID of the ThingType to manipulate is stored as command_ttid.id. If
-    the integer of the input value is valid (>= -32768 and <= 32767), but <0 or
-    >255, a new ID is calculated: the lowest unused ID >=0 and <= 255.
+    The ID is stored as id_store.id. If the integer of the input is valid (if
+    start_at_1, >= 0 and <= 255, else >= -32768 and <= 32767), but <0 or (if
+    start_at_1) <1, calculate new ID: lowest unused ID >=0 or (if start_at_1)
+    >= 1, and <= 255. None is always returned when no new object is created,
+    otherwise the new object's ID.
     """
-    id = integer_test(id_string, -32768, 32767)
+    min = 0 if start_at_1 else -32768
+    max = 255 if start_at_1 else 32767
+    id = integer_test(id_string, min, max)
     if None != id:
-        if id in world_db["ThingTypes"]:
-            command_ttid.id = id
+        if id in world_db[category]:
+            id_store.id = id
+            return None
         else:
-            if id < 0 or id > 255:
+            if (start_at_1 and 0 == id) \
+               or ((not start_at_1) and (id < 0 or id > 255)):
                 id = -1
                 while 1:
                     id = id + 1
-                    if id not in world_db["ThingTypes"]:
+                    if id not in world_db[category]:
                         break
                 if id > 255:
                     print("Ignoring: "
                           "No unused ID available to add to ID list.")
-                    return
-            command_ttid.id = id
-            world_db["ThingTypes"][id] = {
-                "TT_NAME": "(none)",
-                "TT_CONSUMABLE": 0,
-                "TT_LIFEPOINTS": 0,
-                "TT_PROLIFERATE": 0,
-                "TT_START_NUMBER": 0,
-                "TT_SYMBOL": "?",
-                "TT_CORPSE_ID": id
-            }
+                    return None
+            id_store.id = id
+    return id
 
 
 def test_for_id_maker(object, category):
@@ -386,28 +435,164 @@ def test_for_id_maker(object, category):
     return decorator
 
 
-test_ThingType_id = test_for_id_maker(command_ttid, "ThingType")
+def command_tid(id_string):
+    """Set ID of Thing to manipulate. ID unused? Create new one.
+
+    Default new Thing's type to the first available ThingType, others: zero.
+    """
+    id = id_setter(id_string, "Things", command_tid)
+    if None != id:
+        if world_db["ThingTypes"] == {}:
+            print("Ignoring: No ThingType to settle new Thing in.")
+            return
+        world_db["Things"][id] = {
+            "T_LIFEPOINTS": 0,
+            "T_ARGUMENT": 0,
+            "T_PROGRESS": 0,
+            "T_SATIATION": 0,
+            "T_COMMAND": 0,
+            "T_TYPE": list(world_db["ThingTypes"].keys())[0],
+            "T_POSY": 0,
+            "T_POSX": 0,
+            "T_CARRIES": [],
+            "carried": False,
+            "T_MEMTHING": [],
+            "T_MEMMAP": False,
+            "T_MEMDEPTHMAP": False
+        }
 
 
-def ThingType_value_setter(key, min, max):
-    """Build: Set selected ThingType's [key] to int(val_string) >=min/<=max."""
-    @test_ThingType_id
-    def f(val_string):
-        val = integer_test(val_string, min, max)
+test_Thing_id = test_for_id_maker(command_tid, "Thing")
+
+
+@test_Thing_id
+def command_tcommand(str_int):
+    """Set T_COMMAND of selected Thing."""
+    val = integer_test(str_int, 0, 255)
+    if None != val:
+        if 0 == val or val in world_db["ThingActions"]:
+            world_db["Things"][command_tid.id]["T_COMMAND"] = val
+        else:
+            print("Ignoring: ThingAction ID belongs to no known ThingAction.")
+
+
+@test_Thing_id
+def command_ttype(str_int):
+    """Set T_TYPE of selected Thing."""
+    val = integer_test(str_int, 0, 255)
+    if None != val:
+        if val in world_db["ThingTypes"]:
+            world_db["Things"][command_tid.id]["T_TYPE"] = val
+        else:
+            print("Ignoring: ThingType ID belongs to no known ThingType.")
+
+
+@test_Thing_id
+def command_tcarries(str_int):
+    """Append int(str_int) to T_CARRIES of selected Thing.
+
+    The ID int(str_int) must not be of the selected Thing, and must belong to a
+    Thing with unset "carried" flag. Its "carried" flag will be set on owning.
+    """
+    val = integer_test(str_int, 0, 255)
+    if None != val:
+        if val == command_tid.id:
+            print("Ignoring: Thing cannot carry itself.")
+        elif val in world_db["Things"] \
+             and not world_db["Things"][val]["carried"]:
+            world_db["Things"][command_tid.id]["T_CARRIES"].append(val)
+            world_db["Things"][val]["carried"] = True
+        else:
+            print("Ignoring: Thing not available for carrying.")
+
+
+@test_Thing_id
+def command_tmemthing(str_t, str_y, str_x):
+    """Add (int(str_t), int(str_y), int(str_x)) to selected Thing's T_MEMTHING.
+
+    The type must fit to an existing ThingType, and the position into the map.
+    """
+    type = integer_test(str_t, 0, 255)
+    posy = integer_test(str_y, 0, 255)
+    posx = integer_test(str_x, 0, 255)
+    if None != type and None != posy and None != posx:
+        if type not in world_db["ThingTypes"] \
+           or posy >= world_db["MAP_LENGTH"] or posx >= world_db["MAP_LENGTH"]:
+            print("Ignoring: Illegal value for thing type or position.")
+        else:
+            memthing = (type, posy, posx)
+            world_db["Things"][command_tid.id]["T_MEMTHING"].append(memthing)
+
+
+def setter_map(maptype):
+    """Set selected Thing's map of maptype's int(str_int)-th line to mapline.
+
+    If Thing has no map of maptype yet, initialize it with ' ' bytes first.
+    """
+    @test_Thing_id
+    def helper(str_int, mapline):
+        val = integer_test(str_int, 0, 255)
         if None != val:
-            world_db["ThingTypes"][command_ttid.id][key] = val
-    return f
+            if val >= world_db["MAP_LENGTH"]:
+                print("Illegal value for map line number.")
+            elif len(mapline) != world_db["MAP_LENGTH"]:
+                print("Map line length is unequal map width.")
+            else:
+                length = world_db["MAP_LENGTH"]
+                rmap = None
+                if not world_db["Things"][command_tid.id][maptype]:
+                    rmap = bytearray(b' ' * (length ** 2))
+                else:
+                    rmap = world_db["Things"][command_tid.id][maptype]
+                rmap[val * length:(val * length) + length] = mapline.encode()
+                world_db["Things"][command_tid.id][maptype] = rmap
+    return helper
+
+
+def setter_tpos(axis):
+    """Generate setter for T_POSX or  T_POSY of selected Thing."""
+    @test_Thing_id
+    def helper(str_int):
+        val = integer_test(str_int, 0, 255)
+        if None != val:
+            if val < world_db["MAP_LENGTH"]:
+                world_db["Things"][command_tid.id]["T_POS" + axis] = val
+                # TODO: Delete Thing's FOV, and rebuild it if world is active.
+            else:
+                print("Ignoring: Position is outside of map.")
+    return helper
+
+
+def command_ttid(id_string):
+    """Set ID of ThingType to manipulate. ID unused? Create new one.
+
+    Default new ThingType's TT_SYMBOL to "?", TT_CORPSE_ID to self, others: 0.
+    """
+    id = id_setter(id_string, "ThingTypes", command_ttid)
+    if None != id:
+        world_db["ThingTypes"][id] = {
+            "TT_NAME": "(none)",
+            "TT_CONSUMABLE": 0,
+            "TT_LIFEPOINTS": 0,
+            "TT_PROLIFERATE": 0,
+            "TT_START_NUMBER": 0,
+            "TT_SYMBOL": "?",
+            "TT_CORPSE_ID": id
+        }
+
+
+test_ThingType_id = test_for_id_maker(command_ttid, "ThingType")
 
 
 @test_ThingType_id
 def command_ttname(name):
-    """Set to name TT_NAME of selected ThingType."""
+    """Set TT_NAME of selected ThingType."""
     world_db["ThingTypes"][command_ttid.id]["TT_NAME"] = name
 
 
 @test_ThingType_id
 def command_ttsymbol(char):
-    """Set to char TT_SYMBOL of selected ThingType. """
+    """Set TT_SYMBOL of selected ThingType. """
     if 1 == len(char):
         world_db["ThingTypes"][command_ttid.id]["TT_SYMBOL"] = char
     else:
@@ -416,57 +601,34 @@ def command_ttsymbol(char):
 
 @test_ThingType_id
 def command_ttcorpseid(str_int):
-    """Set to int(str_int) TT_CORPSE_ID of selected ThingType."""
+    """Set TT_CORPSE_ID of selected ThingType."""
     val = integer_test(str_int, 0, 255)
     if None != val:
         if val in world_db["ThingTypes"]:
             world_db["ThingTypes"][command_ttid.id]["TT_CORPSE_ID"] = val
         else:
-            print("Corpse ID belongs to no known object type.")
+            print("Ignoring: Corpse ID belongs to no known ThignType.")
 
 
 def command_taid(id_string):
-    """Set ID of ThingAction to manipulate. ID unused? Create new ThingAction.
+    """Set ID of ThingAction to manipulate. ID unused? Create new one.
 
-    The ID of the ThingAction to manipulate is stored as command_taid.id. If
-    the integer of the input value is valid (>= 0 and <= 255), but 0, a new ID
-    is calculated: The lowest unused ID >0 and <= 255.
+    Default new ThingAction's TA_EFFORT to 1, its TA_NAME to "wait".
     """
-    id = integer_test(id_string, 0, 255)
+    id = id_setter(id_string, "ThingActions", command_taid, True)
     if None != id:
-        if id in world_db["ThingActions"]:
-            command_taid.id = id
-        else:
-            if 0 == id:
-                while 1:
-                    id = id + 1
-                    if id not in world_db["ThingActions"]:
-                        break
-                if id > 255:
-                    print("Ignoring: "
-                          "No unused ID available to add to ID list.")
-                    return
-            command_taid.id = id
-            world_db["ThingActions"][id] = {
-                "TA_EFFORT": 1,
-                "TA_NAME": "wait"
-            }
+        world_db["ThingActions"][id] = {
+            "TA_EFFORT": 1,
+            "TA_NAME": "wait"
+        }
 
 
 test_ThingAction_id = test_for_id_maker(command_taid, "ThingAction")
 
 
 @test_ThingAction_id
-def command_taeffort(str_int):
-    """Set to int(str_int) TA_EFFORT of selected ThingAction."""
-    val = integer_test(str_int, 0, 255)
-    if None != val:
-        world_db["ThingActions"][command_taid.id]["TA_EFFORT"] = val
-
-
-@test_ThingAction_id
 def command_taname(name):
-    """Set to name TA_NAME of selected ThingAction.
+    """Set TA_NAME of selected ThingAction.
 
     The name must match a valid thing action function. If after the name
     setting no ThingAction with name "wait" remains, call set_world_inactive().
@@ -499,27 +661,39 @@ commands_db = {
     "PING": (0, True, command_ping),
     "MAKE_WORLD": (1, False, command_makeworld),
     "SEED_MAP": (1, False, command_seedmap),
-    "SEED_RANDOMNESS": (1, False, worlddb_value_setter("SEED_RANDOMNESS",
-                                                       0, 4294967295)),
-    "TURN": (1, False, worlddb_value_setter("TURN", 0, 65535)),
-    "PLAYER_TYPE": (1, False, worlddb_value_setter("PLAYER_TYPE", 0, 255)),
+    "SEED_RANDOMNESS": (1, False, setter(None, "SEED_RANDOMNESS",
+                                         0, 4294967295)),
+    "TURN": (1, False, setter(None, "TURN", 0, 65535)),
+    "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0, 255)),
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "TA_ID": (1, False, command_taid),
-    "TA_EFFORT": (1, False, command_taeffort),
+    "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
     "TA_NAME": (1, False, command_taname),
     "TT_ID": (1, False, command_ttid),
     "TT_NAME": (1, False, command_ttname),
     "TT_SYMBOL": (1, False, command_ttsymbol),
     "TT_CORPSE_ID": (1, False, command_ttcorpseid),
-    "TT_CONSUMABLE": (1, False, ThingType_value_setter("TT_CONSUMABLE",
-                                                       0, 65535)),
-    "TT_START_NUMBER": (1, False, ThingType_value_setter("TT_START_NUMBER",
-                                                         0, 255)),
-    "TT_PROLIFERATE": (1, False, ThingType_value_setter("TT_PROLIFERATE",
-                                                        0, 255)),
-    "TT_LIFEPOINTS": (1, False, ThingType_value_setter("TT_LIFEPOINTS",
-                                                       0, 255))
+    "TT_CONSUMABLE": (1, False, setter("ThingType", "TT_CONSUMABLE",
+                                       0, 65535)),
+    "TT_START_NUMBER": (1, False, setter("ThingType", "TT_START_NUMBER",
+                                         0, 255)),
+    "TT_PROLIFERATE": (1, False, setter("ThingType", "TT_PROLIFERATE",
+                                        0, 255)),
+    "TT_LIFEPOINTS": (1, False, setter("ThingType", "TT_LIFEPOINTS", 0, 255)),
+    "T_ID": (1, False, command_tid),
+    "T_ARGUMENT": (1, False, setter("Thing", "T_ARGUMENT", 0, 255)),
+    "T_PROGRESS": (1, False, setter("Thing", "T_PROGRESS", 0, 255)),
+    "T_LIFEPOINTS": (1, False, setter("Thing", "T_LIFEPOINTS", 0, 255)),
+    "T_SATIATION": (1, False, setter("Thing", "T_SATIATION", -32768, 32767)),
+    "T_COMMAND": (1, False, command_tcommand),
+    "T_TYPE": (1, False, command_ttype),
+    "T_CARRIES": (1, False, command_tcarries),
+    "T_MEMMAP": (2, False, setter_map("T_MEMMAP")),
+    "T_MEMDEPTHMAP": (2, False, setter_map("T_MEMDEPTHMAP")),
+    "T_MEMTHING": (3, False, command_tmemthing),
+    "T_POSY": (1, False, setter_tpos("Y")),
+    "T_POSX": (1, False, setter_tpos("X")),
 }
 
 

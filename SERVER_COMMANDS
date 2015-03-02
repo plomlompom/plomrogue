@@ -139,7 +139,7 @@ lifepoints value; if world is active and the thing is animate, build its field
 of view.
 
 T_TYPE [0 to 255]
-Set selected thing's type ID to argument.
+Set selected thing's type ID to argument, if the respective ThingType exists.
 
 T_POSY [0 to 255]
 Set selected thing's map row position to argument. Delete thing's field of view
