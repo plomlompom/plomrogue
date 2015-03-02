@@ -369,7 +369,7 @@ def command_makeworld(seed_string):
 def command_maplength(maplength_string):
     # DUMMY.
     set_world_inactive()
-    # TODO: remove map
+    # TODO: remove map (is this necessary? no memory management trouble …)
     world_db["Things"] = {}
     setter(None, "MAP_LENGTH", 1, 256)(maplength_string)
 
@@ -378,8 +378,11 @@ def command_worldactive(worldactive_string):
     # DUMMY.
     val = integer_test(worldactive_string, 0, 1)
     if val:
-        if 0 != world_db["WORLD_ACTIVE"] and 0 == val:
-            set_world_inactive()
+        if 0 != world_db["WORLD_ACTIVE"]:
+            if 0 == val:
+                set_world_inactive()
+            else:
+                print("World already active.")
         elif 0 == world_db["WORLD_ACTIVE"]:
             wait_exists = False
             for ThingAction in world_db["ThingActions"]:
