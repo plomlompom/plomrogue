@@ -384,7 +384,8 @@ def command_makeworld(seed_string):
     world_db["Things"] = {}
     remake_map()
     world_db["WORLD_ACTIVE"] = 1
-    # TODO: Generate things (player first, with updated memory), set TURN 1,
+    world_db["TURN"] = 1
+    # TODO: Generate things (player first, with updated memory)
     atomic_write(io_db["path_out"], "NEW_WORLD\n", do_append=True)
 
 
