@@ -361,9 +361,31 @@ def command_seedmap(seed_string):
 
 def command_makeworld(seed_string):
     # DUMMY.
-    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
     setter(None, "SEED_RANDOMNESS", 0, 4294967295)(seed_string)
-    # TODO: Test for existence of player thing and 'wait' thing action?
+    player_will_be_generated = False
+    for ThingType in world_db["ThingTypes"]:
+        if 0 == ThingType:
+            if 0 < world_db["ThingTypes"][ThingType]["TT_START_NUMBER"]:
+                player_will_be_generated = True
+            break
+    if not player_will_be_generated:
+        print("Ignoring beyond SEED_MAP: " +
+              "No player type with start number >0 defined.")
+        return
+    wait_action = False
+    for ThingAction in world_db["ThingActions"]:
+        if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
+            wait_action = True
+    if not wait_action:
+        print("Ignoring beyond SEED_MAP: " +
+              "No thing action with name 'wait' defined.")
+        return
+    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
+    world_db["Things"] = {}
+    remake_map()
+    world_db["WORLD_ACTIVE"] = 1
+    # TODO: Generate things (player first, with updated memory), set TURN 1,
+    atomic_write(io_db["path_out"], "NEW_WORLD\n", do_append=True)
 
 
 def command_maplength(maplength_string):
