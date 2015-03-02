@@ -369,7 +369,8 @@ def command_makeworld(seed_string):
 def command_maplength(maplength_string):
     # DUMMY.
     set_world_inactive()
-    # TODO: remove things, map
+    # TODO: remove map
+    world_db["Things"] = {}
     setter(None, "MAP_LENGTH", 1, 256)(maplength_string)
 
 
