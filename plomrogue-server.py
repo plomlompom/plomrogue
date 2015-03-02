@@ -117,9 +117,9 @@ def record(command):
 
 
 def save_world():
-    # Dummy for saving all commands to reconstruct current world state.
-    # Misses same optimizations as record() from the original record().
-    # How to handle strings that contain ' or "?
+    """Save all commands needed to reconstruct current world state.""" 
+    # TODO: Misses same optimizations as record() from the original record().
+    # TODO: How to handle strings that contain ' or "?
 
     def mapsetter(key):
         def helper(id):
@@ -504,6 +504,9 @@ def command_tcarries(str_int):
             world_db["Things"][val]["carried"] = True
         else:
             print("Ignoring: Thing not available for carrying.")
+    # Note that the whole carrying structure is different from the C version:
+    # Carried-ness is marked by a "carried" flag, not by Things containing
+    # Things internally.
 
 
 @test_Thing_id
