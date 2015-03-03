@@ -381,6 +381,25 @@ def setter(category, key, min, max):
     return f
 
 
+def new_Thing(type):
+    """Return prototype for Thing of T_TYPE of type."""
+    return {
+        "T_LIFEPOINTS": world_db["ThingTypes"][type]["TT_LIFEPOINTS"],
+        "T_ARGUMENT": 0,
+        "T_PROGRESS": 0,
+        "T_SATIATION": 0,
+        "T_COMMAND": 0,
+        "T_TYPE": type,
+        "T_POSY": 0,
+        "T_POSX": 0,
+        "T_CARRIES": [],
+        "carried": False,
+        "T_MEMTHING": [],
+        "T_MEMMAP": False,
+        "T_MEMDEPTHMAP": False
+    }
+
+
 def id_setter(id, category, id_store=False, start_at_1=False):
     """Set ID of object of category to manipulate ID unused? Create new one.
 
@@ -438,8 +457,18 @@ def command_seedmap(seed_string):
 
 
 def command_makeworld(seed_string):
-    # DUMMY.
+    """(Re-)build game world, i.e. map, things, to a new turn 1 from seed.
+
+    Make seed world_db["SEED_RANDOMNESS"] and world_db["SEED_MAP"]. Do more
+    only with a "wait" ThingAction and world["PLAYER_TYPE"] matching ThingType
+    of TT_START_NUMBER > 0. Then, world_db["Things"] emptied, call remake_map()
+    and set world_db["WORLD_ACTIVE"], world_db["TURN"] to 1. Build new Things
+    according to ThingTypes' TT_START_NUMBERS, with Thing of ID 0 to ThingType
+    of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
+    other; init their FOV/memory maps. Write "NEW_WORLD" line to out file.
+    """
     setter(None, "SEED_RANDOMNESS", 0, 4294967295)(seed_string)
+    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
     player_will_be_generated = False
     playertype = world_db["PLAYER_TYPE"]
     for ThingType in world_db["ThingTypes"]:
@@ -459,29 +488,18 @@ def command_makeworld(seed_string):
         print("Ignoring beyond SEED_MAP: " +
               "No thing action with name 'wait' defined.")
         return
-    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
     world_db["Things"] = {}
     remake_map()
     world_db["WORLD_ACTIVE"] = 1
     world_db["TURN"] = 1
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
-        world_db["Things"][id_setter(-1, "Things")] = {
-            "T_LIFEPOINTS": world_db["ThingTypes"][playertype]["TT_LIFEPOINTS"],
-            "T_TYPE": playertype,
-            "T_POSY": 0, # randomize safely
-            "T_POSX": 0, # randomize safely
-            "T_ARGUMENT": 0,
-            "T_PROGRESS": 0,
-            "T_SATIATION": 0,
-            "T_COMMAND": 0,
-            "T_CARRIES": [],
-            "carried": False,
-            "T_MEMTHING": [],
-            "T_MEMMAP": False,
-            "T_MEMDEPTHMAP": False
-        }
-    # generate fov map?
-    # TODO: Generate things (player first, with updated memory)
+        id = id_setter(-1, "Things")
+        world_db["Things"][id] = new_Thing(playertype)
+    for type in world_db["ThingTypes"]:
+        for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
+            id = id_setter(-1, "Things")
+            world_db["Things"][id] = new_Thing(playertype)
+    # TODO: position? update FOVs / map memories? (only at the end)
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 
@@ -546,21 +564,8 @@ def command_tid(id_string):
         if world_db["ThingTypes"] == {}:
             print("Ignoring: No ThingType to settle new Thing in.")
             return
-        world_db["Things"][id] = {
-            "T_LIFEPOINTS": 0,
-            "T_ARGUMENT": 0,
-            "T_PROGRESS": 0,
-            "T_SATIATION": 0,
-            "T_COMMAND": 0,
-            "T_TYPE": list(world_db["ThingTypes"].keys())[0],
-            "T_POSY": 0,
-            "T_POSX": 0,
-            "T_CARRIES": [],
-            "carried": False,
-            "T_MEMTHING": [],
-            "T_MEMMAP": False,
-            "T_MEMDEPTHMAP": False
-        }
+        type = list(world_db["ThingTypes"].keys())[0]
+        world_db["Things"][id] = new_Thing(type)
 
 
 test_Thing_id = test_for_id_maker(command_tid, "Thing")
