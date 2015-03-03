@@ -72,7 +72,7 @@ def obey(command, prefix, replay=False, do_record=False):
     if len(tokens) > 0 and tokens[0] in commands_db \
        and len(tokens) == commands_db[tokens[0]][0] + 1:
         if commands_db[tokens[0]][1]:
-            commands_db[tokens[0]][2]()
+            commands_db[tokens[0]][2](*tokens[1:])
         elif replay:
             print("Due to replay mode, reading command as 'go on in record'.")
             line = io_db["file_record"].readline()
@@ -423,6 +423,11 @@ def command_quit():
     raise SystemExit("received QUIT command")
 
 
+def command_thingshere(y, x):
+    # DUMMY
+    print("Ignoring not-yet implemented THINGS_HERE command.")
+
+
 def command_seedmap(seed_string):
     """Set world_db["SEED_MAP"] to int(seed_string), then (re-)make map."""
     setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
@@ -751,6 +756,7 @@ to be called on it.
 commands_db = {
     "QUIT": (0, True, command_quit),
     "PING": (0, True, command_ping),
+    "THINGS_HERE": (2, True, command_thingshere),
     "MAKE_WORLD": (1, False, command_makeworld),
     "SEED_MAP": (1, False, command_seedmap),
     "SEED_RANDOMNESS": (1, False, setter(None, "SEED_RANDOMNESS",
