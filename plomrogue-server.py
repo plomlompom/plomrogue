@@ -800,7 +800,7 @@ commands_db = {
 
 """World state database. With sane default values."""
 world_db = {
-    "TURN": 1,
+    "TURN": 0,
     "SEED_MAP": 0,
     "SEED_RANDOMNESS": 0,
     "PLAYER_TYPE": 0,
