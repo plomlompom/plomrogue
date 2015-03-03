@@ -7,7 +7,7 @@ import time
 
 
 def strong_write(file, string):
-    """Apply write(string), flush() and os.fsync() to file."""
+    """Apply write(string), flush(), and os.fsync() to file."""
     file.write(string)
     file.flush()
     os.fsync(file)
@@ -465,7 +465,7 @@ def command_makeworld(seed_string):
     and set world_db["WORLD_ACTIVE"], world_db["TURN"] to 1. Build new Things
     according to ThingTypes' TT_START_NUMBERS, with Thing of ID 0 to ThingType
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
-    other; init their FOV/memory maps. Write "NEW_WORLD" line to out file.
+    other. Init player's FOV/memory map. Write "NEW_WORLD" line to out file.
     """
     setter(None, "SEED_RANDOMNESS", 0, 4294967295)(seed_string)
     setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
@@ -495,11 +495,12 @@ def command_makeworld(seed_string):
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
         id = id_setter(-1, "Things")
         world_db["Things"][id] = new_Thing(playertype)
+    # TODO: Positioning. Init player's FOV / memory map.
     for type in world_db["ThingTypes"]:
         for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
             id = id_setter(-1, "Things")
             world_db["Things"][id] = new_Thing(playertype)
-    # TODO: position? update FOVs / map memories? (only at the end)
+    # TODO: Positioning.
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 
