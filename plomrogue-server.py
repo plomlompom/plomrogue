@@ -138,8 +138,8 @@ def save_world():
                 length = world_db["MAP_LENGTH"]
                 for i in range(length):
                     line = map[i * length:(i * length) + length].decode()
-                    string = string + key + " " + str(i) + " " + quote(line) + \
-                             "\n"
+                    string = string + key + " " + str(i) + " " + quote(line) \
+                             + "\n"
             return string
         return helper
 
@@ -750,7 +750,7 @@ def setter_tpos(axis):
                 world_db["Things"][command_tid.id]["T_POS" + axis] = val
                 if world_db["WORLD_ACTIVE"] \
                    and world_db["Things"][command_tid.id]["T_LIFEPOINTS"]:
-                    build_fov_map( world_db["Things"][command_tid.id])
+                    build_fov_map(world_db["Things"][command_tid.id])
                     if 0 == command_tid.id:
                         update_map_memory(world_db["Things"][command_tid.id])
             else:
