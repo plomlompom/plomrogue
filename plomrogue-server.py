@@ -54,10 +54,11 @@ def cleanup_server_io():
 def obey(command, prefix, replay=False, do_record=False):
     """Call function from commands_db mapped to command's first token.
 
-    The command string is tokenized by shlex.split(comments=True). If replay is
-    set, a non-meta command from the commands_db merely triggers obey() on the
-    next command from the records file. If not, and do do_record is set,
-    non-meta commands are recorded via record(), and save_world() is called.
+    Tokenize command string with shlex.split(comments=True). If replay is set,
+    a non-meta command from the commands_db merely triggers obey() on the next
+    command from the records file. If not, non-meta commands set
+    io_db["worldstate_updateable"] to world_db["WORLD_EXISTS"], and, if
+    do_record is set, are recorded via record(), and save_world() is called.
     The prefix string is inserted into the server's input message between its
     beginning 'input ' & ':'. All activity is preceded by a server_test() call.
     """
@@ -86,6 +87,7 @@ def obey(command, prefix, replay=False, do_record=False):
             if do_record:
                 record(command)
                 save_world()
+            io_db["worldstate_updateable"] = world_db["WORLD_ACTIVE"]
     elif 0 != len(tokens):
         print("Invalid command/argument, or bad number of tokens.")
 
@@ -130,7 +132,7 @@ def save_world():
             if world_db["Things"][id][key]:
                 rmap = world_db["Things"][id][key]
                 length = world_db["MAP_LENGTH"]
-                for i in range(world_db["MAP_LENGTH"]):
+                for i in range(length):
                     line = rmap[i * length:(i * length) + length].decode()
                     string = string + key + " " + str(i) + quote(line) + "\n"
             return string
@@ -175,6 +177,7 @@ def save_world():
             string = string + "T_ID " + str(id) + "\n"
             for carried_id in world_db["Things"][id]["T_CARRIES"]:
                 string = string + "T_CARRIES " + str(carried_id) + "\n"
+    string = string + "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"])
     atomic_write(io_db["path_save"], string)
 
 
@@ -243,12 +246,34 @@ def read_command():
     return command
 
 
+def try_worldstate_update():
+    """Write worldstate file if io_db["worldstate_updateable"] is set."""
+    if io_db["worldstate_updateable"]:
+        string = str(world_db["TURN"]) + "\n" + \
+                 str(world_db["Things"][0]["T_LIFEPOINTS"]) + "\n" + \
+                 str(world_db["Things"][0]["T_SATIATION"]) + "\n" + \
+                 "(none)\n%\n" + \
+                 str(world_db["Things"][0]["T_POSY"]) + "\n" + \
+                 str(world_db["Things"][0]["T_POSX"]) + "\n" + \
+                 str(world_db["MAP_LENGTH"]) + "\n"
+        # TODO: no inventory so far
+        length = world_db["MAP_LENGTH"]
+        for i in range(length):
+            line = world_db["MAP"][i * length:(i * length) + length].decode()
+            string = string + line + "\n"
+        # TODO: no proper user-subjective map
+        atomic_write(io_db["path_worldstate"], string)
+        atomic_write(io_db["path_out"], "WORLD_UPDATED\n", do_append=True)
+        io_db["worldstate_updateable"] = False
+
+
 def replay_game():
     """Replay game from record file.
 
     Use opts.replay as breakpoint turn to which to replay automatically before
     switching to manual input by non-meta commands in server input file
     triggering further reads of record file. Ensure opts.replay is at least 1.
+    Run try_worldstate_update() before each interactive obey()/read_command().
     """
     if opts.replay < 1:
         opts.replay = 1
@@ -267,6 +292,7 @@ def replay_game():
              + str(io_db["file_record"].line_n))
         io_db["file_record"].line_n = io_db["file_record"].line_n + 1
     while True:
+        try_worldstate_update()
         obey(read_command(), "in file", replay=True)
 
 
@@ -275,7 +301,8 @@ def play_game():
 
     If no save file is found, a new world is generated from the commands in the
     world config plus a 'MAKE WORLD [current Unix timestamp]'. Record this
-    command and all that follow via the server input file.
+    command and all that follow via the server input file. Run
+    try_worldstate_update() before each interactive obey()/read_command().
     """
     if os.access(io_db["path_save"], os.F_OK):
         obey_lines_in_file(io_db["path_save"], "save")
@@ -287,6 +314,7 @@ def play_game():
                            do_record=True)
         obey("MAKE_WORLD " + str(int(time.time())), "in file", do_record=True)
     while True:
+        try_worldstate_update()
         obey(read_command(), "in file", do_record=True)
 
 
@@ -342,6 +370,41 @@ def setter(category, key, min, max):
     return f
 
 
+def id_setter(id, category, id_store=False, start_at_1=False):
+    """Set ID of object of category to manipulate ID unused? Create new one.
+
+    The ID is stored as id_store.id (if id_store is set). If the integer of the
+    input is valid (if start_at_1, >= 0 and <= 255, else >= -32768 and <=
+    32767), but <0 or (if start_at_1) <1, calculate new ID: lowest unused ID
+    >=0 or (if start_at_1) >= 1, and <= 255. None is always returned when no
+    new object is created, otherwise the new object's ID.
+    """
+    min = 0 if start_at_1 else -32768
+    max = 255 if start_at_1 else 32767
+    if str == type(id):
+        id = integer_test(id, min, max)
+    if None != id:
+        if id in world_db[category]:
+            if id_store:
+                id_store.id = id
+            return None
+        else:
+            if (start_at_1 and 0 == id) \
+               or ((not start_at_1) and (id < 0 or id > 255)):
+                id = -1
+                while 1:
+                    id = id + 1
+                    if id not in world_db[category]:
+                        break
+                if id > 255:
+                    print("Ignoring: "
+                          "No unused ID available to add to ID list.")
+                    return None
+            if id_store:
+                id_store.id = id
+    return id
+
+
 def command_ping():
     """Send PONG line to server output file."""
     io_db["file_out"].write("PONG\n")
@@ -363,8 +426,9 @@ def command_makeworld(seed_string):
     # DUMMY.
     setter(None, "SEED_RANDOMNESS", 0, 4294967295)(seed_string)
     player_will_be_generated = False
+    playertype = world_db["PLAYER_TYPE"]
     for ThingType in world_db["ThingTypes"]:
-        if 0 == ThingType:
+        if playertype == ThingType:
             if 0 < world_db["ThingTypes"][ThingType]["TT_START_NUMBER"]:
                 player_will_be_generated = True
             break
@@ -385,6 +449,23 @@ def command_makeworld(seed_string):
     remake_map()
     world_db["WORLD_ACTIVE"] = 1
     world_db["TURN"] = 1
+    for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
+        world_db["Things"][id_setter(-1, "Things")] = {
+            "T_LIFEPOINTS": world_db["ThingTypes"][playertype]["TT_LIFEPOINTS"],
+            "T_TYPE": playertype,
+            "T_POSY": 0, # randomize safely
+            "T_POSX": 0, # randomize safely
+            "T_ARGUMENT": 0,
+            "T_PROGRESS": 0,
+            "T_SATIATION": 0,
+            "T_COMMAND": 0,
+            "T_CARRIES": [],
+            "carried": False,
+            "T_MEMTHING": [],
+            "T_MEMMAP": False,
+            "T_MEMDEPTHMAP": False
+        }
+    # generate fov map?
     # TODO: Generate things (player first, with updated memory)
     atomic_write(io_db["path_out"], "NEW_WORLD\n", do_append=True)
 
@@ -409,50 +490,18 @@ def command_worldactive(worldactive_string):
         elif 0 == world_db["WORLD_ACTIVE"]:
             wait_exists = False
             for ThingAction in world_db["ThingActions"]:
-                if "wait" == ThingAction["TA_NAME"]:
+                if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
                     wait_exists = True
                     break
             player_exists = False
             for Thing in world_db["Things"]:
-                if 0 == ThingAction["T_ID"]:
+                if 0 == Thing:
                     player_exists = True
                     break
             map_exists = "MAP" in world_db
             if wait_exists and player_exists and map_exists:
                 # TODO: rebuild all things' FOVs, map memories
                 world_db["WORLD_ACTIVE"] = 1
-
-
-def id_setter(id_string, category, id_store, start_at_1=False):
-    """Set ID of object of category to manipulate ID unused? Create new one.
-
-    The ID is stored as id_store.id. If the integer of the input is valid (if
-    start_at_1, >= 0 and <= 255, else >= -32768 and <= 32767), but <0 or (if
-    start_at_1) <1, calculate new ID: lowest unused ID >=0 or (if start_at_1)
-    >= 1, and <= 255. None is always returned when no new object is created,
-    otherwise the new object's ID.
-    """
-    min = 0 if start_at_1 else -32768
-    max = 255 if start_at_1 else 32767
-    id = integer_test(id_string, min, max)
-    if None != id:
-        if id in world_db[category]:
-            id_store.id = id
-            return None
-        else:
-            if (start_at_1 and 0 == id) \
-               or ((not start_at_1) and (id < 0 or id > 255)):
-                id = -1
-                while 1:
-                    id = id + 1
-                    if id not in world_db[category]:
-                        break
-                if id > 255:
-                    print("Ignoring: "
-                          "No unused ID available to add to ID list.")
-                    return None
-            id_store.id = id
-    return id
 
 
 def test_for_id_maker(object, category):
@@ -757,7 +806,8 @@ io_db = {
     "path_out": "server/out",
     "path_worldstate": "server/worldstate",
     "tmp_suffix": "_tmp",
-    "kicked_by_rival": False
+    "kicked_by_rival": False,
+    "worldstate_updateable": False
 }
 
 
