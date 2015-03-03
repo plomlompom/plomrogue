@@ -164,7 +164,7 @@ def save_world():
 
     string = ""
     for key in world_db:
-        if dict != type(world_db[key]):
+        if dict != type(world_db[key]) and key != "MAP":
             string = string + key + " " + str(world_db[key]) + "\n"
     string = string + helper("ThingActions", "TA_ID")
     string = string + helper("ThingTypes", "TT_ID", {"TT_CORPSE_ID": False})
