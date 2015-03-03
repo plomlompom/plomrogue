@@ -270,7 +270,9 @@ def try_worldstate_update():
             string = string + line + "\n"
         # TODO: no proper user-subjective map
         atomic_write(io_db["path_worldstate"], string)
-        atomic_write(io_db["path_out"], "WORLD_UPDATED\n", do_append=True)
+        io_db["file_out"].write("WORLD_UPDATED\n")
+        io_db["file_out"].flush()
+        os.fsync(io_db["file_out"])
         io_db["worldstate_updateable"] = False
 
 
@@ -416,6 +418,7 @@ def command_ping():
     """Send PONG line to server output file."""
     io_db["file_out"].write("PONG\n")
     io_db["file_out"].flush()
+    os.fsync(io_db["file_out"].fileno())
 
 
 def command_quit():
