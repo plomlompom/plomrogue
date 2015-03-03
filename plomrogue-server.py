@@ -134,11 +134,12 @@ def save_world():
         def helper(id):
             string = ""
             if world_db["Things"][id][key]:
-                rmap = world_db["Things"][id][key]
+                map = world_db["Things"][id][key]
                 length = world_db["MAP_LENGTH"]
                 for i in range(length):
-                    line = rmap[i * length:(i * length) + length].decode()
-                    string = string + key + " " + str(i) + quote(line) + "\n"
+                    line = map[i * length:(i * length) + length].decode()
+                    string = string + key + " " + str(i) + " " + quote(line) + \
+                             "\n"
             return string
         return helper
 
@@ -174,7 +175,7 @@ def save_world():
     string = string + helper("Things", "T_ID",
                              {"T_CARRIES": False, "carried": False,
                               "T_MEMMAP": mapsetter("T_MEMMAP"),
-                              "T_MEMTHING": memthing,
+                              "T_MEMTHING": memthing, "fovmap": False,
                               "T_MEMDEPTHMAP": mapsetter("T_MEMDEPTHMAP")})
     for id in world_db["Things"]:
         if [] != world_db["Things"][id]["T_CARRIES"]:
@@ -253,6 +254,28 @@ def read_command():
 def try_worldstate_update():
     """Write worldstate file if io_db["worldstate_updateable"] is set."""
     if io_db["worldstate_updateable"]:
+
+        def draw_visible_Things(map, run):
+            for id in world_db["Things"]:
+                type = world_db["Things"][id]["T_TYPE"]
+                consumable = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+                alive = world_db["ThingTypes"][type]["TT_LIFEPOINTS"]
+                if (0 == run and not consumable and not alive) \
+                   or (1 == run and consumable and not alive) \
+                   or (2 == run and alive):
+                    y = world_db["Things"][id]["T_POSY"]
+                    x = world_db["Things"][id]["T_POSX"]
+                    fovflag = world_db["Things"][0]["fovmap"][(y * length) + x]
+                    if 'v' == chr(fovflag):
+                        c = world_db["ThingTypes"][type]["TT_SYMBOL"]
+                        map[(y * length) + x] = ord(c)
+
+        def write_map(string, map):
+            for i in range(length):
+                line = map[i * length:(i * length) + length].decode()
+                string = string + line + "\n"
+            return string
+
         inventory = ""
         if [] == world_db["Things"][0]["T_CARRIES"]:
             inventory = "(none)\n"
@@ -269,10 +292,23 @@ def try_worldstate_update():
                  str(world_db["Things"][0]["T_POSX"]) + "\n" + \
                  str(world_db["MAP_LENGTH"]) + "\n"
         length = world_db["MAP_LENGTH"]
-        for i in range(length):
-            line = world_db["MAP"][i * length:(i * length) + length].decode()
-            string = string + line + "\n"
-        # TODO: no proper user-subjective map
+        fov = bytearray(b' ' * (length ** 2))
+        for pos in range(length ** 2):
+            fovflag = world_db["Things"][0]["fovmap"][pos]
+            if 'v' == chr(fovflag):
+                fov[pos] = world_db["MAP"][pos]
+        for i in range(3):
+            draw_visible_Things(fov, i)
+        string = write_map(string, fov)
+        mem = world_db["Things"][0]["T_MEMMAP"][:]
+        for i in range(2):
+            for id in world_db["Things"][0]["T_MEMTHING"]:
+                type = world_db["Things"][id]["T_TYPE"]
+                consumable = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+                if (i == 0 and not consumable) or (i == 1 and consumable):
+                        c = world_db["ThingTypes"][type]["TT_SYMBOL"]
+                        mem[(y * length) + x] = ord(c)
+        string = write_map(string, mem)
         atomic_write(io_db["path_worldstate"], string)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
         io_db["worldstate_updateable"] = False
@@ -334,6 +370,33 @@ def remake_map():
     world_db["MAP"] = bytearray(b'.' * (world_db["MAP_LENGTH"] ** 2))
 
 
+def update_map_memory(t):
+    """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
+    if not t["T_MEMMAP"]:
+        t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+    if not t["T_MEMDEPTHMAP"]:
+        t["T_MEMDEPTHMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+    for pos in range(world_db["MAP_LENGTH"] ** 2):
+        if "v" == chr(t["fovmap"][pos]):
+            t["T_MEMDEPTHMAP"][pos] = ord("0")
+            if " " == chr(t["T_MEMMAP"][pos]):
+                t["T_MEMMAP"][pos] = world_db["MAP"][pos]
+            continue
+        # TODO: Aging of MEMDEPTHMAP.
+    for id in t["T_MEMTHING"]:
+        y = world_db["Things"][id]["T_POSY"]
+        x = world_db["Things"][id]["T_POSY"]
+        if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
+            t["T_MEMTHING"].remove(id)
+    for id in world_db["Things"]:
+        type = world_db["Things"][id]["T_TYPE"]
+        if not world_db["ThingTypes"][type]["TT_LIFEPOINTS"]:
+            y = world_db["Things"][id]["T_POSY"]
+            x = world_db["Things"][id]["T_POSY"]
+            if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
+                t["T_MEMTHING"] = (type, y, x)
+
+
 def set_world_inactive():
     """Set world_db["WORLD_ACTIVE"] to 0 and remove worldstate file."""
     server_test()
@@ -381,9 +444,15 @@ def setter(category, key, min, max):
     return f
 
 
+def build_fov_map(t):
+    """Build Thing's FOV map."""
+    t["fovmap"] = bytearray(b'v' * (world_db["MAP_LENGTH"] ** 2))
+    # DUMMY so far. Just builds an all-visible map.
+
+
 def new_Thing(type):
-    """Return prototype for Thing of T_TYPE of type."""
-    return {
+    """Return Thing of type T_TYPE, with fovmap if alive and world active."""
+    thing = {
         "T_LIFEPOINTS": world_db["ThingTypes"][type]["TT_LIFEPOINTS"],
         "T_ARGUMENT": 0,
         "T_PROGRESS": 0,
@@ -396,8 +465,12 @@ def new_Thing(type):
         "carried": False,
         "T_MEMTHING": [],
         "T_MEMMAP": False,
-        "T_MEMDEPTHMAP": False
+        "T_MEMDEPTHMAP": False,
+        "fovmap": False
     }
+    if world_db["WORLD_ACTIVE"] and thing["T_LIFEPOINTS"]:
+        build_fov_map(thing)
+    return thing
 
 
 def id_setter(id, category, id_store=False, start_at_1=False):
@@ -465,7 +538,7 @@ def command_makeworld(seed_string):
     and set world_db["WORLD_ACTIVE"], world_db["TURN"] to 1. Build new Things
     according to ThingTypes' TT_START_NUMBERS, with Thing of ID 0 to ThingType
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
-    other. Init player's FOV/memory map. Write "NEW_WORLD" line to out file.
+    other. Init player's memory map. Write "NEW_WORLD" line to out file.
     """
     setter(None, "SEED_RANDOMNESS", 0, 4294967295)(seed_string)
     setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
@@ -495,7 +568,8 @@ def command_makeworld(seed_string):
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
         id = id_setter(-1, "Things")
         world_db["Things"][id] = new_Thing(playertype)
-    # TODO: Positioning. Init player's FOV / memory map.
+    # TODO: Positioning.
+    update_map_memory(world_db["Things"][0])
     for type in world_db["ThingTypes"]:
         for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
             id = id_setter(-1, "Things")
@@ -516,7 +590,7 @@ def command_worldactive(worldactive_string):
 
     An active world can always be set inactive. An inactive world can only be
     set active with a "wait" ThingAction, and a player Thing (of ID 0). On
-    activation, rebuild all Things' FOVs and map memories.
+    activation, rebuild all Things' FOVs, and the player's map memory.
     """
     # In original version, map existence was also tested (unnecessarily?).
     val = integer_test(worldactive_string, 0, 1)
@@ -538,7 +612,11 @@ def command_worldactive(worldactive_string):
                     player_exists = True
                     break
             if wait_exists and player_exists:
-                # TODO: rebuild all things' FOVs, map memories
+                for id in world_db["Things"]:
+                    if world_db["Things"][id]["T_LIFEPOINTS"]:
+                        build_fov_map(world_db["Things"][id])
+                        if 0 == id:
+                            update_map_memory(world_db["Things"][id])
                 world_db["WORLD_ACTIVE"] = 1
 
 
@@ -649,25 +727,32 @@ def setter_map(maptype):
                 print("Map line length is unequal map width.")
             else:
                 length = world_db["MAP_LENGTH"]
-                rmap = None
+                map = None
                 if not world_db["Things"][command_tid.id][maptype]:
-                    rmap = bytearray(b' ' * (length ** 2))
+                    map = bytearray(b' ' * (length ** 2))
                 else:
-                    rmap = world_db["Things"][command_tid.id][maptype]
-                rmap[val * length:(val * length) + length] = mapline.encode()
-                world_db["Things"][command_tid.id][maptype] = rmap
+                    map = world_db["Things"][command_tid.id][maptype]
+                map[val * length:(val * length) + length] = mapline.encode()
+                world_db["Things"][command_tid.id][maptype] = map
     return helper
 
 
 def setter_tpos(axis):
-    """Generate setter for T_POSX or  T_POSY of selected Thing."""
+    """Generate setter for T_POSX or  T_POSY of selected Thing.
+
+    If world is active, rebuilds animate things' fovmap, player's memory map.
+    """
     @test_Thing_id
     def helper(str_int):
         val = integer_test(str_int, 0, 255)
         if None != val:
             if val < world_db["MAP_LENGTH"]:
                 world_db["Things"][command_tid.id]["T_POS" + axis] = val
-                # TODO: Delete Thing's FOV, and rebuild it if world is active.
+                if world_db["WORLD_ACTIVE"] \
+                   and world_db["Things"][command_tid.id]["T_LIFEPOINTS"]:
+                    build_fov_map( world_db["Things"][command_tid.id])
+                    if 0 == command_tid.id:
+                        update_map_memory(world_db["Things"][command_tid.id])
             else:
                 print("Ignoring: Position is outside of map.")
     return helper
