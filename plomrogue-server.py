@@ -486,15 +486,20 @@ def command_makeworld(seed_string):
 
 
 def command_maplength(maplength_string):
-    # DUMMY.
+    """Redefine map length. Invalidate map, therefore lose all things on it."""
     set_world_inactive()
-    # TODO: remove map (is this necessary? no memory management trouble …)
     world_db["Things"] = {}
     setter(None, "MAP_LENGTH", 1, 256)(maplength_string)
 
 
 def command_worldactive(worldactive_string):
-    # DUMMY.
+    """Toggle world_db["WORLD_ACTIVE"] if possible.
+
+    An active world can always be set inactive. An inactive world can only be
+    set active with a "wait" ThingAction, and a player Thing (of ID 0). On
+    activation, rebuild all Things' FOVs and map memories.
+    """
+    # In original version, map existence was also tested (unnecessarily?).
     val = integer_test(worldactive_string, 0, 1)
     if val:
         if 0 != world_db["WORLD_ACTIVE"]:
@@ -513,8 +518,7 @@ def command_worldactive(worldactive_string):
                 if 0 == Thing:
                     player_exists = True
                     break
-            map_exists = "MAP" in world_db
-            if wait_exists and player_exists and map_exists:
+            if wait_exists and player_exists:
                 # TODO: rebuild all things' FOVs, map memories
                 world_db["WORLD_ACTIVE"] = 1
 
