@@ -482,7 +482,7 @@ def command_makeworld(seed_string):
         }
     # generate fov map?
     # TODO: Generate things (player first, with updated memory)
-    atomic_write(io_db["path_out"], "NEW_WORLD\n", do_append=True)
+    strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 
 def command_maplength(maplength_string):
