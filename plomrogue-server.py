@@ -949,7 +949,6 @@ io_db = {
 try:
     opts = parse_command_line_arguments()
     setup_server_io()
-    # print("DUMMY: Run game.")
     if None != opts.replay:
         replay_game()
     else:
@@ -961,4 +960,3 @@ except:
     raise
 finally:
     cleanup_server_io()
-    # print("DUMMY: (Clean up C heap.)")
