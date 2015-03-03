@@ -518,9 +518,32 @@ def command_quit():
     raise SystemExit("received QUIT command")
 
 
-def command_thingshere(y, x):
-    # DUMMY
-    print("Ignoring not-yet implemented THINGS_HERE command.")
+def command_thingshere(str_y, str_x):
+    """Write to out file list of Things known to player at coordinate y, x."""
+    def write_thing_if_here():
+        if y == world_db["Things"][id]["T_POSY"] \
+           and x == world_db["Things"][id]["T_POSX"]:
+            type = world_db["Things"][id]["T_TYPE"]
+            name = world_db["ThingTypes"][type]["TT_NAME"]
+            strong_write(io_db["file_out"], name + "\n")
+    if world_db["WORLD_ACTIVE"]:
+        y = integer_test(str_y, 0, 255)
+        x = integer_test(str_x, 0, 255)
+        length = world_db["MAP_LENGTH"]
+        if None != y and None != x and y < length and x < length:
+            pos = (y * world_db["MAP_LENGTH"]) + x
+            strong_write(io_db["file_out"], "THINGS_HERE START\n")
+            if "v" == chr(world_db["Things"][0]["fovmap"][pos]):
+                for id in world_db["Things"]:
+                    write_thing_if_here()
+            else:
+                for id in world_db["Things"]["T_MEMTHING"]:
+                    write_thing_if_here()
+            strong_write(io_db["file_out"], "THINGS_HERE END\n")
+        else:
+            print("Ignoring: Invalid map coordinates.")
+    else:
+        print("Ignoring: Command only works on existing worlds.")
 
 
 def command_seedmap(seed_string):
@@ -572,8 +595,9 @@ def command_makeworld(seed_string):
     update_map_memory(world_db["Things"][0])
     for type in world_db["ThingTypes"]:
         for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
-            id = id_setter(-1, "Things")
-            world_db["Things"][id] = new_Thing(playertype)
+            if type != playertype:
+                id = id_setter(-1, "Things")
+                world_db["Things"][id] = new_Thing(type)
     # TODO: Positioning.
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
