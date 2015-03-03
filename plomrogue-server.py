@@ -6,6 +6,13 @@ import shutil
 import time
 
 
+def strong_write(file, string):
+    """Apply write(string), flush() and os.fsync() to file."""
+    file.write(string)
+    file.flush()
+    os.fsync(file)
+
+
 def setup_server_io():
     """Fill IO files DB with proper file( path)s. Write process IO test string.
 
@@ -25,8 +32,7 @@ def setup_server_io():
     io_db["teststring"] = str(os.getpid()) + " " + str(time.time())
     os.makedirs(io_db["path_server"], exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
-    io_db["file_out"].write(io_db["teststring"] + "\n")
-    io_db["file_out"].flush()
+    strong_write(io_db["file_out"], io_db["teststring"] + "\n")
     if os.access(io_db["path_in"], os.F_OK):
         os.remove(io_db["path_in"])
     io_db["file_in"] = open(io_db["path_in"], "w")
@@ -101,9 +107,7 @@ def atomic_write(path, text, do_append=False):
         if os.access(path, os.F_OK):
             shutil.copyfile(path, path_tmp)
     file = open(path_tmp, mode)
-    file.write(text)
-    file.flush()
-    os.fsync(file.fileno())
+    strong_write(file, text)
     file.close()
     if os.access(path, os.F_OK):
         os.remove(path)
@@ -270,9 +274,7 @@ def try_worldstate_update():
             string = string + line + "\n"
         # TODO: no proper user-subjective map
         atomic_write(io_db["path_worldstate"], string)
-        io_db["file_out"].write("WORLD_UPDATED\n")
-        io_db["file_out"].flush()
-        os.fsync(io_db["file_out"])
+        strong_write(io_db["file_out"], "WORLD_UPDATED\n")
         io_db["worldstate_updateable"] = False
 
 
@@ -416,9 +418,7 @@ def id_setter(id, category, id_store=False, start_at_1=False):
 
 def command_ping():
     """Send PONG line to server output file."""
-    io_db["file_out"].write("PONG\n")
-    io_db["file_out"].flush()
-    os.fsync(io_db["file_out"].fileno())
+    strong_write(io_db["file_out"], "PONG\n")
 
 
 def command_quit():
