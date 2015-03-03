@@ -249,14 +249,21 @@ def read_command():
 def try_worldstate_update():
     """Write worldstate file if io_db["worldstate_updateable"] is set."""
     if io_db["worldstate_updateable"]:
+        inventory = ""
+        if [] == world_db["Things"][0]["T_CARRIES"]:
+            inventory = "(none)\n"
+        else:
+            for id in world_db["Things"][0]["T_CARRIES"]:
+                type_id = world_db["Things"][id]["T_TYPE"]
+                name = world_db["ThingTypes"][type_id]["TT_NAME"]
+                inventory = inventory + name + "\n"
         string = str(world_db["TURN"]) + "\n" + \
                  str(world_db["Things"][0]["T_LIFEPOINTS"]) + "\n" + \
                  str(world_db["Things"][0]["T_SATIATION"]) + "\n" + \
-                 "(none)\n%\n" + \
+                 inventory + "%\n" + \
                  str(world_db["Things"][0]["T_POSY"]) + "\n" + \
                  str(world_db["Things"][0]["T_POSX"]) + "\n" + \
                  str(world_db["MAP_LENGTH"]) + "\n"
-        # TODO: no inventory so far
         length = world_db["MAP_LENGTH"]
         for i in range(length):
             line = world_db["MAP"][i * length:(i * length) + length].decode()
