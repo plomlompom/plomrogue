@@ -545,6 +545,43 @@ def command_thingshere(str_y, str_x):
         print("Ignoring: Command only works on existing worlds.")
 
 
+def play_commander(action, args=False):
+    """Setter for player's T_COMMAND (to "action") and T_ARGUMENT.
+
+    T_ARGUMENT is set to direction char if action=="wait",or 8-bit int if args.
+    """
+
+    def set_command():
+        id = [x for x in world_db["ThingActions"]
+                if world_db["ThingActions"][x]["TA_NAME"] == action][0]
+        world_db["Things"][0]["T_COMMAND"] = id
+        # TODO: call turn_over()
+
+    def set_command_and_argument_int(str_arg):
+        val = integer_test(str_arg, 0, 255)
+        if None != val:
+            world_db["Things"][0]["T_ARGUMENT"] = val
+            set_command()
+        else:
+            print("Ignoring: Argument must be integer >= 0 <=255.")
+
+    def set_command_and_argument_movestring(str_arg):
+        dirs = {"east": "d", "south-east": "c", "south-west": "x",
+                "west": "s", "north-west": "w", "north-east": "e"}
+        if str_arg in dirs:
+            world_db["Things"][0]["T_ARGUMENT"] = dirs[str_arg]
+            set_command()
+        else:
+            print("Ignoring: Argument must be valid direction string.")
+
+    if action == "move":
+        return set_command_and_argument_movestring
+    elif args:
+        return set_command_and_argument_int
+    else:
+        return set_command
+
+
 def command_seedmap(seed_string):
     """Set world_db["SEED_MAP"] to int(seed_string), then (re-)make map."""
     setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
@@ -913,6 +950,11 @@ commands_db = {
     "T_MEMTHING": (3, False, command_tmemthing),
     "T_POSY": (1, False, setter_tpos("Y")),
     "T_POSX": (1, False, setter_tpos("X")),
+    "wait": (0, False, play_commander("wait")),
+    "move": (1, False, play_commander("move")),
+    "pick_up": (0, False, play_commander("pick_up")),
+    "drop": (1, False, play_commander("drop", True)),
+    "use": (1, False, play_commander("use", True)),
 }
 
 
