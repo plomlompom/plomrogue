@@ -491,7 +491,23 @@ def actor_drop(t):
 
 
 def actor_use(t):
-    pass
+    """Make t use (for now: consume) T_ARGUMENT-indexed Thing in inventory."""
+    # Original wrongly featured lifepoints increase through consumable!
+    # TODO: Handle case where T_ARGUMENT matches nothing.
+    if len(t["T_CARRIES"]):
+        id = t["T_CARRIES"][t["T_ARGUMENT"]]
+        type = world_db["Things"][id]["T_TYPE"]
+        if world_db["ThingTypes"][type]["TT_CONSUMABLE"]:
+            t["T_CARRIES"].remove(id)
+            del world_db["Things"][id]
+            t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+            strong_write(io_db["file_out"], "LOG You consume this object.\n")
+        else:
+            strong_write(io_db["file_out"], "LOG You try to use this " + \
+                                            "object, but fail.\n")
+    else:
+        strong_write(io_db["file_out"], "LOG You try to use an object, " + \
+                                        "but you own none.\n")
 
 
 def turn_over():
