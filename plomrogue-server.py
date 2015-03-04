@@ -460,7 +460,19 @@ def actor_move(Thing):
 
 
 def actor_pick_up(Thing):
-    pass
+    """Pick up (topmost?) thing from ground into inventory."""
+    # Topmostness is actually not defined so far.
+    ids = [id for id in world_db["Things"] if world_db["Things"][id] != Thing
+           if not world_db["Things"][id]["carried"]
+           if world_db["Things"][id]["T_POSY"] == Thing["T_POSY"]
+           if world_db["Things"][id]["T_POSX"] == Thing["T_POSX"]]
+    if ids:
+        world_db["Things"][ids[0]]["carried"] = True
+        Thing["T_CARRIES"].append(ids[0])
+        strong_write(io_db["file_out"], "LOG You pick up an object.\n")
+    else:
+        err = "You try to pick up an object, but there is none."
+        strong_write(io_db["file_out"], "LOG " + err + "\n")
 
 
 def actor_drop(Thing):
@@ -477,8 +489,7 @@ def turn_over():
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         for id in [id for id in world_db["Things"]
-                      if not world_db["Things"][id]["carried"]
-                      if world_db["Things"][id]["T_LIFEPOINTS"]]:
+                   if world_db["Things"][id]["T_LIFEPOINTS"]]:
             Thing = world_db["Things"][id]
             if Thing["T_LIFEPOINTS"]:
                 if not Thing["T_COMMAND"]:
@@ -576,7 +587,8 @@ def command_thingshere(str_y, str_x):
     """Write to out file list of Things known to player at coordinate y, x."""
     def write_thing_if_here():
         if y == world_db["Things"][id]["T_POSY"] \
-           and x == world_db["Things"][id]["T_POSX"]:
+           and x == world_db["Things"][id]["T_POSX"] \
+           and not world_db["Things"][id]["carried"]:
             type = world_db["Things"][id]["T_TYPE"]
             name = world_db["ThingTypes"][type]["TT_NAME"]
             strong_write(io_db["file_out"], name + "\n")
