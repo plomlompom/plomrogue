@@ -449,6 +449,47 @@ def build_fov_map(t):
     # DUMMY so far. Just builds an all-visible map.
 
 
+def turn_over():
+    """Run game world and its inhabitants until new player input expected."""
+    id = 0
+    print("turning over")
+    whilebreaker = False
+    while world_db["Things"][0]["T_LIFEPOINTS"]:
+        for id in [id for id in world_db["Things"]
+                      if not world_db["Things"][id]["carried"]
+                      if world_db["Things"][id]["T_LIFEPOINTS"]]:
+            print(str(id))
+            Thing = world_db["Things"][id]
+            if Thing["T_LIFEPOINTS"]:
+                print("  evaluating thing")
+                if not Thing["T_COMMAND"]:
+                    print("    thing needs new command")
+                    update_map_memory(Thing)
+                    if 0 == id:
+                        whilebreaker = True
+                        break
+                    # DUMMY: ai(thing)
+                    print("    run AI")
+                    Thing["T_COMMAND"] = 1
+                # DUMMY: try_healing
+                Thing["T_PROGRESS"] += 1
+                taid = [a for a in world_db["ThingActions"]
+                          if a == Thing["T_COMMAND"]][0]
+                ThingAction = world_db["ThingActions"][taid]
+                if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
+                    print("  running thing action")
+                    # run_thing_action(action["TA_NAME"])
+                    Thing["T_COMMAND"] = 0
+                    Thing["T_PROGRESS"] = 0
+                # DUMMY: hunger
+            # DUMMY: thingproliferation
+        if whilebreaker:
+            break
+        print("  turn finished")
+        world_db["TURN"] += 1
+        print("  new turn " + str(world_db["TURN"]))
+
+
 def new_Thing(type):
     """Return Thing of type T_TYPE, with fovmap if alive and world active."""
     thing = {
@@ -546,7 +587,7 @@ def command_thingshere(str_y, str_x):
 
 
 def play_commander(action, args=False):
-    """Setter for player's T_COMMAND (to "action") and T_ARGUMENT.
+    """Setter for player's T_COMMAND and T_ARGUMENT, then calling turn_over().
 
     T_ARGUMENT is set to direction char if action=="wait",or 8-bit int if args.
     """
@@ -555,6 +596,7 @@ def play_commander(action, args=False):
         id = [x for x in world_db["ThingActions"]
                 if world_db["ThingActions"][x]["TA_NAME"] == action][0]
         world_db["Things"][0]["T_COMMAND"] = id
+        turn_over()
         # TODO: call turn_over()
 
     def set_command_and_argument_int(str_arg):
