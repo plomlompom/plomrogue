@@ -449,6 +449,28 @@ def build_fov_map(t):
     # DUMMY so far. Just builds an all-visible map.
 
 
+def actor_wait(Thing):
+    """Do nothing (but loudly, if by player)."""
+    if Thing == world_db["Things"][0]:
+        strong_write(io_db["file_out"], "LOG You wait.\n")
+
+
+def actor_move(Thing):
+    pass
+
+
+def actor_pick_up(Thing):
+    pass
+
+
+def actor_drop(Thing):
+    pass
+
+
+def actor_use(Thing):
+    pass
+
+
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
     id = 0
@@ -472,7 +494,7 @@ def turn_over():
                           if a == Thing["T_COMMAND"]][0]
                 ThingAction = world_db["ThingActions"][taid]
                 if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
-                    # run_thing_action(action["TA_NAME"])
+                    eval("actor_" + ThingAction["TA_NAME"])(Thing)
                     Thing["T_COMMAND"] = 0
                     Thing["T_PROGRESS"] = 0
                 # DUMMY: hunger
