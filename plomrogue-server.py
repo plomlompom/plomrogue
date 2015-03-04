@@ -455,7 +455,7 @@ def actor_wait(t):
         strong_write(io_db["file_out"], "LOG You wait.\n")
 
 
-def actor_move(Thing):
+def actor_move(t):
     pass
 
 
@@ -484,12 +484,13 @@ def actor_drop(t):
         t["T_CARRIES"].remove(id)
         world_db["Things"][id]["carried"] = False
         if t == world_db["Things"][0]:
-            print("You drop an object.")
+            strong_write(io_db["file_out"], "LOG You drop an object.\n")
     elif t == world_db["Things"][0]:
-        print("You try to drop an object, but you own none.")
+        err = "You try to drop an object, but you own none."
+        strong_write(io_db["file_out"], "LOG " + err + "\n")
 
 
-def actor_use(Thing):
+def actor_use(t):
     pass
 
 
