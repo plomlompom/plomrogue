@@ -382,11 +382,11 @@ def update_map_memory(t):
                 t["T_MEMMAP"][pos] = world_db["MAP"][pos]
             continue
         # TODO: Aging of MEMDEPTHMAP.
-    for id in t["T_MEMTHING"]:
-        y = world_db["Things"][id]["T_POSY"]
-        x = world_db["Things"][id]["T_POSY"]
+    for memthing in t["T_MEMTHING"]:
+        y = world_db["Things"][memthing[0]]["T_POSY"]
+        x = world_db["Things"][memthing[1]]["T_POSY"]
         if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
-            t["T_MEMTHING"].remove(id)
+            t["T_MEMTHING"].remove(memthing)
     for id in world_db["Things"]:
         type = world_db["Things"][id]["T_TYPE"]
         if not world_db["ThingTypes"][type]["TT_LIFEPOINTS"]:
