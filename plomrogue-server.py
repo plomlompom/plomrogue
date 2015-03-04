@@ -449,9 +449,9 @@ def build_fov_map(t):
     # DUMMY so far. Just builds an all-visible map.
 
 
-def actor_wait(Thing):
-    """Do nothing (but loudly, if by player)."""
-    if Thing == world_db["Things"][0]:
+def actor_wait(t):
+    """Make t do nothing (but loudly, if player avatar)."""
+    if t == world_db["Things"][0]:
         strong_write(io_db["file_out"], "LOG You wait.\n")
 
 
@@ -459,24 +459,34 @@ def actor_move(Thing):
     pass
 
 
-def actor_pick_up(Thing):
-    """Pick up (topmost?) thing from ground into inventory."""
+def actor_pick_up(t):
+    """Make t pick up (topmost?) Thing from ground into inventory."""
     # Topmostness is actually not defined so far.
-    ids = [id for id in world_db["Things"] if world_db["Things"][id] != Thing
+    ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
            if not world_db["Things"][id]["carried"]
-           if world_db["Things"][id]["T_POSY"] == Thing["T_POSY"]
-           if world_db["Things"][id]["T_POSX"] == Thing["T_POSX"]]
-    if ids:
+           if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+           if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
+    if len(ids):
         world_db["Things"][ids[0]]["carried"] = True
-        Thing["T_CARRIES"].append(ids[0])
-        strong_write(io_db["file_out"], "LOG You pick up an object.\n")
-    else:
+        t["T_CARRIES"].append(ids[0])
+        if t == world_db["Things"][0]:
+            strong_write(io_db["file_out"], "LOG You pick up an object.\n")
+    elif t == world_db["Things"][0]:
         err = "You try to pick up an object, but there is none."
         strong_write(io_db["file_out"], "LOG " + err + "\n")
 
 
-def actor_drop(Thing):
-    pass
+def actor_drop(t):
+    """Make t rop Thing from inventory to ground indexed by T_ARGUMENT."""
+    # TODO: Handle case where T_ARGUMENT matches nothing.
+    if len(t["T_CARRIES"]):
+        id = t["T_CARRIES"][t["T_ARGUMENT"]]
+        t["T_CARRIES"].remove(id)
+        world_db["Things"][id]["carried"] = False
+        if t == world_db["Things"][0]:
+            print("You drop an object.")
+    elif t == world_db["Things"][0]:
+        print("You try to drop an object, but you own none.")
 
 
 def actor_use(Thing):
