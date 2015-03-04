@@ -294,20 +294,19 @@ def try_worldstate_update():
         length = world_db["MAP_LENGTH"]
         fov = bytearray(b' ' * (length ** 2))
         for pos in range(length ** 2):
-            fovflag = world_db["Things"][0]["fovmap"][pos]
-            if 'v' == chr(fovflag):
+            if 'v' == chr(world_db["Things"][0]["fovmap"][pos]):
                 fov[pos] = world_db["MAP"][pos]
         for i in range(3):
             draw_visible_Things(fov, i)
         string = write_map(string, fov)
         mem = world_db["Things"][0]["T_MEMMAP"][:]
         for i in range(2):
-            for id in world_db["Things"][0]["T_MEMTHING"]:
-                type = world_db["Things"][id]["T_TYPE"]
+            for memthing in world_db["Things"][0]["T_MEMTHING"]:
+                type = world_db["Things"][memthing[0]]["T_TYPE"]
                 consumable = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
                 if (i == 0 and not consumable) or (i == 1 and consumable):
-                        c = world_db["ThingTypes"][type]["TT_SYMBOL"]
-                        mem[(y * length) + x] = ord(c)
+                    c = world_db["ThingTypes"][type]["TT_SYMBOL"]
+                    mem[(memthing[1] * length) + memthing[2]] = ord(c)
         string = write_map(string, mem)
         atomic_write(io_db["path_worldstate"], string)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
@@ -394,7 +393,7 @@ def update_map_memory(t):
             y = world_db["Things"][id]["T_POSY"]
             x = world_db["Things"][id]["T_POSY"]
             if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
-                t["T_MEMTHING"] = (type, y, x)
+                t["T_MEMTHING"].append((type, y, x))
 
 
 def set_world_inactive():
