@@ -32,6 +32,10 @@ def prep_library():
     libpr.seed_rrand.restype = ctypes.c_uint32
     libpr.rrand.argtypes = []
     libpr.rrand.restype = ctypes.c_uint16
+    libpr.set_maplength.argtypes = [ctypes.c_uint16]
+    libpr.mv_yx_in_dir_legal_wrap.argtypes = [ctypes.c_char, ctypes.c_uint8,
+                                              ctypes.c_uint8]
+    libpr.mv_yx_in_dir_legal_wrap.restype = ctypes.c_uint8
     return libpr
 
 
@@ -740,8 +744,6 @@ def play_commander(action, args=False):
         if None != val:
             world_db["Things"][0]["T_ARGUMENT"] = val
             set_command()
-        else:
-            print("Ignoring: Argument must be integer >= 0 <=255.")
 
     def set_command_and_argument_movestring(str_arg):
         dirs = {"east": "d", "south-east": "c", "south-west": "x",
@@ -765,8 +767,6 @@ def command_seedrandomness(seed_string):
     val = integer_test(seed_string, 0, 4294967295)
     if None != val:
         rand.seed = val
-    else:
-        print("Ignoring: Value must be integer >= 0, <= 4294967295.")
 
 
 def command_seedmap(seed_string):
@@ -810,7 +810,6 @@ def command_makeworld(seed_string):
 
     val = integer_test(seed_string, 0, 4294967295)
     if None == val:
-        print("Ignoring: Value must be integer >= 0, <= 4294967295.")
         return
     rand.seed = val
     world_db["SEED_MAP"] = val
@@ -851,9 +850,12 @@ def command_makeworld(seed_string):
 
 def command_maplength(maplength_string):
     """Redefine map length. Invalidate map, therefore lose all things on it."""
-    set_world_inactive()
-    world_db["Things"] = {}
-    setter(None, "MAP_LENGTH", 1, 256)(maplength_string)
+    val = integer_test(val_string, 1, 256)
+    if None != val:
+        world_db["MAP_LENGTH"] = val
+        set_world_inactive()
+        world_db["Things"] = {}
+        libpr.set_maplength = val
 
 
 def command_worldactive(worldactive_string):
