@@ -572,7 +572,7 @@ def turn_over():
         world_db["TURN"] += 1
 
 
-def new_Thing(type):
+def new_Thing(type, pos=(0,0)):
     """Return Thing of type T_TYPE, with fovmap if alive and world active."""
     thing = {
         "T_LIFEPOINTS": world_db["ThingTypes"][type]["TT_LIFEPOINTS"],
@@ -581,8 +581,8 @@ def new_Thing(type):
         "T_SATIATION": 0,
         "T_COMMAND": 0,
         "T_TYPE": type,
-        "T_POSY": 0,
-        "T_POSX": 0,
+        "T_POSY": pos[0],
+        "T_POSX": pos[1],
         "T_CARRIES": [],
         "carried": False,
         "T_MEMTHING": [],
@@ -680,7 +680,6 @@ def play_commander(action, args=False):
                 if world_db["ThingActions"][x]["TA_NAME"] == action][0]
         world_db["Things"][0]["T_COMMAND"] = id
         turn_over()
-        # TODO: call turn_over()
 
     def set_command_and_argument_int(str_arg):
         val = integer_test(str_arg, 0, 255)
@@ -733,6 +732,28 @@ def command_makeworld(seed_string):
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
     other. Init player's memory map. Write "NEW_WORLD" line to out file.
     """
+
+    def free_pos():
+        i = 0
+        while 1:
+            err = "Space to put thing on too hard to find. Map too small?"
+            while 1:
+                y = rand.next() % world_db["MAP_LENGTH"]
+                x = rand.next() % world_db["MAP_LENGTH"]
+                if "." == chr(world_db["MAP"][y * world_db["MAP_LENGTH"] + x]):
+                    break
+                i += 1
+                if i == 65535:
+                    raise SystemExit(err)
+            # Replica of C code, wrongly ignores animatedness of new Thing.
+            pos_clear = (0 == len([id for id in world_db["Things"]
+                                   if world_db["Things"][id]["T_LIFEPOINTS"]
+                                   if world_db["Things"][id]["T_POSY"] == y
+                                   if world_db["Things"][id]["T_POSX"] == x]))
+            if pos_clear:
+                break
+        return (y, x)
+
     val = integer_test(seed_string, 0, 4294967295)
     if None == val:
         print("Ignoring: Value must be integer >= 0, <= 4294967295.")
@@ -764,15 +785,13 @@ def command_makeworld(seed_string):
     world_db["TURN"] = 1
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
         id = id_setter(-1, "Things")
-        world_db["Things"][id] = new_Thing(playertype)
-    # TODO: Positioning.
+        world_db["Things"][id] = new_Thing(playertype, free_pos())
     update_map_memory(world_db["Things"][0])
     for type in world_db["ThingTypes"]:
         for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
             if type != playertype:
                 id = id_setter(-1, "Things")
-                world_db["Things"][id] = new_Thing(type)
-    # TODO: Positioning.
+                world_db["Things"][id] = new_Thing(type, free_pos())
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 
