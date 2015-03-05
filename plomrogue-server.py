@@ -4,6 +4,35 @@ import os
 import shlex
 import shutil
 import time
+import ctypes
+
+
+class RandomnessIO:
+    """"Interface to libplomrogue's pseudo-randomness generator."""
+
+    def set_seed(self, seed):
+        libpr.seed_rrand(1, seed)
+
+    def get_seed(self):
+        return libpr.seed_rrand(0, 0)
+
+    def next(self):
+        return libpr.rrand()
+
+    seed = property(get_seed, set_seed)
+
+
+def prep_library():
+    """Prepare ctypes library at ./libplomrogue.so"""
+    libpath = ("./libplomrogue.so")
+    if not os.access(libpath, os.F_OK):
+        raise SystemExit("No library " + libpath + ", run ./compile.sh first?")
+    libpr = ctypes.cdll.LoadLibrary(libpath)
+    libpr.seed_rrand.argtypes = [ctypes.c_uint8, ctypes.c_uint32]
+    libpr.seed_rrand.restype = ctypes.c_uint32
+    libpr.rrand.argtypes = []
+    libpr.rrand.restype = ctypes.c_uint16
+    return libpr
 
 
 def strong_write(file, string):
@@ -182,7 +211,8 @@ def save_world():
             string = string + "T_ID " + str(id) + "\n"
             for carried_id in world_db["Things"][id]["T_CARRIES"]:
                 string = string + "T_CARRIES " + str(carried_id) + "\n"
-    string = string + "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"])
+    string = string + "SEED_RANDOMNESS " + str(rand.seed) + "\n" + \
+             "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"])
     atomic_write(io_db["path_save"], string)
 
 
@@ -503,11 +533,11 @@ def actor_use(t):
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_CONSUMABLE"]
             strong_write(io_db["file_out"], "LOG You consume this object.\n")
         else:
-            strong_write(io_db["file_out"], "LOG You try to use this " + \
-                                            "object, but fail.\n")
+            strong_write(io_db["file_out"], "LOG You try to use this object," +
+                                            "but fail.\n")
     else:
-        strong_write(io_db["file_out"], "LOG You try to use an object, " + \
-                                        "but you own none.\n")
+        strong_write(io_db["file_out"], "LOG You try to use an object, but " +
+                                        "you own none.\n")
 
 
 def turn_over():
@@ -677,6 +707,15 @@ def play_commander(action, args=False):
         return set_command
 
 
+def command_seedrandomness(seed_string):
+    """Set rand seed to int(seed_string)."""
+    val = integer_test(seed_string, 0, 4294967295)
+    if None != val:
+        rand.seed = val
+    else:
+        print("Ignoring: Value must be integer >= 0, <= 4294967295.")
+
+
 def command_seedmap(seed_string):
     """Set world_db["SEED_MAP"] to int(seed_string), then (re-)make map."""
     setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
@@ -686,16 +725,20 @@ def command_seedmap(seed_string):
 def command_makeworld(seed_string):
     """(Re-)build game world, i.e. map, things, to a new turn 1 from seed.
 
-    Make seed world_db["SEED_RANDOMNESS"] and world_db["SEED_MAP"]. Do more
-    only with a "wait" ThingAction and world["PLAYER_TYPE"] matching ThingType
-    of TT_START_NUMBER > 0. Then, world_db["Things"] emptied, call remake_map()
+    Seed rand with seed, fill it into world_db["SEED_MAP"]. Do more only with a
+    "wait" ThingAction and world["PLAYER_TYPE"] matching ThingType of
+    TT_START_NUMBER > 0. Then, world_db["Things"] emptied, call remake_map()
     and set world_db["WORLD_ACTIVE"], world_db["TURN"] to 1. Build new Things
     according to ThingTypes' TT_START_NUMBERS, with Thing of ID 0 to ThingType
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
     other. Init player's memory map. Write "NEW_WORLD" line to out file.
     """
-    setter(None, "SEED_RANDOMNESS", 0, 4294967295)(seed_string)
-    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
+    val = integer_test(seed_string, 0, 4294967295)
+    if None == val:
+        print("Ignoring: Value must be integer >= 0, <= 4294967295.")
+        return
+    rand.seed = val
+    world_db["SEED_MAP"] = val
     player_will_be_generated = False
     playertype = world_db["PLAYER_TYPE"]
     for ThingType in world_db["ThingTypes"]:
@@ -1012,8 +1055,7 @@ commands_db = {
     "THINGS_HERE": (2, True, command_thingshere),
     "MAKE_WORLD": (1, False, command_makeworld),
     "SEED_MAP": (1, False, command_seedmap),
-    "SEED_RANDOMNESS": (1, False, setter(None, "SEED_RANDOMNESS",
-                                         0, 4294967295)),
+    "SEED_RANDOMNESS": (1, False, command_seedrandomness),
     "TURN": (1, False, setter(None, "TURN", 0, 65535)),
     "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0, 255)),
     "MAP_LENGTH": (1, False, command_maplength),
@@ -1053,11 +1095,10 @@ commands_db = {
 }
 
 
-"""World state database. With sane default values."""
+"""World state database. With sane default values. (Randomness is in rand.)"""
 world_db = {
     "TURN": 0,
     "SEED_MAP": 0,
-    "SEED_RANDOMNESS": 0,
     "PLAYER_TYPE": 0,
     "MAP_LENGTH": 64,
     "WORLD_ACTIVE": 0,
@@ -1083,6 +1124,8 @@ io_db = {
 
 
 try:
+    libpr = prep_library()
+    rand = RandomnessIO()
     opts = parse_command_line_arguments()
     setup_server_io()
     if None != opts.replay:
