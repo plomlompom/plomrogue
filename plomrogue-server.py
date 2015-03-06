@@ -706,6 +706,27 @@ def thingproliferation(t):
             world_db["Things"][id] = newT
 
 
+def try_healing(t):
+    """Grow t's HP to a 1/32 chance if < HP max, satiation > 0, and waiting.
+
+    On success, decrease satiation score by 32.
+    """
+    if t["T_SATIATION"] > 0 \
+       and t["T_LIFEPOINTS"] < \
+           world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] \
+       and 0 == (rand.next() % 31) \
+       and t["T_COMMAND"] == [id for id in world_db["ThingActions"]
+                              if world_db["ThingActions"][id]["TA_NAME"] ==
+                                 "wait"][0]:
+        t["T_LIFEPOINTS"] += 1
+        t["T_SATIATION"] -= 32
+        if t == world_db["Things"][0]:
+            strong_write(io_db["file_out"], "LOG You heal.\n")
+        else:
+            name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+            strong_write(io_db["file_out"], "LOG " + name + "heals.\n")
+
+
 def hunger(t):
     """Decrement t's satiation, dependent on it trigger lifepoint dec chance."""
     if t["T_SATIATION"] > -32768:
@@ -739,7 +760,7 @@ def turn_over():
                         break
                     # DUMMY: ai(thing)
                     Thing["T_COMMAND"] = 1
-                # DUMMY: try_healing
+                try_healing(Thing)
                 Thing["T_PROGRESS"] += 1
                 taid = [a for a in world_db["ThingActions"]
                           if a == Thing["T_COMMAND"]][0]
