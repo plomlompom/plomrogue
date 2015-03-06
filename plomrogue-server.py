@@ -746,12 +746,73 @@ def hunger(t):
         decrement_lifepoints(t)
 
 
+def get_dir_to_nearest_target(t, c):
+    # Dummy
+    return False
+
+
+def standing_on_consumable(t):
+    """Return True/False whether t is standing on a consumable."""
+    for id in [id for id in world_db["Things"] if world_db["Things"][id] != t
+               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]
+               if world_db["ThingTypes"][world_db["Things"][id]["T_TYPE"]]
+                          ["TT_CONSUMABLE"]]:
+        return True
+    return False
+
+
+def get_inventory_slot_to_consume(t):
+    """Return slot Id of strongest consumable in t's inventory, else -1."""
+    cmp_consumability = 0
+    selection = -1
+    i = 0
+    for id in t["T_CARRIES"]:
+        type = world_db["Things"][id]["T_TYPE"]
+        if world_db["ThingTypes"][type]["TT_CONSUMABLE"] > cmp_consumability:
+            cmp_consumability = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+            selection = i
+        i += 1
+    return selection
+
+
+def ai(t):
+    """Determine next command/argment for actor t via AI algorithms.
+
+    AI will look for, and move towards, enemies (animate Things not of their
+    own ThingType); if they see none, they will consume consumables in their
+    inventory; if there are none, they will pick up what they stand on if they
+    stand on consumables; if they stand on none, they will move towards the
+    next consumable they see or remember on the map; if they see or remember
+    none, they will explore parts of the map unseen since ever or for at least
+    one turn; if there is nothing to explore, they will simply wait.
+    """
+    t["T_COMMAND"] = [id for id in world_db["ThingActions"]
+                      if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
+    if not get_dir_to_nearest_target(t, "f"):
+        sel = get_inventory_slot_to_consume(t)
+        if -1 != sel:
+            t["T_COMMAND"] = [id for id in world_db["ThingActions"]
+                              if world_db["ThingActions"][id]["TA_NAME"]
+                                 == "use"][0]
+            t["T_ARGUMENT"] = sel
+        elif standing_on_consumable(t):
+            t["T_COMMAND"] = [id for id in world_db["ThingActions"]
+                              if world_db["ThingActions"][id]["TA_NAME"]
+                                 == "pick_up"][0]
+        elif (not get_dir_to_nearest_target(t, "c")) and \
+             (not get_dir_to_nearest_target(t, "a")):
+            get_dir_to_nearest_target(t, "s")
+
+
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         for id in [id for id in world_db["Things"]]:
+            if not id in world_db["Things"]: # Thing may have been consumed
+                continue                     # during turn …
             Thing = world_db["Things"][id]
             if Thing["T_LIFEPOINTS"]:
                 if not Thing["T_COMMAND"]:
@@ -759,7 +820,7 @@ def turn_over():
                     if 0 == id:
                         whilebreaker = True
                         break
-                    # DUMMY: ai(thing)
+                    ai(Thing)
                     Thing["T_COMMAND"] = 1
                 try_healing(Thing)
                 Thing["T_PROGRESS"] += 1
@@ -1262,6 +1323,12 @@ def command_taname(name):
     # In contrast to the original,naming won't map a function to a ThingAction.
 
 
+def command_ai():
+    """Call ai() on player Thing, then turn_over()."""
+    ai(world_db["Things"][0])
+    turn_over()
+
+
 """Commands database.
 
 Map command start tokens to ([0]) number of expected command arguments, ([1])
@@ -1312,6 +1379,7 @@ commands_db = {
     "pick_up": (0, False, play_commander("pick_up")),
     "drop": (1, False, play_commander("drop", True)),
     "use": (1, False, play_commander("use", True)),
+    "ai": (0, False, command_ai)
 }
 
 
