@@ -705,6 +705,24 @@ def thingproliferation(t):
             world_db["Things"][id] = newT
 
 
+def hunger(t):
+    """Decrement t's satiation, dependent on it trigger lifepoint dec chance."""
+    if t["T_SATIATION"] > -32768:
+        t["T_SATIATION"] -= 1
+    testbase = t["T_SATIATION"] if t["T_SATIATION"] >= 0 else -t["T_SATIATION"]
+    if not world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]:
+        raise RuntimeError("A thing that should not hunger is hungering.")
+    stomach = int(32767 / world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"])
+    if int(int(testbase / stomach) / ((rand.next() % stomach) + 1)):
+        if t == world_db["Things"][0]:
+            strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
+        else:
+            name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+            strong_write(io_db["file_out"], "LOG " + name + \
+                                            " suffers from hunger.\n")
+        decrement_lifepoints(t)
+
+
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
     id = 0
@@ -729,7 +747,7 @@ def turn_over():
                     eval("actor_" + ThingAction["TA_NAME"])(Thing)
                     Thing["T_COMMAND"] = 0
                     Thing["T_PROGRESS"] = 0
-                # DUMMY: hunger
+                hunger(Thing)
             thingproliferation(Thing)
         if whilebreaker:
             break
