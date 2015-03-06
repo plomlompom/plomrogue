@@ -468,13 +468,16 @@ def update_map_memory(t):
         t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
     if not t["T_MEMDEPTHMAP"]:
         t["T_MEMDEPTHMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-    for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
-                    if "v" == chr(t["fovmap"][pos])]:
+    for pos in range(world_db["MAP_LENGTH"] ** 2):
+        if "v" == chr(t["fovmap"][pos]):
             t["T_MEMDEPTHMAP"][pos] = ord("0")
             if " " == chr(t["T_MEMMAP"][pos]):
                 t["T_MEMMAP"][pos] = world_db["MAP"][pos]
             continue
-        # TODO: Aging of MEMDEPTHMAP.
+        if ord('0') <= t["T_MEMDEPTHMAP"][pos] \
+           and ord('9') >= t["T_MEMDEPTHMAP"][pos] \
+           and not rand.next() % (2 ** (t["T_MEMDEPTHMAP"][pos] - 48)):
+            t["T_MEMDEPTHMAP"][pos] += 1
     for mt in [mt for mt in t["T_MEMTHING"]
                if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                          + mt[2]])]:
