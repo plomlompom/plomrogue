@@ -672,13 +672,45 @@ def actor_use(t):
                                         "you own none.\n")
 
 
+def thingproliferation(t):
+    """To chance of 1/TT_PROLIFERATE, create t offspring in neighbor cell.
+
+    Naturally only works with TT_PROLIFERATE > 0. The neighbor cell must be
+    passable and not be inhabited by a Thing of the same type, or, if Thing is
+    animate, any other animate Thing. If there are several map cell candidates,
+    one is selected randomly.
+    """
+    def test_cell(t, y, x):
+        if "." == chr(world_db["MAP"][(y * world_db["MAP_LENGTH"]) + x]):
+            for id in [id for id in world_db["Things"]
+                       if y == world_db["Things"][id]["T_POSY"]
+                       if x == world_db["Things"][id]["T_POSX"]
+                       if (t["T_TYPE"] == world_db["Things"][id]["T_TYPE"])
+                       or (t["T_LIFEPOINTS"] and 
+                           world_db["Things"][id]["T_LIFEPOINTS"])]:
+                return False
+            return True
+        return False
+    prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
+    if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
+        candidates = []
+        for dir in [directions_db[key] for key in directions_db]:
+            mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
+            if mv_result[0] and test_cell(t, mv_result[1], mv_result[2]):
+                candidates.append((mv_result[1], mv_result[2]))
+        if len(candidates):
+            i = rand.next() % len(candidates)
+            id = id_setter(-1, "Things")
+            newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
+            world_db["Things"][id] = newT
+
+
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
-        for id in [id for id in world_db["Things"]
-                   if world_db["Things"][id]["T_LIFEPOINTS"]]:
+        for id in [id for id in world_db["Things"]]:
             Thing = world_db["Things"][id]
             if Thing["T_LIFEPOINTS"]:
                 if not Thing["T_COMMAND"]:
@@ -698,7 +730,7 @@ def turn_over():
                     Thing["T_COMMAND"] = 0
                     Thing["T_PROGRESS"] = 0
                 # DUMMY: hunger
-            # DUMMY: thingproliferation
+            thingproliferation(Thing)
         if whilebreaker:
             break
         world_db["TURN"] += 1
