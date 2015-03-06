@@ -1,3 +1,4 @@
+#include <stddef.h> /* NULL */
 #include <stdint.h> /* uint8_t, uint16_t, uint32_t, INT8_MIN, INT8_MAX */
 
 
@@ -114,20 +115,29 @@ static int8_t mv_yx_in_dir_legal(char dir, struct yx_uint8 * yx)
 
 
 
-/* Wrapper around mv_yx_in_dir_legal() that stores the new coordinate in the
- * globals res_y, res_x.
+/* Wrapper around mv_yx_in_dir_legal() that stores new coordinate in res_y/x,
+ * (return with result_y/x()), and immediately resets the wrapping.
  */
-uint8_t res_y = 0;
-uint8_t res_x = 0;
+static uint8_t res_y = 0;
+static uint8_t res_x = 0;
 extern uint8_t mv_yx_in_dir_legal_wrap(char dir, uint8_t y, uint8_t x)
 {
     struct yx_uint8 yx;
     yx.y = y;
     yx.x = x;
     uint8_t result = mv_yx_in_dir_legal(dir, &yx);
+    mv_yx_in_dir_legal(0, NULL);
     res_y = yx.y;
     res_x = yx.x;
     return result;
+}
+extern uint8_t result_y()
+{
+    return res_y;
+}
+extern uint8_t result_x()
+{
+    return res_x;
 }
 
 

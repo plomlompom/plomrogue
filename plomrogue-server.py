@@ -36,6 +36,9 @@ def prep_library():
     libpr.mv_yx_in_dir_legal_wrap.argtypes = [ctypes.c_char, ctypes.c_uint8,
                                               ctypes.c_uint8]
     libpr.mv_yx_in_dir_legal_wrap.restype = ctypes.c_uint8
+    libpr.result_y.restype = ctypes.c_uint8
+    libpr.result_x.restype = ctypes.c_uint8
+    libpr.set_maplength(world_db["MAP_LENGTH"])
     return libpr
 
 
@@ -472,7 +475,7 @@ def update_map_memory(t):
         # TODO: Aging of MEMDEPTHMAP.
     for memthing in t["T_MEMTHING"]:
         y = world_db["Things"][memthing[0]]["T_POSY"]
-        x = world_db["Things"][memthing[1]]["T_POSY"]
+        x = world_db["Things"][memthing[0]]["T_POSX"]
         if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
             t["T_MEMTHING"].remove(memthing)
     for id in world_db["Things"]:
@@ -537,6 +540,26 @@ def build_fov_map(t):
     # DUMMY so far. Just builds an all-visible map.
 
 
+def decrement_lifepoints(t):
+    """Decrement t's lifepoints by 1, and if to zero, corpse it.
+
+    If t is the player avatar, only blank its fovmap, so that the client may
+    still display memory data. On non-player things, erase fovmap and memory.
+    """
+    t["T_LIFEPOINTS"] -= 1
+    if 0 == t["T_LIFEPOINTS"]:
+        t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
+        if world_db["Things"][0] == t:
+            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+            strong_write(io_db["file_out"], "LOG You die.\n")
+        else:
+            t["fovmap"] = False
+            t["T_MEMMAP"] = False
+            t["T_MEMDEPTHMAP"] = False
+            t["T_MEMTHING"] = []
+            strong_write(io_db["file_out"], "LOG It dies.\n")
+
+
 def actor_wait(t):
     """Make t do nothing (but loudly, if player avatar)."""
     if t == world_db["Things"][0]:
@@ -544,7 +567,44 @@ def actor_wait(t):
 
 
 def actor_move(t):
-    pass
+    """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
+    dir_c = t["T_ARGUMENT"].encode("ascii")[0]
+    legal_move = libpr.mv_yx_in_dir_legal_wrap(dir_c, t["T_POSY"], t["T_POSX"])
+    passable = False
+    if -1 == legal_move:
+        raise SystemExit("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
+    elif 1 == legal_move:
+        pos = (libpr.result_y() * world_db["MAP_LENGTH"]) + libpr.result_x()
+        passable = "." == chr(world_db["MAP"][pos])
+        hitted = [id for id in world_db["Things"]
+                  if world_db["Things"][id] != t
+                  if world_db["Things"][id]["T_LIFEPOINTS"]
+                  if world_db["Things"][id]["T_POSY"] == libpr.result_y()
+                  if world_db["Things"][id]["T_POSX"] == libpr.result_x()]
+        if len(hitted):
+            hitted = hitted[0]
+            decrement_lifepoints(world_db["Things"][hitted])
+            hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+            hitter = "You" if t == world_db["Things"][0] else hitter_name
+            hitted_type = world_db["Things"][hitted]["T_TYPE"]
+            hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
+            hitted = "you" if hitted == world_db["Things"][0] else hitted_name
+            verb = " wound " if hitter == "You" else " wounds "
+            strong_write(io_db["file_out"], "LOG " + hitter + verb + hitted + \
+                                            ".\n")
+            return
+    dir = [dir for dir in directions_db
+           if directions_db[dir] == t["T_ARGUMENT"]][0]
+    if passable:
+        t["T_POSY"] = libpr.result_y()
+        t["T_POSX"] = libpr.result_x()
+        for id in t["T_CARRIES"]:
+            world_db["Things"][id]["T_POSY"] = libpr.result_y()
+            world_db["Things"][id]["T_POSX"] = libpr.result_x()
+        build_fov_map(t)
+        strong_write(io_db["file_out"], "LOG You move " + dir + ".\n")
+    else:
+        strong_write(io_db["file_out"], "LOG You fail to move " + dir + ".\n")
 
 
 def actor_pick_up(t):
@@ -746,10 +806,8 @@ def play_commander(action, args=False):
             set_command()
 
     def set_command_and_argument_movestring(str_arg):
-        dirs = {"east": "d", "south-east": "c", "south-west": "x",
-                "west": "s", "north-west": "w", "north-east": "e"}
-        if str_arg in dirs:
-            world_db["Things"][0]["T_ARGUMENT"] = dirs[str_arg]
+        if str_arg in directions_db:
+            world_db["Things"][0]["T_ARGUMENT"] = directions_db[str_arg]
             set_command()
         else:
             print("Ignoring: Argument must be valid direction string.")
@@ -855,7 +913,7 @@ def command_maplength(maplength_string):
         world_db["MAP_LENGTH"] = val
         set_world_inactive()
         world_db["Things"] = {}
-        libpr.set_maplength = val
+        libpr.set_maplength(val)
 
 
 def command_worldactive(worldactive_string):
@@ -1182,6 +1240,9 @@ world_db = {
     "Things": {}
 }
 
+"""Mapping of direction names to internal direction chars."""
+directions_db = {"east": "d", "south-east": "c", "south-west": "x",
+                 "west": "s", "north-west": "w", "north-east": "e"}
 
 """File IO database."""
 io_db = {
