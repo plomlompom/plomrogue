@@ -269,7 +269,7 @@ def read_command():
     Keep building return string until a newline is encountered. Pause between
     unsuccessful reads, and after too much waiting, run server_test().
     """
-    wait_on_fail = 1
+    wait_on_fail = 0.03333
     max_wait = 5
     now = time.time()
     command = ""
