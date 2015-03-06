@@ -585,11 +585,7 @@ def actor_wait(t):
 
 def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
-    # dir_c = t["T_ARGUMENT"].encode("ascii")[0]
-    # legal_move = libpr.mv_yx_in_dir_legal_wrap(dir_c, t["T_POSY"], t["T_POSX"])
     passable = False
-    # if -1 == legal_move:
-    #    raise SystemExit("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
     move_result = mv_yx_in_dir_legal(t["T_ARGUMENT"], t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
