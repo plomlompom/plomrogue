@@ -485,7 +485,7 @@ def update_map_memory(t):
         type = world_db["Things"][id]["T_TYPE"]
         if not world_db["ThingTypes"][type]["TT_LIFEPOINTS"]:
             y = world_db["Things"][id]["T_POSY"]
-            x = world_db["Things"][id]["T_POSY"]
+            x = world_db["Things"][id]["T_POSX"]
             if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
                 t["T_MEMTHING"].append((type, y, x))
 
@@ -824,7 +824,7 @@ def command_thingshere(str_y, str_x):
                 for id in world_db["Things"]:
                     write_thing_if_here()
             else:
-                for id in world_db["Things"]["T_MEMTHING"]:
+                for id in world_db["Things"][id]["T_MEMTHING"]:
                     write_thing_if_here()
             strong_write(io_db["file_out"], "THINGS_HERE END\n")
         else:
