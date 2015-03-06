@@ -582,16 +582,16 @@ def actor_move(t):
                   if world_db["Things"][id]["T_POSY"] == libpr.result_y()
                   if world_db["Things"][id]["T_POSX"] == libpr.result_x()]
         if len(hitted):
-            hitted = hitted[0]
-            decrement_lifepoints(world_db["Things"][hitted])
+            hit_id = hitted[0]
             hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
             hitter = "You" if t == world_db["Things"][0] else hitter_name
-            hitted_type = world_db["Things"][hitted]["T_TYPE"]
+            hitted_type = world_db["Things"][hit_id]["T_TYPE"]
             hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-            hitted = "you" if hitted == world_db["Things"][0] else hitted_name
+            hitted = "you" if hit_id == 0 else hitted_name
             verb = " wound " if hitter == "You" else " wounds "
             strong_write(io_db["file_out"], "LOG " + hitter + verb + hitted + \
                                             ".\n")
+            decrement_lifepoints(world_db["Things"][hit_id])
             return
     dir = [dir for dir in directions_db
            if directions_db[dir] == t["T_ARGUMENT"]][0]
