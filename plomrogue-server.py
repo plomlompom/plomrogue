@@ -604,7 +604,7 @@ def actor_move(t):
             hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
             hitted = "you" if hit_id == 0 else hitted_name
             verb = " wound " if hitter == "You" else " wounds "
-            strong_write(io_db["file_out"], "LOG " + hitter + verb + hitted + \
+            strong_write(io_db["file_out"], "LOG " + hitter + verb + hitted +
                                             ".\n")
             decrement_lifepoints(world_db["Things"][hit_id])
             return
@@ -687,7 +687,7 @@ def thingproliferation(t):
                        if y == world_db["Things"][id]["T_POSY"]
                        if x == world_db["Things"][id]["T_POSX"]
                        if (t["T_TYPE"] == world_db["Things"][id]["T_TYPE"])
-                       or (t["T_LIFEPOINTS"] and 
+                       or (t["T_LIFEPOINTS"] and
                            world_db["Things"][id]["T_LIFEPOINTS"])]:
                 return False
             return True
@@ -728,7 +728,7 @@ def try_healing(t):
 
 
 def hunger(t):
-    """Decrement t's satiation, dependent on it trigger lifepoint dec chance."""
+    """Decrement t's satiation,dependent on it trigger lifepoint dec chance."""
     if t["T_SATIATION"] > -32768:
         t["T_SATIATION"] -= 1
     testbase = t["T_SATIATION"] if t["T_SATIATION"] >= 0 else -t["T_SATIATION"]
@@ -740,7 +740,7 @@ def hunger(t):
             strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
         else:
             name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-            strong_write(io_db["file_out"], "LOG " + name + \
+            strong_write(io_db["file_out"], "LOG " + name +
                                             " suffers from hunger.\n")
         decrement_lifepoints(t)
 
@@ -776,7 +776,7 @@ def turn_over():
         world_db["TURN"] += 1
 
 
-def new_Thing(type, pos=(0,0)):
+def new_Thing(type, pos=(0, 0)):
     """Return Thing of type T_TYPE, with fovmap if alive and world active."""
     thing = {
         "T_LIFEPOINTS": world_db["ThingTypes"][type]["TT_LIFEPOINTS"],
