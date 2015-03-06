@@ -545,7 +545,7 @@ def build_fov_map(t):
                                maptype.from_buffer(t["fovmap"]),
                                maptype.from_buffer(world_db["MAP"]))
     if test:
-        raise SystemExit("Malloc error in build_fov_Map().")
+        raise RuntimeError("Malloc error in build_fov_Map().")
 
 
 def decrement_lifepoints(t):
@@ -573,7 +573,7 @@ def mv_yx_in_dir_legal(dir, y, x):
     dir_c = dir.encode("ascii")[0]
     test = libpr.mv_yx_in_dir_legal_wrap(dir_c, y, x)
     if -1 == test:
-        raise SystemExit("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
+        raise RuntimeError("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
     return (test, libpr.result_y(), libpr.result_x())
 
 
