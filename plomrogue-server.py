@@ -341,12 +341,11 @@ def try_worldstate_update():
         string = write_map(string, fov)
         mem = world_db["Things"][0]["T_MEMMAP"][:]
         for i in range(2):
-            for memthing in world_db["Things"][0]["T_MEMTHING"]:
-                type = world_db["Things"][memthing[0]]["T_TYPE"]
-                consumable = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+            for mt in world_db["Things"][0]["T_MEMTHING"]:
+                consumable = world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]
                 if (i == 0 and not consumable) or (i == 1 and consumable):
-                    c = world_db["ThingTypes"][type]["TT_SYMBOL"]
-                    mem[(memthing[1] * length) + memthing[2]] = ord(c)
+                    c = world_db["ThingTypes"][mt[0]]["TT_SYMBOL"]
+                    mem[(mt[1] * length) + mt[2]] = ord(c)
         string = write_map(string, mem)
         atomic_write(io_db["path_worldstate"], string)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
@@ -469,18 +468,17 @@ def update_map_memory(t):
         t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
     if not t["T_MEMDEPTHMAP"]:
         t["T_MEMDEPTHMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-    for pos in range(world_db["MAP_LENGTH"] ** 2):
-        if "v" == chr(t["fovmap"][pos]):
+    for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
+                    if "v" == chr(t["fovmap"][pos])]:
             t["T_MEMDEPTHMAP"][pos] = ord("0")
             if " " == chr(t["T_MEMMAP"][pos]):
                 t["T_MEMMAP"][pos] = world_db["MAP"][pos]
             continue
         # TODO: Aging of MEMDEPTHMAP.
-    for memthing in t["T_MEMTHING"]:
-        y = world_db["Things"][memthing[0]]["T_POSY"]
-        x = world_db["Things"][memthing[0]]["T_POSX"]
-        if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
-            t["T_MEMTHING"].remove(memthing)
+    for mt in [mt for mt in t["T_MEMTHING"]
+               if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
+                                         + mt[2]])]:
+            t["T_MEMTHING"].remove(mt)
     for id in world_db["Things"]:
         type = world_db["Things"][id]["T_TYPE"]
         if not world_db["ThingTypes"][type]["TT_LIFEPOINTS"]:
