@@ -568,6 +568,15 @@ def decrement_lifepoints(t):
             strong_write(io_db["file_out"], "LOG It dies.\n")
 
 
+def mv_yx_in_dir_legal(dir, y, x):
+    """Wrapper around libpr.mv_yx_in_dir_legal to simplify its use."""
+    dir_c = dir.encode("ascii")[0]
+    test = libpr.mv_yx_in_dir_legal_wrap(dir_c, y, x)
+    if -1 == test:
+        raise SystemExit("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
+    return (test, libpr.result_y(), libpr.result_x())
+
+
 def actor_wait(t):
     """Make t do nothing (but loudly, if player avatar)."""
     if t == world_db["Things"][0]:
@@ -576,19 +585,20 @@ def actor_wait(t):
 
 def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
-    dir_c = t["T_ARGUMENT"].encode("ascii")[0]
-    legal_move = libpr.mv_yx_in_dir_legal_wrap(dir_c, t["T_POSY"], t["T_POSX"])
+    # dir_c = t["T_ARGUMENT"].encode("ascii")[0]
+    # legal_move = libpr.mv_yx_in_dir_legal_wrap(dir_c, t["T_POSY"], t["T_POSX"])
     passable = False
-    if -1 == legal_move:
-        raise SystemExit("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
-    elif 1 == legal_move:
-        pos = (libpr.result_y() * world_db["MAP_LENGTH"]) + libpr.result_x()
+    # if -1 == legal_move:
+    #    raise SystemExit("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
+    move_result = mv_yx_in_dir_legal(t["T_ARGUMENT"], t["T_POSY"], t["T_POSX"])
+    if 1 == move_result[0]:
+        pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
         passable = "." == chr(world_db["MAP"][pos])
         hitted = [id for id in world_db["Things"]
                   if world_db["Things"][id] != t
                   if world_db["Things"][id]["T_LIFEPOINTS"]
-                  if world_db["Things"][id]["T_POSY"] == libpr.result_y()
-                  if world_db["Things"][id]["T_POSX"] == libpr.result_x()]
+                  if world_db["Things"][id]["T_POSY"] == move_result[1]
+                  if world_db["Things"][id]["T_POSX"] == move_result[2]]
         if len(hitted):
             hit_id = hitted[0]
             hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
@@ -604,11 +614,11 @@ def actor_move(t):
     dir = [dir for dir in directions_db
            if directions_db[dir] == t["T_ARGUMENT"]][0]
     if passable:
-        t["T_POSY"] = libpr.result_y()
-        t["T_POSX"] = libpr.result_x()
+        t["T_POSY"] = move_result[1]
+        t["T_POSX"] = move_result[2]
         for id in t["T_CARRIES"]:
-            world_db["Things"][id]["T_POSY"] = libpr.result_y()
-            world_db["Things"][id]["T_POSX"] = libpr.result_x()
+            world_db["Things"][id]["T_POSY"] = move_result[1]
+            world_db["Things"][id]["T_POSX"] = move_result[2]
         build_fov_map(t)
         strong_write(io_db["file_out"], "LOG You move " + dir + ".\n")
     else:
