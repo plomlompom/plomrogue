@@ -842,7 +842,7 @@ def command_thingshere(str_y, str_x):
                 for id in world_db["Things"]:
                     write_thing_if_here()
             else:
-                for id in world_db["Things"][id]["T_MEMTHING"]:
+                for id in world_db["Things"][0]["T_MEMTHING"]:
                     write_thing_if_here()
             strong_write(io_db["file_out"], "THINGS_HERE END\n")
         else:
