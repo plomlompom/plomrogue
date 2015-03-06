@@ -850,7 +850,7 @@ def command_makeworld(seed_string):
 
 def command_maplength(maplength_string):
     """Redefine map length. Invalidate map, therefore lose all things on it."""
-    val = integer_test(val_string, 1, 256)
+    val = integer_test(maplength_string, 1, 256)
     if None != val:
         world_db["MAP_LENGTH"] = val
         set_world_inactive()
