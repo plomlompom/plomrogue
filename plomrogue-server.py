@@ -39,6 +39,9 @@ def prep_library():
     libpr.result_y.restype = ctypes.c_uint8
     libpr.result_x.restype = ctypes.c_uint8
     libpr.set_maplength(world_db["MAP_LENGTH"])
+    libpr.build_fov_map.argtypes = [ctypes.c_uint8, ctypes.c_uint8,
+                                    ctypes.c_char_p, ctypes.c_char_p]
+    libpr.build_fov_map.restype = ctypes.c_uint8
     return libpr
 
 
@@ -537,7 +540,12 @@ def setter(category, key, min, max):
 def build_fov_map(t):
     """Build Thing's FOV map."""
     t["fovmap"] = bytearray(b'v' * (world_db["MAP_LENGTH"] ** 2))
-    # DUMMY so far. Just builds an all-visible map.
+    maptype = ctypes.c_char * len(world_db["MAP"])
+    test = libpr.build_fov_map(t["T_POSY"], t["T_POSX"],
+                               maptype.from_buffer(t["fovmap"]),
+                               maptype.from_buffer(world_db["MAP"]))
+    if test:
+        raise SystemExit("Malloc error in build_fov_Map().")
 
 
 def decrement_lifepoints(t):
