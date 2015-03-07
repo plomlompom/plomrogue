@@ -435,6 +435,7 @@ def remake_map():
             return True
         return False
     store_seed = rand.seed
+    rand.seed = world_db["SEED_MAP"]
     world_db["MAP"] = bytearray(b'~' * (world_db["MAP_LENGTH"] ** 2))
     length = world_db["MAP_LENGTH"]
     add_half_width = (not (length % 2)) * int(length / 2)
