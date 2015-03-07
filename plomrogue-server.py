@@ -668,13 +668,15 @@ def actor_use(t):
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_CONSUMABLE"]
-            strong_write(io_db["file_out"], "LOG You consume this object.\n")
-        else:
-            strong_write(io_db["file_out"], "LOG You try to use this object," +
-                                            "but fail.\n")
-    else:
-        strong_write(io_db["file_out"], "LOG You try to use an object, but " +
-                                        "you own none.\n")
+            if t == world_db["Things"][0]:
+                strong_write(io_db["file_out"],
+                             "LOG You consume this object.\n")
+        elif t == world_db["Things"][0]:
+            strong_write(io_db["file_out"],
+                         "LOG You try to use this object, but fail.\n")
+    elif t == world_db["Things"][0]:
+        strong_write(io_db["file_out"],
+                     "LOG You try to use an object, but you own none.\n")
 
 
 def thingproliferation(t):
