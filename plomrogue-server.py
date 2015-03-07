@@ -465,7 +465,7 @@ def remake_map():
     # This all-too-precise replica of the original C code misses iter_limit().
 
 
-def update_map_memory(t):
+def update_map_memory(t, age_map=True):
     """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
     if not t["T_MEMMAP"]:
         t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
@@ -477,7 +477,7 @@ def update_map_memory(t):
             if " " == chr(t["T_MEMMAP"][pos]):
                 t["T_MEMMAP"][pos] = world_db["MAP"][pos]
             continue
-        if ord('0') <= t["T_MEMDEPTHMAP"][pos] \
+        if age_map and ord('0') <= t["T_MEMDEPTHMAP"][pos] \
            and ord('9') > t["T_MEMDEPTHMAP"][pos] \
            and not rand.next() % (2 ** (t["T_MEMDEPTHMAP"][pos] - 48)):
             t["T_MEMDEPTHMAP"][pos] += 1
