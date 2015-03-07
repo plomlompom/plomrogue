@@ -1388,9 +1388,9 @@ commands_db = {
 """World state database. With sane default values. (Randomness is in rand.)"""
 world_db = {
     "TURN": 0,
+    "MAP_LENGTH": 64,
     "SEED_MAP": 0,
     "PLAYER_TYPE": 0,
-    "MAP_LENGTH": 64,
     "WORLD_ACTIVE": 0,
     "ThingActions": {},
     "ThingTypes": {},
