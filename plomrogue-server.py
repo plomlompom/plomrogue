@@ -668,8 +668,6 @@ def actor_use(t):
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_CONSUMABLE"]
-            t["T_LIFEPOINTS"] += 1
-            # Wrongly increment HPs is a replica of the original code.
             strong_write(io_db["file_out"], "LOG You consume this object.\n")
         else:
             strong_write(io_db["file_out"], "LOG You try to use this object," +
