@@ -909,13 +909,6 @@ def command_quit():
 
 def command_thingshere(str_y, str_x):
     """Write to out file list of Things known to player at coordinate y, x."""
-    def write_thing_if_here():
-        if y == world_db["Things"][id]["T_POSY"] \
-           and x == world_db["Things"][id]["T_POSX"] \
-           and not world_db["Things"][id]["carried"]:
-            type = world_db["Things"][id]["T_TYPE"]
-            name = world_db["ThingTypes"][type]["TT_NAME"]
-            strong_write(io_db["file_out"], name + "\n")
     if world_db["WORLD_ACTIVE"]:
         y = integer_test(str_y, 0, 255)
         x = integer_test(str_x, 0, 255)
@@ -925,10 +918,18 @@ def command_thingshere(str_y, str_x):
             strong_write(io_db["file_out"], "THINGS_HERE START\n")
             if "v" == chr(world_db["Things"][0]["fovmap"][pos]):
                 for id in world_db["Things"]:
-                    write_thing_if_here()
+                    # write_thing_if_here()
+                    if y == world_db["Things"][id]["T_POSY"] \
+                       and x == world_db["Things"][id]["T_POSX"] \
+                       and not world_db["Things"][id]["carried"]:
+                        type = world_db["Things"][id]["T_TYPE"]
+                        name = world_db["ThingTypes"][type]["TT_NAME"]
+                        strong_write(io_db["file_out"], name + "\n")
             else:
-                for id in world_db["Things"][0]["T_MEMTHING"]:
-                    write_thing_if_here()
+                for mt in world_db["Things"][0]["T_MEMTHING"]:
+                    if y == mt[1] and x == mt[2]:
+                        name = world_db["ThingTypes"][mt[0]]["TT_NAME"]
+                        strong_write(io_db["file_out"], name + "\n")
             strong_write(io_db["file_out"], "THINGS_HERE END\n")
         else:
             print("Ignoring: Invalid map coordinates.")
