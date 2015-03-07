@@ -572,7 +572,7 @@ def decrement_lifepoints(t):
 
 def mv_yx_in_dir_legal(dir, y, x):
     """Wrapper around libpr.mv_yx_in_dir_legal to simplify its use."""
-    dir_c = dir.encode("ascii")[0]
+    dir_c = chr(dir).encode("ascii")[0]
     test = libpr.mv_yx_in_dir_legal_wrap(dir_c, y, x)
     if -1 == test:
         raise RuntimeError("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
@@ -610,7 +610,7 @@ def actor_move(t):
             decrement_lifepoints(world_db["Things"][hit_id])
             return
     dir = [dir for dir in directions_db
-           if directions_db[dir] == t["T_ARGUMENT"]][0]
+           if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
     if passable:
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
@@ -957,7 +957,7 @@ def play_commander(action, args=False):
 
     def set_command_and_argument_movestring(str_arg):
         if str_arg in directions_db:
-            world_db["Things"][0]["T_ARGUMENT"] = directions_db[str_arg]
+            world_db["Things"][0]["T_ARGUMENT"] = ord(directions_db[str_arg])
             set_command()
         else:
             print("Ignoring: Argument must be valid direction string.")
