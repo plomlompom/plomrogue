@@ -574,7 +574,7 @@ def decrement_lifepoints(t):
 
 def mv_yx_in_dir_legal(dir, y, x):
     """Wrapper around libpr.mv_yx_in_dir_legal to simplify its use."""
-    dir_c = chr(dir).encode("ascii")[0]
+    dir_c = dir.encode("ascii")[0]
     test = libpr.mv_yx_in_dir_legal_wrap(dir_c, y, x)
     if -1 == test:
         raise RuntimeError("Too much wrapping in mv_yx_in_dir_legal_wrap()!")
@@ -590,7 +590,8 @@ def actor_wait(t):
 def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
     passable = False
-    move_result = mv_yx_in_dir_legal(t["T_ARGUMENT"], t["T_POSY"], t["T_POSX"])
+    move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
+                                     t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
         passable = "." == chr(world_db["MAP"][pos])
