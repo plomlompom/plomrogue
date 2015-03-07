@@ -204,8 +204,10 @@ def save_world():
 
     string = ""
     for key in world_db:
-        if dict != type(world_db[key]) and key != "MAP":
+        if dict != type(world_db[key]) and key != "MAP" and \
+           key != "WORLD_ACTIVE" and key != "SEED_MAP":
             string = string + key + " " + str(world_db[key]) + "\n"
+    string = string + "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n"
     string = string + helper("ThingActions", "TA_ID")
     string = string + helper("ThingTypes", "TT_ID", {"TT_CORPSE_ID": False})
     for id in world_db["ThingTypes"]:
