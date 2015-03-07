@@ -485,7 +485,8 @@ def update_map_memory(t, age_map=True):
                if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                          + mt[2]])]:
             t["T_MEMTHING"].remove(mt)
-    for id in world_db["Things"]:
+    for id in [id for id in world_db["Things"]
+               if not world_db["Things"][id]["carried"]]:
         type = world_db["Things"][id]["T_TYPE"]
         if not world_db["ThingTypes"][type]["TT_LIFEPOINTS"]:
             y = world_db["Things"][id]["T_POSY"]
