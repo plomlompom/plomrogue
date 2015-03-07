@@ -478,7 +478,7 @@ def update_map_memory(t):
                 t["T_MEMMAP"][pos] = world_db["MAP"][pos]
             continue
         if ord('0') <= t["T_MEMDEPTHMAP"][pos] \
-           and ord('9') >= t["T_MEMDEPTHMAP"][pos] \
+           and ord('9') > t["T_MEMDEPTHMAP"][pos] \
            and not rand.next() % (2 ** (t["T_MEMDEPTHMAP"][pos] - 48)):
             t["T_MEMDEPTHMAP"][pos] += 1
     for mt in [mt for mt in t["T_MEMTHING"]
