@@ -42,6 +42,16 @@ def prep_library():
     libpr.build_fov_map.argtypes = [ctypes.c_uint8, ctypes.c_uint8,
                                     ctypes.c_char_p, ctypes.c_char_p]
     libpr.build_fov_map.restype = ctypes.c_uint8
+    libpr.init_score_map.restype = ctypes.c_uint8
+    libpr.set_map_score.argtypes = [ctypes.c_uint16, ctypes.c_uint16]
+    libpr.set_map_score.restype = ctypes.c_uint8
+    libpr.get_map_score.argtypes = [ctypes.c_uint16]
+    libpr.get_map_score.restype = ctypes.c_int32
+    libpr.get_neighbor_score.argtypes = [ctypes.c_uint8]
+    libpr.get_neighbor_score.restype = ctypes.c_uint16
+    libpr.ready_neighbor_scores.argtpes = [ctypes.c_uint16]
+    libpr.ready_neighbor_scores.restype = ctypes.c_uint8
+    libpr.dijkstra_map.restype = ctypes.c_uint8
     return libpr
 
 
@@ -756,9 +766,178 @@ def hunger(t):
         decrement_lifepoints(t)
 
 
-def get_dir_to_nearest_target(t, c):
-    # Dummy
-    return False
+def get_dir_to_target(t, filter):
+    """Try to set T_COMMAND/T_ARGUMENT for move to "filter"-determined target.
+
+    The path-wise nearest target is chosen, via the shortest available path.
+    Target must not be t. On succcess, return positive value, else False.
+    Filters:
+    "a": Thing in FOV is below a certain distance, animate, but of ThingType
+         that is not t's, and starts out weaker than t is; build path as
+         avoiding things of t's ThingType
+    "f": neighbor cell (not inhabited by any animate Thing) further away from
+         animate Thing not further than x steps away and in FOV and of a
+         ThingType that is not t's, and starts out stronger or as strong as t
+         is currently; or (cornered), if no such flight cell, but Thing of
+         above criteria is too near,1 a cell closer to it, or, if less near,
+         just wait
+    "c": Thing in memorized map is consumable
+    "s": memory map cell with greatest-reachable degree of unexploredness
+    """
+
+    def set_map_score(pos, score):
+        test = libpr.set_map_score(pos, score)
+        if test:
+            raise RuntimeError("No score map allocated for set_map_score().")
+
+    def get_map_score(pos):
+        result = libpr.get_map_score(pos)
+        if result < 0:
+            raise RuntimeError("No score map allocated for get_map_score().")
+        return result
+
+    def seeing_thing():
+        if t["fovmap"] and ("a" == filter or "f" == filter):
+            for id in world_db["Things"]:
+                Thing = world_db["Things"][id]
+                if Thing != t and Thing["T_LIFEPOINTS"] and \
+                   t["T_TYPE"] != Thing["T_TYPE"] and \
+                   'v' == chr(t["fovmap"][(Thing["T_POSY"]
+                                          * world_db["MAP_LENGTH"])
+                                          + Thing["T_POSX"]]):
+                    ThingType = world_db["ThingTypes"][Thing["T_TYPE"]]
+                    if ("f" == filter and ThingType["TT_LIFEPOINTS"] >=
+                                          t["T_LIFEPOINTS"]) \
+                       or ("a" == filter and ThingType["TT_LIFEPOINTS"] <
+                                             t["T_LIFEPOINTS"]):
+                        return True
+        elif t["T_MEMMAP"] and "c" == filter:
+            for mt in t["T_MEMTHING"]:
+                if ' ' != chr(t["T_MEMMAP"][(mt[1] * world_db["MAP_LENGTH"])
+                                         + mt[2]]) \
+                   and world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]:
+                    return True
+        return False
+
+    def init_score_map():
+        test = libpr.init_score_map()
+        if test:
+            raise RuntimeError("Malloc error in init_score_map().")
+        for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
+                  if '.' == chr(t["T_MEMMAP"][i])]:
+            set_map_score(i, 65535 - 1)
+        if "a" == filter:
+            for id in world_db["Things"]:
+                Thing = world_db["Things"][id]
+                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] + Thing["T_POSX"]
+                if t != Thing and Thing["T_LIFEPOINTS"] and \
+                   t["T_TYPE"] != Thing["T_TYPE"] and \
+                   'v' == chr(t["fovmap"][pos]) and \
+                   t["T_LIFEPOINTS"] > \
+                       world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
+                    set_map_score(pos, 0)
+                elif t["T_TYPE"] == Thing["T_TYPE"]:
+                    set_map_score(pos, 65535)
+        elif "f" == filter:
+            for id in [id for id in world_db["Things"]
+                       if world_db["Things"][id]["T_LIFEPOINTS"]]:
+                Thing = world_db["Things"][id]
+                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] + Thing["T_POSX"]
+                if t["T_TYPE"] != Thing["T_TYPE"] and \
+                   'v' == chr(t["fovmap"][pos]) and \
+                   t["T_LIFEPOINTS"] <= \
+                       world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
+                    set_map_score(pos, 0)
+        elif "c" == filter:
+            for mt in [mt for mt in t["T_MEMTHING"]
+                       if ' ' != chr(t["T_MEMMAP"][mt[1]
+                                                   * world_db["MAP_LENGTH"]
+                                                   + mt[2]])
+                       if world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]]:
+                set_map_score(mt[1] * world_db["MAP_LENGTH"] + mt[2], 0)
+        elif "s" == filter:
+            for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
+                      if t["T_MEMDEPTHMAP"][i] == mem_depth_c[0]]:
+                set_map_score(i, 0)
+    
+    def rand_target_dir(neighbors, cmp, dirs):
+        candidates = []
+        n_candidates = 0
+        for i in range(len(dirs)):
+            if cmp == neighbors[i]:
+                candidates.append(dirs[i])
+                n_candidates += 1
+        return candidates[rand.next() % n_candidates] if n_candidates else 0
+
+    def get_neighbor_scores(dirs, eye_pos):
+        scores = []
+        if libpr.ready_neighbor_scores(eye_pos):
+            raise RuntimeError("No score map allocated for " +
+                               "ready_neighbor_scores.()")
+        for i in range(len(dirs)):
+            scores.append(libpr.get_neighbor_score(i))
+        return scores
+
+    def get_dir_from_neighbors():
+        dir_to_target = False
+        dirs = "edcxsw"
+        eye_pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+        neighbors = get_neighbor_scores(dirs, eye_pos)
+        if "f" == filter:
+            inhabited = [world_db["Things"][id]["T_POSY"]
+                         * world_db["MAP_LENGTH"]
+                         + world_db["Things"][id]["T_POSX"]
+                         for id in world_db["Things"]
+                         if world_db["Things"][id]["T_LIFEPOINTS"]]
+            for i in range(len(dirs)):
+                mv_yx_in_dir_legal(dirs[i], t["T_POSY"], t["T_POSX"])
+                pos_cmp = libpr.result_y() * world_db["MAP_LENGTH"] \
+                          + libpr.result_x()
+                for pos in [pos for pos in inhabited if pos == pos_cmp]:
+                    neighbors[i] = 65535
+                    break
+        minmax_start = 0 if "f" == filter else 65535 - 1
+        minmax_neighbor = minmax_start
+        for i in range(len(dirs)):
+            if ("f" == filter and get_map_score(eye_pos) < neighbors[i] and
+                minmax_neighbor < neighbors[i] and 65535 != neighbors[i]) \
+               or ("f" != filter and minmax_neighbor > neighbors[i]):
+                minmax_neighbor = neighbors[i]
+        if minmax_neighbor != minmax_start:
+            dir_to_target = rand_target_dir(neighbors, minmax_neighbor, dirs)
+        if "f" == filter:
+            if not dir_to_target:
+                if 1 == get_map_score(eye_pos):
+                    dir_to_target = rand_target_dir(neighbors, 0, dirs)
+                elif 3 >= get_map_score(eye_pos):
+                    t["T_COMMAND"] = [id for id in world_db["ThingActions"]
+                                      if world_db["ThingActions"][id]["TA_NAME"]
+                                         == "wait"][0]
+                    return 1;
+            elif dir_to_target and 3 < get_map_score(eye_pos):
+                dir_to_target = 0
+        elif "a" == filter and 10 <= get_map_score(eye_pos):
+            dir_to_target = 0
+        return dir_to_target
+
+    dir_to_target = False
+    mem_depth_c = b' '
+    run_i = 9 + 1 if "s" == filter else 1
+    while run_i and not dir_to_target and ("s" == filter or seeing_thing()):
+        run_i -= 1
+        init_score_map()
+        mem_depth_c = b'9' if b' ' == mem_depth_c \
+                           else bytes([mem_depth_c[0] - 1])
+        if libpr.dijkstra_map():
+            raise RuntimeError("No score map allocated for dijkstra_map().")
+        dir_to_target = get_dir_from_neighbors()
+        libpr.free_score_map()
+        if dir_to_target and str == type(dir_to_target):
+            t["T_COMMAND"] = [id for id in world_db["ThingActions"]
+                              if world_db["ThingActions"][id]["TA_NAME"]
+                                 == "move"][0]
+            t["T_ARGUMENT"] = ord(dir_to_target)
+    return dir_to_target
 
 
 def standing_on_consumable(t):
@@ -799,7 +978,7 @@ def ai(t):
     """
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
-    if not get_dir_to_nearest_target(t, "f"):
+    if not get_dir_to_target(t, "f"):
         sel = get_inventory_slot_to_consume(t)
         if -1 != sel:
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
@@ -810,9 +989,9 @@ def ai(t):
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                               if world_db["ThingActions"][id]["TA_NAME"]
                                  == "pick_up"][0]
-        elif (not get_dir_to_nearest_target(t, "c")) and \
-             (not get_dir_to_nearest_target(t, "a")):
-            get_dir_to_nearest_target(t, "s")
+        elif (not get_dir_to_target(t, "c")) and \
+             (not get_dir_to_target(t, "a")):
+            get_dir_to_target(t, "s")
 
 
 def turn_over():
@@ -832,7 +1011,6 @@ def turn_over():
                         whilebreaker = True
                         break
                     ai(Thing)
-                    Thing["T_COMMAND"] = 1
                 try_healing(Thing)
                 Thing["T_PROGRESS"] += 1
                 taid = [a for a in world_db["ThingActions"]

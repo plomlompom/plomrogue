@@ -419,3 +419,157 @@ extern uint8_t build_fov_map(uint8_t y, uint8_t x,
     free_angles(shadows);
     return 0;
 }
+
+static uint16_t * score_map = NULL;
+static uint16_t neighbor_scores[6];
+
+/* Init AI score map. Return 1 on failure, else 0. */
+extern uint8_t init_score_map()
+{
+    uint32_t map_size = maplength * maplength;
+    score_map = malloc(map_size * sizeof(uint16_t));
+    if (!score_map)
+    {
+        return 1;
+    }
+    uint32_t i = 0;
+    for (; i < map_size; i++)
+    {
+        score_map[i] = UINT16_MAX;
+    }
+    return 0;
+}
+
+/* Set score_map[pos] to score. Return 1 on failure, else 0. */
+extern uint8_t set_map_score(uint16_t pos, uint16_t score)
+{
+    if (!score_map)
+    {
+        return 1;
+    }
+    score_map[pos] = score;
+/*
+    uint32_t mup_size = maplength * maplength;
+    uint32_t pus;
+    FILE * file = fopen("test_set", "w");
+    for (pus = 0; pus < mup_size; pus++)
+    {
+        fprintf(file, "%d ", score_map[pus]);
+        if (0 == pus % maplength)
+        {
+            fprintf(file, "\n");
+        }
+    }
+    fclose(file);
+*/
+    return 0;
+}
+
+/* Get score_map[pos]. Return uint16_t value on success, -1 on failure. */
+extern int32_t get_map_score(uint16_t pos)
+{
+    if (!score_map)
+    {
+        return -1;
+    }
+    return score_map[pos];
+}
+
+/* Free score_map. */
+extern void free_score_map()
+{
+    free(score_map);
+    score_map = NULL;
+}
+
+/* Write into "neighbors" scores of the immediate neighbors of the score_map
+ * cell at pos_i (array index), as found in the directions north-east, east,
+ * south-east etc. (clockwise order). Use kill_score for illegal neighborhoods
+ * (i.e. if direction would lead beyond the map's border).
+ */
+static void get_neighbor_scores(uint16_t pos_i, uint16_t kill_score,
+                                uint16_t * neighbors)
+{
+    uint32_t map_size = maplength * maplength;
+    uint8_t open_north     = pos_i >= maplength;
+    uint8_t open_east      = pos_i + 1 % maplength;
+    uint8_t open_south     = pos_i + maplength < map_size;
+    uint8_t open_west      = pos_i % maplength;
+    uint8_t is_indented    = (pos_i / maplength) % 2;
+    uint8_t open_diag_west = is_indented || open_west;
+    uint8_t open_diag_east = !is_indented || open_east;
+    neighbors[0] = !(open_north && open_diag_east) ? kill_score :
+                   score_map[pos_i - maplength + is_indented];
+    neighbors[1] = !(open_east) ? kill_score : score_map[pos_i + 1];
+    neighbors[2] = !(open_south && open_diag_east) ? kill_score :
+                   score_map[pos_i + maplength + is_indented];
+    neighbors[3] = !(open_south && open_diag_west) ? kill_score :
+                   score_map[pos_i + maplength - !is_indented];
+    neighbors[4] = !(open_west) ? kill_score : score_map[pos_i - 1];
+    neighbors[5] = !(open_north && open_diag_west) ? kill_score :
+                   score_map[pos_i - maplength - !is_indented];
+}
+
+/* Call get_neighbor_scores() on neighbor_scores buffer. Return 1 on error. */
+extern uint8_t ready_neighbor_scores(uint16_t pos)
+{
+    if (!score_map)
+    {
+        return 1;
+    }
+    get_neighbor_scores(pos, UINT16_MAX, neighbor_scores);
+    return 0;
+}
+
+/* Return i-th position from neighbor_scores buffer.*/
+extern uint16_t get_neighbor_score(uint8_t i)
+{
+    return neighbor_scores[i];
+}
+
+/* Iterate over scored cells in score_map geometry. Compare each cell's score
+ * against the score of its immediate neighbors in 6 directions. If any
+ * neighbor's score is at least two points lower than the current cell's score,
+ * re-set it to 1 point higher than its lowest-scored neighbor. Repeat this
+ * whole process until all cells have settled on their final score. Ignore cells
+ * whose score is greater than UINT16_MAX - 1 (treat those as unreachable).
+ * Return 1 on error, else 0.
+ */
+extern uint8_t dijkstra_map()
+{
+    if (!score_map)
+    {
+        return 1;
+    }
+    uint16_t max_score = UINT16_MAX - 1;
+    uint32_t map_size = maplength * maplength;
+    uint32_t pos;
+    uint16_t i_scans, neighbors[6], min_neighbor;
+    uint8_t scores_still_changing = 1;
+    uint8_t i_dirs;
+    for (i_scans = 0; scores_still_changing; i_scans++)
+    {
+        scores_still_changing = 0;
+        for (pos = 0; pos < map_size; pos++)
+        {
+            if (score_map[pos] <= max_score)
+            {
+                get_neighbor_scores(pos, max_score, neighbors);
+                min_neighbor = max_score;
+                for (i_dirs = 0; i_dirs < 6; i_dirs++)
+                {
+                    if (min_neighbor > neighbors[i_dirs])
+                    {
+                        min_neighbor = neighbors[i_dirs];
+                    }
+                }
+                if (score_map[pos] > min_neighbor + 1)
+                {
+                    score_map[pos] = min_neighbor + 1;
+                    scores_still_changing = 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
