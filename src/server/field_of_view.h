@@ -18,7 +18,7 @@ struct Thing;
 /* Update "t_eye"'s .mem_map memory with what's in its current FOV, and update
  * and age the .mem_depth_map.
  */
-extern void update_map_memory(struct Thing * t_eye);
+extern void update_map_memory(struct Thing * t_eye, uint8_t age_map);
 
 /* Build "t"'s field of view. */
 extern void build_fov_map(struct Thing * t);

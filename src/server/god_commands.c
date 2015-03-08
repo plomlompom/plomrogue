@@ -257,7 +257,7 @@ static uint8_t parse_position(char* tok0, char * tok1, struct Thing * t)
                 build_fov_map(t);
                 if (t == get_player())
                 {
-                    update_map_memory(t);
+                    update_map_memory(t, 1);
                 }
             }
         }
@@ -386,7 +386,7 @@ static uint8_t parse_world_active(char * tok0, char * tok1)
                         build_fov_map(ti);
                         if (ti == get_player())
                         {
-                            update_map_memory(ti);
+                            update_map_memory(ti, 0);
                         }
                     }
                 }

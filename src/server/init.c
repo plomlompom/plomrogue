@@ -209,7 +209,7 @@ extern uint8_t remake_world()
             break;
         }
     }
-    update_map_memory(get_player());
+    update_map_memory(get_player(), 1);
     for (tt = world.thing_types; tt; tt = tt->next)
     {
         if (world.player_type != tt->id)

@@ -327,7 +327,7 @@ static void turn_over()
             {
                 if (0 == thing->command)
                 {
-                    update_map_memory(thing);
+                    update_map_memory(thing, 1);
                     if (thing == player)
                     {
                         break;

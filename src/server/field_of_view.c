@@ -308,7 +308,7 @@ static void add_things_to_map_memory(struct Thing * t_eye)
 
 
 
-extern void update_map_memory(struct Thing * t_eye)
+extern void update_map_memory(struct Thing * t_eye, uint8_t age_map)
 {
     if (!t_eye->mem_map)
     {
@@ -330,7 +330,8 @@ extern void update_map_memory(struct Thing * t_eye)
             }
             continue;
         }
-        if (   '0' <= t_eye->mem_depth_map[i] && '9' > t_eye->mem_depth_map[i]
+        if (age_map &&
+            '0' <= t_eye->mem_depth_map[i] && '9' > t_eye->mem_depth_map[i]
             && !(rrand() % (uint16_t) pow(2, t_eye->mem_depth_map[i] - 48)))
         {
             t_eye->mem_depth_map[i]++;
