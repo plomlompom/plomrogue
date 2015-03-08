@@ -98,16 +98,9 @@ static void write_uvalue(FILE * file, uint32_t value)
 
 static void write_string(FILE * file, char * string)
 {
-    uint8_t contains_space = NULL != strchr(string, ' ');
-    if (contains_space)
-    {
-        try_fputc('\'', file, __func__);
-    }
+    try_fputc('\'', file, __func__);
     try_fwrite(string, strlen(string), 1, file, __func__);
-    if (contains_space)
-    {
-        try_fputc('\'', file, __func__);
-    }
+    try_fputc('\'', file, __func__);
 }
 
 
@@ -177,20 +170,6 @@ static void write_thing(FILE * file, struct Thing * t)
         write_thing(file, o);
     }
     write_key_space_uvalue(file, s[S_CMD_T_ID], t->id);
-    write_key_space_uvalue(file, s[S_CMD_T_TYPE], t->type);
-    write_key_space_uvalue(file, s[S_CMD_T_POSY], t->pos.y);
-    write_key_space_uvalue(file, s[S_CMD_T_POSX], t->pos.x);
-    write_key_space_uvalue(file, s[S_CMD_T_COMMAND], t->command);
-    write_key_space_uvalue(file, s[S_CMD_T_ARGUMENT], t->arg);
-    write_key_space_uvalue(file, s[S_CMD_T_PROGRESS], t->progress);
-    write_key_space_uvalue(file, s[S_CMD_T_HP], t->lifepoints);
-    write_key_space_svalue(file, s[S_CMD_T_SATIATION], t->satiation);
-    for (o = t->owns; o; o = o->next)
-    {
-        write_key_space_uvalue(file, s[S_CMD_T_CARRIES], o->id);
-    }
-    write_mem_map(file, t->mem_depth_map, s[S_CMD_T_MEMDEPTHMAP]);
-    write_mem_map(file, t->mem_map, s[S_CMD_T_MEMMAP]);
     struct ThingInMemory * tm = t->t_mem;
     for (; tm; tm = tm->next)
     {
@@ -202,7 +181,31 @@ static void write_thing(FILE * file, struct Thing * t)
         write_uvalue(file, tm->pos.x);
         try_fputc('\n', file, __func__);
     }
-    try_fputc('\n', file, __func__);
+    write_key_space_uvalue(file, s[S_CMD_T_COMMAND], t->command);
+    write_key_space_uvalue(file, s[S_CMD_T_HP], t->lifepoints);
+    write_key_space_uvalue(file, s[S_CMD_T_TYPE], t->type);
+    write_key_space_uvalue(file, s[S_CMD_T_ARGUMENT], t->arg);
+    write_key_space_uvalue(file, s[S_CMD_T_POSY], t->pos.y);
+    write_key_space_uvalue(file, s[S_CMD_T_POSX], t->pos.x);
+    write_key_space_uvalue(file, s[S_CMD_T_PROGRESS], t->progress);
+    write_mem_map(file, t->mem_depth_map, s[S_CMD_T_MEMDEPTHMAP]);
+    write_key_space_svalue(file, s[S_CMD_T_SATIATION], t->satiation);
+    write_mem_map(file, t->mem_map, s[S_CMD_T_MEMMAP]);
+}
+
+
+
+static void write_thing_carrying(FILE * file, struct Thing * t)
+{
+    if (t->owns)
+    {
+        write_key_space_uvalue(file, s[S_CMD_T_ID], t->id);
+        struct Thing * o;
+        for (o = t->owns; o; o = o->next)
+        {
+            write_key_space_uvalue(file, s[S_CMD_T_CARRIES], o->id);
+        }
+    }
 }
 
 
@@ -395,45 +398,44 @@ extern void save_world()
 {
     char * path_tmp;
     FILE * file = atomic_write_start(s[S_PATH_SAVE], &path_tmp);
-    write_key_space_uvalue(file, s[S_CMD_MAPLENGTH], world.map.length);
+    write_key_space_uvalue(file, s[S_CMD_TURN], world.turn);
     write_key_space_uvalue(file, s[S_CMD_PLAYTYPE], world.player_type);
-    try_fputc('\n', file, __func__);
+    write_key_space_uvalue(file, s[S_CMD_MAPLENGTH], world.map.length);
+    write_key_space_uvalue(file, s[S_CMD_SEED_MAP], world.seed_map);
     struct ThingAction * ta;
     for (ta = world.thing_actions; ta; ta = ta->next)
     {
         write_key_space_uvalue(file, s[S_CMD_TA_ID], ta->id);
         write_key_space_uvalue(file, s[S_CMD_TA_EFFORT], ta->effort);
         write_key_space_string(file, s[S_CMD_TA_NAME], ta->name);
-        try_fputc('\n', file, __func__);
     }
     struct ThingType * tt;
     for (tt = world.thing_types; tt; tt = tt->next)
     {
         write_key_space_uvalue(file, s[S_CMD_TT_ID], tt->id);
         write_key_space_uvalue(file, s[S_CMD_TT_STARTN], tt->start_n);
-        write_key_space_uvalue(file, s[S_CMD_TT_HP], tt->lifepoints);
-        int test = fprintf(file, "%s %c\n", s[S_CMD_TT_SYMB], tt->char_on_map);
+        int test = fprintf(file, "%s '%c'\n", s[S_CMD_TT_SYMB], tt->char_on_map);
         exit_trouble(test < 0, __func__, "fprintf");
         write_key_space_string(file, s[S_CMD_TT_NAME], tt->name);
-        write_key_space_uvalue(file, s[S_CMD_TT_CONSUM], tt->consumable);
         write_key_space_uvalue(file, s[S_CMD_TT_PROL], tt->proliferate);
-        try_fputc('\n', file, __func__);
+        write_key_space_uvalue(file, s[S_CMD_TT_HP], tt->lifepoints);
+        write_key_space_uvalue(file, s[S_CMD_TT_CONSUM], tt->consumable);
     }
     for (tt = world.thing_types; tt; tt = tt->next)
     {
         write_key_space_uvalue(file, s[S_CMD_TT_ID], tt->id);
         write_key_space_uvalue(file, s[S_CMD_TT_CORPS], tt->corpse_id);
     }
-    try_fputc('\n', file, __func__);
-    write_key_space_uvalue(file, s[S_CMD_SEED_MAP], world.seed_map);
-    write_key_space_uvalue(file, s[S_CMD_SEED_RAND], world.seed);
-    write_key_space_uvalue(file, s[S_CMD_TURN], world.turn);
-    try_fputc('\n', file, __func__);
     struct Thing * t;
     for (t = world.things; t; t = t->next)
     {
         write_thing(file, t);
     }
+    for (t = world.things; t; t = t->next)
+    {
+        write_thing_carrying(file, t);
+    }
+    write_key_space_uvalue(file, s[S_CMD_SEED_RAND], world.seed);
     write_key_space_uvalue(file, s[S_CMD_WORLD_ACTIVE], 1);
     atomic_write_finish(file, s[S_PATH_SAVE], path_tmp);
 }
