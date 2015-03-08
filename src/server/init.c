@@ -166,7 +166,7 @@ extern void obey_argv(int argc, char * argv[])
 
 extern void setup_server_io()
 {
-    int test = mkdir("server", 0700);
+    int test = mkdir("server", 0777);
     exit_trouble(test && EEXIST != errno, __func__, "mkdir");
     world.file_out = try_fopen(s[S_PATH_OUT], "w", __func__);
     world.server_test = try_malloc(10 + 1 + 10 + 1 + 1, __func__);
