@@ -79,6 +79,7 @@ def setup_server_io():
         if os.access(path_tmp, os.F_OK):
             raise SystemExit(msg)
     io_db["teststring"] = str(os.getpid()) + " " + str(time.time())
+    io_db["save_wait"] = 0
     os.makedirs(io_db["path_server"], exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
     strong_write(io_db["file_out"], io_db["teststring"] + "\n")
@@ -113,9 +114,10 @@ def obey(command, prefix, replay=False, do_record=False):
     a non-meta command from the commands_db merely triggers obey() on the next
     command from the records file. If not, non-meta commands set
     io_db["worldstate_updateable"] to world_db["WORLD_EXISTS"], and, if
-    do_record is set, are recorded via record(), and save_world() is called.
-    The prefix string is inserted into the server's input message between its
-    beginning 'input ' & ':'. All activity is preceded by a server_test() call.
+    do_record is set, are recorded via record(), and save_world() is called if
+    15 seconds have passed since the last time it was called. The prefix string
+    is inserted into the server's input message between its beginning 'input '
+    & ':'. All activity is preceded by a server_test() call.
     """
     server_test()
     print("input " + prefix + ": " + command)
@@ -141,7 +143,9 @@ def obey(command, prefix, replay=False, do_record=False):
             commands_db[tokens[0]][2](*tokens[1:])
             if do_record:
                 record(command)
-                save_world()
+                if time.time() > io_db["save_wait"] + 15:
+                    save_world()
+                    io_db["save_wait"] = time.time()
             io_db["worldstate_updateable"] = world_db["WORLD_ACTIVE"]
     elif 0 != len(tokens):
         print("Invalid command/argument, or bad number of tokens.")
@@ -1095,6 +1099,7 @@ def command_ping():
 
 def command_quit():
     """Abort server process."""
+    save_world()
     raise SystemExit("received QUIT command")
 
 
