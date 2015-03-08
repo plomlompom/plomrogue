@@ -1106,7 +1106,6 @@ def command_thingshere(str_y, str_x):
             strong_write(io_db["file_out"], "THINGS_HERE START\n")
             if "v" == chr(world_db["Things"][0]["fovmap"][pos]):
                 for id in world_db["Things"]:
-                    # write_thing_if_here()
                     if y == world_db["Things"][id]["T_POSY"] \
                        and x == world_db["Things"][id]["T_POSX"] \
                        and not world_db["Things"][id]["carried"]:
@@ -1285,7 +1284,7 @@ def command_worldactive(worldactive_string):
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
                         if 0 == id:
-                            update_map_memory(world_db["Things"][id])
+                            update_map_memory(world_db["Things"][id], False)
                 world_db["WORLD_ACTIVE"] = 1
 
 
