@@ -117,7 +117,6 @@ static uint8_t parse_player_command_0arg(char * tok0)
             else
             {
                 player->command = get_thing_action_id_by_name(tok0);
-                player->arg = 0;
             }
             turn_over();
         }
