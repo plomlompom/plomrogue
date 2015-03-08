@@ -18,5 +18,12 @@
 # <https://github.com/plomlompom/plomrogue/issues/2#issuecomment-50972436> for a
 # workaround.
 
+if [ ! -e ./libplomrogue.so ]
+then
+  echo "non-redo stuff (preparing for future Python port sans redo needs):"
+  echo "Building library for server's Python variant with mere shell one-liner."
+  ./compile-server.sh
+fi
+
 export PATH=$PATH:$PWD/build/redo_scripts
 redo "$@"

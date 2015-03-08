@@ -26,7 +26,8 @@ def prep_library():
     """Prepare ctypes library at ./libplomrogue.so"""
     libpath = ("./libplomrogue.so")
     if not os.access(libpath, os.F_OK):
-        raise SystemExit("No library " + libpath + ", run ./compile.sh first?")
+        raise SystemExit("No library " + libpath +
+                         ", run ./compile-server.sh first?")
     libpr = ctypes.cdll.LoadLibrary(libpath)
     libpr.seed_rrand.argtypes = [ctypes.c_uint8, ctypes.c_uint32]
     libpr.seed_rrand.restype = ctypes.c_uint32
