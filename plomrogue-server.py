@@ -80,6 +80,7 @@ def setup_server_io():
             raise SystemExit(msg)
     io_db["teststring"] = str(os.getpid()) + " " + str(time.time())
     io_db["save_wait"] = 0
+    io_db["record_chunk"] = ""
     os.makedirs(io_db["path_server"], exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
     strong_write(io_db["file_out"], io_db["teststring"] + "\n")
@@ -114,10 +115,11 @@ def obey(command, prefix, replay=False, do_record=False):
     a non-meta command from the commands_db merely triggers obey() on the next
     command from the records file. If not, non-meta commands set
     io_db["worldstate_updateable"] to world_db["WORLD_EXISTS"], and, if
-    do_record is set, are recorded via record(), and save_world() is called if
-    15 seconds have passed since the last time it was called. The prefix string
-    is inserted into the server's input message between its beginning 'input '
-    & ':'. All activity is preceded by a server_test() call.
+    do_record is set, are recorded to io_db["record_chunk"], and save_world()
+    is called (and io_db["record_chunk"] written) if 15 seconds have passed
+    since the last time it was called. The prefix string is inserted into the
+    server's input message between its beginning 'input ' and ':'. All activity
+    is preceded by a server_test() call.
     """
     server_test()
     print("input " + prefix + ": " + command)
@@ -142,9 +144,12 @@ def obey(command, prefix, replay=False, do_record=False):
         else:
             commands_db[tokens[0]][2](*tokens[1:])
             if do_record:
-                record(command)
+                io_db["record_chunk"] += command + "\n"
                 if time.time() > io_db["save_wait"] + 15:
+                    atomic_write(io_db["path_record"], io_db["record_chunk"],
+                                 do_append=True)
                     save_world()
+                    io_db["record_chunk"] = ""
                     io_db["save_wait"] = time.time()
             io_db["worldstate_updateable"] = world_db["WORLD_ACTIVE"]
     elif 0 != len(tokens):
@@ -167,17 +172,8 @@ def atomic_write(path, text, do_append=False):
     os.rename(path_tmp, path)
 
 
-def record(command):
-    """Append command string plus newline to record file. (Atomic.)"""
-    # This misses some optimizations from the original record(), namely only
-    # finishing the atomic write with expensive flush() and fsync() every 15
-    # seconds unless explicitely forced. Implement as needed.
-    atomic_write(io_db["path_record"], command + "\n", do_append=True)
-
-
 def save_world():
     """Save all commands needed to reconstruct current world state."""
-    # TODO: Misses same optimizations as record() from the original record().
 
     def quote(string):
         string = string.replace("\u005C", '\u005C\u005C')
@@ -1100,6 +1096,7 @@ def command_ping():
 def command_quit():
     """Abort server process."""
     save_world()
+    atomic_write(io_db["path_record"], io_db["record_chunk"], do_append=True)
     raise SystemExit("received QUIT command")
 
 
