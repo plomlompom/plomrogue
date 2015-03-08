@@ -324,7 +324,6 @@ extern void actor_use(struct Thing * t)
             }
             t->satiation = t->satiation + tt->consumable > INT16_MAX ?
                            INT16_MAX : t->satiation + tt->consumable;
-            t->lifepoints = t->lifepoints + tt->consumable;
         }
     }
     if (t == get_player())
