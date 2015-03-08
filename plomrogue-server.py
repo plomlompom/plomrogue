@@ -257,6 +257,8 @@ def parse_command_line_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
+    parser.add_argument('-l', nargs="?", const="save", dest='savefile',
+                        action="store")
     parser.add_argument('-v', dest='verbose', action='store_true')
     opts, unknown = parser.parse_known_args()
     return opts
@@ -1600,7 +1602,7 @@ directions_db = {"east": "d", "south-east": "c", "south-west": "x",
 """File IO database."""
 io_db = {
     "path_save": "save",
-    "path_record": "history",
+    "path_record": "record_save",
     "path_worldconf": "confserver/world",
     "path_server": "server/",
     "path_in": "server/in",
@@ -1615,8 +1617,11 @@ io_db = {
 try:
     libpr = prep_library()
     rand = RandomnessIO()
-    setup_server_io()
     opts = parse_command_line_arguments()
+    if opts.savefile:
+        io_db["path_save"] = opts.savefile
+        io_db["path_record"] = "record_" + opts.savefile
+    setup_server_io()
     if opts.verbose:
         io_db["verbose"] = True
     if None != opts.replay:
