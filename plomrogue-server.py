@@ -629,14 +629,18 @@ def actor_move(t):
 
 def actor_pick_up(t):
     """Make t pick up (topmost?) Thing from ground into inventory."""
-    # Topmostness is actually not defined so far.
+    # Topmostness is actually not defined so far. Picks Thing with highest ID.
     ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
            if not world_db["Things"][id]["carried"]
            if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
            if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
     if len(ids):
-        world_db["Things"][ids[0]]["carried"] = True
-        t["T_CARRIES"].append(ids[0])
+        highest_id = 0
+        for id in ids:
+            if id > highest_id:
+                highest_id = id
+        world_db["Things"][highest_id]["carried"] = True
+        t["T_CARRIES"].append(highest_id)
         if t == world_db["Things"][0]:
             strong_write(io_db["file_out"], "LOG You pick up an object.\n")
     elif t == world_db["Things"][0]:
