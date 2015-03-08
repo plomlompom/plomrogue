@@ -99,11 +99,11 @@ def cleanup_server_io():
     def helper(file_key, path_key):
         if file_key in io_db:
             io_db[file_key].close()
-            if not io_db["kicked_by_rival"] \
-               and os.access(io_db[path_key], os.F_OK):
-                os.remove(io_db[path_key])
-    helper("file_out", "path_out")
+        if not io_db["kicked_by_rival"] \
+           and os.access(io_db[path_key], os.F_OK):
+            os.remove(io_db[path_key])
     helper("file_in", "path_in")
+    helper("file_out", "path_out")
     helper("file_worldstate", "path_worldstate")
     if "file_record" in io_db:
         io_db["file_record"].close()
