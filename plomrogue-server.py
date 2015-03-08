@@ -829,12 +829,13 @@ def get_dir_to_target(t, filter):
         if "a" == filter:
             for id in world_db["Things"]:
                 Thing = world_db["Things"][id]
-                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] + Thing["T_POSX"]
+                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] \
+                      + Thing["T_POSX"]
                 if t != Thing and Thing["T_LIFEPOINTS"] and \
                    t["T_TYPE"] != Thing["T_TYPE"] and \
                    'v' == chr(t["fovmap"][pos]) and \
                    t["T_LIFEPOINTS"] > \
-                       world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
+                   world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
                     set_map_score(pos, 0)
                 elif t["T_TYPE"] == Thing["T_TYPE"]:
                     set_map_score(pos, 65535)
@@ -842,11 +843,12 @@ def get_dir_to_target(t, filter):
             for id in [id for id in world_db["Things"]
                        if world_db["Things"][id]["T_LIFEPOINTS"]]:
                 Thing = world_db["Things"][id]
-                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] + Thing["T_POSX"]
+                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] \
+                      + Thing["T_POSX"]
                 if t["T_TYPE"] != Thing["T_TYPE"] and \
                    'v' == chr(t["fovmap"][pos]) and \
                    t["T_LIFEPOINTS"] <= \
-                       world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
+                   world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
                     set_map_score(pos, 0)
         elif "c" == filter:
             for mt in [mt for mt in t["T_MEMTHING"]
@@ -859,7 +861,7 @@ def get_dir_to_target(t, filter):
             for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
                       if t["T_MEMDEPTHMAP"][i] == mem_depth_c[0]]:
                 set_map_score(i, 0)
-    
+
     def rand_target_dir(neighbors, cmp, dirs):
         candidates = []
         n_candidates = 0
@@ -911,9 +913,10 @@ def get_dir_to_target(t, filter):
                     dir_to_target = rand_target_dir(neighbors, 0, dirs)
                 elif 3 >= get_map_score(eye_pos):
                     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
-                                      if world_db["ThingActions"][id]["TA_NAME"]
+                                      if
+                                      world_db["ThingActions"][id]["TA_NAME"]
                                          == "wait"][0]
-                    return 1;
+                    return 1
             elif dir_to_target and 3 < get_map_score(eye_pos):
                 dir_to_target = 0
         elif "a" == filter and 10 <= get_map_score(eye_pos):
@@ -999,10 +1002,10 @@ def turn_over():
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
-        for id in [id for id in world_db["Things"]]: # Only what is from start!
+        for id in [id for id in world_db["Things"]]:  # Only what's from start!
             if not id in world_db["Things"] or \
-               world_db["Things"][id]["carried"]:# Thing may have been consumed
-                continue                         # or picked up during turn …
+               world_db["Things"][id]["carried"]:   # May have been consumed or
+                continue                            # picked up during turn …
             Thing = world_db["Things"][id]
             if Thing["T_LIFEPOINTS"]:
                 if not Thing["T_COMMAND"]:
