@@ -820,9 +820,10 @@ def turn_over():
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
-        for id in [id for id in world_db["Things"]]:
-            if not id in world_db["Things"]: # Thing may have been consumed
-                continue                     # during turn …
+        for id in [id for id in world_db["Things"]]: # Only what is from start!
+            if not id in world_db["Things"] or \
+               world_db["Things"][id]["carried"]:# Thing may have been consumed
+                continue                         # or picked up during turn …
             Thing = world_db["Things"][id]
             if Thing["T_LIFEPOINTS"]:
                 if not Thing["T_COMMAND"]:
