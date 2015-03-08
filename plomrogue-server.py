@@ -622,8 +622,9 @@ def actor_move(t):
             world_db["Things"][id]["T_POSY"] = move_result[1]
             world_db["Things"][id]["T_POSX"] = move_result[2]
         build_fov_map(t)
-        strong_write(io_db["file_out"], "LOG You move " + dir + ".\n")
-    else:
+        if t == world_db["Things"][0]:
+            strong_write(io_db["file_out"], "LOG You move " + dir + ".\n")
+    elif t == world_db["Things"][0]:
         strong_write(io_db["file_out"], "LOG You fail to move " + dir + ".\n")
 
 
