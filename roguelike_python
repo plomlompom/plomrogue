@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Wrapper to the script so that its suppressed server messages get read on exit.
+./start_server_client_union.sh "$@"
+
+# For some reason, mere sync won't ensure a log is written out, so wait a while.
+sync
+sleep 0.5
+if [ -e ./log ]
+then
+    cat log
+fi
