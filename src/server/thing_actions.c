@@ -270,11 +270,16 @@ extern void actor_pick(struct Thing * t)
 {
     struct Thing * picked = NULL;
     struct Thing * t_i;
+    uint8_t highest_id = 0;
     for (t_i = world.things; t_i; t_i = t_i->next)
     {
         if (t_i != t && t_i->pos.y == t->pos.y && t_i->pos.x == t->pos.x)
         {
-            picked = t_i;
+            if (t_i->id >= highest_id)   /* With several Things to pick,      */
+            {                            /* pick the one with the highest ID. */
+                highest_id = t_i->id;
+                picked = t_i;
+            }
         }
     }
     if (picked)
