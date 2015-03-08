@@ -80,6 +80,7 @@ def setup_server_io():
             raise SystemExit(msg)
     io_db["teststring"] = str(os.getpid()) + " " + str(time.time())
     io_db["save_wait"] = 0
+    io_db["verbose"] = False
     io_db["record_chunk"] = ""
     os.makedirs(io_db["path_server"], exist_ok=True)
     io_db["file_out"] = open(io_db["path_out"], "w")
@@ -122,7 +123,8 @@ def obey(command, prefix, replay=False, do_record=False):
     is preceded by a server_test() call.
     """
     server_test()
-    print("input " + prefix + ": " + command)
+    if io_db["verbose"]:
+        print("input " + prefix + ": " + command)
     try:
         tokens = shlex.split(command, comments=True)
     except ValueError as err:
@@ -254,6 +256,7 @@ def parse_command_line_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
+    parser.add_argument('-v', dest='verbose', action='store_true')
     opts, unknown = parser.parse_known_args()
     return opts
 
@@ -1611,8 +1614,10 @@ io_db = {
 try:
     libpr = prep_library()
     rand = RandomnessIO()
-    opts = parse_command_line_arguments()
     setup_server_io()
+    opts = parse_command_line_arguments()
+    if opts.verbose:
+        io_db["verbose"] = True
     if None != opts.replay:
         replay_game()
     else:
