@@ -56,10 +56,9 @@ def prep_library():
 
 
 def strong_write(file, string):
-    """Apply write(string), flush(), and os.fsync() to file."""
+    """Apply write(string), then flush()."""
     file.write(string)
     file.flush()
-    os.fsync(file)
 
 
 def setup_server_io():
