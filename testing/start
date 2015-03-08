@@ -1,0 +1,743 @@
+TURN 1
+PLAYER_TYPE 0
+MAP_LENGTH 64
+SEED_MAP 1425835989
+TA_ID 1
+TA_EFFORT 1
+TA_NAME "wait"
+TA_ID 2
+TA_EFFORT 5
+TA_NAME "move"
+TA_ID 3
+TA_EFFORT 15
+TA_NAME "pick_up"
+TA_ID 4
+TA_EFFORT 5
+TA_NAME "drop"
+TA_ID 5
+TA_EFFORT 45
+TA_NAME "use"
+TT_ID 0
+TT_START_NUMBER 1
+TT_SYMBOL "@"
+TT_NAME "HUMAN"
+TT_PROLIFERATE 0
+TT_LIFEPOINTS 30
+TT_CONSUMABLE 0
+TT_ID 1
+TT_START_NUMBER 27
+TT_SYMBOL "a"
+TT_NAME "ANT"
+TT_PROLIFERATE 0
+TT_LIFEPOINTS 6
+TT_CONSUMABLE 0
+TT_ID 2
+TT_START_NUMBER 9
+TT_SYMBOL "z"
+TT_NAME "ZOMBIE"
+TT_PROLIFERATE 0
+TT_LIFEPOINTS 18
+TT_CONSUMABLE 0
+TT_ID 3
+TT_START_NUMBER 3
+TT_SYMBOL "S"
+TT_NAME "SHOGGOTH"
+TT_PROLIFERATE 0
+TT_LIFEPOINTS 54
+TT_CONSUMABLE 0
+TT_ID 4
+TT_START_NUMBER 9
+TT_SYMBOL "#"
+TT_NAME "DIRT"
+TT_PROLIFERATE 0
+TT_LIFEPOINTS 0
+TT_CONSUMABLE 0
+TT_ID 5
+TT_START_NUMBER 9
+TT_SYMBOL "%"
+TT_NAME "SKELETON"
+TT_PROLIFERATE 0
+TT_LIFEPOINTS 0
+TT_CONSUMABLE 0
+TT_ID 6
+TT_START_NUMBER 1
+TT_SYMBOL "m"
+TT_NAME "MAGIC MEAT"
+TT_PROLIFERATE 255
+TT_LIFEPOINTS 0
+TT_CONSUMABLE 512
+TT_ID 0
+TT_CORPSE_ID 5
+TT_ID 1
+TT_CORPSE_ID 4
+TT_ID 2
+TT_CORPSE_ID 5
+TT_ID 3
+TT_CORPSE_ID 6
+TT_ID 4
+TT_CORPSE_ID 4
+TT_ID 5
+TT_CORPSE_ID 4
+TT_ID 6
+TT_CORPSE_ID 4
+T_ID 0
+T_COMMAND 0
+T_LIFEPOINTS 30
+T_TYPE 0
+T_ARGUMENT 0
+T_POSY 37
+T_POSX 43
+T_PROGRESS 0
+T_MEMDEPTHMAP 0 "                                                                "
+T_MEMDEPTHMAP 1 "                                                                "
+T_MEMDEPTHMAP 2 "                                                                "
+T_MEMDEPTHMAP 3 "                                                                "
+T_MEMDEPTHMAP 4 "                                                                "
+T_MEMDEPTHMAP 5 "                                                                "
+T_MEMDEPTHMAP 6 "                                                                "
+T_MEMDEPTHMAP 7 "                                                                "
+T_MEMDEPTHMAP 8 "                                                                "
+T_MEMDEPTHMAP 9 "                                                                "
+T_MEMDEPTHMAP 10 "                                                                "
+T_MEMDEPTHMAP 11 "                                                                "
+T_MEMDEPTHMAP 12 "                                                                "
+T_MEMDEPTHMAP 13 "                                                                "
+T_MEMDEPTHMAP 14 "                                                                "
+T_MEMDEPTHMAP 15 "                                                                "
+T_MEMDEPTHMAP 16 "                                                               0"
+T_MEMDEPTHMAP 17 "                                                              00"
+T_MEMDEPTHMAP 18 "                                                              00"
+T_MEMDEPTHMAP 19 "                                                            0000"
+T_MEMDEPTHMAP 20 "                                                            0000"
+T_MEMDEPTHMAP 21 "                                                          000000"
+T_MEMDEPTHMAP 22 "                                                          000000"
+T_MEMDEPTHMAP 23 "                                                        00000000"
+T_MEMDEPTHMAP 24 "                                                        00000000"
+T_MEMDEPTHMAP 25 "                                                       000000000"
+T_MEMDEPTHMAP 26 "                                  0                   0000000000"
+T_MEMDEPTHMAP 27 "                                  00                 00000000000"
+T_MEMDEPTHMAP 28 "                                   00               000000000000"
+T_MEMDEPTHMAP 29 "                                    0              0000000000000"
+T_MEMDEPTHMAP 30 "                                   0000           00000000000000"
+T_MEMDEPTHMAP 31 "                                    00000    00  000000000000000"
+T_MEMDEPTHMAP 32 "                                      0000    0  000000000000000"
+T_MEMDEPTHMAP 33 "                                       000   0000000000000000000"
+T_MEMDEPTHMAP 34 "                                       0000000000000000000000000"
+T_MEMDEPTHMAP 35 "                                 00   00000000000000000000000000"
+T_MEMDEPTHMAP 36 "                                00000000000000000000000000000000"
+T_MEMDEPTHMAP 37 "                                 0000000000000000000000000000000"
+T_MEMDEPTHMAP 38 "                                 0000000000000000000000000000000"
+T_MEMDEPTHMAP 39 "                                 0  0000000000000000000000000000"
+T_MEMDEPTHMAP 40 "                                    0000000000000000000000000000"
+T_MEMDEPTHMAP 41 "                                   00000000000000000000000000000"
+T_MEMDEPTHMAP 42 "                                   0000000 000000000000000000000"
+T_MEMDEPTHMAP 43 "                                 00000000  000000000000000000000"
+T_MEMDEPTHMAP 44 "                                000000000  00 000000000000000000"
+T_MEMDEPTHMAP 45 "                              000  00000   0 0000000000000000000"
+T_MEMDEPTHMAP 46 "                              00    0000    0 000000000000000000"
+T_MEMDEPTHMAP 47 "                                  00000    0  000000000000000000"
+T_MEMDEPTHMAP 48 "                                   0000     0  00000000000000000"
+T_MEMDEPTHMAP 49 "                                 00000     00 000000000000000000"
+T_MEMDEPTHMAP 50 "                                 00000      0  00000000000000000"
+T_MEMDEPTHMAP 51 "                                000000      0  00000000000000000"
+T_MEMDEPTHMAP 52 "                               0000000      0   0000000000000000"
+T_MEMDEPTHMAP 53 "                              0000000      00  00000000000000000"
+T_MEMDEPTHMAP 54 "                              0000000       0   0000000000000000"
+T_MEMDEPTHMAP 55 "                            00000000        0   0000000000000000"
+T_MEMDEPTHMAP 56 "                            00000000        00   000000000000000"
+T_MEMDEPTHMAP 57 "                           00000000        00   0000000000000000"
+T_MEMDEPTHMAP 58 "                          000000000         00   000000000000000"
+T_MEMDEPTHMAP 59 "                         000000000         00    000000000000000"
+T_MEMDEPTHMAP 60 "                         000000000          00    00000000000000"
+T_MEMDEPTHMAP 61 "                       0000000000          000   000000000000000"
+T_MEMDEPTHMAP 62 "                       0000000000           00    00000000000000"
+T_MEMDEPTHMAP 63 "                      0000000000           000    00000000000000"
+T_SATIATION 0
+T_MEMMAP 0 "                                                                "
+T_MEMMAP 1 "                                                                "
+T_MEMMAP 2 "                                                                "
+T_MEMMAP 3 "                                                                "
+T_MEMMAP 4 "                                                                "
+T_MEMMAP 5 "                                                                "
+T_MEMMAP 6 "                                                                "
+T_MEMMAP 7 "                                                                "
+T_MEMMAP 8 "                                                                "
+T_MEMMAP 9 "                                                                "
+T_MEMMAP 10 "                                                                "
+T_MEMMAP 11 "                                                                "
+T_MEMMAP 12 "                                                                "
+T_MEMMAP 13 "                                                                "
+T_MEMMAP 14 "                                                                "
+T_MEMMAP 15 "                                                                "
+T_MEMMAP 16 "                                                               ~"
+T_MEMMAP 17 "                                                              ~~"
+T_MEMMAP 18 "                                                              ~~"
+T_MEMMAP 19 "                                                            ~~~~"
+T_MEMMAP 20 "                                                            ~~~~"
+T_MEMMAP 21 "                                                          ~~~~~~"
+T_MEMMAP 22 "                                                          ~~~~~~"
+T_MEMMAP 23 "                                                        ~~~~~~~~"
+T_MEMMAP 24 "                                                        ~~~~~~~~"
+T_MEMMAP 25 "                                                       ~~~~~~~~~"
+T_MEMMAP 26 "                                  X                   ~~~~~~~~~~"
+T_MEMMAP 27 "                                  ..                 ~~~~~~~~~~~"
+T_MEMMAP 28 "                                   ..               ~~~~~~~~~~~~"
+T_MEMMAP 29 "                                    .              ~~~~~~~~~~~~~"
+T_MEMMAP 30 "                                   XX..           ..~~~~~~~~~~~~"
+T_MEMMAP 31 "                                    ...XX    XX  ...~~~~~~~~~~~~"
+T_MEMMAP 32 "                                      ....    .  ...~~~~~~~~~~~~"
+T_MEMMAP 33 "                                       ...   .X...~~~~~~~~~~~~~~"
+T_MEMMAP 34 "                                       X...XX~~..~~~~~~~~~~~~~~~"
+T_MEMMAP 35 "                                 X.   X.......~~.~~~~~~~~~~~~~~~"
+T_MEMMAP 36 "                                X...~............~~~~~~~~~~~~~~~"
+T_MEMMAP 37 "                                 X.................~~~~~~~~~~~~~"
+T_MEMMAP 38 "                                 X.............~.~~~~~~~~~~~~~~~"
+T_MEMMAP 39 "                                 X  X............~~~~~~~~~~~~~~~"
+T_MEMMAP 40 "                                    X...~........~~~~~~~~~~~~~~~"
+T_MEMMAP 41 "                                   X.~...~X~.....~~~~~~~~~~~~~~~"
+T_MEMMAP 42 "                                   ....... ..~.~~~~~~~~~~~~~~~~~"
+T_MEMMAP 43 "                                 ..~.....  .X~~~~~~~~~~~~~~~~~~~"
+T_MEMMAP 44 "                                ...X~~...  X. ~~~~~~~~~~~~~~~~~~"
+T_MEMMAP 45 "                              .~.  X~...   ~ ~~~~~~~~~~~~~~~~~~~"
+T_MEMMAP 46 "                              X.    ~~~.    ~ ~~~~~~~~~~~~~~~~~~"
+T_MEMMAP 47 "                                  X.~~~    ~  ~~~~~~~~~~~~~~~~~~"
+T_MEMMAP 48 "                                   ..~~     ~  ~~~~~~~~~~~~~~~~~"
+T_MEMMAP 49 "                                 .~...     ~~ ~~~~~~~~~~~~~~~~~~"
+T_MEMMAP 50 "                                 ..~.~      ~  ~~~~~~~~~~~~~~~~~"
+T_MEMMAP 51 "                                ..~..~      ~  ~~~~~~~~~~~~~~~~~"
+T_MEMMAP 52 "                               ~~~.~~~      ~   ~~~~~~~~~~~~~~~~"
+T_MEMMAP 53 "                              ~~~.~~~      ~~  ~~~~~~~~~~~~~~~~~"
+T_MEMMAP 54 "                              ~~~.~~~       ~   ~~~~~~~~~~~~~~~~"
+T_MEMMAP 55 "                            ~~~~~~~~        ~   ~~~~~~~~~~~~~~~~"
+T_MEMMAP 56 "                            ~~~~~~~~        ~~   ~~~~~~~~~~~~~~~"
+T_MEMMAP 57 "                           ~~~~~~~~        ~~   ~~~~~~~~~~~~~~~~"
+T_MEMMAP 58 "                          ~~~~~~~~~         ~~   ~~~~~~~~~~~~~~~"
+T_MEMMAP 59 "                         ~~~~~~~~~         ~~    ~~~~~~~~~~~~~~~"
+T_MEMMAP 60 "                         ~~~~~~~~~          ~~    ~~~~~~~~~~~~~~"
+T_MEMMAP 61 "                       ~~~~~~~~~~          ~~~   ~~~~~~~~~~~~~~~"
+T_MEMMAP 62 "                       ~~~~~~~~~~           ~~    ~~~~~~~~~~~~~~"
+T_MEMMAP 63 "                      ~~~~~~~~~~           ~~~    ~~~~~~~~~~~~~~"
+T_ID 1
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 38
+T_POSX 41
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 2
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 33
+T_POSX 24
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 3
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 41
+T_POSX 32
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 4
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 11
+T_POSX 35
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 5
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 29
+T_POSX 13
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 6
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 51
+T_POSX 17
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 7
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 37
+T_POSX 18
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 8
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 45
+T_POSX 30
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 9
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 50
+T_POSX 25
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 10
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 50
+T_POSX 19
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 11
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 40
+T_POSX 33
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 12
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 38
+T_POSX 35
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 13
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 34
+T_POSX 19
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 14
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 22
+T_POSX 34
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 15
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 4
+T_POSX 34
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 16
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 24
+T_POSX 24
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 17
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 39
+T_POSX 45
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 18
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 34
+T_POSX 18
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 19
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 25
+T_POSX 46
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 20
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 20
+T_POSX 20
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 21
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 38
+T_POSX 29
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 22
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 38
+T_POSX 46
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 23
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 47
+T_POSX 35
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 24
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 32
+T_POSX 46
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 25
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 48
+T_POSX 36
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 26
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 43
+T_POSX 43
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 27
+T_COMMAND 0
+T_LIFEPOINTS 6
+T_TYPE 1
+T_ARGUMENT 0
+T_POSY 21
+T_POSX 22
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 28
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 13
+T_POSX 27
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 29
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 22
+T_POSX 39
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 30
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 36
+T_POSX 21
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 31
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 41
+T_POSX 28
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 32
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 14
+T_POSX 42
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 33
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 35
+T_POSX 40
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 34
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 17
+T_POSX 21
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 35
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 51
+T_POSX 22
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 36
+T_COMMAND 0
+T_LIFEPOINTS 18
+T_TYPE 2
+T_ARGUMENT 0
+T_POSY 13
+T_POSX 37
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 37
+T_COMMAND 0
+T_LIFEPOINTS 54
+T_TYPE 3
+T_ARGUMENT 0
+T_POSY 28
+T_POSX 20
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 38
+T_COMMAND 0
+T_LIFEPOINTS 54
+T_TYPE 3
+T_ARGUMENT 0
+T_POSY 44
+T_POSX 17
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 39
+T_COMMAND 0
+T_LIFEPOINTS 54
+T_TYPE 3
+T_ARGUMENT 0
+T_POSY 44
+T_POSX 29
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 40
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 22
+T_POSX 38
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 41
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 25
+T_POSX 18
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 42
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 11
+T_POSX 24
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 43
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 28
+T_POSX 49
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 44
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 12
+T_POSX 40
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 45
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 36
+T_POSX 30
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 46
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 32
+T_POSX 26
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 47
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 31
+T_POSX 19
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 48
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 4
+T_ARGUMENT 0
+T_POSY 31
+T_POSX 19
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 49
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 27
+T_POSX 22
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 50
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 42
+T_POSX 43
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 51
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 10
+T_POSX 34
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 52
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 8
+T_POSX 36
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 53
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 52
+T_POSX 34
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 54
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 12
+T_POSX 33
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 55
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 4
+T_POSX 29
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 56
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 11
+T_POSX 27
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 57
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 5
+T_ARGUMENT 0
+T_POSY 12
+T_POSX 21
+T_PROGRESS 0
+T_SATIATION 0
+T_ID 58
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_TYPE 6
+T_ARGUMENT 0
+T_POSY 7
+T_POSX 19
+T_PROGRESS 0
+T_SATIATION 0
+SEED_RANDOMNESS 3746818701
+WORLD_ACTIVE 1
