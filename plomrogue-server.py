@@ -1599,7 +1599,7 @@ directions_db = {"east": "d", "south-east": "c", "south-west": "x",
 """File IO database."""
 io_db = {
     "path_save": "save",
-    "path_record": "record",
+    "path_record": "history",
     "path_worldconf": "confserver/world",
     "path_server": "server/",
     "path_in": "server/in",
