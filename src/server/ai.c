@@ -378,7 +378,7 @@ static uint8_t get_dir_to_nearest_target(struct Thing * t_eye, char filter)
         dijkstra_map(score_map, UINT16_MAX-1);
         dir_to_nearest_target = get_dir_from_neighbors(filter,t_eye,score_map);
         free(score_map);
-        if (dir_to_nearest_target)
+        if (dir_to_nearest_target && 1 != dir_to_nearest_target)
         {
             t_eye->command = get_thing_action_id_by_name(s[S_CMD_MOVE]);
             t_eye->arg = dir_to_nearest_target;
