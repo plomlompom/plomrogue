@@ -117,7 +117,7 @@ action is defined, and a thing of ID 0 (= a player character) that is not part
 of any other thing's inventory, (re-)build all animate things' fields of view,
 and activate world. (Initial value: 0.)
 
-TA_ID [0 to 255]
+TA_ID [0 to infinity]
 Select thing action to manipulate by argument as ID. If argument is 0, change it
 to the lowest unused thing action ID greater than 0. If action of ID does not
 exist yet, create it with default name "wait" and default effort 1.
@@ -131,10 +131,10 @@ command). Legal worlds need at least one action of name "wait", so if this
 unsets the world's only "wait" action, the world is deactivated, and the
 ./server/worldstate file removed.
 
-T_ID [-32768 to 32767]
-Select thing to manipulate by argument as ID. If argument is <0 or >255, change
-it to the lowest unused thing ID. If thing of ID does not exist yet, create it
-with default position of y=0/x=0, the first thing type's ID, and that type's
+T_ID [-1 to infinity]
+Select thing to manipulate by argument as ID. If argument is <0, change it to
+the lowest unused thing ID. If thing of ID does not exist yet, create it with
+default position of y=0/x=0, the first thing type's ID, and that type's
 lifepoints value; if world is active and the thing is animate, build its field
 of view.
 
@@ -187,11 +187,11 @@ T_MEMTHING [0 to 255] [0 to 255] [0 to 255]
 Add to selected thing's memory of things on map thing of ID of first argument,
 y position of second argument and x position of third argument.
 
-TT_ID [-32768 to 32767]
-Select thing type to manipulate by argument as ID. If argument is < 0 or > 255,
-change it to the lowest unused thing type ID. If thing type of ID does not exist
-yet, create it with default name "(none)", corpse ID equal to the new thing
-type's ID, symbol "?", and remaining thing type attributes to 0.
+TT_ID [-1 to infinity]
+Select thing type to manipulate by argument as ID. If argument is < 0, change it
+to the lowest unused thing type ID. If thing type of ID does not exist yet,
+create it with default name "(none)", corpse ID equal to the new thing type's
+ID, symbol "?", and remaining thing type attributes to 0.
 
 TT_CONSUMABLE [0-65535]
 Set selected thing type's consumability value to argument – the number of
