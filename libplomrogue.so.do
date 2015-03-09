@@ -7,4 +7,4 @@
 redo-ifchange build/compiler_flags
 . ./build/compiler_flags
 redo-ifchange src/server/libplomrogue.c
-gcc -shared -fPIC $CFLAGS -o libplomrogue.so src/server/libplomrogue.c -lm
+gcc -shared -fPIC $CFLAGS -o $3 src/server/libplomrogue.c -lm
