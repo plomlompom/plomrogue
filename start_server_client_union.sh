@@ -12,7 +12,12 @@ fi
 # Give helpful message to players that want to start without compiling first.
 if [ ! -e ./roguelike-client ]
 then
-    echo 'No ./roguelike-client file found to execute. Try "./redo" first?'
+    echo 'No ./roguelike-client executable found. Try "./redo" first?'
+    false
+fi
+if [ ! -e ./libplomrogue.so ]
+then
+    echo 'No ./libplomrogue.so library found. Try "./redo" first?'
     false
 fi
 
