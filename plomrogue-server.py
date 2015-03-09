@@ -36,30 +36,7 @@ def prep_library():
         raise SystemExit("No library " + libpath +
                          ", run ./compile-server.sh first?")
     libpr = ctypes.cdll.LoadLibrary(libpath)
-    libpr.seed_rrand.argtypes = [ctypes.c_uint8, ctypes.c_uint32]
     libpr.seed_rrand.restype = ctypes.c_uint32
-    libpr.rrand.argtypes = []
-    libpr.rrand.restype = ctypes.c_uint16
-    libpr.set_maplength.argtypes = [ctypes.c_uint16]
-    libpr.mv_yx_in_dir_legal_wrap.argtypes = [ctypes.c_char, ctypes.c_uint8,
-                                              ctypes.c_uint8]
-    libpr.mv_yx_in_dir_legal_wrap.restype = ctypes.c_uint8
-    libpr.result_y.restype = ctypes.c_uint8
-    libpr.result_x.restype = ctypes.c_uint8
-    libpr.set_maplength(world_db["MAP_LENGTH"])
-    libpr.build_fov_map.argtypes = [ctypes.c_uint8, ctypes.c_uint8,
-                                    ctypes.c_char_p, ctypes.c_char_p]
-    libpr.build_fov_map.restype = ctypes.c_uint8
-    libpr.init_score_map.restype = ctypes.c_uint8
-    libpr.set_map_score.argtypes = [ctypes.c_uint16, ctypes.c_uint16]
-    libpr.set_map_score.restype = ctypes.c_uint8
-    libpr.get_map_score.argtypes = [ctypes.c_uint16]
-    libpr.get_map_score.restype = ctypes.c_int32
-    libpr.get_neighbor_score.argtypes = [ctypes.c_uint8]
-    libpr.get_neighbor_score.restype = ctypes.c_uint16
-    libpr.ready_neighbor_scores.argtpes = [ctypes.c_uint16]
-    libpr.ready_neighbor_scores.restype = ctypes.c_uint8
-    libpr.dijkstra_map.restype = ctypes.c_uint8
     return libpr
 
 
