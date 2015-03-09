@@ -13,10 +13,6 @@
 # build/redo_scripts/. For details on this version, see:
 # - <http://news.dieweltistgarnichtso.net/bin/redo.html>
 # - <http://news.dieweltistgarnichtso.net/bin/redo-ifchange.html>
-#
-# This "redo" implementation may experience trouble on OS X systems, see
-# <https://github.com/plomlompom/plomrogue/issues/2#issuecomment-50972436> for a
-# workaround.
 
 # Some tests first: for gcc, and certain necessary header files. (This is not
 # strictly the responsibility of a mere redo wrapper. But those using a
