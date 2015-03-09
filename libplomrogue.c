@@ -448,20 +448,6 @@ extern uint8_t set_map_score(uint16_t pos, uint16_t score)
         return 1;
     }
     score_map[pos] = score;
-/*
-    uint32_t mup_size = maplength * maplength;
-    uint32_t pus;
-    FILE * file = fopen("test_set", "w");
-    for (pus = 0; pus < mup_size; pus++)
-    {
-        fprintf(file, "%d ", score_map[pus]);
-        if (0 == pus % maplength)
-        {
-            fprintf(file, "\n");
-        }
-    }
-    fclose(file);
-*/
     return 0;
 }
 
