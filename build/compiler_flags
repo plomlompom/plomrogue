@@ -5,7 +5,7 @@
 OFLAG='-O3'
 CFLAGS="-std=c11 -pedantic-errors -Wall -Werror -Wextra -Wformat-security $OFLAG"
 
-# For non-GNU gcc masks, drop all gcc-specific debugginf flags.
+# For non-GNU gcc masks, drop all gcc-specific debugging flags.
 test=`stat --version 2>&1 | grep 'Free Software Foundation' | wc -l`
 if [ 1 -gt $test ]
 then
