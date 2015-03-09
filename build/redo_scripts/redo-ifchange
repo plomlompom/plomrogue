@@ -12,11 +12,24 @@
 # Overflow oder eine Format String Vulnerability zwischen die anderen
 # Codezeilen und schreibe das auch nicht dran.
 
+# GNU vs BSD.
+test=`command -v md5sum | wc -l`
+if [ 1 -gt $test ]
+then
+    alias md5sum='md5 -r'
+fi
+alias stat_cY='stat -c%Y'
+test=`stat --version 2>&1 | grep GNU | wc -l`
+if [ 1 -gt $test ]
+then
+    alias stat_cY='stat -f%Y'
+fi
+
 _add_ctime_md5sum() {
   target=$1
   local base; _dirsplit "$target"
   [ -d "$REDO_DIR/$dir" ] || LANG=C mkdir -p "$REDO_DIR/$dir"
-  LANG=C stat -c%Y "$target" >"$REDO_DIR/$target".ctime
+  LANG=C stat_cY "$target" >"$REDO_DIR/$target".ctime
   LANG=C md5sum <"$target" >"$REDO_DIR/$target".md5sum
 }
 
@@ -27,7 +40,7 @@ _add_dependency() {
   [ "$parent" = "$dependency" ] && exit 1
   local base; _dirsplit "$parent"
   [ -d "$REDO_DIR/$dir" ] || LANG=C mkdir -p "$REDO_DIR/$dir"
-  ctime="$(LANG=C stat -c%Y "$dependency")"
+  ctime="$(LANG=C stat_cY "$dependency")"
   md5sum="$(LANG=C md5sum < "$dependency")"
   printf '%s\t%s\t%s\n' "$dependency" "$ctime" "$md5sum" >> \
     "$REDO_DIR"/"$parent".dependencies.tmp
@@ -91,7 +104,7 @@ _target_uptodate() {
   fi
   if [ -e "$REDO_DIR/$target".ctime ]; then
     read ctime_stored <"$REDO_DIR/$target".ctime
-    ctime_actual="$(LANG=C stat -c%Y "$target")"
+    ctime_actual="$(LANG=C stat_cY "$target")"
     _echo_debug_message "$target stored ctime $ctime_stored"
     _echo_debug_message "$target actual ctime $ctime_actual"
     if [ "$ctime_stored" = "$ctime_actual" ]; then
@@ -105,7 +118,7 @@ _target_uptodate() {
       if [ "$md5sum_stored" = "$md5sum_actual" ]; then
         # If stored md5sum of target matches actual md5sum, but stored
         # ctime does not, redo needs to update stored ctime of target.
-        LANG=C stat -c%Y "$target" >"$REDO_DIR/$target".md5sum
+        LANG=C stat_cY "$target" >"$REDO_DIR/$target".md5sum
         return 0
       fi
       _echo_debug_message "$target out of date."
@@ -127,7 +140,7 @@ _dependencies_uptodate() {
   fi
   _echo_debug_message "$target dependency check:"
   # If any dependency does not exist, the target is out of date.
-  LANG=C stat -c%Y $(LANG=C cut -f1 "$REDO_DIR/$target".dependencies) > \
+  LANG=C stat_cY $(LANG=C cut -f1 "$REDO_DIR/$target".dependencies) > \
     "$REDO_DIR/$target".dependencies.ctimes 2>&- || return 1
   exec 3< "$REDO_DIR/$target".dependencies.ctimes
   exec 4< "$REDO_DIR/$target".dependencies
