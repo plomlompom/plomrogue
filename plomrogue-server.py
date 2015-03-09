@@ -493,20 +493,27 @@ def update_map_memory(t, age_map=True):
         t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
     if not t["T_MEMDEPTHMAP"]:
         t["T_MEMDEPTHMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-    for pos in range(world_db["MAP_LENGTH"] ** 2):
-        if "v" == chr(t["fovmap"][pos]):
-            t["T_MEMDEPTHMAP"][pos] = ord("0")
-            if " " == chr(t["T_MEMMAP"][pos]):
-                t["T_MEMMAP"][pos] = world_db["MAP"][pos]
-            continue
-        if age_map and ord('0') <= t["T_MEMDEPTHMAP"][pos] \
-           and ord('9') > t["T_MEMDEPTHMAP"][pos] \
-           and not rand.next() % (2 ** (t["T_MEMDEPTHMAP"][pos] - 48)):
+    ord_v = ord("v")
+    ord_0 = ord("0")
+    ord_9 = ord("9")
+    ord_space = ord(" ")
+    for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
+                if ord_v == t["fovmap"][pos]]:
+        t["T_MEMDEPTHMAP"][pos] = ord_0
+        if ord_space == t["T_MEMMAP"][pos]:
+            t["T_MEMMAP"][pos] = world_db["MAP"][pos]
+    if age_map:
+         for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
+                     if not ord_v == t["fovmap"][pos]
+                     if ord_0 <= t["T_MEMDEPTHMAP"][pos]
+                     if ord_9 > t["T_MEMDEPTHMAP"][pos]
+                     if not rand.next() % (2 **
+                                           (t["T_MEMDEPTHMAP"][pos] - 48))]:
             t["T_MEMDEPTHMAP"][pos] += 1
     for mt in [mt for mt in t["T_MEMTHING"]
                if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                          + mt[2]])]:
-            t["T_MEMTHING"].remove(mt)
+         t["T_MEMTHING"].remove(mt)
     for id in [id for id in world_db["Things"]
                if not world_db["Things"][id]["carried"]]:
         type = world_db["Things"][id]["T_TYPE"]
