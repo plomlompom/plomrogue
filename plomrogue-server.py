@@ -506,20 +506,23 @@ def set_world_inactive():
     world_db["WORLD_ACTIVE"] = 0
 
 
-def integer_test(val_string, min, max):
+def integer_test(val_string, min, max=None):
     """Return val_string if possible integer >= min and <= max, else None."""
     try:
         val = int(val_string)
-        if val < min or val > max:
+        if val < min or (max != None and val > max):
             raise ValueError
         return val
     except ValueError:
-        print("Ignoring: Please use integer >= " + str(min) + " and <= " +
-              str(max) + ".")
+        msg = "Ignoring: Please use integer >= " + str(min)
+        if max != None:
+            msg += " and <= " + str(max)
+        msg += "."
+        print(msg)
         return None
 
 
-def setter(category, key, min, max):
+def setter(category, key, min, max=None):
     """Build setter for world_db([category + "s"][id])[key] to >=min/<=max."""
     if category is None:
         def f(val_string):
@@ -1059,15 +1062,14 @@ def id_setter(id, category, id_store=False, start_at_1=False):
     """Set ID of object of category to manipulate ID unused? Create new one.
 
     The ID is stored as id_store.id (if id_store is set). If the integer of the
-    input is valid (if start_at_1, >= 0 and <= 255, else >= -32768 and <=
-    32767), but <0 or (if start_at_1) <1, calculate new ID: lowest unused ID
-    >=0 or (if start_at_1) >= 1, and <= 255. None is always returned when no
-    new object is created, otherwise the new object's ID.
+    input is valid (if start_at_1, >= 0, else >= -1), but <0 or (if start_at_1)
+    <1, calculate new ID: lowest unused ID >=0 or (if start_at_1) >= 1. None is
+    always returned when no new object is created, otherwise the new object's
+    ID.
     """
-    min = 0 if start_at_1 else -32768
-    max = 255 if start_at_1 else 32767
+    min = 0 if start_at_1 else -1
     if str == type(id):
-        id = integer_test(id, min, max)
+        id = integer_test(id, min)
     if None != id:
         if id in world_db[category]:
             if id_store:
@@ -1075,16 +1077,12 @@ def id_setter(id, category, id_store=False, start_at_1=False):
             return None
         else:
             if (start_at_1 and 0 == id) \
-               or ((not start_at_1) and (id < 0 or id > 255)):
-                id = -1
+               or ((not start_at_1) and (id < 0)):
+                id = 0 if start_at_1 else -1
                 while 1:
                     id = id + 1
                     if id not in world_db[category]:
                         break
-                if id > 255:
-                    print("Ignoring: "
-                          "No unused ID available to add to ID list.")
-                    return None
             if id_store:
                 id_store.id = id
     return id
@@ -1328,7 +1326,7 @@ test_Thing_id = test_for_id_maker(command_tid, "Thing")
 @test_Thing_id
 def command_tcommand(str_int):
     """Set T_COMMAND of selected Thing."""
-    val = integer_test(str_int, 0, 255)
+    val = integer_test(str_int, 0)
     if None != val:
         if 0 == val or val in world_db["ThingActions"]:
             world_db["Things"][command_tid.id]["T_COMMAND"] = val
@@ -1339,7 +1337,7 @@ def command_tcommand(str_int):
 @test_Thing_id
 def command_ttype(str_int):
     """Set T_TYPE of selected Thing."""
-    val = integer_test(str_int, 0, 255)
+    val = integer_test(str_int, 0)
     if None != val:
         if val in world_db["ThingTypes"]:
             world_db["Things"][command_tid.id]["T_TYPE"] = val
@@ -1354,7 +1352,7 @@ def command_tcarries(str_int):
     The ID int(str_int) must not be of the selected Thing, and must belong to a
     Thing with unset "carried" flag. Its "carried" flag will be set on owning.
     """
-    val = integer_test(str_int, 0, 255)
+    val = integer_test(str_int, 0)
     if None != val:
         if val == command_tid.id:
             print("Ignoring: Thing cannot carry itself.")
@@ -1375,7 +1373,7 @@ def command_tmemthing(str_t, str_y, str_x):
 
     The type must fit to an existing ThingType, and the position into the map.
     """
-    type = integer_test(str_t, 0, 255)
+    type = integer_test(str_t, 0)
     posy = integer_test(str_y, 0, 255)
     posx = integer_test(str_x, 0, 255)
     if None != type and None != posy and None != posx:
@@ -1472,7 +1470,7 @@ def command_ttsymbol(char):
 @test_ThingType_id
 def command_ttcorpseid(str_int):
     """Set TT_CORPSE_ID of selected ThingType."""
-    val = integer_test(str_int, 0, 255)
+    val = integer_test(str_int, 0)
     if None != val:
         if val in world_db["ThingTypes"]:
             world_db["ThingTypes"][command_ttid.id]["TT_CORPSE_ID"] = val
@@ -1540,7 +1538,7 @@ commands_db = {
     "SEED_MAP": (1, False, command_seedmap),
     "SEED_RANDOMNESS": (1, False, command_seedrandomness),
     "TURN": (1, False, setter(None, "TURN", 0, 65535)),
-    "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0, 255)),
+    "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0)),
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "TA_ID": (1, False, command_taid),
