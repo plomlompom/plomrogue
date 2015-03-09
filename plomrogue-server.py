@@ -472,7 +472,6 @@ def update_map_memory(t, age_map=True):
         t["T_MEMDEPTHMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
     ord_v = ord("v")
     ord_0 = ord("0")
-    ord_9 = ord("9")
     ord_space = ord(" ")
     for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
                 if ord_v == t["fovmap"][pos]]:
