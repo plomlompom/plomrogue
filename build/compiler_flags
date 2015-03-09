@@ -2,4 +2,4 @@
 # or any later version. For details on its copyright, license, and warranties,
 # see the file NOTICE in the root directory of the PlomRogue source package.
 
-CFLAGS='-std=c11 -pedantic-errors -Wall -Werror -Wextra -Wformat-security -g'
+CFLAGS='-std=c11 -pedantic-errors -Wall -Werror -Wextra -Wformat-security -O3'
