@@ -842,8 +842,11 @@ def get_dir_to_target(t, filter):
         test = libpr.init_score_map()
         if test:
             raise RuntimeError("Malloc error in init_score_map().")
+        ord_dot = ord(".")
+        ord_v = ord("v")
+        ord_blank = ord(" ")
         for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
-                  if '.' == chr(t["T_MEMMAP"][i])]:
+                  if ord_dot == t["T_MEMMAP"][i]]:
             set_map_score(i, 65535 - 1)
         if "a" == filter:
             for id in world_db["Things"]:
@@ -852,7 +855,7 @@ def get_dir_to_target(t, filter):
                       + Thing["T_POSX"]
                 if t != Thing and Thing["T_LIFEPOINTS"] and \
                    t["T_TYPE"] != Thing["T_TYPE"] and \
-                   'v' == chr(t["fovmap"][pos]) and \
+                   ord_v == t["fovmap"][pos] and \
                    t["T_LIFEPOINTS"] > \
                    world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
                     set_map_score(pos, 0)
@@ -865,15 +868,15 @@ def get_dir_to_target(t, filter):
                 pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] \
                       + Thing["T_POSX"]
                 if t["T_TYPE"] != Thing["T_TYPE"] and \
-                   'v' == chr(t["fovmap"][pos]) and \
+                   ord_v == t["fovmap"][pos] and \
                    t["T_LIFEPOINTS"] <= \
                    world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
                     set_map_score(pos, 0)
         elif "c" == filter:
             for mt in [mt for mt in t["T_MEMTHING"]
-                       if ' ' != chr(t["T_MEMMAP"][mt[1]
-                                                   * world_db["MAP_LENGTH"]
-                                                   + mt[2]])
+                       if ord_blank != t["T_MEMMAP"][mt[1]
+                                                    * world_db["MAP_LENGTH"]
+                                                    + mt[2]]
                        if world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]]:
                 set_map_score(mt[1] * world_db["MAP_LENGTH"] + mt[2], 0)
         elif "s" == filter:
