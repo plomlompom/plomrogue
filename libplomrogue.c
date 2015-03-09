@@ -1,3 +1,4 @@
+#include <math.h> /* pow() */
 #include <stddef.h> /* NULL */
 #include <stdint.h> /* ?(u)int(8|16|32)_t, ?(U)INT8_(MIN|MAX) */
 #include <stdlib.h> /* free, malloc */
@@ -558,4 +559,41 @@ extern uint8_t dijkstra_map()
         }
     }
     return 0;
+}
+
+extern uint8_t zero_score_map_where_char_on_memdepthmap(char c,
+                                                        char * memdepthmap)
+{
+    if (!score_map)
+    {
+        return 1;
+    }
+    uint32_t map_size = maplength * maplength;
+    uint16_t pos;
+    for (pos = 0; pos < map_size; pos++)
+    {
+        if (c == memdepthmap[pos])
+        {
+            score_map[pos] = 0;
+        }
+    }
+    return 0;
+}
+
+extern void age_some_memdepthmap_on_nonfov_cells(char * memdepthmap,
+                                                     char * fovmap)
+{
+    uint32_t map_size = maplength * maplength;
+    uint16_t pos;
+    for (pos = 0; pos < map_size; pos++)
+    {
+        if ('v' != fovmap[pos])
+        {
+            char c = memdepthmap[pos];
+            if( '0' <= c && '9' > c && !(rrand() % (uint16_t) pow(2, c - 48)))
+            {
+                memdepthmap[pos]++;
+            }
+        }
+    }
 }

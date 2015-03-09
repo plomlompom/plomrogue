@@ -480,13 +480,10 @@ def update_map_memory(t, age_map=True):
         if ord_space == t["T_MEMMAP"][pos]:
             t["T_MEMMAP"][pos] = world_db["MAP"][pos]
     if age_map:
-         for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
-                     if not ord_v == t["fovmap"][pos]
-                     if ord_0 <= t["T_MEMDEPTHMAP"][pos]
-                     if ord_9 > t["T_MEMDEPTHMAP"][pos]
-                     if not rand.next() % (2 **
-                                           (t["T_MEMDEPTHMAP"][pos] - 48))]:
-            t["T_MEMDEPTHMAP"][pos] += 1
+        maptype = ctypes.c_char * len(t["T_MEMDEPTHMAP"])
+        memdepthmap = maptype.from_buffer(t["T_MEMDEPTHMAP"])
+        fovmap = maptype.from_buffer(t["fovmap"])
+        libpr.age_some_memdepthmap_on_nonfov_cells(memdepthmap, fovmap)
     for mt in [mt for mt in t["T_MEMTHING"]
                if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                          + mt[2]])]:
@@ -781,6 +778,14 @@ def get_dir_to_target(t, filter):
     "s": memory map cell with greatest-reachable degree of unexploredness
     """
 
+    def zero_score_map_where_char_on_memdepthmap(c):
+        maptype = ctypes.c_char * len(t["T_MEMDEPTHMAP"])
+        map = maptype.from_buffer(t["T_MEMDEPTHMAP"])
+        test = libpr.zero_score_map_where_char_on_memdepthmap(c, map)
+        if test:
+            raise RuntimeError("No score map allocated for "
+                               "zero_score_map_where_char_on_memdepthmap().")
+
     def set_map_score(pos, score):
         test = libpr.set_map_score(pos, score)
         if test:
@@ -857,9 +862,7 @@ def get_dir_to_target(t, filter):
                        if world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]]:
                 set_map_score(mt[1] * world_db["MAP_LENGTH"] + mt[2], 0)
         elif "s" == filter:
-            for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
-                      if t["T_MEMDEPTHMAP"][i] == mem_depth_c[0]]:
-                set_map_score(i, 0)
+            zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
 
     def rand_target_dir(neighbors, cmp, dirs):
         candidates = []
