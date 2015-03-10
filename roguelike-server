@@ -330,7 +330,7 @@ def try_worldstate_update():
                 type_id = world_db["Things"][id]["T_TYPE"]
                 name = world_db["ThingTypes"][type_id]["TT_NAME"]
                 inventory = inventory + name + "\n"
-        ## 7DRL additions:  GOD_MOOD, GOD_FAVOR
+        # # 7DRL additions:  GOD_MOOD, GOD_FAVOR
         string = str(world_db["TURN"]) + "\n" + \
                  str(world_db["GOD_MOOD"]) + "\n" + \
                  str(world_db["GOD_FAVOR"]) + "\n" + \
@@ -582,8 +582,11 @@ def decrement_lifepoints(t):
     If t is the player avatar, only blank its fovmap, so that the client may
     still display memory data. On non-player things, erase fovmap and memory.
     """
+    # # 7DRL: also decrements God's mood; deaths heavily so
     t["T_LIFEPOINTS"] -= 1
+    world_db["GOD_MOOD"] -= 1  # #
     if 0 == t["T_LIFEPOINTS"]:
+        world_db["GOD_MOOD"] -= 9  # #
         t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
         if world_db["Things"][0] == t:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
@@ -720,6 +723,7 @@ def thingproliferation(t):
     animate, any other animate Thing. If there are several map cell candidates,
     one is selected randomly.
     """
+    # # 7DRL: success increments God's mood
     def test_cell(t, y, x):
         if "." == chr(world_db["MAP"][(y * world_db["MAP_LENGTH"]) + x]):
             for id in [id for id in world_db["Things"]
@@ -743,6 +747,7 @@ def thingproliferation(t):
             id = id_setter(-1, "Things")
             newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
             world_db["Things"][id] = newT
+            world_db["GOD_MOOD"] += 1  # #
 
 
 def try_healing(t):
@@ -750,6 +755,7 @@ def try_healing(t):
 
     On success, decrease satiation score by 32.
     """
+    # # 7DRL: Successful heals increment God's mood.
     if t["T_SATIATION"] > 0 \
        and t["T_LIFEPOINTS"] < \
            world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] \
@@ -758,6 +764,7 @@ def try_healing(t):
                               if world_db["ThingActions"][id]["TA_NAME"] ==
                                  "wait"][0]:
         t["T_LIFEPOINTS"] += 1
+        world_db["GOD_MOOD"] += 1  # #
         t["T_SATIATION"] -= 32
         if t == world_db["Things"][0]:
             strong_write(io_db["file_out"], "LOG You heal.\n")
@@ -1010,7 +1017,7 @@ def ai(t):
     none, they will explore parts of the map unseen since ever or for at least
     one turn; if there is nothing to explore, they will simply wait.
     """
-    # 7DRL add: Don't pick up or search things when inventory is full.
+    # # 7DRL add: Don't pick up or search things when inventory is full.
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
     if not get_dir_to_target(t, "f"):
