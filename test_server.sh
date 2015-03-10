@@ -2,7 +2,7 @@
 
 cp ./testing/start _test
 echo "Starting server on save file '_test' copied from ./testing/start."
-python3 -m cProfile -o ./testing/cProfile roguelike-server -l _test > ./testing/log 2>&1 &
+python3 -m cProfile -o ./testing/cProfile roguelike-server -l _test
 
 echo "Waiting until ./server/in is ready for writing."
 while [ ! -e ./server/in ]
