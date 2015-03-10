@@ -331,9 +331,9 @@ def try_worldstate_update():
                 name = world_db["ThingTypes"][type_id]["TT_NAME"]
                 inventory = inventory + name + "\n"
         ## 7DRL additions:  GOD_MOOD, GOD_FAVOR
-        string = str(world_db["GOD_MOOD"]) + "\n" + \
+        string = str(world_db["TURN"]) + "\n" + \
+                 str(world_db["GOD_MOOD"]) + "\n" + \
                  str(world_db["GOD_FAVOR"]) + "\n" + \
-                 str(world_db["TURN"]) + "\n" + \
                  str(world_db["Things"][0]["T_LIFEPOINTS"]) + "\n" + \
                  str(world_db["Things"][0]["T_SATIATION"]) + "\n" + \
                  inventory + "%\n" + \

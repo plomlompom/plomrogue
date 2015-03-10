@@ -184,9 +184,9 @@ static uint8_t read_worldstate()
     }
     uint32_t linemax = textfile_width(file);
     char * read_buf = try_malloc(linemax + 1, __func__);
+    world.turn = (uint16_t) read_value_from_line(read_buf, linemax, file);
     world.godsmood = (int16_t) read_value_from_line(read_buf, linemax, file); //
     world.godsfavor = (int16_t) read_value_from_line(read_buf, linemax, file); //
-    world.turn = (uint16_t) read_value_from_line(read_buf, linemax, file);
     world.player_lifepoints = (uint16_t) read_value_from_line(read_buf, linemax,
                                                               file);
     world.player_satiation = (int16_t) read_value_from_line(read_buf, linemax,
