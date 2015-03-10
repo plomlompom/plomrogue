@@ -11,7 +11,7 @@ fi
 
 # Abort if no proper Python version installed.
 test=`command -v python3 | wc -l`
-if [ 1 != $test ]
+if [ 1 -gt $test ]
 then
     echo "FAILURE:"
     echo "No python3 installed, but it's needed!"
