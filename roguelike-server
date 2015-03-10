@@ -626,6 +626,7 @@ def actor_move(t):
         if len(hitted):
             hit_id = hitted[0]
             if t == world_db["Things"][0]:
+                hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
                 strong_write(io_db["file_out"], "LOG You wound " + hitted +
                                                 ".\n")
