@@ -39,6 +39,12 @@ def prep_library():
     return libpr
 
 
+def c_pointer_to_bytearray(ba):
+    """Return C char * pointer to ba."""
+    type = ctypes.c_char * len(ba)
+    return type.from_buffer(ba)
+
+
 def strong_write(file, string):
     """Apply write(string), then flush()."""
     file.write(string)
@@ -824,6 +830,17 @@ def get_dir_to_target(t, filter):
                     return True
         return False
 
+    def set_cells_passable_on_memmap_to_65534_on_scoremap():
+        # OUTSOURCED TO libplomrogue.so:
+        # memmap = t["T_MEMMAP"]
+        # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
+        #            if ord_dot == memmap[i]]:
+        #     set_map_score(i, 65534) # i.e. 65535-1
+        map = c_pointer_to_bytearray(t["T_MEMMAP"])
+        if libpr.set_cells_passable_on_memmap_to_65534_on_scoremap(map):
+            raise RuntimeError("No score map allocated for "
+                         "set_cells_passable_on_memmap_to_65534_on_scoremap().")
+
     def init_score_map():
         test = libpr.init_score_map()
         if test:
@@ -831,9 +848,7 @@ def get_dir_to_target(t, filter):
         ord_dot = ord(".")
         ord_v = ord("v")
         ord_blank = ord(" ")
-        for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
-                  if ord_dot == t["T_MEMMAP"][i]]:
-            set_map_score(i, 65535 - 1)
+        set_cells_passable_on_memmap_to_65534_on_scoremap()
         if "a" == filter:
             for id in world_db["Things"]:
                 Thing = world_db["Things"][id]
