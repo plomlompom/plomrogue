@@ -21,8 +21,7 @@ done
 
 echo "Server has quit. Here's the diff of final '_test' to reference save file"
 echo "./testing/ref_end (TEST WENT WELL IF NO LINES FOLLOW):"
-diff _test testing/ref_end > ./testing/diff
-cat ./testing/diff
+mv _test testing/last_end
+diff testing/last_end testing/ref_end
 
-rm _test
 rm record__test
