@@ -653,22 +653,27 @@ def actor_move(t):
 def actor_pick_up(t):
     """Make t pick up (topmost?) Thing from ground into inventory."""
     # Topmostness is actually not defined so far. Picks Thing with highest ID.
-    ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
-           if not world_db["Things"][id]["carried"]
-           if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-           if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
-    if len(ids):
-        highest_id = 0
-        for id in ids:
-            if id > highest_id:
-                highest_id = id
-        world_db["Things"][highest_id]["carried"] = True
-        t["T_CARRIES"].append(highest_id)
-        if t == world_db["Things"][0]:
-            strong_write(io_db["file_out"], "LOG You pick up an object.\n")
-    elif t == world_db["Things"][0]:
-        err = "You try to pick up an object, but there is none."
-        strong_write(io_db["file_out"], "LOG " + err + "\n")
+    used_slots = len(t["T_CARRIES"]) # #
+    if used_slots < world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]: # #
+        ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
+               if not world_db["Things"][id]["carried"]
+               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
+        if len(ids):
+            highest_id = 0
+            for id in ids:
+                if id > highest_id:
+                    highest_id = id
+            world_db["Things"][highest_id]["carried"] = True
+            t["T_CARRIES"].append(highest_id)
+            if t == world_db["Things"][0]:
+                strong_write(io_db["file_out"], "LOG You pick up an object.\n")
+        elif t == world_db["Things"][0]:
+            err = "You try to pick up an object, but there is none."
+            strong_write(io_db["file_out"], "LOG " + err + "\n")
+    elif t == world_db["Things"][0]: # #
+        strong_write(io_db["file_out"], "LOG Can't pick up object: " + # #
+                                        "No storage room to carry more.\n") # #
 
 
 def actor_drop(t):
@@ -1004,6 +1009,7 @@ def ai(t):
     none, they will explore parts of the map unseen since ever or for at least
     one turn; if there is nothing to explore, they will simply wait.
     """
+    # 7DRL add: Don't pick up or search things when inventory is full.
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
     if not get_dir_to_target(t, "f"):
@@ -1013,11 +1019,16 @@ def ai(t):
                               if world_db["ThingActions"][id]["TA_NAME"]
                                  == "use"][0]
             t["T_ARGUMENT"] = sel
-        elif standing_on_consumable(t):
+        elif standing_on_consumable(t) \
+             and (len(t["T_CARRIES"]) < # #
+                 world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]): # #
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                               if world_db["ThingActions"][id]["TA_NAME"]
                                  == "pick_up"][0]
-        elif (not get_dir_to_target(t, "c")) and \
+        elif (not
+              (len(t["T_CARRIES"]) < # #
+                world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"] # #
+               and get_dir_to_target(t, "c"))) and \
              (not get_dir_to_target(t, "a")):
             get_dir_to_target(t, "s")
 
@@ -1464,6 +1475,7 @@ def command_ttid(id_string):
             "TT_LIFEPOINTS": 0,
             "TT_PROLIFERATE": 0,
             "TT_START_NUMBER": 0,
+            "TT_STORAGE": 0, # #
             "TT_SYMBOL": "?",
             "TT_CORPSE_ID": id
         }
@@ -1577,6 +1589,7 @@ commands_db = {
     "TT_PROLIFERATE": (1, False, setter("ThingType", "TT_PROLIFERATE",
                                         0, 255)),
     "TT_LIFEPOINTS": (1, False, setter("ThingType", "TT_LIFEPOINTS", 0, 255)),
+    "TT_STORAGE": (1, False, setter("ThingType", "TT_STORAGE", 0, 255)), # #
     "T_ID": (1, False, command_tid),
     "T_ARGUMENT": (1, False, setter("Thing", "T_ARGUMENT", 0, 255)),
     "T_PROGRESS": (1, False, setter("Thing", "T_PROGRESS", 0, 255)),
