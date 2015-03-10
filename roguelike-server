@@ -583,6 +583,7 @@ def decrement_lifepoints(t):
     still display memory data. On non-player things, erase fovmap and memory.
     """
     # # 7DRL: also decrements God's mood; deaths heavily so
+    # # 7DRL: return 1 if death, else 0
     t["T_LIFEPOINTS"] -= 1
     world_db["GOD_MOOD"] -= 1  # #
     if 0 == t["T_LIFEPOINTS"]:
@@ -596,6 +597,8 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
+        return 1  # #
+    return 0  # #
 
 
 def mv_yx_in_dir_legal(dir, y, x):
@@ -615,6 +618,7 @@ def actor_wait(t):
 
 def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
+    # # 7DRL: Player wounding (worse: killing) others will lower God's favor.
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -633,14 +637,14 @@ def actor_move(t):
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
                 strong_write(io_db["file_out"], "LOG You wound " + hitted_name
                                                 + ".\n")
-                # world_db["GOD_FAVOR"] -= 1  # #
+                world_db["GOD_FAVOR"] -= 1  # #
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 strong_write(io_db["file_out"], "LOG " + hitter_name +
                                                 " wounds you.\n")
             test = decrement_lifepoints(world_db["Things"][hit_id])  # #
-            # if test and t == world_db["Things"][0]:  # #
-                # world_db["GOD_FAVOR"] -= 10  # #
+            if test and t == world_db["Things"][0]:  # #
+                world_db["GOD_FAVOR"] -= 10  # #
             return
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
