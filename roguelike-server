@@ -12,6 +12,7 @@ import shlex
 import shutil
 import time
 import ctypes
+import math  # #
 
 
 class RandomnessIO:
@@ -602,6 +603,26 @@ def decrement_lifepoints(t):
     return 0  # #
 
 
+def add_gods_favor(i): # #
+    """"Add to GOD_FAVOR, multiplied with factor growing log. with GOD_MOOD."""
+    def favor_multiplier(i):
+        x = 100
+        threshold = math.e * x
+        mood = world_db["GOD_MOOD"]
+        if i > 0:
+            if mood > threshold:
+                i = i * math.log(mood / x)
+            elif -mood > threshold:
+                i = i / math.log(-mood / x)
+        elif i < 0:
+            if -mood > threshold:
+                i = i * math.log(-mood / x)
+            if mood > threshold:
+                i = i / math.log(mood / x)
+        return int(i)
+    world_db["GOD_FAVOR"] += favor_multiplier(i)
+
+
 def mv_yx_in_dir_legal(dir, y, x):
     """Wrapper around libpr.mv_yx_in_dir_legal to simplify its use."""
     dir_c = dir.encode("ascii")[0]
@@ -638,14 +659,14 @@ def actor_move(t):
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
                 strong_write(io_db["file_out"], "LOG You wound " + hitted_name
                                                 + ".\n")
-                world_db["GOD_FAVOR"] -= 1  # #
+                add_gods_favor(-1)  # #
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 strong_write(io_db["file_out"], "LOG " + hitter_name +
                                                 " wounds you.\n")
-            test = decrement_lifepoints(world_db["Things"][hit_id])  # #
+            test = decrement_lifepoints(world_db["Things"][hit_id])  # #(test=)
             if test and t == world_db["Things"][0]:  # #
-                world_db["GOD_FAVOR"] -= test  # #
+                add_gods_favor(-test)  # #
             return
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
