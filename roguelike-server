@@ -692,6 +692,7 @@ def actor_move(t):
 def actor_pick_up(t):
     """Make t pick up (topmost?) Thing from ground into inventory."""
     # Topmostness is actually not defined so far. Picks most nutritious Thing.
+    # 7DRL: Non-player picking up player-dropped consumable -> GOD_FAVOR gain.
     used_slots = len(t["T_CARRIES"]) # #
     if used_slots < world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]: # #
         ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
@@ -707,12 +708,12 @@ def actor_pick_up(t):
                     nutritious = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
                     highest_id = id
             world_db["Things"][highest_id]["carried"] = True
-            #if (t != world_db["Things"][0] and  # #
-            #    world_db["Things"][highest_id]["T_PLAYERDROP"]):  # #
-            #    x = world_db["Things"][highest_id]["T_TYPE"]
-            #    score = world_db["ThingTypes"][x]["TT_CONSUMABLE"] / 32  # #
-            #    add_gods_favor(score)  # #
-            #    world_db["Things"][highest_id]["T_PLAYERDROP"] = 0  # #
+            if (t != world_db["Things"][0] and  # #
+                world_db["Things"][highest_id]["T_PLAYERDROP"]):  # #
+                x = world_db["Things"][highest_id]["T_TYPE"]
+                score = world_db["ThingTypes"][x]["TT_CONSUMABLE"] / 32  # #
+                add_gods_favor(score)  # #
+                world_db["Things"][highest_id]["T_PLAYERDROP"] = 0  # #
             t["T_CARRIES"].append(highest_id)
             if t == world_db["Things"][0]:
                 strong_write(io_db["file_out"], "LOG You pick up an object.\n")
@@ -733,6 +734,7 @@ def actor_drop(t):
         world_db["Things"][id]["carried"] = False
         if t == world_db["Things"][0]:
             strong_write(io_db["file_out"], "LOG You drop an object.\n")
+            world_db["Things"][id]["T_PLAYERDROP"] = 1  # #
     elif t == world_db["Things"][0]:
         err = "You try to drop an object, but you own none."
         strong_write(io_db["file_out"], "LOG " + err + "\n")
@@ -1126,6 +1128,7 @@ def new_Thing(type, pos=(0, 0)):
         "T_PROGRESS": 0,
         "T_SATIATION": 0,
         "T_COMMAND": 0,
+        "T_PLAYERDROP": 0,  # #
         "T_TYPE": type,
         "T_POSY": pos[0],
         "T_POSX": pos[1],
@@ -1642,7 +1645,7 @@ commands_db = {
     "TT_PROLIFERATE": (1, False, setter("ThingType", "TT_PROLIFERATE",
                                         0, 255)),
     "TT_LIFEPOINTS": (1, False, setter("ThingType", "TT_LIFEPOINTS", 0, 255)),
-    "TT_STORAGE": (1, False, setter("ThingType", "TT_STORAGE", 0, 255)), # #
+    "TT_STORAGE": (1, False, setter("ThingType", "TT_STORAGE", 0, 255)),  # #
     "T_ID": (1, False, command_tid),
     "T_ARGUMENT": (1, False, setter("Thing", "T_ARGUMENT", 0, 255)),
     "T_PROGRESS": (1, False, setter("Thing", "T_PROGRESS", 0, 255)),
@@ -1656,6 +1659,7 @@ commands_db = {
     "T_MEMTHING": (3, False, command_tmemthing),
     "T_POSY": (1, False, setter_tpos("Y")),
     "T_POSX": (1, False, setter_tpos("X")),
+    "T_PLAYERDROP": (1, False, setter("Thing", "T_PLAYERDROP", 0, 1)),  # #
     "wait": (0, False, play_commander("wait")),
     "move": (1, False, play_commander("move")),
     "pick_up": (0, False, play_commander("pick_up")),
