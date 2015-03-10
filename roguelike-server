@@ -476,6 +476,9 @@ def update_map_memory(t, age_map=True):
     """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
     def age_some_memdepthmap_on_nonfov_cells():
         # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
+        # ord_v = ord("v")
+        # ord_0 = ord("0")
+        # ord_9 = ord("9")
         # for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
         #             if not ord_v == t["fovmap"][pos]
         #             if ord_0 <= t["T_MEMDEPTHMAP"][pos]
@@ -501,8 +504,8 @@ def update_map_memory(t, age_map=True):
     if age_map:
         age_some_memdepthmap_on_nonfov_cells()
     for mt in [mt for mt in t["T_MEMTHING"]
-               if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
-                                         + mt[2]])]:
+               if ord_v == t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
+                                       + mt[2]]]:
         t["T_MEMTHING"].remove(mt)
     for id in [id for id in world_db["Things"]
                if not world_db["Things"][id]["carried"]]:
@@ -510,7 +513,7 @@ def update_map_memory(t, age_map=True):
         if not world_db["ThingTypes"][type]["TT_LIFEPOINTS"]:
             y = world_db["Things"][id]["T_POSY"]
             x = world_db["Things"][id]["T_POSX"]
-            if "v" == chr(t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]):
+            if ord_v == t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]:
                 t["T_MEMTHING"].append((type, y, x))
 
 
