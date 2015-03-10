@@ -631,13 +631,16 @@ def actor_move(t):
             if t == world_db["Things"][0]:
                 hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-                strong_write(io_db["file_out"], "LOG You wound " + hitted +
-                                                ".\n")
+                strong_write(io_db["file_out"], "LOG You wound " + hitted_name
+                                                + ".\n")
+                # world_db["GOD_FAVOR"] -= 1  # #
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 strong_write(io_db["file_out"], "LOG " + hitter_name +
                                                 " wounds you.\n")
-            decrement_lifepoints(world_db["Things"][hit_id])
+            test = decrement_lifepoints(world_db["Things"][hit_id])  # #
+            # if test and t == world_db["Things"][0]:  # #
+                # world_db["GOD_FAVOR"] -= 10  # #
             return
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
