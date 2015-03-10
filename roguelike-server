@@ -632,7 +632,7 @@ def actor_move(t):
                                                 ".\n")
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-                strong_write(io_db["file_out"], "LOG " + hitter +
+                strong_write(io_db["file_out"], "LOG " + hitter_name +
                                                 " wounds you.\n")
             decrement_lifepoints(world_db["Things"][hit_id])
             return
