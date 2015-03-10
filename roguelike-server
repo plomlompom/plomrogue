@@ -582,12 +582,17 @@ def decrement_lifepoints(t):
 
     If t is the player avatar, only blank its fovmap, so that the client may
     still display memory data. On non-player things, erase fovmap and memory.
+    Dying actors drop all their things.
     """
     # # 7DRL: also decrements God's mood; deaths heavily so
     # # 7DRL: return 1 if death, else 0
     t["T_LIFEPOINTS"] -= 1
     world_db["GOD_MOOD"] -= 1  # #
     if 0 == t["T_LIFEPOINTS"]:
+        for id in t["T_CARRIES"]:
+            t["T_CARRIES"].remove(id)
+            world_db["Things"][id]["T_POSY"] = t["T_POSY"]
+            world_db["Things"][id]["T_POSX"] = t["T_POSX"]
         sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
         world_db["GOD_MOOD"] -= sadness  # #        
         t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
