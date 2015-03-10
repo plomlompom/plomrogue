@@ -796,7 +796,7 @@ def get_dir_to_target(t, filter):
     """
 
     def zero_score_map_where_char_on_memdepthmap(c):
-        # OUTSOURCED TO libpomrogue.so:
+        # OUTSOURCED TO libplomrogue.so:
         # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
         #           if t["T_MEMDEPTHMAP"][i] == mem_depth_c[0]]:
         #     set_map_score(i, 0)
