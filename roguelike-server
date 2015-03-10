@@ -691,7 +691,7 @@ def actor_move(t):
 
 def actor_pick_up(t):
     """Make t pick up (topmost?) Thing from ground into inventory."""
-    # Topmostness is actually not defined so far. Picks Thing with highest ID.
+    # Topmostness is actually not defined so far. Picks most nutritious Thing.
     used_slots = len(t["T_CARRIES"]) # #
     if used_slots < world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]: # #
         ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
@@ -699,11 +699,20 @@ def actor_pick_up(t):
                if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
                if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
         if len(ids):
-            highest_id = 0
+            highest_id = ids[0]
+            nutritious = 0
             for id in ids:
-                if id > highest_id:
+                type = world_db["Things"][id]["T_TYPE"]
+                if world_db["ThingTypes"][type]["TT_CONSUMABLE"] > nutritious:
+                    nutritious = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
                     highest_id = id
             world_db["Things"][highest_id]["carried"] = True
+            #if (t != world_db["Things"][0] and  # #
+            #    world_db["Things"][highest_id]["T_PLAYERDROP"]):  # #
+            #    x = world_db["Things"][highest_id]["T_TYPE"]
+            #    score = world_db["ThingTypes"][x]["TT_CONSUMABLE"] / 32  # #
+            #    add_gods_favor(score)  # #
+            #    world_db["Things"][highest_id]["T_PLAYERDROP"] = 0  # #
             t["T_CARRIES"].append(highest_id)
             if t == world_db["Things"][0]:
                 strong_write(io_db["file_out"], "LOG You pick up an object.\n")
