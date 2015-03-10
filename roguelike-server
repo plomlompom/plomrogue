@@ -589,12 +589,13 @@ def decrement_lifepoints(t):
     t["T_LIFEPOINTS"] -= 1
     world_db["GOD_MOOD"] -= 1  # #
     if 0 == t["T_LIFEPOINTS"]:
+        sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
+        world_db["GOD_MOOD"] -= sadness  # #        
         for id in t["T_CARRIES"]:
             t["T_CARRIES"].remove(id)
             world_db["Things"][id]["T_POSY"] = t["T_POSY"]
             world_db["Things"][id]["T_POSX"] = t["T_POSX"]
-        sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
-        world_db["GOD_MOOD"] -= sadness  # #        
+            world_db["Things"][id]["carried"] = False
         t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
         if world_db["Things"][0] == t:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
