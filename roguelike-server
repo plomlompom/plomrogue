@@ -587,7 +587,8 @@ def decrement_lifepoints(t):
     t["T_LIFEPOINTS"] -= 1
     world_db["GOD_MOOD"] -= 1  # #
     if 0 == t["T_LIFEPOINTS"]:
-        world_db["GOD_MOOD"] -= 9  # #
+        sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
+        world_db["GOD_MOOD"] -= sadness  # #        
         t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
         if world_db["Things"][0] == t:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
@@ -597,7 +598,7 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
-        return 1  # #
+        return sadness  # #
     return 0  # #
 
 
@@ -644,7 +645,7 @@ def actor_move(t):
                                                 " wounds you.\n")
             test = decrement_lifepoints(world_db["Things"][hit_id])  # #
             if test and t == world_db["Things"][0]:  # #
-                world_db["GOD_FAVOR"] -= 10  # #
+                world_db["GOD_FAVOR"] -= test  # #
             return
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
