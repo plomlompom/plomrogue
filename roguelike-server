@@ -593,7 +593,6 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
-            strong_write(io_db["file_out"], "LOG It dies.\n")
 
 
 def mv_yx_in_dir_legal(dir, y, x):
