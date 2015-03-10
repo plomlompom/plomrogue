@@ -43,6 +43,8 @@ struct World
     struct yx_uint8 look_pos; /* coordinates of look cursor */
     uint16_t turn; /* world/game turn */
     int16_t player_satiation; /* player's belly fullness */
+    int16_t godsmood; /* island god's mood */ // 7DRL
+    int16_t godsfavor; /* island god's favor to player */ // 7DRL
     uint8_t player_inventory_select; /* index of selected item in inventory */
     uint8_t player_lifepoints; /* how alive the player is */
     uint8_t winch; /* if set, SIGWINCH was registered; trigger reset_windows()*/

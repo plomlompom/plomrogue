@@ -324,7 +324,10 @@ def try_worldstate_update():
                 type_id = world_db["Things"][id]["T_TYPE"]
                 name = world_db["ThingTypes"][type_id]["TT_NAME"]
                 inventory = inventory + name + "\n"
-        string = str(world_db["TURN"]) + "\n" + \
+        ## 7DRL additions:  GOD_MOOD, GOD_FAVOR
+        string = str(world_db["GOD_MOOD"]) + "\n" + \
+                 str(world_db["GOD_FAVOR"]) + "\n" + \
+                 str(world_db["TURN"]) + "\n" + \
                  str(world_db["Things"][0]["T_LIFEPOINTS"]) + "\n" + \
                  str(world_db["Things"][0]["T_SATIATION"]) + "\n" + \
                  inventory + "%\n" + \
@@ -926,6 +929,9 @@ def get_dir_to_target(t, filter):
             dir_to_target = 0
         return dir_to_target
 
+    def FOO():
+        libpr.dijkstra_map()
+
     dir_to_target = False
     mem_depth_c = b' '
     run_i = 9 + 1 if "s" == filter else 1
@@ -934,7 +940,7 @@ def get_dir_to_target(t, filter):
         init_score_map()
         mem_depth_c = b'9' if b' ' == mem_depth_c \
                            else bytes([mem_depth_c[0] - 1])
-        if libpr.dijkstra_map():
+        if FOO(): # libpr.dijkstra_map():
             raise RuntimeError("No score map allocated for dijkstra_map().")
         dir_to_target = get_dir_from_neighbors()
         libpr.free_score_map()
@@ -1536,6 +1542,8 @@ commands_db = {
     "SEED_MAP": (1, False, command_seedmap),
     "SEED_RANDOMNESS": (1, False, command_seedrandomness),
     "TURN": (1, False, setter(None, "TURN", 0, 65535)),
+    "GOD_MOOD": (1, False, setter(None, "GOD_MOOD", -32768, 32767)), ##
+    "GOD_FAVOR": (1, False, setter(None, "GOD_FAVOR", -32768, 32767)), ##
     "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0)),
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
@@ -1582,6 +1590,8 @@ world_db = {
     "SEED_MAP": 0,
     "PLAYER_TYPE": 0,
     "WORLD_ACTIVE": 0,
+    "GOD_MOOD": 0, ##
+    "GOD_FAVOR": 0, ##
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
