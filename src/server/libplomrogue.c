@@ -583,7 +583,7 @@ extern uint8_t zero_score_map_where_char_on_memdepthmap(char c,
 }
 
 extern void age_some_memdepthmap_on_nonfov_cells(char * memdepthmap,
-                                                     char * fovmap)
+                                                 char * fovmap)
 {
     uint32_t map_size = maplength * maplength;
     uint16_t pos;
