@@ -526,7 +526,7 @@ def integer_test(val_string, min, max=None):
     """Return val_string if possible integer >= min and <= max, else None."""
     try:
         val = int(val_string)
-        if val < min or (if max is not None and val > max):
+        if val < min or (max is not None and val > max):
             raise ValueError
         return val
     except ValueError:
