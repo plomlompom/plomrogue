@@ -503,7 +503,7 @@ def update_map_memory(t, age_map=True):
     for mt in [mt for mt in t["T_MEMTHING"]
                if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                          + mt[2]])]:
-         t["T_MEMTHING"].remove(mt)
+        t["T_MEMTHING"].remove(mt)
     for id in [id for id in world_db["Things"]
                if not world_db["Things"][id]["carried"]]:
         type = world_db["Things"][id]["T_TYPE"]
@@ -526,12 +526,12 @@ def integer_test(val_string, min, max=None):
     """Return val_string if possible integer >= min and <= max, else None."""
     try:
         val = int(val_string)
-        if val < min or (max != None and val > max):
+        if val < min or (if max is not None and val > max):
             raise ValueError
         return val
     except ValueError:
         msg = "Ignoring: Please use integer >= " + str(min)
-        if max != None:
+        if max is not None:
             msg += " and <= " + str(max)
         msg += "."
         print(msg)
@@ -848,7 +848,7 @@ def get_dir_to_target(t, filter):
         map = c_pointer_to_bytearray(t["T_MEMMAP"])
         if libpr.set_cells_passable_on_memmap_to_65534_on_scoremap(map):
             raise RuntimeError("No score map allocated for "
-                         "set_cells_passable_on_memmap_to_65534_on_scoremap().")
+                        "set_cells_passable_on_memmap_to_65534_on_scoremap().")
 
     def init_score_map():
         test = libpr.init_score_map()
@@ -1563,8 +1563,8 @@ commands_db = {
     "SEED_MAP": (1, False, command_seedmap),
     "SEED_RANDOMNESS": (1, False, command_seedrandomness),
     "TURN": (1, False, setter(None, "TURN", 0, 65535)),
-    "GOD_MOOD": (1, False, setter(None, "GOD_MOOD", -32768, 32767)), ##
-    "GOD_FAVOR": (1, False, setter(None, "GOD_FAVOR", -32768, 32767)), ##
+    "GOD_MOOD": (1, False, setter(None, "GOD_MOOD", -32768, 32767)),  # #
+    "GOD_FAVOR": (1, False, setter(None, "GOD_FAVOR", -32768, 32767)),  # #
     "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0)),
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
@@ -1611,8 +1611,8 @@ world_db = {
     "SEED_MAP": 0,
     "PLAYER_TYPE": 0,
     "WORLD_ACTIVE": 0,
-    "GOD_MOOD": 0, ##
-    "GOD_FAVOR": 0, ##
+    "GOD_MOOD": 0,  # #
+    "GOD_FAVOR": 0,  # #
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
