@@ -1331,6 +1331,7 @@ def command_maplength(maplength_string):
     val = integer_test(maplength_string, 1, 256)
     if None != val:
         world_db["MAP_LENGTH"] = val
+        world_db["MAP"] = False
         set_world_inactive()
         world_db["Things"] = {}
         libpr.set_maplength(val)
@@ -1361,7 +1362,7 @@ def command_worldactive(worldactive_string):
                 if 0 == Thing:
                     player_exists = True
                     break
-            if wait_exists and player_exists and "MAP" in world_db:
+            if wait_exists and player_exists and world_db["MAP"]:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -1485,12 +1486,12 @@ def setter_map(maptype):
         val = valid_map_line(str_int, mapline)
         if None != val:
             length = world_db["MAP_LENGTH"]
-            if not "MAP" in world_db:
+            if not world_db["MAP"]:
                 map = bytearray(b' ' * (length ** 2))
             else:
                 map = world_db["MAP"]
             map[val * length:(val * length) + length] = mapline.encode()
-            if not "MAP" in world_db:
+            if not world_db["MAP"]:
                 world_db["MAP"] = map
 
     @test_Thing_id
@@ -1689,6 +1690,7 @@ world_db = {
     "WORLD_ACTIVE": 0,
     "GOD_MOOD": 0,  # #
     "GOD_FAVOR": 0,  # #
+    "MAP": False,
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
