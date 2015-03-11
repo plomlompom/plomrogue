@@ -473,7 +473,7 @@ extern void draw_win_map(struct Win * win)
         char c = world.map.cells[y * world.map.length + x];
         c = ' ' == c ? world.mem_map[y * world.map.length + x] : c;
         set_ch_on_yx(win, y, x * 2 + (y % 2),     c   | A_REVERSE);
-        set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | A_REVERSE);
+        set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, '?' | A_REVERSE);
     }
 }
 
