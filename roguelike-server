@@ -1346,10 +1346,9 @@ def command_worldactive(worldactive_string):
     """Toggle world_db["WORLD_ACTIVE"] if possible.
 
     An active world can always be set inactive. An inactive world can only be
-    set active with a "wait" ThingAction, and a player Thing (of ID 0). On
-    activation, rebuild all Things' FOVs, and the player's map memory.
+    set active with a "wait" ThingAction, and a player Thing (of ID 0), and a
+    map. On activation, rebuild all Things' FOVs, and the player's map memory.
     """
-    # In original version, map existence was also tested (unnecessarily?).
     val = integer_test(worldactive_string, 0, 1)
     if val:
         if 0 != world_db["WORLD_ACTIVE"]:
@@ -1368,7 +1367,7 @@ def command_worldactive(worldactive_string):
                 if 0 == Thing:
                     player_exists = True
                     break
-            if wait_exists and player_exists:
+            if wait_exists and player_exists and world_db["MAP"]:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
