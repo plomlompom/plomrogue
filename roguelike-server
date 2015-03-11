@@ -211,10 +211,13 @@ def save_world():
 
     string = ""
     for key in world_db:
-        if dict != type(world_db[key]) \
-           and key != "MAP" and key != "WORLD_ACTIVE":
+        if (dict != type(world_db[key])
+           and key != "ALTAR"   # #
+           and key != "MAP" and key != "WORLD_ACTIVE"):
             string = string + key + " " + str(world_db[key]) + "\n"
     string = string + mapsetter("MAP")()
+    string = (string + "ALTAR " + str(world_db["ALTAR"][0]) + " "  # #
+                                + str(world_db["ALTAR"][1]) + "\n")  # #
     string = string + helper("ThingActions", "TA_ID")
     string = string + helper("ThingTypes", "TT_ID", {"TT_CORPSE_ID": False})
     for id in world_db["ThingTypes"]:
@@ -1348,7 +1351,19 @@ def command_makeworld(seed_string):
                 id = id_setter(-1, "Things")
                 plantness = world_db["ThingTypes"][type]["TT_PROLIFERATE"]  # #
                 world_db["Things"][id] = new_Thing(type, free_pos(plantness))
+    world_db["ALTAR"] = free_pos()  # #
     strong_write(io_db["file_out"], "NEW_WORLD\n")
+
+
+def command_altar(str_y, str_x):  # #
+    """Set position of Island God's altar."""
+    y = integer_test(str_y, 0, 255)
+    x = integer_test(str_x, 0, 255)
+    if None != y and None != x:
+        if y < world_db["MAP_LENGTH"] and x < world_db["MAP_LENGTH"]:
+            world_db["ALTAR"] = (y, x)
+        else:
+            print("Ignoring: Position is outside of map.")
 
 
 def command_maplength(maplength_string):
@@ -1369,6 +1384,7 @@ def command_worldactive(worldactive_string):
     set active with a "wait" ThingAction, and a player Thing (of ID 0), and a
     map. On activation, rebuild all Things' FOVs, and the player's map memory.
     """
+    # 7DRL: Altar position must also be set for world activation.
     val = integer_test(worldactive_string, 0, 1)
     if None != val:
         if 0 != world_db["WORLD_ACTIVE"]:
@@ -1387,7 +1403,8 @@ def command_worldactive(worldactive_string):
                 if 0 == Thing:
                     player_exists = True
                     break
-            if wait_exists and player_exists and world_db["MAP"]:
+            if wait_exists and player_exists and world_db["MAP"] \
+                and  world_db["ALTAR"]:  # #
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -1672,6 +1689,7 @@ commands_db = {
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "MAP": (2, False, setter_map("MAP")),
+    "ALTAR": (2, False, command_altar),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
     "TA_NAME": (1, False, command_taname),
@@ -1720,6 +1738,7 @@ world_db = {
     "GOD_MOOD": 0,  # #
     "GOD_FAVOR": 0,  # #
     "MAP": False,
+    "ALTAR": False,
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}

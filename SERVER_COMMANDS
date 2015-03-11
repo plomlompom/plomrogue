@@ -236,3 +236,5 @@ Unexplained 7DRL additions
 GOD_MOOD [-32768-32767]
 
 GOD_FAVOR [-32768-32767]
+
+ALTAR [0-255] [0-255]
