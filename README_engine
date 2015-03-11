@@ -1,0 +1,116 @@
+NOTE: This is the PlomRogue engine's RADME text, assuming certain configuration
+defaults not present in the 7DRL game. So parts of it may not apply to this
+specific package.
+
+plomrogue
+=========
+
+plomlompom tries to build his own roguelike. It doesn't do much yet (although
+plomlompom has insanely ambitious long-term plans).
+
+You can move around a player on an island and meet different enemies. You have 5
+hitpoints to lose before death. Enemies start with different amounts of
+hitpoints, depending on their species. Dead enemies become dirt, skeletons, or
+food to consume (each turn reduces one's "satiation", and the lower it is, the
+stronger the chance of suffering from hunger and thereby losing hitpoints). Note
+that different kinds of movements/actions take different numbers of turns to
+finish.
+
+Enemies' AI is very dumb so far: Each turn, they look out for actors of
+different species to flee from (if their type starts out with more hitpoints
+than they have) or (if the opposite is the case) move towards for purposes of
+attack. If they see no enemy, they search for and consume "magic meat".
+
+Every move of yours re-writes a file "savefile" that describes the new state of
+dthe world, if more than 15 seconds have passed since its last writing. Once you
+re-start the game, the game state is recreated from the "savefile" file. To
+start over in a new world, simply delete this file.
+
+System requirements / installation / running the game
+-----------------------------------------------------
+
+The game is expected to run:
+- on Unix systems with a vt100-like terminal environment (xterm will do)
+- that contain the ncurses library
+- and Python3 (version >= 3.2.3).
+
+To build it, this is furthermore necessary:
+- gcc (version >= 4.7.2); some llvm masked as gcc was tested successfully on OSX
+- libc library headers (libc6-dev?)
+- ncurses library headers (libncurses5-dev?)
+
+To build and start, do the following steps:
+
+$ ./redo
+$ ./roguelike
+
+(If you got a version of djb's redo build system installed and in your $PATH,
+you could also do a simple "redo" instead of "./redo". The ./redo script calls a
+simple partial shell script implementation of redo stored below
+./build/redo_scripts/, written by Nils Dagsson Moskopp a.k.a. erlehmann.)
+
+./redo generates the executable ./roguelike-client (and the library
+./libplomrogue.so used by the executable ./roguelike-server). 
+
+./roguelike is a pre-existing shell script that merely executes both executables
+./roguelike-client and ./roguelike-server, with the server as a background job.
+You can also ignore the script and start the two by hand.
+
+Client's keybindings and window management
+------------------------------------------
+
+Multiple windows may fill the screen. One of these will be selected as "active"
+– identified by dollar signs enclosing its title. Active windows may come with
+window-specific keybindings. Furthermore, global keybindings are available no
+matter what window is selected.
+
+Hit "W" (per default global keybindings) to switch the active window to a view
+that allows changing its geometry. One more hit on "W" switches the window to a
+view that sports (and allows changing its) window-specific keybindings. (One
+further "W" will return the window to its default, "normal" view.) The global
+keybindings are visible (and can be changed) in the "Set global keys" window,
+those of the window geometry configuration in the "Set window geometry keys"
+window, and those of the window-specific keybindings configuration in the "Set
+window keybinding keys" window; by default, the latter two are not visible, but
+may be turned on by (per default keybindings) hitting the keys "F6" and "F7".
+
+Keybindings and default window selection / visibilities / geometries are read
+from the textfile ./confclient/interface_conf by default, or by another one
+named by the -i command line option of the client. Some other default window
+configurations are stored below ./confclient/single_windows/: "map", "info",
+"inventory" and "log". Each of these opens up only a single window into the
+client, filling up the entire terminal. This may be useful for running multiple
+clients in parallel in multiple terminal windows that can be managed by one's
+own window manager choice, instead of relying on plomrogue-client's bizarre
+in-client window management.
+
+Replay game recording
+---------------------
+
+Once you start a new world, every move of yours is recorded in a file called
+"record". It gets overwritten when a new game world is started after deletion
+of the "savefile" file. Run "./roguelike -s" to watch the current game's
+recording from the beginning. Hit any player action key to increment turns (they
+will not trigger the actions usually mapped to them, only repeat the actions
+done at that point in the game as defined in the "record" file). Keys to manage
+windows, scroll on the map and quit the program do their usual thing. Append a
+number to the -s option (like "-s100") to start the recording at the respective
+turn number.
+
+Hacking / server internals and configuration
+--------------------------------------------
+
+The game world is set up and made subject to player commands by
+./roguelike-server. It's controlled by commands explained in the file
+./SERVER_COMMANDS. The server usually reads these from the files ./server/in
+(written to by ./roguelike-client), ./confserver/world, ./record and ./savefile.
+
+All source files are thoroughly documented to explain more details of
+plomrogue's internals. The ./roguelike-server executable can be run with a -v
+option for helpful debugging info (mostly: what messages the client sends to the
+server). Server and client communicate via files in the ./server/ directory
+(generated when the server is first run). The ./server/in file is read by the
+server for newline-delimited commands. The ./server/out file contains server
+messages to be read by clients. The ./server/worldstate file contains a
+serialized representation of the game world's data as it is to be visible to
+the player / the player's client.

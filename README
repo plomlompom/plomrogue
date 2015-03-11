@@ -1,26 +1,11 @@
-plomrogue
-=========
+7DRL 2015 project: Please the Island God
+========================================
 
-plomlompom tries to build his own roguelike. It doesn't do much yet (although
-plomlompom has insanely ambitious long-term plans).
+Description
+-----------
 
-You can move around a player on an island and meet different enemies. You have 5
-hitpoints to lose before death. Enemies start with different amounts of
-hitpoints, depending on their species. Dead enemies become dirt, skeletons, or
-food to consume (each turn reduces one's "satiation", and the lower it is, the
-stronger the chance of suffering from hunger and thereby losing hitpoints). Note
-that different kinds of movements/actions take different numbers of turns to
-finish.
-
-Enemies' AI is very dumb so far: Each turn, they look out for actors of
-different species to flee from (if their type starts out with more hitpoints
-than they have) or (if the opposite is the case) move towards for purposes of
-attack. If they see no enemy, they search for and consume "magic meat".
-
-Every move of yours re-writes a file "savefile" that describes the new state of
-dthe world, if more than 15 seconds have passed since its last writing. Once you
-re-start the game, the game state is recreated from the "savefile" file. To
-start over in a new world, simply delete this file.
+See <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day2>
+and <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day3>.
 
 System requirements / installation / running the game
 -----------------------------------------------------
@@ -45,38 +30,32 @@ you could also do a simple "redo" instead of "./redo". The ./redo script calls a
 simple partial shell script implementation of redo stored below
 ./build/redo_scripts/, written by Nils Dagsson Moskopp a.k.a. erlehmann.)
 
-./redo generates two executables ./roguelike-server and ./roguelike-client.
+There are two executables ./roguelike-server and ./roguelike-client.
 ./roguelike is a pre-existing shell script that merely executes both of them,
 with the server as a background job. You can also ignore the script and start
-the two by hand.
+any of the two by hand.
 
-Client's keybindings and window management
-------------------------------------------
+Keybindings
+-----------
 
-Multiple windows may fill the screen. One of these will be selected as "active"
-– identified by dollar signs enclosing its title. Active windows may come with
-window-specific keybindings. Furthermore, global keybindings are available no
-matter what window is selected.
+a - let AI decide move
 
-Hit "W" (per default global keybindings) to switch the active window to a view
-that allows changing its geometry. One more hit on "W" switches the window to a
-view that sports (and allows changing its) window-specific keybindings. (One
-further "W" will return the window to its default, "normal" view.) The global
-keybindings are visible (and can be changed) in the "Set global keys" window,
-those of the window geometry configuration in the "Set window geometry keys"
-window, and those of the window-specific keybindings configuration in the "Set
-window keybinding keys" window; by default, the latter two are not visible, but
-may be turned on by (per default keybindings) hitting the keys "F6" and "F7".
+w - move north-west
+e - move north-east
+s - move west
+d - move east
+x - move south-west
+c - move south-east
 
-Keybindings and default window selection / visibilities / geometries are read
-from the textfile ./confclient/interface_conf by default, or by another one
-named by the -i command line option of the client. Some other default window
-configurations are stored below ./confclient/single_windows/: "map", "info",
-"inventory" and "log". Each of these opens up only a single window into the
-client, filling up the entire terminal. This may be useful for running multiple
-clients in parallel in multiple terminal windows that can be managed by one's
-own window manager choice, instead of relying on plomrogue-client's bizarre
-in-client window management.
+l - toggle "look" mode, investigate map cells by moving a cursor over the map
+    instead of the player avatar
+
+p - pick up item
+D - drop item selected in inventory
+u - use item selected in inventory
+
+UP - navigate upwards in Inventory
+DOWN - navigate downwards in inventory
 
 Replay game recording
 ---------------------
