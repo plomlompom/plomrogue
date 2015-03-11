@@ -425,7 +425,7 @@ extern void draw_win_map(struct Win * win)
             // if (' ' != world.map.cells[y*world.map.length + x])
             {
                 attr_t a = COLOR_PAIR(4); //
-                if ('.' == c) //
+                if ('.' == c || ':' == c) //
                 { //
                     a = COLOR_PAIR(5); //
                 } //
@@ -441,7 +441,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = COLOR_PAIR(8); //
                 } //
-                else if (':' == c || '%' == c) //
+                else if ('$' == c || '%' == c) //
                 { //
                     a = COLOR_PAIR(9); //
                 } //

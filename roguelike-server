@@ -427,6 +427,7 @@ def make_map():
     to land. The cycle ends when a land cell is due to be created at the map's
     border. Then put some trees on the map (TODO: more precise algorithm desc).
     """
+    # 7DRL: Also add some ":" cells as land to which plants may proliferate.
 
     def is_neighbor(coordinates, type):
         y = coordinates[0]
@@ -475,6 +476,17 @@ def make_map():
             world_db["MAP"][pos] = ord("X")
             i_trees += 1
     # This all-too-precise replica of the original C code misses iter_limit().
+    n_colons = int((length ** 2) / 16)  # #
+    i_colons = 0  # #
+    while (i_colons <= n_colons):  # #
+        single_allowed = rand.next() % 256  # #
+        y = rand.next() % length  # #
+        x = rand.next() % length  # #
+        pos = (y * length) + x  # #
+        if ("." == chr(world_db["MAP"][pos])  # #
+          and ((not single_allowed) or is_neighbor((y, x), ":"))):  # #
+            world_db["MAP"][pos] = ord(":")  # #
+            i_colons += 1  # #
 
 
 def update_map_memory(t, age_map=True):
@@ -775,12 +787,14 @@ def thingproliferation(t, prol_map):
     selected randomly.
     """
     # # 7DRL: success increments God's mood
+    # # 7DRL: Things proliferate only on ":" ground.
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
         candidates = []
         for dir in [directions_db[key] for key in directions_db]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            if mv_result[0] and  ord(".") == prol_map[mv_result[1]
+            # if mv_result[0] and  ord(":") == prol_map[mv_result[1]
+            if mv_result[0] and  ord(".") == prol_map[mv_result[1]  # #
                                                       * world_db["MAP_LENGTH"]
                                                       + mv_result[2]]:
                 candidates.append((mv_result[1], mv_result[2]))
@@ -1271,7 +1285,8 @@ def command_makeworld(seed_string):
     other. Init player's memory map. Write "NEW_WORLD" line to out file.
     """
 
-    def free_pos():
+    # def free_pos(plant=False):
+    def free_pos(plant=False):  # #
         i = 0
         while 1:
             err = "Space to put thing on too hard to find. Map too small?"
@@ -1279,7 +1294,8 @@ def command_makeworld(seed_string):
                 y = rand.next() % world_db["MAP_LENGTH"]
                 x = rand.next() % world_db["MAP_LENGTH"]
                 pos = y * world_db["MAP_LENGTH"] + x;
-                if "." == chr(world_db["MAP"][pos]) \
+                if (not plant  # #
+                    and "." == chr(world_db["MAP"][pos])) \
                    or ":" == chr(world_db["MAP"][pos]):  # #
                     break
                 i += 1
@@ -1330,7 +1346,8 @@ def command_makeworld(seed_string):
         for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
             if type != playertype:
                 id = id_setter(-1, "Things")
-                world_db["Things"][id] = new_Thing(type, free_pos())
+                plantness = world_db["ThingTypes"][type]["TT_PROLIFERATE"]  # #
+                world_db["Things"][id] = new_Thing(type, free_pos(plantness))
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 
