@@ -382,30 +382,82 @@ extern void draw_win_log(struct Win * win)
 extern void draw_win_map(struct Win * win)
 {
     uint16_t x, y;
-    init_pair(1, COLOR_WHITE, COLOR_BLUE);
-    init_pair(2, COLOR_BLUE, COLOR_BLACK);
-    attr_t attr_mem = COLOR_PAIR(2);
-    attr_t attr_sha = COLOR_PAIR(1);
+    init_pair(1, COLOR_WHITE, COLOR_WHITE); //
+    init_pair(2, COLOR_WHITE, COLOR_BLUE); //
+    init_pair(3, COLOR_BLUE, COLOR_WHITE); //
+    // attr_t attr_mem = COLOR_PAIR(2);
+    // attr_t attr_sha = COLOR_PAIR(1);
     try_resize_winmap(win, world.map.length, world.map.length * 2 + 1);
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            attr_t a=' '==world.mem_map[y*world.map.length+x]?attr_sha:attr_mem;
+            char c_m = world.mem_map[y * world.map.length + x]; //
+            attr_t a = COLOR_PAIR(2); //
+            if (c_m == ' ') //
+            { //
+                a = COLOR_PAIR(1); //
+            } //
+            else if (c_m == 'X') //
+            { //
+                a = COLOR_PAIR(3); //
+            } //
+            // attr_t a=' '==world.mem_map[y*world.map.length+x]?attr_sha:attr_mem;
             char c = world.mem_map[y*world.map.length + x];
             set_ch_on_yx(win, y, x * 2 + (y % 2),     c   | a);
             set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | a);
         }
     }
+    init_pair(4, COLOR_BLUE, COLOR_BLACK);
+    init_pair(5, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(6, COLOR_RED, COLOR_WHITE);
+    init_pair(7, COLOR_WHITE, COLOR_RED);
+    init_pair(8, COLOR_GREEN, COLOR_BLACK);
+    init_pair(9, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(10, COLOR_CYAN, COLOR_BLACK);
+    init_pair(11, COLOR_BLACK, COLOR_GREEN);
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
         {
-            if (' ' != world.map.cells[y*world.map.length + x])
+            char c = world.map.cells[y*world.map.length + x]; //
+            if (' ' != c) //
+            // if (' ' != world.map.cells[y*world.map.length + x])
             {
-                char c = world.map.cells[y*world.map.length + x];
-                set_ch_on_yx(win, y, x * 2 + (y % 2),     c);
-                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ');
+                attr_t a = COLOR_PAIR(4); //
+                if ('.' == c) //
+                { //
+                    a = COLOR_PAIR(5); //
+                } //
+                else if ('@' == c) //
+                { //
+                    a = COLOR_PAIR(6); //
+                } //
+                else if ('a' == c || 'd' == c || 'b' == c) //
+                { //
+                    a = COLOR_PAIR(7); //
+                } //
+                else if ('#' == c) //
+                { //
+                    a = COLOR_PAIR(8); //
+                } //
+                else if (':' == c || '%' == c) //
+                { //
+                    a = COLOR_PAIR(9); //
+                } //
+                else if ('m' == c) //
+                { //
+                    a = COLOR_PAIR(10); //
+                } //
+                else if ('X' == c) //
+                { //
+                    a = COLOR_PAIR(11); //
+                } //
+                // char c = world.map.cells[y*world.map.length + x];
+                set_ch_on_yx(win, y, x * 2 + (y % 2),     c | a); //
+                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | a); //
+                // set_ch_on_yx(win, y, x * 2 + (y % 2),     c);
+                // set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ');
             }
         }
     }
