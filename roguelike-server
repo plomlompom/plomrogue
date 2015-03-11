@@ -110,7 +110,8 @@ def obey(command, prefix, replay=False, do_record=False):
     is called (and io_db["record_chunk"] written) if 15 seconds have passed
     since the last time it was called. The prefix string is inserted into the
     server's input message between its beginning 'input ' and ':'. All activity
-    is preceded by a server_test() call.
+    is preceded by a server_test() call. Commands that start with a lowercase
+    letter are ignored when world_db["WORLD_ACTIVE"] is False/0.
     """
     server_test()
     if io_db["verbose"]:
