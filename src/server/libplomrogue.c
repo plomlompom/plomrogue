@@ -610,7 +610,9 @@ extern uint8_t set_cells_passable_on_memmap_to_65534_on_scoremap(char * mem_map)
     uint16_t pos;
     for (pos = 0; pos < map_size; pos++)
     {
-        if ('.' == mem_map[pos])
+        char c = mem_map[pos]; //
+        if ('.' == c || ':' == c) //
+        //if ('.' == mem_map[pos])
         {
             score_map[pos] = 65534;
         }

@@ -655,7 +655,8 @@ def actor_move(t):
                                      t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        passable = "." == chr(world_db["MAP"][pos])
+        passable = "." == chr(world_db["MAP"][pos]) or \
+                   ":" == chr(world_db["MAP"][pos])  # #
         hitted = [id for id in world_db["Things"]
                   if world_db["Things"][id] != t
                   if world_db["Things"][id]["T_LIFEPOINTS"]
@@ -768,7 +769,7 @@ def thingproliferation(t, prol_map):
     """To chance of 1/TT_PROLIFERATE,create  t offspring in open neighbor cell.
 
     Naturally only works with TT_PROLIFERATE > 0. The neighbor cell must be be
-    marked '.' in prol_map. If there are several map cell candidates, one is
+    marked "." in prol_map. If there are several map cell candidates, one is
     selected randomly.
     """
     # # 7DRL: success increments God's mood
@@ -777,7 +778,7 @@ def thingproliferation(t, prol_map):
         candidates = []
         for dir in [directions_db[key] for key in directions_db]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            if mv_result[0] and  ord('.') == prol_map[mv_result[1]
+            if mv_result[0] and  ord(".") == prol_map[mv_result[1]
                                                       * world_db["MAP_LENGTH"]
                                                       + mv_result[2]]:
                 candidates.append((mv_result[1], mv_result[2]))
@@ -1275,7 +1276,9 @@ def command_makeworld(seed_string):
             while 1:
                 y = rand.next() % world_db["MAP_LENGTH"]
                 x = rand.next() % world_db["MAP_LENGTH"]
-                if "." == chr(world_db["MAP"][y * world_db["MAP_LENGTH"] + x]):
+                pos = y * world_db["MAP_LENGTH"] + x;
+                if "." == chr(world_db["MAP"][pos]) \
+                   or ":" == chr(world_db["MAP"][pos]):  # #
                     break
                 i += 1
                 if i == 65535:
