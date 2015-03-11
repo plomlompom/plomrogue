@@ -16,86 +16,6 @@ KEY 269 to_logwin
 KEY 270 to_g_keywin
 KEY 271 to_wg_keywin
 KEY 272 to_wk_keywin
-
-KEYBINDINGS 'wingeom'
-KEY 258 shift_f
-KEY 259 shift_b
-KEY 42 grow_h
-KEY 95 shri_h
-KEY 43 grow_v
-KEY 45 shri_v
-KEY 98 to_break
-KEY 121 to_height_t
-KEY 120 to_width_t
-
-KEYBINDINGS 'winkeys'
-KEY 258 keyb_dw
-KEY 259 keyb_uw
-KEY 10 keyb_mw
-
-WIN_ORDER 'l0csim'
-WIN_FOCUS 'm'
-
-WINDOW 0
-NAME 'Set global keys'
-BREAK 0
-WIDTH 22
-HEIGHT 7
-KEY 258 keyb_dG
-KEY 259 keyb_uG
-KEY 10 keyb_mG
-
-WINDOW 1
-NAME 'Set window geometry keys'
-BREAK 0
-WIDTH 29
-HEIGHT 9
-KEY 258 keyb_dg
-KEY 259 keyb_ug
-KEY 10 keyb_mg
-
-WINDOW 2
-NAME 'Set window keybinding keys'
-BREAK 0
-WIDTH 29
-HEIGHT 3
-KEY 258 keyb_dk
-KEY 259 keyb_uk
-KEY 10 keyb_mk
-
-WINDOW c
-NAME 'Inventory'
-BREAK 1
-WIDTH 14
-HEIGHT 11
-KEY 68 drop
-KEY 259 inv_u
-KEY 258 inv_d
-KEY 117 use
-
-WINDOW s
-NAME 'Things here'
-BREAK 1
-WIDTH 14
-HEIGHT -12
-
-WINDOW i
-NAME 'Info'
-BREAK 2
-WIDTH -38
-HEIGHT 2
-
-WINDOW l
-NAME 'Log'
-BREAK 0
-WIDTH 22
-HEIGHT -8
-
-WINDOW m
-NAME 'Map'
-BREAK 0
-WIDTH -38
-HEIGHT -3
 KEY 97 ai
 KEY 112 pick
 KEY 58 wait
@@ -106,3 +26,83 @@ KEY 120 move_x
 KEY 115 move_s
 KEY 119 move_w
 KEY 108 to_look
+KEY 68 drop
+KEY 117 use
+KEY 259 inv_u
+KEY 258 inv_d
+
+KEYBINDINGS 'wingeom'
+KEY 50 shift_f
+KEY 49 shift_b
+KEY 42 grow_h
+KEY 95 shri_h
+KEY 43 grow_v
+KEY 45 shri_v
+KEY 98 to_break
+KEY 89 to_height_t
+KEY 88 to_width_t
+
+KEYBINDINGS 'winkeys'
+KEY 50 keyb_dw
+KEY 49 keyb_uw
+KEY 10 keyb_mw
+
+WIN_ORDER 'ilcsm'
+WIN_FOCUS 'm'
+
+WINDOW 0
+NAME 'Set global keys'
+BREAK 0
+WIDTH 22
+HEIGHT 7
+KEY 50 keyb_dG
+KEY 49 keyb_uG
+KEY 10 keyb_mG
+
+WINDOW 1
+NAME 'Set window geometry keys'
+BREAK 0
+WIDTH 29
+HEIGHT 9
+KEY 50 keyb_dg
+KEY 49 keyb_ug
+KEY 10 keyb_mg
+
+WINDOW 2
+NAME 'Set window keybinding keys'
+BREAK 0
+WIDTH 29
+HEIGHT 3
+KEY 50 keyb_dk
+KEY 49 keyb_uk
+KEY 10 keyb_mk
+
+WINDOW c
+NAME 'Inventory'
+BREAK 0
+WIDTH 16
+HEIGHT 4
+
+WINDOW s
+NAME 'Things here'
+BREAK 1
+WIDTH 16
+HEIGHT 4
+
+WINDOW i
+NAME 'Info'
+BREAK 2
+WIDTH 33
+HEIGHT 3
+
+WINDOW l
+NAME 'Log'
+BREAK 0
+WIDTH 33
+HEIGHT -9
+
+WINDOW m
+NAME 'Map'
+BREAK 0
+WIDTH -34
+HEIGHT 0
