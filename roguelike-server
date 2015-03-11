@@ -672,8 +672,9 @@ def actor_move(t):
                                      t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        passable = "." == chr(world_db["MAP"][pos]) or \
-                   ":" == chr(world_db["MAP"][pos])  # #
+        passable = ("." == chr(world_db["MAP"][pos]) or
+                    ":" == chr(world_db["MAP"][pos]) or # #
+                    "_" == chr(world_db["MAP"][pos])) # #
         hitted = [id for id in world_db["Things"]
                   if world_db["Things"][id] != t
                   if world_db["Things"][id]["T_LIFEPOINTS"]
@@ -1336,6 +1337,9 @@ def command_makeworld(seed_string):
         return
     world_db["Things"] = {}
     make_map()
+    world_db["ALTAR"] = free_pos()  # #
+    world_db["MAP"][world_db["ALTAR"][0] * world_db["MAP_LENGTH"]  # #
+                    + world_db["ALTAR"][1]] = ord("_")  # #
     world_db["WORLD_ACTIVE"] = 1
     world_db["TURN"] = 1
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
@@ -1351,7 +1355,6 @@ def command_makeworld(seed_string):
                 id = id_setter(-1, "Things")
                 plantness = world_db["ThingTypes"][type]["TT_PROLIFERATE"]  # #
                 world_db["Things"][id] = new_Thing(type, free_pos(plantness))
-    world_db["ALTAR"] = free_pos()  # #
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 
@@ -1362,6 +1365,7 @@ def command_altar(str_y, str_x):  # #
     if None != y and None != x:
         if y < world_db["MAP_LENGTH"] and x < world_db["MAP_LENGTH"]:
             world_db["ALTAR"] = (y, x)
+            world_db["MAP"][y * world_db["MAP_LENGTH"] + x] = ord("_")
         else:
             print("Ignoring: Position is outside of map.")
 

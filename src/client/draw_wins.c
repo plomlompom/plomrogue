@@ -408,14 +408,15 @@ extern void draw_win_map(struct Win * win)
             set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | a);
         }
     }
-    init_pair(4, COLOR_BLUE, COLOR_BLACK);
-    init_pair(5, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(6, COLOR_RED, COLOR_WHITE);
-    init_pair(7, COLOR_WHITE, COLOR_RED);
-    init_pair(8, COLOR_GREEN, COLOR_BLACK);
-    init_pair(9, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(10, COLOR_CYAN, COLOR_BLACK);
-    init_pair(11, COLOR_BLACK, COLOR_GREEN);
+    init_pair(4, COLOR_BLUE, COLOR_BLACK); //
+    init_pair(5, COLOR_YELLOW, COLOR_BLACK); //
+    init_pair(6, COLOR_RED, COLOR_WHITE); //
+    init_pair(7, COLOR_WHITE, COLOR_RED); //
+    init_pair(8, COLOR_GREEN, COLOR_BLACK); //
+    init_pair(9, COLOR_MAGENTA, COLOR_BLACK); //
+    init_pair(10, COLOR_CYAN, COLOR_BLACK); //
+    init_pair(11, COLOR_BLACK, COLOR_GREEN); //
+    init_pair(12, COLOR_BLACK, COLOR_MAGENTA); //
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
@@ -452,6 +453,10 @@ extern void draw_win_map(struct Win * win)
                 else if ('X' == c) //
                 { //
                     a = COLOR_PAIR(11); //
+                } //
+                else if ('_' == c) //
+                { //
+                    a = COLOR_PAIR(12); //
                 } //
                 // char c = world.map.cells[y*world.map.length + x];
                 set_ch_on_yx(win, y, x * 2 + (y % 2),     c | a); //
