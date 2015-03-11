@@ -1377,6 +1377,8 @@ def command_worldactive(worldactive_string):
                         if 0 == id:
                             update_map_memory(world_db["Things"][id], False)
                 world_db["WORLD_ACTIVE"] = 1
+            else:
+                print("Ignoring: Not all conditions for world activation met.")
 
 
 def test_for_id_maker(object, category):
