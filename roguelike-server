@@ -504,10 +504,9 @@ def update_map_memory(t, age_map=True):
             t["T_MEMMAP"][pos] = world_db["MAP"][pos]
     if age_map:
         age_some_memdepthmap_on_nonfov_cells()
-    for mt in [mt for mt in t["T_MEMTHING"]
-               if ord_v == t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
-                                       + mt[2]]]:
-        t["T_MEMTHING"].remove(mt)
+    t["T_MEMTHING"] = [mt for mt in t["T_MEMTHING"]
+                       if ord_v != t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
+                                               + mt[2]]]
     for id in [id for id in world_db["Things"]
                if not world_db["Things"][id]["carried"]]:
         type = world_db["Things"][id]["T_TYPE"]
