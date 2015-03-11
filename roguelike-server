@@ -793,10 +793,10 @@ def thingproliferation(t, prol_map):
         candidates = []
         for dir in [directions_db[key] for key in directions_db]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            # if mv_result[0] and  ord(":") == prol_map[mv_result[1]
-            if mv_result[0] and  ord(".") == prol_map[mv_result[1]  # #
-                                                      * world_db["MAP_LENGTH"]
-                                                      + mv_result[2]]:
+            if mv_result[0] and ord(":") == prol_map[mv_result[1]  # #
+            # if mv_result[0] and ord(".") == prol_map[mv_result[1]
+                                                     * world_db["MAP_LENGTH"]
+                                                     + mv_result[2]]:
                 candidates.append((mv_result[1], mv_result[2]))
         if len(candidates):
             i = rand.next() % len(candidates)
