@@ -760,32 +760,22 @@ def actor_use(t):
                      "LOG You try to use an object, but you own none.\n")
 
 
-def thingproliferation(t):
-    """To chance of 1/TT_PROLIFERATE, create t offspring in neighbor cell.
+def thingproliferation(t, prol_map):
+    """To chance of 1/TT_PROLIFERATE,create  t offspring in open neighbor cell.
 
-    Naturally only works with TT_PROLIFERATE > 0. The neighbor cell must be
-    passable and not be inhabited by a Thing of the same type, or, if Thing is
-    animate, any other animate Thing. If there are several map cell candidates,
-    one is selected randomly.
+    Naturally only works with TT_PROLIFERATE > 0. The neighbor cell must be be
+    marked '.' in prol_map. If there are several map cell candidates, one is
+    selected randomly.
     """
     # # 7DRL: success increments God's mood
-    def test_cell(t, y, x):
-        if "." == chr(world_db["MAP"][(y * world_db["MAP_LENGTH"]) + x]):
-            for id in [id for id in world_db["Things"]
-                       if y == world_db["Things"][id]["T_POSY"]
-                       if x == world_db["Things"][id]["T_POSX"]
-                       if (t["T_TYPE"] == world_db["Things"][id]["T_TYPE"])
-                       or (t["T_LIFEPOINTS"] and
-                           world_db["Things"][id]["T_LIFEPOINTS"])]:
-                return False
-            return True
-        return False
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
         candidates = []
         for dir in [directions_db[key] for key in directions_db]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            if mv_result[0] and test_cell(t, mv_result[1], mv_result[2]):
+            if mv_result[0] and  ord('.') == prol_map[mv_result[1]
+                                                      * world_db["MAP_LENGTH"]
+                                                      + mv_result[2]]:
                 candidates.append((mv_result[1], mv_result[2]))
         if len(candidates):
             i = rand.next() % len(candidates)
@@ -1091,6 +1081,12 @@ def turn_over():
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
+        proliferable_map = world_db["MAP"][:]
+        for id in [id for id in world_db["Things"]
+                   if not world_db["Things"][id]["carried"]]:
+            y = world_db["Things"][id]["T_POSY"]
+            x = world_db["Things"][id]["T_POSX"]
+            proliferable_map[y * world_db["MAP_LENGTH"] + x] = ord('X')
         for id in [id for id in world_db["Things"]]:  # Only what's from start!
             if not id in world_db["Things"] or \
                world_db["Things"][id]["carried"]:   # May have been consumed or
@@ -1113,7 +1109,7 @@ def turn_over():
                     Thing["T_COMMAND"] = 0
                     Thing["T_PROGRESS"] = 0
                 hunger(Thing)
-            thingproliferation(Thing)
+            thingproliferation(Thing, proliferable_map)
         if whilebreaker:
             break
         world_db["TURN"] += 1
