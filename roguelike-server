@@ -418,7 +418,7 @@ def play_game():
         obey(read_command(), "in file", do_record=True)
 
 
-def remake_map():
+def make_map():
     """(Re-)make island map.
 
     Let "~" represent water, "." land, "X" trees: Build island shape randomly,
@@ -1261,7 +1261,7 @@ def command_makeworld(seed_string):
 
     Seed rand with seed. Do more only with a "wait" ThingAction and
     world["PLAYER_TYPE"] matching ThingType of TT_START_NUMBER > 0. Then,
-    world_db["Things"] emptied, call remake_map() and set
+    world_db["Things"] emptied, call make_map() and set
     world_db["WORLD_ACTIVE"], world_db["TURN"] to 1. Build new Things
     according to ThingTypes' TT_START_NUMBERS, with Thing of ID 0 to ThingType
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
@@ -1311,7 +1311,7 @@ def command_makeworld(seed_string):
         print("Ignoring: No thing action with name 'wait' defined.")
         return
     world_db["Things"] = {}
-    remake_map()
+    make_map()
     world_db["WORLD_ACTIVE"] = 1
     world_db["TURN"] = 1
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
