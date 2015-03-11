@@ -124,6 +124,8 @@ def obey(command, prefix, replay=False, do_record=False):
        and len(tokens) == commands_db[tokens[0]][0] + 1:
         if commands_db[tokens[0]][1]:
             commands_db[tokens[0]][2](*tokens[1:])
+        elif tokens[0][0].islower() and not world_db["WORLD_ACTIVE"]:
+            print("Ignoring lowercase-starting commands when world inactive.")
         elif replay:
             print("Due to replay mode, reading command as 'go on in record'.")
             line = io_db["file_record"].readline()
