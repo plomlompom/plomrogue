@@ -229,3 +229,10 @@ If non-zero, there is a chance of 1 divided by the given value each turn for any
 thing of the selected type to emit an offspring to a random neighbor cell if one
 is available that is passable and not inhabited by a thing of the same same type
 or, if the proliferating thing is animate, any other animate thing.
+
+Unexplained 7DRL additions
+---------------------------
+
+GOD_MOOD [-32768-32767]
+
+GOD_FAVOR [-32768-32767]
