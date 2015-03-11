@@ -154,8 +154,8 @@ static uint8_t try_client_commands(struct Command * command)
             || try_1args(command, "grow_v", resize_active_win, '+')
             || try_1args(command, "shri_v", resize_active_win, '-')
             || try_0args(command, "to_break", toggle_linebreak_type)
-            || try_1args(command, "to_height_t", toggle_win_size_type, 'Y') //
-            || try_1args(command, "to_width_t", toggle_win_size_type, 'X') //
+            || try_1args(command, "to_height_t", toggle_win_size_type, 'y')
+            || try_1args(command, "to_width_t", toggle_win_size_type, 'x')
             || try_1args(command, "shift_f", shift_active_win, 'f')
             || try_1args(command, "shift_b", shift_active_win, 'b')
             || try_0args(command, "reload_conf", reload_interface_conf)
