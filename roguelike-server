@@ -1367,7 +1367,7 @@ def command_worldactive(worldactive_string):
                 if 0 == Thing:
                     player_exists = True
                     break
-            if wait_exists and player_exists and world_db["MAP"]:
+            if wait_exists and player_exists and "MAP" in world_db:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
