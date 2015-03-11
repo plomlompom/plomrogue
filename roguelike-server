@@ -176,10 +176,11 @@ def save_world():
         return '"' + string.replace('"', '\u005C"') + '"'
 
     def mapsetter(key):
-        def helper(id):
+        def helper(id=None):
             string = ""
-            if world_db["Things"][id][key]:
-                map = world_db["Things"][id][key]
+            if key == "MAP" or world_db["Things"][id][key]:
+                map = world_db["MAP"] if key == "MAP" \
+                                      else world_db["Things"][id][key]
                 length = world_db["MAP_LENGTH"]
                 for i in range(length):
                     line = map[i * length:(i * length) + length].decode()
@@ -210,10 +211,10 @@ def save_world():
 
     string = ""
     for key in world_db:
-        if dict != type(world_db[key]) and key != "MAP" and \
-           key != "WORLD_ACTIVE" and key != "SEED_MAP":
+        if dict != type(world_db[key]) \
+           and key != "MAP" and key != "WORLD_ACTIVE":
             string = string + key + " " + str(world_db[key]) + "\n"
-    string = string + "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n"
+    string = string + mapsetter("MAP")()
     string = string + helper("ThingActions", "TA_ID")
     string = string + helper("ThingTypes", "TT_ID", {"TT_CORPSE_ID": False})
     for id in world_db["ThingTypes"]:
@@ -426,6 +427,7 @@ def remake_map():
     to land. The cycle ends when a land cell is due to be created at the map's
     border. Then put some trees on the map (TODO: more precise algorithm desc).
     """
+
     def is_neighbor(coordinates, type):
         y = coordinates[0]
         x = coordinates[1]
@@ -448,8 +450,7 @@ def remake_map():
                and type == chr(world_db["MAP"][pos + length - (not ind)])):
             return True
         return False
-    store_seed = rand.seed
-    rand.seed = world_db["SEED_MAP"]
+
     world_db["MAP"] = bytearray(b'~' * (world_db["MAP_LENGTH"] ** 2))
     length = world_db["MAP_LENGTH"]
     add_half_width = (not (length % 2)) * int(length / 2)
@@ -473,7 +474,6 @@ def remake_map():
           and ((not single_allowed) or is_neighbor((y, x), "X")):
             world_db["MAP"][pos] = ord("X")
             i_trees += 1
-    rand.seed = store_seed
     # This all-too-precise replica of the original C code misses iter_limit().
 
 
@@ -1256,19 +1256,13 @@ def command_seedrandomness(seed_string):
         rand.seed = val
 
 
-def command_seedmap(seed_string):
-    """Set world_db["SEED_MAP"] to int(seed_string), then (re-)make map."""
-    setter(None, "SEED_MAP", 0, 4294967295)(seed_string)
-    remake_map()
-
-
 def command_makeworld(seed_string):
     """(Re-)build game world, i.e. map, things, to a new turn 1 from seed.
 
-    Seed rand with seed, fill it into world_db["SEED_MAP"]. Do more only with a
-    "wait" ThingAction and world["PLAYER_TYPE"] matching ThingType of
-    TT_START_NUMBER > 0. Then, world_db["Things"] emptied, call remake_map()
-    and set world_db["WORLD_ACTIVE"], world_db["TURN"] to 1. Build new Things
+    Seed rand with seed. Do more only with a "wait" ThingAction and
+    world["PLAYER_TYPE"] matching ThingType of TT_START_NUMBER > 0. Then,
+    world_db["Things"] emptied, call remake_map() and set
+    world_db["WORLD_ACTIVE"], world_db["TURN"] to 1. Build new Things
     according to ThingTypes' TT_START_NUMBERS, with Thing of ID 0 to ThingType
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
     other. Init player's memory map. Write "NEW_WORLD" line to out file.
@@ -1299,7 +1293,6 @@ def command_makeworld(seed_string):
     if None == val:
         return
     rand.seed = val
-    world_db["SEED_MAP"] = val
     player_will_be_generated = False
     playertype = world_db["PLAYER_TYPE"]
     for ThingType in world_db["ThingTypes"]:
@@ -1308,16 +1301,14 @@ def command_makeworld(seed_string):
                 player_will_be_generated = True
             break
     if not player_will_be_generated:
-        print("Ignoring beyond SEED_MAP: " +
-              "No player type with start number >0 defined.")
+        print("Ignoring: No player type with start number >0 defined.")
         return
     wait_action = False
     for ThingAction in world_db["ThingActions"]:
         if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
             wait_action = True
     if not wait_action:
-        print("Ignoring beyond SEED_MAP: " +
-              "No thing action with name 'wait' defined.")
+        print("Ignoring: No thing action with name 'wait' defined.")
         return
     world_db["Things"] = {}
     remake_map()
@@ -1474,12 +1465,12 @@ def command_tmemthing(str_t, str_y, str_x):
 
 
 def setter_map(maptype):
-    """Set selected Thing's map of maptype's int(str_int)-th line to mapline.
+    """Set (world or Thing's) map of maptype's int(str_int)-th line to mapline.
 
-    If Thing has no map of maptype yet, initialize it with ' ' bytes first.
+    If no map of maptype exists yet, initialize it with ' ' bytes first.
     """
-    @test_Thing_id
-    def helper(str_int, mapline):
+
+    def valid_map_line(str_int, mapline):
         val = integer_test(str_int, 0, 255)
         if None != val:
             if val >= world_db["MAP_LENGTH"]:
@@ -1487,15 +1478,35 @@ def setter_map(maptype):
             elif len(mapline) != world_db["MAP_LENGTH"]:
                 print("Map line length is unequal map width.")
             else:
-                length = world_db["MAP_LENGTH"]
-                map = None
-                if not world_db["Things"][command_tid.id][maptype]:
-                    map = bytearray(b' ' * (length ** 2))
-                else:
-                    map = world_db["Things"][command_tid.id][maptype]
-                map[val * length:(val * length) + length] = mapline.encode()
+                return val
+        return None
+
+    def nonThingMap_helper(str_int, mapline):
+        val = valid_map_line(str_int, mapline)
+        if None != val:
+            length = world_db["MAP_LENGTH"]
+            if not "MAP" in world_db:
+                map = bytearray(b' ' * (length ** 2))
+            else:
+                map = world_db["MAP"]
+            map[val * length:(val * length) + length] = mapline.encode()
+            if not "MAP" in world_db:
+                world_db["MAP"] = map
+
+    @test_Thing_id
+    def ThingMap_helper(str_int, mapline):
+        val = valid_map_line(str_int, mapline)
+        if None != val:
+            length = world_db["MAP_LENGTH"]
+            if not world_db["Things"][command_tid.id][maptype]:
+                map = bytearray(b' ' * (length ** 2))
+            else:
+                map = world_db["Things"][command_tid.id][maptype]
+            map[val * length:(val * length) + length] = mapline.encode()
+            if not world_db["Things"][command_tid.id][maptype]:
                 world_db["Things"][command_tid.id][maptype] = map
-    return helper
+
+    return nonThingMap_helper if maptype == "MAP" else ThingMap_helper
 
 
 def setter_tpos(axis):
@@ -1624,7 +1635,6 @@ commands_db = {
     "PING": (0, True, command_ping),
     "THINGS_HERE": (2, True, command_thingshere),
     "MAKE_WORLD": (1, False, command_makeworld),
-    "SEED_MAP": (1, False, command_seedmap),
     "SEED_RANDOMNESS": (1, False, command_seedrandomness),
     "TURN": (1, False, setter(None, "TURN", 0, 65535)),
     "GOD_MOOD": (1, False, setter(None, "GOD_MOOD", -32768, 32767)),  # #
@@ -1632,6 +1642,7 @@ commands_db = {
     "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0)),
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
+    "MAP": (2, False, setter_map("MAP")),
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
     "TA_NAME": (1, False, command_taname),
@@ -1674,7 +1685,6 @@ commands_db = {
 world_db = {
     "TURN": 0,
     "MAP_LENGTH": 64,
-    "SEED_MAP": 0,
     "PLAYER_TYPE": 0,
     "WORLD_ACTIVE": 0,
     "GOD_MOOD": 0,  # #
