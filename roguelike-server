@@ -339,7 +339,7 @@ def try_worldstate_update():
                 type_id = world_db["Things"][id]["T_TYPE"]
                 name = world_db["ThingTypes"][type_id]["TT_NAME"]
                 inventory = inventory + name + "\n"
-        # # 7DRL additions:  GOD_MOOD, GOD_FAVOR
+        # 7DRL additions:  GOD_MOOD, GOD_FAVOR
         string = str(world_db["TURN"]) + "\n" + \
                  str(world_db["GOD_MOOD"]) + "\n" + \
                  str(world_db["GOD_FAVOR"]) + "\n" + \
@@ -604,8 +604,8 @@ def decrement_lifepoints(t):
     still display memory data. On non-player things, erase fovmap and memory.
     Dying actors drop all their things.
     """
-    # # 7DRL: also decrements God's mood; deaths heavily so
-    # # 7DRL: return 1 if death, else 0
+    # 7DRL: Also decrements God's mood; deaths heavily so.
+    # 7DRL: Return 1 if death, else 0.
     t["T_LIFEPOINTS"] -= 1
     world_db["GOD_MOOD"] -= 1  # #
     if 0 == t["T_LIFEPOINTS"]:
@@ -658,6 +658,30 @@ def mv_yx_in_dir_legal(dir, y, x):
     return (test, libpr.result_y(), libpr.result_x())
 
 
+def enter_altar():  # #
+     """What happens when the player enters the altar."""
+     if world_db["GAME_WON"]:
+        strong_write(io_db["file_out"],
+                     "LOG You step on a soul-less slab of stone.\n")
+        return
+     strong_write(io_db["file_out"], "LOG YOU ENTER SACRED GROUND.\n")
+     if world_db["GOD_FAVOR"] > 9000:
+         world_db["GAME_WON"] = 1
+         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
+                      + "\"You have proven yourself worthy of my respect. "
+                      + "You were a good citizen to the island, and sometimes "
+                      + "a better steward to its inhabitants than me. The "
+                      + "island shall miss you when you leave. But you have "
+                      + "earned the right to do so. Take this "
+                      + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"]
+                      + " and USE it when you please. It will take you to "
+                      + "where you came from. (But do feel free to stay here "
+                      + "as long as you like.)\"\n")
+         id = id_setter(-1, "Things")
+         world_db["Things"][id] = new_Thing(world_db["SLIPPERS"],
+                                            world_db["ALTAR"])
+
+
 def actor_wait(t):
     """Make t do nothing (but loudly, if player avatar)."""
     if t == world_db["Things"][0]:
@@ -666,7 +690,8 @@ def actor_wait(t):
 
 def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
-    # # 7DRL: Player wounding (worse: killing) others will lower God's favor.
+    # 7DRL: Player wounding (worse: killing) others will lower God's favor.
+    # 7DRL: Player entering the altar triggers enter_altar().
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -707,6 +732,9 @@ def actor_move(t):
         build_fov_map(t)
         if t == world_db["Things"][0]:
             strong_write(io_db["file_out"], "LOG You move " + dir + ".\n")
+            if (move_result[1] == world_db["ALTAR"][0] and  # #
+                move_result[2] == world_db["ALTAR"][1]):  # #
+                enter_altar()  # #
     elif t == world_db["Things"][0]:
         strong_write(io_db["file_out"], "LOG You fail to move " + dir + ".\n")
 
@@ -765,10 +793,20 @@ def actor_drop(t):
 def actor_use(t):
     """Make t use (for now: consume) T_ARGUMENT-indexed Thing in inventory."""
     # TODO: Handle case where T_ARGUMENT matches nothing.
+    # 7DLR: Handle SLIPPERS-type Thing use.
     if len(t["T_CARRIES"]):
         id = t["T_CARRIES"][t["T_ARGUMENT"]]
         type = world_db["Things"][id]["T_TYPE"]
-        if world_db["ThingTypes"][type]["TT_CONSUMABLE"]:
+        if type == world_db["SLIPPERS"]:  # #
+            if t == world_db["Things"][0]:  # #
+                strong_write(io_db["file_out"], "LOG You use the "  # #
+                             + world_db["ThingTypes"][type]["TT_NAME"]  # #
+                             + ". It glows in wondrous colors, and emits "  # #
+                             + "a sound as if from a dying cat. The "  # #
+                             + "Island God laughs.\n")  # #
+            t["T_LIFEPOINTS"] = 1  # #
+            decrement_lifepoints(t)  # #
+        elif world_db["ThingTypes"][type]["TT_CONSUMABLE"]:
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_CONSUMABLE"]
@@ -790,8 +828,8 @@ def thingproliferation(t, prol_map):
     marked "." in prol_map. If there are several map cell candidates, one is
     selected randomly.
     """
-    # # 7DRL: success increments God's mood
-    # # 7DRL: Things proliferate only on ":" ground.
+    # 7DRL: success increments God's mood
+    # 7DRL: Things proliferate only on ":" ground.
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
         candidates = []
@@ -815,7 +853,7 @@ def try_healing(t):
 
     On success, decrease satiation score by 32.
     """
-    # # 7DRL: Successful heals increment God's mood.
+    # 7DRL: Successful heals increment God's mood.
     if t["T_SATIATION"] > 0 \
        and t["T_LIFEPOINTS"] < \
            world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] \
@@ -1077,7 +1115,7 @@ def ai(t):
     none, they will explore parts of the map unseen since ever or for at least
     one turn; if there is nothing to explore, they will simply wait.
     """
-    # # 7DRL add: Don't pick up or search things when inventory is full.
+    # 7DRL add: Don't pick up or search things when inventory is full.
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
     if not get_dir_to_target(t, "f"):
@@ -1336,6 +1374,9 @@ def command_makeworld(seed_string):
     if not wait_action:
         print("Ignoring: No thing action with name 'wait' defined.")
         return
+    if not world_db["SLIPPERS"] in world_db["ThingTypes"]:  # #
+        print("Ignoring: No valid SLIPPERS set.")  # #
+        return  # #
     world_db["Things"] = {}
     make_map()
     world_db["ALTAR"] = free_pos()  # #
@@ -1389,7 +1430,7 @@ def command_worldactive(worldactive_string):
     set active with a "wait" ThingAction, and a player Thing (of ID 0), and a
     map. On activation, rebuild all Things' FOVs, and the player's map memory.
     """
-    # 7DRL: Altar position must also be set for world activation.
+    # 7DRL: ALTAR position and (valid) SLIPPERS must be set for world activation.
     val = integer_test(worldactive_string, 0, 1)
     if None != val:
         if 0 != world_db["WORLD_ACTIVE"]:
@@ -1408,8 +1449,9 @@ def command_worldactive(worldactive_string):
                 if 0 == Thing:
                     player_exists = True
                     break
+            valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]  # #
             if wait_exists and player_exists and world_db["MAP"] \
-                and  world_db["ALTAR"]:  # #
+                and  world_db["ALTAR"] and valid_slippers:  # #
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -1421,6 +1463,19 @@ def command_worldactive(worldactive_string):
                 world_db["WORLD_ACTIVE"] = 1
             else:
                 print("Ignoring: Not all conditions for world activation met.")
+
+
+def command_slippers(str_int):  # #
+    """Set SLIPPERS, but deactivate world if not in ThingTypes."""
+    val = integer_test(str_int, 0)
+    if None != val:
+        world_db["SLIPPERS"] = val
+        if world_db["WORLD_ACTIVE"] and \
+           world_db["SLIPPERS"] not in world_db["ThingTypes"]:
+            print(world_db["ThingTypes"])
+            print(":::" + str(world_db["SLIPPERS"]))
+            world_db["WORLD_ACTIVE"] = 0
+            print("SLIPPERS matches no known ThingTypes, deactivating world.")
 
 
 def test_for_id_maker(object, category):
@@ -1695,6 +1750,8 @@ commands_db = {
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "MAP": (2, False, setter_map("MAP")),
     "ALTAR": (2, False, command_altar),  # #
+    "GAME_WON": (1, False, setter(None, "GAME_WON", 0, 1)),  # #
+    "SLIPPERS": (1, False, command_slippers),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
     "TA_NAME": (1, False, command_taname),
@@ -1743,7 +1800,9 @@ world_db = {
     "GOD_MOOD": 0,  # #
     "GOD_FAVOR": 0,  # #
     "MAP": False,
-    "ALTAR": False,
+    "ALTAR": False,  # #
+    "GAME_WON": 0,  # #
+    "SLIPPERS": 0,  # #
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
