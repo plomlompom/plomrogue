@@ -736,6 +736,7 @@ def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
     # 7DRL: Player wounding (worse: killing) others will lower God's favor.
     # 7DRL: Player entering the altar triggers enter_altar().
+    # 7DRL: Player with axe chops down trees.
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -762,6 +763,28 @@ def actor_move(t):
             if test and t == world_db["Things"][0]:  # #
                 add_gods_favor(-test)  # #
             return
+        if ord("X") == world_db["MAP"][pos]:  # #
+            carries_axe = False  # #
+            for id in t["T_CARRIES"]:  # # 
+                type = world_db["Things"][id]["T_TYPE"]  # #
+                if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":  # #
+                    carries_axe = True  # #
+            if carries_axe:  # #
+                axe_name = world_db["ThingTypes"][type]["TT_NAME"]  # #
+                if t == world_db["Things"][0]:  # #
+                    strong_write(io_db["file_out"], "LOG With your "  # #
+                                                    + axe_name  # #
+                                                    + ", you chop!\n")  # #
+                    add_gods_favor(-1)  # #
+                chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
+                if chop_power > 0 and 0 == int(rand.next() / chop_power):  # #
+                    if t == world_db["Things"][0]:  # #
+                        strong_write(io_db["file_out"],  # #
+                                     "LOG You chop the tree down.\n")  # #
+                    add_gods_favor(-10)  # #
+                    world_db["MAP"][pos] = ord(".")   # #
+                    build_fov_map(t)  # #
+                return   # #
         passable = ("." == chr(world_db["MAP"][pos]) or
                     ":" == chr(world_db["MAP"][pos]) or # #
                     "_" == chr(world_db["MAP"][pos])) # #
@@ -852,6 +875,12 @@ def actor_use(t):
                              + "Island God laughs.\n")  # #
             t["T_LIFEPOINTS"] = 1  # #
             decrement_lifepoints(t)  # #
+        elif (world_db["ThingTypes"][type]["TT_TOOL"] == "axe"  # #
+              and t == world_db["Things"][0]):  # #
+                strong_write(io_db["file_out"],  # #
+                             "LOG To use this item for chopping, move "  # #
+                             "towards a tree while carrying it in "  # #
+                             "your inventory.\n")  # #
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
