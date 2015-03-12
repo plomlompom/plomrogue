@@ -311,7 +311,7 @@ def try_worldstate_update():
         def draw_visible_Things(map, run):
             for id in world_db["Things"]:
                 type = world_db["Things"][id]["T_TYPE"]
-                consumable = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+                consumable = world_db["ThingTypes"][type]["TT_TOOL"] == "food"
                 alive = world_db["ThingTypes"][type]["TT_LIFEPOINTS"]
                 if (0 == run and not consumable and not alive) \
                    or (1 == run and consumable and not alive) \
@@ -358,7 +358,7 @@ def try_worldstate_update():
         mem = world_db["Things"][0]["T_MEMMAP"][:]
         for i in range(2):
             for mt in world_db["Things"][0]["T_MEMTHING"]:
-                consumable = world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]
+                consumable = world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"
                 if (i == 0 and not consumable) or (i == 1 and consumable):
                     c = world_db["ThingTypes"][mt[0]]["TT_SYMBOL"]
                     mem[(mt[1] * length) + mt[2]] = ord(c)
@@ -798,14 +798,16 @@ def actor_pick_up(t):
             nutritious = 0
             for id in ids:
                 type = world_db["Things"][id]["T_TYPE"]
-                if world_db["ThingTypes"][type]["TT_CONSUMABLE"] > nutritious:
-                    nutritious = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+                if world_db["ThingTypes"][type]["TT_TOOL"] == "food" \
+                and world_db["ThingTypes"][type]["TT_TOOLPOWER"] > nutritious:
+                    nutritious = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
                     highest_id = id
             world_db["Things"][highest_id]["carried"] = True
-            if (t != world_db["Things"][0] and  # #
-                world_db["Things"][highest_id]["T_PLAYERDROP"]):  # #
-                x = world_db["Things"][highest_id]["T_TYPE"]
-                score = world_db["ThingTypes"][x]["TT_CONSUMABLE"] / 32  # #
+            type = world_db["Things"][highest_id]["T_TYPE"]  # #
+            if (t != world_db["Things"][0] # #
+                and world_db["Things"][highest_id]["T_PLAYERDROP"]  # #
+                and world_db["ThingTypes"][type]["TT_TOOL"] == "food"):  # #
+                score = world_db["ThingTypes"][type]["TT_TOOLPOWER"] / 32  # #
                 add_gods_favor(score)  # #
                 world_db["Things"][highest_id]["T_PLAYERDROP"] = 0  # #
             t["T_CARRIES"].append(highest_id)
@@ -850,10 +852,10 @@ def actor_use(t):
                              + "Island God laughs.\n")  # #
             t["T_LIFEPOINTS"] = 1  # #
             decrement_lifepoints(t)  # #
-        elif world_db["ThingTypes"][type]["TT_CONSUMABLE"]:
+        elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
-            t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+            t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_TOOLPOWER"]
             if t == world_db["Things"][0]:
                 strong_write(io_db["file_out"],
                              "LOG You consume this object.\n")
@@ -988,7 +990,7 @@ def get_dir_to_target(t, filter):
             for mt in t["T_MEMTHING"]:
                 if ' ' != chr(t["T_MEMMAP"][(mt[1] * world_db["MAP_LENGTH"])
                                          + mt[2]]) \
-                   and world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]:
+                   and world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food":
                     return True
         return False
 
@@ -1040,7 +1042,7 @@ def get_dir_to_target(t, filter):
                        if ord_blank != t["T_MEMMAP"][mt[1]
                                                     * world_db["MAP_LENGTH"]
                                                     + mt[2]]
-                       if world_db["ThingTypes"][mt[0]]["TT_CONSUMABLE"]]:
+                       if world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"]:
                 set_map_score(mt[1] * world_db["MAP_LENGTH"] + mt[2], 0)
         elif "s" == filter:
             zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
@@ -1126,26 +1128,27 @@ def get_dir_to_target(t, filter):
     return dir_to_target
 
 
-def standing_on_consumable(t):
+def standing_on_food(t):
     """Return True/False whether t is standing on a consumable."""
     for id in [id for id in world_db["Things"] if world_db["Things"][id] != t
                if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
                if world_db["Things"][id]["T_POSX"] == t["T_POSX"]
                if world_db["ThingTypes"][world_db["Things"][id]["T_TYPE"]]
-                          ["TT_CONSUMABLE"]]:
+                  ["TT_TOOL"] == "food"]:
         return True
     return False
 
 
 def get_inventory_slot_to_consume(t):
     """Return slot Id of strongest consumable in t's inventory, else -1."""
-    cmp_consumability = 0
+    cmp_food = 0
     selection = -1
     i = 0
     for id in t["T_CARRIES"]:
         type = world_db["Things"][id]["T_TYPE"]
-        if world_db["ThingTypes"][type]["TT_CONSUMABLE"] > cmp_consumability:
-            cmp_consumability = world_db["ThingTypes"][type]["TT_CONSUMABLE"]
+        if world_db["ThingTypes"][type]["TT_TOOL"] == "food" \
+           and world_db["ThingTypes"][type]["TT_TOOLPOWER"] > cmp_food:
+            cmp_food = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
             selection = i
         i += 1
     return selection
@@ -1172,7 +1175,7 @@ def ai(t):
                               if world_db["ThingActions"][id]["TA_NAME"]
                                  == "use"][0]
             t["T_ARGUMENT"] = sel
-        elif standing_on_consumable(t) \
+        elif standing_on_food(t) \
              and (len(t["T_CARRIES"]) < # #
                  world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]): # #
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
@@ -1697,19 +1700,21 @@ def setter_tpos(axis):
 def command_ttid(id_string):
     """Set ID of ThingType to manipulate. ID unused? Create new one.
 
-    Default new ThingType's TT_SYMBOL to "?", TT_CORPSE_ID to self, others: 0.
+    Default new ThingType's TT_SYMBOL to "?", TT_CORPSE_ID to self, TT_TOOL to
+    "", others: 0.
     """
     id = id_setter(id_string, "ThingTypes", command_ttid)
     if None != id:
         world_db["ThingTypes"][id] = {
             "TT_NAME": "(none)",
-            "TT_CONSUMABLE": 0,
+            "TT_TOOLPOWER": 0,
             "TT_LIFEPOINTS": 0,
             "TT_PROLIFERATE": 0,
             "TT_START_NUMBER": 0,
             "TT_STORAGE": 0, # #
             "TT_SYMBOL": "?",
-            "TT_CORPSE_ID": id
+            "TT_CORPSE_ID": id,
+            "TT_TOOL": ""
         }
 
 
@@ -1720,6 +1725,12 @@ test_ThingType_id = test_for_id_maker(command_ttid, "ThingType")
 def command_ttname(name):
     """Set TT_NAME of selected ThingType."""
     world_db["ThingTypes"][command_ttid.id]["TT_NAME"] = name
+
+
+@test_ThingType_id
+def command_tttool(name):
+    """Set TT_TOOL of selected ThingType."""
+    world_db["ThingTypes"][command_ttid.id]["TT_TOOL"] = name
 
 
 @test_ThingType_id
@@ -1815,10 +1826,10 @@ commands_db = {
     "TA_NAME": (1, False, command_taname),
     "TT_ID": (1, False, command_ttid),
     "TT_NAME": (1, False, command_ttname),
+    "TT_TOOL": (1, False, command_tttool),
     "TT_SYMBOL": (1, False, command_ttsymbol),
     "TT_CORPSE_ID": (1, False, command_ttcorpseid),
-    "TT_CONSUMABLE": (1, False, setter("ThingType", "TT_CONSUMABLE",
-                                       0, 65535)),
+    "TT_TOOLPOWER": (1, False, setter("ThingType", "TT_TOOLPOWER", 0, 65535)),
     "TT_START_NUMBER": (1, False, setter("ThingType", "TT_START_NUMBER",
                                          0, 255)),
     "TT_PROLIFERATE": (1, False, setter("ThingType", "TT_PROLIFERATE",
