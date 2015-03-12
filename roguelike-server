@@ -530,8 +530,7 @@ def update_map_memory(t, age_map=True):
     for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
                 if ord_v == t["fovmap"][pos]]:
         t["T_MEMDEPTHMAP"][pos] = ord_0
-        if ord_space == t["T_MEMMAP"][pos]:
-            t["T_MEMMAP"][pos] = world_db["MAP"][pos]
+        t["T_MEMMAP"][pos] = world_db["MAP"][pos]
     if age_map:
         age_some_memdepthmap_on_nonfov_cells()
     t["T_MEMTHING"] = [mt for mt in t["T_MEMTHING"]
