@@ -1474,8 +1474,6 @@ def command_slippers(str_int):  # #
         world_db["SLIPPERS"] = val
         if world_db["WORLD_ACTIVE"] and \
            world_db["SLIPPERS"] not in world_db["ThingTypes"]:
-            print(world_db["ThingTypes"])
-            print(":::" + str(world_db["SLIPPERS"]))
             world_db["WORLD_ACTIVE"] = 0
             print("SLIPPERS matches no known ThingTypes, deactivating world.")
 
