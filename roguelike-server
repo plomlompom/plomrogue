@@ -605,6 +605,22 @@ def build_fov_map(t):
         raise RuntimeError("Malloc error in build_fov_Map().")
 
 
+def log_help():
+    """Send quick usage info to log."""
+    strong_write(io_db["file_out"], "LOG "
+                 + "Use 'w'/'e'/'s'/'d'/'x'/'c' to move.\n")
+    strong_write(io_db["file_out"], "LOG "
+                 + "Use 'p' to pick up objects, and 'D' to drop them.\n")
+    strong_write(io_db["file_out"], "LOG "
+                 + "Some objects can be used (such as: eaten) by 'u' if "
+                 + "they are in your inventory. "
+                 + "Use 'UP'/'DOWN' to navigate the inventory.\n")
+    strong_write(io_db["file_out"], "LOG "
+                 + "Use 'l' to toggle 'look' mode (move an exploration cursor "
+                 + "instead of the player over the map).\n")
+    strong_write(io_db["file_out"], "LOG See README file for more details.\n")
+
+
 def decrement_lifepoints(t):
     """Decrement t's lifepoints by 1, and if to zero, corpse it.
 
@@ -1334,6 +1350,7 @@ def command_makeworld(seed_string):
     according to ThingTypes' TT_START_NUMBERS, with Thing of ID 0 to ThingType
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
     other. Init player's memory map. Write "NEW_WORLD" line to out file.
+    Call log_help().
     """
 
     # def free_pos(plant=False):
@@ -1403,6 +1420,7 @@ def command_makeworld(seed_string):
                 plantness = world_db["ThingTypes"][type]["TT_PROLIFERATE"]  # #
                 world_db["Things"][id] = new_Thing(type, free_pos(plantness))
     strong_write(io_db["file_out"], "NEW_WORLD\n")
+    log_help()
 
 
 def command_maplength(maplength_string):
@@ -1422,6 +1440,7 @@ def command_worldactive(worldactive_string):
     An active world can always be set inactive. An inactive world can only be
     set active with a "wait" ThingAction, and a player Thing (of ID 0), and a
     map. On activation, rebuild all Things' FOVs, and the player's map memory.
+    Also call log_help().
     """
     # 7DRL: altar must be on map, and (valid) SLIPPERS must be set for world
     # activation.
@@ -1463,6 +1482,7 @@ def command_worldactive(worldactive_string):
                     empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
                     world_db["Things"][0]["fovmap"] = empty_fovmap
                 world_db["WORLD_ACTIVE"] = 1
+                log_help()
             else:
                 print("Ignoring: Not all conditions for world activation met.")
 
