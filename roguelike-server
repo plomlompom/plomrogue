@@ -769,6 +769,7 @@ def actor_move(t):
                 type = world_db["Things"][id]["T_TYPE"]  # #
                 if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":  # #
                     carries_axe = True  # #
+                    break  # #
             if carries_axe:  # #
                 axe_name = world_db["ThingTypes"][type]["TT_NAME"]  # #
                 if t == world_db["Things"][0]:  # #
@@ -783,6 +784,10 @@ def actor_move(t):
                                      "LOG You chop the tree down.\n")  # #
                     add_gods_favor(-10)  # #
                     world_db["MAP"][pos] = ord(".")   # #
+                    id = id_setter(-1, "Things")  # #
+                    world_db["Things"][id] = new_Thing(world_db["LUMBER"],  # #
+                                                       (move_result[1],  # #
+                                                        move_result[2]))  # # 
                     build_fov_map(t)  # #
                 return   # #
         passable = ("." == chr(world_db["MAP"][pos]) or
@@ -1460,6 +1465,9 @@ def command_makeworld(seed_string):
     if not world_db["PLANT_0"] in world_db["ThingTypes"]:  # #
         print("Ignoring: No valid PLANT_0 set.")  # #
         return  # #
+    if not world_db["LUMBER"] in world_db["ThingTypes"]:  # #
+        print("Ignoring: No valid LUMBER set.")  # #
+        return  # #
     world_db["Things"] = {}
     make_map()
     world_db["WORLD_ACTIVE"] = 1
@@ -1500,8 +1508,8 @@ def command_worldactive(worldactive_string):
     map. On activation, rebuild all Things' FOVs, and the player's map memory.
     Also call log_help().
     """
-    # 7DRL: altar must be on map, and (valid) SLIPPERS and PLANT_0must be set
-    # for world activation.
+    # 7DRL: altar must be on map, and (valid) SLIPPERS and PLANT_0 and LUMBER
+    # must be set for world activation.
     val = integer_test(worldactive_string, 0, 1)
     if None != val:
         if 0 != world_db["WORLD_ACTIVE"]:
@@ -1522,6 +1530,7 @@ def command_worldactive(worldactive_string):
                     break
             valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]  # #
             valid_plant0 = world_db["PLANT_0"] in world_db["ThingTypes"]  # #
+            valid_lumber = world_db["PLANT_0"] in world_db["ThingTypes"]  # #
             altar_found = False  # #
             if world_db["MAP"]:  # #
                 pos = world_db["MAP"].find(b'_')  # #
@@ -1530,8 +1539,9 @@ def command_worldactive(worldactive_string):
                     x = pos % world_db["MAP_LENGTH"]  # #
                     world_db["altar"] = (y, x)  # #
                     altar_found = True  # #
-            if wait_exists and player_exists and world_db["MAP"] \
-                and altar_found and valid_slippers and valid_plant0:  # #
+            if (wait_exists and player_exists and world_db["MAP"]
+                and altar_found and valid_slippers and valid_plant0  # #
+                and valid_lumber):  # #
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -1566,6 +1576,17 @@ def command_plant0(str_int):  # #
            world_db["PLANT_0"] not in world_db["ThingTypes"]:
             world_db["WORLD_ACTIVE"] = 0
             print("PLANT_0 matches no known ThingTypes, deactivating world.")
+
+
+def command_lumber(str_int):  # #
+    """Set LUMBER, but deactivate world if not in ThingTypes."""
+    val = integer_test(str_int, 0)
+    if None != val:
+        world_db["LUMBER"] = val
+        if world_db["WORLD_ACTIVE"] and \
+           world_db["LUMBER"] not in world_db["ThingTypes"]:
+            world_db["WORLD_ACTIVE"] = 0
+            print("LUMBER matches no known ThingTypes, deactivating world.")
 
 
 def test_for_id_maker(object, category):
@@ -1850,6 +1871,7 @@ commands_db = {
     "FAVOR_STAGE": (1, False, setter(None, "FAVOR_STAGE", 0, 65535)),  # #
     "SLIPPERS": (1, False, command_slippers),  # #
     "PLANT_0": (1, False, command_plant0),  # #
+    "LUMBER": (1, False, command_lumber),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
     "TA_NAME": (1, False, command_taname),
@@ -1901,6 +1923,7 @@ world_db = {
     "FAVOR_STAGE": 0,  # #
     "SLIPPERS": 0,  # #
     "PLANT_0": 0,  # #
+    "LUMBER": 0,  # #
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
