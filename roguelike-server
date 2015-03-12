@@ -741,9 +741,6 @@ def actor_move(t):
                                      t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        passable = ("." == chr(world_db["MAP"][pos]) or
-                    ":" == chr(world_db["MAP"][pos]) or # #
-                    "_" == chr(world_db["MAP"][pos])) # #
         hitted = [id for id in world_db["Things"]
                   if world_db["Things"][id] != t
                   if world_db["Things"][id]["T_LIFEPOINTS"]
@@ -765,6 +762,9 @@ def actor_move(t):
             if test and t == world_db["Things"][0]:  # #
                 add_gods_favor(-test)  # #
             return
+        passable = ("." == chr(world_db["MAP"][pos]) or
+                    ":" == chr(world_db["MAP"][pos]) or # #
+                    "_" == chr(world_db["MAP"][pos])) # #
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
     if passable:
