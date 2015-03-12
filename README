@@ -59,8 +59,8 @@ u - use item selected in inventory
 UP - navigate upwards in Inventory
 DOWN - navigate downwards in inventory
 
-Save files and replay game recording
-------------------------------------
+Save files, replay game recording, starting over
+------------------------------------------------
 
 By default, the game state is saved in the file ./save, and read from there on
 (server) restart. Another file name to use can be given with the -l option (i.e.
