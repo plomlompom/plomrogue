@@ -212,6 +212,7 @@ def save_world():
     string = ""
     for key in world_db:
         if (dict != type(world_db[key])
+            and key != "altar"  # #
             and key != "MAP" and key != "WORLD_ACTIVE"):
             string = string + key + " " + str(world_db[key]) + "\n"
     string = string + mapsetter("MAP")()
