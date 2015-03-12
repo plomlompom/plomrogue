@@ -63,14 +63,14 @@ Replay game recording
 ---------------------
 
 Once you start a new world, every move of yours is recorded in a file called
-"record". It gets overwritten when a new game world is started after deletion
-of the "savefile" file. Run "./roguelike -s" to watch the current game's
+"record_save". It gets overwritten when a new game world is started after
+deletion of the "save" file. Run "./roguelike -s" to watch the current game's
 recording from the beginning. Hit any player action key to increment turns (they
-will not trigger the actions usually mapped to them, only repeat the actions
-done at that point in the game as defined in the "record" file). Keys to manage
-windows, scroll on the map and quit the program do their usual thing. Append a
-number to the -s option (like "-s100") to start the recording at the respective
-turn number.
+will not trigger the actions usually mapped to them, only repeat theactions
+done at that point in the game as defined in the "record_save" file). Keys to
+manage windows, scroll on the map and quit the program do their usual thing.
+Append a number to the -s option (like "-s100") to start the recording at the
+respective turn number.
 
 Hacking / server internals and configuration
 --------------------------------------------
@@ -78,7 +78,8 @@ Hacking / server internals and configuration
 The game world is set up and made subject to player commands by
 ./roguelike-server. It's controlled by commands explained in the file
 ./SERVER_COMMANDS. The server usually reads these from the files ./server/in
-(written to by ./roguelike-client), ./confserver/world, ./record and ./savefile.
+(written to by ./roguelike-client), ./confserver/world, ./record_save and
+./save.
 
 All source files are thoroughly documented to explain more details of
 plomrogue's internals. The ./roguelike-server executable can be run with a -v
