@@ -47,6 +47,8 @@ d - move east
 x - move south-west
 c - move south-east
 
+w - wait one turn
+
 l - toggle "look" mode, investigate map cells by moving a cursor over the map
     instead of the player avatar
 

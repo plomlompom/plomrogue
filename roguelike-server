@@ -608,7 +608,7 @@ def build_fov_map(t):
 def log_help():
     """Send quick usage info to log."""
     strong_write(io_db["file_out"], "LOG "
-                 + "Use 'w'/'e'/'s'/'d'/'x'/'c' to move.\n")
+                 + "Use 'w'/'e'/'s'/'d'/'x'/'c' to move, and 'w' to wait.\n")
     strong_write(io_db["file_out"], "LOG "
                  + "Use 'p' to pick up objects, and 'D' to drop them.\n")
     strong_write(io_db["file_out"], "LOG "
@@ -619,6 +619,7 @@ def log_help():
                  + "Use 'l' to toggle 'look' mode (move an exploration cursor "
                  + "instead of the player over the map).\n")
     strong_write(io_db["file_out"], "LOG See README file for more details.\n")
+    strong_write(io_db["file_out"], "LOG \n")
 
 
 def decrement_lifepoints(t):
