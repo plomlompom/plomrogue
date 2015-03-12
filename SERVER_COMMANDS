@@ -239,3 +239,7 @@ GOD_MOOD [-32768 to 32767]
 GOD_FAVOR [-32768 to 32767]
 
 SLIPPERS [0 to infinity]
+
+FAVOR_STAGE [0 to 65535]
+
+PLANT_0 [0 to infinity]

@@ -417,6 +417,7 @@ extern void draw_win_map(struct Win * win)
     init_pair(10, COLOR_CYAN, COLOR_BLACK); //
     init_pair(11, COLOR_BLACK, COLOR_GREEN); //
     init_pair(12, COLOR_BLACK, COLOR_MAGENTA); //
+    init_pair(13, COLOR_WHITE, COLOR_BLACK); //
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
@@ -442,7 +443,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = COLOR_PAIR(8); //
                 } //
-                else if ('$' == c || '%' == c) //
+                else if ('$' == c) //
                 { //
                     a = COLOR_PAIR(9); //
                 } //
@@ -457,6 +458,10 @@ extern void draw_win_map(struct Win * win)
                 else if ('_' == c) //
                 { //
                     a = COLOR_PAIR(12); //
+                } //
+                else if ('%' == c) //
+                { //
+                    a = COLOR_PAIR(13); //
                 } //
                 // char c = world.map.cells[y*world.map.length + x];
                 set_ch_on_yx(win, y, x * 2 + (y % 2),     c | a); //

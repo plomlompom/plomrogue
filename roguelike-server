@@ -688,13 +688,29 @@ def mv_yx_in_dir_legal(dir, y, x):
 
 def enter_altar():  # #
      """What happens when the player enters the altar."""
-     if world_db["GAME_WON"]:
+     if world_db["FAVOR_STAGE"] > 9000:
         strong_write(io_db["file_out"],
                      "LOG You step on a soul-less slab of stone.\n")
         return
      strong_write(io_db["file_out"], "LOG YOU ENTER SACRED GROUND.\n")
-     if world_db["GOD_FAVOR"] > 9000:
-         world_db["GAME_WON"] = 1
+     if world_db["FAVOR_STAGE"] == 0:
+        world_db["FAVOR_STAGE"] = 1
+        strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
+                     + "\"I don't trust you. You intrude on the island's "
+                     + "affairs. I think you're a nuisance at best, and a "
+                     + "danger to my children at worst. I will give you a "
+                     + "chance to lighten my mood, however: For a while now, "
+                     + "I've been trying to spread the plant "
+                     + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+                     + " (\""
+                     + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
+                     + "\"). I have not been very successful so far. Maybe "
+                     + "you can make yourself useful there. I will count "
+                     + "each further "
+                     + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+                     + " that grows to your favor.\n")
+     elif world_db["GOD_FAVOR"] > 9000:
+         world_db["FAVOR_STAGE"] = 9001
          strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
                       + "\"You have proven yourself worthy of my respect. "
                       + "You were a good citizen to the island, and sometimes "
@@ -874,6 +890,9 @@ def thingproliferation(t, prol_map):
             newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
             world_db["Things"][id] = newT
             world_db["GOD_MOOD"] += 1  # #
+            if (world_db["FAVOR_STAGE"] > 0  # #
+                and t["T_TYPE"] == world_db["PLANT_0"]):
+                world_db["GOD_FAVOR"] += 5
 
 
 def try_healing(t):
@@ -1406,6 +1425,9 @@ def command_makeworld(seed_string):
     if not world_db["SLIPPERS"] in world_db["ThingTypes"]:  # #
         print("Ignoring: No valid SLIPPERS set.")  # #
         return  # #
+    if not world_db["PLANT_0"] in world_db["ThingTypes"]:  # #
+        print("Ignoring: No valid PLANT_0 set.")  # #
+        return  # #
     world_db["Things"] = {}
     make_map()
     world_db["WORLD_ACTIVE"] = 1
@@ -1446,8 +1468,8 @@ def command_worldactive(worldactive_string):
     map. On activation, rebuild all Things' FOVs, and the player's map memory.
     Also call log_help().
     """
-    # 7DRL: altar must be on map, and (valid) SLIPPERS must be set for world
-    # activation.
+    # 7DRL: altar must be on map, and (valid) SLIPPERS and PLANT_0must be set
+    # for world activation.
     val = integer_test(worldactive_string, 0, 1)
     if None != val:
         if 0 != world_db["WORLD_ACTIVE"]:
@@ -1467,6 +1489,7 @@ def command_worldactive(worldactive_string):
                     player_exists = True
                     break
             valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]  # #
+            valid_plant0 = world_db["PLANT_0"] in world_db["ThingTypes"]  # #
             altar_found = False  # #
             if world_db["MAP"]:  # #
                 pos = world_db["MAP"].find(b'_')  # #
@@ -1476,7 +1499,7 @@ def command_worldactive(worldactive_string):
                     world_db["altar"] = (y, x)  # #
                     altar_found = True  # #
             if wait_exists and player_exists and world_db["MAP"] \
-                and altar_found and valid_slippers:  # #
+                and altar_found and valid_slippers and valid_plant0:  # #
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -1500,6 +1523,17 @@ def command_slippers(str_int):  # #
            world_db["SLIPPERS"] not in world_db["ThingTypes"]:
             world_db["WORLD_ACTIVE"] = 0
             print("SLIPPERS matches no known ThingTypes, deactivating world.")
+
+
+def command_plant0(str_int):  # #
+    """Set PLANT_0, but deactivate world if not in ThingTypes."""
+    val = integer_test(str_int, 0)
+    if None != val:
+        world_db["PLANT_0"] = val
+        if world_db["WORLD_ACTIVE"] and \
+           world_db["PLANT_0"] not in world_db["ThingTypes"]:
+            world_db["WORLD_ACTIVE"] = 0
+            print("PLANT_0 matches no known ThingTypes, deactivating world.")
 
 
 def test_for_id_maker(object, category):
@@ -1773,8 +1807,9 @@ commands_db = {
     "MAP_LENGTH": (1, False, command_maplength),
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "MAP": (2, False, setter_map("MAP")),
-    "GAME_WON": (1, False, setter(None, "GAME_WON", 0, 1)),  # #
+    "FAVOR_STAGE": (1, False, setter(None, "FAVOR_STAGE", 0, 65535)),  # #
     "SLIPPERS": (1, False, command_slippers),  # #
+    "PLANT_0": (1, False, command_plant0),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
     "TA_NAME": (1, False, command_taname),
@@ -1823,8 +1858,9 @@ world_db = {
     "GOD_MOOD": 0,  # #
     "GOD_FAVOR": 0,  # #
     "MAP": False,
-    "GAME_WON": 0,  # #
+    "FAVOR_STAGE": 0,  # #
     "SLIPPERS": 0,  # #
+    "PLANT_0": 0,  # #
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
