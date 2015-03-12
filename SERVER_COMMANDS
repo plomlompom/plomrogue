@@ -233,6 +233,8 @@ or, if the proliferating thing is animate, any other animate thing.
 Unexplained 7DRL additions
 ---------------------------
 
-GOD_MOOD [-32768-32767]
+GOD_MOOD [-32768 to 32767]
 
-GOD_FAVOR [-32768-32767]
+GOD_FAVOR [-32768 to 32767]
+
+SLIPPERS [0 to infinity]
