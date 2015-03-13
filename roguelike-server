@@ -363,6 +363,15 @@ def try_worldstate_update():
         stacksmap = bytearray(b'0' * (length ** 2))  # #
         for id in [id for id in world_db["Things"]  # #
                       if not world_db["Things"][id]["carried"]  # #
+                      if world_db["Things"][id]["T_LIFEPOINTS"]
+                      if world_db["Things"][0]["fovmap"][  # #
+                           world_db["Things"][id]["T_POSY"] * length  # #
+                           + world_db["Things"][id]["T_POSX"]] == ord_v]:  # #
+            pos = (world_db["Things"][id]["T_POSY"] * length  # #
+                  + world_db["Things"][id]["T_POSX"])  # #
+            stacksmap[pos] = ord('X')  # #
+        for id in [id for id in world_db["Things"]  # #
+                      if not world_db["Things"][id]["carried"]  # #
                       if world_db["Things"][0]["fovmap"][  # #
                            world_db["Things"][id]["T_POSY"] * length  # #
                            + world_db["Things"][id]["T_POSX"]] == ord_v]:  # #
