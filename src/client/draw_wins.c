@@ -425,6 +425,12 @@ extern void draw_win_map(struct Win * win)
     init_pair(12, COLOR_BLACK, COLOR_MAGENTA); //
     init_pair(13, COLOR_WHITE, COLOR_BLACK); //
     init_pair(14, COLOR_RED, COLOR_BLACK); //
+    init_pair(15, COLOR_WHITE, COLOR_GREEN); //
+    init_pair(16, COLOR_WHITE, COLOR_YELLOW); //
+    init_pair(17, COLOR_WHITE, COLOR_RED); //
+    attr_t col_health_good = COLOR_PAIR(15); //
+    attr_t col_health_middle = COLOR_PAIR(16); //
+    attr_t col_health_bad = COLOR_PAIR(17); //
     for (y = 0; y < world.map.length; y++)
     {
         for (x = 0; x < world.map.length; x++)
@@ -477,10 +483,23 @@ extern void draw_win_map(struct Win * win)
                 // char c = world.map.cells[y*world.map.length + x];
                 set_ch_on_yx(win, y, x * 2 + (y % 2),     c | a); //
                 chtype depth = ' ' | a;  //
-                if (world.stacks_map[y * world.map.length + x] == '2')  //
+                char stacksmapval = world.stacks_map[y*world.map.length+x]; //
+                if (stacksmapval == '2')  //
                 {  //
                     depth = '+' | COLOR_PAIR(13);  //
                 }  //
+                else if (stacksmapval == 'a') //
+                { //
+                    depth = ' ' | col_health_bad; //
+                } //
+                else if (stacksmapval == 'b') //
+                { //
+                    depth = ' ' | col_health_middle; //
+                } //
+                else if (stacksmapval == 'c') //
+                { //
+                    depth = ' ' | col_health_good; //
+                } //
                 set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, depth); //
                 // set_ch_on_yx(win, y, x * 2 + (y % 2),     c);
                 // set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ');

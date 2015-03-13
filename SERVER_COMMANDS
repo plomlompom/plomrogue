@@ -253,4 +253,6 @@ LUMBER [0 to infinity]
 
 TOOL_0 [0 to infinity]
 
+EMPATHY [0 to 1]
+
 TT_TOOLS gains the arguments "axe", "carpentry", "wood".
