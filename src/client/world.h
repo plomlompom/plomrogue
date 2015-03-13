@@ -38,6 +38,7 @@ struct World
     char * path_commands; /* path of commands config file */
     char * player_inventory; /* one-item-per-line string list of owned items */
     char * mem_map; /* map cells of player's map memory */
+    char * stacks_map; /* map of depths of thing stacks on world map */ // 7DRL
     char * queue; /* stores un-processed messages read from the input file */
     struct yx_uint8 player_pos; /* coordinates of player on map */
     struct yx_uint8 look_pos; /* coordinates of look cursor */

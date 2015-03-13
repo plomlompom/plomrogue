@@ -406,7 +406,12 @@ extern void draw_win_map(struct Win * win)
             // attr_t a=' '==world.mem_map[y*world.map.length+x]?attr_sha:attr_mem;
             char c = world.mem_map[y*world.map.length + x];
             set_ch_on_yx(win, y, x * 2 + (y % 2),     c   | a);
-            set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | a);
+            chtype depth = ' ' | a;  //
+            if (world.stacks_map[y * world.map.length + x] == '2')  //
+            {  //
+                depth = '+' | COLOR_PAIR(2);  //
+            }  //
+            set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, depth);
         }
     }
     init_pair(4, COLOR_BLUE, COLOR_BLACK); //
@@ -471,7 +476,12 @@ extern void draw_win_map(struct Win * win)
                 } //
                 // char c = world.map.cells[y*world.map.length + x];
                 set_ch_on_yx(win, y, x * 2 + (y % 2),     c | a); //
-                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ' | a); //
+                chtype depth = ' ' | a;  //
+                if (world.stacks_map[y * world.map.length + x] == '2')  //
+                {  //
+                    depth = '+' | COLOR_PAIR(13);  //
+                }  //
+                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, depth); //
                 // set_ch_on_yx(win, y, x * 2 + (y % 2),     c);
                 // set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ');
             }

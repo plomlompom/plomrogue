@@ -333,12 +333,12 @@ def try_worldstate_update():
                  str(world_db["Things"][0]["T_POSX"]) + "\n" + \
                  str(world_db["MAP_LENGTH"]) + "\n"
         length = world_db["MAP_LENGTH"]
+
         fov = bytearray(b' ' * (length ** 2))
         ord_v = ord("v")
         for pos in [pos for pos in range(length ** 2)
                         if ord_v == world_db["Things"][0]["fovmap"][pos]]:
             fov[pos] = world_db["MAP"][pos]
-        length = world_db["MAP_LENGTH"]
         for id in [id for tid in reversed(sorted(list(world_db["ThingTypes"])))
                       for id in world_db["Things"]
                       if not world_db["Things"][id]["carried"]
@@ -351,6 +351,7 @@ def try_worldstate_update():
             fov[world_db["Things"][id]["T_POSY"] * length
                 + world_db["Things"][id]["T_POSX"]] = c
         string = write_map(string, fov)
+
         mem = world_db["Things"][0]["T_MEMMAP"][:]
         for mt in [mt for tid in reversed(sorted(list(world_db["ThingTypes"])))
                       for mt in world_db["Things"][0]["T_MEMTHING"]
@@ -358,6 +359,23 @@ def try_worldstate_update():
              c = world_db["ThingTypes"][mt[0]]["TT_SYMBOL"]
              mem[(mt[1] * length) + mt[2]] = ord(c)
         string = write_map(string, mem)
+
+        stacksmap = bytearray(b'0' * (length ** 2))  # #
+        for id in [id for id in world_db["Things"]  # #
+                      if not world_db["Things"][id]["carried"]  # #
+                      if world_db["Things"][0]["fovmap"][  # #
+                           world_db["Things"][id]["T_POSY"] * length  # #
+                           + world_db["Things"][id]["T_POSX"]] == ord_v]:  # #
+            pos = (world_db["Things"][id]["T_POSY"] * length  # #
+                  + world_db["Things"][id]["T_POSX"])  # #
+            if stacksmap[pos] < ord('2'):  # #
+                stacksmap[pos] += 1  # #
+        for mt in world_db["Things"][0]["T_MEMTHING"]:  # #
+            pos = mt[1] * length + mt[2]  # #
+            if stacksmap[pos] < ord('2'):  # #
+                stacksmap[pos] += 1  # #
+        string = write_map(string, stacksmap)  # #
+        
         atomic_write(io_db["path_worldstate"], string, delete=False)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
         io_db["worldstate_updateable"] = False
