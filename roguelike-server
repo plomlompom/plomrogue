@@ -495,7 +495,7 @@ def make_map():
         pos = (y * length) + x  # #
         if (("." == chr(world_db["MAP"][pos]  # #
              or ":" == chr(world_db["MAP"][pos]))
-            and not is_neighbor((y, x), 'X'))):  # #
+            and not is_neighbor((y, x), "X"))):  # #
             world_db["MAP"][pos] = ord("_")  # #
             world_db["altar"] = (y, x)  # #
             altar_placed = True  # #
@@ -762,7 +762,8 @@ def actor_move(t):
             if test and t == world_db["Things"][0]:  # #
                 add_gods_favor(-test)  # #
             return
-        if ord("X") == world_db["MAP"][pos]:  # #
+        if (ord("X") == world_db["MAP"][pos]  # #
+            or ord("|") == world_db["MAP"][pos]):  # #
             carries_axe = False  # #
             for id in t["T_CARRIES"]:  # # 
                 type = world_db["Things"][id]["T_TYPE"]  # #
@@ -777,16 +778,23 @@ def actor_move(t):
                                                     + ", you chop!\n")  # #
                     add_gods_favor(-1)  # #
                 chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-                if chop_power > 0 and 0 == int(rand.next() / chop_power):  # #
+                case_X = world_db["MAP"][pos] == ord("X")  # #
+                if (chop_power > 0  # #
+                    and ((case_X and  # #
+                          0 == int(rand.next() / chop_power))  # #
+                    or (not case_X and  # #
+                             0 == int(rand.next() / (3 * chop_power))))):  # #
                     if t == world_db["Things"][0]:  # #
                         strong_write(io_db["file_out"],  # #
-                                     "LOG You chop the tree down.\n")  # #
+                                     "LOG You chop it down.\n")  # #
                     add_gods_favor(-10)  # #
                     world_db["MAP"][pos] = ord(".")   # #
-                    id = id_setter(-1, "Things")  # #
-                    world_db["Things"][id] = new_Thing(world_db["LUMBER"],  # #
-                                                       (move_result[1],  # #
-                                                        move_result[2]))  # # 
+                    i = 3 if case_X else 1  # #
+                    for i in range(i):  # #
+                        id = id_setter(-1, "Things")  # #
+                        world_db["Things"][id] = \
+                          new_Thing(world_db["LUMBER"],  # #
+                                    (move_result[1], move_result[2]))  # # 
                     build_fov_map(t)  # #
                 return   # #
         passable = ("." == chr(world_db["MAP"][pos]) or
@@ -885,6 +893,47 @@ def actor_use(t):
                              "LOG To use this item for chopping, move "  # #
                              "towards a tree while carrying it in "  # #
                              "your inventory.\n")  # #
+        elif (world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry"):  # #
+            pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+            if (world_db["MAP"][pos] == ord("X")  # #
+                or world_db["MAP"][pos] == ord("|")):  # #
+                strong_write(io_db["file_out"],  # #
+                             "LOG Can't build when standing on barrier.\n")  # #
+                return
+            for id in [id for id in world_db["Things"]
+                       if not world_db["Things"][id] == t
+                       if not world_db["Things"][id]["carried"]
+                       if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+                       if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]:
+                 strong_write(io_db["file_out"],
+                              "LOG Can't build when standing objects.\n")  # #
+                 return
+            for id in t["T_CARRIES"]:  # #
+                type_tool = world_db["Things"][id]["T_TYPE"]  # #
+                if (world_db["ThingTypes"][type_tool]["TT_TOOL"]  # #
+                    == "carpentry"):  # #
+                    break  # #
+            wood_id = None  # #
+            for id in t["T_CARRIES"]:  # #
+                type_material = world_db["Things"][id]["T_TYPE"]  # #
+                if (world_db["ThingTypes"][type_material]["TT_TOOL"]  # #
+                    == "wood"):  # #
+                    wood_id = id  # #
+                    break  # #
+            if wood_id != None:  # #
+                t["T_CARRIES"].remove(wood_id)  # #
+                del world_db["Things"][wood_id]  # #
+                world_db["MAP"][pos] = ord("|")  # #
+                strong_write(io_db["file_out"], "LOG With your "  # #
+                             + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
+                             + " you build a wooden barrier from your "  # #
+                             + world_db["ThingTypes"][type_material]  # #
+                               ["TT_NAME"]  # #
+                             + ".\n")  # #
+            else:  # #
+                strong_write(io_db["file_out"], "LOG You can't use a "  # #
+                             + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
+                             + " without some wood in your inventory.\n")  # #
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
@@ -1232,7 +1281,7 @@ def turn_over():
                    if not world_db["Things"][id]["carried"]]:
             y = world_db["Things"][id]["T_POSY"]
             x = world_db["Things"][id]["T_POSX"]
-            proliferable_map[y * world_db["MAP_LENGTH"] + x] = ord('X')
+            proliferable_map[y * world_db["MAP_LENGTH"] + x] = ord("X")
         for id in [id for id in world_db["Things"]]:  # Only what's from start!
             if not id in world_db["Things"] or \
                world_db["Things"][id]["carried"]:   # May have been consumed or

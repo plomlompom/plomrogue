@@ -357,7 +357,8 @@ static uint8_t eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
     uint16_t pos_in_map = test_pos->y * maplength + test_pos->x;
     uint8_t all_shaded = shade_hex(left_angle, right_angle_1st, middle_angle,
                                    shadows, pos_in_map, fov_map);
-    if (!all_shaded && 'X' == worldmap[pos_in_map])
+    if (!all_shaded && ('X' == worldmap[pos_in_map]
+                        || '|' == worldmap[pos_in_map]))  //
     {
         if (set_shadow(left_angle, right_angle_1st, shadows))
         {

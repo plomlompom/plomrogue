@@ -365,7 +365,7 @@ extern void draw_win_log(struct Win * win)
         }
     }
     if (n_postbreak_lines > win->frame_size.y)
-    {
+    { 
         uint32_t size = n_postbreak_lines * (win->frame_size.x + 1);
         win->winmap = try_malloc(sizeof(chtype) * size, __func__);
         for (i = 0; i < size; win->winmap[i] = ' ', i++);
@@ -398,7 +398,7 @@ extern void draw_win_map(struct Win * win)
             { //
                 a = COLOR_PAIR(1); //
             } //
-            else if (c_m == 'X') //
+            else if (c_m == 'X' || c_m == '|') //
             { //
                 a = COLOR_PAIR(3); //
             } //
@@ -448,11 +448,11 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = COLOR_PAIR(9); //
                 } //
-                else if ('m' == c || '/' == c) //
+                else if ('m' == c || '/' == c || '-' == c) //
                 { //
                     a = COLOR_PAIR(10); //
                 } //
-                else if ('X' == c) //
+                else if ('X' == c || '|' == c) //
                 { //
                     a = COLOR_PAIR(11); //
                 } //
