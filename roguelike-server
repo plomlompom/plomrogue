@@ -990,23 +990,31 @@ def thingproliferation(t, prol_map):
     selected randomly.
     """
     # 7DRL: success increments God's mood
-    # 7DRL: Things proliferate only on ":" ground.
+    # 7DRL: Plants (no TT_LIFEPOINTS) proliferate only on ":" ground.
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
         candidates = []
         for dir in [directions_db[key] for key in directions_db]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            if mv_result[0] and ord(":") == prol_map[mv_result[1]  # #
+            pos = mv_result[1] * world_db["MAP_LENGTH"] + mv_result[2]
+            if mv_result[0] and \
+               (ord(":") == prol_map[pos]  # #
+                or (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
+                    and ord(".") == prol_map[pos])):
             # if mv_result[0] and ord(".") == prol_map[mv_result[1]
-                                                     * world_db["MAP_LENGTH"]
-                                                     + mv_result[2]]:
+            #                                          * world_db["MAP_LENGTH"]
+            #                                          + mv_result[2]]:
                 candidates.append((mv_result[1], mv_result[2]))
         if len(candidates):
             i = rand.next() % len(candidates)
             id = id_setter(-1, "Things")
             newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
             world_db["Things"][id] = newT
-            world_db["GOD_MOOD"] += 1  # #
+            animacy = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
+            if animacy:  # #
+                world_db["GOD_MOOD"] += animacy  # #
+            else:  # #
+                world_db["GOD_MOOD"] += 1  # #
             if (world_db["FAVOR_STAGE"] > 0  # #
                 and t["T_TYPE"] == world_db["PLANT_0"]):  # #
                 world_db["GOD_FAVOR"] += 5  # #
