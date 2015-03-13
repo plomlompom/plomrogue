@@ -2042,7 +2042,7 @@ world_db = {
     "PLANT_1": 0,  # #
     "LUMBER": 0,  # #
     "TOOL_0": 0,  # #
-    "EMPATHY": 0,  # #
+    "EMPATHY": 1,  # #
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
