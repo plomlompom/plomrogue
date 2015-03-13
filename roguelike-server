@@ -614,12 +614,13 @@ def log_help():
     strong_write(io_db["file_out"], "LOG "
                  + "Some objects can be used (such as: eaten) by 'u' if "
                  + "they are in your inventory. "
-                 + "Use 'UP'/'DOWN' to navigate the inventory.\n")
+                 + "Use 'Up'/'Down' to navigate the inventory.\n")
     strong_write(io_db["file_out"], "LOG "
                  + "Use 'l' to toggle 'look' mode (move an exploration cursor "
                  + "instead of the player over the map).\n")
+    strong_write(io_db["file_out"], "LOG "
+                 + "Use 'PgUp'/PgDn' to scroll the 'Things here' window.\n")
     strong_write(io_db["file_out"], "LOG See README file for more details.\n")
-    strong_write(io_db["file_out"], "LOG \n")
 
 
 def decrement_lifepoints(t):

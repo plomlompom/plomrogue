@@ -30,6 +30,8 @@ KEY 68 drop
 KEY 117 use
 KEY 259 inv_u
 KEY 258 inv_d
+KEY 339 stack_u
+KEY 338 stack_d
 
 KEYBINDINGS 'wingeom'
 KEY 50 shift_f

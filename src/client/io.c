@@ -278,6 +278,7 @@ static uint8_t read_queue()
             {
                 nl_append_string("(none known)", &world.things_here);
             }
+            world.things_here_scroll = 0;  //
         }
         else if (things_here_parsing)
         {

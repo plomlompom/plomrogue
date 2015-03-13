@@ -113,6 +113,12 @@ DESCRIPTION 'nav down object'
 COMMAND inv_u
 DESCRIPTION 'nav up object'
 
+COMMAND stack_d
+DESCRIPTION 'nav down stack'
+
+COMMAND stack_u
+DESCRIPTION 'nav up stack'
+
 COMMAND keyb_dw
 DESCRIPTION 'nav down window keys'
 

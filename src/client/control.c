@@ -87,6 +87,36 @@ static void nav_inventory(char dir)
 
 
 
+static void nav_stack(char dir)  //
+{
+    FILE * file = fopen("test", "a");
+    fprintf(file, "called %d\n", world.things_here_scroll);
+    if ('u' == dir && world.things_here_scroll > 0)
+    {
+        world.things_here_scroll--;
+        fprintf(file, "u\n");
+    }
+    else if ('d' == dir && world.things_here)
+    {
+        uint32_t i;
+        uint32_t n_lines = 1;
+        for (i = 0; '\0' != world.things_here[i]; i++)
+        {
+            n_lines = n_lines + (world.things_here[i] == '\n');
+        }
+        uint16_t f_h = get_win_by_id('s')->frame_size.y;
+        fprintf(file, "%d %d\n", n_lines, f_h);
+        if (n_lines > f_h && world.things_here_scroll < n_lines - f_h)
+        {
+            world.things_here_scroll++;
+        }
+        fprintf(file, "d %d\n", world.things_here_scroll);
+    }
+    fclose(file);
+}
+
+
+
 static uint8_t try_0args(struct Command * command, char * match, void (* f) ())
 {
     if (!strcmp(command->dsc_short, match))
@@ -136,6 +166,8 @@ static uint8_t try_client_commands(struct Command * command)
 {
     return (   try_1args(command, "inv_u", nav_inventory, 'u')
             || try_1args(command, "inv_d", nav_inventory, 'd')
+            || try_1args(command, "stack_u", nav_stack, 'u') //
+            || try_1args(command, "stack_d", nav_stack, 'd') //
             || try_1args(command, "cyc_win_f", cycle_active_win, 'f')
             || try_1args(command, "cyc_win_b", cycle_active_win, 'b')
             || try_1args(command, "scrl_r", scroll_v_screen, '+')

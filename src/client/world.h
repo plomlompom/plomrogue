@@ -42,6 +42,7 @@ struct World
     struct yx_uint8 player_pos; /* coordinates of player on map */
     struct yx_uint8 look_pos; /* coordinates of look cursor */
     uint16_t turn; /* world/game turn */
+    uint16_t things_here_scroll; /* scroll position things here win */ // 7DRL
     int16_t player_satiation; /* player's belly fullness */
     int16_t godsmood; /* island god's mood */ // 7DRL
     int16_t godsfavor; /* island god's favor to player */ // 7DRL

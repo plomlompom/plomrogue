@@ -56,8 +56,11 @@ p - pick up item
 D - drop item selected in inventory
 u - use item selected in inventory
 
-UP - navigate upwards in Inventory
-DOWN - navigate downwards in inventory
+Up - navigate upwards in inventory
+Down - navigate downwards in inventory
+
+PgUp - scroll upwards in "Things here" window
+PgDn - scroll downwards in "Things here" window
 
 Save files, replay game recording, starting over
 ------------------------------------------------
