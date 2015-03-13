@@ -361,14 +361,15 @@ extern void draw_win_log(struct Win * win)
         if (x > win->frame_size.x || '\n' == world.log[i])
         {
             n_postbreak_lines++;
-            x = 0;
+            x = 1;
         }
     }
     if (n_postbreak_lines > win->frame_size.y)
-    { 
+    {
         uint32_t size = n_postbreak_lines * (win->frame_size.x + 1);
         win->winmap = try_malloc(sizeof(chtype) * size, __func__);
         for (i = 0; i < size; win->winmap[i] = ' ', i++);
+        /* TODO: This should only be done with "long" line break style. */
         do_realloc_winmap = 0;
         draw_text_from_bottom(win, world.log);
         do_realloc_winmap = 1;
