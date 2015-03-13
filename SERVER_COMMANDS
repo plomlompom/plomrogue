@@ -251,4 +251,6 @@ PLANT_0 [0 to infinity]
 
 LUMBER [0 to infinity]
 
+TOOL_0 [0 to infinity]
+
 TT_TOOLS gains the arguments "axe", "carpentry", "wood".

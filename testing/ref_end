@@ -1,11 +1,13 @@
-PLANT_0 8
-MAP_LENGTH 64
-FAVOR_STAGE 0
 PLAYER_TYPE 0
+PLANT_1 0
+PLANT_0 8
 GOD_FAVOR 0
+MAP_LENGTH 64
 GOD_MOOD -250
+FAVOR_STAGE 0
 TURN 461
 LUMBER 0
+TOOL_0 0
 SLIPPERS 1
 MAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 MAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

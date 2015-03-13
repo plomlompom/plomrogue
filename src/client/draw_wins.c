@@ -461,7 +461,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = COLOR_PAIR(12); //
                 } //
-                else if ('%' == c) //
+                else if ('%' == c || '*' == c) //
                 { //
                     a = COLOR_PAIR(13); //
                 } //

@@ -693,21 +693,54 @@ def enter_altar():  # #
         return
      strong_write(io_db["file_out"], "LOG YOU ENTER SACRED GROUND.\n")
      if world_db["FAVOR_STAGE"] == 0:
-        world_db["FAVOR_STAGE"] = 1
-        strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
-                     + "\"I don't trust you. You intrude on the island's "
-                     + "affairs. I think you're a nuisance at best, and a "
-                     + "danger to my children at worst. I will give you a "
-                     + "chance to lighten my mood, however: For a while now, "
-                     + "I've been trying to spread the plant "
-                     + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
-                     + " (\""
-                     + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
-                     + "\"). I have not been very successful so far. Maybe "
-                     + "you can make yourself useful there. I will count "
-                     + "each further "
-                     + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
-                     + " that grows to your favor.\n")
+         world_db["FAVOR_STAGE"] = 1
+         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
+                      + "\"I don't trust you. You intrude on the island's "
+                      + "affairs. I think you're a nuisance at best, and a "
+                      + "danger to my children at worst. I will give you a "
+                      + "chance to lighten my mood, however: For a while now, "
+                      + "I've been trying to spread the plant "
+                      + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+                      + " (\""
+                      + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
+                      + "\"). I have not been very successful so far. Maybe "
+                      + "you can make yourself useful there. I will count "
+                      + "each further "
+                      + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+                      + " that grows to your favor.\n")
+     elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
+         world_db["FAVOR_STAGE"] = 2
+         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
+                      + "\"You could have done worse so far. Maybe you are not "
+                      + "the worst to happen to this island since the metal "
+                      + "birds threw the great lightning ball. Maybe you can "
+                      + "help me spread another plant. It multiplies faster, "
+                      + "and it is highly nutritious: "
+                      + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
+                      + " (\""
+                      + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"]
+                      + "\"). It is new. I give you the only example. Be very "
+                      + "careful with it! I also give you another tool that "
+                      + "might be helpful.\n")
+         id = id_setter(-1, "Things")
+         world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
+                                            world_db["altar"])
+         id = id_setter(-1, "Things")
+         world_db["Things"][id] = new_Thing(world_db["TOOL_0"],
+                                            world_db["altar"])
+     elif world_db["FAVOR_STAGE"] == 2 and \
+          0 == len([id for id in world_db["Things"]
+                   if world_db["Things"][id]["T_TYPE"]
+                      == world_db["PLANT_1"]]):
+         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
+                      + "\"I am greatly disappointed that you lost all "
+                      + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
+                      + " this island had. Here is another one. It cost me "
+                      + " great work. Be more careful this time.\n")
+         id = id_setter(-1, "Things")
+         world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
+                                            world_db["altar"])
+         add_gods_favor(-250)
      elif world_db["GOD_FAVOR"] > 9000:
          world_db["FAVOR_STAGE"] = 9001
          strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
@@ -950,7 +983,7 @@ def actor_use(t):
 
 
 def thingproliferation(t, prol_map):
-    """To chance of 1/TT_PROLIFERATE,create  t offspring in open neighbor cell.
+    """To chance of 1/TT_PROLIFERATE, create t offspring in open neighbor cell.
 
     Naturally only works with TT_PROLIFERATE > 0. The neighbor cell must be be
     marked "." in prol_map. If there are several map cell candidates, one is
@@ -975,8 +1008,10 @@ def thingproliferation(t, prol_map):
             world_db["Things"][id] = newT
             world_db["GOD_MOOD"] += 1  # #
             if (world_db["FAVOR_STAGE"] > 0  # #
-                and t["T_TYPE"] == world_db["PLANT_0"]):
-                world_db["GOD_FAVOR"] += 5
+                and t["T_TYPE"] == world_db["PLANT_0"]):  # #
+                world_db["GOD_FAVOR"] += 5  # #
+            elif t["T_TYPE"] == world_db["PLANT_1"]:  # #
+                world_db["GOD_FAVOR"] += 25  # #
 
 
 def try_healing(t):
@@ -1507,15 +1542,10 @@ def command_makeworld(seed_string):
     if not wait_action:
         print("Ignoring: No thing action with name 'wait' defined.")
         return
-    if not world_db["SLIPPERS"] in world_db["ThingTypes"]:  # #
-        print("Ignoring: No valid SLIPPERS set.")  # #
-        return  # #
-    if not world_db["PLANT_0"] in world_db["ThingTypes"]:  # #
-        print("Ignoring: No valid PLANT_0 set.")  # #
-        return  # #
-    if not world_db["LUMBER"] in world_db["ThingTypes"]:  # #
-        print("Ignoring: No valid LUMBER set.")  # #
-        return  # #
+    for name in specials:  # #
+        if world_db[name] not in world_db["ThingTypes"]:  # #
+            print("Ignoring: No valid " + name + " set.")  # #
+            return  # #
     world_db["Things"] = {}
     make_map()
     world_db["WORLD_ACTIVE"] = 1
@@ -1556,8 +1586,7 @@ def command_worldactive(worldactive_string):
     map. On activation, rebuild all Things' FOVs, and the player's map memory.
     Also call log_help().
     """
-    # 7DRL: altar must be on map, and (valid) SLIPPERS and PLANT_0 and LUMBER
-    # must be set for world activation.
+    # 7DRL: altar must be on map, and specials must be set for active world.
     val = integer_test(worldactive_string, 0, 1)
     if None != val:
         if 0 != world_db["WORLD_ACTIVE"]:
@@ -1576,9 +1605,10 @@ def command_worldactive(worldactive_string):
                 if 0 == Thing:
                     player_exists = True
                     break
-            valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]  # #
-            valid_plant0 = world_db["PLANT_0"] in world_db["ThingTypes"]  # #
-            valid_lumber = world_db["PLANT_0"] in world_db["ThingTypes"]  # #
+            specials_set = True  # #
+            for name in specials:  # #
+                if world_db[name] not in world_db["ThingTypes"]:  # #
+                    specials_set = False  # #
             altar_found = False  # #
             if world_db["MAP"]:  # #
                 pos = world_db["MAP"].find(b'_')  # #
@@ -1587,9 +1617,8 @@ def command_worldactive(worldactive_string):
                     x = pos % world_db["MAP_LENGTH"]  # #
                     world_db["altar"] = (y, x)  # #
                     altar_found = True  # #
-            if (wait_exists and player_exists and world_db["MAP"]
-                and altar_found and valid_slippers and valid_plant0  # #
-                and valid_lumber):  # #
+            if wait_exists and player_exists and world_db["MAP"] \
+               and specials_set:  # #
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -1604,37 +1633,17 @@ def command_worldactive(worldactive_string):
                 print("Ignoring: Not all conditions for world activation met.")
 
 
-def command_slippers(str_int):  # #
-    """Set SLIPPERS, but deactivate world if not in ThingTypes."""
-    val = integer_test(str_int, 0)
-    if None != val:
-        world_db["SLIPPERS"] = val
-        if world_db["WORLD_ACTIVE"] and \
-           world_db["SLIPPERS"] not in world_db["ThingTypes"]:
-            world_db["WORLD_ACTIVE"] = 0
-            print("SLIPPERS matches no known ThingTypes, deactivating world.")
-
-
-def command_plant0(str_int):  # #
-    """Set PLANT_0, but deactivate world if not in ThingTypes."""
-    val = integer_test(str_int, 0)
-    if None != val:
-        world_db["PLANT_0"] = val
-        if world_db["WORLD_ACTIVE"] and \
-           world_db["PLANT_0"] not in world_db["ThingTypes"]:
-            world_db["WORLD_ACTIVE"] = 0
-            print("PLANT_0 matches no known ThingTypes, deactivating world.")
-
-
-def command_lumber(str_int):  # #
-    """Set LUMBER, but deactivate world if not in ThingTypes."""
-    val = integer_test(str_int, 0)
-    if None != val:
-        world_db["LUMBER"] = val
-        if world_db["WORLD_ACTIVE"] and \
-           world_db["LUMBER"] not in world_db["ThingTypes"]:
-            world_db["WORLD_ACTIVE"] = 0
-            print("LUMBER matches no known ThingTypes, deactivating world.")
+def specialtypesetter(name):  # #
+    """Setter world_db[name], deactivating world if set int no ThingType."""
+    def helper(str_int):
+        val = integer_test(str_int, 0)
+        if None != val:
+            world_db[name] = val
+            if world_db["WORLD_ACTIVE"] \
+               and world_db[name] not in world_db["ThingTypes"]:
+                world_db["WORLD_ACTIVE"] = 0
+                print(name + " fits no known ThingType, deactivating world.")
+    return helper
 
 
 def test_for_id_maker(object, category):
@@ -1917,9 +1926,11 @@ commands_db = {
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "MAP": (2, False, setter_map("MAP")),
     "FAVOR_STAGE": (1, False, setter(None, "FAVOR_STAGE", 0, 65535)),  # #
-    "SLIPPERS": (1, False, command_slippers),  # #
-    "PLANT_0": (1, False, command_plant0),  # #
-    "LUMBER": (1, False, command_lumber),  # #
+    "SLIPPERS": (1, False, specialtypesetter("SLIPPERS")),  # #
+    "PLANT_0": (1, False, specialtypesetter("PLANT_0")),  # #
+    "PLANT_1": (1, False, specialtypesetter("PLANT_1")),  # #
+    "LUMBER": (1, False, specialtypesetter("LUMBER")),  # #
+    "TOOL_0": (1, False, specialtypesetter("TOOL_0")),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
     "TA_NAME": (1, False, command_taname),
@@ -1971,11 +1982,17 @@ world_db = {
     "FAVOR_STAGE": 0,  # #
     "SLIPPERS": 0,  # #
     "PLANT_0": 0,  # #
+    "PLANT_1": 0,  # #
     "LUMBER": 0,  # #
+    "TOOL_0": 0,  # #
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
 }
+
+# 7DRL-specific!
+"""Special type settings."""
+specials = ["SLIPPERS", "PLANT_0", "PLANT_1", "LUMBER", "TOOL_0"]  # #
 
 """Mapping of direction names to internal direction chars."""
 directions_db = {"east": "d", "south-east": "c", "south-west": "x",
