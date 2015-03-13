@@ -1426,6 +1426,7 @@ def command_quit():
 
 def command_thingshere(str_y, str_x):
     """Write to out file list of Things known to player at coordinate y, x."""
+    # 7DRL: terrain, too
     if world_db["WORLD_ACTIVE"]:
         y = integer_test(str_y, 0, 255)
         x = integer_test(str_x, 0, 255)
@@ -1433,6 +1434,20 @@ def command_thingshere(str_y, str_x):
         if None != y and None != x and y < length and x < length:
             pos = (y * world_db["MAP_LENGTH"]) + x
             strong_write(io_db["file_out"], "THINGS_HERE START\n")
+            pos = y * world_db["MAP_LENGTH"] + x;  # #
+            if world_db["Things"][0]["T_MEMMAP"][pos] == ord("~"):  # #
+                name = "(terrain: SEA)"  # #
+            elif world_db["Things"][0]["T_MEMMAP"][pos] == ord("."):  # #
+                name = "(terrain: EARTH)"  # #
+            elif world_db["Things"][0]["T_MEMMAP"][pos] == ord(":"):  # #
+                name = "(terrain: SOIL)"  # #
+            elif world_db["Things"][0]["T_MEMMAP"][pos] == ord("X"):  # #
+                name = "(terrain: TREE)"  # #
+            elif world_db["Things"][0]["T_MEMMAP"][pos] == ord("|"):  # #
+                name = "(terrain: WALL)"  # #
+            elif world_db["Things"][0]["T_MEMMAP"][pos] == ord("_"):  # #
+                name = "(terrain: ALTAR)"  # #
+            strong_write(io_db["file_out"], name + "\n")  # #
             if "v" == chr(world_db["Things"][0]["fovmap"][pos]):
                 for id in world_db["Things"]:
                     if y == world_db["Things"][id]["T_POSY"] \
