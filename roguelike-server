@@ -809,7 +809,8 @@ def actor_move(t):
                     strong_write(io_db["file_out"], "LOG With your "  # #
                                                     + axe_name  # #
                                                     + ", you chop!\n")  # #
-                    add_gods_favor(-1)  # #
+                    if ord("X") == world_db["MAP"][pos]:  # #
+                        add_gods_favor(-1)  # #
                 chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
                 case_X = world_db["MAP"][pos] == ord("X")  # #
                 if (chop_power > 0  # #
@@ -820,7 +821,8 @@ def actor_move(t):
                     if t == world_db["Things"][0]:  # #
                         strong_write(io_db["file_out"],  # #
                                      "LOG You chop it down.\n")  # #
-                    add_gods_favor(-10)  # #
+                    if world_db["MAP"][pos] == ord("X"):  # #
+                        add_gods_favor(-10)  # #
                     world_db["MAP"][pos] = ord(".")   # #
                     i = 3 if case_X else 1  # #
                     for i in range(i):  # #
