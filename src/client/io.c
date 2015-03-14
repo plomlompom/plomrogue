@@ -197,7 +197,8 @@ static uint8_t read_worldstate()
     world.map.length = (uint16_t) read_value_from_line(read_buf, linemax, file);
     read_map_cells(file, &world.map.cells);
     read_map_cells(file, &world.mem_map);
-    read_map_cells(file, &world.stacks_map);  //
+    read_map_cells(file, &world.meta_map_0);  //
+    read_map_cells(file, &world.meta_map_1);  //
     free(read_buf);
     try_fclose(file, __func__);
     return 1;

@@ -360,7 +360,7 @@ def try_worldstate_update():
              mem[(mt[1] * length) + mt[2]] = ord(c)
         string = write_map(string, mem)
 
-        stacksmap = bytearray(b'0' * (length ** 2))  # #
+        metamapA = bytearray(b'0' * (length ** 2))  # #
         for id in [id for id in world_db["Things"]  # #
                       if not world_db["Things"][id]["carried"]  # #
                       if world_db["Things"][id]["T_LIFEPOINTS"]  # #
@@ -379,15 +379,33 @@ def try_worldstate_update():
                      add = 2  # #
                 elif hp > third_of_hp:  # #
                     add = 1  # #
-                stacksmap[pos] = ord('a') + add # #
+                metamapA[pos] = ord('a') + add # #
             else:  # #
-                stacksmap[pos] = ord('X')  # #
+                metamapA[pos] = ord('X')  # #
         for mt in world_db["Things"][0]["T_MEMTHING"]:  # #
             pos = mt[1] * length + mt[2]  # #
-            if stacksmap[pos] < ord('2'):  # #
-                stacksmap[pos] += 1  # #
-        string = write_map(string, stacksmap)  # #
+            if metamapA[pos] < ord('2'):  # #
+                metamapA[pos] += 1  # #
+        string = write_map(string, metamapA)  # #
         
+        metamapB = bytearray(b' ' * (length ** 2))  # #
+        for id in [id for id in world_db["Things"]  # #
+                      if not world_db["Things"][id]["carried"]  # #
+                      if world_db["Things"][id]["T_LIFEPOINTS"]  # #
+                      if world_db["Things"][0]["fovmap"][  # #
+                           world_db["Things"][id]["T_POSY"] * length  # #
+                           + world_db["Things"][id]["T_POSX"]] == ord_v]:  # #
+            pos = (world_db["Things"][id]["T_POSY"] * length  # #
+                  + world_db["Things"][id]["T_POSX"])  # #
+            if id == 0 or world_db["EMPATHY"]:  # #
+                action = world_db["Things"][id]["T_COMMAND"]  # #
+                if 0 != action:  # #
+                    name = world_db["ThingActions"][action]["TA_NAME"]  # #
+                else:  # #
+                    name = " "  # #
+                metamapB[pos] = ord(name[0]) # #
+        string = write_map(string, metamapB)  # #
+
         atomic_write(io_db["path_worldstate"], string, delete=False)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
         io_db["worldstate_updateable"] = False

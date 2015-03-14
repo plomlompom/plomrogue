@@ -387,10 +387,10 @@ extern void draw_win_map(struct Win * win)
     init_pair(2, COLOR_BLUE, COLOR_WHITE); //
     init_pair(3, COLOR_RED, COLOR_WHITE); //
     init_pair(4, COLOR_WHITE, COLOR_BLUE); //
-    init_pair(5, COLOR_WHITE, COLOR_RED); //
+    init_pair(5, COLOR_BLUE, COLOR_RED); //
     init_pair(6, COLOR_BLACK, COLOR_RED); //
-    init_pair(7, COLOR_WHITE, COLOR_GREEN); //
-    init_pair(8, COLOR_WHITE, COLOR_YELLOW); //
+    init_pair(7, COLOR_BLUE, COLOR_GREEN); //
+    init_pair(8, COLOR_BLUE, COLOR_YELLOW); //
     init_pair(9, COLOR_BLACK, COLOR_MAGENTA); //
     init_pair(18, COLOR_WHITE, COLOR_CYAN); //
     init_pair(10, COLOR_BLACK, COLOR_CYAN); //
@@ -430,7 +430,7 @@ extern void draw_win_map(struct Win * win)
             char c = world.mem_map[y*world.map.length + x];
             set_ch_on_yx(win, y, x * 2 + (y % 2),     c   | a);
             chtype depth = ' ' | a;  //
-            if (world.stacks_map[y * world.map.length + x] == '2')  //
+            if (world.meta_map_0[y * world.map.length + x] == '2')  //
             {  //
                 depth = '+' | col_mem; //
             }  //
@@ -503,25 +503,29 @@ extern void draw_win_map(struct Win * win)
                 } //
                 // char c = world.map.cells[y*world.map.length + x];
                 set_ch_on_yx(win, y, x * 2 + (y % 2),     c | a); //
-                chtype depth = ' ' | a;  //
-                char stacksmapval = world.stacks_map[y*world.map.length+x]; //
-                if (stacksmapval == '2')  //
+                chtype meta = ' ' | a;  //
+                char metamap0val = world.meta_map_0[y*world.map.length+x]; //
+                if (metamap0val == '2')  //
                 {  //
-                    depth = '+' | col_stack;  //
+                    meta = '+' | col_stack;  //
                 }  //
-                else if (stacksmapval == 'a') //
+                else if (metamap0val != '0' && metamap0val != '1') //
                 { //
-                    depth = ' ' | col_health_bad; //
+                    char c = world.meta_map_1[y*world.map.length+x];
+                    if (metamap0val == 'a') //
+                    { //
+                        meta = c | col_health_bad; //
+                    } //
+                    else if (metamap0val == 'b') //
+                    { //
+                        meta = c | col_health_middle; //
+                    } //
+                    else if (metamap0val == 'c') //
+                    { //
+                        meta = c | col_health_good; //
+                    } //
                 } //
-                else if (stacksmapval == 'b') //
-                { //
-                    depth = ' ' | col_health_middle; //
-                } //
-                else if (stacksmapval == 'c') //
-                { //
-                    depth = ' ' | col_health_good; //
-                } //
-                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, depth); //
+                set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, meta); //
                 // set_ch_on_yx(win, y, x * 2 + (y % 2),     c);
                 // set_ch_on_yx(win, y, x * 2 + (y % 2) + 1, ' ');
             }
