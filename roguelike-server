@@ -1097,16 +1097,15 @@ def get_dir_to_target(t, filter):
     The path-wise nearest target is chosen, via the shortest available path.
     Target must not be t. On succcess, return positive value, else False.
     Filters:
-    "a": Thing in FOV is below a certain distance, animate, but of ThingType
-         that is not t's, and starts out weaker than t is; build path as
-         avoiding things of t's ThingType
-    "f": neighbor cell (not inhabited by any animate Thing) further away from
-         animate Thing not further than x steps away and in FOV and of a
-         ThingType that is not t's, and starts out stronger or as strong as t
-         is currently; or (cornered), if no such flight cell, but Thing of
-         above criteria is too near,1 a cell closer to it, or, if less near,
-         just wait
-    "c": Thing in memorized map is consumable
+    "a": Thing in FOV is animate, but of ThingType, starts out weaker than t
+         is, and its corpse would be healthy food for t
+    "f": move away from an enemy – any visible actor whose thing type has more
+         TT_LIFEPOINTS than t LIFEPOINTS, and might find t's corpse healthy
+         food – if it is closer than n steps, where n will shrink as t's hunger
+         grows; if enemy is too close, move towards (attack) the enemy instead;
+         if no fleeing is possible, nor attacking useful, wait; don't tread on
+         non-enemies for fleeing
+    "c": Thing in memorized map is consumable of sufficient nutrition for t
     "s": memory map cell with greatest-reachable degree of unexploredness
     """
 
@@ -1120,6 +1119,11 @@ def get_dir_to_target(t, filter):
             raise RuntimeError("No score map allocated for "
                                "zero_score_map_where_char_on_memdepthmap().")
 
+    def set_map_score_at_thingpos(id, score):
+        pos = world_db["Things"][id]["T_POSY"] * world_db["MAP_LENGTH"] \
+                                     + world_db["Things"][id]["T_POSX"]
+        set_map_score(pos, score)
+
     def set_map_score(pos, score):
         test = libpr.set_map_score(pos, score)
         if test:
@@ -1131,21 +1135,43 @@ def get_dir_to_target(t, filter):
             raise RuntimeError("No score map allocated for get_map_score().")
         return result
 
+    def animate_in_fov(Thing):
+        if Thing["carried"] or Thing == t or not Thing["T_LIFEPOINTS"]:
+            return False
+        pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] + Thing["T_POSX"]
+        if ord("v") == t["fovmap"][pos]:
+            return True
+
+    def good_attack_target(v):
+        eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
+        type = world_db["ThingTypes"][v["T_TYPE"]]
+        type_corpse = world_db["ThingTypes"][type["TT_CORPSE_ID"]]
+        if t["T_LIFEPOINTS"] > type["TT_LIFEPOINTS"] \
+        and type_corpse["TT_TOOL"] == "food" \
+        and type_corpse["TT_TOOLPOWER"] > eat_cost:
+            return True
+        return False
+
+    def good_flee_target(m):
+        own_corpse_id = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
+        corpse_type = world_db["ThingTypes"][own_corpse_id]
+        targetness = 0 if corpse_type["TT_TOOL"] != "food" \
+                       else corpse_type["TT_TOOLPOWER"]
+        type = world_db["ThingTypes"][m["T_TYPE"]]
+        if t["T_LIFEPOINTS"] < type["TT_LIFEPOINTS"] \
+        and targetness > eat_vs_hunger_threshold(m["T_TYPE"]):
+            return True
+        return False
+
     def seeing_thing():
-        if t["fovmap"] and ("a" == filter or "f" == filter):
+        if t["fovmap"] and "a" == filter:
             for id in world_db["Things"]:
-                Thing = world_db["Things"][id]
-                if Thing != t and Thing["T_LIFEPOINTS"] and \
-                   t["T_TYPE"] != Thing["T_TYPE"] and \
-                   'v' == chr(t["fovmap"][(Thing["T_POSY"]
-                                          * world_db["MAP_LENGTH"])
-                                          + Thing["T_POSX"]]):
-                    ThingType = world_db["ThingTypes"][Thing["T_TYPE"]]
-                    if ("f" == filter and ThingType["TT_LIFEPOINTS"] >=
-                                          t["T_LIFEPOINTS"]) \
-                       or ("a" == filter and ThingType["TT_LIFEPOINTS"] <
-                                             t["T_LIFEPOINTS"]):
-                        return True
+                if animate_in_fov(world_db["Things"][id]):
+                    return good_attack_target(world_db["Things"][id])
+        elif t["fovmap"] and "f" == filter:
+            for id in world_db["Things"]:
+                if animate_in_fov(world_db["Things"][id]):
+                    return good_flee_target(world_db["Things"][id])
         elif t["T_MEMMAP"] and "c" == filter:
             eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
             for mt in t["T_MEMTHING"]:
@@ -1178,28 +1204,14 @@ def get_dir_to_target(t, filter):
         set_cells_passable_on_memmap_to_65534_on_scoremap()
         if "a" == filter:
             for id in world_db["Things"]:
-                Thing = world_db["Things"][id]
-                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] \
-                      + Thing["T_POSX"]
-                if t != Thing and Thing["T_LIFEPOINTS"] and \
-                   t["T_TYPE"] != Thing["T_TYPE"] and \
-                   ord_v == t["fovmap"][pos] and \
-                   t["T_LIFEPOINTS"] > \
-                   world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
-                    set_map_score(pos, 0)
-                elif t["T_TYPE"] == Thing["T_TYPE"]:
-                    set_map_score(pos, 65535)
+                if animate_in_fov(world_db["Things"][id]) \
+                and good_attack_target(world_db["Things"][id]):
+                    set_map_score_at_thingpos(id, 0)
         elif "f" == filter:
-            for id in [id for id in world_db["Things"]
-                       if world_db["Things"][id]["T_LIFEPOINTS"]]:
-                Thing = world_db["Things"][id]
-                pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] \
-                      + Thing["T_POSX"]
-                if t["T_TYPE"] != Thing["T_TYPE"] and \
-                   ord_v == t["fovmap"][pos] and \
-                   t["T_LIFEPOINTS"] <= \
-                   world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
-                    set_map_score(pos, 0)
+            for id in world_db["Things"]:
+                if animate_in_fov(world_db["Things"][id]) \
+                and good_flee_target(world_db["Things"][id]):
+                    set_map_score_at_thingpos(id, 0)
         elif "c" == filter:
             eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
             for mt in [mt for mt in t["T_MEMTHING"]
@@ -1212,6 +1224,16 @@ def get_dir_to_target(t, filter):
                 set_map_score(mt[1] * world_db["MAP_LENGTH"] + mt[2], 0)
         elif "s" == filter:
             zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
+        if "a" != filter:
+            for id in world_db["Things"]:
+                if animate_in_fov(world_db["Things"][id]):
+                    if "f" == filter:
+                        pos = world_db["Things"][id]["T_POSY"] \
+                              * world_db["MAP_LENGTH"] \
+                              + world_db["Things"][id]["T_POSX"]
+                        if 0 == get_map_score(pos):
+                            continue
+                    set_map_score_at_thingpos(id, 65535)
 
     def rand_target_dir(neighbors, cmp, dirs):
         candidates = []
@@ -1236,19 +1258,6 @@ def get_dir_to_target(t, filter):
         dirs = "edcxsw"
         eye_pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
         neighbors = get_neighbor_scores(dirs, eye_pos)
-        if "f" == filter:
-            inhabited = [world_db["Things"][id]["T_POSY"]
-                         * world_db["MAP_LENGTH"]
-                         + world_db["Things"][id]["T_POSX"]
-                         for id in world_db["Things"]
-                         if world_db["Things"][id]["T_LIFEPOINTS"]]
-            for i in range(len(dirs)):
-                mv_yx_in_dir_legal(dirs[i], t["T_POSY"], t["T_POSX"])
-                pos_cmp = libpr.result_y() * world_db["MAP_LENGTH"] \
-                          + libpr.result_x()
-                for pos in [pos for pos in inhabited if pos == pos_cmp]:
-                    neighbors[i] = 65535
-                    break
         minmax_start = 0 if "f" == filter else 65535 - 1
         minmax_neighbor = minmax_start
         for i in range(len(dirs)):
@@ -1259,19 +1268,23 @@ def get_dir_to_target(t, filter):
         if minmax_neighbor != minmax_start:
             dir_to_target = rand_target_dir(neighbors, minmax_neighbor, dirs)
         if "f" == filter:
+            distance = get_map_score(eye_pos)
+            fear_distance = world_db["MAP_LENGTH"]
+            if t["T_SATIATION"] < 0 and math.sqrt(-t["T_SATIATION"]) > 0:
+                fear_distance = fear_distance / math.sqrt(-t["T_SATIATION"])
+            attack_distance = 1
             if not dir_to_target:
-                if 1 == get_map_score(eye_pos):
-                    dir_to_target = rand_target_dir(neighbors, 0, dirs)
-                elif 3 >= get_map_score(eye_pos):
+                if attack_distance >= distance:
+                    dir_to_target = rand_target_dir(neighbors,
+                                                    distance - 1, dirs)
+                elif fear_distance >= distance:
                     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                                       if
                                       world_db["ThingActions"][id]["TA_NAME"]
                                          == "wait"][0]
                     return 1
-            elif dir_to_target and 3 < get_map_score(eye_pos):
+            elif dir_to_target and fear_distance < distance:
                 dir_to_target = 0
-        elif "a" == filter and 10 <= get_map_score(eye_pos):
-            dir_to_target = 0
         return dir_to_target
 
     dir_to_target = False
@@ -1330,38 +1343,46 @@ def get_inventory_slot_to_consume(t):
 
 
 def ai(t):
-    """Determine next command/argment for actor t via AI algorithms.
-
-    AI will look for, and move towards, enemies (animate Things not of their
-    own ThingType); if they see none, they will consume consumables in their
-    inventory; if there are none, they will pick up what they stand on if they
-    stand on consumables; if they stand on none, they will move towards the
-    next consumable they see or remember on the map; if they see or remember
-    none, they will explore parts of the map unseen since ever or for at least
-    one turn; if there is nothing to explore, they will simply wait.
-    """
+    """Determine next command/argment for actor t via AI algorithms."""
     # 7DRL add: Don't pick up or search things when inventory is full.
+    if t == world_db["Things"][0]:
+         log("%AI------")
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
-    if not get_dir_to_target(t, "f"):
-        sel = get_inventory_slot_to_consume(t)
-        if -1 != sel:
+    if get_dir_to_target(t, "f"):
+        if t == world_db["Things"][0]:
+            log("%FLEE")
+        return
+    sel = get_inventory_slot_to_consume(t)
+    if -1 != sel:
+        if t == world_db["Things"][0]:
+            log("%EAT")
+        t["T_COMMAND"] = [id for id in world_db["ThingActions"]
+                          if world_db["ThingActions"][id]["TA_NAME"]
+                             == "use"][0]
+        t["T_ARGUMENT"] = sel
+    elif standing_on_food(t):
+        if t == world_db["Things"][0]:
+            log("%STANDINGON")
+        if  (len(t["T_CARRIES"]) <  # #
+             world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]):  # #
+            if t == world_db["Things"][0]:
+                log("%(pickingup)")
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
-                              if world_db["ThingActions"][id]["TA_NAME"]
-                                 == "use"][0]
-            t["T_ARGUMENT"] = sel
-        elif standing_on_food(t) \
-             and (len(t["T_CARRIES"]) < # #
-                 world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]): # #
-            t["T_COMMAND"] = [id for id in world_db["ThingActions"]
-                              if world_db["ThingActions"][id]["TA_NAME"]
+                                 if world_db["ThingActions"][id]["TA_NAME"]
                                  == "pick_up"][0]
-        elif (not
-              (len(t["T_CARRIES"]) < # #
-                world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"] # #
-               and get_dir_to_target(t, "c"))) and \
-             (not get_dir_to_target(t, "a")):
-            get_dir_to_target(t, "s")
+    else:
+        if t == world_db["Things"][0]:
+            log("%AIMING_FOR_FOOD")
+        going_to_known_food_spot = get_dir_to_target(t, "c")
+        if not going_to_known_food_spot:
+            if t == world_db["Things"][0]:
+                log("%AIMING_FOR_WALKING_FOOD")
+            aiming_for_walking_food = get_dir_to_target(t, "a")
+            if not aiming_for_walking_food:
+                if t == world_db["Things"][0]:
+                    log("%SEARCHING")
+                get_dir_to_target(t, "s")
 
 
 def turn_over():
