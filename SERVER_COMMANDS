@@ -169,8 +169,10 @@ Set selected thing's lifepoints to argument.
 T_SATIATION [-32768 to 32767]
 Set selected thing's satiation score. If above zero, and thing's lifepoints are
 below its thing type's initial lifepoints, there is a 1/32 chance each turn of
-waiting action that the thing's lifepoints will rise. For values affecting the
-thing's lifepoints negatively, see note on TT_LIFEPOINTS.
+waiting action that the thing's lifepoints will rise. Each turn, there is a
+chance of hitpoint loss that grows with the satiation score's absolute value.
+Each turn, T_SATIATION lessens by the square root of the thing's type's start
+hitpoints (see TT_LIFEPOINTS).
 
 T_CARRIES [0 to 255]
 Add thing of ID in argument to inventory of selected thing, if said thing is
@@ -209,14 +211,8 @@ MAKE_WORLD command to argument.
 
 TT_LIFEPOINTS [0-255]
 Set selected thing type's initial lifepoints value to argument. Things of 0
-lifepoints are considered inanimate, otherwise animate. This value also sets the
-degree to which the selected type's things suffer from under- or over-satiation:
-If 0, not at all. Else, it defines a stomach size value of 32767 divided by it.
-Each turn a thing of the given type may then suffer a lifepoint decrement to the
-chance of the rounded down quotient of its satiation score's absolute value by
-its stomach size value, then again divided by the latter. (This means that the
-change is always zero when the absolute value of the satiation score is lower
-than the stomach size value.)
+lifepoints are considered inanimate, otherwise animate. The square root of this
+is the amount things of the type suffer satiation score loss each turn.
 
 TT_SYMBOL [char]
 Set to argument symbol by which things of the selected type are represented on

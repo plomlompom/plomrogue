@@ -1091,12 +1091,9 @@ def try_healing(t):
 def hunger(t):
     """Decrement t's satiation,dependent on it trigger lifepoint dec chance."""
     if t["T_SATIATION"] > -32768:
-        t["T_SATIATION"] -= 1
-    if not world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]:
-        raise RuntimeError("A thing that should not hunger is hungering.")
-    stomach = int(32767 / world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"])
-    if int(int(abs(t["T_SATIATION"]) / stomach)
-           / ((rand.next() % stomach) + 1)):
+        max_hp = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
+        t["T_SATIATION"] -= int(math.sqrt(max_hp))
+    if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
         if t == world_db["Things"][0]:
             if t["T_SATIATION"] < 0:
                 strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
