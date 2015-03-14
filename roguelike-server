@@ -1310,16 +1310,20 @@ def standing_on_food(t):
 
 
 def get_inventory_slot_to_consume(t):
-    """Return slot Id of strongest consumable in t's inventory, else -1."""
-    cmp_food = 0
+    """Return slot Id of healthiest consumable in t's inventory, else -1."""
+    cmp_food = -1
     selection = -1
     i = 0
     for id in t["T_CARRIES"]:
         type = world_db["Things"][id]["T_TYPE"]
         if world_db["ThingTypes"][type]["TT_TOOL"] == "food" \
-           and world_db["ThingTypes"][type]["TT_TOOLPOWER"] > cmp_food:
-            cmp_food = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-            selection = i
+           and world_db["ThingTypes"][type]["TT_TOOLPOWER"]:
+            nutvalue = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
+            tmp_cmp = abs(t["T_SATIATION"] + nutvalue)
+            if (cmp_food < 0 and tmp_cmp < abs(t["T_SATIATION"])) \
+            or tmp_cmp < cmp_food:
+                cmp_food = tmp_cmp
+                selection = i
         i += 1
     return selection
 
