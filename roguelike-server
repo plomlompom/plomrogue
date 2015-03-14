@@ -1098,7 +1098,11 @@ def hunger(t):
     stomach = int(32767 / world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"])
     if int(int(testbase / stomach) / ((rand.next() % stomach) + 1)):
         if t == world_db["Things"][0]:
-            strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
+            if t["T_SATIATION"] < 0:
+                strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
+            else:
+                strong_write(io_db["file_out"],
+                             "LOG You suffer from over-eating.\n")
         decrement_lifepoints(t)
 
 
