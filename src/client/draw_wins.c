@@ -440,7 +440,7 @@ extern void draw_win_map(struct Win * win)
     attr_t col_plant = COLOR_PAIR(11); //
     attr_t col_altar = COLOR_PAIR(10); //
     attr_t col_tool = COLOR_PAIR(16); //
-    attr_t col_dirt = COLOR_PAIR(17); //
+    attr_t col_corpse = COLOR_PAIR(17); //
     attr_t col_unkraut = COLOR_PAIR(14); //
     attr_t col_animal = COLOR_PAIR(6); //
     attr_t col_player = COLOR_PAIR(3); //
@@ -477,11 +477,11 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = col_unkraut; //
                 } //
-                else if ('$' == c) //
+                else if ('$' == c || '%' == c || ';' == c || '&' == c) //
                 { //
-                    a = col_dirt; //
+                    a = col_corpse; //
                 } //
-                else if ('m' == c || '/' == c || '-' == c) //
+                else if ('/' == c || '-' == c) //
                 { //
                     a = col_tool; //
                 } //
@@ -493,7 +493,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = col_altar; //
                 } //
-                else if ('%' == c || '*' == c) //
+                else if (']' == c || '*' == c) //
                 { //
                     a = col_plant; //
                 } //
