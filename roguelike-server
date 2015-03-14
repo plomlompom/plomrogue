@@ -99,6 +99,11 @@ def cleanup_server_io():
         io_db["file_record"].close()
 
 
+def log(msg):
+    """Send "msg" to log."""
+    strong_write(io_db["file_out"], "LOG " + msg + "\n")
+
+
 def obey(command, prefix, replay=False, do_record=False):
     """Call function from commands_db mapped to command's first token.
 
@@ -650,20 +655,14 @@ def build_fov_map(t):
 
 def log_help():
     """Send quick usage info to log."""
-    strong_write(io_db["file_out"], "LOG "
-                 + "Use 'w'/'e'/'s'/'d'/'x'/'c' to move, and 'w' to wait.\n")
-    strong_write(io_db["file_out"], "LOG "
-                 + "Use 'p' to pick up objects, and 'D' to drop them.\n")
-    strong_write(io_db["file_out"], "LOG "
-                 + "Some objects can be used (such as: eaten) by 'u' if "
-                 + "they are in your inventory. "
-                 + "Use 'Up'/'Down' to navigate the inventory.\n")
-    strong_write(io_db["file_out"], "LOG "
-                 + "Use 'l' to toggle 'look' mode (move an exploration cursor "
-                 + "instead of the player over the map).\n")
-    strong_write(io_db["file_out"], "LOG "
-                 + "Use 'PgUp'/PgDn' to scroll the 'Things here' window.\n")
-    strong_write(io_db["file_out"], "LOG See README file for more details.\n")
+    log("Use 'w'/'e'/'s'/'d'/'x'/'c' to move, and 'w' to wait.")
+    log("Use 'p' to pick up objects, and 'D' to drop them.")
+    log("Some objects can be used (such as: eaten) by 'u' if they are in "
+        + "your inventory. Use 'Up'/'Down' to navigate the inventory.")
+    log("Use 'l' to toggle 'look' mode (move an exploration cursor instead of "
+        + "the player over the map).")
+    log("Use 'PgUp'/PgDn' to scroll the 'Things here' window.")
+    log("See README file for more details.")
 
 
 def decrement_lifepoints(t):
@@ -688,9 +687,8 @@ def decrement_lifepoints(t):
         t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
         if world_db["Things"][0] == t:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            strong_write(io_db["file_out"], "LOG You die.\n")
-            strong_write(io_db["file_out"],
-                         "LOG See README on how to start over.\n")
+            log("You die.")
+            log("See README on how to start over.")
         else:
             t["fovmap"] = False
             t["T_MEMMAP"] = False
@@ -732,40 +730,33 @@ def mv_yx_in_dir_legal(dir, y, x):
 def enter_altar():  # #
      """What happens when the player enters the altar."""
      if world_db["FAVOR_STAGE"] > 9000:
-        strong_write(io_db["file_out"],
-                     "LOG You step on a soul-less slab of stone.\n")
+        log("You step on a soul-less slab of stone.")
         return
-     strong_write(io_db["file_out"], "LOG YOU ENTER SACRED GROUND.\n")
+     log("YOU ENTER SACRED GROUND.")
      if world_db["FAVOR_STAGE"] == 0:
          world_db["FAVOR_STAGE"] = 1
-         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
-                      + "\"I don't trust you. You intrude on the island's "
-                      + "affairs. I think you're a nuisance at best, and a "
-                      + "danger to my children at worst. I will give you a "
-                      + "chance to lighten my mood, however: For a while now, "
-                      + "I've been trying to spread the plant "
-                      + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
-                      + " (\""
-                      + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
-                      + "\"). I have not been very successful so far. Maybe "
-                      + "you can make yourself useful there. I will count "
-                      + "each further "
-                      + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
-                      + " that grows to your favor.\n")
+         log("The Island God speaks to you: \"I don't trust you. You intrude "
+              + "on the island's affairs. I think you're a nuisance at best, "
+              + "and a danger to my children at worst. I will give you a "
+              + "chance to lighten my mood, however: For a while now, I've "
+              + "been trying to spread the plant "
+              + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"] + " (\""
+              + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
+              + "\"). I have not been very successful so far. Maybe you can "
+              + "make yourself useful there. I will count each further "
+              + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+              + " that grows to your favor.\"")
      elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
          world_db["FAVOR_STAGE"] = 2
-         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
-                      + "\"You could have done worse so far. Maybe you are not "
-                      + "the worst to happen to this island since the metal "
-                      + "birds threw the great lightning ball. Maybe you can "
-                      + "help me spread another plant. It multiplies faster, "
-                      + "and it is highly nutritious: "
-                      + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
-                      + " (\""
-                      + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"]
-                      + "\"). It is new. I give you the only example. Be very "
-                      + "careful with it! I also give you another tool that "
-                      + "might be helpful.\n")
+         log("The Island God speaks to you: \"You could have done worse so "
+             + "far. Maybe you are not the worst to happen to this island "
+             + "since the metal birds threw the great lightning ball. Maybe "
+             + "you can help me spread another plant. It multiplies faster, "
+             + "and it is highly nutritious: "
+             + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"] + " (\""
+             + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"]
+             + "\"). It is new. I give you the only example. Be very careful "
+             + "with it! I also give you another tool that may be helpful.\"")
          id = id_setter(-1, "Things")
          world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
                                             world_db["altar"])
@@ -776,27 +767,26 @@ def enter_altar():  # #
           0 == len([id for id in world_db["Things"]
                    if world_db["Things"][id]["T_TYPE"]
                       == world_db["PLANT_1"]]):
-         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
-                      + "\"I am greatly disappointed that you lost all "
-                      + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
-                      + " this island had. Here is another one. It cost me "
-                      + " great work. Be more careful this time.\n")
+         log("The Island God speaks to you: \"I am greatly disappointed that "
+             + "you lost all "
+             + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
+             + " this island had. Here is another one. It cost me great work. "
+             + "Be more careful this time.\"")
          id = id_setter(-1, "Things")
          world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
                                             world_db["altar"])
          add_gods_favor(-250)
      elif world_db["GOD_FAVOR"] > 9000:
          world_db["FAVOR_STAGE"] = 9001
-         strong_write(io_db["file_out"], "LOG The Island God speaks to you: "
-                      + "\"You have proven yourself worthy of my respect. "
-                      + "You were a good citizen to the island, and sometimes "
-                      + "a better steward to its inhabitants than me. The "
-                      + "island shall miss you when you leave. But you have "
-                      + "earned the right to do so. Take this "
-                      + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"]
-                      + " and USE it when you please. It will take you to "
-                      + "where you came from. (But do feel free to stay here "
-                      + "as long as you like.)\"\n")
+         log("The Island God speaks to you: \"You have proven yourself worthy"
+              + " of my respect. You were a good citizen to the island, and "
+              + "sometimes a better steward to its inhabitants than me. The "
+              + "island shall miss you when you leave. But you have earned "
+              + "the right to do so. Take this "
+              + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"]
+              + " and USE it when you please. It will take you to where you "
+              + "came from. (But do feel free to stay here as long as you "
+              + "like.)\"")
          id = id_setter(-1, "Things")
          world_db["Things"][id] = new_Thing(world_db["SLIPPERS"],
                                             world_db["altar"])
@@ -805,7 +795,7 @@ def enter_altar():  # #
 def actor_wait(t):
     """Make t do nothing (but loudly, if player avatar)."""
     if t == world_db["Things"][0]:
-        strong_write(io_db["file_out"], "LOG You wait.\n")
+        log("You wait.")
 
 
 def actor_move(t):
@@ -828,13 +818,11 @@ def actor_move(t):
             if t == world_db["Things"][0]:
                 hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-                strong_write(io_db["file_out"], "LOG You wound " + hitted_name
-                                                + ".\n")
+                log("You wound " + hitted_name + ".")
                 add_gods_favor(-1)  # #
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-                strong_write(io_db["file_out"], "LOG " + hitter_name +
-                                                " wounds you.\n")
+                log(hitter_name +" wounds you.")
             test = decrement_lifepoints(world_db["Things"][hit_id])  # #(test=)
             if test and t == world_db["Things"][0]:  # #
                 add_gods_favor(-test)  # #
@@ -850,9 +838,7 @@ def actor_move(t):
             if carries_axe:  # #
                 axe_name = world_db["ThingTypes"][type]["TT_NAME"]  # #
                 if t == world_db["Things"][0]:  # #
-                    strong_write(io_db["file_out"], "LOG With your "  # #
-                                                    + axe_name  # #
-                                                    + ", you chop!\n")  # #
+                    log("With your " + axe_name + ", you chop!\n")  # #
                     if ord("X") == world_db["MAP"][pos]:  # #
                         add_gods_favor(-1)  # #
                 chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
@@ -863,8 +849,7 @@ def actor_move(t):
                     or (not case_X and  # #
                              0 == int(rand.next() / (3 * chop_power))))):  # #
                     if t == world_db["Things"][0]:  # #
-                        strong_write(io_db["file_out"],  # #
-                                     "LOG You chop it down.\n")  # #
+                        log("You chop it down.")  # #
                     if world_db["MAP"][pos] == ord("X"):  # #
                         add_gods_favor(-10)  # #
                     world_db["MAP"][pos] = ord(".")   # #
@@ -889,12 +874,12 @@ def actor_move(t):
             world_db["Things"][id]["T_POSX"] = move_result[2]
         build_fov_map(t)
         if t == world_db["Things"][0]:
-            strong_write(io_db["file_out"], "LOG You move " + dir + ".\n")
+            log("You move " + dir + ".")
             if (move_result[1] == world_db["altar"][0] and  # #
                 move_result[2] == world_db["altar"][1]):  # #
                 enter_altar()  # #
     elif t == world_db["Things"][0]:
-        strong_write(io_db["file_out"], "LOG You fail to move " + dir + ".\n")
+        log("You fail to move " + dir + ".")
 
 
 def actor_pick_up(t):
@@ -930,13 +915,11 @@ def actor_pick_up(t):
                 world_db["Things"][id]["T_PLAYERDROP"] = 0  # #
             t["T_CARRIES"].append(id)
             if t == world_db["Things"][0]:
-                strong_write(io_db["file_out"], "LOG You pick up an object.\n")
+                log("You pick up an object.")
         elif t == world_db["Things"][0]:
-            err = "You try to pick up an object, but there is none."
-            strong_write(io_db["file_out"], "LOG " + err + "\n")
+            log("You try to pick up an object, but there is none.")
     elif t == world_db["Things"][0]: # #
-        strong_write(io_db["file_out"], "LOG Can't pick up object: " + # #
-                                        "No storage room to carry more.\n") # #
+        log("Can't pick up object: No storage room to carry more.") # #
 
 
 def actor_drop(t):
@@ -947,11 +930,10 @@ def actor_drop(t):
         t["T_CARRIES"].remove(id)
         world_db["Things"][id]["carried"] = False
         if t == world_db["Things"][0]:
-            strong_write(io_db["file_out"], "LOG You drop an object.\n")
+            log("You drop an object.")
             world_db["Things"][id]["T_PLAYERDROP"] = 1  # #
     elif t == world_db["Things"][0]:
-        err = "You try to drop an object, but you own none."
-        strong_write(io_db["file_out"], "LOG " + err + "\n")
+       log("You try to drop an object, but you own none.")
 
 
 def actor_use(t):
@@ -963,33 +945,27 @@ def actor_use(t):
         type = world_db["Things"][id]["T_TYPE"]
         if type == world_db["SLIPPERS"]:  # #
             if t == world_db["Things"][0]:  # #
-                strong_write(io_db["file_out"], "LOG You use the "  # #
-                             + world_db["ThingTypes"][type]["TT_NAME"]  # #
-                             + ". It glows in wondrous colors, and emits "  # #
-                             + "a sound as if from a dying cat. The "  # #
-                             + "Island God laughs.\n")  # #
+                log("You use the " + world_db["ThingTypes"][type]["TT_NAME"]  # #
+                    + ". It glows in wondrous colors, and emits a sound as "  # #
+                    + "if from a dying cat. The Island God laughs.\n")  # #
             t["T_LIFEPOINTS"] = 1  # #
             decrement_lifepoints(t)  # #
         elif (world_db["ThingTypes"][type]["TT_TOOL"] == "axe"  # #
               and t == world_db["Things"][0]):  # #
-                strong_write(io_db["file_out"],  # #
-                             "LOG To use this item for chopping, move "  # #
-                             "towards a tree while carrying it in "  # #
-                             "your inventory.\n")  # #
+                log("To use this item for chopping, move towards a tree while "
+                     + "carrying it in your inventory.")  # #
         elif (world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry"):  # #
             pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
             if (world_db["MAP"][pos] == ord("X")  # #
                 or world_db["MAP"][pos] == ord("|")):  # #
-                strong_write(io_db["file_out"],  # #
-                             "LOG Can't build when standing on barrier.\n")  # #
+                log("Can't build when standing on barrier.")  # #
                 return
             for id in [id for id in world_db["Things"]
                        if not world_db["Things"][id] == t
                        if not world_db["Things"][id]["carried"]
                        if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
                        if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]:
-                 strong_write(io_db["file_out"],
-                              "LOG Can't build when standing objects.\n")  # #
+                 log("Can't build when standing objects.")  # #
                  return
             for id in t["T_CARRIES"]:  # #
                 type_tool = world_db["Things"][id]["T_TYPE"]  # #
@@ -1007,29 +983,25 @@ def actor_use(t):
                 t["T_CARRIES"].remove(wood_id)  # #
                 del world_db["Things"][wood_id]  # #
                 world_db["MAP"][pos] = ord("|")  # #
-                strong_write(io_db["file_out"], "LOG With your "  # #
-                             + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
-                             + " you build a wooden barrier from your "  # #
-                             + world_db["ThingTypes"][type_material]  # #
-                               ["TT_NAME"]  # #
-                             + ".\n")  # #
+                log("With your "  # #
+                    + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
+                    + " you build a wooden barrier from your "  # #
+                    + world_db["ThingTypes"][type_material]["TT_NAME"]  # #
+                    + ".")  # #
             else:  # #
-                strong_write(io_db["file_out"], "LOG You can't use a "  # #
-                             + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
-                             + " without some wood in your inventory.\n")  # #
+                log("You can't use a "  # #
+                    + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
+                    + " without some wood in your inventory.")  # #
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_TOOLPOWER"]
             if t == world_db["Things"][0]:
-                strong_write(io_db["file_out"],
-                             "LOG You consume this object.\n")
+                log("You consume this object.")
         elif t == world_db["Things"][0]:
-            strong_write(io_db["file_out"],
-                         "LOG You try to use this object, but fail.\n")
+            log("You try to use this object, but fail.")
     elif t == world_db["Things"][0]:
-        strong_write(io_db["file_out"],
-                     "LOG You try to use an object, but you own none.\n")
+        log("You try to use an object, but you own none.")
 
 
 def thingproliferation(t, prol_map):
@@ -1086,7 +1058,7 @@ def try_healing(t):
             if t != world_db["Things"][0]: # #
                  world_db["GOD_MOOD"] += 1  # #
             if t == world_db["Things"][0]:
-                strong_write(io_db["file_out"], "LOG You heal.\n")
+                log("You heal.")
 
 
 def hunger_per_turn(type_id):
@@ -1102,10 +1074,9 @@ def hunger(t):
     if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
         if t == world_db["Things"][0]:
             if t["T_SATIATION"] < 0:
-                strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
+                log("You suffer from hunger.")
             else:
-                strong_write(io_db["file_out"],
-                             "LOG You suffer from over-eating.\n")
+                log("You suffer from over-eating.")
         decrement_lifepoints(t)
 
 
@@ -1167,7 +1138,7 @@ def get_dir_to_target(t, filter):
         elif t["T_MEMMAP"] and "c" == filter:
             for mt in t["T_MEMTHING"]:
                 if ' ' != chr(t["T_MEMMAP"][(mt[1] * world_db["MAP_LENGTH"])
-                                         + mt[2]]) \
+                                            + mt[2]]) \
                    and world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food":
                     return True
         return False
