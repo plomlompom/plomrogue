@@ -211,25 +211,26 @@ static void test_and_poll_server()
     static time_t last_server_answer_time = 0;
     static time_t last_pong_time = 0;
     static uint8_t ping_sent = 0;
+    uint8_t wait = 15;
     if (read_file_into_queue(world.file_server_out, &world.queue))
     {
         last_server_answer_time = time(0);
         return;
     }
     time_t now = time(0);
-    if (ping_sent && last_server_answer_time > now - 5)  /* Re-set if last    */
+    if (ping_sent && last_server_answer_time > now - wait)/* Re-set if last   */
     {                                                    /* ping was answered */
         ping_sent = 0;                                   /* with server       */
         return;                                          /* activity.         */
     }
-    if (!ping_sent && last_server_answer_time < now - 5)
+    if (!ping_sent && last_server_answer_time < now - wait)
     {
         send("PING");
         ping_sent = 1;
         last_pong_time = now;
         return;
     }
-    exit_err(ping_sent && last_pong_time < now - 5, "Server not answering.");
+    exit_err(ping_sent && last_pong_time < now - wait, "Server not answering.");
 }
 
 
