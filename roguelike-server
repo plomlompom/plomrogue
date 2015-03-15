@@ -698,7 +698,7 @@ def decrement_lifepoints(t):
     still display memory data. On non-player things, erase fovmap and memory.
     Dying actors drop all their things.
     """
-    # 7DRL: Return 1 if death, else 0.
+    # 7DRL: Return TT_LIFEPOINTS if death, else 0.
     # 7DRL: Re-spawn died-out species.
     t["T_LIFEPOINTS"] -= 1
     live_type = t["T_TYPE"] # 7DRL
@@ -721,14 +721,21 @@ def decrement_lifepoints(t):
             n_species = len([id for id in world_db["Things"]  # #
                              if world_db["Things"][id]["T_TYPE"] == live_type])
             if 0 == n_species:  # #
-                id = id_setter(-1, "Things")
-                world_db["Things"][id] = new_Thing(live_type,
-                                                   world_db["altar"])
-                log("Species "
-                    + world_db["ThingTypes"][live_type]["TT_NAME"]
-                    + " has temporarily died out. "
-                    + "One new-born is spawned at the altar.")
-        return world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
+                if world_db["FAVOR_STAGE"] == 3 and \
+                    live_type == world_db["ANIMAL_0"]:
+                    world_db["GOD_FAVOR"] += 3000
+                    log("Congratulations! The "
+                        + world_db["ThingTypes"][live_type]["TT_NAME"]
+                        + " species has died out. The Island God is pleased.")
+                else:
+                    id = id_setter(-1, "Things")
+                    world_db["Things"][id] = new_Thing(live_type,
+                                                       world_db["altar"])
+                    log("The "
+                        + world_db["ThingTypes"][live_type]["TT_NAME"]
+                        + " species has temporarily died out. "
+                        + "One new-born is spawned at the altar.")
+        return world_db["ThingTypes"][live_type]["TT_LIFEPOINTS"]  # #
     return 0  # #
 
 
@@ -742,68 +749,80 @@ def mv_yx_in_dir_legal(dir, y, x):
 
 
 def enter_altar():  # #
-     """What happens when the player enters the altar."""
-     if world_db["FAVOR_STAGE"] > 9000:
-        log("You step on a soul-less slab of stone.")
-        return
-     log("YOU ENTER SACRED GROUND.")
-     if world_db["FAVOR_STAGE"] == 0:
-         world_db["FAVOR_STAGE"] = 1
-         log("The Island God speaks to you: \"I don't trust you. You intrude "
-              + "on the island's affairs. I think you're a nuisance at best, "
-              + "and a danger to my children at worst. I will give you a "
-              + "chance to lighten my mood, however: For a while now, I've "
-              + "been trying to spread the plant "
-              + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"] + " (\""
-              + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
-              + "\"). I have not been very successful so far. Maybe you can "
-              + "make yourself useful there. I will count each further "
-              + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
-              + " that grows to your favor.\"")
-     elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
-         world_db["FAVOR_STAGE"] = 2
-         log("The Island God speaks to you: \"You could have done worse so "
-             + "far. Maybe you are not the worst to happen to this island "
-             + "since the metal birds threw the great lightning ball. Maybe "
-             + "you can help me spread another plant. It multiplies faster, "
-             + "and it is highly nutritious: "
-             + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"] + " (\""
-             + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"]
-             + "\"). It is new. I give you the only example. Be very careful "
-             + "with it! I also give you another tool that may be helpful.\"")
-         id = id_setter(-1, "Things")
-         world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
-                                            world_db["altar"])
-         id = id_setter(-1, "Things")
-         world_db["Things"][id] = new_Thing(world_db["TOOL_0"],
-                                            world_db["altar"])
-     elif world_db["FAVOR_STAGE"] == 2 and \
-          0 == len([id for id in world_db["Things"]
-                   if world_db["Things"][id]["T_TYPE"]
-                      == world_db["PLANT_1"]]):
-         log("The Island God speaks to you: \"I am greatly disappointed that "
-             + "you lost all "
-             + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
-             + " this island had. Here is another one. It cost me great work. "
-             + "Be more careful this time.\"")
-         id = id_setter(-1, "Things")
-         world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
-                                            world_db["altar"])
-         world_db["GOD_FAVOR"] -= 250
-     elif world_db["GOD_FAVOR"] > 9000:
-         world_db["FAVOR_STAGE"] = 9001
-         log("The Island God speaks to you: \"You have proven yourself worthy"
-              + " of my respect. You were a good citizen to the island, and "
-              + "sometimes a better steward to its inhabitants than me. The "
-              + "island shall miss you when you leave. But you have earned "
-              + "the right to do so. Take this "
-              + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"]
-              + " and USE it when you please. It will take you to where you "
-              + "came from. (But do feel free to stay here as long as you "
-              + "like.)\"")
-         id = id_setter(-1, "Things")
-         world_db["Things"][id] = new_Thing(world_db["SLIPPERS"],
-                                            world_db["altar"])
+    """What happens when the player enters the altar."""
+    if world_db["FAVOR_STAGE"] > 9000:
+       log("You step on a soul-less slab of stone.")
+       return
+    log("YOU ENTER SACRED GROUND.")
+    if world_db["FAVOR_STAGE"] == 0:
+        world_db["FAVOR_STAGE"] = 1
+        log("The Island God speaks to you: \"I don't trust you. You intrude "
+             + "on the island's affairs. I think you're a nuisance at best, "
+             + "and a danger to my children at worst. I will give you a "
+             + "chance to lighten my mood, however: For a while now, I've "
+             + "been trying to spread the plant "
+             + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"] + " (\""
+             + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
+             + "\"). I have not been very successful so far. Maybe you can "
+             + "make yourself useful there. I will count each further "
+             + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+             + " that grows to your favor.\"")
+    elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
+        world_db["FAVOR_STAGE"] = 2
+        log("The Island God speaks to you: \"You could have done worse so "
+            + "far. Maybe you are not the worst to happen to this island "
+            + "since the metal birds threw the great lightning ball. Maybe "
+            + "you can help me spread another plant. It multiplies faster, "
+            + "and it is highly nutritious: "
+            + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"] + " (\""
+            + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"]
+            + "\"). It is new. I give you the only example. Be very careful "
+            + "with it! I also give you another tool that may be helpful.\"")
+        id = id_setter(-1, "Things")
+        world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
+                                           world_db["altar"])
+        id = id_setter(-1, "Things")
+        world_db["Things"][id] = new_Thing(world_db["TOOL_0"],
+                                           world_db["altar"])
+    elif world_db["FAVOR_STAGE"] == 2 and \
+        0 == len([id for id in world_db["Things"]
+                  if world_db["Things"][id]["T_TYPE"]
+                     == world_db["PLANT_1"]]):
+        log("The Island God speaks to you: \"I am greatly disappointed that "
+            + "you lost all "
+            + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
+            + " this island had. Here is another one. It cost me great work. "
+           + "Be more careful this time when planting it.\"")
+        id = id_setter(-1, "Things")
+        world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
+                                           world_db["altar"])
+        world_db["GOD_FAVOR"] -= 250
+    elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] >= 500:
+        world_db["FAVOR_STAGE"] = 3
+        log("The Island God speaks to you: \"The "
+            + world_db["ThingTypes"][world_db["ANIMAL_0"]]["TT_NAME"]
+            + " has lately become a pest. These creatures do not please me "
+            + "as much as they used to do. Exterminate them all. I will count "
+            + "each kill to your favor. To help you with the hunting, I grant "
+            + "you the empathy and knowledge to read animals.\"")
+        log("You will now see animals' health bars, and activities (\"m\": "
+            + "moving (maybe for an attack), \"u\": eating, \"p\": picking "
+            + "something up; no letter: waiting).")
+        world_db["EMPATHY"] = 1
+    elif world_db["GOD_FAVOR"] > 9000:
+        world_db["FAVOR_STAGE"] = 9001
+        log("The Island God speaks to you: \"You have proven yourself worthy"
+             + " of my respect. You were a good citizen to the island, and "
+             + "sometimes a better steward to its inhabitants than me. The "
+             + "island shall miss you when you leave. But you have earned "
+             + "the right to do so. Take this "
+             + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"]
+             + " and USE it when you please. It will take you to where you "
+             + "came from. (But do feel free to stay here as long as you "
+             + "like.)\"")
+        id = id_setter(-1, "Things")
+        world_db["Things"][id] = new_Thing(world_db["SLIPPERS"],
+                                           world_db["altar"])
 
 
 def actor_wait(t):
@@ -829,17 +848,20 @@ def actor_move(t):
                   if world_db["Things"][id]["T_POSX"] == move_result[2]]
         if len(hitted):
             hit_id = hitted[0]
+            hitted_type = world_db["Things"][hit_id]["T_TYPE"]
             if t == world_db["Things"][0]:
-                hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
                 log("You wound " + hitted_name + ".")
-                world_db["GOD_FAVOR"] -= -1  # #
+                world_db["GOD_FAVOR"] -= 1  # #
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" wounds you.")
             test = decrement_lifepoints(world_db["Things"][hit_id])  # #(test=)
-            if test and t == world_db["Things"][0]:  # #
-                world_db["GOD_FAVOR"] -test  # #
+            if test and world_db["FAVOR_STAGE"] >= 3 and \
+               hitted_type == world_db["ANIMAL_0"]:  # #
+                world_db["GOD_FAVOR"] += 125
+            elif test and t == world_db["Things"][0]:  # #
+                world_db["GOD_FAVOR"] -= 2 * test  # #
             return
         if (ord("X") == world_db["MAP"][pos]  # #
             or ord("|") == world_db["MAP"][pos]):  # #
@@ -865,7 +887,7 @@ def actor_move(t):
                     if t == world_db["Things"][0]:  # #
                         log("You chop it down.")  # #
                     if world_db["MAP"][pos] == ord("X"):  # #
-                        world_db["GOD_FAVOR"] = -10  # #
+                        world_db["GOD_FAVOR"] -= 10  # #
                     world_db["MAP"][pos] = ord(".")   # #
                     i = 3 if case_X else 1  # #
                     for i in range(i):  # #
@@ -2131,6 +2153,7 @@ commands_db = {
     "LUMBER": (1, False, specialtypesetter("LUMBER")),  # #
     "TOOL_0": (1, False, specialtypesetter("TOOL_0")),  # #
     "TOOL_1": (1, False, specialtypesetter("TOOL_1")),  # #
+    "ANIMAL_0": (1, False, specialtypesetter("ANIMAL_0")),  # #
     "EMPATHY": (1, False, setter(None, "EMPATHY", 0, 1)),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
@@ -2183,10 +2206,11 @@ world_db = {
     "SLIPPERS": 0,  # #
     "PLANT_0": 0,  # #
     "PLANT_1": 0,  # #
+    "ANIMAL_0": 0,  # #
     "LUMBER": 0,  # #
     "TOOL_0": 0,  # #
     "TOOL_1": 0,  # #
-    "EMPATHY": 1,  # #
+    "EMPATHY": 0,  # #
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}
@@ -2194,7 +2218,8 @@ world_db = {
 
 # 7DRL-specific!
 """Special type settings."""
-specials = ["SLIPPERS", "PLANT_0", "PLANT_1", "LUMBER", "TOOL_0", "TOOL_1"]  # #
+specials = ["SLIPPERS", "PLANT_0", "PLANT_1", "LUMBER", "TOOL_0", "TOOL_1",
+            "ANIMAL_0"]
 
 """Mapping of direction names to internal direction chars."""
 directions_db = {"east": "d", "south-east": "c", "south-west": "x",
