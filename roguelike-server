@@ -725,7 +725,7 @@ def decrement_lifepoints(t):
                 if world_db["FAVOR_STAGE"] >= 3 and \
                     live_type == world_db["ANIMAL_0"]:
                     world_db["GOD_FAVOR"] += 3000
-                    log("Congratulations! The "
+                    log("CONGRATULATIONS! The "
                         + world_db["ThingTypes"][live_type]["TT_NAME"]
                         + " species has died out. The Island God is pleased.")
                 else:
@@ -868,11 +868,11 @@ def actor_move(t):
             hitted_type = world_db["Things"][hit_id]["T_TYPE"]
             if t == world_db["Things"][0]:
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-                log("You wound " + hitted_name + ".")
+                log("You WOUND " + hitted_name + ".")
                 world_db["GOD_FAVOR"] -= 1  # #
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-                log(hitter_name +" wounds you.")
+                log(hitter_name +" WOUNDS you.")
             test = decrement_lifepoints(world_db["Things"][hit_id])  # #(test=)
             if test and world_db["FAVOR_STAGE"] >= 3 and \
                hitted_type == world_db["ANIMAL_0"]:  # #
@@ -902,7 +902,7 @@ def actor_move(t):
                     or (not case_X and  # #
                              0 == int(rand.next() / (3 * chop_power))))):  # #
                     if t == world_db["Things"][0]:  # #
-                        log("You chop it down.")  # #
+                        log("You chop it DOWN.")  # #
                     if world_db["MAP"][pos] == ord("X"):  # #
                         world_db["GOD_FAVOR"] -= 10  # #
                     world_db["MAP"][pos] = ord(".")   # #
@@ -932,7 +932,7 @@ def actor_move(t):
                 move_result[2] == world_db["altar"][1]):  # #
                 enter_altar()  # #
     elif t == world_db["Things"][0]:
-        log("You fail to move " + dir + ".")
+        log("You FAIL to move " + dir + ".")
 
 
 def actor_pick_up(t):
@@ -971,11 +971,11 @@ def actor_pick_up(t):
                 world_db["Things"][id]["T_PLAYERDROP"] = 0  # #
             t["T_CARRIES"].append(id)
             if t == world_db["Things"][0]:
-                log("You pick up an object.")
+                log("You PICK UP an object.")
         elif t == world_db["Things"][0]:
             log("You try to pick up an object, but there is none.")
     elif t == world_db["Things"][0]: # #
-        log("Can't pick up object: No storage room to carry more.") # #
+        log("CAN'T pick up object: No storage room to carry more.") # #
 
 
 def actor_drop(t):
@@ -986,10 +986,10 @@ def actor_drop(t):
         t["T_CARRIES"].remove(id)
         world_db["Things"][id]["carried"] = False
         if t == world_db["Things"][0]:
-            log("You drop an object.")
+            log("You DROP an object.")
             world_db["Things"][id]["T_PLAYERDROP"] = 1  # #
     elif t == world_db["Things"][0]:
-       log("You try to drop an object, but you own none.")
+       log("You try to drop an object, but you own NONE.")
 
 
 def actor_use(t):
@@ -1015,14 +1015,14 @@ def actor_use(t):
             pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
             if (world_db["MAP"][pos] == ord("X")  # #
                 or world_db["MAP"][pos] == ord("|")):  # #
-                log("Can't build when standing on barrier.")  # #
+                log("CAN'T build when standing on barrier.")  # #
                 return
             for id in [id for id in world_db["Things"]
                        if not world_db["Things"][id] == t
                        if not world_db["Things"][id]["carried"]
                        if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
                        if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]:
-                 log("Can't build when standing objects.")  # #
+                 log("CAN'T build when standing objects.")  # #
                  return
             for id in t["T_CARRIES"]:  # #
                 type_tool = world_db["Things"][id]["T_TYPE"]  # #
@@ -1042,30 +1042,30 @@ def actor_use(t):
                 world_db["MAP"][pos] = ord("|")  # #
                 log("With your "  # #
                     + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
-                    + " you build a wooden barrier from your "  # #
+                    + " you build a WOODEN BARRIER from your "  # #
                     + world_db["ThingTypes"][type_material]["TT_NAME"]  # #
                     + ".")  # #
             else:  # #
-                log("You can't use a "  # #
+                log("You CAN'T use a "  # #
                     + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
                     + " without some wood in your inventory.")  # #
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":  # #
             pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
             if world_db["MAP"][pos] == ord("."):
-                log("You create soil.")
+                log("You create SOIL.")
                 world_db["MAP"][pos] = ord(":")
             else:
-                log("Can only make soil out of non-soil earth.")
+                log("Can only make soil out of NON-SOIL earth.")
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_TOOLPOWER"]
             if t == world_db["Things"][0]:
-                log("You consume this object.")
+                log("You eat this thing.")
         elif t == world_db["Things"][0]:
-            log("You try to use this object, but fail.")
+            log("You try to use this object, but FAIL.")
     elif t == world_db["Things"][0]:
-        log("You try to use an object, but you own none.")
+        log("You try to use an object, but you own NONE.")
 
 
 def thingproliferation(t, prol_map):
@@ -1109,7 +1109,7 @@ def thingproliferation(t, prol_map):
                 world_db["GOD_FAVOR"] += 25  # #
             elif world_db["FAVOR_STAGE"] >= 4 and \
                  t["T_TYPE"] == world_db["ANIMAL_1"]:
-                log("The Island God smiles upon a new-born bear baby.")
+                log("The Island God SMILES upon a new-born bear baby.")
                 world_db["GOD_FAVOR"] += 750
 
 
@@ -1125,7 +1125,7 @@ def try_healing(t):
         if (testval <= 1 or 1 == (rand.next() % testval)):
             t["T_LIFEPOINTS"] += 1
             if t == world_db["Things"][0]:
-                log("You heal.")
+                log("You HEAL.")
 
 
 def hunger_per_turn(type_id):
@@ -1140,9 +1140,9 @@ def hunger(t):
     if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
         if t == world_db["Things"][0]:
             if t["T_SATIATION"] < 0:
-                log("You suffer from hunger.")
+                log("You SUFFER from hunger.")
             else:
-                log("You suffer from over-eating.")
+                log("You SUFFER from over-eating.")
         decrement_lifepoints(t)
 
 
@@ -1603,7 +1603,7 @@ def play_commander(action, args=False):
         if action == "drop":
             t = world_db["Things"][0]
             if 0 == len(t["T_CARRIES"]):
-                log("You have nothing to drop in your inventory.")
+                log("You have NOTHING to drop in your inventory.")
                 return
 
         elif action == "pick_up":
@@ -1613,12 +1613,12 @@ def play_commander(action, args=False):
                    if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
                    if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
             if not len(ids):
-                log("No object to pick up.")
+                log("NOTHING to pick up.")
                 return
             used_slots = len(t["T_CARRIES"]) # #
             if used_slots >= world_db["ThingTypes"][t["T_TYPE"]] \
                 ["TT_STORAGE"]: # #
-                log("Can't pick up: No storage room to carry anything more.")
+                log("CAN'T pick up: No storage room to carry anything more.")
                 return
 
         elif action == "move":
@@ -1629,7 +1629,7 @@ def play_commander(action, args=False):
             if 1 == move_result[0]:
                 pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
                 if ord("~") == world_db["MAP"][pos]:
-                    log("You can't swim.")
+                    log("You can't SWIM.")
                     return
                 if (ord("X") == world_db["MAP"][pos]  # #
                     or ord("|") == world_db["MAP"][pos]):  # #
@@ -1640,10 +1640,10 @@ def play_commander(action, args=False):
                             carries_axe = True  # #
                             break  # #
                     if not carries_axe:  # #
-                        log("You can't move there.")
+                        log("You CAN'T move there.")
                         return
             else:
-                log("You can't move there.")
+                log("You CAN'T move there.")
                 return
 
         elif action == "use":
@@ -1659,14 +1659,14 @@ def play_commander(action, args=False):
                     pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
                     if (world_db["MAP"][pos] == ord("X")  # #
                         or world_db["MAP"][pos] == ord("|")):  # #
-                        log("Can't build when standing on barrier.")  # #
+                        log("CAN'T build when standing on barrier.")  # #
                         return
                     for id in [id for id in world_db["Things"]
                                if not world_db["Things"][id] == t
                                if not world_db["Things"][id]["carried"]
                                if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
                                if world_db["Things"][id]["T_POSX"] ==t["T_POSX"]]:
-                         log("Can't build when standing objects.")  # #
+                         log("CAN'T build when standing objects.")  # #
                          return
                     for id in t["T_CARRIES"]:  # #
                         type_tool = world_db["Things"][id]["T_TYPE"]  # #
@@ -1681,20 +1681,20 @@ def play_commander(action, args=False):
                             wood_id = id  # #
                             break  # #
                     if wood_id == None:  # #
-                        log("You can't use a "  # #
+                        log("You CAN'T use a "  # #
                             + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
                             + " without some wood in your inventory.")  # #
                         return
                 elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":  # #
                     pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
                     if not world_db["MAP"][pos] == ord("."):
-                        log("Can only make soil out of non-soil earth.")
+                        log("Can only make soil out of NON-SOIL earth.")
                         return
                 elif world_db["ThingTypes"][type]["TT_TOOL"] == "wood":  # #
-                        log("To use wood, you need a carpentry tool.")  # #
+                        log("To use wood, you NEED a carpentry tool.")  # #
                         return
             else:
-                log("You have nothing to use in your inventory.")
+                log("You have NOTHING to use in your inventory.")
                 return
 
 
