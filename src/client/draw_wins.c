@@ -481,7 +481,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = col_corpse; //
                 } //
-                else if ('/' == c || ']' == c || '[' == c) //
+                else if ('-' == c || '/' == c || ']' == c || '[' == c) //
                 { //
                     a = col_tool; //
                 } //
