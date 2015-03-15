@@ -768,6 +768,9 @@ def enter_altar():  # #
              + "make yourself useful there. I will count each further "
              + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
              + " that grows to your favor.\"")
+    elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] < 100:
+        log("The Island God will talk again when it favors you to >=100 "
+             +" points.")
     elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
         world_db["FAVOR_STAGE"] = 2
         log("The Island God speaks to you: \"You could have done worse so "
@@ -798,6 +801,9 @@ def enter_altar():  # #
         world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
                                            world_db["altar"])
         world_db["GOD_FAVOR"] -= 250
+    elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] < 500:
+        log("The Island God will talk again when it favors you to >=500 "
+             +" points.")
     elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] >= 500:
         world_db["FAVOR_STAGE"] = 3
         log("The Island God speaks to you: \"The "
@@ -810,6 +816,9 @@ def enter_altar():  # #
             + "moving (maybe for an attack), \"u\": eating, \"p\": picking "
             + "something up; no letter: waiting).")
         world_db["EMPATHY"] = 1
+    elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] < 5000:
+        log("The Island God will talk again when it favors you to >=5000 "
+             +" points.")
     elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] >= 5000:
         world_db["FAVOR_STAGE"] = 4
         log("The Island God speaks to you: \"You know what animal I find the "
@@ -827,7 +836,11 @@ def enter_altar():  # #
         id = id_setter(-1, "Things")
         world_db["Things"][id] = new_Thing(world_db["TOOL_1"],
                                            world_db["altar"])
-    elif world_db["GOD_FAVOR"] > 20000:
+    elif world_db["GOD_FAVOR"] < 20000:
+        log("The Island God will talk again when it favors you to >=20000 "
+             +" points.")
+    elif world_db["GOD_FAVOR"] >= 20000:
+        world_db["FAVOR_STAGE"] = 9001
         log("The Island God speaks to you: \"You have proven yourself worthy"
              + " of my respect. You were a good citizen to the island, and "
              + "sometimes a better steward to its inhabitants than me. The "
