@@ -1,21 +1,6 @@
 
 KEYBINDINGS 'global'
 KEY 81 quit
-KEY 87 winconf
-KEY 62 cyc_win_f
-KEY 60 cyc_win_b
-KEY 262 scrl_l
-KEY 360 scrl_r
-KEY 82 reload_conf
-KEY 67 save_conf
-KEY 265 to_mapwin
-KEY 266 to_infowin
-KEY 267 to_inv
-KEY 268 to_terrain
-KEY 269 to_logwin
-KEY 270 to_g_keywin
-KEY 271 to_wg_keywin
-KEY 272 to_wk_keywin
 KEY 97 ai
 KEY 112 pick
 KEY 58 wait
@@ -92,7 +77,7 @@ WIDTH 16
 HEIGHT 4
 
 WINDOW i
-NAME 'Info'
+NAME 'Stats'
 BREAK 2
 WIDTH 33
 HEIGHT 3
@@ -104,7 +89,7 @@ WIDTH 33
 HEIGHT -9
 
 WINDOW m
-NAME 'Map'
+NAME 'Please the Island God'
 BREAK 0
 WIDTH -34
 HEIGHT 0
