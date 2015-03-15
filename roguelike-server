@@ -699,7 +699,9 @@ def decrement_lifepoints(t):
     Dying actors drop all their things.
     """
     # 7DRL: Return 1 if death, else 0.
+    # 7DRL: Re-spawn died-out species.
     t["T_LIFEPOINTS"] -= 1
+    live_type = t["T_TYPE"] # 7DRL
     if 0 == t["T_LIFEPOINTS"]:
         for id in t["T_CARRIES"]:
             t["T_CARRIES"].remove(id)
@@ -716,6 +718,16 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
+            n_species = len([id for id in world_db["Things"]  # #
+                             if world_db["Things"][id]["T_TYPE"] == live_type])
+            if 0 == n_species:  # #
+                id = id_setter(-1, "Things")
+                world_db["Things"][id] = new_Thing(live_type,
+                                                   world_db["altar"])
+                log("Species "
+                    + world_db["ThingTypes"][live_type]["TT_NAME"]
+                    + " has temporarily died out. "
+                    + "One new-born is spawned at the altar.")
         return world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
     return 0  # #
 
