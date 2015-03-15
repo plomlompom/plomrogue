@@ -469,7 +469,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = col_player; //
                 } //
-                else if ('a' == c || 'd' == c || 'b' == c) //
+                else if (',' == c || 'd' == c || 'B' == c) //
                 { //
                     a = col_animal; //
                 } //
@@ -481,7 +481,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = col_corpse; //
                 } //
-                else if ('/' == c || '-' == c) //
+                else if ('/' == c || ']' == c) //
                 { //
                     a = col_tool; //
                 } //
@@ -493,7 +493,7 @@ extern void draw_win_map(struct Win * win)
                 { //
                     a = col_altar; //
                 } //
-                else if (']' == c || '*' == c) //
+                else if ('(' == c || '*' == c) //
                 { //
                     a = col_plant; //
                 } //
