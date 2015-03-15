@@ -1001,9 +1001,10 @@ def actor_use(t):
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":  # #
             pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
             if world_db["MAP"][pos] == ord("."):
+                log("You create soil.")
                 world_db["MAP"][pos] = ord(":")
             else:
-                log("Can only fertilize on unfertilized earth.")
+                log("Can only make soil out of non-soil earth.")
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
@@ -1538,6 +1539,102 @@ def play_commander(action, args=False):
     """
 
     def set_command():
+
+        if action == "drop":
+            t = world_db["Things"][0]
+            if 0 == len(t["T_CARRIES"]):
+                log("You have nothing to drop in your inventory.")
+                return
+
+        elif action == "pick_up":
+            t = world_db["Things"][0]
+            ids = [id for id in world_db["Things"] if id
+                   if not world_db["Things"][id]["carried"]
+                   if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+                   if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
+            if not len(ids):
+                log("No object to pick up.")
+                return
+            used_slots = len(t["T_CARRIES"]) # #
+            if used_slots >= world_db["ThingTypes"][t["T_TYPE"]] \
+                ["TT_STORAGE"]: # #
+                log("Can't pick up: No storage room to carry anything more.")
+                return
+
+        elif action == "move":
+            t = world_db["Things"][0]
+            passable = False
+            move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
+                                             t["T_POSY"], t["T_POSX"])
+            if 1 == move_result[0]:
+                pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+                if (ord("X") == world_db["MAP"][pos]  # #
+                    or ord("|") == world_db["MAP"][pos]):  # #
+                    carries_axe = False  # #
+                    for id in t["T_CARRIES"]:  # #
+                        type = world_db["Things"][id]["T_TYPE"]  # #
+                        if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":  # #
+                            carries_axe = True  # #
+                            break  # #
+                    if not carries_axe:  # #
+                        log("You can't move there.")
+                        return
+            else:
+                log("You can't move there.")
+                return
+
+        elif action == "use":
+            t = world_db["Things"][0]
+            if len(t["T_CARRIES"]):
+                id = t["T_CARRIES"][t["T_ARGUMENT"]]
+                type = world_db["Things"][id]["T_TYPE"]
+                if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":
+                    log("To use this item for chopping, move towards a tree "
+                         + "while carrying it in your inventory.")
+                    return
+                elif world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry":
+                    pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+                    if (world_db["MAP"][pos] == ord("X")  # #
+                        or world_db["MAP"][pos] == ord("|")):  # #
+                        log("Can't build when standing on barrier.")  # #
+                        return
+                    for id in [id for id in world_db["Things"]
+                               if not world_db["Things"][id] == t
+                               if not world_db["Things"][id]["carried"]
+                               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+                               if world_db["Things"][id]["T_POSX"] ==t["T_POSX"]]:
+                         log("Can't build when standing objects.")  # #
+                         return
+                    for id in t["T_CARRIES"]:  # #
+                        type_tool = world_db["Things"][id]["T_TYPE"]  # #
+                        if (world_db["ThingTypes"][type_tool]["TT_TOOL"]  # #
+                            == "carpentry"):  # #
+                            break  # #
+                    wood_id = None  # #
+                    for id in t["T_CARRIES"]:  # #
+                        type_material = world_db["Things"][id]["T_TYPE"]  # #
+                        if (world_db["ThingTypes"][type_material]["TT_TOOL"]  # #
+                            == "wood"):  # #
+                            wood_id = id  # #
+                            break  # #
+                    if wood_id == None:  # #
+                        log("You can't use a "  # #
+                            + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
+                            + " without some wood in your inventory.")  # #
+                        return
+                elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":  # #
+                    pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+                    if not world_db["MAP"][pos] == ord("."):
+                        log("Can only make soil out of non-soil earth.")
+                        return
+                elif world_db["ThingTypes"][type]["TT_TOOL"] == "wood":  # #
+                        log("To use wood, you need a carpentry tool.")  # #
+                        return
+            else:
+                log("You have nothing to use in your inventory.")
+                return
+
+
         id = [x for x in world_db["ThingActions"]
                 if world_db["ThingActions"][x]["TA_NAME"] == action][0]
         world_db["Things"][0]["T_COMMAND"] = id
