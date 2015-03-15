@@ -1,6 +1,8 @@
 NOTE: This is the PlomRogue engine's RADME text, assuming certain configuration
 defaults not present in the 7DRL game. So parts of it may not apply to this
-specific package.
+specific package. (The 7DRL also adds various 7DRL-specific features and
+optimizations to the server and client code. To play with the "pure" client, get
+it at http://github.com/plomlompom/plomrogue ("main" branch).) 
 
 plomrogue
 =========
@@ -122,4 +124,3 @@ by the server for newline-delimited commands. The ./server/out file contains
 server messages to be read by clients. The ./server/worldstate file contains a
 serialized representation of the game world's data as it is to be visible to
 the player / the player's client.
-

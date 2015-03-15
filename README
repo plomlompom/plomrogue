@@ -100,3 +100,5 @@ by the server for newline-delimited commands. The ./server/out file contains
 server messages to be read by clients. The ./server/worldstate file contains a
 serialized representation of the game world's data as it is to be visible to
 the player / the player's client.
+
+See ./README_engine for more stuff.
