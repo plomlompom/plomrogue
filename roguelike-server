@@ -1167,11 +1167,13 @@ def get_dir_to_target(t, filter):
         if t["fovmap"] and "a" == filter:
             for id in world_db["Things"]:
                 if animate_in_fov(world_db["Things"][id]):
-                    return good_attack_target(world_db["Things"][id])
+                    if good_attack_target(world_db["Things"][id]):
+                        return True
         elif t["fovmap"] and "f" == filter:
             for id in world_db["Things"]:
                 if animate_in_fov(world_db["Things"][id]):
-                    return good_flee_target(world_db["Things"][id])
+                    if good_flee_target(world_db["Things"][id]):
+                        return True
         elif t["T_MEMMAP"] and "c" == filter:
             eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
             for mt in t["T_MEMTHING"]:
