@@ -1580,6 +1580,9 @@ def play_commander(action, args=False):
                                              t["T_POSY"], t["T_POSX"])
             if 1 == move_result[0]:
                 pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+                if ord("~") == world_db["MAP"][pos]:
+                    log("You can't swim.")
+                    return
                 if (ord("X") == world_db["MAP"][pos]  # #
                     or ord("|") == world_db["MAP"][pos]):  # #
                     carries_axe = False  # #
