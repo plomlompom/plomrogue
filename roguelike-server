@@ -327,9 +327,8 @@ def try_worldstate_update():
                 type_id = world_db["Things"][id]["T_TYPE"]
                 name = world_db["ThingTypes"][type_id]["TT_NAME"]
                 inventory = inventory + name + "\n"
-        # 7DRL additions:  GOD_MOOD, GOD_FAVOR
+        # 7DRL additions: GOD_FAVOR
         string = str(world_db["TURN"]) + "\n" + \
-                 str(world_db["GOD_MOOD"]) + "\n" + \
                  str(world_db["GOD_FAVOR"]) + "\n" + \
                  str(world_db["Things"][0]["T_LIFEPOINTS"]) + "\n" + \
                  str(world_db["Things"][0]["T_SATIATION"]) + "\n" + \
@@ -699,13 +698,9 @@ def decrement_lifepoints(t):
     still display memory data. On non-player things, erase fovmap and memory.
     Dying actors drop all their things.
     """
-    # 7DRL: Also decrements God's mood; deaths heavily so.
     # 7DRL: Return 1 if death, else 0.
     t["T_LIFEPOINTS"] -= 1
-    world_db["GOD_MOOD"] -= 1  # #
     if 0 == t["T_LIFEPOINTS"]:
-        sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
-        world_db["GOD_MOOD"] -= sadness  # #        
         for id in t["T_CARRIES"]:
             t["T_CARRIES"].remove(id)
             world_db["Things"][id]["T_POSY"] = t["T_POSY"]
@@ -721,28 +716,8 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
-        return sadness  # #
+        return world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
     return 0  # #
-
-
-def add_gods_favor(i): # #
-    """"Add to GOD_FAVOR, multiplied with factor growing log. with GOD_MOOD."""
-    def favor_multiplier(i):
-        x = 100
-        threshold = math.e * x
-        mood = world_db["GOD_MOOD"]
-        if i > 0:
-            if mood > threshold:
-                i = i * math.log(mood / x)
-            elif -mood > threshold:
-                i = i / math.log(-mood / x)
-        elif i < 0:
-            if -mood > threshold:
-                i = i * math.log(-mood / x)
-            if mood > threshold:
-                i = i / math.log(mood / x)
-        return int(i)
-    world_db["GOD_FAVOR"] += favor_multiplier(i)
 
 
 def mv_yx_in_dir_legal(dir, y, x):
@@ -802,7 +777,7 @@ def enter_altar():  # #
          id = id_setter(-1, "Things")
          world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
                                             world_db["altar"])
-         add_gods_favor(-250)
+         world_db["GOD_FAVOR"] -= 250
      elif world_db["GOD_FAVOR"] > 9000:
          world_db["FAVOR_STAGE"] = 9001
          log("The Island God speaks to you: \"You have proven yourself worthy"
@@ -846,13 +821,13 @@ def actor_move(t):
                 hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
                 log("You wound " + hitted_name + ".")
-                add_gods_favor(-1)  # #
+                world_db["GOD_FAVOR"] -= -1  # #
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" wounds you.")
             test = decrement_lifepoints(world_db["Things"][hit_id])  # #(test=)
             if test and t == world_db["Things"][0]:  # #
-                add_gods_favor(-test)  # #
+                world_db["GOD_FAVOR"] -test  # #
             return
         if (ord("X") == world_db["MAP"][pos]  # #
             or ord("|") == world_db["MAP"][pos]):  # #
@@ -867,7 +842,7 @@ def actor_move(t):
                 if t == world_db["Things"][0]:  # #
                     log("With your " + axe_name + ", you chop!\n")  # #
                     if ord("X") == world_db["MAP"][pos]:  # #
-                        add_gods_favor(-1)  # #
+                        world_db["GOD_FAVOR"] = -1  # #
                 chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
                 case_X = world_db["MAP"][pos] == ord("X")  # #
                 if (chop_power > 0  # #
@@ -878,7 +853,7 @@ def actor_move(t):
                     if t == world_db["Things"][0]:  # #
                         log("You chop it down.")  # #
                     if world_db["MAP"][pos] == ord("X"):  # #
-                        add_gods_favor(-10)  # #
+                        world_db["GOD_FAVOR"] = -10  # #
                     world_db["MAP"][pos] = ord(".")   # #
                     i = 3 if case_X else 1  # #
                     for i in range(i):  # #
@@ -941,7 +916,7 @@ def actor_pick_up(t):
                 and world_db["Things"][id]["T_PLAYERDROP"]  # #
                 and world_db["ThingTypes"][type]["TT_TOOL"] == "food"):  # #
                 score = world_db["ThingTypes"][type]["TT_TOOLPOWER"] / 32  # #
-                add_gods_favor(score)  # #
+                world_db["GOD_FAVOR"] += score  # #
                 world_db["Things"][id]["T_PLAYERDROP"] = 0  # #
             t["T_CARRIES"].append(id)
             if t == world_db["Things"][0]:
@@ -970,6 +945,7 @@ def actor_use(t):
     """Make t use (for now: consume) T_ARGUMENT-indexed Thing in inventory."""
     # TODO: Handle case where T_ARGUMENT matches nothing.
     # 7DLR: Handle SLIPPERS-type Thing use.
+    # 7DRL: Player with fertilizer fertilizes
     if len(t["T_CARRIES"]):
         id = t["T_CARRIES"][t["T_ARGUMENT"]]
         type = world_db["Things"][id]["T_TYPE"]
@@ -1068,11 +1044,6 @@ def thingproliferation(t, prol_map):
             id = id_setter(-1, "Things")
             newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
             world_db["Things"][id] = newT
-            animacy = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]  # #
-            if animacy:  # #
-                world_db["GOD_MOOD"] += animacy  # #
-            else:  # #
-                world_db["GOD_MOOD"] += 1  # #
             if (world_db["FAVOR_STAGE"] > 0  # #
                 and t["T_TYPE"] == world_db["PLANT_0"]):  # #
                 world_db["GOD_FAVOR"] += 5  # #
@@ -1091,8 +1062,6 @@ def try_healing(t):
         testval = int(abs(t["T_SATIATION"]) / wait_divider)
         if (testval <= 1 or 1 == (rand.next() % testval)):
             t["T_LIFEPOINTS"] += 1
-            if t != world_db["Things"][0]: # #
-                 world_db["GOD_MOOD"] += 1  # #
             if t == world_db["Things"][0]:
                 log("You heal.")
 
@@ -1373,35 +1342,27 @@ def get_inventory_slot_to_consume(t):
 def ai(t):
     """Determine next command/argment for actor t via AI algorithms."""
     # 7DRL add: Don't pick up or search things when inventory is full.
-    if t == world_db["Things"][0]:
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
     if get_dir_to_target(t, "f"):
-        if t == world_db["Things"][0]:
         return
     sel = get_inventory_slot_to_consume(t)
     if -1 != sel:
-        if t == world_db["Things"][0]:
         t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                           if world_db["ThingActions"][id]["TA_NAME"]
                              == "use"][0]
         t["T_ARGUMENT"] = sel
     elif standing_on_food(t):
-        if t == world_db["Things"][0]:
         if  (len(t["T_CARRIES"]) <  # #
              world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]):  # #
-            if t == world_db["Things"][0]:
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                                  if world_db["ThingActions"][id]["TA_NAME"]
                                  == "pick_up"][0]
     else:
-        if t == world_db["Things"][0]:
         going_to_known_food_spot = get_dir_to_target(t, "c")
         if not going_to_known_food_spot:
-            if t == world_db["Things"][0]:
             aiming_for_walking_food = get_dir_to_target(t, "a")
             if not aiming_for_walking_food:
-                if t == world_db["Things"][0]:
                 get_dir_to_target(t, "s")
 
 
@@ -2046,7 +2007,6 @@ commands_db = {
     "MAKE_WORLD": (1, False, command_makeworld),
     "SEED_RANDOMNESS": (1, False, command_seedrandomness),
     "TURN": (1, False, setter(None, "TURN", 0, 65535)),
-    "GOD_MOOD": (1, False, setter(None, "GOD_MOOD", -32768, 32767)),  # #
     "GOD_FAVOR": (1, False, setter(None, "GOD_FAVOR", -32768, 32767)),  # #
     "PLAYER_TYPE": (1, False, setter(None, "PLAYER_TYPE", 0)),
     "MAP_LENGTH": (1, False, command_maplength),
@@ -2105,7 +2065,6 @@ world_db = {
     "MAP_LENGTH": 64,
     "PLAYER_TYPE": 0,
     "WORLD_ACTIVE": 0,
-    "GOD_MOOD": 0,  # #
     "GOD_FAVOR": 0,  # #
     "MAP": False,
     "FAVOR_STAGE": 0,  # #
