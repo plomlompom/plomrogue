@@ -721,7 +721,7 @@ def decrement_lifepoints(t):
             n_species = len([id for id in world_db["Things"]  # #
                              if world_db["Things"][id]["T_TYPE"] == live_type])
             if 0 == n_species:  # #
-                if world_db["FAVOR_STAGE"] == 3 and \
+                if world_db["FAVOR_STAGE"] >= 3 and \
                     live_type == world_db["ANIMAL_0"]:
                     world_db["GOD_FAVOR"] += 3000
                     log("Congratulations! The "
@@ -809,8 +809,24 @@ def enter_altar():  # #
             + "moving (maybe for an attack), \"u\": eating, \"p\": picking "
             + "something up; no letter: waiting).")
         world_db["EMPATHY"] = 1
-    elif world_db["GOD_FAVOR"] > 9000:
-        world_db["FAVOR_STAGE"] = 9001
+    elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] >= 5000:
+        world_db["FAVOR_STAGE"] = 4
+        log("The Island God speaks to you: \"You know what animal I find the "
+             + "cutest? The "
+             + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
+             + "! I think what this islands clearly needs more of is " 
+             + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
+             + "s. Why don't you help? Support thm. Make sure they are well, "
+             + "and they will multiply faster. From now on, I will "
+             + "count each new-born "
+             + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
+             + " (not spawned by me due to undo an extinction event) "
+             + "greatly to your favor. To help you with the feeding, here is "
+             + "something to make the ground bear more consumables.")
+        id = id_setter(-1, "Things")
+        world_db["Things"][id] = new_Thing(world_db["TOOL_1"],
+                                           world_db["altar"])
+    elif world_db["GOD_FAVOR"] > 20000:
         log("The Island God speaks to you: \"You have proven yourself worthy"
              + " of my respect. You were a good citizen to the island, and "
              + "sometimes a better steward to its inhabitants than me. The "
@@ -1060,8 +1076,14 @@ def thingproliferation(t, prol_map):
     """
     # 7DRL: success increments God's mood
     # 7DRL: Plants (no TT_LIFEPOINTS) proliferate only on ":" ground.
+    # 7DRL: Animals only proliferate when >= 0.9 their max HP.
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
-    if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
+    if prolscore and \
+      (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] == 0 or  # #
+       t["T_LIFEPOINTS"] >= 0.9 *  # #
+                        world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]) \
+       and \
+      (1 == prolscore or 1 == (rand.next() % prolscore)):
         candidates = []
         for dir in [directions_db[key] for key in directions_db]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
@@ -1084,6 +1106,10 @@ def thingproliferation(t, prol_map):
                 world_db["GOD_FAVOR"] += 5  # #
             elif t["T_TYPE"] == world_db["PLANT_1"]:  # #
                 world_db["GOD_FAVOR"] += 25  # #
+            elif world_db["FAVOR_STAGE"] >= 4 and \
+                 t["T_TYPE"] == world_db["ANIMAL_1"]:
+                log("The Island God smiles upon a new-born bear baby.")
+                world_db["GOD_FAVOR"] += 750
 
 
 def try_healing(t):
@@ -1109,8 +1135,7 @@ def hunger_per_turn(type_id):
 def hunger(t):
     """Decrement t's satiation,dependent on it trigger lifepoint dec chance."""
     if t["T_SATIATION"] > -32768:
-        #max_hp = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
-        t["T_SATIATION"] -= hunger_per_turn(t["T_TYPE"]) # int(math.sqrt(max_hp))
+        t["T_SATIATION"] -= hunger_per_turn(t["T_TYPE"])
     if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
         if t == world_db["Things"][0]:
             if t["T_SATIATION"] < 0:
@@ -2154,6 +2179,7 @@ commands_db = {
     "TOOL_0": (1, False, specialtypesetter("TOOL_0")),  # #
     "TOOL_1": (1, False, specialtypesetter("TOOL_1")),  # #
     "ANIMAL_0": (1, False, specialtypesetter("ANIMAL_0")),  # #
+    "ANIMAL_1": (1, False, specialtypesetter("ANIMAL_1")),  # #
     "EMPATHY": (1, False, setter(None, "EMPATHY", 0, 1)),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
@@ -2207,6 +2233,7 @@ world_db = {
     "PLANT_0": 0,  # #
     "PLANT_1": 0,  # #
     "ANIMAL_0": 0,  # #
+    "ANIMAL_1": 0,  # #
     "LUMBER": 0,  # #
     "TOOL_0": 0,  # #
     "TOOL_1": 0,  # #
@@ -2219,7 +2246,7 @@ world_db = {
 # 7DRL-specific!
 """Special type settings."""
 specials = ["SLIPPERS", "PLANT_0", "PLANT_1", "LUMBER", "TOOL_0", "TOOL_1",
-            "ANIMAL_0"]
+            "ANIMAL_0", "ANIMAL_1"]
 
 """Mapping of direction names to internal direction chars."""
 directions_db = {"east": "d", "south-east": "c", "south-west": "x",

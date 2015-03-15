@@ -233,8 +233,6 @@ or, if the proliferating thing is animate, any other animate thing.
 Unexplained 7DRL additions
 ---------------------------
 
-GOD_MOOD [-32768 to 32767]
-
 GOD_FAVOR [-32768 to 32767]
 
 SLIPPERS [0 to infinity]
@@ -247,6 +245,12 @@ LUMBER [0 to infinity]
 
 TOOL_0 [0 to infinity]
 
+TOOL_1 [0 to infinity]
+
 EMPATHY [0 to 1]
+
+ANIMAL_0 [0 to infinity]
+
+ANIMAL_1 [0 to infinity]
 
 TT_TOOLS gains the arguments "axe", "carpentry", "wood".
