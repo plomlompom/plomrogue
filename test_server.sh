@@ -27,5 +27,6 @@ echo "Server has quit. Here's the diff of final '_test' to reference save file"
 echo "./testing/ref_end (TEST WENT WELL IF NO LINES FOLLOW):"
 mv _test testing/last_end
 diff testing/last_end testing/ref_end
+#echo 'NODIFF'
 
 rm record__test

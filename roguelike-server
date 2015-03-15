@@ -1022,6 +1022,12 @@ def actor_use(t):
                 log("You can't use a "  # #
                     + world_db["ThingTypes"][type_tool]["TT_NAME"]  # #
                     + " without some wood in your inventory.")  # #
+        elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":  # #
+            pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+            if world_db["MAP"][pos] == ord("."):
+                world_db["MAP"][pos] = ord(":")
+            else:
+                log("Can only fertilize on unfertilized earth.")
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
@@ -2060,6 +2066,7 @@ commands_db = {
     "PLANT_1": (1, False, specialtypesetter("PLANT_1")),  # #
     "LUMBER": (1, False, specialtypesetter("LUMBER")),  # #
     "TOOL_0": (1, False, specialtypesetter("TOOL_0")),  # #
+    "TOOL_1": (1, False, specialtypesetter("TOOL_1")),  # #
     "EMPATHY": (1, False, setter(None, "EMPATHY", 0, 1)),  # #
     "TA_ID": (1, False, command_taid),
     "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
@@ -2115,6 +2122,7 @@ world_db = {
     "PLANT_1": 0,  # #
     "LUMBER": 0,  # #
     "TOOL_0": 0,  # #
+    "TOOL_1": 0,  # #
     "EMPATHY": 1,  # #
     "ThingActions": {},
     "ThingTypes": {},
@@ -2123,7 +2131,7 @@ world_db = {
 
 # 7DRL-specific!
 """Special type settings."""
-specials = ["SLIPPERS", "PLANT_0", "PLANT_1", "LUMBER", "TOOL_0"]  # #
+specials = ["SLIPPERS", "PLANT_0", "PLANT_1", "LUMBER", "TOOL_0", "TOOL_1"]  # #
 
 """Mapping of direction names to internal direction chars."""
 directions_db = {"east": "d", "south-east": "c", "south-west": "x",
