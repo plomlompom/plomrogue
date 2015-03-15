@@ -1374,42 +1374,34 @@ def ai(t):
     """Determine next command/argment for actor t via AI algorithms."""
     # 7DRL add: Don't pick up or search things when inventory is full.
     if t == world_db["Things"][0]:
-        log("%AI------")
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
     if get_dir_to_target(t, "f"):
         if t == world_db["Things"][0]:
-            log("%FLEE")
         return
     sel = get_inventory_slot_to_consume(t)
     if -1 != sel:
         if t == world_db["Things"][0]:
-            log("%EAT")
         t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                           if world_db["ThingActions"][id]["TA_NAME"]
                              == "use"][0]
         t["T_ARGUMENT"] = sel
     elif standing_on_food(t):
         if t == world_db["Things"][0]:
-            log("%STANDINGON")
         if  (len(t["T_CARRIES"]) <  # #
              world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]):  # #
             if t == world_db["Things"][0]:
-                log("%(pickingup)")
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                                  if world_db["ThingActions"][id]["TA_NAME"]
                                  == "pick_up"][0]
     else:
         if t == world_db["Things"][0]:
-            log("%AIMING_FOR_FOOD")
         going_to_known_food_spot = get_dir_to_target(t, "c")
         if not going_to_known_food_spot:
             if t == world_db["Things"][0]:
-                log("%AIMING_FOR_WALKING_FOOD")
             aiming_for_walking_food = get_dir_to_target(t, "a")
             if not aiming_for_walking_food:
                 if t == world_db["Things"][0]:
-                    log("%SEARCHING")
                 get_dir_to_target(t, "s")
 
 
