@@ -688,6 +688,7 @@ def log_help():
     log("Use 'l' to toggle 'look' mode (move an exploration cursor instead of "
         + "the player over the map).")
     log("Use 'PgUp'/PgDn' to scroll the 'Things here' window.")
+    log("The stats window: T=TURN, H=HEALTH, S=SATIATION, G=GOD'S FAVOR.")
     log("See README file for more details.")
 
 

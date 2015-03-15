@@ -4,8 +4,20 @@
 Description
 -----------
 
-See <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day2>
-and <http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day3>.
+You're stranded on an island. 
+To leave, you must please the God that rules it. 
+This God sees the island's animals and plants as its children. 
+So mere hacking and slashing through the wildlife won't do … 
+
+See also:
+<http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day1>
+<http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day2>
+<http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day3>
+<http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day4>
+<http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day5>
+<http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day6>
+<http://www.plomlompom.de/PlomRogue/plomwiki.php?title=7DRL2015Day7>
+
 
 System requirements / installation / running the game
 -----------------------------------------------------
@@ -64,6 +76,9 @@ PgDn - scroll downwards in "Things here" window
 
 Save files, replay game recording, starting over
 ------------------------------------------------
+
+Short version: To start over, quit ./roguelike, delete the files "save" (it's
+also a good idea to delete the file "record_save"), and re-start ./roguelike.
 
 By default, the game state is saved in the file ./save, and read from there on
 (server) restart. Another file name to use can be given with the -l option (i.e.
