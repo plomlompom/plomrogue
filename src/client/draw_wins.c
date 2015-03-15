@@ -546,18 +546,18 @@ extern void draw_win_map(struct Win * win)
 
 extern void draw_win_info(struct Win * win)
 {
-    char * dsc_turn      = "Turn: ";
-    char * dsc_hitpoints = "\nHitpoints: ";
-    char * dsc_satiation = "\nSatiation: ";
-    char * dsc_godsmood  = "\nGod's mood: "; // 7DRL
-    char * dsc_godsfavor = "\nGod's favor: "; // 7DRL
+    char * dsc_turn      = "T:";
+    char * dsc_hitpoints = " | H:";
+    char * dsc_satiation = " S:";
+    // char * dsc_godsmood  = "\nGod's mood: "; // 7DRL
+    char * dsc_godsfavor = " G:"; // 7DRL
     uint16_t maxl =   strlen(dsc_turn) + 5 + strlen(dsc_hitpoints) + 3 //
-                    + strlen(dsc_satiation) + 6 + strlen(dsc_godsmood) + 6 //
+                    + strlen(dsc_satiation) + 6 + /*strlen(dsc_godsmood) + 6*/ //
                     + strlen(dsc_godsfavor) + 6; //
     char * text = try_malloc(maxl + 1, __func__);
-    int test = sprintf(text, "%s%d%s%d%s%d%s%d%s%d", dsc_turn, world.turn,
+    int test = sprintf(text, "%s%d%s%d%s%d%s%d", dsc_turn, world.turn,
                        dsc_hitpoints, world.player_lifepoints, dsc_satiation,
-                       world.player_satiation, dsc_godsmood, world.godsmood, //
+                       world.player_satiation, /*dsc_godsmood, world.godsmood,*/ //
                        dsc_godsfavor, world.godsfavor); //
     exit_trouble(test < 0, __func__, "sprintf");
     add_text_with_linebreaks(win, text);
