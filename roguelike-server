@@ -1348,7 +1348,7 @@ def ai(t):
     """Determine next command/argment for actor t via AI algorithms."""
     # 7DRL add: Don't pick up or search things when inventory is full.
     if t == world_db["Things"][0]:
-         log("%AI------")
+        log("%AI------")
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
     if get_dir_to_target(t, "f"):
@@ -1389,6 +1389,7 @@ def ai(t):
 
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
+    # 7DRL: effort of move action is TA_EFFORT / sqrt(TT_LIFEPOINTS)
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
@@ -1417,7 +1418,14 @@ def turn_over():
                     taid = [a for a in world_db["ThingActions"]
                               if a == Thing["T_COMMAND"]][0]
                     ThingAction = world_db["ThingActions"][taid]
-                    if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
+                    #if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
+                    effort = ThingAction["TA_EFFORT"]  # #
+                    if ThingAction["TA_NAME"] == "move":  # #
+                        type = Thing["T_TYPE"]  # #
+                        max_hp = (world_db["ThingTypes"][type]  # #
+                                 ["TT_LIFEPOINTS"])  # #
+                        effort = int(effort / math.sqrt(max_hp))  # #
+                    if Thing["T_PROGRESS"] == effort:  # #
                         eval("actor_" + ThingAction["TA_NAME"])(Thing)
                         Thing["T_COMMAND"] = 0
                         Thing["T_PROGRESS"] = 0
