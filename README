@@ -25,20 +25,25 @@ start over in a new world, simply delete this file.
 System requirements / installation / running the game
 -----------------------------------------------------
 
-The game is expected to run on Linux systems that contain the ncurses library.
-(It may also work on other Unix-like systems with ncurses, who knows. See
-<https://github.com/plomlompom/plomrogue/issues/2#issuecomment-50972436> for OS
-X compatibility.) Do the following steps:
+The game is expected to run:
+- on Unix systems with a vt100-like terminal environment (xterm will do)
+- that contain the ncurses library
+- and Python3 (version >= 3.2.3).
 
-$ git clone https://github.com/plomlompom/plomrogue
-$ cd plomrogue
+To build it, this is furthermore necessary:
+- gcc (version >= 4.7.2); some llvm masked as gcc was tested successfully on OSX
+- libc library headers (libc6-dev?)
+- ncurses library headers (libncurses5-dev?)
+
+To build and start, do the following steps:
+
 $ ./redo
 $ ./roguelike
 
-(If you got a redo build system installed and in your $PATH, you could also do a
-simple "redo" instead of "./redo". The ./redo script calls a simple partial
-shell script implementation of redo stored below build/redo_scripts/, written by
-Nils Dagsson Moskopp a.k.a. erlehmann.)
+If you got a version of djb's redo build system installed and in your $PATH,
+you could also do a simple "redo" instead of "./redo". The ./redo script calls a
+simple partial shell script implementation of redo stored below
+./build/redo_scripts/, written by Nils Dagsson Moskopp a.k.a. erlehmann.)
 
 ./redo generates two executables ./roguelike-server and ./roguelike-client.
 ./roguelike is a pre-existing shell script that merely executes both of them,
