@@ -1079,7 +1079,6 @@ def id_setter(id, category, id_store=False, start_at_1=False):
                     id = id + 1
                     if id not in world_db[category]:
                         break
-                    return None
             if id_store:
                 id_store.id = id
     return id
