@@ -99,7 +99,7 @@ def obey(command, prefix, replay=False, do_record=False):
     Tokenize command string with shlex.split(comments=True). If replay is set,
     a non-meta command from the commands_db merely triggers obey() on the next
     command from the records file. If not, non-meta commands set
-    io_db["worldstate_updateable"] to world_db["WORLD_EXISTS"], and, if
+    io_db["worldstate_updateable"] to world_db["WORLD_ACTIVE"], and, if
     do_record is set, are recorded to io_db["record_chunk"], and save_world()
     is called (and io_db["record_chunk"] written) if 15 seconds have passed
     since the last time it was called. The prefix string is inserted into the
