@@ -187,9 +187,9 @@ def save_world():
 
     def helper(category, id_string, special_keys={}):
         string = ""
-        for id in world_db[category]:
+        for id in sorted(world_db[category].keys()):
             string = string + id_string + " " + str(id) + "\n"
-            for key in world_db[category][id]:
+            for key in sorted(world_db[category][id].keys()):
                 if not key in special_keys:
                     x = world_db[category][id][key]
                     argument = quote(x) if str == type(x) else str(x)
@@ -199,14 +199,14 @@ def save_world():
         return string
 
     string = ""
-    for key in world_db:
+    for key in sorted(world_db.keys()):
         if dict != type(world_db[key]) and key != "MAP" and \
            key != "WORLD_ACTIVE" and key != "SEED_MAP":
             string = string + key + " " + str(world_db[key]) + "\n"
     string = string + "SEED_MAP " + str(world_db["SEED_MAP"]) + "\n"
     string = string + helper("ThingActions", "TA_ID")
     string = string + helper("ThingTypes", "TT_ID", {"TT_CORPSE_ID": False})
-    for id in world_db["ThingTypes"]:
+    for id in sorted(world_db["ThingTypes"].keys()):
         string = string + "TT_ID " + str(id) + "\n" + "TT_CORPSE_ID " + \
                  str(world_db["ThingTypes"][id]["TT_CORPSE_ID"]) + "\n"
     string = string + helper("Things", "T_ID",
@@ -214,11 +214,11 @@ def save_world():
                               "T_MEMMAP": mapsetter("T_MEMMAP"),
                               "T_MEMTHING": memthing, "fovmap": False,
                               "T_MEMDEPTHMAP": mapsetter("T_MEMDEPTHMAP")})
-    for id in world_db["Things"]:
+    for id in sorted(world_db["Things"].keys()):
         if [] != world_db["Things"][id]["T_CARRIES"]:
             string = string + "T_ID " + str(id) + "\n"
-            for carried_id in world_db["Things"][id]["T_CARRIES"]:
-                string = string + "T_CARRIES " + str(carried_id) + "\n"
+            for carried in sorted(world_db["Things"][id]["T_CARRIES"].keys()):
+                string = string + "T_CARRIES " + str(carried) + "\n"
     string = string + "SEED_RANDOMNESS " + str(rand.seed) + "\n" + \
              "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"])
     atomic_write(io_db["path_save"], string)

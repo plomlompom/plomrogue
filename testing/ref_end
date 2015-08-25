@@ -1,6 +1,6 @@
-TURN 151
-PLAYER_TYPE 0
 MAP_LENGTH 64
+PLAYER_TYPE 0
+TURN 151
 SEED_MAP 1425835989
 TA_ID 1
 TA_EFFORT 1
@@ -18,54 +18,54 @@ TA_ID 5
 TA_EFFORT 45
 TA_NAME "use"
 TT_ID 0
-TT_START_NUMBER 1
-TT_SYMBOL "@"
+TT_CONSUMABLE 0
+TT_LIFEPOINTS 30
 TT_NAME "HUMAN"
 TT_PROLIFERATE 0
-TT_LIFEPOINTS 30
-TT_CONSUMABLE 0
+TT_START_NUMBER 1
+TT_SYMBOL "@"
 TT_ID 1
-TT_START_NUMBER 27
-TT_SYMBOL "a"
+TT_CONSUMABLE 0
+TT_LIFEPOINTS 6
 TT_NAME "ANT"
 TT_PROLIFERATE 0
-TT_LIFEPOINTS 6
-TT_CONSUMABLE 0
+TT_START_NUMBER 27
+TT_SYMBOL "a"
 TT_ID 2
-TT_START_NUMBER 9
-TT_SYMBOL "z"
+TT_CONSUMABLE 0
+TT_LIFEPOINTS 18
 TT_NAME "ZOMBIE"
 TT_PROLIFERATE 0
-TT_LIFEPOINTS 18
-TT_CONSUMABLE 0
+TT_START_NUMBER 9
+TT_SYMBOL "z"
 TT_ID 3
-TT_START_NUMBER 3
-TT_SYMBOL "S"
+TT_CONSUMABLE 0
+TT_LIFEPOINTS 54
 TT_NAME "SHOGGOTH"
 TT_PROLIFERATE 0
-TT_LIFEPOINTS 54
-TT_CONSUMABLE 0
+TT_START_NUMBER 3
+TT_SYMBOL "S"
 TT_ID 4
-TT_START_NUMBER 9
-TT_SYMBOL "#"
+TT_CONSUMABLE 0
+TT_LIFEPOINTS 0
 TT_NAME "DIRT"
 TT_PROLIFERATE 0
-TT_LIFEPOINTS 0
-TT_CONSUMABLE 0
-TT_ID 5
 TT_START_NUMBER 9
-TT_SYMBOL "%"
+TT_SYMBOL "#"
+TT_ID 5
+TT_CONSUMABLE 0
+TT_LIFEPOINTS 0
 TT_NAME "SKELETON"
 TT_PROLIFERATE 0
-TT_LIFEPOINTS 0
-TT_CONSUMABLE 0
+TT_START_NUMBER 9
+TT_SYMBOL "%"
 TT_ID 6
-TT_START_NUMBER 1
-TT_SYMBOL "m"
+TT_CONSUMABLE 512
+TT_LIFEPOINTS 0
 TT_NAME "MAGIC MEAT"
 TT_PROLIFERATE 255
-TT_LIFEPOINTS 0
-TT_CONSUMABLE 512
+TT_START_NUMBER 1
+TT_SYMBOL "m"
 TT_ID 0
 TT_CORPSE_ID 5
 TT_ID 1
@@ -81,23 +81,9 @@ TT_CORPSE_ID 4
 TT_ID 6
 TT_CORPSE_ID 4
 T_ID 0
-T_MEMTHING 5 42 43
-T_MEMTHING 4 12 40
-T_MEMTHING 4 32 31
-T_MEMTHING 4 32 26
-T_MEMTHING 4 36 30
-T_MEMTHING 5 52 34
-T_MEMTHING 4 22 38
-T_MEMTHING 5 10 34
-T_MEMTHING 5 8 36
-T_MEMTHING 5 12 33
+T_ARGUMENT 101
 T_COMMAND 0
 T_LIFEPOINTS 30
-T_TYPE 0
-T_ARGUMENT 101
-T_POSY 24
-T_POSX 30
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "1111111123133233                       000004443326643   1100000"
 T_MEMDEPTHMAP 1 "0111111231123322                      000004433354524   10000000"
 T_MEMDEPTHMAP 2 "00111111221122133                      00003445434444  110000000"
@@ -162,7 +148,6 @@ T_MEMDEPTHMAP 60 "             5       34323334442333234333344533343354533544534
 T_MEMDEPTHMAP 61 "            4      434334553342332332333344343335344664454544434"
 T_MEMDEPTHMAP 62 "           5       454233544345334332335434534444 33444434454433"
 T_MEMDEPTHMAP 63 "         45       4534343434432232232324455444444 53554544335455"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~                       ~~~~~~~~~~~~~~~   ~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~                      ~~~~~~~~~~~~~~~   ~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~                      ~~~~~~~~~~~~~~  ~~~~~~~~~"
@@ -227,21 +212,25 @@ T_MEMMAP 60 "             ~       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "            ~      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "           ~       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~"
 T_MEMMAP 63 "         ~~       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~~~~~~~~~~~~"
-T_ID 1
+T_MEMTHING 5 42 43
+T_MEMTHING 4 12 40
 T_MEMTHING 4 32 31
 T_MEMTHING 4 32 26
 T_MEMTHING 4 36 30
+T_MEMTHING 5 52 34
+T_MEMTHING 4 22 38
 T_MEMTHING 5 10 34
 T_MEMTHING 5 8 36
-T_MEMTHING 5 52 34
 T_MEMTHING 5 12 33
+T_POSX 30
+T_POSY 24
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 0
+T_ID 1
+T_ARGUMENT 119
 T_COMMAND 2
 T_LIFEPOINTS 3
-T_TYPE 1
-T_ARGUMENT 119
-T_POSY 29
-T_POSX 28
-T_PROGRESS 1
 T_MEMDEPTHMAP 0 "     00000000000                       0     443343233          "
 T_MEMDEPTHMAP 1 "     00000000000                      0     6 4433335           "
 T_MEMDEPTHMAP 2 "      00000000000                           4 5443444           "
@@ -306,7 +295,6 @@ T_MEMDEPTHMAP 60 "             4464   5243244433322000011436553544 44         34
 T_MEMDEPTHMAP 61 "            556    44233353554320000022455445443 22         4543"
 T_MEMDEPTHMAP 62 "           4555   4533225634443320000226455344443 23         476"
 T_MEMDEPTHMAP 63 "          5434   45421424435432130000215465455343 33          65"
-T_SATIATION -150
 T_MEMMAP 0 "     ~~~~~~~~~~~                       ~     ~~~~~~~~~          "
 T_MEMMAP 1 "     ~~~~~~~~~~~                      ~     ~ ~~~~~~~           "
 T_MEMMAP 2 "      ~~~~~~~~~~~                           ~ ~~~~~~~           "
@@ -371,23 +359,22 @@ T_MEMMAP 60 "             ~~~~   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~         ~~~~"
 T_MEMMAP 61 "            ~~~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~         ~~~~"
 T_MEMMAP 62 "           ~~~~   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~         ~~~"
 T_MEMMAP 63 "          ~~~~   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~          ~~"
-T_ID 2
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 4 36 30
-T_MEMTHING 5 52 34
+T_MEMTHING 4 32 31
 T_MEMTHING 4 32 26
-T_MEMTHING 4 22 38
+T_MEMTHING 4 36 30
 T_MEMTHING 5 10 34
 T_MEMTHING 5 8 36
+T_MEMTHING 5 52 34
 T_MEMTHING 5 12 33
+T_POSX 28
+T_POSY 29
+T_PROGRESS 1
+T_SATIATION -150
+T_TYPE 1
+T_ID 2
+T_ARGUMENT 99
 T_COMMAND 0
 T_LIFEPOINTS 2
-T_TYPE 1
-T_ARGUMENT 99
-T_POSY 25
-T_POSX 32
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "3522332223453454          01           0012132323     0000111111"
 T_MEMDEPTHMAP 1 "2323233223234443         00           001222232     000011111111"
 T_MEMDEPTHMAP 2 "32223322335443454         00          001223223     000011111112"
@@ -452,7 +439,6 @@ T_MEMDEPTHMAP 60 "                                4344436                       
 T_MEMDEPTHMAP 61 "                                2334342                         "
 T_MEMDEPTHMAP 62 "                                 2253454                        "
 T_MEMDEPTHMAP 63 "                                33344444                        "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~          ~~           ~~~~~~~~~~     ~~~~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~         ~~           ~~~~~~~~~     ~~~~~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~         ~~          ~~~~~~~~~     ~~~~~~~~~~~~"
@@ -517,18 +503,24 @@ T_MEMMAP 60 "                                ~~~~~~~                         "
 T_MEMMAP 61 "                                ~~~~~~~                         "
 T_MEMMAP 62 "                                 ~~~~~~~                        "
 T_MEMMAP 63 "                                ~~~~~~~~                        "
-T_ID 3
-T_MEMTHING 4 32 26
-T_MEMTHING 4 32 31
-T_MEMTHING 5 52 34
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
 T_MEMTHING 4 36 30
+T_MEMTHING 5 52 34
+T_MEMTHING 4 32 26
+T_MEMTHING 4 22 38
+T_MEMTHING 5 10 34
+T_MEMTHING 5 8 36
+T_MEMTHING 5 12 33
+T_POSX 32
+T_POSY 25
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 3
+T_ARGUMENT 120
 T_COMMAND 0
 T_LIFEPOINTS 2
-T_TYPE 1
-T_ARGUMENT 120
-T_POSY 36
-T_POSX 27
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                               4345434          "
 T_MEMDEPTHMAP 1 "                                              5455455           "
 T_MEMDEPTHMAP 2 "                                              5444444           "
@@ -593,7 +585,6 @@ T_MEMDEPTHMAP 60 "             7565    4443445444434443333352254555425334  33332
 T_MEMDEPTHMAP 61 "           45543    44445443554533334334543246366444343   353433"
 T_MEMDEPTHMAP 62 "           66545    5345436454444534433334232356544324233   2424"
 T_MEMDEPTHMAP 63 "         53555     475344544545464234443322343554443443435   453"
-T_SATIATION -150
 T_MEMMAP 0 "                                               ~~~~~~~          "
 T_MEMMAP 1 "                                              ~~~~~~~           "
 T_MEMMAP 2 "                                              ~~~~~~~           "
@@ -658,24 +649,19 @@ T_MEMMAP 60 "             ~~~~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~"
 T_MEMMAP 61 "           ~~~~~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   ~~~~~~"
 T_MEMMAP 62 "           ~~~~~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   ~~~~"
 T_MEMMAP 63 "         ~~~~~     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   ~~~"
+T_MEMTHING 4 32 26
+T_MEMTHING 4 32 31
+T_MEMTHING 5 52 34
+T_MEMTHING 4 36 30
+T_POSX 27
+T_POSY 36
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 4
-T_MEMTHING 5 8 36
-T_MEMTHING 5 4 29
-T_MEMTHING 4 11 24
-T_MEMTHING 4 12 40
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 5 10 34
-T_MEMTHING 5 12 33
-T_MEMTHING 5 11 27
-T_MEMTHING 5 12 21
+T_ARGUMENT 99
 T_COMMAND 0
 T_LIFEPOINTS 2
-T_TYPE 1
-T_ARGUMENT 99
-T_POSY 11
-T_POSX 22
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "0000000000000000000000000000000000435554344566555574455665555656"
 T_MEMDEPTHMAP 1 "0000000000000000000000000000000044555555543556465675555644575633"
 T_MEMDEPTHMAP 2 "0000000000000000000000000000000034443 57566574754456555655766454"
@@ -740,7 +726,6 @@ T_MEMDEPTHMAP 60 "00000000 61312                                                
 T_MEMDEPTHMAP 61 "0000000 624230                                                  "
 T_MEMDEPTHMAP 62 "0000000  33230                                                  "
 T_MEMDEPTHMAP 63 "0000000 44213                                                   "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~.~ ~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -805,21 +790,25 @@ T_MEMMAP 60 "~~~~~~~~ ~~~~~                                                  "
 T_MEMMAP 61 "~~~~~~~ ~~~~~~                                                  "
 T_MEMMAP 62 "~~~~~~~  ~~~~~                                                  "
 T_MEMMAP 63 "~~~~~~~ ~~~~~                                                   "
-T_ID 5
+T_MEMTHING 5 8 36
+T_MEMTHING 5 4 29
 T_MEMTHING 4 11 24
+T_MEMTHING 4 12 40
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_MEMTHING 5 10 34
+T_MEMTHING 5 12 33
+T_MEMTHING 5 11 27
 T_MEMTHING 5 12 21
-T_MEMTHING 4 25 18
-T_MEMTHING 5 27 22
-T_MEMTHING 4 30 21
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
+T_POSX 22
+T_POSY 11
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 5
+T_ARGUMENT 99
 T_COMMAND 0
 T_LIFEPOINTS 1
-T_TYPE 1
-T_ARGUMENT 99
-T_POSY 32
-T_POSX 24
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "33211222121232223323212222423 4                        4        "
 T_MEMDEPTHMAP 1 "2221212331212322223122331513 3                       4          "
 T_MEMDEPTHMAP 2 "222222232221322113221221243265                      5           "
@@ -884,7 +873,6 @@ T_MEMDEPTHMAP 60 "112223222322322554645443                                      
 T_MEMDEPTHMAP 61 "11112121222324455555335                                         "
 T_MEMDEPTHMAP 62 "112122221222322445344435                                        "
 T_MEMDEPTHMAP 63 "111222232323224553555544                                        "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~                        ~        "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ~                       ~          "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                      ~           "
@@ -949,15 +937,22 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~                                        "
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~                                         "
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~                                        "
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~                                        "
+T_MEMTHING 4 11 24
+T_MEMTHING 5 12 21
+T_MEMTHING 4 25 18
+T_MEMTHING 5 27 22
+T_MEMTHING 4 30 21
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_POSX 24
+T_POSY 32
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 6
-T_MEMTHING 5 52 34
+T_ARGUMENT 100
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 100
-T_POSY 46
-T_POSX 27
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "55444555545545554                                               "
 T_MEMDEPTHMAP 1 "4455665555556556                                                "
 T_MEMDEPTHMAP 2 "55546445444545466                                               "
@@ -1022,7 +1017,6 @@ T_MEMDEPTHMAP 60 "34333242333343310000000000001121243000000000000000000000011111
 T_MEMDEPTHMAP 61 "3343223423332200000000000000111221560000000000000000000000011111"
 T_MEMDEPTHMAP 62 "2323323243224100000000000000011122236000000000000000000000000111"
 T_MEMDEPTHMAP 63 "3334324321331000000000000000111222234000000000000000000000000001"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~                                               "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~                                                "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~                                               "
@@ -1087,21 +1081,16 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+T_MEMTHING 5 52 34
+T_POSX 27
+T_POSY 46
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 7
-T_MEMTHING 5 27 22
-T_MEMTHING 4 30 21
-T_MEMTHING 5 12 21
-T_MEMTHING 4 25 18
-T_MEMTHING 4 11 24
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
+T_ARGUMENT 119
 T_COMMAND 2
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 119
-T_POSY 26
-T_POSX 19
-T_PROGRESS 1
 T_MEMDEPTHMAP 0 "0000000000000211111111111  100                                  "
 T_MEMDEPTHMAP 1 "0000000000000211111111113 100                                   "
 T_MEMDEPTHMAP 2 "0000000000000011111111111 100                                   "
@@ -1166,7 +1155,6 @@ T_MEMDEPTHMAP 60 "000000211111100544                                            
 T_MEMDEPTHMAP 61 "000002111111000544                                              "
 T_MEMDEPTHMAP 62 "000001111111000546                                              "
 T_MEMDEPTHMAP 63 "000021111111003356                                              "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~                                  "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~                                   "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~ ~~~                                   "
@@ -1231,17 +1219,22 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~                                              "
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~                                              "
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~                                              "
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~                                              "
+T_MEMTHING 5 27 22
+T_MEMTHING 4 30 21
+T_MEMTHING 5 12 21
+T_MEMTHING 4 25 18
+T_MEMTHING 4 11 24
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_POSX 19
+T_POSY 26
+T_PROGRESS 1
+T_SATIATION -150
+T_TYPE 1
 T_ID 8
-T_MEMTHING 4 32 31
-T_MEMTHING 4 36 30
-T_MEMTHING 5 52 34
+T_ARGUMENT 115
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 115
-T_POSY 45
-T_POSX 22
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                                                "
 T_MEMDEPTHMAP 1 "                                                                "
 T_MEMDEPTHMAP 2 "                                                  6             "
@@ -1306,7 +1299,6 @@ T_MEMDEPTHMAP 60 "     334344332222322111100000000021233242121112333122121122122
 T_MEMDEPTHMAP 61 "  43533342343323333111100000000003321333322212222221223112222212"
 T_MEMDEPTHMAP 62 "3233333433332234221111110000000000112332222122211222322221122112"
 T_MEMDEPTHMAP 63 "3441523243322322212111110000000000222333232341121221132222122122"
-T_SATIATION -150
 T_MEMMAP 0 "                                                                "
 T_MEMMAP 1 "                                                                "
 T_MEMMAP 2 "                                                  ~             "
@@ -1371,17 +1363,18 @@ T_MEMMAP 60 "     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 9
 T_MEMTHING 4 32 31
 T_MEMTHING 4 36 30
 T_MEMTHING 5 52 34
+T_POSX 22
+T_POSY 45
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 9
+T_ARGUMENT 101
 T_COMMAND 0
 T_LIFEPOINTS 4
-T_TYPE 1
-T_ARGUMENT 101
-T_POSY 36
-T_POSX 37
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                               2212             "
 T_MEMDEPTHMAP 1 "                                              2221              "
 T_MEMDEPTHMAP 2 "                                              2121              "
@@ -1446,7 +1439,6 @@ T_MEMDEPTHMAP 60 "44554554454521003332334000001112222232532220000030123344332223
 T_MEMDEPTHMAP 61 "5453665455440002222423000000122332221422430000003122232342232324"
 T_MEMDEPTHMAP 62 "4475354445310023433253000000112123332233322000001222322343323232"
 T_MEMDEPTHMAP 63 "4454533542000333214210000001111133233222233000002221233323423222"
-T_SATIATION -150
 T_MEMMAP 0 "                                               ~~~~             "
 T_MEMMAP 1 "                                              ~~~~              "
 T_MEMMAP 2 "                                              ~~~~              "
@@ -1511,21 +1503,18 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+T_MEMTHING 4 32 31
+T_MEMTHING 4 36 30
+T_MEMTHING 5 52 34
+T_POSX 37
+T_POSY 36
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 10
-T_MEMTHING 5 12 21
-T_MEMTHING 4 30 21
-T_MEMTHING 5 27 22
-T_MEMTHING 4 11 24
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 4 25 18
+T_ARGUMENT 99
 T_COMMAND 0
 T_LIFEPOINTS 5
-T_TYPE 1
-T_ARGUMENT 99
-T_POSY 47
-T_POSX 18
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "00000000000003212134432535 23                                   "
 T_MEMDEPTHMAP 1 "0000000000001222233334222 43                                    "
 T_MEMDEPTHMAP 2 "0000000000000213321433433 43                                    "
@@ -1590,7 +1579,6 @@ T_MEMDEPTHMAP 60 "00000000000000000000000000054545454                           
 T_MEMDEPTHMAP 61 "000000000000000000000000000456555464                            "
 T_MEMDEPTHMAP 62 "00000000000000000000000000004564663454                          "
 T_MEMDEPTHMAP 63 "000000000000000000000000000045354443345                         "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~                                   "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~ ~~                                    "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~ ~~                                    "
@@ -1655,21 +1643,22 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                             "
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                            "
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                          "
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                         "
-T_ID 11
-T_MEMTHING 4 36 30
-T_MEMTHING 5 52 34
-T_MEMTHING 4 32 31
-T_MEMTHING 4 32 26
+T_MEMTHING 5 12 21
 T_MEMTHING 4 30 21
+T_MEMTHING 5 27 22
+T_MEMTHING 4 11 24
 T_MEMTHING 4 31 19
 T_MEMTHING 4 31 19
+T_MEMTHING 4 25 18
+T_POSX 18
+T_POSY 47
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 11
+T_ARGUMENT 119
 T_COMMAND 2
 T_LIFEPOINTS 4
-T_TYPE 1
-T_ARGUMENT 119
-T_POSY 31
-T_POSX 21
-T_PROGRESS 1
 T_MEMDEPTHMAP 0 "                                               6445556          "
 T_MEMDEPTHMAP 1 "                                              4354435           "
 T_MEMDEPTHMAP 2 "11                                            4454554           "
@@ -1734,7 +1723,6 @@ T_MEMDEPTHMAP 60 " 0000        54554   343256355324343444   56444555464   554445
 T_MEMDEPTHMAP 61 "0000        45454   4343445434342433344   54565455544    5365356"
 T_MEMDEPTHMAP 62 "0000       556555   54443555465453333324   444644554754    56566"
 T_MEMDEPTHMAP 63 "000      443465    444454554564343434353   544656565665    55565"
-T_SATIATION -150
 T_MEMMAP 0 "                                               ~~~~~~~          "
 T_MEMMAP 1 "                                              ~~~~~~~           "
 T_MEMMAP 2 "~~                                            ~~~~~~~           "
@@ -1799,17 +1787,22 @@ T_MEMMAP 60 " ~~~~        ~~~~~   ~~~~~~~~~~~~~~~~~~   ~~~~~~~~~~~   ~~~~~~~~"
 T_MEMMAP 61 "~~~~        ~~~~~   ~~~~~~~~~~~~~~~~~~~   ~~~~~~~~~~~    ~~~~~~~"
 T_MEMMAP 62 "~~~~       ~~~~~~   ~~~~~~~~~~~~~~~~~~~~   ~~~~~~~~~~~~    ~~~~~"
 T_MEMMAP 63 "~~~      ~~~~~~    ~~~~~~~~~~~~~~~~~~~~~   ~~~~~~~~~~~~    ~~~~~"
-T_ID 12
+T_MEMTHING 4 36 30
 T_MEMTHING 5 52 34
-T_MEMTHING 4 28 49
-T_MEMTHING 5 42 43
+T_MEMTHING 4 32 31
+T_MEMTHING 4 32 26
+T_MEMTHING 4 30 21
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_POSX 21
+T_POSY 31
+T_PROGRESS 1
+T_SATIATION -150
+T_TYPE 1
+T_ID 12
+T_ARGUMENT 101
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 101
-T_POSY 38
-T_POSX 46
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                               444       0002 4 "
 T_MEMDEPTHMAP 1 "                                              4445      0002 3 0"
 T_MEMDEPTHMAP 2 "                                              4557       002 2 0"
@@ -1874,7 +1867,6 @@ T_MEMDEPTHMAP 60 "             44      33214343532432334145320000000000000000000
 T_MEMDEPTHMAP 61 "           544     334323333334442333135421000000000000000000000"
 T_MEMDEPTHMAP 62 "           45      423243334224453235133432000000000000000000000"
 T_MEMDEPTHMAP 63 "         464      4333243444423222330143430000000000000000000000"
-T_SATIATION -150
 T_MEMMAP 0 "                                               ~~~       ~~~~ ~ "
 T_MEMMAP 1 "                                              ~~~~      ~~~~ ~ ~"
 T_MEMMAP 2 "                                              ~~~~       ~~~ ~ ~"
@@ -1939,21 +1931,18 @@ T_MEMMAP 60 "             ~~      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "           ~~~     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "           ~~      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "         ~~~      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+T_MEMTHING 5 52 34
+T_MEMTHING 4 28 49
+T_MEMTHING 5 42 43
+T_POSX 46
+T_POSY 38
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 13
-T_MEMTHING 4 11 24
-T_MEMTHING 5 12 21
-T_MEMTHING 4 25 18
-T_MEMTHING 5 27 22
-T_MEMTHING 4 30 21
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
+T_ARGUMENT 100
 T_COMMAND 0
 T_LIFEPOINTS 5
-T_TYPE 1
-T_ARGUMENT 100
-T_POSY 31
-T_POSX 23
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "43333442233324335443335445 33                                   "
 T_MEMDEPTHMAP 1 "4343335443443443423453355 54                                    "
 T_MEMDEPTHMAP 2 "3432234233333243532235543 44                                    "
@@ -2018,7 +2007,6 @@ T_MEMDEPTHMAP 60 "0011111122234355645                                           
 T_MEMDEPTHMAP 61 "011111124333443474                                              "
 T_MEMDEPTHMAP 62 "1111222234343465555                                             "
 T_MEMDEPTHMAP 63 "1112111435433453354                                             "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~ ~~                                   "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~ ~~                                    "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~ ~~                                    "
@@ -2083,23 +2071,22 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~                                             "
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~                                              "
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~                                             "
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~                                             "
+T_MEMTHING 4 11 24
+T_MEMTHING 5 12 21
+T_MEMTHING 4 25 18
+T_MEMTHING 5 27 22
+T_MEMTHING 4 30 21
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_POSX 23
+T_POSY 31
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 14
-T_MEMTHING 5 8 36
-T_MEMTHING 5 10 34
-T_MEMTHING 5 12 33
-T_MEMTHING 4 28 49
-T_MEMTHING 4 22 38
-T_MEMTHING 4 12 40
-T_MEMTHING 4 32 26
-T_MEMTHING 4 32 31
-T_MEMTHING 4 36 30
+T_ARGUMENT 120
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 120
-T_POSY 32
-T_POSX 30
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                454  55456           445444353343433233345533443"
 T_MEMDEPTHMAP 1 "                35554 3365           545544254544532433334443433"
 T_MEMDEPTHMAP 2 "                 3344365444          444224333342233244343244344"
@@ -2164,7 +2151,6 @@ T_MEMDEPTHMAP 60 "                     321132433100      323232332 22    3544335
 T_MEMDEPTHMAP 61 "                    2211333333000     2222243332 22    242334534"
 T_MEMDEPTHMAP 62 "                    21115334231000     3321242211 31    32433343"
 T_MEMDEPTHMAP 63 "                   22110324334000     33343333223 22    33343444"
-T_SATIATION -150
 T_MEMMAP 0 "                ~~~  ~~~~~           ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "                ~~~~~ ~~~~           ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "                 ~~~~~~~~~~          ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -2229,18 +2215,24 @@ T_MEMMAP 60 "                     ~~~~~~~~~~~~      ~~~~~~~~~ ~~    ~~~~~~~~~"
 T_MEMMAP 61 "                    ~~~~~~~~~~~~~     ~~~~~~~~~~ ~~    ~~~~~~~~~"
 T_MEMMAP 62 "                    ~~~~~~~~~~~~~~     ~~~~~~~~~~ ~~    ~~~~~~~~"
 T_MEMMAP 63 "                   ~~~~~~~~~~~~~~     ~~~~~~~~~~~ ~~    ~~~~~~~~"
-T_ID 15
-T_MEMTHING 4 28 49
-T_MEMTHING 4 12 40
 T_MEMTHING 5 8 36
-T_MEMTHING 5 4 29
+T_MEMTHING 5 10 34
+T_MEMTHING 5 12 33
+T_MEMTHING 4 28 49
+T_MEMTHING 4 22 38
+T_MEMTHING 4 12 40
+T_MEMTHING 4 32 26
+T_MEMTHING 4 32 31
+T_MEMTHING 4 36 30
+T_POSX 30
+T_POSY 32
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 15
+T_ARGUMENT 120
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 120
-T_POSY 4
-T_POSX 31
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "000000000000000000000000000000000000000000000000                "
 T_MEMDEPTHMAP 1 "0000000000000000000000000000000000000000000                     "
 T_MEMDEPTHMAP 2 "00000000000000000000000000000000000000                          "
@@ -2305,7 +2297,6 @@ T_MEMDEPTHMAP 60 "                                                              
 T_MEMDEPTHMAP 61 "                                                                "
 T_MEMDEPTHMAP 62 "                                                                "
 T_MEMDEPTHMAP 63 "                                                                "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~~~~~~~                     "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~.~~                          "
@@ -2370,23 +2361,19 @@ T_MEMMAP 60 "                                                                "
 T_MEMMAP 61 "                                                                "
 T_MEMMAP 62 "                                                                "
 T_MEMMAP 63 "                                                                "
-T_ID 16
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 4 32 31
+T_MEMTHING 4 28 49
+T_MEMTHING 4 12 40
 T_MEMTHING 5 8 36
-T_MEMTHING 4 36 30
-T_MEMTHING 4 32 26
-T_MEMTHING 4 22 38
-T_MEMTHING 4 25 18
-T_MEMTHING 5 12 21
+T_MEMTHING 5 4 29
+T_POSX 31
+T_POSY 4
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 16
+T_ARGUMENT 115
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 115
-T_POSY 22
-T_POSX 25
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "0000000000000000003675 63               3423332210000      33423"
 T_MEMDEPTHMAP 1 "000000000000000000356  6               4434443300000      433435"
 T_MEMDEPTHMAP 2 "0000000000000000000345  4              543223330000      3433344"
@@ -2451,7 +2438,6 @@ T_MEMDEPTHMAP 60 "                                   3                          
 T_MEMDEPTHMAP 61 "                                  23 3                          "
 T_MEMDEPTHMAP 62 "                                   2  5                         "
 T_MEMDEPTHMAP 63 "                                   3  3                         "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~ ~~               ~~~~~~~~~~~~~      ~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~  ~               ~~~~~~~~~~~~~      ~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~  ~              ~~~~~~~~~~~~      ~~~~~~~"
@@ -2516,18 +2502,24 @@ T_MEMMAP 60 "                                   ~                            "
 T_MEMMAP 61 "                                  ~~ ~                          "
 T_MEMMAP 62 "                                   ~  ~                         "
 T_MEMMAP 63 "                                   ~  ~                         "
-T_ID 17
-T_MEMTHING 4 28 49
-T_MEMTHING 5 42 43
-T_MEMTHING 5 52 34
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_MEMTHING 4 32 31
+T_MEMTHING 5 8 36
+T_MEMTHING 4 36 30
 T_MEMTHING 4 32 26
+T_MEMTHING 4 22 38
+T_MEMTHING 4 25 18
+T_MEMTHING 5 12 21
+T_POSX 25
+T_POSY 22
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 17
+T_ARGUMENT 115
 T_COMMAND 0
 T_LIFEPOINTS 3
-T_TYPE 1
-T_ARGUMENT 115
-T_POSY 33
-T_POSX 32
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                               42221215544535455"
 T_MEMDEPTHMAP 1 "                                              352312256555554454"
 T_MEMDEPTHMAP 2 "                                              3531111545 4565575"
@@ -2592,7 +2584,6 @@ T_MEMDEPTHMAP 60 "             44     34 445245213134454444254445444045654534464
 T_MEMDEPTHMAP 61 "            54     4  434433322255544343423444443605556345553456"
 T_MEMDEPTHMAP 62 "           34     45 4533543433214465454522644446440646456544445"
 T_MEMDEPTHMAP 63 "          33     44 44654333332154345334534425433440555553565454"
-T_SATIATION -150
 T_MEMMAP 0 "                                               ~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "                                              ~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "                                              ~~~~~~~~~~ ~~~~~~~"
@@ -2657,29 +2648,28 @@ T_MEMMAP 60 "             ~~     ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "            ~~     ~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "           ~~     ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "          ~~     ~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 18
-T_COMMAND 2
-T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 101
-T_POSY 30
-T_POSX 21
-T_PROGRESS 4
-T_SATIATION -89
-T_ID 19
-T_MEMTHING 5 8 36
 T_MEMTHING 4 28 49
 T_MEMTHING 5 42 43
 T_MEMTHING 5 52 34
-T_MEMTHING 4 22 38
-T_MEMTHING 4 12 40
+T_MEMTHING 4 32 26
+T_POSX 32
+T_POSY 33
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 18
+T_ARGUMENT 101
+T_COMMAND 2
+T_LIFEPOINTS 0
+T_POSX 21
+T_POSY 30
+T_PROGRESS 4
+T_SATIATION -89
+T_TYPE 4
+T_ID 19
+T_ARGUMENT 120
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 120
-T_POSY 33
-T_POSX 36
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                               44  45433121210000000344434435444"
 T_MEMDEPTHMAP 1 "                               55  55543222110000005453444354454"
 T_MEMDEPTHMAP 2 "                                 6  4544211110000005454455434434"
@@ -2744,7 +2734,6 @@ T_MEMDEPTHMAP 60 "             2       44330000003334333333334333233424322211111
 T_MEMDEPTHMAP 61 "            2      334441000004234433423333333434241332121111111"
 T_MEMDEPTHMAP 62 "           3       334341000003133344344322423233433443411221111"
 T_MEMDEPTHMAP 63 "         43       4233410000033232223332225344324524232311121111"
-T_SATIATION -150
 T_MEMMAP 0 "                               ~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "                               ~.  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "                                 .  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -2809,23 +2798,21 @@ T_MEMMAP 60 "             ~       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "            ~      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "           ~       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "         ~~       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 20
+T_MEMTHING 5 8 36
+T_MEMTHING 4 28 49
+T_MEMTHING 5 42 43
+T_MEMTHING 5 52 34
 T_MEMTHING 4 22 38
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 4 11 24
 T_MEMTHING 4 12 40
-T_MEMTHING 5 10 34
-T_MEMTHING 5 12 33
-T_MEMTHING 5 11 27
-T_MEMTHING 5 12 21
+T_POSX 36
+T_POSY 33
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 20
+T_ARGUMENT 120
 T_COMMAND 0
 T_LIFEPOINTS 2
-T_TYPE 1
-T_ARGUMENT 120
-T_POSY 10
-T_POSX 23
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "0000000000000000000000000000000004                   443  444534"
 T_MEMDEPTHMAP 1 "00000000000000000000000000000000                   645 5445444  "
 T_MEMDEPTHMAP 2 "00000000000000000000000000000003                 565  63434     "
@@ -2890,7 +2877,6 @@ T_MEMDEPTHMAP 60 "00000004  45114                                               
 T_MEMDEPTHMAP 61 "0000000  23112                                                  "
 T_MEMDEPTHMAP 62 "00000005 532112                                                 "
 T_MEMDEPTHMAP 63 "0000004  33112                                                  "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                   ~~~  ~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                   ~~~ ~~~~~~~  "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                 ~~~  ~~~~~     "
@@ -2955,27 +2941,33 @@ T_MEMMAP 60 "~~~~~~~~  ~~~~~                                                 "
 T_MEMMAP 61 "~~~~~~~  ~~~~~                                                  "
 T_MEMMAP 62 "~~~~~~~~ ~~~~~~                                                 "
 T_MEMMAP 63 "~~~~~~~  ~~~~~                                                  "
+T_MEMTHING 4 22 38
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_MEMTHING 4 11 24
+T_MEMTHING 4 12 40
+T_MEMTHING 5 10 34
+T_MEMTHING 5 12 33
+T_MEMTHING 5 11 27
+T_MEMTHING 5 12 21
+T_POSX 23
+T_POSY 10
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 21
+T_ARGUMENT 99
 T_COMMAND 2
 T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 99
-T_POSY 32
 T_POSX 31
+T_POSY 32
 T_PROGRESS 4
 T_SATIATION -74
+T_TYPE 4
 T_ID 22
-T_MEMTHING 4 28 49
-T_MEMTHING 5 42 43
-T_MEMTHING 4 36 30
-T_MEMTHING 5 52 34
+T_ARGUMENT 119
 T_COMMAND 0
 T_LIFEPOINTS 5
-T_TYPE 1
-T_ARGUMENT 119
-T_POSY 47
-T_POSX 33
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                             322        54554 56"
 T_MEMDEPTHMAP 1 "                                            322        55545 454"
 T_MEMDEPTHMAP 2 "                                             33        64523 354"
@@ -3040,7 +3032,6 @@ T_MEMDEPTHMAP 60 "   11110000000000000000000000000000000000000000000000000000000
 T_MEMDEPTHMAP 61 "1111000000000000000000000000000000000000000000000000000000000000"
 T_MEMDEPTHMAP 62 "1100000000000000000000000000000000000000000000000000000000000000"
 T_MEMDEPTHMAP 63 "0000000000000000000000000000000000000000000000000000000000000000"
-T_SATIATION -150
 T_MEMMAP 0 "                                             ~~~        ~~~~~ ~~"
 T_MEMMAP 1 "                                            ~~~        ~~~~~ ~~~"
 T_MEMMAP 2 "                                             ~~        ~~~~~ ~~~"
@@ -3105,19 +3096,19 @@ T_MEMMAP 60 "   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 23
-T_MEMTHING 4 32 31
+T_MEMTHING 4 28 49
+T_MEMTHING 5 42 43
 T_MEMTHING 4 36 30
-T_MEMTHING 4 32 26
 T_MEMTHING 5 52 34
-T_MEMTHING 5 12 33
+T_POSX 33
+T_POSY 47
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 23
+T_ARGUMENT 101
 T_COMMAND 0
 T_LIFEPOINTS 4
-T_TYPE 1
-T_ARGUMENT 101
-T_POSY 30
-T_POSX 29
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                             533343232          "
 T_MEMDEPTHMAP 1 "                                            345224443           "
 T_MEMDEPTHMAP 2 "                                             44533523           "
@@ -3182,7 +3173,6 @@ T_MEMDEPTHMAP 60 "   73544535455553444433324432321100000055544433333344655344544
 T_MEMDEPTHMAP 61 "5364353554454355444333313443452100000003334465556524454445444355"
 T_MEMDEPTHMAP 62 "5654564546433543554332324354432220000005643443454444545544454454"
 T_MEMDEPTHMAP 63 "5643574655543356445233334434442110000004444455534443455464433553"
-T_SATIATION -150
 T_MEMMAP 0 "                                             ~~~~~~~~~          "
 T_MEMMAP 1 "                                            ~~~~~~~~~           "
 T_MEMMAP 2 "                                             ~~~~~~~~           "
@@ -3247,16 +3237,20 @@ T_MEMMAP 60 "   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 24
-T_MEMTHING 5 42 43
+T_MEMTHING 4 32 31
+T_MEMTHING 4 36 30
+T_MEMTHING 4 32 26
 T_MEMTHING 5 52 34
+T_MEMTHING 5 12 33
+T_POSX 29
+T_POSY 30
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 24
+T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_TYPE 1
-T_ARGUMENT 0
-T_POSY 32
-T_POSX 46
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                                                "
 T_MEMDEPTHMAP 1 "                                                                "
 T_MEMDEPTHMAP 2 "                                                                "
@@ -3321,7 +3315,6 @@ T_MEMDEPTHMAP 60 "                           0000000          000               
 T_MEMDEPTHMAP 61 "                          0000000          000                  "
 T_MEMDEPTHMAP 62 "                         00000000           000                 "
 T_MEMDEPTHMAP 63 "                        00000000           000                  "
-T_SATIATION -150
 T_MEMMAP 0 "                                                                "
 T_MEMMAP 1 "                                                                "
 T_MEMMAP 2 "                                                                "
@@ -3386,17 +3379,17 @@ T_MEMMAP 60 "                           ~~~~~~~          ~~~                 "
 T_MEMMAP 61 "                          ~~~~~~~          ~~~                  "
 T_MEMMAP 62 "                         ~~~~~~~~           ~~~                 "
 T_MEMMAP 63 "                        ~~~~~~~~           ~~~                  "
-T_ID 25
+T_MEMTHING 5 42 43
 T_MEMTHING 5 52 34
-T_MEMTHING 4 32 31
-T_MEMTHING 4 36 30
+T_POSX 46
+T_POSY 32
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 25
+T_ARGUMENT 99
 T_COMMAND 0
 T_LIFEPOINTS 3
-T_TYPE 1
-T_ARGUMENT 99
-T_POSY 37
-T_POSX 26
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                             464444             "
 T_MEMDEPTHMAP 1 "                                             45367              "
 T_MEMDEPTHMAP 2 "                                             44564              "
@@ -3461,7 +3454,6 @@ T_MEMDEPTHMAP 60 "64434465553464434444434443645423442333334320443333535423465000
 T_MEMDEPTHMAP 61 "6444654755654444453343434644444344234423344034243354243554540002"
 T_MEMDEPTHMAP 62 "5545355454643235443324523454463343543334333205543444335433445400"
 T_MEMDEPTHMAP 63 "4664454555434334344533245465443433534223335430334544445344435450"
-T_SATIATION -150
 T_MEMMAP 0 "                                             ~~~~~~             "
 T_MEMMAP 1 "                                             ~~~~~              "
 T_MEMMAP 2 "                                             ~~~~~              "
@@ -3526,19 +3518,18 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 26
-T_MEMTHING 4 28 49
-T_MEMTHING 5 42 43
+T_MEMTHING 5 52 34
 T_MEMTHING 4 32 31
 T_MEMTHING 4 36 30
-T_MEMTHING 5 52 34
+T_POSX 26
+T_POSY 37
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 26
+T_ARGUMENT 120
 T_COMMAND 0
 T_LIFEPOINTS 5
-T_TYPE 1
-T_ARGUMENT 120
-T_POSY 51
-T_POSX 28
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                                             323222        43 6 "
 T_MEMDEPTHMAP 1 "                                            431232        54 6 6"
 T_MEMDEPTHMAP 2 "                                             53222        44 6 6"
@@ -3603,7 +3594,6 @@ T_MEMDEPTHMAP 60 "  323112222243000000000000000000000000000000000000000000000000
 T_MEMDEPTHMAP 61 "2211212111340000000000000000000000000000000000000000000000000000"
 T_MEMDEPTHMAP 62 "1222112215200000000000000000000000000000000000000000000000000000"
 T_MEMDEPTHMAP 63 "1221222320000000000000000000000000000000000000000000000000000000"
-T_SATIATION -150
 T_MEMMAP 0 "                                             ~~~~~~        ~~ ~ "
 T_MEMMAP 1 "                                            ~~~~~~        ~~ ~ ~"
 T_MEMMAP 2 "                                             ~~~~~        ~~ ~ ~"
@@ -3668,23 +3658,20 @@ T_MEMMAP 60 "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+T_MEMTHING 4 28 49
+T_MEMTHING 5 42 43
+T_MEMTHING 4 32 31
+T_MEMTHING 4 36 30
+T_MEMTHING 5 52 34
+T_POSX 28
+T_POSY 51
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
 T_ID 27
-T_MEMTHING 4 22 38
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 5 12 21
-T_MEMTHING 4 11 24
-T_MEMTHING 4 12 40
-T_MEMTHING 5 10 34
-T_MEMTHING 5 12 33
-T_MEMTHING 5 11 27
+T_ARGUMENT 100
 T_COMMAND 0
 T_LIFEPOINTS 4
-T_TYPE 1
-T_ARGUMENT 100
-T_POSY 10
-T_POSX 34
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "1122222212222131232122123222342333                    44534     "
 T_MEMDEPTHMAP 1 "12122222232212231132322221233334                   74546        "
 T_MEMDEPTHMAP 2 "11111232112321212222221231222546                4 54444      000"
@@ -3749,7 +3736,6 @@ T_MEMDEPTHMAP 60 "43433445642644                                                
 T_MEMDEPTHMAP 61 "24323443343444                                                  "
 T_MEMDEPTHMAP 62 "344222244433535                                                 "
 T_MEMDEPTHMAP 63 "22333354334455                                                  "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                    ~~~~~     "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                   ~~~~~        "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~                ~ ~~~~~      ~~~"
@@ -3814,23 +3800,24 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 61 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 62 "~~~~~~~~~~~~~~~                                                 "
 T_MEMMAP 63 "~~~~~~~~~~~~~~                                                  "
-T_ID 28
-T_MEMTHING 5 10 34
+T_MEMTHING 4 22 38
 T_MEMTHING 4 31 19
 T_MEMTHING 4 31 19
-T_MEMTHING 5 4 29
-T_MEMTHING 4 12 40
+T_MEMTHING 5 12 21
 T_MEMTHING 4 11 24
+T_MEMTHING 4 12 40
+T_MEMTHING 5 10 34
 T_MEMTHING 5 12 33
 T_MEMTHING 5 11 27
-T_MEMTHING 5 12 21
+T_POSX 34
+T_POSY 10
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 1
+T_ID 28
+T_ARGUMENT 100
 T_COMMAND 0
 T_LIFEPOINTS 14
-T_TYPE 2
-T_ARGUMENT 100
-T_POSY 8
-T_POSX 26
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "0000000000000000000000000000000001112233333            534424344"
 T_MEMDEPTHMAP 1 "000000000000000000000000000000001312214             555544664543"
 T_MEMDEPTHMAP 2 "000000000000000000000000000000011222               4424445354544"
@@ -3895,7 +3882,6 @@ T_MEMDEPTHMAP 60 "11111222230002                                                
 T_MEMDEPTHMAP 61 "11112212300022                                                  "
 T_MEMDEPTHMAP 62 "11111112200011                                                  "
 T_MEMDEPTHMAP 63 "11111211000122                                                  "
-T_SATIATION 362
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~            ~~~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~~~             ~~~~~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~.               ~~~~~~~~~~~~~"
@@ -3960,19 +3946,24 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 61 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 62 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 63 "~~~~~~~~~~~~~~                                                  "
-T_ID 29
-T_MEMTHING 4 28 49
-T_MEMTHING 4 22 38
+T_MEMTHING 5 10 34
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_MEMTHING 5 4 29
 T_MEMTHING 4 12 40
-T_MEMTHING 5 52 34
-T_MEMTHING 4 36 30
+T_MEMTHING 4 11 24
+T_MEMTHING 5 12 33
+T_MEMTHING 5 11 27
+T_MEMTHING 5 12 21
+T_POSX 26
+T_POSY 8
+T_PROGRESS 0
+T_SATIATION 362
+T_TYPE 2
+T_ID 29
+T_ARGUMENT 120
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_TYPE 2
-T_ARGUMENT 120
-T_POSY 44
-T_POSX 34
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "                54     4               4454450335545565546453454"
 T_MEMDEPTHMAP 1 "                 4     4              54333304333344456554444657"
 T_MEMDEPTHMAP 2 "                  2      4             5445435444456547556644464"
@@ -4037,7 +4028,6 @@ T_MEMDEPTHMAP 60 "             2433   2000000005 4312221211111111111111312211110
 T_MEMDEPTHMAP 61 "           3433    000000000054323211112211111111111133211111000"
 T_MEMDEPTHMAP 62 "           4332   1000000000043432221222221111111111111212211111"
 T_MEMDEPTHMAP 63 "         33335   10000000000544222232122211111111111111222211111"
-T_SATIATION -150
 T_MEMMAP 0 "                ~~     ~               ~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "                 ~     ~              ~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "                  ~      ~             ~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -4102,25 +4092,20 @@ T_MEMMAP 60 "             ~~~~   ~~~~~~~~~~ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "           ~~~~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "           ~~~~   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "         ~~~~~   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 30
-T_MEMTHING 5 27 22
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 4 32 31
-T_MEMTHING 4 36 30
-T_MEMTHING 5 8 36
-T_MEMTHING 4 32 26
+T_MEMTHING 4 28 49
 T_MEMTHING 4 22 38
-T_MEMTHING 4 25 18
-T_MEMTHING 4 11 24
-T_MEMTHING 5 12 21
+T_MEMTHING 4 12 40
+T_MEMTHING 5 52 34
+T_MEMTHING 4 36 30
+T_POSX 34
+T_POSY 44
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
+T_ID 30
+T_ARGUMENT 119
 T_COMMAND 0
 T_LIFEPOINTS 15
-T_TYPE 2
-T_ARGUMENT 119
-T_POSY 22
-T_POSX 22
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "000000000000000000000001100             322221111111100   323422"
 T_MEMDEPTHMAP 1 "000000000000000000000001000            42322322111100   43233323"
 T_MEMDEPTHMAP 2 "00000000000000000000000 100            22222211111 0    33232233"
@@ -4185,7 +4170,6 @@ T_MEMDEPTHMAP 60 "35543                                                         
 T_MEMDEPTHMAP 61 "354                                                             "
 T_MEMDEPTHMAP 62 "354                                                             "
 T_MEMDEPTHMAP 63 "55                                                              "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~             ~~~~~~~~~~~~~~~   ~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~            ~~~~~~~~~~~~~~   ~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~ ~~~            ~~~~~~~~~~~ ~    ~~~~~~~~"
@@ -4250,22 +4234,26 @@ T_MEMMAP 60 "~~~~~                                                           "
 T_MEMMAP 61 "~~~                                                             "
 T_MEMMAP 62 "~~~                                                             "
 T_MEMMAP 63 "~~                                                              "
-T_ID 31
-T_MEMTHING 4 36 30
-T_MEMTHING 5 52 34
+T_MEMTHING 5 27 22
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
 T_MEMTHING 4 32 31
+T_MEMTHING 4 36 30
+T_MEMTHING 5 8 36
 T_MEMTHING 4 32 26
-T_MEMTHING 4 30 21
+T_MEMTHING 4 22 38
 T_MEMTHING 4 25 18
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
+T_MEMTHING 4 11 24
+T_MEMTHING 5 12 21
+T_POSX 22
+T_POSY 22
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
+T_ID 31
+T_ARGUMENT 115
 T_COMMAND 0
 T_LIFEPOINTS 15
-T_TYPE 2
-T_ARGUMENT 115
-T_POSY 36
-T_POSX 19
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "1111110000000000   00                                           "
 T_MEMDEPTHMAP 1 "1111110000000000   0                                            "
 T_MEMDEPTHMAP 2 "2111111000000000   0                                            "
@@ -4330,7 +4318,6 @@ T_MEMDEPTHMAP 60 "                      344       45553444343375   54345   44564
 T_MEMDEPTHMAP 61 "                     554        44534335544555    44445   545452"
 T_MEMDEPTHMAP 62 "                     354        5434434455434544   454544   4543"
 T_MEMDEPTHMAP 63 "                    4564        4435365354566454   444464    433"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~   ~~                                           "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~   ~                                            "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~   ~                                            "
@@ -4395,23 +4382,23 @@ T_MEMMAP 60 "                      ~~~       ~~~~~~~~~~~~~~   ~~~~~   ~~~~~~~"
 T_MEMMAP 61 "                     ~~~        ~~~~~~~~~~~~~~    ~~~~~   ~~~~~~"
 T_MEMMAP 62 "                     ~~~        ~~~~~~~~~~~~~~~~   ~~~~~~   ~~~~"
 T_MEMMAP 63 "                    ~~~~        ~~~~~~~~~~~~~~~~   ~~~~~~    ~~~"
+T_MEMTHING 4 36 30
+T_MEMTHING 5 52 34
+T_MEMTHING 4 32 31
+T_MEMTHING 4 32 26
+T_MEMTHING 4 30 21
+T_MEMTHING 4 25 18
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_POSX 19
+T_POSY 36
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
 T_ID 32
-T_MEMTHING 4 22 38
-T_MEMTHING 4 28 49
-T_MEMTHING 5 8 36
-T_MEMTHING 4 12 40
-T_MEMTHING 5 10 34
-T_MEMTHING 5 11 27
-T_MEMTHING 5 12 33
-T_MEMTHING 5 12 21
-T_MEMTHING 4 11 24
+T_ARGUMENT 101
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_TYPE 2
-T_ARGUMENT 101
-T_POSY 11
-T_POSX 24
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "111222000000000000000000000000043  54535435434455544334344534353"
 T_MEMDEPTHMAP 1 "111121200000000000000000000000444  53444433464554543446644544534"
 T_MEMDEPTHMAP 2 "222121111000000000000000000000  65  6665434446443343433444444345"
@@ -4476,7 +4463,6 @@ T_MEMDEPTHMAP 60 "000113 110000                4                           34554
 T_MEMDEPTHMAP 61 "00211 211000                56                          45644754"
 T_MEMDEPTHMAP 62 "00211 211000                54                           4646445"
 T_MEMDEPTHMAP 63 "02112111000                 4                            5555465"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ~.  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -4541,21 +4527,24 @@ T_MEMMAP 60 "~~~~~~ ~~~~~~                ~                           ~~~~~~~"
 T_MEMMAP 61 "~~~~~ ~~~~~~                ~~                          ~~~~~~~~"
 T_MEMMAP 62 "~~~~~ ~~~~~~                ~~                           ~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~                 ~                            ~~~~~~~"
-T_ID 33
-T_MEMTHING 4 12 40
-T_MEMTHING 5 12 33
-T_MEMTHING 5 10 34
 T_MEMTHING 4 22 38
-T_MEMTHING 4 36 30
+T_MEMTHING 4 28 49
 T_MEMTHING 5 8 36
-T_MEMTHING 5 52 34
+T_MEMTHING 4 12 40
+T_MEMTHING 5 10 34
+T_MEMTHING 5 11 27
+T_MEMTHING 5 12 33
+T_MEMTHING 5 12 21
+T_MEMTHING 4 11 24
+T_POSX 24
+T_POSY 11
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
+T_ID 33
+T_ARGUMENT 119
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_TYPE 2
-T_ARGUMENT 119
-T_POSY 23
-T_POSX 26
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "0000000000000   645 3334334            2100000004343233333312222"
 T_MEMDEPTHMAP 1 "0000000000000    44 3344322           22000000144442334434132321"
 T_MEMDEPTHMAP 2 "00000000000000    4453534432          31000000445423333332323211"
@@ -4620,7 +4609,6 @@ T_MEMDEPTHMAP 60 "                       4 32634545115004445         4   3455454
 T_MEMDEPTHMAP 61 "                     54 445543551115005643         5   454454445"
 T_MEMDEPTHMAP 62 "                     45 3345434551145054343         3   44453555"
 T_MEMDEPTHMAP 63 "                    55 4434344652115406457          5   45465554"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~   ~~~ ~~~~~~~            ~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~    ~~ ~~~~~~~           ~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~    ~~~~~~~~~~          ~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -4685,23 +4673,22 @@ T_MEMMAP 60 "                       ~ ~~~~~~~~~~~~~~~~~         ~   ~~~~~~~~~"
 T_MEMMAP 61 "                     ~~ ~~~~~~~~~~~~~~~~~~         ~   ~~~~~~~~~"
 T_MEMMAP 62 "                     ~~ ~~~~~~~~~~~~~~~~~~~         ~   ~~~~~~~~"
 T_MEMMAP 63 "                    ~~ ~~~~~~~~~~~~~~~~~~~          ~   ~~~~~~~~"
-T_ID 34
-T_MEMTHING 5 4 29
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 5 12 21
-T_MEMTHING 5 11 27
-T_MEMTHING 4 11 24
 T_MEMTHING 4 12 40
-T_MEMTHING 5 10 34
 T_MEMTHING 5 12 33
+T_MEMTHING 5 10 34
+T_MEMTHING 4 22 38
+T_MEMTHING 4 36 30
+T_MEMTHING 5 8 36
+T_MEMTHING 5 52 34
+T_POSX 26
+T_POSY 23
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
+T_ID 34
+T_ARGUMENT 99
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_TYPE 2
-T_ARGUMENT 99
-T_POSY 15
-T_POSX 30
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "211200000012223222311000000133342333434      0000000000000000000"
 T_MEMDEPTHMAP 1 "3221100000022222122110000002233333333       00000000000000000000"
 T_MEMDEPTHMAP 2 "23433211000002212222210000002343435        000000000000000000000"
@@ -4766,7 +4753,6 @@ T_MEMDEPTHMAP 60 "23224433322233                                                
 T_MEMDEPTHMAP 61 "13442422333244                                                  "
 T_MEMDEPTHMAP 62 "134334333232544                                                 "
 T_MEMDEPTHMAP 63 "23424332233345                                                  "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~      ~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~       ~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~        ~~~~~~~~~~~~~~~~~~~~~"
@@ -4831,15 +4817,24 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 61 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 62 "~~~~~~~~~~~~~~~                                                 "
 T_MEMMAP 63 "~~~~~~~~~~~~~~                                                  "
+T_MEMTHING 5 4 29
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
+T_MEMTHING 5 12 21
+T_MEMTHING 5 11 27
+T_MEMTHING 4 11 24
+T_MEMTHING 4 12 40
+T_MEMTHING 5 10 34
+T_MEMTHING 5 12 33
+T_POSX 30
+T_POSY 15
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
 T_ID 35
-T_MEMTHING 5 52 34
+T_ARGUMENT 101
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_TYPE 2
-T_ARGUMENT 101
-T_POSY 40
-T_POSX 21
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "54346554555664335                                               "
 T_MEMDEPTHMAP 1 "53444354465555554                                               "
 T_MEMDEPTHMAP 2 "454445554444443565                                              "
@@ -4904,7 +4899,6 @@ T_MEMDEPTHMAP 60 "00000000000000000335654455546656554355645545556455635454443566
 T_MEMDEPTHMAP 61 "0000000000000000044355464444645554454444465545565665574545653554"
 T_MEMDEPTHMAP 62 "0000000000000000054445465656653545445464445565475545754545645465"
 T_MEMDEPTHMAP 63 "0000000000000000544563453355544344334455556656455665675445556444"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~                                               "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~                                               "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~                                              "
@@ -4969,23 +4963,16 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+T_MEMTHING 5 52 34
+T_POSX 21
+T_POSY 40
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
 T_ID 36
-T_MEMTHING 5 8 36
-T_MEMTHING 4 12 40
-T_MEMTHING 5 11 27
-T_MEMTHING 5 12 33
-T_MEMTHING 5 10 34
-T_MEMTHING 4 11 24
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 5 12 21
+T_ARGUMENT 99
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_TYPE 2
-T_ARGUMENT 99
-T_POSY 17
-T_POSX 21
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "00000000000000000000000000001115     453554334435544111111000000"
 T_MEMDEPTHMAP 1 "0000000000000000000000000001113 3    556555344444311111000000035"
 T_MEMDEPTHMAP 2 "000000000000000000000000000111   5   635445555444211110000043454"
@@ -5050,7 +5037,6 @@ T_MEMDEPTHMAP 60 "000000022211100                                               
 T_MEMDEPTHMAP 61 "00000002211110                                                  "
 T_MEMDEPTHMAP 62 "00000001121110                                                  "
 T_MEMDEPTHMAP 63 "00000022211100                                                  "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~     ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ .    ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   .   ~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -5115,24 +5101,24 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~                                                 "
 T_MEMMAP 61 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 62 "~~~~~~~~~~~~~~                                                  "
 T_MEMMAP 63 "~~~~~~~~~~~~~~                                                  "
-T_ID 37
-T_MEMTHING 5 27 22
-T_MEMTHING 4 31 19
-T_MEMTHING 4 31 19
-T_MEMTHING 4 36 30
 T_MEMTHING 5 8 36
-T_MEMTHING 4 32 26
-T_MEMTHING 4 25 18
-T_MEMTHING 4 22 38
+T_MEMTHING 4 12 40
+T_MEMTHING 5 11 27
+T_MEMTHING 5 12 33
+T_MEMTHING 5 10 34
 T_MEMTHING 4 11 24
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
 T_MEMTHING 5 12 21
+T_POSX 21
+T_POSY 17
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 2
+T_ID 37
+T_ARGUMENT 101
 T_COMMAND 0
 T_LIFEPOINTS 54
-T_TYPE 3
-T_ARGUMENT 101
-T_POSY 14
-T_POSX 26
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "00000000001111110000011112335           333244345333223   443332"
 T_MEMDEPTHMAP 1 "0000000000111111000001122245           34234443442322   43443243"
 T_MEMDEPTHMAP 2 "0000000000001111120000111135           3443433232233    34353434"
@@ -5197,7 +5183,6 @@ T_MEMDEPTHMAP 60 "0034554646444                                                 
 T_MEMDEPTHMAP 61 "044465545454                                                    "
 T_MEMDEPTHMAP 62 "0554445453555                                                   "
 T_MEMDEPTHMAP 63 "364663335463                                                    "
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~           ~~~~~~~~~~~~~~~   ~~~~~~"
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~           ~~~~~~~~~~~~~~   ~~~~~~~~"
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~           ~~~~~~~~~~~~~    ~~~~~~~~"
@@ -5262,18 +5247,25 @@ T_MEMMAP 60 "~~~~~~~~~~~~~                                                   "
 T_MEMMAP 61 "~~~~~~~~~~~~                                                    "
 T_MEMMAP 62 "~~~~~~~~~~~~~                                                   "
 T_MEMMAP 63 "~~~~~~~~~~~~                                                    "
-T_ID 38
-T_MEMTHING 4 25 18
-T_MEMTHING 5 52 34
-T_MEMTHING 4 32 31
+T_MEMTHING 5 27 22
+T_MEMTHING 4 31 19
+T_MEMTHING 4 31 19
 T_MEMTHING 4 36 30
+T_MEMTHING 5 8 36
+T_MEMTHING 4 32 26
+T_MEMTHING 4 25 18
+T_MEMTHING 4 22 38
+T_MEMTHING 4 11 24
+T_MEMTHING 5 12 21
+T_POSX 26
+T_POSY 14
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 3
+T_ID 38
+T_ARGUMENT 119
 T_COMMAND 0
 T_LIFEPOINTS 53
-T_TYPE 3
-T_ARGUMENT 119
-T_POSY 38
-T_POSX 27
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "444553545564436453                                              "
 T_MEMDEPTHMAP 1 "44555644565557645                                               "
 T_MEMDEPTHMAP 2 "44444444466445545                                               "
@@ -5338,7 +5330,6 @@ T_MEMDEPTHMAP 60 "46556354543332332233323124534322332221122121232323334322443300
 T_MEMDEPTHMAP 61 "4443534544344224231333213443525333312212222321423212242334434100"
 T_MEMDEPTHMAP 62 "4534654443443233222242233336442443421221222112122133222233343340"
 T_MEMDEPTHMAP 63 "4545534426423232432422225344323423212211122213322232322343243243"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~~~~~~~~~~~                                              "
 T_MEMMAP 1 "~~~~~~~~~~~~~~~~~                                               "
 T_MEMMAP 2 "~~~~~~~~~~~~~~~~~                                               "
@@ -5403,16 +5394,19 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-T_ID 39
-T_MEMTHING 4 36 30
+T_MEMTHING 4 25 18
 T_MEMTHING 5 52 34
+T_MEMTHING 4 32 31
+T_MEMTHING 4 36 30
+T_POSX 27
+T_POSY 38
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 3
+T_ID 39
+T_ARGUMENT 115
 T_COMMAND 0
 T_LIFEPOINTS 53
-T_TYPE 3
-T_ARGUMENT 115
-T_POSY 43
-T_POSX 17
-T_PROGRESS 0
 T_MEMDEPTHMAP 0 "34363424                                                        "
 T_MEMDEPTHMAP 1 "4233233                                                         "
 T_MEMDEPTHMAP 2 "33332343                                                        "
@@ -5477,7 +5471,6 @@ T_MEMDEPTHMAP 60 "00000000000000000000002535436353312444445214434453543463544433
 T_MEMDEPTHMAP 61 "0000000000000000000000334334324331156335451444343735534455455547"
 T_MEMDEPTHMAP 62 "0000000000000000000000053444344543124643544413445555445545544455"
 T_MEMDEPTHMAP 63 "0000000000000000000000023434453434512455445521435533554554355555"
-T_SATIATION -150
 T_MEMMAP 0 "~~~~~~~~                                                        "
 T_MEMMAP 1 "~~~~~~~                                                         "
 T_MEMMAP 2 "~~~~~~~~                                                        "
@@ -5542,167 +5535,174 @@ T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 T_MEMMAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+T_MEMTHING 4 36 30
+T_MEMTHING 5 52 34
+T_POSX 17
+T_POSY 43
+T_PROGRESS 0
+T_SATIATION -150
+T_TYPE 3
 T_ID 40
+T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 22
 T_POSX 38
+T_POSY 22
 T_PROGRESS 0
 T_SATIATION 0
+T_TYPE 4
 T_ID 41
+T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 25
 T_POSX 18
+T_POSY 25
 T_PROGRESS 0
 T_SATIATION 0
+T_TYPE 4
 T_ID 42
+T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 11
 T_POSX 24
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 43
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 28
-T_POSX 49
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 44
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 12
-T_POSX 40
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 45
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 36
-T_POSX 30
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 46
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 32
-T_POSX 26
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 47
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 31
-T_POSX 19
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 48
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 4
-T_ARGUMENT 0
-T_POSY 31
-T_POSX 19
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 49
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 27
-T_POSX 22
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 50
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 42
-T_POSX 43
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 51
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 10
-T_POSX 34
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 52
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 8
-T_POSX 36
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 53
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 52
-T_POSX 34
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 54
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 12
-T_POSX 33
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 55
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 4
-T_POSX 29
-T_PROGRESS 0
-T_SATIATION 0
-T_ID 56
-T_COMMAND 0
-T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
 T_POSY 11
-T_POSX 27
 T_PROGRESS 0
 T_SATIATION 0
-T_ID 57
+T_TYPE 4
+T_ID 43
+T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_TYPE 5
-T_ARGUMENT 0
-T_POSY 12
-T_POSX 21
+T_POSX 49
+T_POSY 28
 T_PROGRESS 0
 T_SATIATION 0
+T_TYPE 4
+T_ID 44
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 40
+T_POSY 12
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 4
+T_ID 45
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 30
+T_POSY 36
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 4
+T_ID 46
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 26
+T_POSY 32
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 4
+T_ID 47
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 19
+T_POSY 31
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 4
+T_ID 48
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 19
+T_POSY 31
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 4
+T_ID 49
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 22
+T_POSY 27
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 50
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 43
+T_POSY 42
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 51
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 34
+T_POSY 10
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 52
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 36
+T_POSY 8
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 53
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 34
+T_POSY 52
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 54
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 33
+T_POSY 12
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 55
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 29
+T_POSY 4
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 56
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 27
+T_POSY 11
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
+T_ID 57
+T_ARGUMENT 0
+T_COMMAND 0
+T_LIFEPOINTS 0
+T_POSX 21
+T_POSY 12
+T_PROGRESS 0
+T_SATIATION 0
+T_TYPE 5
 SEED_RANDOMNESS 3983596776
 WORLD_ACTIVE 1
