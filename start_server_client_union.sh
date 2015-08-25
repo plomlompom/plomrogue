@@ -32,7 +32,7 @@ fi
 
 # Use shell script's arguments for server and pipe server output to log file.
 # This script's wrapper script will read it out on exit.
-./roguelike-server "$@" > log 2>&1 &
+python3 ./roguelike-server "$@" > log 2>&1 &
 
 # Give server some time to start up and exit on error.
 sleep 0.01
