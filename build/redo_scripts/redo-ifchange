@@ -208,7 +208,7 @@ _do() {
     fi
     printf '%sredo %s%s%s%s%s\n' \
       "$green" "$REDO_DEPTH" "$bold" "$target_relpath" "$plain" >&2
-    ( _run_dofile "$target" "$base" "$tmp.tmp" )
+    ( _run_dofile "$target" "${base##*/}" "$tmp.tmp" )
     rv="$?"
     # Add non existing .do file to non-existence dependencies so
     # target is built when .do file in question is created.
