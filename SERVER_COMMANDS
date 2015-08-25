@@ -89,7 +89,7 @@ God commands
 TURN [0 to 65535]
 Set world turn to argument. (Initial value: 0.)
 
-PLAYER_TYPE [0 to 255]
+PLAYER_TYPE [0 to infinity]
 Set to argument ID of thing type into which a new world's player character will
 be generated. (Initial value: 0.)
 
@@ -117,7 +117,7 @@ action is defined, and a thing of ID 0 (= a player character) that is not part
 of any other thing's inventory, (re-)build all animate things' fields of view,
 and activate world. (Initial value: 0.)
 
-TA_ID [0 to 255]
+TA_ID [0 to infinity]
 Select thing action to manipulate by argument as ID. If argument is 0, change it
 to the lowest unused thing action ID greater than 0. If action of ID does not
 exist yet, create it with default name "wait" and default effort 1.
@@ -131,14 +131,14 @@ command). Legal worlds need at least one action of name "wait", so if this
 unsets the world's only "wait" action, the world is deactivated, and the
 ./server/worldstate file removed.
 
-T_ID [-32768 to 32767]
-Select thing to manipulate by argument as ID. If argument is <0 or >255, change
-it to the lowest unused thing ID. If thing of ID does not exist yet, create it
-with default position of y=0/x=0, the first thing type's ID, and that type's
+T_ID [-1 to infinity]
+Select thing to manipulate by argument as ID. If argument is <0, change it to
+the lowest unused thing ID. If thing of ID does not exist yet, create it with
+default position of y=0/x=0, the first thing type's ID, and that type's
 lifepoints value; if world is active and the thing is animate, build its field
 of view.
 
-T_TYPE [0 to 255]
+T_TYPE [0 to infinity]
 Set selected thing's type ID to argument, if the respective ThingType exists.
 
 T_POSY [0 to 255]
@@ -149,7 +149,7 @@ T_POSX [0 to 255]
 Set selected thing's map column position to argument. Delete thing's field of
 view and, if world is active, rebuild it.
 
-T_COMMAND [0 to 255]
+T_COMMAND [0 to infinity]
 Set to argument the action thing is currently performing, as identified by its
 thing action ID, if a thing action of that ID is defined. If argument is 0, the
 thing's command ID is set to that, implying that it is not performing any
@@ -171,7 +171,7 @@ below its thing type's initial lifepoints, there is a 1/32 chance each turn of
 waiting action that the thing's lifepoints will rise. For values affecting the
 thing's lifepoints negatively, see note on TT_LIFEPOINTS.
 
-T_CARRIES [0 to 255]
+T_CARRIES [0 to infinity]
 Add thing of ID in argument to inventory of selected thing, if said thing is
 available for carrying and not the selected thing.
 
@@ -183,15 +183,15 @@ T_MEMDEPTHMAP [0 to 255] [string]
 Set part of selected thing's game map memory depth map to string argument: the
 line of the argument's number.
 
-T_MEMTHING [0 to 255] [0 to 255] [0 to 255]
+T_MEMTHING [0 to infinity] [0 to 255] [0 to 255]
 Add to selected thing's memory of things on map thing of ID of first argument,
 y position of second argument and x position of third argument.
 
-TT_ID [-32768 to 32767]
-Select thing type to manipulate by argument as ID. If argument is < 0 or > 255,
-change it to the lowest unused thing type ID. If thing type of ID does not exist
-yet, create it with default name "(none)", corpse ID equal to the new thing
-type's ID, symbol "?", and remaining thing type attributes to 0.
+TT_ID [-1 to infinity]
+Select thing type to manipulate by argument as ID. If argument is < 0, change it
+to the lowest unused thing type ID. If thing type of ID does not exist yet,
+create it with default name "(none)", corpse ID equal to the new thing type's
+ID, symbol "?", and remaining thing type attributes to 0.
 
 TT_CONSUMABLE [0-65535]
 Set selected thing type's consumability value to argument – the number of
@@ -220,7 +220,7 @@ TT_NAME [string]
 Set selected thing type's name to argument. This name identifies things in the
 game log and the inventory.
 
-TT_CORPSE_ID [0-255]
+TT_CORPSE_ID [0 to infinity]
 Set to argument the ID of the thing type that things of the selected type
 transform into when their state changes from animate to inanimate.
 
