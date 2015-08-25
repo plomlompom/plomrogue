@@ -4,5 +4,5 @@
 # or any later version. For details on its copyright, license, and warranties,
 # see the file NOTICE in the root directory of the PlomRogue source package.
 
-redo-ifchange roguelike-server 
+redo-ifchange libplomrogue.so 
 redo-ifchange roguelike-client
