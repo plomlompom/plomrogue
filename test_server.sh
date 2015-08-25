@@ -2,13 +2,13 @@
 
 ./redo
 echo "Copying tested server script to ./tested_server.py."
-cp ./plomrogue-server.py ./testing/tested_server.py
+cp ./roguelike-server ./testing/tested_server.py
 echo "Copying tested C library source to ./tested_server_lib.c."
 cp ./libplomrogue.c ./testing/tested_server_lib.c
 
 cp ./testing/start _test
 echo "Starting server on save file '_test' copied from ./testing/start."
-python3 -m cProfile -o ./testing/cProfile plomrogue-server.py -l _test &
+python3 -m cProfile -o ./testing/cProfile roguelike-server -l _test &
 
 echo "Waiting until ./server/in is ready for writing."
 while [ ! -e ./server/in ]
