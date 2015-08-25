@@ -18,5 +18,31 @@
 # <https://github.com/plomlompom/plomrogue/issues/2#issuecomment-50972436> for a
 # workaround.
 
+# Some tests first: for gcc, and certain necessary header files. (This is not
+# strictly the responsibility of a mere redo wrapper. But those using a
+# pre-installed redo probably will be fine with the error messages thrown by it
+# if these miss.)
+test=`command -v gcc | wc -l`
+if [ 1 != $test ]
+then
+    echo "FAILURE:"
+    echo "No gcc installed, but it's needed!"
+    exit 1
+fi
+test_header() {
+    code="#include <$1>"
+    test=`echo $code | cpp -H -o /dev/null 2>&1 | head -n1 | grep error | wc -l`
+    if [ 0 != $test ]
+    then
+        echo "FAILURE:"
+        echo "No $1 header file found, but it's needed!"
+        echo "Maybe install some $2 package?"
+        exit 1
+    fi
+}
+test_header stdlib.h libc6-dev      # Assume stdlib.h guarantees full libc6-dev.
+test_header ncurses.h libncurses5-dev
+
+# The actual redo calling.
 export PATH=$PATH:$PWD/build/redo_scripts
 redo "$@"

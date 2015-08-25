@@ -9,6 +9,15 @@ then
     rm log
 fi
 
+# Abort if no proper Python version installed.
+test=`command -v python3 | wc -l`
+if [ 1 != $test ]
+then
+    echo "FAILURE:"
+    echo "No python3 installed, but it's needed!"
+    exit 1
+fi
+
 # Give helpful message to players that want to start without compiling first.
 if [ ! -e ./roguelike-client ]
 then
