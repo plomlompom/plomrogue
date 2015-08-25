@@ -142,7 +142,7 @@ def obey(command, prefix, replay=False, do_record=False):
         print("Invalid command/argument, or bad number of tokens.")
 
 
-def atomic_write(path, text, do_append=False):
+def atomic_write(path, text, do_append=False, delete=True):
     """Atomic write of text to file at path, appended if do_append is set."""
     path_tmp = path + io_db["tmp_suffix"]
     mode = "w"
@@ -153,7 +153,7 @@ def atomic_write(path, text, do_append=False):
     file = open(path_tmp, mode)
     strong_write(file, text)
     file.close()
-    if os.access(path, os.F_OK):
+    if delete and os.access(path, os.F_OK):
         os.remove(path)
     os.rename(path_tmp, path)
 
@@ -348,7 +348,7 @@ def try_worldstate_update():
                     c = world_db["ThingTypes"][mt[0]]["TT_SYMBOL"]
                     mem[(mt[1] * length) + mt[2]] = ord(c)
         string = write_map(string, mem)
-        atomic_write(io_db["path_worldstate"], string)
+        atomic_write(io_db["path_worldstate"], string, delete=False)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
         io_db["worldstate_updateable"] = False
 
