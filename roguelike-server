@@ -838,6 +838,7 @@ def get_dir_to_target(t, filter):
 
     def set_cells_passable_on_memmap_to_65534_on_scoremap():
         # OUTSOURCED TO libplomrogue.so:
+        # ord_dot = ord(".")
         # memmap = t["T_MEMMAP"]
         # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
         #            if ord_dot == memmap[i]]:
@@ -851,7 +852,6 @@ def get_dir_to_target(t, filter):
         test = libpr.init_score_map()
         if test:
             raise RuntimeError("Malloc error in init_score_map().")
-        ord_dot = ord(".")
         ord_v = ord("v")
         ord_blank = ord(" ")
         set_cells_passable_on_memmap_to_65534_on_scoremap()
