@@ -222,7 +222,7 @@ def save_world():
     for id in sorted(world_db["Things"].keys()):
         if [] != world_db["Things"][id]["T_CARRIES"]:
             string = string + "T_ID " + str(id) + "\n"
-            for carried in sorted(world_db["Things"][id]["T_CARRIES"].keys()):
+            for carried in sorted(world_db["Things"][id]["T_CARRIES"]):
                 string = string + "T_CARRIES " + str(carried) + "\n"
     string = string + "SEED_RANDOMNESS " + str(rand.seed) + "\n" + \
         "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"])
