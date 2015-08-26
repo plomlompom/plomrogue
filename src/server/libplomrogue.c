@@ -519,7 +519,8 @@ extern uint16_t get_neighbor_score(uint8_t i)
  * neighbor's score is at least two points lower than the current cell's score,
  * re-set it to 1 point higher than its lowest-scored neighbor. Repeat this
  * whole process until all cells have settled on their final score. Ignore cells
- * whose score is greater than UINT16_MAX - 1 (treat those as unreachable).
+ * whose score is greater than UINT16_MAX - 1 (treat those as unreachable). Also
+ * ignore cells whose score is smaller or equal the number of past iterations.
  * Return 1 on error, else 0.
  */
 extern uint8_t dijkstra_map()
@@ -539,7 +540,8 @@ extern uint8_t dijkstra_map()
         scores_still_changing = 0;
         for (pos = 0; pos < map_size; pos++)
         {
-            if (score_map[pos] <= max_score)
+            uint16_t score = score_map[pos];
+            if (score <= max_score && score > i_scans)
             {
                 get_neighbor_scores(pos, max_score, neighbors);
                 min_neighbor = max_score;
