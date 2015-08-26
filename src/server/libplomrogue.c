@@ -599,3 +599,21 @@ extern void age_some_memdepthmap_on_nonfov_cells(char * memdepthmap,
         }
     }
 }
+
+extern uint8_t set_cells_passable_on_memmap_to_65534_on_scoremap(char * mem_map)
+{
+    if (!score_map)
+    {
+        return 1;
+    }
+    uint32_t map_size = maplength * maplength;
+    uint16_t pos;
+    for (pos = 0; pos < map_size; pos++)
+    {
+        if ('.' == mem_map[pos])
+        {
+            score_map[pos] = 65534;
+        }
+    }
+    return 0;
+}
