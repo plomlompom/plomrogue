@@ -590,7 +590,6 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
-            strong_write(io_db["file_out"], "LOG It dies.\n")
 
 
 def mv_yx_in_dir_legal(dir, y, x):
@@ -623,14 +622,15 @@ def actor_move(t):
                   if world_db["Things"][id]["T_POSX"] == move_result[2]]
         if len(hitted):
             hit_id = hitted[0]
-            hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-            hitter = "You" if t == world_db["Things"][0] else hitter_name
-            hitted_type = world_db["Things"][hit_id]["T_TYPE"]
-            hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-            hitted = "you" if hit_id == 0 else hitted_name
-            verb = " wound " if hitter == "You" else " wounds "
-            strong_write(io_db["file_out"], "LOG " + hitter + verb + hitted +
-                                            ".\n")
+            if t == world_db["Things"][0]:
+                hitted_type = world_db["Things"][hit_id]["T_TYPE"]
+                hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
+                strong_write(io_db["file_out"], "LOG You wound " + hitted +
+                                                ".\n")
+            elif 0 == hit_id:
+                hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+                strong_write(io_db["file_out"], "LOG " + hitter_name +
+                                                " wounds you.\n")
             decrement_lifepoints(world_db["Things"][hit_id])
             return
     dir = [dir for dir in directions_db
@@ -753,9 +753,6 @@ def try_healing(t):
         t["T_SATIATION"] -= 32
         if t == world_db["Things"][0]:
             strong_write(io_db["file_out"], "LOG You heal.\n")
-        else:
-            name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-            strong_write(io_db["file_out"], "LOG " + name + "heals.\n")
 
 
 def hunger(t):
@@ -769,10 +766,6 @@ def hunger(t):
     if int(int(testbase / stomach) / ((rand.next() % stomach) + 1)):
         if t == world_db["Things"][0]:
             strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
-        else:
-            name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-            strong_write(io_db["file_out"], "LOG " + name +
-                                            " suffers from hunger.\n")
         decrement_lifepoints(t)
 
 
