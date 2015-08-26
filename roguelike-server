@@ -471,6 +471,18 @@ def remake_map():
 
 def update_map_memory(t, age_map=True):
     """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
+    def age_some_memdepthmap_on_nonfov_cells():
+        # OUTSOURCED TO libplomrogue.so:
+        # for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
+        #             if not ord_v == t["fovmap"][pos]
+        #             if ord_0 <= t["T_MEMDEPTHMAP"][pos]
+        #             if ord_9 > t["T_MEMDEPTHMAP"][pos]
+        #             if not rand.next() % (2 **
+        #                                   (t["T_MEMDEPTHMAP"][pos] - 48))]:
+        #     t["T_MEMDEPTHMAP"][pos] += 1
+        memdepthmap = c_pointer_to_bytearray(t["T_MEMDEPTHMAP"])
+        fovmap = c_pointer_to_bytearray(t["fovmap"])
+        libpr.age_some_memdepthmap_on_nonfov_cells(memdepthmap, fovmap)
     if not t["T_MEMMAP"]:
         t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
     if not t["T_MEMDEPTHMAP"]:
@@ -484,10 +496,7 @@ def update_map_memory(t, age_map=True):
         if ord_space == t["T_MEMMAP"][pos]:
             t["T_MEMMAP"][pos] = world_db["MAP"][pos]
     if age_map:
-        maptype = ctypes.c_char * len(t["T_MEMDEPTHMAP"])
-        memdepthmap = maptype.from_buffer(t["T_MEMDEPTHMAP"])
-        fovmap = maptype.from_buffer(t["fovmap"])
-        libpr.age_some_memdepthmap_on_nonfov_cells(memdepthmap, fovmap)
+        age_some_memdepthmap_on_nonfov_cells()
     for mt in [mt for mt in t["T_MEMTHING"]
                if "v" == chr(t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                          + mt[2]])]:
@@ -555,11 +564,9 @@ def setter(category, key, min, max=None):
 def build_fov_map(t):
     """Build Thing's FOV map."""
     t["fovmap"] = bytearray(b'v' * (world_db["MAP_LENGTH"] ** 2))
-    maptype = ctypes.c_char * len(world_db["MAP"])
-    test = libpr.build_fov_map(t["T_POSY"], t["T_POSX"],
-                               maptype.from_buffer(t["fovmap"]),
-                               maptype.from_buffer(world_db["MAP"]))
-    if test:
+    fovmap = c_pointer_to_bytearray(t["fovmap"])
+    map = c_pointer_to_bytearray(world_db["MAP"])
+    if libpr.build_fov_map(t["T_POSY"], t["T_POSX"], fovmap, map):
         raise RuntimeError("Malloc error in build_fov_Map().")
 
 
@@ -786,10 +793,12 @@ def get_dir_to_target(t, filter):
     """
 
     def zero_score_map_where_char_on_memdepthmap(c):
-        maptype = ctypes.c_char * len(t["T_MEMDEPTHMAP"])
-        map = maptype.from_buffer(t["T_MEMDEPTHMAP"])
-        test = libpr.zero_score_map_where_char_on_memdepthmap(c, map)
-        if test:
+        # OUTSOURCED TO libpomrogue.so:
+        # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
+        #           if t["T_MEMDEPTHMAP"][i] == mem_depth_c[0]]:
+        #     set_map_score(i, 0)
+        map = c_pointer_to_bytearray(t["T_MEMDEPTHMAP"])
+        if libpr.zero_score_map_where_char_on_memdepthmap(c, map):
             raise RuntimeError("No score map allocated for "
                                "zero_score_map_where_char_on_memdepthmap().")
 
