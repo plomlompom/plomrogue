@@ -1111,8 +1111,9 @@ def command_ping():
 
 def command_quit():
     """Abort server process."""
-    save_world()
-    atomic_write(io_db["path_record"], io_db["record_chunk"], do_append=True)
+    if None == opts.replay:
+        save_world()
+        atomic_write(io_db["path_record"], io_db["record_chunk"], do_append=True)
     raise SystemExit("received QUIT command")
 
 
