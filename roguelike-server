@@ -472,7 +472,7 @@ def remake_map():
 def update_map_memory(t, age_map=True):
     """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
     def age_some_memdepthmap_on_nonfov_cells():
-        # OUTSOURCED TO libplomrogue.so:
+        # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
         # for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
         #             if not ord_v == t["fovmap"][pos]
         #             if ord_0 <= t["T_MEMDEPTHMAP"][pos]
@@ -793,7 +793,7 @@ def get_dir_to_target(t, filter):
     """
 
     def zero_score_map_where_char_on_memdepthmap(c):
-        # OUTSOURCED TO libplomrogue.so:
+        # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
         # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
         #           if t["T_MEMDEPTHMAP"][i] == mem_depth_c[0]]:
         #     set_map_score(i, 0)
@@ -837,7 +837,7 @@ def get_dir_to_target(t, filter):
         return False
 
     def set_cells_passable_on_memmap_to_65534_on_scoremap():
-        # OUTSOURCED TO libplomrogue.so:
+        # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
         # ord_dot = ord(".")
         # memmap = t["T_MEMMAP"]
         # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
