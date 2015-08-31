@@ -44,6 +44,9 @@ whitespaces. "[char]" means a single ASCII character is expected. If one of a
 set of pre-defined strings is expected, the legal strings are divided by pipe
 symbols ("|").
 
+Commands in lowercase characters ("player commands") are only interpreted if the
+game world is set active.
+
 Meta commands
 -------------
 
@@ -227,5 +230,4 @@ transform into when their state changes from animate to inanimate.
 TT_PROLIFERATE [0-255]
 If non-zero, there is a chance of 1 divided by the given value each turn for any
 thing of the selected type to emit an offspring to a random neighbor cell if one
-is available that is passable and not inhabited by a thing of the same same type
-or, if the proliferating thing is animate, any other animate thing.
+is available that is passable and not inhabited by any thing.
