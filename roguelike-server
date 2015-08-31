@@ -139,7 +139,8 @@ def obey(command, prefix, replay=False, do_record=False):
                 if time.time() > io_db["save_wait"] + 15:
                     atomic_write(io_db["path_record"], io_db["record_chunk"],
                                  do_append=True)
-                    save_world()
+                    if world_db["WORLD_ACTIVE"]:
+                        save_world()
                     io_db["record_chunk"] = ""
                     io_db["save_wait"] = time.time()
             io_db["worldstate_updateable"] = world_db["WORLD_ACTIVE"]
@@ -1116,7 +1117,8 @@ def command_ping():
 def command_quit():
     """Abort server process."""
     if None == opts.replay:
-        save_world()
+        if world_db["WORLD_ACTIVE"]:
+            save_world()
         atomic_write(io_db["path_record"], io_db["record_chunk"], do_append=True)
     raise SystemExit("received QUIT command")
 
