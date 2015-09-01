@@ -1290,7 +1290,7 @@ def command_worldactive(worldactive_string):
     map. On activation, rebuild all Things' FOVs, and the player's map memory.
     """
     val = integer_test(worldactive_string, 0, 1)
-    if val:
+    if None != val:
         if 0 != world_db["WORLD_ACTIVE"]:
             if 0 == val:
                 set_world_inactive()
