@@ -601,6 +601,8 @@ def decrement_lifepoints(t):
         if world_db["Things"][0] == t:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
             strong_write(io_db["file_out"], "LOG You die.\n")
+            strong_write(io_db["file_out"],
+                         "LOG See README on how to start over.\n")
         else:
             t["fovmap"] = False
             t["T_MEMMAP"] = False
