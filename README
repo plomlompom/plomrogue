@@ -17,9 +17,9 @@ different species to flee from (if their type starts out with more hitpoints
 than they have) or (if the opposite is the case) move towards for purposes of
 attack. If they see no enemy, they search for and consume "magic meat".
 
-Every move of yours re-writes a file "savefile" that describes the new state of
-dthe world, if more than 15 seconds have passed since its last writing. Once you
-re-start the game, the game state is recreated from the "savefile" file. To
+Every move of yours re-writes a file "save" that describes the new state of the
+world, if more than 15 seconds have passed since its last writing. Once you
+re-start the game, the game state is recreated from the "save" file. To
 start over in a new world, simply delete this file.
 
 System requirements / installation / running the game
@@ -78,18 +78,25 @@ clients in parallel in multiple terminal windows that can be managed by one's
 own window manager choice, instead of relying on plomrogue-client's bizarre
 in-client window management.
 
-Replay game recording
----------------------
+Save files and replay game recording
+------------------------------------
 
-Once you start a new world, every move of yours is recorded in a file called
-"record". It gets overwritten when a new game world is started after deletion
-of the "savefile" file. Run "./roguelike -s" to watch the current game's
-recording from the beginning. Hit any player action key to increment turns (they
-will not trigger the actions usually mapped to them, only repeat the actions
-done at that point in the game as defined in the "record" file). Keys to manage
-windows, scroll on the map and quit the program do their usual thing. Append a
-number to the -s option (like "-s100") to start the recording at the respective
-turn number.
+By default, the game state is saved in the file ./save, and read from there on
+(server) restart. Another file name to use can be given with the -l option (i.e.
+start the game with "./roguelike -l alternate_savefile"). To start over in a new
+world, remove ./save, or use the -l option with the name of a file that does not
+exist yet.
+
+Once you start a new world, every game action of yours is appended to a file
+called "record_" plus the save file name. Run "./roguelike -s" to watch the
+current game's recording from the beginning. Hit any player action key to
+increment turns (they will not trigger the actions usually mapped to them, only
+repeat the actions done at that point in the game as defined in the record
+file). Keys to manage windows, scroll on the map and quit the program do their
+usual thing. Append a number to the -s option (like "-s100") to start the
+recording playback at the respective turn number. (Don't forget to delete /
+empty a game's record file when deleting its save file, or different game's
+moves will get mixed up in one record file.)
 
 Hacking / server internals and configuration
 --------------------------------------------
@@ -97,14 +104,15 @@ Hacking / server internals and configuration
 The game world is set up and made subject to player commands by
 ./roguelike-server. It's controlled by commands explained in the file
 ./SERVER_COMMANDS. The server usually reads these from the files ./server/in
-(written to by ./roguelike-client), ./confserver/world, ./record and ./savefile.
+(written to by ./roguelike-client), ./confserver/world, ./record_save and
+./save.
 
-All source files are thoroughly documented to explain more details of
-plomrogue's internals. The ./roguelike-server executable can be run with a -v
-option for helpful debugging info (mostly: what messages the client sends to the
-server). Server and client communicate via files in the ./server/ directory
-(generated when the server is first run). The ./server/in file is read by the
-server for newline-delimited commands. The ./server/out file contains server
-messages to be read by clients. The ./server/worldstate file contains a
+All source files are thoroughly documented to explain more details of the
+PlomRogue engine's internals. The ./roguelike-server executable can be run with
+a -v option for helpful debugging info (mostly: what messages the client sends
+to the server). Server and client communicate via files in the ./server/
+directory (generated when the server is first run). The ./server/in file is read
+by the server for newline-delimited commands. The ./server/out file contains
+server messages to be read by clients. The ./server/worldstate file contains a
 serialized representation of the game world's data as it is to be visible to
 the player / the player's client.

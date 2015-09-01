@@ -4,15 +4,16 @@ Command reading and writing
 Normal mode
 -----------
 
-In normal mode, the server on start up checks for the existence of ./savefile
-and, on success, reads all commands from it. If no savefile exists, commands
-from ./confserver/world are read instead – and written to the file ./record.
+In normal mode, the server on start up checks for the existence of ./save and,
+on success, reads all commands from it. If no save file exists, commands from
+./confserver/world are read instead – and written to the file ./record_save.
 Afterwards, the command "MAKE_WORLD" with the current Unix time as argument is
-interpreted (and also written to ./record).
+interpreted (and also written to ./record_save).
 
 In any case, from then on, further commands are read in from ./server/in. New
 commands must be appended to the file – which is what the client does. All
-commands from ./server/in except meta commands are also written to ./record.
+commands from ./server/in except meta commands are also written to
+./record_save.
 
 Every fifteen seconds, if any turns have passed, ./savefile is written – with a
 list of all god commands necessary to recreate the current world state. On each
@@ -22,15 +23,15 @@ written to ./server/out.
 Replay mode
 -----------
 
-In replay mode, commands from ./record are read. If a turn number is given as an
-argument, the file is read until the given turn is reached, or, if the turn
-number is higher than the last turn of the recorded play, the last turn. If no
-turn number is given as argument, the record file is replayed until turn 1 is
-reached. Meta commands in ./record are not understood.
+In replay mode, commands from ./record_save are read. If a turn number is given
+as an argument, the file is read until the given turn is reached, or, if the
+turn number is higher than the last turn of the recorded play, the last turn. If
+no turn number is given as argument, the record file is replayed until turn 1 is
+reached. Meta commands in ./record_save are not understood.
 
 From then on, ./server/in is also read. Meta commands sent by the client are
 interpreted normally, but any player and god command merely furthers reading of
-./record by one line and is otherwise ignored.
+./record_save by one line and is otherwise ignored.
 
 Command list
 ============
