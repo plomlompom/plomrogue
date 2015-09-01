@@ -99,9 +99,6 @@ be generated. (Initial value: 0.)
 SEED_RANDOMNESS [0 to 4294967295]
 Set randomness seed to argument. (Initial value: 0.)
 
-SEED_MAP [0 to 4294967295]
-(Re-)generate map to seed of argument and map size.
-
 MAKE_WORLD [0 to 4294967295]
 Set map seed and randomness seed to argument. Remove all things. (Re-)generate
 map. Add to map things specified in thing types table in quantity defined there
@@ -112,6 +109,9 @@ with 'NEW_WORLD' message in ./server/out file.
 MAP_LENGTH [1 to 256]
 Deactivate world. Remove ./server/worldstate file. Remove all things. Remove
 map. Set map edge length to argument. (Initial value: 64.)
+
+MAP [0 to 255] [string]
+Set part of game map to string argument: the line of the argument's number.
 
 WORLD_ACTIVE [0|1]
 Set world activity state to argument. If 0, remove ./server/worldstate file.
