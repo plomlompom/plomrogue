@@ -1614,7 +1614,7 @@ commands_db = {
     "TT_START_NUMBER": (1, False, setter("ThingType", "TT_START_NUMBER",
                                          0, 255)),
     "TT_PROLIFERATE": (1, False, setter("ThingType", "TT_PROLIFERATE",
-                                        0, 255)),
+                                        0, 65535)),
     "TT_LIFEPOINTS": (1, False, setter("ThingType", "TT_LIFEPOINTS", 0, 255)),
     "T_ID": (1, False, command_tid),
     "T_ARGUMENT": (1, False, setter("Thing", "T_ARGUMENT", 0, 255)),
