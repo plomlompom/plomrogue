@@ -475,6 +475,7 @@ def make_map():
 
 def update_map_memory(t, age_map=True):
     """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
+
     def age_some_memdepthmap_on_nonfov_cells():
         # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
         # ord_v = ord("v")
@@ -490,6 +491,7 @@ def update_map_memory(t, age_map=True):
         memdepthmap = c_pointer_to_bytearray(t["T_MEMDEPTHMAP"])
         fovmap = c_pointer_to_bytearray(t["fovmap"])
         libpr.age_some_memdepthmap_on_nonfov_cells(memdepthmap, fovmap)
+
     if not t["T_MEMMAP"]:
         t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
     if not t["T_MEMDEPTHMAP"]:
@@ -1257,6 +1259,9 @@ def command_makeworld(seed_string):
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
         id = id_setter(-1, "Things")
         world_db["Things"][id] = new_Thing(playertype, free_pos())
+    if not world_db["Things"][0]["fovmap"]:
+        empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
+        world_db["Things"][0]["fovmap"] = empty_fovmap
     update_map_memory(world_db["Things"][0])
     for type in world_db["ThingTypes"]:
         for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
@@ -1308,6 +1313,9 @@ def command_worldactive(worldactive_string):
                         build_fov_map(world_db["Things"][id])
                         if 0 == id:
                             update_map_memory(world_db["Things"][id], False)
+                if not world_db["Things"][0]["T_LIFEPOINTS"]:
+                    empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
+                    world_db["Things"][0]["fovmap"] = empty_fovmap
                 world_db["WORLD_ACTIVE"] = 1
             else:
                 print("Ignoring: Not all conditions for world activation met.")
@@ -1616,6 +1624,7 @@ commands_db = {
     "use": (1, False, play_commander("use", True)),
     "ai": (0, False, command_ai)
 }
+# TODO: Unhandled cases: (Un-)killing animates (esp. player!) with T_LIFEPOINTS.
 
 
 """World state database. With sane default values. (Randomness is in rand.)"""
