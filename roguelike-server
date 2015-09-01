@@ -1048,15 +1048,16 @@ def turn_over():
                         break
                     ai(Thing)
                 try_healing(Thing)
-                Thing["T_PROGRESS"] += 1
-                taid = [a for a in world_db["ThingActions"]
-                        if a == Thing["T_COMMAND"]][0]
-                ThingAction = world_db["ThingActions"][taid]
-                if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
-                    eval("actor_" + ThingAction["TA_NAME"])(Thing)
-                    Thing["T_COMMAND"] = 0
-                    Thing["T_PROGRESS"] = 0
                 hunger(Thing)
+                if Thing["T_LIFEPOINTS"]:
+                    Thing["T_PROGRESS"] += 1
+                    taid = [a for a in world_db["ThingActions"]
+                              if a == Thing["T_COMMAND"]][0]
+                    ThingAction = world_db["ThingActions"][taid]
+                    if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
+                        eval("actor_" + ThingAction["TA_NAME"])(Thing)
+                        Thing["T_COMMAND"] = 0
+                        Thing["T_PROGRESS"] = 0
             thingproliferation(Thing, proliferable_map)
         if whilebreaker:
             break
