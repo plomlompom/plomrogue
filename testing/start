@@ -2,68 +2,68 @@ MAP_LENGTH 64
 PLAYER_TYPE 0
 TURN 1
 MAP 0 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~~~~~~~~~"
-MAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~~~~~~~~~"
-MAP 3 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~...~~~~~~~~~~~~"
-MAP 4 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~~~~~~~.~~~~~.~.~~~~~~~~~~~~"
-MAP 5 "~~~~~~~~~~~~~~~~~~~~~~~~~X~~~~~~....~~~~~~..~~~.~~~.~~~~~~~~~~~~"
-MAP 6 "~~~~~~~~~~~~~~~~~.~~~~~~~~.~.~~~~..~...~~~~..~~~.~~...~~~~~~~~~~"
-MAP 7 "~~~~~~~~~~~~~~~~...~~~~.~~X...~~~...~..~~.~..~~..~.XXX~~~~~~~~~~"
-MAP 8 "~~~~~~~~~~~~~~~~..XXX~..~.X..~.~............~~~~.~..XX~~~~~~~~~~"
-MAP 9 "~~~~~~~~~~~~~~~~X.........X.~~.........~...~....~...~.~~~~~~~~~~"
-MAP 10 "~~~~~~~~~~~~~~~~~~............~...........~..~..~....~~~~~~~~~~~"
-MAP 11 "~~~~~~~~~~..~~~~~....~......~.X~...................~~~~~~~~~~~~~"
-MAP 12 "~~~~~~~~~~~~...~~...........XXX........~....~~......~.~~~~~~~~~~"
-MAP 13 "~~~~~~~~~~~..........X.......XX...........~..........~~~.~~~~~~~"
-MAP 14 "~~~~~~~~~.~~~..~......X........X......X..XXX........~~...~~~~~~~"
-MAP 15 "~~~~~~~~~..~~..X....XX...............XX...X......XX.....~~~~~~~~"
-MAP 16 "~~~~~~~~~~~.~...X...X..............~...X~........XXX~~~.~~~~~~~~"
-MAP 17 "~~~~~~~~~~~..X.....XX.................X..XX......X..~~~~~~~~~~~~"
-MAP 18 "~~~~~~~~~~.~....X~..X..................XXX......XX..~~~~~~~~~~~~"
-MAP 19 "~~~~~~~~~~.....X....X..........X.......XX...........~.~~~~~~~~~~"
-MAP 20 "~~~~~~~~~~.~....XX.XX.X........X.......X..............~~~~~~~~~~"
-MAP 21 "~~~~~~~.X......~XXXXXX....X.......................~..~~~~~~~~~~~"
-MAP 22 "~~~~~~~.XX......XX..X..X.XX..........................~.~~~~~~~~~"
-MAP 23 "~~~~~~XXX.....XX.XXXX.X.XXX.........XX.........X.......~~~~~~~~~"
-MAP 24 "~~~~~~~.....~.XX....XX....XX.X.................XXX..~~.~~.~~~~~~"
-MAP 25 "~~~~~~...~...XX...X...XXXX.X....................XX.....~.~~~~~~~"
-MAP 26 "~~~~~~.~.......X...X.......X................X..XXX~X...~.~~~~~~~"
-MAP 27 "~~~~~~.~......X..XXXX.....X..............XXX......X.~...~~~~~~~~"
-MAP 28 "~~~~~~~XXX......XXX........X..............X.X......X....~.~~~~~~"
-MAP 29 "~~~~~~~X.X....XX...X.X............................XX......~~~~~~"
-MAP 30 "~~~~~~~X~.X~..~.....XX...X.................X.............~~~~~~~"
-MAP 31 "~~~~~~~~~~~~~......X....XX................X.........~.~~~.~~~~~~"
-MAP 32 "~~~~~~~~~~~~~.~..........XX...............................~.~..~"
-MAP 33 "~~.~~.~~~.~~~~...........X.................................~.~~~"
-MAP 34 "~~~.~~.~.~.~.........................X.....................~...~"
-MAP 35 "~~~.....~~...................................................~~~"
-MAP 36 "~~~~~X.~~~.~............................................~......~"
-MAP 37 "~~~~.........................X...............................~~~"
-MAP 38 "~~~~~............~...........XXX.............~....X..XXX.X...~~~"
-MAP 39 "~~~~~.~~.~.....X.X~..........X...................XXXXXX~.~.~.~~~"
-MAP 40 "~~~~~~~.........XXXX..............................XX~.XX.......~"
-MAP 41 "~~~~~~~.~........XX.......XX.........................X.XX~.~~.~~"
-MAP 42 "~~~~~~~~~~~~..............X...........X.....~....X...X~.X..~~.~~"
-MAP 43 "~~~~~~~~~~~~~..~~...................XX.....~.....X~~X~.X...~~~~~"
-MAP 44 "~~~~~~~~~~~~~..............................X.X......~~~.~~..~~~~"
-MAP 45 "~~~~~~~~~~~~~.....................X.........~~.~..~~~~.X~~~~~~~~"
-MAP 46 "~~~~~~~~~~~~~~.....X.X............XX..X.....~.....~~~~~~~~~~~~~~"
-MAP 47 "~~~~~~~~~~~~~......XX..............X..X.......~~...~~~~~~~~~~~~~"
-MAP 48 "~~~~~~~~~~~~~~~~....XX...XX........XXXX..~.....~.~~~~~~~~~~~~~~~"
-MAP 49 "~~~~~~~~~~~~~~~...........X..~X..XXXX.....~~~~.~~~~~~~~~~~~~~~~~"
-MAP 50 "~~~~~~~~~~~~~~~~~~.............X....X.....~~~~~~~~~~~~~~~~~~~~~~"
-MAP 51 "~~~~~~~~~~~~~~~.~..~..~.......X.....X.~~~.~~~~~~~~~~~~~~~~~~~~~~"
-MAP 52 "~~~~~~~~~~~~~~~~..~~~~.....X.......~...~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 53 "~~~~~~~~~~~~~~~.~.~....~................~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 54 "~~~~~~~~~~~~~~~~~~...~............~.~..~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 55 "~~~~~~~~~~~~~~~~~.~~X~X.............~.~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 56 "~~~~~~~~~~~~~~~~~.~..XX~........~...~.~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 57 "~~~~~~~~~~~~~~~~~~.~~~~~...~~..~~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 58 "~~~~~~~~~~~~~~~~~~~~~~~~~.~~~.X~X...~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 59 "~~~~~~~~~~~~~~~~~~~~~~~~..~~.XXX..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~XX.X..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~X.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-MAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 1 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 2 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 3 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 4 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 5 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 6 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 7 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.....~~..~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 8 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~......~....~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 9 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~........~..~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 10 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~..~........X.~~.~~~~~~~~~~~~~~~~~~~~"
+MAP 11 "~~~~~~~~~~~~~~~~~~~~~~~~~~~...~........XX...~~~~~~~~~~~~~~~~~~~~"
+MAP 12 "~~~~~~~~~~~~~~~~~.~~~~~~~X~...~.........X~..~~..~~~~~~~~~~~~~~~~"
+MAP 13 "~~~~~~~~~~~~~~~~.~~.~~..~X~.............X~..~...~~~~~~~~~~~~~~~~"
+MAP 14 "~~~~~~~~~~~~.~~.X.....~~......XX.........~.....~.~~~~~~~~~~~~~~~"
+MAP 15 "~~~~~~~~~~~~.~..XXX~...~.........~...~...~...........~~~~~~~~~~~"
+MAP 16 "~~~~~~~~~~~~~..~XX~~.......X.....XX.~......~XX....~.~~~~~~~~~~~~"
+MAP 17 "~~~~~~~~~~~~~XXXX.~~~........~XXX.....~....XXXX.~...~~~~~~~~~~~~"
+MAP 18 "~~~~~~~~~~~.~X.X...~~...~.~..~...X~........XXXX....X~.~~~~~~~~~~"
+MAP 19 "~~~~~~~~.~........~~~...........XX.........X...~...X..~~~~~~~~~~"
+MAP 20 "~~~~~~~~~...........~X.X.......XXX....................~~~~~~~~~~"
+MAP 21 "~~~~~~.~~.........~..XX....X......................~~.~~~~~~~~~~~"
+MAP 22 "~~~~~~~.~~.XX..........X...X....X......X...........~~~~~~~~~~~~~"
+MAP 23 "~~~~~~~.~......X.......X.X.....XXX....X...........~~..~~~~~~~~~~"
+MAP 24 "~~~~~~...X.~..XX............X...XX...XXX........~XX.X.~~~~~~~~~~"
+MAP 25 "~~~~~~~~X..~XXXX.................X...XX.....~~X.X.XX.~~.~~~~~~~~"
+MAP 26 "~~~~~~~~X~...XX.X............XXX..............XXXXXXX...~~~~~~~~"
+MAP 27 "~~~~~~~~~~.~...XX..........XX.X.XXXX...........X.XX...~~~~~~~~~~"
+MAP 28 "~~~~~~~~~~~......X......X......XXXX.X..X.......XXX.X~..~~~~~~~~~"
+MAP 29 "~~~~~~~~~....X.................X..X..XX.........~X~...~~~~~~~~~~"
+MAP 30 "~~~~~~~~~.~..XX......~..........XX..................~~~~~~~~~~~~"
+MAP 31 "~~~~~~~~~~~~..X..................X..................~~~~~~~~~~~~"
+MAP 32 "~~~~~~~~~~~.......XX..X............................~.~~~~~~~~~~~"
+MAP 33 "~~~~~~~~~~....XXX..XXXX...............................~~~~~~~~~~"
+MAP 34 "~~~~~~~~~~~....XXX...X.................X......~.......~~~~~~~~~~"
+MAP 35 "~~~~~~~~~~.~...~X..XX.............................X~X~...~~~~~~~"
+MAP 36 "~~~~~~~~~~~~..~....XXXX.XX......X..................XXX..~~~~~~~~"
+MAP 37 "~~~~~~~~~~~.............XX....XX....................X.~~~~~~~~~~"
+MAP 38 "~~~~~~~~~~~...........X.XX........X...........~..~....~.~~~~~~~~"
+MAP 39 "~~~~~~~~~~~......XX....X.........X...XX.....~.~...~.....~~~~~~~~"
+MAP 40 "~~~~~~~~~~~~.....X.X...X........XX.................~.~.~~~~~~~~~"
+MAP 41 "~~~~~~~~~~~~~.....~....X.......XXX.........~.....X.~~.~~~~~~~~~~"
+MAP 42 "~~~~~~~~~~~~~~..~.......XX........X..............XX~~~~~~~~~~~~~"
+MAP 43 "~~~~~~~~~~~.X~......X...X........X......X.~..~...X~~~~~~~~~~~~~~"
+MAP 44 "~~~~~~~~~.XXX~~....................~X.........~...~~~~~~~~~~~~~~"
+MAP 45 "~~~~~~~~..XXX.....~.................X......X.~.~...~~~~~~~~~~~~~"
+MAP 46 "~~~~~~~~~~.~X....~.~...~.....X......X...~..X.~~~.XX.~~~~~~~~~~~~"
+MAP 47 "~~~~~~~~~...~~..XX...........XX~X..~~.~..XX..~~.XX..~~~~~~~~~~~~"
+MAP 48 "~~~~~~~~~...~....X...........X.XX..~...~~~.....~X.~~~~~~~~~~~~~~"
+MAP 49 "~~~~~~~~~~~X~~..~~~..........XXX~.....~~~~~.~~~~~~~~~~~~~~~~~~~~"
+MAP 50 "~~~~~~~~~~~~~~~.......~.....XXXXX....~~~~~~~.~~~~~~~~~~~~~~~~~~~"
+MAP 51 "~~~~~~~~~~~~~~...~~..~~........XX....~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 52 "~~~~~~~~~~~~~~~.~~~~~~~..~~~......X~..~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 53 "~~~~~~~~~~~~~~~~~~~~~.X.~~.......X.....~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 54 "~~~~~~~~~~~~~~~~~~~~~XXX..~...~...X..~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 55 "~~~~~~~~~~~~~~~~~~~~~~X...~XX.~..X~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 56 "~~~~~~~~~~~~~~~~~~~~~~..~~~XX~......~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 57 "~~~~~~~~~~~~~~~~~~~~~~~~~~~.......~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 58 "~~~~~~~~~~~~~~~~~~~~~~~~~~~...~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 59 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~~.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 60 "~~~~~~~~~~~~~~~~~~~~~~~~~~~..~~.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 61 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~...~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+MAP 62 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.~.~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 MAP 63 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 TA_ID 1
 TA_EFFORT 1
@@ -81,54 +81,61 @@ TA_ID 5
 TA_EFFORT 45
 TA_NAME "use"
 TT_ID 0
-TT_CONSUMABLE 0
 TT_LIFEPOINTS 30
 TT_NAME "HUMAN"
 TT_PROLIFERATE 0
 TT_START_NUMBER 1
 TT_SYMBOL "@"
+TT_TOOL ""
+TT_TOOLPOWER 0
 TT_ID 1
-TT_CONSUMABLE 0
 TT_LIFEPOINTS 6
 TT_NAME "ANT"
 TT_PROLIFERATE 0
 TT_START_NUMBER 27
 TT_SYMBOL "a"
+TT_TOOL ""
+TT_TOOLPOWER 0
 TT_ID 2
-TT_CONSUMABLE 0
 TT_LIFEPOINTS 18
 TT_NAME "ZOMBIE"
 TT_PROLIFERATE 0
 TT_START_NUMBER 9
 TT_SYMBOL "z"
+TT_TOOL ""
+TT_TOOLPOWER 0
 TT_ID 3
-TT_CONSUMABLE 0
 TT_LIFEPOINTS 54
 TT_NAME "SHOGGOTH"
 TT_PROLIFERATE 0
 TT_START_NUMBER 3
 TT_SYMBOL "S"
+TT_TOOL ""
+TT_TOOLPOWER 0
 TT_ID 4
-TT_CONSUMABLE 0
 TT_LIFEPOINTS 0
 TT_NAME "DIRT"
 TT_PROLIFERATE 0
 TT_START_NUMBER 9
 TT_SYMBOL "#"
+TT_TOOL ""
+TT_TOOLPOWER 0
 TT_ID 5
-TT_CONSUMABLE 0
 TT_LIFEPOINTS 0
 TT_NAME "SKELETON"
 TT_PROLIFERATE 0
 TT_START_NUMBER 9
 TT_SYMBOL "%"
+TT_TOOL ""
+TT_TOOLPOWER 0
 TT_ID 6
-TT_CONSUMABLE 512
 TT_LIFEPOINTS 0
 TT_NAME "MAGIC MEAT"
 TT_PROLIFERATE 255
 TT_START_NUMBER 1
 TT_SYMBOL "m"
+TT_TOOL "food"
+TT_TOOLPOWER 512
 TT_ID 0
 TT_CORPSE_ID 5
 TT_ID 1
@@ -147,136 +154,136 @@ T_ID 0
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 30
-T_MEMDEPTHMAP 0 "                                                                "
-T_MEMDEPTHMAP 1 "                                                                "
-T_MEMDEPTHMAP 2 "                                                                "
-T_MEMDEPTHMAP 3 "                                                                "
-T_MEMDEPTHMAP 4 "                                                                "
-T_MEMDEPTHMAP 5 "                                                                "
-T_MEMDEPTHMAP 6 "                                                                "
-T_MEMDEPTHMAP 7 "                                                                "
-T_MEMDEPTHMAP 8 "                                                                "
-T_MEMDEPTHMAP 9 "                                                                "
-T_MEMDEPTHMAP 10 "                                                                "
-T_MEMDEPTHMAP 11 "                                                                "
-T_MEMDEPTHMAP 12 "                                                                "
-T_MEMDEPTHMAP 13 "                                                                "
-T_MEMDEPTHMAP 14 "                                                                "
-T_MEMDEPTHMAP 15 "                                                                "
-T_MEMDEPTHMAP 16 "                                                                "
-T_MEMDEPTHMAP 17 "                                                                "
-T_MEMDEPTHMAP 18 "                                                                "
-T_MEMDEPTHMAP 19 "0                                                               "
-T_MEMDEPTHMAP 20 "000                                                             "
-T_MEMDEPTHMAP 21 "000                                                             "
-T_MEMDEPTHMAP 22 " 0000                                                           "
-T_MEMDEPTHMAP 23 "  00000                                                         "
-T_MEMDEPTHMAP 24 "    00000                  0                                    "
-T_MEMDEPTHMAP 25 "     0000                00                                     "
-T_MEMDEPTHMAP 26 "       0000              00                                     "
-T_MEMDEPTHMAP 27 "        0000      0    0000                                     "
-T_MEMDEPTHMAP 28 "         0000   0000   0000                                     "
-T_MEMDEPTHMAP 29 "00       0000000000   000                                       "
-T_MEMDEPTHMAP 30 "000000 00 0000000000 00000                                      "
-T_MEMDEPTHMAP 31 "0000000000000000000000000                                  00000"
-T_MEMDEPTHMAP 32 "00000000000000000000000000                    000000000000000000"
-T_MEMDEPTHMAP 33 "00000000000000000000000000      00000000000000000000000         "
-T_MEMDEPTHMAP 34 "00000000000000000000000000000000000000                          "
-T_MEMDEPTHMAP 35 "000000000000000000000000000000000000000000000000000000          "
-T_MEMDEPTHMAP 36 "0    00000000000000000000000000000000000000000000000000000000000"
-T_MEMDEPTHMAP 37 "   000000000000000000000000000  00000000000000000000000000000000"
-T_MEMDEPTHMAP 38 "000000000000000000000000000000       00000000000000            0"
-T_MEMDEPTHMAP 39 "000000000000000000000000000000          0000000000              "
-T_MEMDEPTHMAP 40 "000000000000000 0 0000000000000              000000             "
-T_MEMDEPTHMAP 41 "0000000000000       000000000000                 000            "
-T_MEMDEPTHMAP 42 "0000000000000       0000000   0000                              "
-T_MEMDEPTHMAP 43 "000000000000        000000     00000                            "
-T_MEMDEPTHMAP 44 "00000000000         0000000      00000                          "
-T_MEMDEPTHMAP 45 "0000000000          00000000      00000                         "
-T_MEMDEPTHMAP 46 "0000000000          000000000        00 0                       "
-T_MEMDEPTHMAP 47 "00000000            0 0000000            00                     "
-T_MEMDEPTHMAP 48 "00000000              000000000            00                   "
-T_MEMDEPTHMAP 49 "0000000               000  0000             00                  "
-T_MEMDEPTHMAP 50 "000000                 000  000               000               "
-T_MEMDEPTHMAP 51 "00000                  000  000                000              "
-T_MEMDEPTHMAP 52 "00000                  0000  00                   00            "
-T_MEMDEPTHMAP 53 "000                    000   00                    000          "
-T_MEMDEPTHMAP 54 "000                     000   00                     000        "
-T_MEMDEPTHMAP 55 "00                     0000   000                     000       "
-T_MEMDEPTHMAP 56 "0                       0000   000                      000     "
-T_MEMDEPTHMAP 57 "                        0000   000                       0000   "
-T_MEMDEPTHMAP 58 "                        00000   000                         000 "
-T_MEMDEPTHMAP 59 "                        00000    00                          000"
-T_MEMDEPTHMAP 60 "                         00000    00                           0"
-T_MEMDEPTHMAP 61 "                         0000     00                            "
-T_MEMDEPTHMAP 62 "                         0000      000                          "
-T_MEMDEPTHMAP 63 "                         0000      000                          "
-T_MEMMAP 0 "                                                                "
-T_MEMMAP 1 "                                                                "
-T_MEMMAP 2 "                                                                "
-T_MEMMAP 3 "                                                                "
-T_MEMMAP 4 "                                                                "
-T_MEMMAP 5 "                                                                "
-T_MEMMAP 6 "                                                                "
-T_MEMMAP 7 "                                                                "
-T_MEMMAP 8 "                                                                "
-T_MEMMAP 9 "                                                                "
-T_MEMMAP 10 "                                                                "
-T_MEMMAP 11 "                                                                "
-T_MEMMAP 12 "                                                                "
-T_MEMMAP 13 "                                                                "
-T_MEMMAP 14 "                                                                "
-T_MEMMAP 15 "                                                                "
-T_MEMMAP 16 "                                                                "
-T_MEMMAP 17 "                                                                "
-T_MEMMAP 18 "                                                                "
-T_MEMMAP 19 "~                                                               "
-T_MEMMAP 20 "~~~                                                             "
-T_MEMMAP 21 "~~~                                                             "
-T_MEMMAP 22 " ~~~~                                                           "
-T_MEMMAP 23 "  ~~~~X                                                         "
-T_MEMMAP 24 "    ~~~..                  X                                    "
-T_MEMMAP 25 "     ~...                X.                                     "
-T_MEMMAP 26 "       ~...              ..                                     "
-T_MEMMAP 27 "        ....      X    ...X                                     "
-T_MEMMAP 28 "         X...   XXX.   ....                                     "
-T_MEMMAP 29 "~~       X....XX...   ...                                       "
-T_MEMMAP 30 "~~~~~~ X~ X~..~..... X...X                                      "
-T_MEMMAP 31 "~~~~~~~~~~~~~......X....X                                  ~~~~~"
-T_MEMMAP 32 "~~~~~~~~~~~~~.~..........X                    ............~.~..~"
-T_MEMMAP 33 "~~.~~.~~~.~~~~...........X      .......................         "
-T_MEMMAP 34 "~~~.~~.~.~.~.........................X                          "
-T_MEMMAP 35 "~~~.....~~............................................          "
-T_MEMMAP 36 "~    X.~~~.~............................................~......~"
-T_MEMMAP 37 "   ~.........................X  .............................~~~"
-T_MEMMAP 38 "~~~~~............~...........X       ........~....X            ~"
-T_MEMMAP 39 "~~~~~.~~.~.....X.X~..........X          .........X              "
-T_MEMMAP 40 "~~~~~~~........ X XX...........              .....X             "
-T_MEMMAP 41 "~~~~~~~.~....       ......XX....                 ...            "
-T_MEMMAP 42 "~~~~~~~~~~~~.       ......X   ....                              "
-T_MEMMAP 43 "~~~~~~~~~~~~        ......     .....                            "
-T_MEMMAP 44 "~~~~~~~~~~~         .......      .....                          "
-T_MEMMAP 45 "~~~~~~~~~~          ........      X....                         "
-T_MEMMAP 46 "~~~~~~~~~~          .X.......        .X .                       "
-T_MEMMAP 47 "~~~~~~~~            X .......            ..                     "
-T_MEMMAP 48 "~~~~~~~~              ...XX....            ..                   "
-T_MEMMAP 49 "~~~~~~~               ...  ..~X             ~~                  "
-T_MEMMAP 50 "~~~~~~                 ...  ...               ~~~               "
-T_MEMMAP 51 "~~~~~                  ...  ..X                ~~~              "
-T_MEMMAP 52 "~~~~~                  ....  ..                   ~~            "
-T_MEMMAP 53 "~~~                    ~..   ..                    ~~~          "
-T_MEMMAP 54 "~~~                     ...   ..                     ~~~        "
-T_MEMMAP 55 "~~                     ....   ...                     ~~~       "
-T_MEMMAP 56 "~                       ....   .~.                      ~~~     "
-T_MEMMAP 57 "                        ...~   ~~.                       ~~~~   "
-T_MEMMAP 58 "                        ~.~~~   X..                         ~~~ "
-T_MEMMAP 59 "                        ..~~.    .~                          ~~~"
-T_MEMMAP 60 "                         ~~~~X    .~                           ~"
-T_MEMMAP 61 "                         ~~~X     ~~                            "
-T_MEMMAP 62 "                         ~~~~      ~~~                          "
-T_MEMMAP 63 "                         ~~~~      ~~~                          "
-T_POSX 19
-T_POSY 34
+T_MEMDEPTHMAP 0 "                          0                                     "
+T_MEMDEPTHMAP 1 "                          0                                     "
+T_MEMDEPTHMAP 2 "                          0                                     "
+T_MEMDEPTHMAP 3 "                          0                                   00"
+T_MEMDEPTHMAP 4 "                          0                                   00"
+T_MEMDEPTHMAP 5 "                          0                                 00  "
+T_MEMDEPTHMAP 6 "                          0                                 00  "
+T_MEMDEPTHMAP 7 "                          0                                00   "
+T_MEMDEPTHMAP 8 "                          0                               00    "
+T_MEMDEPTHMAP 9 "                          0                              00     "
+T_MEMDEPTHMAP 10 "                          0                              0      "
+T_MEMDEPTHMAP 11 "                          0                            00       "
+T_MEMDEPTHMAP 12 "                          0                            0        "
+T_MEMDEPTHMAP 13 "                          0                          00         "
+T_MEMDEPTHMAP 14 "                          0                          00         "
+T_MEMDEPTHMAP 15 "                          0                         0           "
+T_MEMDEPTHMAP 16 "                          0                        00           "
+T_MEMDEPTHMAP 17 "                          0                       0             "
+T_MEMDEPTHMAP 18 "                          0                      000            "
+T_MEMDEPTHMAP 19 "                          0                     0000            "
+T_MEMDEPTHMAP 20 "                          0                     000             "
+T_MEMDEPTHMAP 21 "                          0                   0000              "
+T_MEMDEPTHMAP 22 "                          00                  000               "
+T_MEMDEPTHMAP 23 "                          0                  000                "
+T_MEMDEPTHMAP 24 "                          00                000                 "
+T_MEMDEPTHMAP 25 "                          0                000                  "
+T_MEMDEPTHMAP 26 "                          00  0           000000                "
+T_MEMDEPTHMAP 27 "                          00000          00000                  "
+T_MEMDEPTHMAP 28 "                          000000         00000                  "
+T_MEMDEPTHMAP 29 "                          000000       00000                    "
+T_MEMDEPTHMAP 30 "                          00000000     0000                     "
+T_MEMDEPTHMAP 31 "                          0000000    00000                      "
+T_MEMDEPTHMAP 32 "                          0000000    0000                       "
+T_MEMDEPTHMAP 33 "                          000000    000                         "
+T_MEMDEPTHMAP 34 "                          000000   000                          "
+T_MEMDEPTHMAP 35 "                          00000   000                           "
+T_MEMDEPTHMAP 36 "                          00000   00                            "
+T_MEMDEPTHMAP 37 "                         000000000                              "
+T_MEMDEPTHMAP 38 "                         000000000                              "
+T_MEMDEPTHMAP 39 "                         0000000                                "
+T_MEMDEPTHMAP 40 "                         00000000                               "
+T_MEMDEPTHMAP 41 "                         0000000                                "
+T_MEMDEPTHMAP 42 "                         0000000000                             "
+T_MEMDEPTHMAP 43 "            000     000 0000000000                              "
+T_MEMDEPTHMAP 44 "            0000000000000000000000000                           "
+T_MEMDEPTHMAP 45 "            0000000000000000000000000                           "
+T_MEMDEPTHMAP 46 "            000000000000000000 000000                           "
+T_MEMDEPTHMAP 47 "          0000   000000000000   0 0000                          "
+T_MEMDEPTHMAP 48 "    0000000      0000000000000       00000                      "
+T_MEMDEPTHMAP 49 "0000000         0000000000000          0000000                  "
+T_MEMDEPTHMAP 50 "000            000000000000000             0000000              "
+T_MEMDEPTHMAP 51 "            0000000000000000                 00000000           "
+T_MEMDEPTHMAP 52 "           000000000000000000                   0000000000      "
+T_MEMDEPTHMAP 53 "        00000000000000000000                      00000000000   "
+T_MEMDEPTHMAP 54 "       000000000000000 000000                        00000000000"
+T_MEMDEPTHMAP 55 "     000000000000000   000000                           00000000"
+T_MEMDEPTHMAP 56 "   00000000000000000   00000                               00000"
+T_MEMDEPTHMAP 57 " 000000000000000000    0000                                  000"
+T_MEMDEPTHMAP 58 "0000000000000000000    0000                                     "
+T_MEMDEPTHMAP 59 "000000000000000000    00000                                     "
+T_MEMDEPTHMAP 60 "000000000000000000    00000                                     "
+T_MEMDEPTHMAP 61 "00000000000000000     00000                                     "
+T_MEMDEPTHMAP 62 "00000000000000000     00000                                     "
+T_MEMDEPTHMAP 63 "0000000000000000     000000                                     "
+T_MEMMAP 0 "                          ~                                     "
+T_MEMMAP 1 "                          ~                                     "
+T_MEMMAP 2 "                          ~                                     "
+T_MEMMAP 3 "                          ~                                   ~~"
+T_MEMMAP 4 "                          ~                                   ~~"
+T_MEMMAP 5 "                          ~                                 ~~  "
+T_MEMMAP 6 "                          ~                                 ~~  "
+T_MEMMAP 7 "                          ~                                ~~   "
+T_MEMMAP 8 "                          ~                               ~~    "
+T_MEMMAP 9 "                          ~                              ~~     "
+T_MEMMAP 10 "                          ~                              ~      "
+T_MEMMAP 11 "                          ~                            ~~       "
+T_MEMMAP 12 "                          ~                            ~        "
+T_MEMMAP 13 "                          ~                          ~~         "
+T_MEMMAP 14 "                          .                          ~~         "
+T_MEMMAP 15 "                          .                         .           "
+T_MEMMAP 16 "                          .                        .~           "
+T_MEMMAP 17 "                          .                       .             "
+T_MEMMAP 18 "                          ~                      ..X            "
+T_MEMMAP 19 "                          .                     ...X            "
+T_MEMMAP 20 "                          .                     ...             "
+T_MEMMAP 21 "                          .                   ....              "
+T_MEMMAP 22 "                          .X                  ...               "
+T_MEMMAP 23 "                          .                  ...                "
+T_MEMMAP 24 "                          ..                ...                 "
+T_MEMMAP 25 "                          .                .~~                  "
+T_MEMMAP 26 "                          ..  X           ....XX                "
+T_MEMMAP 27 "                          .XX.X          .....                  "
+T_MEMMAP 28 "                          .....X         .....                  "
+T_MEMMAP 29 "                          .....X       .....                    "
+T_MEMMAP 30 "                          ......XX     ....                     "
+T_MEMMAP 31 "                          .......    .....                      "
+T_MEMMAP 32 "                          .......    ....                       "
+T_MEMMAP 33 "                          ......    ...                         "
+T_MEMMAP 34 "                          ......   ...                          "
+T_MEMMAP 35 "                          .....   ...                           "
+T_MEMMAP 36 "                          .....   ..                            "
+T_MEMMAP 37 "                         X....XX..                              "
+T_MEMMAP 38 "                         X........                              "
+T_MEMMAP 39 "                         .......                                "
+T_MEMMAP 40 "                         .......X                               "
+T_MEMMAP 41 "                         ......X                                "
+T_MEMMAP 42 "                         X........X                             "
+T_MEMMAP 43 "            X~.     X.. X........X                              "
+T_MEMMAP 44 "            X~~....................~X                           "
+T_MEMMAP 45 "            X.....~.................X                           "
+T_MEMMAP 46 "            X....~.~...~.....X .....X                           "
+T_MEMMAP 47 "          ..~~   X...........   X .~~.                          "
+T_MEMMAP 48 "    ~~~~~..      X...........X       ..~~~                      "
+T_MEMMAP 49 "~~~~~~~         ~~~..........          ~~~~.~~                  "
+T_MEMMAP 50 "~~~            .......~.....XX             ~.~~~~~              "
+T_MEMMAP 51 "            ~~...~~..~~.....                 ~~~~~~~~           "
+T_MEMMAP 52 "           ~~~~.~~~~~~~..~~~.                   ~~~~~~~~~~      "
+T_MEMMAP 53 "        ~~~~~~~~~~~~~.X.~~..                      ~~~~~~~~~~~   "
+T_MEMMAP 54 "       ~~~~~~~~~~~~~~X X..~..                        ~~~~~~~~~~~"
+T_MEMMAP 55 "     ~~~~~~~~~~~~~~~   ...~XX                           ~~~~~~~~"
+T_MEMMAP 56 "   ~~~~~~~~~~~~~~~~~   .~~~X                               ~~~~~"
+T_MEMMAP 57 " ~~~~~~~~~~~~~~~~~~    ~~~~                                  ~~~"
+T_MEMMAP 58 "~~~~~~~~~~~~~~~~~~~    ~~~~                                     "
+T_MEMMAP 59 "~~~~~~~~~~~~~~~~~~    ~~~~~                                     "
+T_MEMMAP 60 "~~~~~~~~~~~~~~~~~~    ~~~~~                                     "
+T_MEMMAP 61 "~~~~~~~~~~~~~~~~~     ~~~~~                                     "
+T_MEMMAP 62 "~~~~~~~~~~~~~~~~~     ~~~~~                                     "
+T_MEMMAP 63 "~~~~~~~~~~~~~~~~     ~~~~~~                                     "
+T_POSX 26
+T_POSY 44
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 0
@@ -284,8 +291,8 @@ T_ID 1
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 33
-T_POSY 21
+T_POSX 9
+T_POSY 30
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -293,8 +300,8 @@ T_ID 2
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 21
-T_POSY 36
+T_POSX 28
+T_POSY 59
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -302,8 +309,8 @@ T_ID 3
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 28
-T_POSY 29
+T_POSX 29
+T_POSY 21
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -312,7 +319,7 @@ T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
 T_POSX 38
-T_POSY 29
+T_POSY 32
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -320,8 +327,8 @@ T_ID 5
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 19
-T_POSY 42
+T_POSX 37
+T_POSY 19
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -329,8 +336,8 @@ T_ID 6
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 32
-T_POSY 10
+T_POSX 14
+T_POSY 45
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -338,8 +345,8 @@ T_ID 7
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 32
-T_POSY 41
+T_POSX 31
+T_POSY 59
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -347,8 +354,8 @@ T_ID 8
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 40
-T_POSY 28
+T_POSX 33
+T_POSY 7
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -356,8 +363,8 @@ T_ID 9
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 25
-T_POSY 45
+T_POSX 41
+T_POSY 35
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -365,8 +372,8 @@ T_ID 10
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 6
-T_POSY 35
+T_POSX 29
+T_POSY 11
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -374,8 +381,8 @@ T_ID 11
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 40
-T_POSY 30
+T_POSX 19
+T_POSY 27
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -383,8 +390,8 @@ T_ID 12
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 18
-T_POSY 7
+T_POSX 34
+T_POSY 36
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -392,7 +399,7 @@ T_ID 13
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 28
+T_POSX 30
 T_POSY 43
 T_PROGRESS 0
 T_SATIATION 0
@@ -401,7 +408,7 @@ T_ID 14
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 8
+T_POSX 17
 T_POSY 27
 T_PROGRESS 0
 T_SATIATION 0
@@ -410,8 +417,8 @@ T_ID 15
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 62
-T_POSY 34
+T_POSX 36
+T_POSY 29
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -419,8 +426,8 @@ T_ID 16
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 26
-T_POSY 25
+T_POSX 37
+T_POSY 8
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -428,8 +435,8 @@ T_ID 17
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 56
-T_POSY 39
+T_POSX 14
+T_POSY 22
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -437,8 +444,8 @@ T_ID 18
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 15
-T_POSY 20
+T_POSX 35
+T_POSY 26
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -446,8 +453,8 @@ T_ID 19
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 29
-T_POSY 30
+T_POSX 39
+T_POSY 41
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -455,8 +462,8 @@ T_ID 20
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 15
-T_POSY 41
+T_POSX 27
+T_POSY 43
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -464,8 +471,8 @@ T_ID 21
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 12
-T_POSY 21
+T_POSX 39
+T_POSY 31
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -473,8 +480,8 @@ T_ID 22
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 39
-T_POSY 24
+T_POSX 46
+T_POSY 19
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -482,8 +489,8 @@ T_ID 23
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 25
-T_POSY 39
+T_POSX 46
+T_POSY 43
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -491,8 +498,8 @@ T_ID 24
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 21
-T_POSY 18
+T_POSX 39
+T_POSY 20
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -500,8 +507,8 @@ T_ID 25
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 15
-T_POSY 28
+T_POSX 44
+T_POSY 50
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -509,8 +516,8 @@ T_ID 26
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 27
-T_POSY 42
+T_POSX 38
+T_POSY 30
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -518,8 +525,8 @@ T_ID 27
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 6
-T_POSX 33
-T_POSY 14
+T_POSX 30
+T_POSY 33
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 1
@@ -527,8 +534,8 @@ T_ID 28
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 32
-T_POSY 14
+T_POSX 28
+T_POSY 34
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -536,8 +543,8 @@ T_ID 29
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 42
-T_POSY 46
+T_POSX 34
+T_POSY 39
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -545,8 +552,8 @@ T_ID 30
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 17
-T_POSY 51
+T_POSX 14
+T_POSY 40
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -555,7 +562,7 @@ T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
 T_POSX 39
-T_POSY 53
+T_POSY 37
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -563,7 +570,7 @@ T_ID 32
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 51
+T_POSX 50
 T_POSY 17
 T_PROGRESS 0
 T_SATIATION 0
@@ -572,8 +579,8 @@ T_ID 33
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 47
-T_POSY 22
+T_POSX 23
+T_POSY 52
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -581,8 +588,8 @@ T_ID 34
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 33
-T_POSY 25
+T_POSX 48
+T_POSY 38
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -590,8 +597,8 @@ T_ID 35
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 18
-T_POSY 44
+T_POSX 50
+T_POSY 28
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -599,8 +606,8 @@ T_ID 36
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 18
-T_POSX 25
-T_POSY 41
+T_POSX 42
+T_POSY 29
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 2
@@ -608,8 +615,8 @@ T_ID 37
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 54
-T_POSX 28
-T_POSY 14
+T_POSX 36
+T_POSY 17
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 3
@@ -617,8 +624,8 @@ T_ID 38
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 54
-T_POSX 34
-T_POSY 42
+T_POSX 22
+T_POSY 15
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 3
@@ -626,8 +633,8 @@ T_ID 39
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 54
-T_POSX 46
-T_POSY 36
+T_POSX 12
+T_POSY 30
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 3
@@ -635,8 +642,8 @@ T_ID 40
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 6
-T_POSY 26
+T_POSX 38
+T_POSY 44
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -644,8 +651,8 @@ T_ID 41
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 11
-T_POSY 13
+T_POSX 27
+T_POSY 38
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -653,8 +660,8 @@ T_ID 42
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 55
-T_POSY 36
+T_POSX 41
+T_POSY 43
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -662,8 +669,8 @@ T_ID 43
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 41
-T_POSY 40
+T_POSX 46
+T_POSY 23
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -671,8 +678,8 @@ T_ID 44
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 37
-T_POSY 25
+T_POSX 9
+T_POSY 29
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -680,8 +687,8 @@ T_ID 45
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 45
-T_POSY 26
+T_POSX 23
+T_POSY 56
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -689,8 +696,8 @@ T_ID 46
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 13
-T_POSY 44
+T_POSX 30
+T_POSY 25
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -698,8 +705,8 @@ T_ID 47
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 49
-T_POSY 33
+T_POSX 39
+T_POSY 9
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -707,8 +714,8 @@ T_ID 48
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 21
-T_POSY 32
+T_POSX 37
+T_POSY 21
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 4
@@ -716,8 +723,8 @@ T_ID 49
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 38
-T_POSY 33
+T_POSX 24
+T_POSY 35
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -725,8 +732,8 @@ T_ID 50
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 23
-T_POSY 48
+T_POSX 22
+T_POSY 28
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -734,8 +741,8 @@ T_ID 51
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 40
-T_POSY 31
+T_POSX 45
+T_POSY 41
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -743,8 +750,8 @@ T_ID 52
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 23
-T_POSY 51
+T_POSX 19
+T_POSY 50
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -752,8 +759,8 @@ T_ID 53
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 22
-T_POSY 17
+T_POSX 47
+T_POSY 44
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -761,8 +768,8 @@ T_ID 54
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 39
-T_POSY 31
+T_POSX 37
+T_POSY 13
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -770,8 +777,8 @@ T_ID 55
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 18
-T_POSY 49
+T_POSX 34
+T_POSY 40
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -779,8 +786,8 @@ T_ID 56
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 40
-T_POSY 48
+T_POSX 29
+T_POSY 29
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -788,8 +795,8 @@ T_ID 57
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 34
-T_POSY 41
+T_POSX 20
+T_POSY 32
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 5
@@ -797,10 +804,10 @@ T_ID 58
 T_ARGUMENT 0
 T_COMMAND 0
 T_LIFEPOINTS 0
-T_POSX 41
-T_POSY 25
+T_POSX 19
+T_POSY 39
 T_PROGRESS 0
 T_SATIATION 0
 T_TYPE 6
-SEED_RANDOMNESS 149551318
+SEED_RANDOMNESS 2480095565
 WORLD_ACTIVE 1

@@ -197,9 +197,14 @@ to the lowest unused thing type ID. If thing type of ID does not exist yet,
 create it with default name "(none)", corpse ID equal to the new thing type's
 ID, symbol "?", and remaining thing type attributes to 0.
 
-TT_CONSUMABLE [0-65535]
-Set selected thing type's consumability value to argument – the number of
-.satiation score points earned by consuming/using things of that type.
+TT_TOOL [|food]
+(May be left empty.) Defines the way things of the selected type can be used.
+The only options so far that is interpreted is "food" (may be consumed).
+
+TT_TOOLPOWER [0 to 65535]
+Set selected thing type's tool power value to argument. If its tool type is
+"food", this sets the number of .satiation score points earned by consuming
+things of that type.
 
 TT_START_NUMBER [0-255]
 Set selected thing type's number of things of type to spawn on successful
