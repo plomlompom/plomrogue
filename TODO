@@ -20,3 +20,5 @@ CLIENT:
 - re-work unnecessary complex command / keybinding / server message mapping
 
 - only send "ITEM_HERE" query to server when the dependent window is open
+
+- draw_win_log() is still buggy (make mem alloc for other line break styles!)
