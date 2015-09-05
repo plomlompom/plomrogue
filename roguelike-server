@@ -306,21 +306,6 @@ def try_worldstate_update():
     """Write worldstate file if io_db["worldstate_updateable"] is set."""
     if io_db["worldstate_updateable"]:
 
-        def draw_visible_Things(map, run):
-            for id in world_db["Things"]:
-                type = world_db["Things"][id]["T_TYPE"]
-                consumable = world_db["ThingTypes"][type]["TT_TOOL"] == "food"
-                alive = world_db["ThingTypes"][type]["TT_LIFEPOINTS"]
-                if (0 == run and not consumable and not alive) \
-                   or (1 == run and consumable and not alive) \
-                   or (2 == run and alive):
-                    y = world_db["Things"][id]["T_POSY"]
-                    x = world_db["Things"][id]["T_POSX"]
-                    fovflag = world_db["Things"][0]["fovmap"][(y * length) + x]
-                    if 'v' == chr(fovflag):
-                        c = world_db["ThingTypes"][type]["TT_SYMBOL"]
-                        map[(y * length) + x] = ord(c)
-
         def write_map(string, map):
             for i in range(length):
                 line = map[i * length:(i * length) + length].decode()
@@ -344,19 +329,29 @@ def try_worldstate_update():
             str(world_db["MAP_LENGTH"]) + "\n"
         length = world_db["MAP_LENGTH"]
         fov = bytearray(b' ' * (length ** 2))
-        for pos in range(length ** 2):
-            if 'v' == chr(world_db["Things"][0]["fovmap"][pos]):
-                fov[pos] = world_db["MAP"][pos]
-        for i in range(3):
-            draw_visible_Things(fov, i)
+        ord_v = ord("v")
+        for pos in [pos for pos in range(length ** 2)
+                        if ord_v == world_db["Things"][0]["fovmap"][pos]]:
+            fov[pos] = world_db["MAP"][pos]
+        length = world_db["MAP_LENGTH"]
+        for id in [id for tid in reversed(sorted(list(world_db["ThingTypes"])))
+                      for id in world_db["Things"]
+                      if not world_db["Things"][id]["carried"]
+                      if world_db["Things"][id]["T_TYPE"] == tid
+                      if world_db["Things"][0]["fovmap"][
+                           world_db["Things"][id]["T_POSY"] * length
+                           + world_db["Things"][id]["T_POSX"]] == ord_v]:
+            type = world_db["Things"][id]["T_TYPE"]
+            c = ord(world_db["ThingTypes"][type]["TT_SYMBOL"])
+            fov[world_db["Things"][id]["T_POSY"] * length
+                + world_db["Things"][id]["T_POSX"]] = c
         string = write_map(string, fov)
         mem = world_db["Things"][0]["T_MEMMAP"][:]
-        for i in range(2):
-            for mt in world_db["Things"][0]["T_MEMTHING"]:
-                consumable = world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"
-                if (i == 0 and not consumable) or (i == 1 and consumable):
-                    c = world_db["ThingTypes"][mt[0]]["TT_SYMBOL"]
-                    mem[(mt[1] * length) + mt[2]] = ord(c)
+        for mt in [mt for tid in reversed(sorted(list(world_db["ThingTypes"])))
+                      for mt in world_db["Things"][0]["T_MEMTHING"]
+                      if mt[0] == tid]:
+             c = world_db["ThingTypes"][mt[0]]["TT_SYMBOL"]
+             mem[(mt[1] * length) + mt[2]] = ord(c)
         string = write_map(string, mem)
         atomic_write(io_db["path_worldstate"], string, delete=False)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
@@ -665,23 +660,23 @@ def actor_move(t):
 
 
 def actor_pick_up(t):
-    """Make t pick up (topmost?) Thing from ground into inventory."""
-    # Topmostness is actually not defined so far. Picks most nutritious Thing.
+    """Make t pick up (topmost?) Thing from ground into inventory.
+
+    Define topmostness by how low the thing's type ID is.
+    """
     ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
            if not world_db["Things"][id]["carried"]
            if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
            if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
     if len(ids):
-        highest_id = ids[0]
-        nutritious = 0
-        for id in ids:
-            type = world_db["Things"][id]["T_TYPE"]
-            if world_db["ThingTypes"][type]["TT_TOOL"] == "food" \
-            and world_db["ThingTypes"][type]["TT_TOOLPOWER"] > nutritious:
-                nutritious = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-                highest_id = id
-        world_db["Things"][highest_id]["carried"] = True
-        t["T_CARRIES"].append(highest_id)
+        lowest_tid = -1
+        for iid in ids:
+            tid = world_db["Things"][iid]["T_TYPE"]
+            if lowest_tid == -1 or tid < lowest_tid:
+                id = iid
+                lowest_tid = tid
+        world_db["Things"][id]["carried"] = True
+        t["T_CARRIES"].append(id)
         if t == world_db["Things"][0]:
             strong_write(io_db["file_out"], "LOG You pick up an object.\n")
     elif t == world_db["Things"][0]:
@@ -1146,18 +1141,21 @@ def command_thingshere(str_y, str_x):
             pos = (y * world_db["MAP_LENGTH"]) + x
             strong_write(io_db["file_out"], "THINGS_HERE START\n")
             if "v" == chr(world_db["Things"][0]["fovmap"][pos]):
-                for id in world_db["Things"]:
-                    if y == world_db["Things"][id]["T_POSY"] \
-                       and x == world_db["Things"][id]["T_POSX"] \
-                       and not world_db["Things"][id]["carried"]:
-                        type = world_db["Things"][id]["T_TYPE"]
-                        name = world_db["ThingTypes"][type]["TT_NAME"]
-                        strong_write(io_db["file_out"], name + "\n")
+                for id in [id for tid in sorted(list(world_db["ThingTypes"]))
+                              for id in world_db["Things"]
+                              if not world_db["Things"][id]["carried"]
+                              if world_db["Things"][id]["T_TYPE"] == tid
+                              if y == world_db["Things"][id]["T_POSY"]
+                              if x == world_db["Things"][id]["T_POSX"]]:
+                    type = world_db["Things"][id]["T_TYPE"]
+                    name = world_db["ThingTypes"][type]["TT_NAME"]
+                    strong_write(io_db["file_out"], name + "\n")
             else:
-                for mt in world_db["Things"][0]["T_MEMTHING"]:
-                    if y == mt[1] and x == mt[2]:
-                        name = world_db["ThingTypes"][mt[0]]["TT_NAME"]
-                        strong_write(io_db["file_out"], name + "\n")
+                for mt in [mt for tid in sorted(list(world_db["ThingTypes"]))
+                              for mt in world_db["Things"][0]["T_MEMTHING"]
+                              if mt[0] == tid if y == mt[1] if x == mt[2]]:
+                    name = world_db["ThingTypes"][mt[0]]["TT_NAME"]
+                    strong_write(io_db["file_out"], name + "\n")
             strong_write(io_db["file_out"], "THINGS_HERE END\n")
         else:
             print("Ignoring: Invalid map coordinates.")
