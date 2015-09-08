@@ -756,11 +756,16 @@ def try_healing(t):
             if t == world_db["Things"][0]:
                 strong_write(io_db["file_out"], "LOG You heal.\n")
 
+
+def hunger_per_turn(type_id):
+    """The amount of satiation score lost per turn for things of given type."""
+    return int(math.sqrt(world_db["ThingTypes"][type_id]["TT_LIFEPOINTS"]))
+
+
 def hunger(t):
     """Decrement t's satiation,dependent on it trigger lifepoint dec chance."""
     if t["T_SATIATION"] > -32768:
-        max_hp = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
-        t["T_SATIATION"] -= int(math.sqrt(max_hp))
+        t["T_SATIATION"] -= hunger_per_turn(t["T_TYPE"])
     if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
         if t == world_db["Things"][0]:
             if t["T_SATIATION"] < 0:
@@ -981,16 +986,24 @@ def standing_on_food(t):
 
 
 def get_inventory_slot_to_consume(t):
-    """Return slot Id of strongest consumable in t's inventory, else -1."""
-    cmp_food = 0
+    """Return invent. slot of healthiest consumable(if any healthy),else -1."""
+    cmp_food = -1
     selection = -1
     i = 0
+    hunger_u = hunger_per_turn(t["T_TYPE"])
+    type = [id for id in world_db["ThingActions"]
+               if world_db["ThingActions"][id]["TA_NAME"] == "use"][0]
+    consume_hungering =  world_db["ThingActions"][type]["TA_EFFORT"] * hunger_u
     for id in t["T_CARRIES"]:
         type = world_db["Things"][id]["T_TYPE"]
         if world_db["ThingTypes"][type]["TT_TOOL"] == "food" \
-           and world_db["ThingTypes"][type]["TT_TOOLPOWER"] > cmp_food:
-            cmp_food = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-            selection = i
+           and world_db["ThingTypes"][type]["TT_TOOLPOWER"]:
+            nutvalue = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
+            tmp_cmp = abs(t["T_SATIATION"] + nutvalue - consume_hungering)
+            if (cmp_food < 0 and tmp_cmp < abs(t["T_SATIATION"])) \
+            or tmp_cmp < cmp_food:
+                cmp_food = tmp_cmp
+                selection = i
         i += 1
     return selection
 
