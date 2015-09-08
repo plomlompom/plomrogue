@@ -170,12 +170,10 @@ T_LIFEPOINTS [0 to 255]
 Set selected thing's lifepoints to argument.
 
 T_SATIATION [-32768 to 32767]
-Set selected thing's satiation score. If above zero, and thing's lifepoints are
-below its thing type's initial lifepoints, there is a 1/32 chance each turn of
-waiting action that the thing's lifepoints will rise. Each turn, there is a
-chance of hitpoint loss that grows with the satiation score's absolute value.
-Each turn, T_SATIATION lessens by the square root of the thing's type's start
-hitpoints (see TT_LIFEPOINTS).
+Set selected thing's satiation score. Each turn, there is a chance of hitpoint
+loss that grows with the satiation score's absolute value, and one of hitpoint
+gain that lowers with it. Each turn, T_SATIATION lessens by the square root of
+the thing's type's start hitpoints (see TT_LIFEPOINTS).
 
 T_CARRIES [0 to infinity]
 Add thing of ID in argument to inventory of selected thing, if said thing is
