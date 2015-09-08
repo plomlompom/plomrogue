@@ -997,6 +997,7 @@ def get_inventory_slot_to_consume(t):
             nutvalue = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
             tmp_cmp = abs(t["T_SATIATION"] + nutvalue - consume_hungering)
             if (cmp_food < 0 and tmp_cmp < abs(t["T_SATIATION"])) \
+            or (cmp_food < 0 and 0 > t["T_SATIATION"] + nutvalue) \
             or tmp_cmp < cmp_food:
                 cmp_food = tmp_cmp
                 selection = i
