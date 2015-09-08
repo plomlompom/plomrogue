@@ -99,6 +99,11 @@ def cleanup_server_io():
         io_db["file_record"].close()
 
 
+def log(msg):
+    """Send "msg" to log."""
+    strong_write(io_db["file_out"], "LOG " + msg + "\n")
+
+
 def obey(command, prefix, replay=False, do_record=False):
     """Call function from commands_db mapped to command's first token.
 
@@ -574,7 +579,7 @@ def build_fov_map(t):
 
 def log_help():
     """Send quick usage info to log."""
-    strong_write(io_db["file_out"], "LOG See README file for help.\n")
+    log("LOG See README file for help.")
 
 
 def decrement_lifepoints(t):
@@ -594,9 +599,8 @@ def decrement_lifepoints(t):
         t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
         if world_db["Things"][0] == t:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            strong_write(io_db["file_out"], "LOG You die.\n")
-            strong_write(io_db["file_out"],
-                         "LOG See README on how to start over.\n")
+            log("You die.")
+            log("See README on how to start over.")
         else:
             t["fovmap"] = False
             t["T_MEMMAP"] = False
@@ -616,7 +620,7 @@ def mv_yx_in_dir_legal(dir, y, x):
 def actor_wait(t):
     """Make t do nothing (but loudly, if player avatar)."""
     if t == world_db["Things"][0]:
-        strong_write(io_db["file_out"], "LOG You wait.\n")
+        log("You wait")
 
 
 def actor_move(t):
@@ -636,12 +640,10 @@ def actor_move(t):
             if t == world_db["Things"][0]:
                 hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-                strong_write(io_db["file_out"], "LOG You wound "
-                                                + hitted_name + ".\n")
+                log("You wound " + hitted_name + ".")
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-                strong_write(io_db["file_out"], "LOG " + hitter_name +
-                                                " wounds you.\n")
+                log(hitter_name +" wounds you.")
             decrement_lifepoints(world_db["Things"][hit_id])
             return
         passable = "." == chr(world_db["MAP"][pos])
@@ -655,9 +657,9 @@ def actor_move(t):
             world_db["Things"][id]["T_POSX"] = move_result[2]
         build_fov_map(t)
         if t == world_db["Things"][0]:
-            strong_write(io_db["file_out"], "LOG You move " + dir + ".\n")
+            log("You move " + dir + ".")
     elif t == world_db["Things"][0]:
-        strong_write(io_db["file_out"], "LOG You fail to move " + dir + ".\n")
+        log("You fail to move " + dir + ".")
 
 
 def actor_pick_up(t):
@@ -679,10 +681,9 @@ def actor_pick_up(t):
         world_db["Things"][id]["carried"] = True
         t["T_CARRIES"].append(id)
         if t == world_db["Things"][0]:
-            strong_write(io_db["file_out"], "LOG You pick up an object.\n")
+                log("You pick up an object.")
     elif t == world_db["Things"][0]:
-        err = "You try to pick up an object, but there is none."
-        strong_write(io_db["file_out"], "LOG " + err + "\n")
+            log("You try to pick up an object, but there is none.")
 
 
 def actor_drop(t):
@@ -693,10 +694,9 @@ def actor_drop(t):
         t["T_CARRIES"].remove(id)
         world_db["Things"][id]["carried"] = False
         if t == world_db["Things"][0]:
-            strong_write(io_db["file_out"], "LOG You drop an object.\n")
+            log("You drop an object.")
     elif t == world_db["Things"][0]:
-        err = "You try to drop an object, but you own none."
-        strong_write(io_db["file_out"], "LOG " + err + "\n")
+       log("You try to drop an object, but you own none.")
 
 
 def actor_use(t):
@@ -710,14 +710,11 @@ def actor_use(t):
             del world_db["Things"][id]
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_TOOLPOWER"]
             if t == world_db["Things"][0]:
-                strong_write(io_db["file_out"],
-                             "LOG You consume this object.\n")
+                log("You consume this object.")
         elif t == world_db["Things"][0]:
-            strong_write(io_db["file_out"],
-                         "LOG You try to use this object, but fail.\n")
+            log("You try to use this object, but fail.")
     elif t == world_db["Things"][0]:
-        strong_write(io_db["file_out"],
-                     "LOG You try to use an object, but you own none.\n")
+        log("You try to use an object, but you own none.")
 
 
 def thingproliferation(t, prol_map):
@@ -754,7 +751,7 @@ def try_healing(t):
         if (testval <= 1 or 1 == (rand.next() % testval)):
             t["T_LIFEPOINTS"] += 1
             if t == world_db["Things"][0]:
-                strong_write(io_db["file_out"], "LOG You heal.\n")
+                log("You heal.")
 
 
 def hunger_per_turn(type_id):
@@ -769,10 +766,9 @@ def hunger(t):
     if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
         if t == world_db["Things"][0]:
             if t["T_SATIATION"] < 0:
-                strong_write(io_db["file_out"], "LOG You suffer from hunger.\n")
+                log("You suffer from hunger.")
             else:
-                strong_write(io_db["file_out"],
-                             "LOG You suffer from over-eating.\n")
+                log("You suffer from over-eating.")
         decrement_lifepoints(t)
 
 
