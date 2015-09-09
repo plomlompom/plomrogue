@@ -474,6 +474,14 @@ def make_map():
     # This all-too-precise replica of the original C code misses iter_limit().
 
 
+def eat_vs_hunger_threshold(thingtype):
+    """Return satiation cost of eating for type. Good food for it must be >."""
+    hunger_unit = hunger_per_turn(thingtype)
+    actiontype = [id for id in world_db["ThingActions"]
+               if world_db["ThingActions"][id]["TA_NAME"] == "use"][0]
+    return world_db["ThingActions"][actiontype]["TA_EFFORT"] * hunger_unit
+
+
 def update_map_memory(t, age_map=True):
     """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
 
@@ -828,10 +836,13 @@ def get_dir_to_target(t, filter):
                             t["T_LIFEPOINTS"]):
                         return True
         elif t["T_MEMMAP"] and "c" == filter:
+            eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
             for mt in t["T_MEMTHING"]:
                 if ' ' != chr(t["T_MEMMAP"][(mt[1] * world_db["MAP_LENGTH"])
                                             + mt[2]]) \
-                   and world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food":
+                   and world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food" \
+                   and world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"] \
+                       > eat_cost:
                     return True
         return False
 
@@ -879,11 +890,14 @@ def get_dir_to_target(t, filter):
                    world_db["ThingTypes"][Thing["T_TYPE"]]["TT_LIFEPOINTS"]:
                     set_map_score(pos, 0)
         elif "c" == filter:
+            eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
             for mt in [mt for mt in t["T_MEMTHING"]
                        if ord_blank != t["T_MEMMAP"][mt[1]
                                                      * world_db["MAP_LENGTH"]
                                                      + mt[2]]
-                       if world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"]:
+                       if world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"
+                       if world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"]
+                           > eat_cost]:
                 set_map_score(mt[1] * world_db["MAP_LENGTH"] + mt[2], 0)
         elif "s" == filter:
             zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
@@ -970,13 +984,16 @@ def get_dir_to_target(t, filter):
 
 
 def standing_on_food(t):
-    """Return True/False whether t is standing on a consumable."""
+    """Return True/False whether t is standing on healthy consumable."""
+    eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
     for id in [id for id in world_db["Things"] if world_db["Things"][id] != t
                if not world_db["Things"][id]["carried"]
                if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
                if world_db["Things"][id]["T_POSX"] == t["T_POSX"]
                if world_db["ThingTypes"][world_db["Things"][id]["T_TYPE"]]
-                          ["TT_TOOL"] == "food"]:
+                  ["TT_TOOL"] == "food"
+               if world_db["ThingTypes"][world_db["Things"][id]["T_TYPE"]]
+                  ["TT_TOOLPOWER"] > eat_cost]:
         return True
     return False
 
@@ -986,18 +1003,14 @@ def get_inventory_slot_to_consume(t):
     cmp_food = -1
     selection = -1
     i = 0
-    hunger_u = hunger_per_turn(t["T_TYPE"])
-    type = [id for id in world_db["ThingActions"]
-               if world_db["ThingActions"][id]["TA_NAME"] == "use"][0]
-    consume_hungering =  world_db["ThingActions"][type]["TA_EFFORT"] * hunger_u
+    eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
     for id in t["T_CARRIES"]:
         type = world_db["Things"][id]["T_TYPE"]
         if world_db["ThingTypes"][type]["TT_TOOL"] == "food" \
            and world_db["ThingTypes"][type]["TT_TOOLPOWER"]:
             nutvalue = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-            tmp_cmp = abs(t["T_SATIATION"] + nutvalue - consume_hungering)
+            tmp_cmp = abs(t["T_SATIATION"] + nutvalue - eat_cost)
             if (cmp_food < 0 and tmp_cmp < abs(t["T_SATIATION"])) \
-            or (cmp_food < 0 and 0 > t["T_SATIATION"] + nutvalue) \
             or tmp_cmp < cmp_food:
                 cmp_food = tmp_cmp
                 selection = i
