@@ -51,6 +51,10 @@ game world is set active.
 Meta commands
 -------------
 
+PLUGIN [string]
+Run plugin code in ./plugins/[argument], with argument only consisting of
+alphanumeric characters and underscores.
+
 PING
 Write "PONG" line to ./server/out file.
 

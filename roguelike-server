@@ -1140,6 +1140,15 @@ def id_setter(id, category, id_store=False, start_at_1=False):
     return id
 
 
+def command_plugin(str_plugin):
+    """Run code in plugins/[str_plugin]."""
+    if (str_plugin.replace("_", "").isalnum()
+        and os.access("plugins/" + str_plugin, os.F_OK)):
+        exec(open("plugins/" + str_plugin).read())
+        return
+    print("Bad plugin name:", str_plugin)
+
+
 def command_ping():
     """Send PONG line to server output file."""
     strong_write(io_db["file_out"], "PONG\n")
@@ -1664,6 +1673,7 @@ be ignored in replay mode if read from server input file), and ([2]) a function
 to be called on it.
 """
 commands_db = {
+    "PLUGIN": (1, True, command_plugin),
     "QUIT": (0, True, command_quit),
     "PING": (0, True, command_ping),
     "THINGS_HERE": (2, True, command_thingshere),
