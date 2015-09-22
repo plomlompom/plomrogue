@@ -25,8 +25,7 @@ def set_window_geometries():
         if (win_i > 0):
 
             # If not, get win's closest predecessor starting a new stack on the
-            # screen top, fit win's top left corner that predecessor's top
-            # right corner.
+            # screen top,fit win's top left to that win_top's top right corner.
             win_top = None
             for i in range(win_i - 1, -1, -1):
                 win_top = windows[i]
@@ -45,13 +44,11 @@ def set_window_geometries():
                 win["start"][0] = next_free_y
 
             # If that fails, try to fit win's top left corner to the top right
-            # corner of its closest predecessor win_test that 1) is below
-            # win_top (win's closest predecessor starting a new stack on the
-            # screen top) 2) and has enough space open to its right between its
-            # right edge and the lower edge of a window win_high located
-            # directly above win_test to fit win there (without growing further
-            # to the right than win_high does or surpassing the lower edge of
-            # the screen).
+            # corner of its closest predecessor win_test 1) below win_top (see
+            # above) 2) and with enough space open to its right between its
+            # right edge and the lower edge of a win_high located directly
+            # above win_test to fit win there (without growing further to the
+            # right than win_high does or surpassing the screen's lower edge).
             else:
                 win_test = win_prev
                 win_high = None
@@ -85,8 +82,8 @@ def draw_screen():
                 j = win["start"][int(k == 0)] - sep_size
                 if (j >= 0 and j < screen_size[int(k == 0)]):
                     start = win["start"][k]
-                    end = win["start"][k] + win["size"][k]
                     start = start if start >= 0 else 0
+                    end = win["start"][k] + win["size"][k]
                     end = end if end < screen_size[k] else screen_size[k]
                     if k:
                         [stdscr.addch(j, i, '-') for i in range(start, end)]
