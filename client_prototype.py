@@ -144,7 +144,9 @@ def main(stdscr):
     set_window_geometries()
     while True:
         draw_screen()
-        stdscr.getch()
+        char = stdscr.getkey()
+        if ('Q' == char):
+            exit()
 
 def foo():
     winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
