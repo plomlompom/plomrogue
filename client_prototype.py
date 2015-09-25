@@ -144,8 +144,8 @@ def main(stdscr):
     set_window_geometries()
     while True:
         draw_screen()
-        char = stdscr.getkey()
-        if ('Q' == char):
+        char = stdscr.getch()
+        if (char >= 0 and chr(char) == 'Q'):
             exit()
 
 def foo():
