@@ -127,6 +127,19 @@ def draw_screen():
                     if (y_in_screen < screen_size[0]
                             and x_in_screen < screen_size[1]):
                         stdscr.addch(y_in_screen, x_in_screen, cell)
+            for i in range(2):
+                if (offset[i] > 0):
+                    pos_1 = win["start"][i]
+                    for j in range(win["size"][int(i == 0)]):
+                        pos_2 = win["start"][int(i == 0)] + j
+                        x, y = (pos_2, pos_1) if i == 0 else (pos_1, pos_2)
+                        stdscr.addch(y, x, '^' if 0 == i else '<')
+                if (size[i] > offset[i] + win["size"][i]):
+                    pos_1 = win["start"][i] + win["size"][i] - 1
+                    for j in range(win["size"][int(i == 0)]):
+                        pos_2 = win["start"][int(i == 0)] + j
+                        x, y = (pos_2, pos_1) if i == 0 else (pos_1, pos_2)
+                        stdscr.addch(y, x, 'v' if 0 == i else '>')
 
     stdscr.clear()
     draw_window_border_lines()
