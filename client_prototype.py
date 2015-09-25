@@ -1,4 +1,5 @@
 import curses
+import signal
 
 
 def set_window_geometries():
@@ -69,6 +70,10 @@ def set_window_geometries():
                         break
                     win_test = win_high
 
+    global screen_size, stdscr
+    curses.endwin()
+    stdscr = curses.initscr()
+    screen_size = stdscr.getmaxyx()
     for win in windows:
         set_window_size()
         place_window()
@@ -123,6 +128,7 @@ def draw_screen():
                             and x_in_screen < screen_size[1]):
                         stdscr.addch(y_in_screen, x_in_screen, cell)
 
+    stdscr.clear()
     draw_window_border_lines()
     draw_window_border_corners()
     draw_window_contents()
@@ -133,11 +139,12 @@ def main(stdscr):
     curses.noecho()
     curses.curs_set(False)
     # stdscr.keypad(True)
+    signal.signal(signal.SIGWINCH,
+        lambda ignore_1, ignore_2: set_window_geometries())
     set_window_geometries()
     while True:
         draw_screen()
         stdscr.getch()
-
 
 def foo():
     winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
@@ -155,7 +162,7 @@ windows = [
 ]
 
 sep_size = 1  # Width of inter-window borders and title bars.
-stdscr = curses.initscr()
-screen_size = stdscr.getmaxyx()
+stdscr = None
+screen_size = [0,0]
 
 curses.wrapper(main)
