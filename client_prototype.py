@@ -87,7 +87,7 @@ def draw_screen():
                 j = win["start"][int(k == 0)] - sep_size
                 if (j >= 0 and j < screen_size[int(k == 0)]):
                     start = win["start"][k]
-                    start = start if start >= 0 else 0
+                    # start = start if start >= 0 else 0
                     end = win["start"][k] + win["size"][k]
                     end = end if end < screen_size[k] else screen_size[k]
                     if k:
