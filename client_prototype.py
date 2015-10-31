@@ -113,8 +113,7 @@ def draw_screen():
                     stdscr.addch(down, right, '+')
 
     def draw_window_contents():
-        for win in windows:
-            offset, size, winmap = win["func"]()
+        def draw_winmap():
             stop = [0, 0]
             for i in range(2):
                 stop[i] = win["size"][i] + offset[i]
@@ -127,19 +126,39 @@ def draw_screen():
                     if (y_in_screen < screen_size[0]
                             and x_in_screen < screen_size[1]):
                         stdscr.addch(y_in_screen, x_in_screen, cell)
+        def draw_scroll_hints():
+            def draw_scroll_string(hint_number):
+                hint = ' ' + str(hint_number + 1) + ' more ' + unit + ' '
+                if len(hint) <= win["size"][ni]:
+                    non_hint_space = win["size"][ni] - len(hint)
+                    hint_offset = int(non_hint_space / 2)
+                    for j in range(win["size"][ni] - non_hint_space):
+                        pos_2 = win["start"][ni] + hint_offset + j
+                        x, y = (pos_2, pos_1) if ni else (pos_1, pos_2)
+                        stdscr.addch(y, x, hint[j], curses.A_REVERSE)
             for i in range(2):
+                ni = int(i == 0)
+                unit = 'rows' if ni else 'columns'
                 if (offset[i] > 0):
                     pos_1 = win["start"][i]
-                    for j in range(win["size"][int(i == 0)]):
-                        pos_2 = win["start"][int(i == 0)] + j
-                        x, y = (pos_2, pos_1) if i == 0 else (pos_1, pos_2)
-                        stdscr.addch(y, x, '^' if 0 == i else '<')
+                    for j in range(win["size"][ni]):
+                        pos_2 = win["start"][ni] + j
+                        x, y = (pos_2, pos_1) if ni else (pos_1, pos_2)
+                        stdscr.addch(y, x, '^' if ni else '<',
+                            curses.A_REVERSE)
+                    draw_scroll_string(offset[i])
                 if (size[i] > offset[i] + win["size"][i]):
                     pos_1 = win["start"][i] + win["size"][i] - 1
-                    for j in range(win["size"][int(i == 0)]):
-                        pos_2 = win["start"][int(i == 0)] + j
-                        x, y = (pos_2, pos_1) if i == 0 else (pos_1, pos_2)
-                        stdscr.addch(y, x, 'v' if 0 == i else '>')
+                    for j in range(win["size"][ni]):
+                        pos_2 = win["start"][ni] + j
+                        x, y = (pos_2, pos_1) if ni else (pos_1, pos_2)
+                        stdscr.addch(y, x, 'v' if ni else '>',
+                            curses.A_REVERSE)
+                    draw_scroll_string(size[i] - offset[i] - win["size"][i])
+        for win in windows:
+            offset, size, winmap = win["func"]()
+            draw_winmap()
+            draw_scroll_hints()
 
     stdscr.clear()
     draw_window_border_lines()
