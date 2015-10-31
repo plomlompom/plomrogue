@@ -174,14 +174,20 @@ def main(stdscr):
     while True:
         draw_screen()
         char = stdscr.getch()
-        if (char >= 0 and chr(char) == 'Q'):
-            exit()
+        if (char >= 0):
+            if chr(char) in commands:
+                commands[chr(char)]()
+
 
 def foo():
     winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
     size = [4, 3]
     offset = [0, 0]
     return offset, size, winmap
+
+
+def command_quit():
+    exit()
 
 
 windows = [
@@ -191,9 +197,10 @@ windows = [
     {"config": [4, 16], "func": foo},
     {"config": [0, -34], "func": foo}
 ]
-
+commands = {
+    "Q": command_quit
+}
 sep_size = 1  # Width of inter-window borders and title bars.
 stdscr = None
 screen_size = [0,0]
-
 curses.wrapper(main)
