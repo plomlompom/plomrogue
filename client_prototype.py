@@ -1,5 +1,6 @@
 import curses
 import signal
+import os
 
 
 def set_window_geometries():
@@ -187,6 +188,8 @@ def foo():
 
 
 def command_quit():
+    io["file_out"].write("QUIT\n")
+    io["file_out"].flush()
     exit()
 
 
@@ -197,10 +200,20 @@ windows = [
     {"config": [4, 16], "func": foo},
     {"config": [0, -34], "func": foo}
 ]
+io = {
+    "path_out": "server/in"
+}
 commands = {
     "Q": command_quit
 }
+
+
 sep_size = 1  # Width of inter-window borders and title bars.
 stdscr = None
 screen_size = [0,0]
+if (not os.access(io["path_out"], os.F_OK)):
+    print("No server input file found at expected location.")
+    exit()
+io["file_out"] = open(io["path_out"], "a")
 curses.wrapper(main)
+io["file_out"].close()
