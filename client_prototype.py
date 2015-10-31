@@ -127,8 +127,8 @@ def draw_screen():
                             and x_in_screen < screen_size[1]):
                         stdscr.addch(y_in_screen, x_in_screen, cell)
         def draw_scroll_hints():
-            def draw_scroll_string(hint_number):
-                hint = ' ' + str(hint_number + 1) + ' more ' + unit + ' '
+            def draw_scroll_string(n_lines_outside):
+                hint = ' ' + str(n_lines_outside + 1) + ' more ' + unit + ' '
                 if len(hint) <= win["size"][ni]:
                     non_hint_space = win["size"][ni] - len(hint)
                     hint_offset = int(non_hint_space / 2)
