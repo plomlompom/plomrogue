@@ -165,7 +165,7 @@ def draw_screen():
     stdscr.refresh()
 
 
-def main(stdscr):
+def cursed_main(stdscr):
     curses.noecho()
     curses.curs_set(False)
     # stdscr.keypad(True)
@@ -190,7 +190,7 @@ def foo():
 def command_quit():
     io["file_out"].write("QUIT\n")
     io["file_out"].flush()
-    exit()
+    raise SystemExit("Received QUIT command, forwarded to server, leaving.") 
 
 
 windows = [
@@ -206,14 +206,22 @@ io = {
 commands = {
     "Q": command_quit
 }
-
-
 sep_size = 1  # Width of inter-window borders and title bars.
 stdscr = None
 screen_size = [0,0]
-if (not os.access(io["path_out"], os.F_OK)):
-    print("No server input file found at expected location.")
-    exit()
-io["file_out"] = open(io["path_out"], "a")
-curses.wrapper(main)
-io["file_out"].close()
+
+
+try:
+    if (not os.access(io["path_out"], os.F_OK)):
+        msg = "No server input file found at " + io["path_out"] + "."
+        raise SystemExit(msg)
+    io["file_out"] = open(io["path_out"], "a")
+    curses.wrapper(cursed_main)
+except SystemExit as exit:
+    print("ABORTING: " + exit.args[0])
+except:
+    print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
+    raise
+finally:
+    if "file_out" in io:
+        io["file_out"].close()
