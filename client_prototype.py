@@ -79,6 +79,7 @@ def set_window_geometries():
     for win in windows:
         set_window_size()
         place_window()
+    cursed_main.redraw = True
 
 
 def draw_screen():
@@ -195,11 +196,14 @@ def cursed_main(stdscr):
     while True:
         stdscr.timeout(delay)
         delay = delay * 2 if delay < 1000 else delay
-        draw_screen()
+        if cursed_main.redraw:
+            draw_screen()
+            cursed_main.redraw = False
         char = stdscr.getch()
         if (char >= 0):
             if chr(char) in commands:
                 commands[chr(char)]()
+                cursed_main.redraw = True
         test_and_poll_server()
 
 
