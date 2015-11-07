@@ -171,9 +171,9 @@ def draw_screen():
 
 def cursed_main(stdscr):
 
-    def ping_test(server_answered):
+    def ping_test():
         half_wait_time = 5
-        if server_answered:
+        if len(new_data_from_server) > 0:
             ping_test.sent = False
         elif ping_test.wait_start + half_wait_time < time.time():
             if not ping_test.sent:
@@ -185,13 +185,13 @@ def cursed_main(stdscr):
                 raise SystemExit("Server not answering anymore.")
     ping_test.wait_start = 0
 
-    def read_into_message_queue(string):
-        if string == "":
+    def read_into_message_queue():
+        if new_data_from_server == "":
             return
         new_open_end = False
-        if string[-1] is not "\n":
+        if new_data_from_server[-1] is not "\n":
             new_open_end = True
-        new_messages = string.splitlines()
+        new_messages = new_data_from_server.splitlines()
         if message_queue["open_end"]:
             message_queue["messages"][-1] += new_messages[0]
             del new_messages[0]
@@ -218,8 +218,8 @@ def cursed_main(stdscr):
             commands[chr(char)]()
             cursed_main.redraw = True
         new_data_from_server = io["file_in"].read()
-        ping_test(len(new_data_from_server) > 0)
-        read_into_message_queue(new_data_from_server)
+        ping_test()
+        read_into_message_queue()
 
 
 def foo():
