@@ -214,10 +214,9 @@ def cursed_main(stdscr):
             draw_screen()
             cursed_main.redraw = False
         char = stdscr.getch()
-        if (char >= 0):
-            if chr(char) in commands:
-                commands[chr(char)]()
-                cursed_main.redraw = True
+        if char >= 0 and chr(char) in commands:
+            commands[chr(char)]()
+            cursed_main.redraw = True
         new_data_from_server = io["file_in"].read()
         ping_test(len(new_data_from_server) > 0)
         read_into_message_queue(new_data_from_server)
