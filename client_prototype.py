@@ -271,9 +271,6 @@ except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
 finally:
-    logfile = open("log", "a")
-    logfile.write(str(message_queue))
-    logfile.close()
     if "file_out" in io:
         io["file_out"].close()
     if "file_in" in io:
