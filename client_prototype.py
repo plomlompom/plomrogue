@@ -167,22 +167,38 @@ def draw_screen():
     stdscr.refresh()
 
 
-def test_and_poll_server():
+def ping_test(server_answered):
     half_wait_time = 5
-    new_file_content = io["file_in"].read()
-    # TODO: do something useful with new_file_content
-    server_answered = len(new_file_content) > 0
     if server_answered:
-        test_and_poll_server.ping_sent = False
-    elif test_and_poll_server.wait_start + half_wait_time < time.time():
-        if not test_and_poll_server.ping_sent:
+        ping_test.sent = False
+    elif ping_test.wait_start + half_wait_time < time.time():
+        if not ping_test.sent:
             io["file_out"].write("PING\n")
             io["file_out"].flush()
-            test_and_poll_server.ping_sent = True
-            test_and_poll_server.wait_start = time.time()
-        elif test_and_poll_server.ping_sent:
+            ping_test.sent = True
+            ping_test.wait_start = time.time()
+        elif ping_test.sent:
             raise SystemExit("Server not answering anymore.")
-test_and_poll_server.wait_start = 0
+ping_test.wait_start = 0
+
+
+def read_into_message_queue(string):
+    if string == "":
+        return
+    new_open_end = False
+    if string[-1] is not "\n":
+        new_open_end = True
+    new_messages = string.splitlines()
+    logfile = open("log", "a")
+    logfile.write(str(new_messages) + "\n")
+    logfile.flush()
+    logfile.close()
+    if message_queue["open_end"]:
+        message_queue["messages"][-1] = message_queue["messages"][-1] + new_messages[0]
+        del new_messages[0]
+    message_queue["messages"] = message_queue["messages"] + new_messages
+    if new_open_end:
+        message_queue["open_end"] = True
 
 
 def cursed_main(stdscr):
@@ -204,7 +220,9 @@ def cursed_main(stdscr):
             if chr(char) in commands:
                 commands[chr(char)]()
                 cursed_main.redraw = True
-        test_and_poll_server()
+        new_data_from_server = io["file_in"].read()
+        ping_test(len(new_data_from_server) > 0)
+        read_into_message_queue(new_data_from_server)
 
 
 def foo():
@@ -234,6 +252,10 @@ io = {
 commands = {
     "Q": command_quit
 }
+message_queue = {
+    "open_end": False,
+    "messages": []
+}
 sep_size = 1  # Width of inter-window borders and title bars.
 stdscr = None
 screen_size = [0,0]
@@ -252,6 +274,10 @@ except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
 finally:
+    logfile = open("log", "a")
+    logfile.write(str(message_queue))
+    logfile.flush()
+    logfile.close()
     if "file_out" in io:
         io["file_out"].close()
     if "file_in" in io:
