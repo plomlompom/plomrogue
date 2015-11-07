@@ -1,6 +1,7 @@
 import curses
-import signal
 import os
+import signal
+import time
 
 
 def set_window_geometries():
@@ -165,6 +166,24 @@ def draw_screen():
     stdscr.refresh()
 
 
+def test_and_poll_server():
+    half_wait_time = 5
+    new_file_content = io["file_in"].read()
+    # TODO: do something useful with new_file_content
+    server_answered = len(new_file_content) > 0
+    if server_answered:
+        test_and_poll_server.ping_sent = False
+    elif test_and_poll_server.wait_start + half_wait_time < time.time():
+        if not test_and_poll_server.ping_sent:
+            io["file_out"].write("PING\n")
+            io["file_out"].flush()
+            test_and_poll_server.ping_sent = True
+            test_and_poll_server.wait_start = time.time()
+        elif test_and_poll_server.ping_sent:
+            raise SystemExit("Server not answering anymore.")
+test_and_poll_server.wait_start = 0
+
+
 def cursed_main(stdscr):
     curses.noecho()
     curses.curs_set(False)
@@ -172,12 +191,16 @@ def cursed_main(stdscr):
     signal.signal(signal.SIGWINCH,
         lambda ignore_1, ignore_2: set_window_geometries())
     set_window_geometries()
+    delay = 1
     while True:
+        stdscr.timeout(delay)
+        delay = delay * 2 if delay < 1000 else delay
         draw_screen()
         char = stdscr.getch()
         if (char >= 0):
             if chr(char) in commands:
                 commands[chr(char)]()
+        test_and_poll_server()
 
 
 def foo():
@@ -190,7 +213,7 @@ def foo():
 def command_quit():
     io["file_out"].write("QUIT\n")
     io["file_out"].flush()
-    raise SystemExit("Received QUIT command, forwarded to server, leaving.") 
+    raise SystemExit("Received QUIT command, forwarded to server, leaving.")
 
 
 windows = [
@@ -201,7 +224,8 @@ windows = [
     {"config": [0, -34], "func": foo}
 ]
 io = {
-    "path_out": "server/in"
+    "path_out": "server/in",
+    "path_in": "server/out"
 }
 commands = {
     "Q": command_quit
@@ -216,6 +240,7 @@ try:
         msg = "No server input file found at " + io["path_out"] + "."
         raise SystemExit(msg)
     io["file_out"] = open(io["path_out"], "a")
+    io["file_in"] = open(io["path_in"], "r")
     curses.wrapper(cursed_main)
 except SystemExit as exit:
     print("ABORTING: " + exit.args[0])
@@ -225,3 +250,5 @@ except:
 finally:
     if "file_out" in io:
         io["file_out"].close()
+    if "file_in" in io:
+        io["file_in"].close()
