@@ -167,37 +167,38 @@ def draw_screen():
     stdscr.refresh()
 
 
-def ping_test(server_answered):
-    half_wait_time = 5
-    if server_answered:
-        ping_test.sent = False
-    elif ping_test.wait_start + half_wait_time < time.time():
-        if not ping_test.sent:
-            io["file_out"].write("PING\n")
-            io["file_out"].flush()
-            ping_test.sent = True
-            ping_test.wait_start = time.time()
-        elif ping_test.sent:
-            raise SystemExit("Server not answering anymore.")
-ping_test.wait_start = 0
-
-
-def read_into_message_queue(string):
-    if string == "":
-        return
-    new_open_end = False
-    if string[-1] is not "\n":
-        new_open_end = True
-    new_messages = string.splitlines()
-    if message_queue["open_end"]:
-        message_queue["messages"][-1] = message_queue["messages"][-1] + new_messages[0]
-        del new_messages[0]
-    message_queue["messages"] = message_queue["messages"] + new_messages
-    if new_open_end:
-        message_queue["open_end"] = True
 
 
 def cursed_main(stdscr):
+
+    def ping_test(server_answered):
+        half_wait_time = 5
+        if server_answered:
+            ping_test.sent = False
+        elif ping_test.wait_start + half_wait_time < time.time():
+            if not ping_test.sent:
+                io["file_out"].write("PING\n")
+                io["file_out"].flush()
+                ping_test.sent = True
+                ping_test.wait_start = time.time()
+            elif ping_test.sent:
+                raise SystemExit("Server not answering anymore.")
+    ping_test.wait_start = 0
+
+    def read_into_message_queue(string):
+        if string == "":
+            return
+        new_open_end = False
+        if string[-1] is not "\n":
+            new_open_end = True
+        new_messages = string.splitlines()
+        if message_queue["open_end"]:
+            message_queue["messages"][-1] += new_messages[0]
+            del new_messages[0]
+        message_queue["messages"] += new_messages
+        if new_open_end:
+            message_queue["open_end"] = True
+
     curses.noecho()
     curses.curs_set(False)
     # stdscr.keypad(True)
@@ -271,6 +272,9 @@ except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
 finally:
+    logfile = open("log", "a")
+    logfile.write(str(message_queue))
+    logfile.close()
     if "file_out" in io:
         io["file_out"].close()
     if "file_in" in io:
