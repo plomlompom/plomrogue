@@ -189,10 +189,6 @@ def read_into_message_queue(string):
     if string[-1] is not "\n":
         new_open_end = True
     new_messages = string.splitlines()
-    logfile = open("log", "a")
-    logfile.write(str(new_messages) + "\n")
-    logfile.flush()
-    logfile.close()
     if message_queue["open_end"]:
         message_queue["messages"][-1] = message_queue["messages"][-1] + new_messages[0]
         del new_messages[0]
@@ -275,10 +271,6 @@ except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
 finally:
-    logfile = open("log", "a")
-    logfile.write(str(message_queue))
-    logfile.flush()
-    logfile.close()
     if "file_out" in io:
         io["file_out"].close()
     if "file_in" in io:
