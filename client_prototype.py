@@ -213,6 +213,7 @@ def cursed_main(stdscr):
         stdscr.timeout(delay)
         delay = delay * 2 if delay < 1000 else delay
         if cursed_main.redraw:
+            delay = 1
             draw_screen()
             cursed_main.redraw = False
         char = stdscr.getch()
