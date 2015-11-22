@@ -252,11 +252,10 @@ def win_foo():
 
 
 def win_info():
-    size = [1, 33]
     winmap = "T: " + str(world_data["turn"]) \
         + " H: " + str(world_data["lifepoints"]) \
         + " S: " + str(world_data["satiation"])
-    winmap = str(winmap).ljust(size[1])
+    size = [1, len(winmap)]
     offset = [0, 0]
     return offset, size, winmap
 
