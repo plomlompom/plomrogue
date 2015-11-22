@@ -184,6 +184,8 @@ def read_worldstate():
     if read_anew:
         cursed_main.redraw = True
         world_data["turn"] = int(turn_string)
+        world_data["lifepoints"] = int(worldstate_file.readline())
+        world_data["satiation"] = int(worldstate_file.readline())
     worldstate_file.close()
 read_worldstate.last_checked_mtime = -1
 
@@ -242,11 +244,19 @@ def cursed_main(stdscr):
         read_worldstate()
 
 
-def foo():
-    #winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
-    #size = [4, 3]
-    winmap = str(world_data["turn"]).rjust(10)
-    size = [1, 10]
+def win_foo():
+    winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
+    size = [4, 3]
+    offset = [0, 0]
+    return offset, size, winmap
+
+
+def win_info():
+    size = [1, 33]
+    winmap = "T: " + str(world_data["turn"]) \
+        + " H: " + str(world_data["lifepoints"]) \
+        + " S: " + str(world_data["satiation"])
+    winmap = str(winmap).ljust(size[1])
     offset = [0, 0]
     return offset, size, winmap
 
@@ -258,11 +268,11 @@ def command_quit():
 
 
 windows = [
-    {"config": [1, 33], "func": foo},
-    {"config": [-7, 33], "func": foo},
-    {"config": [4, 16], "func": foo},
-    {"config": [4, 16], "func": foo},
-    {"config": [0, -34], "func": foo}
+    {"config": [1, 33], "func": win_info},
+    {"config": [-7, 33], "func": win_foo},
+    {"config": [4, 16], "func": win_foo},
+    {"config": [4, 16], "func": win_foo},
+    {"config": [0, -34], "func": win_foo}
 ]
 io = {
     "path_out": "server/in",
@@ -277,6 +287,8 @@ message_queue = {
     "messages": []
 }
 world_data = {
+    "lifepoints": -1,
+    "satiation": -1,
     "turn": -1
 }
 sep_size = 1  # Width of inter-window borders and title bars.
