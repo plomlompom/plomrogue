@@ -167,6 +167,25 @@ def draw_screen():
     stdscr.refresh()
 
 
+def read_worldstate():
+    if not os.access(io["path_worldstate"], os.F_OK):
+        msg = "No world state file found at " + io["path_worldstate"] + "."
+        raise SystemExit(msg)
+    read_anew = False
+    worldstate_file = open(io["path_worldstate"], "r")
+    turn_string = worldstate_file.readline()
+    if int(turn_string) != world_data["turn"]:
+        read_anew = True
+    if not read_anew: # In rare cases, world may change, but not turn number.
+        mtime = os.stat(io["path_worldstate"])
+        if mtime != read_worldstate.last_checked_mtime:
+            read_worldstate.last_checked_mtime = mtime
+            read_anew = True
+    if read_anew:
+        cursed_main.redraw = True
+        world_data["turn"] = int(turn_string)
+    worldstate_file.close()
+read_worldstate.last_checked_mtime = -1
 
 
 def cursed_main(stdscr):
@@ -220,11 +239,14 @@ def cursed_main(stdscr):
         new_data_from_server = io["file_in"].read()
         ping_test()
         read_into_message_queue()
+        read_worldstate()
 
 
 def foo():
-    winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
-    size = [4, 3]
+    #winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
+    #size = [4, 3]
+    winmap = str(world_data["turn"]).rjust(10)
+    size = [1, 10]
     offset = [0, 0]
     return offset, size, winmap
 
@@ -244,7 +266,8 @@ windows = [
 ]
 io = {
     "path_out": "server/in",
-    "path_in": "server/out"
+    "path_in": "server/out",
+    "path_worldstate": "server/worldstate"
 }
 commands = {
     "Q": command_quit
@@ -252,6 +275,9 @@ commands = {
 message_queue = {
     "open_end": False,
     "messages": []
+}
+world_data = {
+    "turn": -1
 }
 sep_size = 1  # Width of inter-window borders and title bars.
 stdscr = None
