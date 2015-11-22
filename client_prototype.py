@@ -1,4 +1,5 @@
 import curses
+import math
 import os
 import signal
 import time
@@ -190,6 +191,16 @@ def read_worldstate():
 read_worldstate.last_checked_mtime = -1
 
 
+def read_message_queue():
+    while (len(message_queue["messages"]) > 1
+        or (len(message_queue["messages"]) == 0
+            and not message_queue["open_end"])):
+        message = message_queue["messages"].pop(0)
+        if message[0:4] == "LOG ":
+            world_data["log"] += [message[4:]]
+            cursed_main.redraw = True
+
+
 def cursed_main(stdscr):
 
     def ping_test():
@@ -242,6 +253,7 @@ def cursed_main(stdscr):
         ping_test()
         read_into_message_queue()
         read_worldstate()
+        read_message_queue()
 
 
 def win_foo():
@@ -260,6 +272,24 @@ def win_info():
     return offset, size, winmap
 
 
+def win_log():
+    win_size = next(win["size"] for win in windows if win["func"] == win_log)
+    offset = [0, 0]
+    winmap = ""
+    number_of_lines = 0
+    for line in world_data["log"]:
+        number_of_lines += math.ceil(len(line) / win_size[1])
+        padding_size = win_size[1] - (len(line) % win_size[1])
+        winmap += line + (padding_size * " ")
+    if number_of_lines < win_size[0]:
+        winmap = (" " * win_size[1] * (win_size[0] - number_of_lines)) + winmap
+        number_of_lines = win_size[0]
+    elif number_of_lines > win_size[0]:
+        offset[0] = number_of_lines - win_size[0]
+    winmap_size = [number_of_lines, win_size[1]]
+    return offset, winmap_size, winmap
+
+
 def command_quit():
     io["file_out"].write("QUIT\n")
     io["file_out"].flush()
@@ -268,7 +298,7 @@ def command_quit():
 
 windows = [
     {"config": [1, 33], "func": win_info},
-    {"config": [-7, 33], "func": win_foo},
+    {"config": [-7, 33], "func": win_log},
     {"config": [4, 16], "func": win_foo},
     {"config": [4, 16], "func": win_foo},
     {"config": [0, -34], "func": win_foo}
@@ -287,6 +317,7 @@ message_queue = {
 }
 world_data = {
     "lifepoints": -1,
+    "log": [],
     "satiation": -1,
     "turn": -1
 }
