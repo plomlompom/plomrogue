@@ -121,10 +121,11 @@ def draw_screen():
             stop = [0, 0]
             for i in range(2):
                 stop[i] = win["size"][i] + offset[i]
-                stop[i] = stop[i] if stop[i] < size[i] else size[i]
+                if stop[i] >= winmap_size[i]:
+                    stop[i] = winmap_size[i]
             for y in range(offset[0], stop[0]):
                 for x in range(offset[1], stop[1]):
-                    cell = winmap[y * size[1] + x]
+                    cell = winmap[y * winmap_size[1] + x]
                     y_in_screen = win["start"][0] + (y - offset[0])
                     x_in_screen = win["start"][1] + (x - offset[1])
                     if (y_in_screen < screen_size[0]
@@ -152,12 +153,13 @@ def draw_screen():
                     pos_1 = win["start"][i]
                     draw_scroll_arrows('^', '<')
                     draw_scroll_string(offset[i])
-                if (size[i] > offset[i] + win["size"][i]):
+                if (winmap_size[i] > offset[i] + win["size"][i]):
                     pos_1 = win["start"][i] + win["size"][i] - 1
                     draw_scroll_arrows('v', '>')
-                    draw_scroll_string(size[i] - offset[i] - win["size"][i])
+                    draw_scroll_string(winmap_size[i] - offset[i]
+                        - win["size"][i])
         for win in windows:
-            offset, size, winmap = win["func"]()
+            offset, winmap_size, winmap = win["func"]()
             draw_winmap()
             draw_scroll_hints()
 
@@ -258,18 +260,18 @@ def cursed_main(stdscr):
 
 def win_foo():
     winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
-    size = [4, 3]
+    winmap_size = [4, 3]
     offset = [0, 0]
-    return offset, size, winmap
+    return offset, winmap_size, winmap
 
 
 def win_info():
     winmap = "T: " + str(world_data["turn"]) \
         + " H: " + str(world_data["lifepoints"]) \
         + " S: " + str(world_data["satiation"])
-    size = [1, len(winmap)]
+    winmap_size = [1, len(winmap)]
     offset = [0, 0]
-    return offset, size, winmap
+    return offset, winmap_size, winmap
 
 
 def win_log():
