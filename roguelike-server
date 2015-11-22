@@ -56,7 +56,7 @@ def setup_server_io():
     """Fill IO files DB with proper file( path)s. Write process IO test string.
 
     Ensure IO files directory at server/. Remove any old input file if found.
-    Set up new input file for reading, and new output file for writing. Start
+    Set up new input file for reading, and new output file for appending. Start
     output file with process hash line of format PID + " " + floated UNIX time
     (io_db["teststring"]). Raise SystemExit if file is found at path of either
     record or save file plus io_db["tmp_suffix"].
@@ -73,7 +73,7 @@ def setup_server_io():
     io_db["verbose"] = False
     io_db["record_chunk"] = ""
     os.makedirs(io_db["path_server"], exist_ok=True)
-    io_db["file_out"] = open(io_db["path_out"], "w")
+    io_db["file_out"] = open(io_db["path_out"], "a")
     strong_write(io_db["file_out"], io_db["teststring"] + "\n")
     if os.access(io_db["path_in"], os.F_OK):
         os.remove(io_db["path_in"])
