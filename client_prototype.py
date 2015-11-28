@@ -195,6 +195,9 @@ def read_worldstate():
             if line == '%':
                 break
             world_data["inventory"] += [line]
+        world_data["position"][0] = int(worldstate_file.readline())
+        world_data["position"][1] = int(worldstate_file.readline())
+        world_data["map_size"] = int(worldstate_file.readline())
     worldstate_file.close()
 read_worldstate.last_checked_mtime = -1
 
@@ -341,6 +344,8 @@ world_data = {
     "inventory": [],
     "lifepoints": -1,
     "log": [],
+    "map_size": -1,
+    "position": [-1, -1],
     "satiation": -1,
     "turn": -1
 }
