@@ -86,7 +86,7 @@ def set_window_geometries():
 def draw_screen():
 
     def healthy_addch(y, x, char, attr=0):
-    """Bizarre workaround for <http://stackoverflow.com/questions/7063128/>."""
+        """Workaround for <http://stackoverflow.com/questions/7063128/>."""
         if y == screen_size[0] - 1 and x == screen_size[1] - 1:
             char_before = stdscr.inch(y, x - 1)
             stdscr.addch(y, x - 1, char, attr)
