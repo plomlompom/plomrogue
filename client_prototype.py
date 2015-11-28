@@ -85,6 +85,16 @@ def set_window_geometries():
 
 def draw_screen():
 
+    def healthy_addch(y, x, char, attr=0):
+    """Bizarre workaround for <http://stackoverflow.com/questions/7063128/>."""
+        if y == screen_size[0] - 1 and x == screen_size[1] - 1:
+            char_before = stdscr.inch(y, x - 1)
+            stdscr.addch(y, x - 1, char, attr)
+            stdscr.insstr(y, x - 1, " ")
+            stdscr.addch(y, x - 1, char_before)
+        else:
+            stdscr.addch(y, x, char, attr)
+
     def draw_window_border_lines():
         for win in windows:
             for k in range(2):
@@ -95,9 +105,9 @@ def draw_screen():
                     end = win["start"][k] + win["size"][k]
                     end = end if end < screen_size[k] else screen_size[k]
                     if k:
-                        [stdscr.addch(j, i, '-') for i in range(start, end)]
+                        [healthy_addch(j, i, '-') for i in range(start, end)]
                     else:
-                        [stdscr.addch(i, j, '|') for i in range(start, end)]
+                        [healthy_addch(i, j, '|') for i in range(start, end)]
 
     def draw_window_border_corners():
         for win in windows:
@@ -107,14 +117,14 @@ def draw_screen():
             right = win["start"][1] + win["size"][1]
             if (up >= 0 and up < screen_size[0]):
                 if (left >= 0 and left < screen_size[1]):
-                    stdscr.addch(up, left, '+')
+                    healthy_addch(up, left, '+')
                 if (right >= 0 and right < screen_size[1]):
-                    stdscr.addch(up, right, '+')
+                    healthy_addch(up, right, '+')
             if (down >= 0 and down < screen_size[0]):
                 if (left >= 0 and left < screen_size[1]):
-                    stdscr.addch(down, left, '+')
+                    healthy_addch(down, left, '+')
                 if (right >= 0 and right < screen_size[1]):
-                    stdscr.addch(down, right, '+')
+                    healthy_addch(down, right, '+')
 
     def draw_window_contents():
         def draw_winmap():
@@ -130,7 +140,7 @@ def draw_screen():
                     x_in_screen = win["start"][1] + (x - offset[1])
                     if (y_in_screen < screen_size[0]
                             and x_in_screen < screen_size[1]):
-                        stdscr.addch(y_in_screen, x_in_screen, cell)
+                        healthy_addch(y_in_screen, x_in_screen, cell)
         def draw_scroll_hints():
             def draw_scroll_string(n_lines_outside):
                 hint = ' ' + str(n_lines_outside + 1) + ' more ' + unit + ' '
@@ -140,12 +150,12 @@ def draw_screen():
                     for j in range(win["size"][ni] - non_hint_space):
                         pos_2 = win["start"][ni] + hint_offset + j
                         x, y = (pos_2, pos_1) if ni else (pos_1, pos_2)
-                        stdscr.addch(y, x, hint[j], curses.A_REVERSE)
+                        healthy_addch(y, x, hint[j], curses.A_REVERSE)
             def draw_scroll_arrows(ar1, ar2):
                 for j in range(win["size"][ni]):
                     pos_2 = win["start"][ni] + j
                     x, y = (pos_2, pos_1) if ni else (pos_1, pos_2)
-                    stdscr.addch(y, x, ar1 if ni else ar2, curses.A_REVERSE)
+                    healthy_addch(y, x, ar1 if ni else ar2, curses.A_REVERSE)
             for i in range(2):
                 ni = int(i == 0)
                 unit = 'rows' if ni else 'columns'
