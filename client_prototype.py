@@ -136,11 +136,15 @@ def draw_screen():
             for y in range(offset[0], stop[0]):
                 for x in range(offset[1], stop[1]):
                     cell = winmap[y * winmap_size[1] + x]
+                    attr = 0
+                    if len(cell) > 1:
+                        attr = cell[1]
+                        cell = cell[0]
                     y_in_screen = win["start"][0] + (y - offset[0])
                     x_in_screen = win["start"][1] + (x - offset[1])
                     if (y_in_screen < screen_size[0]
                             and x_in_screen < screen_size[1]):
-                        healthy_addch(y_in_screen, x_in_screen, cell)
+                        healthy_addch(y_in_screen, x_in_screen, cell, attr)
         def draw_scroll_hints():
             def draw_scroll_string(n_lines_outside):
                 hint = ' ' + str(n_lines_outside + 1) + ' more ' + unit + ' '
@@ -208,6 +212,14 @@ def read_worldstate():
         world_data["position"][0] = int(worldstate_file.readline())
         world_data["position"][1] = int(worldstate_file.readline())
         world_data["map_size"] = int(worldstate_file.readline())
+        world_data["fov_map"] = ""
+        for i in range(world_data["map_size"]):
+            line = worldstate_file.readline().replace("\n", "")
+            world_data["fov_map"] += line
+        world_data["mem_map"] = ""
+        for i in range(world_data["map_size"]):
+            line = worldstate_file.readline().replace("\n", "")
+            world_data["mem_map"] += line
     worldstate_file.close()
 read_worldstate.last_checked_mtime = -1
 
@@ -278,9 +290,28 @@ def cursed_main(stdscr):
 
 
 def win_foo():
-    winmap = ['.', 'o', '.', 'o', 'O', 'o', '.', 'o', '.', 'x', 'y', 'x']
+    winmap = [('.', 0), ('o', 0), ('.', 0), ('o', 0), ('O', 0), ('o', 0),
+        ('.', 0), ('o', 0), ('.', 0), ('x', 0), ('y', 0), ('x', 0)]
     winmap_size = [4, 3]
     offset = [0, 0]
+    return offset, winmap_size, winmap
+
+
+def win_map():
+    offset = [0, 0]
+    winmap_size = [world_data["map_size"], world_data["map_size"] * 2 + 1]
+    winmap = []
+    for y in range(world_data["map_size"]):
+        for x in range(world_data["map_size"]):
+            char = world_data["fov_map"][y * world_data["map_size"] + x]
+            if char == " ":
+                char = world_data["mem_map"][y * world_data["map_size"] + x]
+                attribute = curses.A_REVERSE
+                winmap += [(char, attribute), (" ", attribute)]
+            else:
+                winmap += char + " "
+        if y % 2 == 0:
+            winmap += "  "
     return offset, winmap_size, winmap
 
 
@@ -336,7 +367,7 @@ windows = [
     {"config": [-7, 33], "func": win_log},
     {"config": [4, 16], "func": win_inventory},
     {"config": [4, 16], "func": win_foo},
-    {"config": [0, -34], "func": win_foo}
+    {"config": [0, -34], "func": win_map}
 ]
 io = {
     "path_out": "server/in",
@@ -351,10 +382,12 @@ message_queue = {
     "messages": []
 }
 world_data = {
+    "fov_map": "",
     "inventory": [],
     "lifepoints": -1,
     "log": [],
-    "map_size": -1,
+    "map_size": 0,
+    "mem_map": "",
     "position": [-1, -1],
     "satiation": -1,
     "turn": -1
