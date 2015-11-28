@@ -189,6 +189,12 @@ def read_worldstate():
         world_data["turn"] = int(turn_string)
         world_data["lifepoints"] = int(worldstate_file.readline())
         world_data["satiation"] = int(worldstate_file.readline())
+        world_data["inventory"] = []
+        while True:
+            line = worldstate_file.readline().replace("\n", "")
+            if line == '%':
+                break
+            world_data["inventory"] += [line]
     worldstate_file.close()
 read_worldstate.last_checked_mtime = -1
 
@@ -265,6 +271,20 @@ def win_foo():
     return offset, winmap_size, winmap
 
 
+def win_inventory():
+    winmap = ""
+    winmap_size = [0, 0]
+    for line in world_data["inventory"]:
+        winmap_size[1] = winmap_size[1] if len(line) <= winmap_size[1] \
+            else len(line)
+    for line in world_data["inventory"]:
+        padding_size = winmap_size[1] - len(line)
+        winmap += line + (" " * padding_size)
+        winmap_size[0] = winmap_size[0] + 1
+    offset = [0, 0]
+    return offset, winmap_size, winmap
+
+
 def win_info():
     winmap = "T: " + str(world_data["turn"]) \
         + " H: " + str(world_data["lifepoints"]) \
@@ -301,7 +321,7 @@ def command_quit():
 windows = [
     {"config": [1, 33], "func": win_info},
     {"config": [-7, 33], "func": win_log},
-    {"config": [4, 16], "func": win_foo},
+    {"config": [4, 16], "func": win_inventory},
     {"config": [4, 16], "func": win_foo},
     {"config": [0, -34], "func": win_foo}
 ]
@@ -318,6 +338,7 @@ message_queue = {
     "messages": []
 }
 world_data = {
+    "inventory": [],
     "lifepoints": -1,
     "log": [],
     "satiation": -1,
