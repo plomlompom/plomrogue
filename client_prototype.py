@@ -298,7 +298,16 @@ def win_foo():
 
 
 def win_map():
+    win_size = next(win["size"] for win in windows if win["func"] == win_map)
     offset = [0, 0]
+    for i in range(2):
+        if world_data["position"][i] * (i + 1) > win_size[i] / 2:
+            if world_data["position"][i] * (i + 1) \
+                < world_data["map_size"] * (i + 1) - win_size[i] / 2:
+                offset[i] = world_data["position"][i] * (i + 1) \
+                    - int(win_size[i] / 2)
+            else:
+                offset[i] = world_data["map_size"] * (i + 1) - win_size[i] + i
     winmap_size = [world_data["map_size"], world_data["map_size"] * 2 + 1]
     winmap = []
     for y in range(world_data["map_size"]):
