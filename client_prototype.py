@@ -209,8 +209,11 @@ def read_worldstate():
             if line == '%':
                 break
             world_data["inventory"] += [line]
-        world_data["position"][0] = int(worldstate_file.readline())
-        world_data["position"][1] = int(worldstate_file.readline())
+        world_data["avatar_position"][0] = int(worldstate_file.readline())
+        world_data["avatar_position"][1] = int(worldstate_file.readline())
+        if not world_data["look_mode"]:
+            world_data["map_center"][0] = world_data["avatar_position"][0]
+            world_data["map_center"][1] = world_data["avatar_position"][1]
         world_data["map_size"] = int(worldstate_file.readline())
         world_data["fov_map"] = ""
         for i in range(world_data["map_size"]):
@@ -301,10 +304,10 @@ def win_map():
     win_size = next(win["size"] for win in windows if win["func"] == win_map)
     offset = [0, 0]
     for i in range(2):
-        if world_data["position"][i] * (i + 1) > win_size[i] / 2:
-            if world_data["position"][i] * (i + 1) \
+        if world_data["map_center"][i] * (i + 1) > win_size[i] / 2:
+            if world_data["map_center"][i] * (i + 1) \
                 < world_data["map_size"] * (i + 1) - win_size[i] / 2:
-                offset[i] = world_data["position"][i] * (i + 1) \
+                offset[i] = world_data["map_center"][i] * (i + 1) \
                     - int(win_size[i] / 2)
             else:
                 offset[i] = world_data["map_size"] * (i + 1) - win_size[i] + i
@@ -315,6 +318,13 @@ def win_map():
     for y in range(world_data["map_size"]):
         for x in range(world_data["map_size"]):
             char = world_data["fov_map"][y * world_data["map_size"] + x]
+            if world_data["look_mode"] and y == world_data["map_center"][0] \
+                and x == world_data["map_center"][1]:
+                if char == " ":
+                    char = \
+                        world_data["mem_map"][y * world_data["map_size"] + x]
+                winmap += [(char, curses.A_REVERSE), (" ", curses.A_REVERSE)]
+                continue
             if char == " ":
                 char = world_data["mem_map"][y * world_data["map_size"] + x]
                 attribute = curses.color_pair(1) if char == " " \
@@ -374,6 +384,10 @@ def command_quit():
     raise SystemExit("Received QUIT command, forwarded to server, leaving.")
 
 
+def command_toggle_look_mode():
+    world_data["look_mode"] = False if world_data["look_mode"] else True
+
+
 windows = [
     {"config": [1, 33], "func": win_info},
     {"config": [-7, 33], "func": win_log},
@@ -387,6 +401,7 @@ io = {
     "path_worldstate": "server/worldstate"
 }
 commands = {
+    "l": command_toggle_look_mode,
     "Q": command_quit
 }
 message_queue = {
@@ -394,13 +409,15 @@ message_queue = {
     "messages": []
 }
 world_data = {
+    "avatar_position": [-1, -1],
     "fov_map": "",
     "inventory": [],
     "lifepoints": -1,
+    "look_mode": False,
     "log": [],
+    "map_center": [-1, -1],
     "map_size": 0,
     "mem_map": "",
-    "position": [-1, -1],
     "satiation": -1,
     "turn": -1
 }
