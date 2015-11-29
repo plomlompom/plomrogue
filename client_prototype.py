@@ -310,12 +310,15 @@ def win_map():
                 offset[i] = world_data["map_size"] * (i + 1) - win_size[i] + i
     winmap_size = [world_data["map_size"], world_data["map_size"] * 2 + 1]
     winmap = []
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
     for y in range(world_data["map_size"]):
         for x in range(world_data["map_size"]):
             char = world_data["fov_map"][y * world_data["map_size"] + x]
             if char == " ":
                 char = world_data["mem_map"][y * world_data["map_size"] + x]
-                attribute = curses.A_REVERSE
+                attribute = curses.color_pair(1) if char == " " \
+                    else curses.color_pair(2)
                 winmap += [(char, attribute), (" ", attribute)]
             else:
                 winmap += char + " "
