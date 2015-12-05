@@ -282,9 +282,15 @@ def cursed_main(stdscr):
             draw_screen()
             cursed_main.redraw = False
         char = stdscr.getch()
-        if char >= 0 and chr(char) in commands:
-            commands[chr(char)]()
-            cursed_main.redraw = True
+        if char >= 0:
+            char = chr(char)
+            if char in commands:
+                if len(commands[char]) == 1 or not world_data["look_mode"]:
+                    commands[char][0]()
+                    cursed_main.redraw = True
+                else:
+                    commands[char][1]()
+                    cursed_main.redraw = True
         new_data_from_server = io["file_in"].read()
         ping_test()
         read_into_message_queue()
@@ -379,13 +385,55 @@ def win_log():
 
 
 def command_quit():
-    io["file_out"].write("QUIT\n")
-    io["file_out"].flush()
+    command_sender("QUIT")()
     raise SystemExit("Received QUIT command, forwarded to server, leaving.")
 
 
 def command_toggle_look_mode():
-    world_data["look_mode"] = False if world_data["look_mode"] else True
+    if not world_data["look_mode"]:
+        world_data["look_mode"] = True
+    else:
+        world_data["look_mode"] = False
+        world_data["map_center"] = world_data["avatar_position"]
+
+
+def command_sender(string):
+    def command_send():
+        io["file_out"].write(string + "\n")
+        io["file_out"].flush()
+    return command_send
+
+
+def command_looker(string):
+    def command_look():
+        if string == "west" \
+                and world_data["map_center"][1] > 0:
+            world_data["map_center"][1] -= 1
+        elif string == "east" \
+                and world_data["map_center"][1] < world_data["map_size"] - 1:
+            world_data["map_center"][1] += 1
+        else:
+            y_unevenness = world_data["map_center"][0] % 2
+            y_evenness = int(not(y_unevenness))
+            if string[6:] == "west" and \
+                    world_data["map_center"][1] > -y_unevenness:
+                if string[:5] == "north" and world_data["map_center"][0] > 0:
+                    world_data["map_center"][0] -= 1
+                    world_data["map_center"][1] -= y_evenness
+                if string[:5] == "south" and world_data["map_center"][0] \
+                        < world_data["map_size"] - 1:
+                    world_data["map_center"][0] += 1
+                    world_data["map_center"][1] -= y_evenness
+            elif string[6:] == "east" and world_data["map_center"][1] \
+                    < world_data["map_size"] - y_unevenness:
+                if string[:5] == "north" and world_data["map_center"][0] > 0:
+                    world_data["map_center"][0] -= 1
+                    world_data["map_center"][1] += y_unevenness
+                if string[:5] == "south" and world_data["map_center"][0] \
+                        < world_data["map_size"] - 1:
+                    world_data["map_center"][0] += 1
+                    world_data["map_center"][1] += y_unevenness
+    return command_look
 
 
 windows = [
@@ -401,8 +449,14 @@ io = {
     "path_worldstate": "server/worldstate"
 }
 commands = {
-    "l": command_toggle_look_mode,
-    "Q": command_quit
+    "Q": (command_quit,),
+    "c": (command_sender("move south-east"), command_looker("south-east")),
+    "d": (command_sender("move east"), command_looker("east")),
+    "e": (command_sender("move north-east"), command_looker("north-east")),
+    "l": (command_toggle_look_mode,),
+    "s": (command_sender("move west"), command_looker("west")),
+    "w": (command_sender("move north-west"), command_looker("north-west")),
+    "x": (command_sender("move south-west"), command_looker("south-west")),
 }
 message_queue = {
     "open_end": False,
