@@ -177,7 +177,7 @@ def draw_screen():
             draw_winmap()
             draw_scroll_hints()
 
-    stdscr.clear()
+    stdscr.erase()
     draw_window_border_lines()
     draw_window_border_corners()
     draw_window_contents()
