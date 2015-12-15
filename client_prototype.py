@@ -384,20 +384,6 @@ def win_look():
     return offset, winmap_size, winmap
 
 
-def win_look():
-    winmap = ""
-    winmap_size = [0, 0]
-    for line in world_data["look"]:
-        winmap_size[1] = winmap_size[1] if len(line) <= winmap_size[1] \
-            else len(line)
-    for line in world_data["look"]:
-        padding_size = winmap_size[1] - len(line)
-        winmap += line + (" " * padding_size)
-        winmap_size[0] = winmap_size[0] + 1
-    offset = [0, 0]
-    return offset, winmap_size, winmap
-
-
 def win_info():
     winmap = "T: " + str(world_data["turn"]) \
         + " H: " + str(world_data["lifepoints"]) \
