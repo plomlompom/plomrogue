@@ -229,12 +229,31 @@ read_worldstate.last_checked_mtime = -1
 
 def read_message_queue():
     while (len(message_queue["messages"]) > 1
-        or (len(message_queue["messages"]) == 0
+        or (len(message_queue["messages"]) == 1
             and not message_queue["open_end"])):
         message = message_queue["messages"].pop(0)
-        if message[0:4] == "LOG ":
+        if message == "THINGS_HERE START":
+            read_message_queue.parse_thingshere = True
+            world_data["look"] = []
+        elif message == "THINGS_HERE END":
+            read_message_queue.parse_thingshere = False
+            if world_data["look"] == []:
+                world_data["look"] = ["(none known)"]
+            cursed_main.redraw = True
+        elif read_message_queue.parse_thingshere:
+            world_data["look"] += [message]
+        elif message[0:4] == "LOG ":
             world_data["log"] += [message[4:]]
             cursed_main.redraw = True
+        elif message == "WORLD_UPDATED":
+            query_mapcell()
+read_message_queue.parse_thingshere = False
+
+
+def query_mapcell():
+   command_sender("THINGS_HERE " + str(world_data["map_center"][0]) + " "
+        + str(world_data["map_center"][1]))()
+   world_data["look"] = ["(polling)"]
 
 
 def cursed_main(stdscr):
@@ -275,8 +294,8 @@ def cursed_main(stdscr):
     set_window_geometries()
     delay = 1
     while True:
-        stdscr.timeout(delay)
-        delay = delay * 2 if delay < 1000 else delay
+        stdscr.timeout(int(delay))
+        delay = delay * 1.1 if delay < 1000 else delay
         if cursed_main.redraw:
             delay = 1
             draw_screen()
@@ -296,14 +315,6 @@ def cursed_main(stdscr):
         read_into_message_queue()
         read_worldstate()
         read_message_queue()
-
-
-def win_foo():
-    winmap = [('.', 0), ('o', 0), ('.', 0), ('o', 0), ('O', 0), ('o', 0),
-        ('.', 0), ('o', 0), ('.', 0), ('x', 0), ('y', 0), ('x', 0)]
-    winmap_size = [4, 3]
-    offset = [0, 0]
-    return offset, winmap_size, winmap
 
 
 def win_map():
@@ -359,6 +370,34 @@ def win_inventory():
     return offset, winmap_size, winmap
 
 
+def win_look():
+    winmap = ""
+    winmap_size = [0, 0]
+    for line in world_data["look"]:
+        winmap_size[1] = winmap_size[1] if len(line) <= winmap_size[1] \
+            else len(line)
+    for line in world_data["look"]:
+        padding_size = winmap_size[1] - len(line)
+        winmap += line + (" " * padding_size)
+        winmap_size[0] = winmap_size[0] + 1
+    offset = [0, 0]
+    return offset, winmap_size, winmap
+
+
+def win_look():
+    winmap = ""
+    winmap_size = [0, 0]
+    for line in world_data["look"]:
+        winmap_size[1] = winmap_size[1] if len(line) <= winmap_size[1] \
+            else len(line)
+    for line in world_data["look"]:
+        padding_size = winmap_size[1] - len(line)
+        winmap += line + (" " * padding_size)
+        winmap_size[0] = winmap_size[0] + 1
+    offset = [0, 0]
+    return offset, winmap_size, winmap
+
+
 def win_info():
     winmap = "T: " + str(world_data["turn"]) \
         + " H: " + str(world_data["lifepoints"]) \
@@ -397,6 +436,7 @@ def command_toggle_look_mode():
     else:
         world_data["look_mode"] = False
         world_data["map_center"] = world_data["avatar_position"]
+        query_mapcell()
 
 
 def command_sender(string):
@@ -435,6 +475,7 @@ def command_looker(string):
                         < world_data["map_size"] - 1:
                     world_data["map_center"][0] += 1
                     world_data["map_center"][1] += y_unevenness
+        query_mapcell()
     return command_look
 
 
@@ -442,7 +483,7 @@ windows = [
     {"config": [1, 33], "func": win_info},
     {"config": [-7, 33], "func": win_log},
     {"config": [4, 16], "func": win_inventory},
-    {"config": [4, 16], "func": win_foo},
+    {"config": [4, 16], "func": win_look},
     {"config": [0, -34], "func": win_map}
 ]
 io = {
@@ -469,6 +510,7 @@ world_data = {
     "fov_map": "",
     "inventory": [],
     "lifepoints": -1,
+    "look": [],
     "look_mode": False,
     "log": [],
     "map_center": [-1, -1],
