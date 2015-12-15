@@ -315,6 +315,8 @@ def win_map():
                 < world_data["map_size"] * (i + 1) - win_size[i] / 2:
                 offset[i] = world_data["map_center"][i] * (i + 1) \
                     - int(win_size[i] / 2)
+                if i == 1:
+                    offset[1] = offset[1] + world_data["map_center"][0] % 2
             else:
                 offset[i] = world_data["map_size"] * (i + 1) - win_size[i] + i
     winmap_size = [world_data["map_size"], world_data["map_size"] * 2 + 1]
@@ -325,7 +327,7 @@ def win_map():
         for x in range(world_data["map_size"]):
             char = world_data["fov_map"][y * world_data["map_size"] + x]
             if world_data["look_mode"] and y == world_data["map_center"][0] \
-                and x == world_data["map_center"][1]:
+                    and x == world_data["map_center"][1]:
                 if char == " ":
                     char = \
                         world_data["mem_map"][y * world_data["map_size"] + x]
