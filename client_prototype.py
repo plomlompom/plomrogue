@@ -492,7 +492,9 @@ io = {
     "path_worldstate": "server/worldstate"
 }
 commands = {
+    "P": (command_sender("pick_up"),),
     "Q": (command_quit,),
+    "W": (command_sender("wait"),),
     "c": (command_sender("move south-east"), command_looker("south-east")),
     "d": (command_sender("move east"), command_looker("east")),
     "e": (command_sender("move north-east"), command_looker("north-east")),
