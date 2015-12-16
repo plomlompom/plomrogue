@@ -35,9 +35,8 @@ To build it, this is furthermore necessary:
 - gcc (version >= 4.7.2); some llvm masked as gcc was tested successfully on OSX
 - libc library headers (libc6-dev?)
 
-To build and start, do the following steps:
+To build and start, just run:
 
-$ ./build.sh
 $ ./roguelike
 
 ./roguelike is a shell script that executes a union of ./roguelike-server and

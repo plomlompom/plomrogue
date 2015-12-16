@@ -21,8 +21,8 @@ fi
 # Give helpful message to players that want to start without compiling first.
 if [ ! -e ./libplomrogue.so ]
 then
-    echo 'No ./libplomrogue.so library found. Try "./build.sh" first?'
-    false
+    echo 'No ./libplomrogue.so library found. Building …'
+    ./build.sh
 fi
 
 # Use shell script's arguments for server and pipe server output to log file.
