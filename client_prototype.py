@@ -519,6 +519,7 @@ commands = {
     "D": (command_sender("drop", "inventory_selection"),),
     "P": (command_sender("pick_up"),),
     "Q": (command_quit,),
+    "U": (command_sender("use", "inventory_selection"),),
     "W": (command_sender("wait"),),
     "c": (command_sender("move south-east"), command_looker("south-east")),
     "d": (command_sender("move east"), command_looker("east")),
