@@ -125,6 +125,16 @@ def draw_screen():
                 if (right >= 0 and right < screen_size[1]):
                     healthy_addch(down, right, '+')
 
+    def draw_window_titles():
+        for win in windows:
+            title = " " + win["title"] + " "
+            if len(title) <= win["size"][1]:
+                y = win["start"][0] - 1
+                start_x = win["start"][1] + int((win["size"][1] \
+                    - len(title))/2)
+                for x in range(len(title)):
+                    healthy_addch(y, start_x + x, title[x])
+
     def draw_window_contents():
         def draw_winmap():
             """Draw winmap in area delimited by offset, winmap_size.
@@ -185,6 +195,7 @@ def draw_screen():
     stdscr.erase()
     draw_window_border_lines()
     draw_window_border_corners()
+    draw_window_titles()
     draw_window_contents()
     stdscr.refresh()
 
@@ -502,11 +513,11 @@ def command_inventory_selector(string):
 
 
 windows = [
-    {"config": [1, 33], "func": win_info},
-    {"config": [-7, 33], "func": win_log},
-    {"config": [4, 16], "func": win_inventory},
-    {"config": [4, 16], "func": win_look},
-    {"config": [0, -34], "func": win_map}
+    {"config": [1, 33], "func": win_info, "title": "Info"},
+    {"config": [-7, 33], "func": win_log, "title": "Log"},
+    {"config": [4, 16], "func": win_inventory, "title": "Inventory"},
+    {"config": [4, 16], "func": win_look, "title": "Things here"},
+    {"config": [0, -34], "func": win_map, "title": "Map"}
 ]
 io = {
     "path_out": "server/in",
