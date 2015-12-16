@@ -447,9 +447,12 @@ def command_toggle_look_mode():
         query_mapcell()
 
 
-def command_sender(string):
+def command_sender(string, int_field=None):
     def command_send():
-        io["file_out"].write(string + "\n")
+        int_string = ""
+        if int_field:
+            int_string = " " + str(world_data[int_field])
+        io["file_out"].write(string + int_string + "\n")
         io["file_out"].flush()
     return command_send
 
@@ -513,6 +516,7 @@ io = {
     "path_worldstate": "server/worldstate"
 }
 commands = {
+    "D": (command_sender("drop", "inventory_selection"),),
     "P": (command_sender("pick_up"),),
     "Q": (command_quit,),
     "W": (command_sender("wait"),),
