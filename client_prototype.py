@@ -411,7 +411,7 @@ def win_look():
         padding_size = winmap_size[1] - len(line)
         winmap += line + (" " * padding_size)
         winmap_size[0] = winmap_size[0] + 1
-    offset = [0, 0]
+    offset = [world_data["look_scroll"], 0]
     return offset, winmap_size, winmap
 
 
@@ -499,11 +499,20 @@ def command_looker(string):
     return command_look
 
 
+def command_look_scroller(string):
+    def command_look_scroll():
+        win_size = next(win["size"] for win in windows
+                                    if win["func"] == win_look)
+        if string == "up" and world_data["look_scroll"] > 0:
+            world_data["look_scroll"] -= 1
+        elif string == "down" and world_data["look_scroll"] \
+                < len(world_data["look"]) - win_size[0]:
+            world_data["look_scroll"] += 1
+    return command_look_scroll
+
+
 def command_inventory_selector(string):
     def command_inventory_select():
-        logfile = open("logfile", "a")
-        logfile.write(string + "\n")
-        logfile.close()
         if string == "up" and world_data["inventory_selection"] > 0:
             world_data["inventory_selection"] -= 1
         elif string == "down" and world_data["inventory_selection"] \
@@ -527,6 +536,8 @@ io = {
 commands = {
     "A": (command_sender("ai"),),
     "D": (command_sender("drop", "inventory_selection"),),
+    "J": (command_look_scroller("down"),),
+    "K": (command_look_scroller("up"),),
     "P": (command_sender("pick_up"),),
     "Q": (command_quit,),
     "U": (command_sender("use", "inventory_selection"),),
@@ -553,6 +564,7 @@ world_data = {
     "lifepoints": -1,
     "look": [],
     "look_mode": False,
+    "look_scroll": 0,
     "log": [],
     "map_center": [-1, -1],
     "map_size": 0,
