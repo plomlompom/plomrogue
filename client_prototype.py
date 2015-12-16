@@ -516,6 +516,7 @@ io = {
     "path_worldstate": "server/worldstate"
 }
 commands = {
+    "A": (command_sender("ai"),),
     "D": (command_sender("drop", "inventory_selection"),),
     "P": (command_sender("pick_up"),),
     "Q": (command_quit,),
