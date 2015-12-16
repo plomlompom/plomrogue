@@ -587,7 +587,7 @@ def build_fov_map(t):
 
 def log_help():
     """Send quick usage info to log."""
-    log("LOG See README file for help.")
+    log("See README file for help.")
 
 
 def decrement_lifepoints(t):
