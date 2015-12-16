@@ -1,15 +1,8 @@
 Information on the contained programs' copyright, licenses, and warranties
 ==========================================================================
 
-redo – the scripts below ./build/redo_scripts/
-----------------------------------------------
-
-See redo files below ./build/redo_scripts/ for copyright, license, and warranty
-information. In the file ./AGPLv3 a copy of the GNU Affero Public License
-version 3 is provided.
-
-PlomRogue – the package's files that are not below ./build/redo_scripts/
-------------------------------------------------------------------------
+PlomRogue
+---------
 
 PlomRogue (C) 2013-2015 Christian Heller a.k.a. plomlompom
 

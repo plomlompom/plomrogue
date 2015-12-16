@@ -19,14 +19,9 @@ then
 fi
 
 # Give helpful message to players that want to start without compiling first.
-if [ ! -e ./roguelike-client ]
-then
-    echo 'No ./roguelike-client executable found. Try "./redo" first?'
-    false
-fi
 if [ ! -e ./libplomrogue.so ]
 then
-    echo 'No ./libplomrogue.so library found. Try "./redo" first?'
+    echo 'No ./libplomrogue.so library found. Try "./build.sh" first?'
     false
 fi
 
@@ -57,4 +52,4 @@ fi
 
 # Only start the interface when everything else went well.
 kill -0 $! 2> /dev/null
-./roguelike-client
+python3 ./roguelike-client

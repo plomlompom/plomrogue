@@ -7,10 +7,11 @@ plomlompom has insanely ambitious long-term plans).
 You can move around a player on an island and meet different enemies. You have 5
 hitpoints to lose before death. Enemies start with different amounts of
 hitpoints, depending on their species. Dead enemies become dirt, skeletons, or
-food to consume (each turn reduces one's "satiation", and the lower it is, the
-stronger the chance of suffering from hunger and thereby losing hitpoints). Note
-that different kinds of movements/actions take different numbers of turns to
-finish.
+food to consume (each turn reduces one's "satiation", and the further away from
+a healthy center it is, the smaller the chance of regaining lost hitpoints by
+healing, and the stronger the chance of suffering from hunger or  overfeeding
+and thereby losing hitpoints). Note that different kinds of movements/actions
+take different numbers of turns to finish.
 
 Enemies' AI is very dumb so far: Each turn, they look out for actors of
 different species to flee from (if their type starts out with more hitpoints
@@ -33,50 +34,15 @@ The game is expected to run:
 To build it, this is furthermore necessary:
 - gcc (version >= 4.7.2); some llvm masked as gcc was tested successfully on OSX
 - libc library headers (libc6-dev?)
-- ncurses library headers (libncurses5-dev?)
 
 To build and start, do the following steps:
 
-$ ./redo
+$ ./build.sh
 $ ./roguelike
 
-If you got a version of djb's redo build system installed and in your $PATH,
-you could also do a simple "redo" instead of "./redo". The ./redo script calls a
-simple partial shell script implementation of redo stored below
-./build/redo_scripts/, written by Nils Dagsson Moskopp a.k.a. erlehmann.)
-
-./redo generates two executables ./roguelike-server and ./roguelike-client.
-./roguelike is a pre-existing shell script that merely executes both of them,
-with the server as a background job. You can also ignore the script and start
-the two by hand.
-
-Client's keybindings and window management
-------------------------------------------
-
-Multiple windows may fill the screen. One of these will be selected as "active"
-– identified by dollar signs enclosing its title. Active windows may come with
-window-specific keybindings. Furthermore, global keybindings are available no
-matter what window is selected.
-
-Hit "W" (per default global keybindings) to switch the active window to a view
-that allows changing its geometry. One more hit on "W" switches the window to a
-view that sports (and allows changing its) window-specific keybindings. (One
-further "W" will return the window to its default, "normal" view.) The global
-keybindings are visible (and can be changed) in the "Set global keys" window,
-those of the window geometry configuration in the "Set window geometry keys"
-window, and those of the window-specific keybindings configuration in the "Set
-window keybinding keys" window; by default, the latter two are not visible, but
-may be turned on by (per default keybindings) hitting the keys "F6" and "F7".
-
-Keybindings and default window selection / visibilities / geometries are read
-from the textfile ./confclient/interface_conf by default, or by another one
-named by the -i command line option of the client. Some other default window
-configurations are stored below ./confclient/single_windows/: "map", "info",
-"inventory" and "log". Each of these opens up only a single window into the
-client, filling up the entire terminal. This may be useful for running multiple
-clients in parallel in multiple terminal windows that can be managed by one's
-own window manager choice, instead of relying on plomrogue-client's bizarre
-in-client window management.
+./roguelike is a shell script that executes a union of ./roguelike-server and
+./roguelike-client, with the server as a background job. You may ignore the
+script and start either or both of the two by hand if you please.
 
 Save files, replay game recording, starting over
 ------------------------------------------------
@@ -92,11 +58,12 @@ called "record_" plus the save file name. Run "./roguelike -s" to watch the
 current game's recording from the beginning. Hit any player action key to
 increment turns (they will not trigger the actions usually mapped to them, only
 repeat the actions done at that point in the game as defined in the record
-file). Keys to manage windows, scroll on the map and quit the program do their
-usual thing. Append a number to the -s option (like "-s100") to start the
-recording playback at the respective turn number. (Don't forget to delete /
-empty a game's record file when deleting its save file, or different game's
-moves will get mixed up in one record file.)
+file). Other keys do their usual thing.
+
+Append a number to the -s option (like "-s100") to start the recording playback
+at the respective turn number. (Don't forget to delete / empty a game's record
+file when deleting its save file, or different game's moves will get mixed up in
+one record file.)
 
 Hacking / server internals and configuration
 --------------------------------------------
@@ -107,12 +74,12 @@ The game world is set up and made subject to player commands by
 (written to by ./roguelike-client), ./confserver/world, ./record_save and
 ./save.
 
-All source files are thoroughly documented to explain more details of the
-PlomRogue engine's internals. The ./roguelike-server executable can be run with
-a -v option for helpful debugging info (mostly: what messages the client sends
-to the server). Server and client communicate via files in the ./server/
-directory (generated when the server is first run). The ./server/in file is read
-by the server for newline-delimited commands. The ./server/out file contains
-server messages to be read by clients. The ./server/worldstate file contains a
-serialized representation of the game world's data as it is to be visible to
-the player / the player's client.
+The ./roguelike-server executable can be run with a -v option for possibly
+helpful debugging info (mostly: what messages the client sends to the server).
+
+Server and client communicate via files in the ./server/ directory (generated
+when the server is first run). The ./server/in file is read by the server for
+newline-delimited commands. The ./server/out file contains server messages to be
+read by clients. The ./server/worldstate file contains a serialized
+representation of the game world's data as it is to be visible to the player /
+the player's client.

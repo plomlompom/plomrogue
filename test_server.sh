@@ -1,6 +1,6 @@
 #!/bin/sh
 
-./redo
+./build.sh
 echo "Copying tested server script to ./tested_server.py."
 cp ./roguelike-server ./testing/tested_server.py
 echo "Copying tested C library source to ./tested_server_lib.c."
