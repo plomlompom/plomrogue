@@ -1,10 +1,12 @@
 #!/bin/sh
 
+set -e
+
 ./build.sh
 echo "Copying tested server script to ./tested_server.py."
 cp ./roguelike-server ./testing/tested_server.py
 echo "Copying tested C library source to ./tested_server_lib.c."
-cp ./src/server/libplomrogue.c ./testing/tested_server_lib.c
+cp .libplomrogue.c ./testing/tested_server_lib.c
 
 cp ./testing/start _test
 echo "Starting server on save file '_test' copied from ./testing/start."
