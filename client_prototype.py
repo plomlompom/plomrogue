@@ -128,6 +128,12 @@ def draw_screen():
 
     def draw_window_contents():
         def draw_winmap():
+            """Draw winmap in area delimited by offset, winmap_size.
+
+            The individuall cell of a winmap is interpreted as either a single
+            character element, or as a tuple of character and attribute,
+            depending on the size len(cell) spits out.
+            """
             stop = [0, 0]
             for i in range(2):
                 stop[i] = win["size"][i] + offset[i]
@@ -357,16 +363,32 @@ def win_map():
 
 
 def win_inventory():
-    winmap = ""
-    winmap_size = [0, 0]
+    win_size = next(win["size"] for win in windows
+                                if win["func"] == win_inventory)
+    winmap = []
+    winmap_size = [0, win_size[1]]
     for line in world_data["inventory"]:
         winmap_size[1] = winmap_size[1] if len(line) <= winmap_size[1] \
             else len(line)
+    count = 0
     for line in world_data["inventory"]:
         padding_size = winmap_size[1] - len(line)
-        winmap += line + (" " * padding_size)
+        line += (" " * padding_size)
+        if count == world_data["inventory_selection"]:
+            line_new = []
+            for x in range(len(line)):
+                line_new += [(line[x], curses.A_REVERSE)]
+            line = line_new
+        winmap += line
         winmap_size[0] = winmap_size[0] + 1
+        count += 1
     offset = [0, 0]
+    if world_data["inventory_selection"] > win_size[0]/2:
+        if world_data["inventory_selection"] < len(world_data["inventory"]) \
+            - win_size[0]/2:
+            offset[0] = world_data["inventory_selection"] - int(win_size[0]/2)
+        else:
+            offset[0] = len(world_data["inventory"]) - win_size[0]
     return offset, winmap_size, winmap
 
 
@@ -465,6 +487,19 @@ def command_looker(string):
     return command_look
 
 
+def command_inventory_selector(string):
+    def command_inventory_select():
+        logfile = open("logfile", "a")
+        logfile.write(string + "\n")
+        logfile.close()
+        if string == "up" and world_data["inventory_selection"] > 0:
+            world_data["inventory_selection"] -= 1
+        elif string == "down" and world_data["inventory_selection"] \
+                < len(world_data["inventory"]) - 1:
+            world_data["inventory_selection"] += 1
+    return command_inventory_select
+
+
 windows = [
     {"config": [1, 33], "func": win_info},
     {"config": [-7, 33], "func": win_log},
@@ -484,6 +519,8 @@ commands = {
     "c": (command_sender("move south-east"), command_looker("south-east")),
     "d": (command_sender("move east"), command_looker("east")),
     "e": (command_sender("move north-east"), command_looker("north-east")),
+    "j": (command_inventory_selector("down"),),
+    "k": (command_inventory_selector("up"),),
     "l": (command_toggle_look_mode,),
     "s": (command_sender("move west"), command_looker("west")),
     "w": (command_sender("move north-west"), command_looker("north-west")),
@@ -497,6 +534,7 @@ world_data = {
     "avatar_position": [-1, -1],
     "fov_map": "",
     "inventory": [],
+    "inventory_selection": 0,
     "lifepoints": -1,
     "look": [],
     "look_mode": False,
