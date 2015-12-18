@@ -1,33 +1,47 @@
 #!/usr/bin/python3
 
 import curses
-import math
 import os
 import signal
 import time
 
 
+from client.config.world_data import world_data
+from client.config.io import io
+from client.config.commands import commands
+from client.config.windows import windows_config
+from client.query_mapcell import query_mapcell
+
+
+import types
+class Window:
+    def __init__(self, title, draw_function, size):
+        self.title = title
+        self.draw = types.MethodType(draw_function, self)
+        self.size = size
+
+
 def set_window_geometries():
 
-    def set_window_size():
-        win["size"], win["start"] = [0, 0], [0, 0]
-        win["size"][0] = win["config"][0]
-        if (win["config"][0] == 0):
-            win["size"][0] = screen_size[0] - sep_size
-        elif (win["config"][0] < 0):
-            win["size"][0] = screen_size[0] + win["config"][0] - sep_size
-        win["size"][1] = win["config"][1]
-        if (win["config"][1] == 0):
-            win["size"][1] = screen_size[1]
-        elif (win["config"][1] < 0):
-            win["size"][1] = screen_size[1] + win["config"][1]
+    def size_window(config):
+        size = [0, 0]
+        size[0] = config[0]
+        if (config[0] == 0):
+            size[0] = screen_size[0] - sep_size
+        elif (config[0] < 0):
+            size[0] = screen_size[0] + config[0] - sep_size
+        size[1] = config[1]
+        if (config[1] == 0):
+            size[1] = screen_size[1]
+        elif (config[1] < 0):
+            size[1] = screen_size[1] + config[1]
+        return size
 
-    def place_window():
+    def place_window(win):
         win_i = windows.index(win)
 
         # If win is first window, it goes into the top left corner.
-        win["start"][0] = 0 + sep_size
-        win["start"][1] = 0
+        win.start = [0 + sep_size, 0]
         if (win_i > 0):
 
             # If not, get win's closest predecessor starting a new stack on the
@@ -35,19 +49,18 @@ def set_window_geometries():
             win_top = None
             for i in range(win_i - 1, -1, -1):
                 win_top = windows[i]
-                if (win_top["start"][0] == 0 + sep_size):
+                if (win_top.start[0] == 0 + sep_size):
                     break
-            win["start"][1] = win_top["start"][1] + win_top["size"][1] \
-                + sep_size
+            win.start[1] = win_top.start[1] + win_top.size[1] + sep_size
 
             # If enough space is found below win's predecessor, fit win's top
             # left corner to that predecessor's bottom left corner.
             win_prev = windows[win_i - 1]
-            next_free_y = win_prev["start"][0] + win_prev["size"][0] + sep_size
-            if (win["size"][1] <= win_prev["size"][1] and
-                    win["size"][0] <= screen_size[0] - next_free_y):
-                win["start"][1] = win_prev["start"][1]
-                win["start"][0] = next_free_y
+            next_free_y = win_prev.start[0] + win_prev.size[0] + sep_size
+            if (win.size[1] <= win_prev.size[1] and
+                    win.size[0] <= screen_size[0] - next_free_y):
+                win.start[1] = win_prev.start[1]
+                win.start[0] = next_free_y
 
             # If that fails, try to fit win's top left corner to the top right
             # corner of its closest predecessor win_test 1) below win_top (see
@@ -61,17 +74,17 @@ def set_window_geometries():
                 while (win_test != win_top):
                     for i in range(win_i - 2, -1, -1):
                         win_high = windows[i]
-                        if win_test["start"][0] > win_high["start"][0]:
+                        if win_test.start[0] > win_high.start[0]:
                             break
-                    next_free_y = win_high["start"][0] + win_high["size"][0] \
+                    next_free_y = win_high.start[0] + win_high.size[0] \
                         + sep_size
-                    first_free_x = win_test["start"][1] + win_test["size"][1] \
+                    first_free_x = win_test.start[1] + win_test.size[1] \
                         + sep_size
-                    last_free_x = win_high["start"][1] + win_high["size"][1]
-                    if (win["size"][0] <= screen_size[0] - next_free_y and
-                            win["size"][1] <= last_free_x - first_free_x):
-                        win["start"][1] = first_free_x
-                        win["start"][0] = next_free_y
+                    last_free_x = win_high.start[1] + win_high.size[1]
+                    if (win.size[0] <= screen_size[0] - next_free_y and
+                            win.size[1] <= last_free_x - first_free_x):
+                        win.start[1] = first_free_x
+                        win.start[0] = next_free_y
                         break
                     win_test = win_high
 
@@ -79,9 +92,11 @@ def set_window_geometries():
     curses.endwin()
     stdscr = curses.initscr()
     screen_size = stdscr.getmaxyx()
-    for win in windows:
-        set_window_size()
-        place_window()
+    for config in windows_config:
+        size = size_window(config["config"])
+        window = Window(config["title"], config["func"], size)
+        windows.append(window)
+        place_window(window)
     cursed_main.redraw = True
 
 
@@ -100,10 +115,10 @@ def draw_screen():
     def draw_window_border_lines():
         for win in windows:
             for k in range(2):
-                j = win["start"][int(k == 0)] - sep_size
+                j = win.start[int(k == 0)] - sep_size
                 if (j >= 0 and j < screen_size[int(k == 0)]):
-                    start = win["start"][k]
-                    end = win["start"][k] + win["size"][k]
+                    start = win.start[k]
+                    end = win.start[k] + win.size[k]
                     end = end if end < screen_size[k] else screen_size[k]
                     if k:
                         [healthy_addch(j, i, '-') for i in range(start, end)]
@@ -112,10 +127,10 @@ def draw_screen():
 
     def draw_window_border_corners():
         for win in windows:
-            up = win["start"][0] - sep_size
-            down = win["start"][0] + win["size"][0]
-            left = win["start"][1] - sep_size
-            right = win["start"][1] + win["size"][1]
+            up = win.start[0] - sep_size
+            down = win.start[0] + win.size[0]
+            left = win.start[1] - sep_size
+            right = win.start[1] + win.size[1]
             if (up >= 0 and up < screen_size[0]):
                 if (left >= 0 and left < screen_size[1]):
                     healthy_addch(up, left, '+')
@@ -129,11 +144,10 @@ def draw_screen():
 
     def draw_window_titles():
         for win in windows:
-            title = " " + win["title"] + " "
-            if len(title) <= win["size"][1]:
-                y = win["start"][0] - 1
-                start_x = win["start"][1] + int((win["size"][1] \
-                    - len(title))/2)
+            title = " " + win.title + " "
+            if len(title) <= win.size[1]:
+                y = win.start[0] - 1
+                start_x = win.start[1] + int((win.size[1] - len(title))/2)
                 for x in range(len(title)):
                     healthy_addch(y, start_x + x, title[x])
 
@@ -147,7 +161,7 @@ def draw_screen():
             """
             stop = [0, 0]
             for i in range(2):
-                stop[i] = win["size"][i] + offset[i]
+                stop[i] = win.size[i] + offset[i]
                 if stop[i] >= winmap_size[i]:
                     stop[i] = winmap_size[i]
             for y in range(offset[0], stop[0]):
@@ -157,40 +171,44 @@ def draw_screen():
                     if len(cell) > 1:
                         attr = cell[1]
                         cell = cell[0]
-                    y_in_screen = win["start"][0] + (y - offset[0])
-                    x_in_screen = win["start"][1] + (x - offset[1])
+                    y_in_screen = win.start[0] + (y - offset[0])
+                    x_in_screen = win.start[1] + (x - offset[1])
                     if (y_in_screen < screen_size[0]
                             and x_in_screen < screen_size[1]):
                         healthy_addch(y_in_screen, x_in_screen, cell, attr)
         def draw_scroll_hints():
             def draw_scroll_string(n_lines_outside):
                 hint = ' ' + str(n_lines_outside + 1) + ' more ' + unit + ' '
-                if len(hint) <= win["size"][ni]:
-                    non_hint_space = win["size"][ni] - len(hint)
+                if len(hint) <= win.size[ni]:
+                    non_hint_space = win.size[ni] - len(hint)
                     hint_offset = int(non_hint_space / 2)
-                    for j in range(win["size"][ni] - non_hint_space):
-                        pos_2 = win["start"][ni] + hint_offset + j
+                    for j in range(win.size[ni] - non_hint_space):
+                        pos_2 = win.start[ni] + hint_offset + j
                         x, y = (pos_2, pos_1) if ni else (pos_1, pos_2)
                         healthy_addch(y, x, hint[j], curses.A_REVERSE)
             def draw_scroll_arrows(ar1, ar2):
-                for j in range(win["size"][ni]):
-                    pos_2 = win["start"][ni] + j
+                for j in range(win.size[ni]):
+                    pos_2 = win.start[ni] + j
                     x, y = (pos_2, pos_1) if ni else (pos_1, pos_2)
                     healthy_addch(y, x, ar1 if ni else ar2, curses.A_REVERSE)
             for i in range(2):
                 ni = int(i == 0)
                 unit = 'rows' if ni else 'columns'
                 if (offset[i] > 0):
-                    pos_1 = win["start"][i]
+                    pos_1 = win.start[i]
                     draw_scroll_arrows('^', '<')
                     draw_scroll_string(offset[i])
-                if (winmap_size[i] > offset[i] + win["size"][i]):
-                    pos_1 = win["start"][i] + win["size"][i] - 1
+                if (winmap_size[i] > offset[i] + win.size[i]):
+                    pos_1 = win.start[i] + win.size[i] - 1
                     draw_scroll_arrows('v', '>')
                     draw_scroll_string(winmap_size[i] - offset[i]
-                        - win["size"][i])
+                        - win.size[i])
         for win in windows:
-            offset, winmap_size, winmap = win["func"]()
+            logfile = open("logfile", "a")
+            logfile.write(repr(Window) + "\n")
+            logfile.write(repr(win) + "\n")
+            logfile.close()
+            offset, winmap_size, winmap = win.draw()
             draw_winmap()
             draw_scroll_hints()
 
@@ -268,12 +286,6 @@ def read_message_queue():
 read_message_queue.parse_thingshere = False
 
 
-def query_mapcell():
-   command_sender("THINGS_HERE " + str(world_data["map_center"][0]) + " "
-        + str(world_data["map_center"][1]))()
-   world_data["look"] = ["(polling)"]
-
-
 def cursed_main(stdscr):
 
     def ping_test():
@@ -334,265 +346,14 @@ def cursed_main(stdscr):
         read_message_queue()
 
 
-def win_map():
-    win_size = next(win["size"] for win in windows if win["func"] == win_map)
-    offset = [0, 0]
-    for i in range(2):
-        if world_data["map_center"][i] * (i + 1) > win_size[i] / 2 and \
-                win_size[i] < world_data["map_size"] * (i + 1):
-            if world_data["map_center"][i] * (i + 1) \
-                < world_data["map_size"] * (i + 1) - win_size[i] / 2:
-                offset[i] = world_data["map_center"][i] * (i + 1) \
-                    - int(win_size[i] / 2)
-                if i == 1:
-                    offset[1] = offset[1] + world_data["map_center"][0] % 2
-            else:
-                offset[i] = world_data["map_size"] * (i + 1) - win_size[i] + i
-    winmap_size = [world_data["map_size"], world_data["map_size"] * 2 + 1]
-    winmap = []
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
-    curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
-    for y in range(world_data["map_size"]):
-        for x in range(world_data["map_size"]):
-            char = world_data["fov_map"][y * world_data["map_size"] + x]
-            if world_data["look_mode"] and y == world_data["map_center"][0] \
-                    and x == world_data["map_center"][1]:
-                if char == " ":
-                    char = \
-                        world_data["mem_map"][y * world_data["map_size"] + x]
-                winmap += [(char, curses.A_REVERSE), (" ", curses.A_REVERSE)]
-                continue
-            if char == " ":
-                char = world_data["mem_map"][y * world_data["map_size"] + x]
-                attribute = curses.color_pair(1) if char == " " \
-                    else curses.color_pair(2)
-                winmap += [(char, attribute), (" ", attribute)]
-            else:
-                winmap += char + " "
-        if y % 2 == 0:
-            winmap += "  "
-    return offset, winmap_size, winmap
-
-
-def win_inventory():
-    win_size = next(win["size"] for win in windows
-                                if win["func"] == win_inventory)
-    winmap = []
-    winmap_size = [0, win_size[1]]
-    for line in world_data["inventory"]:
-        winmap_size[1] = winmap_size[1] if len(line) <= winmap_size[1] \
-            else len(line)
-    count = 0
-    for line in world_data["inventory"]:
-        padding_size = winmap_size[1] - len(line)
-        line += (" " * padding_size)
-        if count == world_data["inventory_selection"]:
-            line_new = []
-            for x in range(len(line)):
-                line_new += [(line[x], curses.A_REVERSE)]
-            line = line_new
-        winmap += line
-        winmap_size[0] = winmap_size[0] + 1
-        count += 1
-    offset = [0, 0]
-    if world_data["inventory_selection"] > win_size[0]/2:
-        if world_data["inventory_selection"] < len(world_data["inventory"]) \
-            - win_size[0]/2:
-            offset[0] = world_data["inventory_selection"] - int(win_size[0]/2)
-        else:
-            offset[0] = len(world_data["inventory"]) - win_size[0]
-    return offset, winmap_size, winmap
-
-
-def win_look():
-    winmap = ""
-    winmap_size = [0, 0]
-    for line in world_data["look"]:
-        winmap_size[1] = winmap_size[1] if len(line) <= winmap_size[1] \
-            else len(line)
-    for line in world_data["look"]:
-        padding_size = winmap_size[1] - len(line)
-        winmap += line + (" " * padding_size)
-        winmap_size[0] = winmap_size[0] + 1
-    offset = [world_data["look_scroll"], 0]
-    return offset, winmap_size, winmap
-
-
-def win_info():
-    winmap = "T: " + str(world_data["turn"]) \
-        + " H: " + str(world_data["lifepoints"]) \
-        + " S: " + str(world_data["satiation"])
-    winmap_size = [1, len(winmap)]
-    offset = [0, 0]
-    return offset, winmap_size, winmap
-
-
-def win_log():
-    win_size = next(win["size"] for win in windows if win["func"] == win_log)
-    offset = [0, 0]
-    winmap = ""
-    number_of_lines = 0
-    for line in world_data["log"]:
-        number_of_lines += math.ceil(len(line) / win_size[1])
-        padding_size = win_size[1] - (len(line) % win_size[1])
-        winmap += line + (padding_size * " ")
-    if number_of_lines < win_size[0]:
-        winmap = (" " * win_size[1] * (win_size[0] - number_of_lines)) + winmap
-        number_of_lines = win_size[0]
-    elif number_of_lines > win_size[0]:
-        offset[0] = number_of_lines - win_size[0]
-    winmap_size = [number_of_lines, win_size[1]]
-    return offset, winmap_size, winmap
-
-
-def command_quit():
-    command_sender("QUIT")()
-    raise SystemExit("Received QUIT command, forwarded to server, leaving.")
-
-
-def command_toggle_look_mode():
-    if not world_data["look_mode"]:
-        world_data["look_mode"] = True
-    else:
-        world_data["look_mode"] = False
-        world_data["map_center"] = world_data["avatar_position"]
-        query_mapcell()
-
-
-def command_sender(string, int_field=None):
-    def command_send():
-        int_string = ""
-        if int_field:
-            int_string = " " + str(world_data[int_field])
-        io["file_out"].write(string + int_string + "\n")
-        io["file_out"].flush()
-    return command_send
-
-
-def command_looker(string):
-    def command_look():
-        if string == "west" \
-                and world_data["map_center"][1] > 0:
-            world_data["map_center"][1] -= 1
-        elif string == "east" \
-                and world_data["map_center"][1] < world_data["map_size"] - 1:
-            world_data["map_center"][1] += 1
-        else:
-            y_unevenness = world_data["map_center"][0] % 2
-            y_evenness = int(not(y_unevenness))
-            if string[6:] == "west" and \
-                    world_data["map_center"][1] > -y_unevenness:
-                if string[:5] == "north" and world_data["map_center"][0] > 0:
-                    world_data["map_center"][0] -= 1
-                    world_data["map_center"][1] -= y_evenness
-                if string[:5] == "south" and world_data["map_center"][0] \
-                        < world_data["map_size"] - 1:
-                    world_data["map_center"][0] += 1
-                    world_data["map_center"][1] -= y_evenness
-            elif string[6:] == "east" and world_data["map_center"][1] \
-                    < world_data["map_size"] - y_unevenness:
-                if string[:5] == "north" and world_data["map_center"][0] > 0:
-                    world_data["map_center"][0] -= 1
-                    world_data["map_center"][1] += y_unevenness
-                if string[:5] == "south" and world_data["map_center"][0] \
-                        < world_data["map_size"] - 1:
-                    world_data["map_center"][0] += 1
-                    world_data["map_center"][1] += y_unevenness
-        query_mapcell()
-    return command_look
-
-
-def command_look_scroller(string):
-    def command_look_scroll():
-        win_size = next(win["size"] for win in windows
-                                    if win["func"] == win_look)
-        if string == "up" and world_data["look_scroll"] > 0:
-            world_data["look_scroll"] -= 1
-        elif string == "down" and world_data["look_scroll"] \
-                < len(world_data["look"]) - win_size[0]:
-            world_data["look_scroll"] += 1
-    return command_look_scroll
-
-
-def command_inventory_selector(string):
-    def command_inventory_select():
-        if string == "up" and world_data["inventory_selection"] > 0:
-            world_data["inventory_selection"] -= 1
-        elif string == "down" and world_data["inventory_selection"] \
-                < len(world_data["inventory"]) - 1:
-            world_data["inventory_selection"] += 1
-    return command_inventory_select
-
-
-windows = [
-    {"config": [1, 33], "func": win_info, "title": "Info"},
-    {"config": [-7, 33], "func": win_log, "title": "Log"},
-    {"config": [4, 16], "func": win_inventory, "title": "Inventory"},
-    {"config": [4, 16], "func": win_look, "title": "Things here"},
-    {"config": [0, -34], "func": win_map, "title": "Map"}
-]
-io = {
-    "path_out": "server/in",
-    "path_in": "server/out",
-    "path_worldstate": "server/worldstate"
-}
-commands = {
-    "A": (command_sender("ai"),),
-    "D": (command_sender("drop", "inventory_selection"),),
-    "J": (command_look_scroller("down"),),
-    "K": (command_look_scroller("up"),),
-    "P": (command_sender("pick_up"),),
-    "Q": (command_quit,),
-    "U": (command_sender("use", "inventory_selection"),),
-    "W": (command_sender("wait"),),
-    "c": (command_sender("move south-east"), command_looker("south-east")),
-    "d": (command_sender("move east"), command_looker("east")),
-    "e": (command_sender("move north-east"), command_looker("north-east")),
-    "j": (command_inventory_selector("down"),),
-    "k": (command_inventory_selector("up"),),
-    "l": (command_toggle_look_mode,),
-    "s": (command_sender("move west"), command_looker("west")),
-    "w": (command_sender("move north-west"), command_looker("north-west")),
-    "x": (command_sender("move south-west"), command_looker("south-west")),
-}
 message_queue = {
     "open_end": False,
     "messages": []
 }
-world_data = {
-    "avatar_position": [-1, -1],
-    "fov_map": "",
-    "inventory": [],
-    "inventory_selection": 0,
-    "lifepoints": -1,
-    "look": [],
-    "look_mode": False,
-    "look_scroll": 0,
-    "log": [
-"QUICK COMMAND OVERVIEW: "
-"Move through map with 'w', 'e', 's', 'd', 'x', 'c'. "
-"Pick up things with 'P', drop a thing selected from the inventory with 'D' "
-"or use it with 'P'. "
-"Move through inventory selection with 'j' and 'k'. "
-"Toggle looking around mode with 'l'. "
-"Scroll 'Things here' window with 'J' and 'K'. "
-"Let AI decide next move with 'A'. "
-"Quit with 'Q'. ",
-"STATS OVERVIEW: "
-"'T': Turn; 'H': Health (the higher, the better); "
-"'S': Satiation (the closer to zero, the better).",
-"See README file for more help."
-],
-    "map_center": [-1, -1],
-    "map_size": 0,
-    "mem_map": "",
-    "satiation": -1,
-    "turn": -1
-}
 sep_size = 1  # Width of inter-window borders and title bars.
 stdscr = None
 screen_size = [0,0]
-
+windows = []
 
 try:
     if (not os.access(io["path_out"], os.F_OK)):
