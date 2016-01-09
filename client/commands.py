@@ -22,7 +22,7 @@ def command_sender(string, int_field=None):
         int_string = ""
         if int_field:
             int_string = " " + str(world_data[int_field])
-        send(string + int_string) 
+        send(string + int_string)
     return command_send
 
 

@@ -21,4 +21,3 @@ commands = {
     "w": (command_sender("move north-west"), command_looker("north-west")),
     "x": (command_sender("move south-west"), command_looker("south-west")),
 }
-

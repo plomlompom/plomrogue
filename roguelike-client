@@ -204,10 +204,6 @@ def draw_screen():
                     draw_scroll_string(winmap_size[i] - offset[i]
                         - win.size[i])
         for win in windows:
-            logfile = open("logfile", "a")
-            logfile.write(repr(Window) + "\n")
-            logfile.write(repr(win) + "\n")
-            logfile.close()
             offset, winmap_size, winmap = win.draw()
             draw_winmap()
             draw_scroll_hints()
