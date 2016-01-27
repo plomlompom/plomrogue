@@ -38,28 +38,27 @@ def read_worldstate():
     if read_anew:
         redraw_windows = True
         world_data["turn"] = int(turn_string)
-        world_data["lifepoints"] = int(worldstate_file.readline())
-        world_data["satiation"] = int(worldstate_file.readline())
-        world_data["inventory"] = []
-        while True:
-            line = worldstate_file.readline().replace("\n", "")
-            if line == '%':
-                break
-            world_data["inventory"] += [line]
-        world_data["avatar_position"][0] = int(worldstate_file.readline())
-        world_data["avatar_position"][1] = int(worldstate_file.readline())
+        for entry in io["worldstate_read_order"]:
+            if entry[1] == "int":
+                if 2 == len(entry):
+                    world_data[entry[0]] = int(worldstate_file.readline())
+                elif 3 == len(entry):
+                    world_data[entry[0]][entry[2]] = \
+                            int(worldstate_file.readline())
+            elif entry[1] == "lines":
+                world_data[entry[0]] = []
+                while True:
+                    line = worldstate_file.readline().replace("\n", "")
+                    if line == '%':
+                        break
+                    world_data[entry[0]] += [line]
+            elif entry[1] == "map":
+                world_data[entry[0]] = ""
+                for i in range(world_data["map_size"]):
+                    line = worldstate_file.readline().replace("\n", "")
+                    world_data[entry[0]] += line
         if not world_data["look_mode"]:
-            world_data["map_center"][0] = world_data["avatar_position"][0]
-            world_data["map_center"][1] = world_data["avatar_position"][1]
-        world_data["map_size"] = int(worldstate_file.readline())
-        world_data["fov_map"] = ""
-        for i in range(world_data["map_size"]):
-            line = worldstate_file.readline().replace("\n", "")
-            world_data["fov_map"] += line
-        world_data["mem_map"] = ""
-        for i in range(world_data["map_size"]):
-            line = worldstate_file.readline().replace("\n", "")
-            world_data["mem_map"] += line
+            world_data["map_center"] = world_data["avatar_position"][:]
     worldstate_file.close()
 read_worldstate.last_checked_mtime = -1
 
