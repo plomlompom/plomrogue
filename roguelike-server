@@ -15,6 +15,10 @@ import ctypes
 import math
 
 
+from server.config.world_data import world_db, directions_db
+from server.config.io import io_db
+
+
 class RandomnessIO:
     """"Interface to libplomrogue's pseudo-randomness generator."""
 
@@ -1710,37 +1714,6 @@ commands_db = {
     "ai": (0, False, command_ai)
 }
 # TODO: Unhandled cases: (Un-)killing animates (esp. player!) with T_LIFEPOINTS.
-
-
-"""World state database. With sane default values. (Randomness is in rand.)"""
-world_db = {
-    "TURN": 0,
-    "MAP_LENGTH": 64,
-    "PLAYER_TYPE": 0,
-    "WORLD_ACTIVE": 0,
-    "MAP": False,
-    "ThingActions": {},
-    "ThingTypes": {},
-    "Things": {}
-}
-
-"""Mapping of direction names to internal direction chars."""
-directions_db = {"east": "d", "south-east": "c", "south-west": "x",
-                 "west": "s", "north-west": "w", "north-east": "e"}
-
-"""File IO database."""
-io_db = {
-    "path_save": "save",
-    "path_record": "record_save",
-    "path_worldconf": "confserver/world",
-    "path_server": "server_run/",
-    "path_in": "server_run/in",
-    "path_out": "server_run/out",
-    "path_worldstate": "server_run/worldstate",
-    "tmp_suffix": "_tmp",
-    "kicked_by_rival": False,
-    "worldstate_updateable": False
-}
 
 
 try:
