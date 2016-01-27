@@ -39,12 +39,12 @@ kill -0 $! 2> /dev/null
 
 # Give server some time (max. 10 seconds) to generate its worldstate file.
 i=0
-while [ ! -e server/worldstate ] && [ $i -le 1000 ]
+while [ ! -e server_run/worldstate ] && [ $i -le 1000 ]
 do
     sleep 0.01
     i=`expr $i + 1`
 done
-if [ ! -e server/worldstate ]
+if [ ! -e server_run/worldstate ]
 then
     echo "Server failed generating worldstate file within given time limit."
     false

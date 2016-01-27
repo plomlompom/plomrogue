@@ -69,16 +69,16 @@ Hacking / server internals and configuration
 
 The game world is set up and made subject to player commands by
 ./roguelike-server. It's controlled by commands explained in the file
-./SERVER_COMMANDS. The server usually reads these from the files ./server/in
+./SERVER_COMMANDS. The server usually reads these from the files ./server_run/in
 (written to by ./roguelike-client), ./confserver/world, ./record_save and
 ./save.
 
 The ./roguelike-server executable can be run with a -v option for possibly
 helpful debugging info (mostly: what messages the client sends to the server).
 
-Server and client communicate via files in the ./server/ directory (generated
-when the server is first run). The ./server/in file is read by the server for
-newline-delimited commands. The ./server/out file contains server messages to be
-read by clients. The ./server/worldstate file contains a serialized
-representation of the game world's data as it is to be visible to the player /
-the player's client.
+Server and client communicate via files in the ./server_run/ directory
+(generated when the server is first run). The ./server_run/in file is read by
+the server for newline-delimited commands. The ./server_run/out file contains
+server messages to be read by clients. The ./server/worldstate file contains a
+serialized representation of the game world's data as it is to be visible to the
+player / the player's client.

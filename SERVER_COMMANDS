@@ -10,15 +10,15 @@ on success, reads all commands from it. If no save file exists, commands from
 Afterwards, the command "MAKE_WORLD" with the current Unix time as argument is
 interpreted (and also written to ./record_save).
 
-In any case, from then on, further commands are read in from ./server/in. New
-commands must be appended to the file – which is what the client does. All
-commands from ./server/in except meta commands are also written to
+In any case, from then on, further commands are read in from ./server_run/in.
+New commands must be appended to the file – which is what the client does. All
+commands from ./server_run/in except meta commands are also written to
 ./record_save.
 
 Every fifteen seconds, if any turns have passed, ./savefile is written – with a
 list of all god commands necessary to recreate the current world state. On each
-world state change, ./server/worldstate is updated and a message "WORLD_UPDATED"
-written to ./server/out.
+world state change, ./server_run/worldstate is updated and a message
+"WORLD_UPDATED" written to ./server_run/out.
 
 Replay mode
 -----------
@@ -29,7 +29,7 @@ turn number is higher than the last turn of the recorded play, the last turn. If
 no turn number is given as argument, the record file is replayed until turn 1 is
 reached. Meta commands in ./record_save are not understood.
 
-From then on, ./server/in is also read. Meta commands sent by the client are
+From then on, ./server_run/in is also read. Meta commands sent by the client are
 interpreted normally, but any player and god command merely furthers reading of
 ./record_save by one line and is otherwise ignored.
 
@@ -56,7 +56,7 @@ Run plugin code in ./plugins/[argument], with argument only consisting of
 alphanumeric characters and underscores.
 
 PING
-Write "PONG" line to ./server/out file.
+Write "PONG" line to ./server_run/out file.
 
 QUIT
 Shut down server.
@@ -64,7 +64,7 @@ Shut down server.
 THINGS_HERE [0 to 255] [0 to 255]
 If world exists, write line-by-line list of things visible or in memory at y
 position of first argument, x position of second argument of map into
-./server/out file, enclosed by two lines "THINGS_HERE START" and
+./server_run/out file, enclosed by two lines "THINGS_HERE START" and
 "THINGS_HERE END".
 
 Player commands
@@ -109,17 +109,17 @@ Set map seed and randomness seed to argument. Remove all things. (Re-)generate
 map. Add to map things specified in thing types table in quantity defined there
 by START_NUMBER command, with first thing (of thing ID of 0) of type defined as
 player type by PLAYER_TYPE command. Set world turn to 1. Activate world. Answer
-with 'NEW_WORLD' message in ./server/out file.
+with 'NEW_WORLD' message in ./server_run/out file.
 
 MAP_LENGTH [1 to 256]
-Deactivate world. Remove ./server/worldstate file. Remove all things. Remove
+Deactivate world. Remove ./server_run/worldstate file. Remove all things. Remove
 map. Set map edge length to argument. (Initial value: 64.)
 
 MAP [0 to 255] [string]
 Set part of game map to string argument: the line of the argument's number.
 
 WORLD_ACTIVE [0|1]
-Set world activity state to argument. If 0, remove ./server/worldstate file.
+Set world activity state to argument. If 0, remove ./server_run/worldstate file.
 Else, if world was so far inactive, a map exists, at least one "wait" thing
 action is defined, and a thing of ID 0 (= a player character) that is not part
 of any other thing's inventory, (re-)build all animate things' fields of view,
@@ -137,7 +137,7 @@ TA_NAME [wait|move|use|drop|pick_up]
 Set selected thing action's name (and thereby function, equal to player
 command). Legal worlds need at least one action of name "wait", so if this
 unsets the world's only "wait" action, the world is deactivated, and the
-./server/worldstate file removed.
+./server_run/worldstate file removed.
 
 T_ID [-1 to infinity]
 Select thing to manipulate by argument as ID. If argument is <0, change it to

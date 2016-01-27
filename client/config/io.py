@@ -1,7 +1,7 @@
 io = {
-    "path_out": "server/in",
-    "path_in": "server/out",
-    "path_worldstate": "server/worldstate",
+    "path_out": "server_run/in",
+    "path_in": "server_run/out",
+    "path_worldstate": "server_run/worldstate",
     "worldstate_read_order": [
         ["lifepoints", "int"],
         ["satiation", "int"],
