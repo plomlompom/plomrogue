@@ -36,6 +36,7 @@ def read_worldstate():
             read_worldstate.last_checked_mtime = mtime
             read_anew = True
     if read_anew:
+        # TODO: Hardcore order of necessary fields, ensure dependency order.
         redraw_windows = True
         world_data["turn"] = int(turn_string)
         for entry in io["worldstate_read_order"]:
