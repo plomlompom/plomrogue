@@ -9,8 +9,8 @@ import time
 from client.config.world_data import world_data
 from client.config.io import io
 from client.config.commands import commands
-from client.window_management import redraw_windows, set_window_geometries, \
-                                     stdscr, draw_screen
+from client.window_management import redraw_windows, set_windows, draw_screen, \
+                                     stdscr
 from client.query_mapcell import query_mapcell
 
 
@@ -122,12 +122,13 @@ def cursed_main(stdscr):
     curses.noecho()
     curses.curs_set(False)
     signal.signal(signal.SIGWINCH,
-        lambda ignore_1, ignore_2: set_window_geometries())
-    set_window_geometries()
+        lambda ignore_1, ignore_2: set_windows())
+    set_windows()
     delay = 1
     while True:
         stdscr.timeout(int(delay))
-        delay = delay * 1.1 if delay < 1000 else delay
+        if delay < 1000:
+            delay = delay * 1.1
         if redraw_windows:
             delay = 1
             draw_screen()
@@ -138,10 +139,9 @@ def cursed_main(stdscr):
             if char in commands:
                 if len(commands[char]) == 1 or not world_data["look_mode"]:
                     commands[char][0]()
-                    redraw_windows = True
                 else:
                     commands[char][1]()
-                    redraw_windows = True
+                redraw_windows = True
         new_data_from_server = io["file_in"].read()
         ping_test()
         read_into_message_queue()

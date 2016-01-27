@@ -19,7 +19,7 @@ class Window:
         self.size = size
 
 
-def set_window_geometries():
+def set_windows():
 
     def size_window(config):
         size = [0, 0]
