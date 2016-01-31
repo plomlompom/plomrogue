@@ -9,6 +9,8 @@ io_db = {
     "path_worldstate": "server_run/worldstate",
     "tmp_suffix": "_tmp",
     "kicked_by_rival": False,
-    "worldstate_updateable": False
+    "worldstate_updateable": False,
+    "wait_on_read_fail": 0.03333,
+    "max_wait_on_read_fail": 5,
+    "save_wait": 15
 }
-
