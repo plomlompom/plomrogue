@@ -4,7 +4,7 @@ Information on the contained programs' copyright, licenses, and warranties
 PlomRogue
 ---------
 
-PlomRogue (C) 2013-2015 Christian Heller a.k.a. plomlompom
+PlomRogue (C) 2013-2016 Christian Heller a.k.a. plomlompom
 
 PlomRogue is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,4 +18,3 @@ License for more details.
 
 You should have received a copy of the GNU General Public License along with
 this program (see file ./GPLv3).  If not, see <http://www.gnu.org/licenses/>.
-
