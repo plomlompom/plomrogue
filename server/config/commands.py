@@ -1,3 +1,8 @@
+# This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+# or any later version. For details on its copyright, license, and warranties,
+# see the file NOTICE in the root directory of the PlomRogue source package.
+
+
 from server.commands import command_plugin, command_quit, command_ping, \
     command_thingshere, command_makeworld, command_seedrandomness, setter, \
     command_maplength, command_worldactive, setter_map, command_taid, \

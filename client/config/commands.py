@@ -1,6 +1,12 @@
+# This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+# or any later version. For details on its copyright, license, and warranties,
+# see the file NOTICE in the root directory of the PlomRogue source package.
+
+
 from client.commands import command_sender, command_look_scroller, \
     command_quit, command_looker, command_inventory_selector, \
     command_toggle_look_mode
+
 
 commands = {
     "A": (command_sender("ai"),),
