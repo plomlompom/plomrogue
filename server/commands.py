@@ -426,69 +426,82 @@ def play_wait():
     set_command("wait")
 
 
+def action_exists(action):
+    matching_actions = [x for x in world_db["ThingActions"]
+                        if world_db["ThingActions"][x]["TA_NAME"] == action]
+    if len(matching_actions) > 1:
+        return True
+    print("No appropriate ThingAction defined.")
+    return False
+
+
 def play_pickup():
     """Try "pick_up" as player's T_COMMAND"."""
-    t = world_db["Things"][0]
-    ids = [id for id in world_db["Things"] if id
-           if not world_db["Things"][id]["carried"]
-           if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-           if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
-    if not len(ids):
-         log("NOTHING to pick up.")
-    else:
-        set_command("pick_up")
+    if action_exists("pickup"):
+        t = world_db["Things"][0]
+        ids = [id for id in world_db["Things"] if id
+               if not world_db["Things"][id]["carried"]
+               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
+        if not len(ids):
+             log("NOTHING to pick up.")
+        else:
+            set_command("pick_up")
 
 
 def play_drop(str_arg):
     """Try "drop" as player's T_COMMAND, int(str_arg) as T_ARGUMENT / slot."""
-    t = world_db["Things"][0]
-    if 0 == len(t["T_CARRIES"]):
-        log("You have NOTHING to drop in your inventory.")
-    else:
-        val = integer_test(str_arg, 0, 255)
-        if None != val and val < len(t["T_CARRIES"]):
-            world_db["Things"][0]["T_ARGUMENT"] = val
-            set_command("drop")
+    if action_exists("drop"):
+        t = world_db["Things"][0]
+        if 0 == len(t["T_CARRIES"]):
+            log("You have NOTHING to drop in your inventory.")
         else:
-            print("Illegal inventory index.")
+            val = integer_test(str_arg, 0, 255)
+            if None != val and val < len(t["T_CARRIES"]):
+                world_db["Things"][0]["T_ARGUMENT"] = val
+                set_command("drop")
+            else:
+                print("Illegal inventory index.")
 
 
 def play_use(str_arg):
     """Try "use" as player's T_COMMAND, int(str_arg) as T_ARGUMENT / slot."""
-    t = world_db["Things"][0]
-    if 0 == len(t["T_CARRIES"]):
-        log("You have NOTHING to use in your inventory.")
-    else:
-        val = integer_test(str_arg, 0, 255)
-        if None != val and val < len(t["T_CARRIES"]):
-            id = t["T_CARRIES"][val]
-            type = world_db["Things"][id]["T_TYPE"]
-            if not world_db["ThingTypes"][type]["TT_TOOL"] == "food":
-                log("You CAN'T consume this thing.")
-                return
-            world_db["Things"][0]["T_ARGUMENT"] = val
-            set_command("use")
+    if action_exists("use"):
+        t = world_db["Things"][0]
+        if 0 == len(t["T_CARRIES"]):
+            log("You have NOTHING to use in your inventory.")
         else:
-            print("Illegal inventory index.")
+            val = integer_test(str_arg, 0, 255)
+            if None != val and val < len(t["T_CARRIES"]):
+                id = t["T_CARRIES"][val]
+                type = world_db["Things"][id]["T_TYPE"]
+                if not world_db["ThingTypes"][type]["TT_TOOL"] == "food":
+                    log("You CAN'T consume this thing.")
+                    return
+                world_db["Things"][0]["T_ARGUMENT"] = val
+                set_command("use")
+            else:
+                print("Illegal inventory index.")
 
 
 def play_move(str_arg):
     """Try "move" as player's T_COMMAND, str_arg as T_ARGUMENT / direction."""
-    from server.config.world_data import directions_db
-    t = world_db["Things"][0]
-    if not str_arg in directions_db:
-        print("Illegal move direction string.")
-        return
-    dir = ord(directions_db[str_arg])
-    from server.utils import mv_yx_in_dir_legal
-    move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
-    if 1 == move_result[0]:
-        pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        if ord(".") == world_db["MAP"][pos]:
-            world_db["Things"][0]["T_ARGUMENT"] = dir
-            set_command("move")
+    if action_exists("move"):
+        from server.config.world_data import directions_db
+        t = world_db["Things"][0]
+        if not str_arg in directions_db:
+            print("Illegal move direction string.")
             return
-    log("You CAN'T move there.")
+        dir = ord(directions_db[str_arg])
+        from server.utils import mv_yx_in_dir_legal
+        move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
+        if 1 == move_result[0]:
+            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+            if ord(".") == world_db["MAP"][pos]:
+                world_db["Things"][0]["T_ARGUMENT"] = dir
+                set_command("move")
+                return
+        log("You CAN'T move there.")
 
 
 def command_ai():
