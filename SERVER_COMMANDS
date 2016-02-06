@@ -6,9 +6,10 @@ Normal mode
 
 In normal mode, the server on start up checks for the existence of ./save and,
 on success, reads all commands from it. If no save file exists, commands from
-./confserver/world are read instead – and written to the file ./record_save.
-Afterwards, the command "MAKE_WORLD" with the current Unix time as argument is
-interpreted (and also written to ./record_save).
+./confserver/world (or any file defined with the -w argument) are read instead
+– and written to the file ./record_save. Afterwards, the command "MAKE_WORLD"
+with the current Unix time as argument is interpreted (and also written to
+./record_save).
 
 In any case, from then on, further commands are read in from ./server_run/in.
 New commands must be appended to the file – which is what the client does. All

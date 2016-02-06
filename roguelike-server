@@ -47,11 +47,10 @@ def play_game():
     if os.access(io_db["path_save"], os.F_OK):
         obey_lines_in_file(io_db["path_save"], "save")
     else:
-        if not os.access(io_db["path_worldconf"], os.F_OK):
+        if not os.access(opts.worldconf, os.F_OK):
             msg = "No world config file from which to start a new world."
             raise SystemExit(msg)
-        obey_lines_in_file(io_db["path_worldconf"], "world config ",
-                           do_record=True)
+        obey_lines_in_file(opts.worldconf, "world config ", do_record=True)
         obey("MAKE_WORLD " + str(int(time.time())), "in file", do_record=True)
     while True:
         try_worldstate_update()

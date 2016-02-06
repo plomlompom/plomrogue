@@ -95,6 +95,8 @@ def parse_command_line_arguments():
                         action='store')
     parser.add_argument('-l', nargs="?", const="save", dest='savefile',
                         action="store")
+    parser.add_argument('-w', type=str, default="confserver/world",
+                        dest='worldconf', action='store')
     parser.add_argument('-v', dest='verbose', action='store_true')
     opts, unknown = parser.parse_known_args()
     return opts
