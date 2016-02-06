@@ -264,6 +264,10 @@ def make_world(seed):
         return (y, x)
 
     rand.seed = seed 
+    if world_db["MAP_LENGTH"] < 1:
+        print("Ignoring: No map length >= 1 defined.")
+        return
+    libpr.set_maplength(world_db["MAP_LENGTH"])
     player_will_be_generated = False
     playertype = world_db["PLAYER_TYPE"]
     for ThingType in world_db["ThingTypes"]:
