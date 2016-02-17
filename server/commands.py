@@ -429,7 +429,7 @@ def play_wait():
 def action_exists(action):
     matching_actions = [x for x in world_db["ThingActions"]
                         if world_db["ThingActions"][x]["TA_NAME"] == action]
-    if len(matching_actions) > 1:
+    if len(matching_actions) >= 1:
         return True
     print("No appropriate ThingAction defined.")
     return False
