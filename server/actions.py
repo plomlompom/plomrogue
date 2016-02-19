@@ -53,7 +53,7 @@ def actor_move(t):
             log("You MOVE " + dir + ".")
 
 
-def actor_pick_up(t):
+def actor_pickup(t):
     """Make t pick up (topmost?) Thing from ground into inventory.
 
     Define topmostness by how low the thing's type ID is.

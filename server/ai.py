@@ -285,7 +285,7 @@ def ai(t):
     elif standing_on_food(t):
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                               if world_db["ThingActions"][id]["TA_NAME"]
-                              == "pick_up"][0]
+                              == "pickup"][0]
     else:
         going_to_known_food_spot = get_dir_to_target(t, "c")
         if not going_to_known_food_spot:

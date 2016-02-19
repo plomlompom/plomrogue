@@ -13,7 +13,7 @@ commands = {
     "D": (command_sender("drop", "inventory_selection"),),
     "J": (command_look_scroller("down"),),
     "K": (command_look_scroller("up"),),
-    "P": (command_sender("pick_up"),),
+    "P": (command_sender("pickup"),),
     "Q": (command_quit,),
     "U": (command_sender("use", "inventory_selection"),),
     "W": (command_sender("wait"),),

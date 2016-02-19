@@ -305,7 +305,7 @@ def command_taname(name):
     setting no ThingAction with name "wait" remains, call set_world_inactive().
     """
     if name == "wait" or name == "move" or name == "use" or name == "drop" \
-       or name == "pick_up":
+       or name == "pickup":
         world_db["ThingActions"][command_taid.id]["TA_NAME"] = name
         if 1 == world_db["WORLD_ACTIVE"]:
             wait_defined = False
@@ -436,7 +436,7 @@ def action_exists(action):
 
 
 def play_pickup():
-    """Try "pick_up" as player's T_COMMAND"."""
+    """Try "pickup" as player's T_COMMAND"."""
     if action_exists("pickup"):
         t = world_db["Things"][0]
         ids = [id for id in world_db["Things"] if id
@@ -446,7 +446,7 @@ def play_pickup():
         if not len(ids):
              log("NOTHING to pick up.")
         else:
-            set_command("pick_up")
+            set_command("pickup")
 
 
 def play_drop(str_arg):

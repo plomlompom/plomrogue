@@ -60,7 +60,7 @@ commands_db = {
     "T_POSX": (1, False, setter_tpos("X")),
     "wait": (0, False, play_wait),
     "move": (1, False, play_move),
-    "pick_up": (0, False, play_pickup),
+    "pickup": (0, False, play_pickup),
     "drop": (1, False, play_drop),
     "use": (1, False, play_use),
     "ai": (0, False, command_ai)

@@ -11,7 +11,7 @@ TA_NAME move
 
 TA_ID 3
 TA_EFFORT 15
-TA_NAME pick_up
+TA_NAME pickup
 
 TA_ID 4
 TA_EFFORT 5
