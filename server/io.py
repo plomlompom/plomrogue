@@ -273,56 +273,15 @@ def obey_lines_in_file(path, name, do_record=False):
 
 def try_worldstate_update():
     """Write worldstate file if io_db["worldstate_updateable"] is set."""
-    from server.config.commands import commands_db
     if io_db["worldstate_updateable"]:
-
-        def write_map(string, map):
-            for i in range(length):
-                line = map[i * length:(i * length) + length].decode()
-                string = string + line + "\n"
-            return string
-
-        inventory = ""
-        if [] == world_db["Things"][0]["T_CARRIES"]:
-            inventory = "(none)\n"
-        else:
-            for id in world_db["Things"][0]["T_CARRIES"]:
-                type_id = world_db["Things"][id]["T_TYPE"]
-                name = world_db["ThingTypes"][type_id]["TT_NAME"]
-                inventory = inventory + name + "\n"
-        string = str(world_db["TURN"]) + "\n" + \
-            str(world_db["Things"][0]["T_LIFEPOINTS"]) + "\n" + \
-            str(world_db["Things"][0]["T_SATIATION"]) + "\n" + \
-            inventory + "%\n" + \
-            str(world_db["Things"][0]["T_POSY"]) + "\n" + \
-            str(world_db["Things"][0]["T_POSX"]) + "\n" + \
-            str(world_db["MAP_LENGTH"]) + "\n"
-        length = world_db["MAP_LENGTH"]
-        fov = bytearray(b' ' * (length ** 2))
-        ord_v = ord("v")
-        for pos in [pos for pos in range(length ** 2)
-                        if ord_v == world_db["Things"][0]["fovmap"][pos]]:
-            fov[pos] = world_db["MAP"][pos]
-        length = world_db["MAP_LENGTH"]
-        for id in [id for tid in reversed(sorted(list(world_db["ThingTypes"])))
-                      for id in world_db["Things"]
-                      if not world_db["Things"][id]["carried"]
-                      if world_db["Things"][id]["T_TYPE"] == tid
-                      if world_db["Things"][0]["fovmap"][
-                           world_db["Things"][id]["T_POSY"] * length
-                           + world_db["Things"][id]["T_POSX"]] == ord_v]:
-            type = world_db["Things"][id]["T_TYPE"]
-            c = ord(world_db["ThingTypes"][type]["TT_SYMBOL"])
-            fov[world_db["Things"][id]["T_POSY"] * length
-                + world_db["Things"][id]["T_POSX"]] = c
-        string = write_map(string, fov)
-        mem = world_db["Things"][0]["T_MEMMAP"][:]
-        for mt in [mt for tid in reversed(sorted(list(world_db["ThingTypes"])))
-                      for mt in world_db["Things"][0]["T_MEMTHING"]
-                      if mt[0] == tid]:
-             c = world_db["ThingTypes"][mt[0]]["TT_SYMBOL"]
-             mem[(mt[1] * length) + mt[2]] = ord(c)
-        string = write_map(string, mem)
+        string = ""
+        for entry in io_db["worldstate_write_order"]:
+            if entry[1] == "world_int":
+                string += str(world_db[entry[0]]) + "\n"
+            elif entry[1] == "player_int":
+                string += str(world_db["Things"][0][entry[0]]) + "\n"
+            elif entry[1] == "func":
+                string += entry[0]()
         atomic_write(io_db["path_worldstate"], string, delete=False)
         strong_write(io_db["file_out"], "WORLD_UPDATED\n")
         io_db["worldstate_updateable"] = False
