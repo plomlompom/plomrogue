@@ -20,7 +20,7 @@ be ignored in replay mode if read from server input file), and ([2]) a function
 to be called on it.
 """
 commands_db = {
-    "PLUGIN": (1, True, command_plugin),
+    "PLUGIN": (1, False, command_plugin),
     "QUIT": (0, True, command_quit),
     "PING": (0, True, command_ping),
     "THINGS_HERE": (2, True, command_thingshere),

@@ -17,6 +17,7 @@ def command_plugin(str_plugin):
     if (str_plugin.replace("_", "").isalnum()
         and os.access("plugins/server/" + str_plugin, os.F_OK)):
         exec(open("plugins/server/" + str_plugin).read())
+        world_db["PLUGIN"] += [str_plugin]
         return
     print("Bad plugin name:", str_plugin)
 

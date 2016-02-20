@@ -10,6 +10,7 @@ world_db = {
     "PLAYER_TYPE": 0,
     "WORLD_ACTIVE": 0,
     "MAP": False,
+    "PLUGIN": [],
     "ThingActions": {},
     "ThingTypes": {},
     "Things": {}

@@ -52,10 +52,6 @@ game world is set active.
 Meta commands
 -------------
 
-PLUGIN [string]
-Run plugin code in ./plugins/[argument], with argument only consisting of
-alphanumeric characters and underscores.
-
 PING
 Write "PONG" line to ./server_run/out file.
 
@@ -94,6 +90,10 @@ inventory.
 
 God commands
 ------------
+
+PLUGIN [string]
+Run plugin code in ./plugins/[argument], with argument only consisting of
+alphanumeric characters and underscores.
 
 TURN [0 to 65535]
 Set world turn to argument. (Initial value: 0.)
