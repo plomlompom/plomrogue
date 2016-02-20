@@ -76,7 +76,7 @@ try:
     else:
         play_game()
 except SystemExit as exit:
-    print("ABORTING: " + exit.args[0])
+    print("ABORTING: " + str(exit.args[0]))
 except:
     print("SOMETHING WENT WRONG IN UNEXPECTED WAYS")
     raise
