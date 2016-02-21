@@ -309,8 +309,7 @@ def make_world(seed):
 
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
-    from server.config.actions import action_db
-    from server.ai import ai
+    from server.config.actions import action_db, ai_func
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
@@ -331,7 +330,7 @@ def turn_over():
                     if 0 == id:
                         whilebreaker = True
                         break
-                    ai(Thing)
+                    ai_func(Thing)
                 try_healing(Thing)
                 hunger(Thing)
                 if Thing["T_LIFEPOINTS"]:

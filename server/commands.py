@@ -507,6 +507,6 @@ def play_move(str_arg):
 
 def command_ai():
     """Call ai() on player Thing, then turn_over()."""
-    from server.ai import ai
-    ai(world_db["Things"][0])
+    from server.config.actions import ai_func
+    ai_func(world_db["Things"][0])
     turn_over()
