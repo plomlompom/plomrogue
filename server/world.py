@@ -84,22 +84,14 @@ def build_fov_map(t):
 
 def new_Thing(type, pos=(0, 0)):
     """Return Thing of type T_TYPE, with fovmap if alive and world active."""
-    thing = {
-        "T_LIFEPOINTS": world_db["ThingTypes"][type]["TT_LIFEPOINTS"],
-        "T_ARGUMENT": 0,
-        "T_PROGRESS": 0,
-        "T_SATIATION": 0,
-        "T_COMMAND": 0,
-        "T_TYPE": type,
-        "T_POSY": pos[0],
-        "T_POSX": pos[1],
-        "T_CARRIES": [],
-        "carried": False,
-        "T_MEMTHING": [],
-        "T_MEMMAP": False,
-        "T_MEMDEPTHMAP": False,
-        "fovmap": False
-    }
+    from server.config.world_data import thing_defaults
+    thing = {}
+    for key in thing_defaults:
+        thing[key] = thing_defaults[key]
+    thing["T_LIFEPOINTS"] = world_db["ThingTypes"][type]["TT_LIFEPOINTS"]
+    thing["T_TYPE"] = type
+    thing["T_POSY"] = pos[0]
+    thing["T_POSX"] = pos[1]
     if world_db["WORLD_ACTIVE"] and thing["T_LIFEPOINTS"]:
         build_fov_map(thing)
     return thing
