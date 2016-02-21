@@ -95,6 +95,8 @@ def set_windows():
     curses.endwin()
     stdscr = curses.initscr()
     screen_size = stdscr.getmaxyx()
+    global windows
+    windows = []
     for config in windows_config:
         size = size_window(config["config"])
         window = Window(config["title"], config["func"], size)

@@ -89,7 +89,7 @@ def read_message_queue():
             redraw_windows = True
         elif message == "WORLD_UPDATED":
             query_mapcell()
-        elif message == "PLUGIN":
+        elif message[:6] == "PLUGIN":
             str_plugin = message[7:]
             if (str_plugin.replace("_", "").isalnum()
                 and os.access("plugins/client/" + str_plugin + ".py",
