@@ -342,7 +342,6 @@ def turn_over():
                     if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
                         action = action_db["actor_" + ThingAction["TA_NAME"]]
                         action(Thing)
-                        #eval("actor_" + ThingAction["TA_NAME"])(Thing)
                         Thing["T_COMMAND"] = 0
                         Thing["T_PROGRESS"] = 0
             thingproliferation(Thing, proliferable_map)

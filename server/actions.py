@@ -33,7 +33,7 @@ def actor_move(t):
             if t == world_db["Things"][0]:
                 hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-                log("You WOUND" + hitted_name + ".")
+                log("You WOUND " + hitted_name + ".")
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" WOUNDS you.")
