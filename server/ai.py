@@ -274,21 +274,26 @@ def ai(t):
     """Determine next command/argment for actor t via AI algorithms."""
     t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                       if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
-    if get_dir_to_target(t, "f"):
-        return
-    sel = get_inventory_slot_to_consume(t)
-    if -1 != sel:
-        t["T_COMMAND"] = [id for id in world_db["ThingActions"]
-                          if world_db["ThingActions"][id]["TA_NAME"]
-                             == "use"][0]
-        t["T_ARGUMENT"] = sel
-    elif standing_on_food(t):
+    eating = len([id for id in world_db["ThingActions"]
+                  if world_db["ThingActions"][id]["TA_NAME"] == "use"]) > 0
+    picking = len([id for id in world_db["ThingActions"]
+                   if world_db["ThingActions"][id]["TA_NAME"] == "pickup"]) > 0
+    if eating and picking:
+        if get_dir_to_target(t, "f"):
+            return
+        sel = get_inventory_slot_to_consume(t)
+        if -1 != sel:
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                               if world_db["ThingActions"][id]["TA_NAME"]
-                              == "pickup"][0]
-    else:
-        going_to_known_food_spot = get_dir_to_target(t, "c")
-        if not going_to_known_food_spot:
-            aiming_for_walking_food = get_dir_to_target(t, "a")
-            if not aiming_for_walking_food:
-                get_dir_to_target(t, "s")
+                                 == "use"][0]
+            t["T_ARGUMENT"] = sel
+        elif standing_on_food(t):
+                t["T_COMMAND"] = [id for id in world_db["ThingActions"]
+                                  if world_db["ThingActions"][id]["TA_NAME"]
+                                  == "pickup"][0]
+        else:
+            going_to_known_food_spot = get_dir_to_target(t, "c")
+            if not going_to_known_food_spot:
+                aiming_for_walking_food = get_dir_to_target(t, "a")
+                if not aiming_for_walking_food:
+                    get_dir_to_target(t, "s")
