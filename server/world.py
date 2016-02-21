@@ -82,14 +82,16 @@ def build_fov_map(t):
         raise RuntimeError("Malloc error in build_fov_Map().")
 
 
-def new_Thing(type, pos=(0, 0)):
+def new_Thing(_type, pos=(0, 0)):
     """Return Thing of type T_TYPE, with fovmap if alive and world active."""
     from server.config.world_data import thing_defaults
     thing = {}
     for key in thing_defaults:
         thing[key] = thing_defaults[key]
-    thing["T_LIFEPOINTS"] = world_db["ThingTypes"][type]["TT_LIFEPOINTS"]
-    thing["T_TYPE"] = type
+        if type(thing[key]) == list:
+            thing[key] = thing[key][:]
+    thing["T_LIFEPOINTS"] = world_db["ThingTypes"][_type]["TT_LIFEPOINTS"]
+    thing["T_TYPE"] = _type
     thing["T_POSY"] = pos[0]
     thing["T_POSX"] = pos[1]
     if world_db["WORLD_ACTIVE"] and thing["T_LIFEPOINTS"]:
