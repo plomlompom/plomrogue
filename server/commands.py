@@ -489,7 +489,7 @@ def play_use(str_arg):
 def play_move(str_arg):
     """Try "move" as player's T_COMMAND, str_arg as T_ARGUMENT / direction."""
     if action_exists("move"):
-        from server.config.world_data import directions_db
+        from server.config.world_data import directions_db, symbols_passable
         t = world_db["Things"][0]
         if not str_arg in directions_db:
             print("Illegal move direction string.")
@@ -499,7 +499,7 @@ def play_move(str_arg):
         move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            if ord(".") == world_db["MAP"][pos]:
+            if chr(world_db["MAP"][pos]) in symbols_passable:
                 world_db["Things"][0]["T_ARGUMENT"] = dir
                 set_command("move")
                 return
