@@ -11,16 +11,15 @@ def thingproliferation(t, prol_map):
     marked "." in prol_map. If there are several map cell candidates, one is
     selected randomly.
     """
-    from server.config.world_data import directions_db
+    from server.config.world_data import directions_db, symbols_passable
     from server.utils import mv_yx_in_dir_legal
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
         candidates = []
         for dir in [directions_db[key] for key in sorted(directions_db.keys())]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            if mv_result[0] and  ord(".") == prol_map[mv_result[1]
-                                                      * world_db["MAP_LENGTH"]
-                                                      + mv_result[2]]:
+            c = prol_map[mv_result[1] + world_db["MAP_LENGTH"] + mv_result[2]]
+            if mv_result[0] and c in symbols_passable:
                 candidates.append((mv_result[1], mv_result[2]))
         if len(candidates):
             i = rand.next() % len(candidates)
