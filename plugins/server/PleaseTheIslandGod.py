@@ -102,7 +102,7 @@ def actor_move(t):
             log("BAR " + str(t["T_LIFEPOINTS"]))
             return sadness 
         return 0 
-    from server.world import build_fov_map
+    from server.build_fov_map import build_fov_map
     from server.utils import mv_yx_in_dir_legal
     from server.config.world_data import directions_db
     passable = False

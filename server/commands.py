@@ -7,8 +7,8 @@ from server.config.world_data import world_db
 from server.config.io import io_db
 from server.io import log, strong_write 
 from server.utils import integer_test, id_setter
-from server.world import build_fov_map, update_map_memory, set_world_inactive,\
-        turn_over
+from server.world import update_map_memory, set_world_inactive, turn_over
+from server.build_fov_map import build_fov_map
 
 
 def command_plugin(str_plugin):
@@ -149,7 +149,7 @@ def command_tid(id_string):
             print("Ignoring: No ThingType to settle new Thing in.")
             return
         type = list(world_db["ThingTypes"].keys())[0]
-        from server.world import new_Thing
+        from server.new_thing import new_Thing
         world_db["Things"][id] = new_Thing(type)
 
 

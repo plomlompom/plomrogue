@@ -15,7 +15,8 @@ def actor_wait(t):
 
 def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
-    from server.world import build_fov_map, decrement_lifepoints
+    from server.build_fov_map import build_fov_map
+    from server.world import decrement_lifepoints
     from server.utils import mv_yx_in_dir_legal
     from server.config.world_data import directions_db, symbols_passable
     passable = False

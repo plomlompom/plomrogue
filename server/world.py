@@ -5,36 +5,13 @@
 
 from server.config.world_data import world_db
 from server.io import log
-from server.utils import rand, libpr, c_pointer_to_bytearray
+from server.utils import rand, libpr
 from server.utils import id_setter
-
-
-def thingproliferation(t, prol_map):
-    """To chance of 1/TT_PROLIFERATE, create t offspring in open neighbor cell.
-
-    Naturally only works with TT_PROLIFERATE > 0. The neighbor cell must be be
-    marked "." in prol_map. If there are several map cell candidates, one is
-    selected randomly.
-    """
-    from server.config.world_data import directions_db, symbols_passable
-    from server.utils import mv_yx_in_dir_legal
-    prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
-    if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)):
-        candidates = []
-        for dir in [directions_db[key] for key in sorted(directions_db.keys())]:
-            mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            c = prol_map[mv_result[1] + world_db["MAP_LENGTH"] + mv_result[2]]
-            if mv_result[0] and str(c) in symbols_passable:
-                candidates.append((mv_result[1], mv_result[2]))
-        if len(candidates):
-            i = rand.next() % len(candidates)
-            id = id_setter(-1, "Things")
-            newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
-            world_db["Things"][id] = newT
 
 
 def update_map_memory(t, age_map=True):
     """Update t's T_MEMMAP with what's in its FOV now,age its T_MEMMEPTHMAP."""
+    from server.utils import c_pointer_to_bytearray
 
     def age_some_memdepthmap_on_nonfov_cells():
         # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
@@ -75,32 +52,6 @@ def update_map_memory(t, age_map=True):
             x = world_db["Things"][id]["T_POSX"]
             if ord_v == t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]:
                 t["T_MEMTHING"].append((type, y, x))
-
-
-def build_fov_map(t):
-    """Build Thing's FOV map."""
-    t["fovmap"] = bytearray(b'v' * (world_db["MAP_LENGTH"] ** 2))
-    fovmap = c_pointer_to_bytearray(t["fovmap"])
-    map = c_pointer_to_bytearray(world_db["MAP"])
-    if libpr.build_fov_map(t["T_POSY"], t["T_POSX"], fovmap, map):
-        raise RuntimeError("Malloc error in build_fov_Map().")
-
-
-def new_Thing(_type, pos=(0, 0)):
-    """Return Thing of type T_TYPE, with fovmap if alive and world active."""
-    from server.config.world_data import thing_defaults
-    thing = {}
-    for key in thing_defaults:
-        thing[key] = thing_defaults[key]
-        if type(thing[key]) == list:
-            thing[key] = thing[key][:]
-    thing["T_LIFEPOINTS"] = world_db["ThingTypes"][_type]["TT_LIFEPOINTS"]
-    thing["T_TYPE"] = _type
-    thing["T_POSY"] = pos[0]
-    thing["T_POSX"] = pos[1]
-    if world_db["WORLD_ACTIVE"] and thing["T_LIFEPOINTS"]:
-        build_fov_map(thing)
-    return thing
 
 
 def decrement_lifepoints(t):
@@ -232,6 +183,7 @@ def make_world(seed):
     make_map_func()
     world_db["WORLD_ACTIVE"] = 1
     world_db["TURN"] = 1
+    from server.new_thing import new_Thing
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
         id = id_setter(-1, "Things")
         world_db["Things"][id] = new_Thing(playertype, free_pos())
@@ -252,6 +204,7 @@ def make_world(seed):
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
     from server.config.actions import action_db, ai_func
+    from server.config.misc import thingproliferation_func
     id = 0
     whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
@@ -285,7 +238,7 @@ def turn_over():
                         action(Thing)
                         Thing["T_COMMAND"] = 0
                         Thing["T_PROGRESS"] = 0
-            thingproliferation(Thing, proliferable_map)
+            thingproliferation_func(Thing, proliferable_map)
         if whilebreaker:
             break
         world_db["TURN"] += 1
