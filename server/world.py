@@ -19,7 +19,7 @@ def thingproliferation(t, prol_map):
         for dir in [directions_db[key] for key in sorted(directions_db.keys())]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
             c = prol_map[mv_result[1] + world_db["MAP_LENGTH"] + mv_result[2]]
-            if mv_result[0] and c in symbols_passable:
+            if mv_result[0] and str(c) in symbols_passable:
                 candidates.append((mv_result[1], mv_result[2]))
         if len(candidates):
             i = rand.next() % len(candidates)
