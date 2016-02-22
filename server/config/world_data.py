@@ -32,3 +32,5 @@ thing_defaults = {
         "T_MEMDEPTHMAP": False,
         "fovmap": False
 }
+
+symbols_passable = "."

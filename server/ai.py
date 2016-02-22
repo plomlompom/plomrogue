@@ -33,6 +33,7 @@ def get_dir_to_target(t, filter):
     "s": memory map cell with greatest-reachable degree of unexploredness
     """
     from server.utils import rand, libpr, c_pointer_to_bytearray
+    from server.config.world_data import symbols_passable
 
     def zero_score_map_where_char_on_memdepthmap(c):
         # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
@@ -112,13 +113,13 @@ def get_dir_to_target(t, filter):
 
     def set_cells_passable_on_memmap_to_65534_on_scoremap():
         # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
-        # ord_dot = ord(".")
         # memmap = t["T_MEMMAP"]
         # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
-        #            if ord_dot == memmap[i]]:
+        #            if memmap[i] in symbols_passable]:
         #     set_map_score(i, 65534) # i.e. 65535-1
         map = c_pointer_to_bytearray(t["T_MEMMAP"])
-        if libpr.set_cells_passable_on_memmap_to_65534_on_scoremap(map):
+        if libpr.set_cells_passable_on_memmap_to_65534_on_scoremap(map,
+                    symbols_passable):
             raise RuntimeError("No score map allocated for set_cells_passable"
                                "_on_memmap_to_65534_on_scoremap().")
 

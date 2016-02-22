@@ -17,7 +17,7 @@ def actor_move(t):
     """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
     from server.world import build_fov_map, decrement_lifepoints
     from server.utils import mv_yx_in_dir_legal
-    from server.config.world_data import directions_db
+    from server.config.world_data import directions_db, symbols_passable
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -39,7 +39,7 @@ def actor_move(t):
                 log(hitter_name +" WOUNDS you.")
             decrement_lifepoints(world_db["Things"][hit_id])
             return
-        passable = "." == chr(world_db["MAP"][pos])
+        passable = chr(world_db["MAP"][pos]) in symbols_passable
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
     if passable:

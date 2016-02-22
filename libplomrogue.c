@@ -600,7 +600,8 @@ extern void age_some_memdepthmap_on_nonfov_cells(char * memdepthmap,
     }
 }
 
-extern uint8_t set_cells_passable_on_memmap_to_65534_on_scoremap(char * mem_map)
+extern uint8_t set_cells_passable_on_memmap_to_65534_on_scoremap(char * mem_map,
+                                                  const char * symbols_passable)
 {
     if (!score_map)
     {
@@ -610,7 +611,7 @@ extern uint8_t set_cells_passable_on_memmap_to_65534_on_scoremap(char * mem_map)
     uint16_t pos;
     for (pos = 0; pos < map_size; pos++)
     {
-        if ('.' == mem_map[pos])
+        if (NULL != strchr(symbols_passable, mem_map[pos]))
         {
             score_map[pos] = 65534;
         }

@@ -8,7 +8,7 @@ def thingproliferation(t, prol_map):
     """To chance of 1/TT_PROLIFERATE, create t offspring in open neighbor cell.
 
     Naturally only works with TT_PROLIFERATE > 0. The neighbor cell must be be
-    marked '.' in prol_map. If there are several map cell candidates, one is
+    marked "." in prol_map. If there are several map cell candidates, one is
     selected randomly.
     """
     from server.config.world_data import directions_db
@@ -18,7 +18,7 @@ def thingproliferation(t, prol_map):
         candidates = []
         for dir in [directions_db[key] for key in sorted(directions_db.keys())]:
             mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            if mv_result[0] and  ord('.') == prol_map[mv_result[1]
+            if mv_result[0] and  ord(".") == prol_map[mv_result[1]
                                                       * world_db["MAP_LENGTH"]
                                                       + mv_result[2]]:
                 candidates.append((mv_result[1], mv_result[2]))
@@ -235,6 +235,7 @@ def make_world(seed):
     of ID = world["PLAYER_TYPE"]. Place Things randomly, and actors not on each
     other. Init player's memory map. Write "NEW_WORLD" line to out file.
     """
+    from server.config.world_data import symbols_passable
 
     def free_pos():
         i = 0
@@ -243,7 +244,8 @@ def make_world(seed):
             while 1:
                 y = rand.next() % world_db["MAP_LENGTH"]
                 x = rand.next() % world_db["MAP_LENGTH"]
-                if "." == chr(world_db["MAP"][y * world_db["MAP_LENGTH"] + x]):
+                if chr(world_db["MAP"][y * world_db["MAP_LENGTH"] + x]) in \
+                    symbols_passable:
                     break
                 i += 1
                 if i == 65535:
