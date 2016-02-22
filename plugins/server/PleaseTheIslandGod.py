@@ -1,5 +1,195 @@
-from server.io import log
-from server.config.world_data import world_db
+from server.io import log, strong_write
+from server.config.world_data import world_db, symbols_passable, directions_db
+from server.utils import mv_yx_in_dir_legal, rand, id_setter
+from server.config.io import io_db
+from server.new_thing import new_Thing
+
+def make_world(seed):
+    from server.config.world_data import world_db, symbols_passable
+    from server.config.misc import make_map_func
+    from server.config.io import io_db
+    from server.utils import rand, libpr, id_setter
+    from server.new_thing import new_Thing
+    from server.io import strong_write
+    from server.update_map_memory import update_map_memory
+
+    def free_pos(plant=False):
+        i = 0
+        while 1:
+            err = "Space to put thing on too hard to find. Map too small?"
+            while 1:
+                y = rand.next() % world_db["MAP_LENGTH"]
+                x = rand.next() % world_db["MAP_LENGTH"]
+                pos = y * world_db["MAP_LENGTH"] + x;
+                if (not plant
+                    and "." == chr(world_db["MAP"][pos])) \
+                   or ":" == chr(world_db["MAP"][pos]):
+                    break
+                i += 1
+                if i == 65535:
+                    raise SystemExit(err)
+            pos_clear = (0 == len([id for id in world_db["Things"]
+                                   if world_db["Things"][id]["T_LIFEPOINTS"]
+                                   if world_db["Things"][id]["T_POSY"] == y
+                                   if world_db["Things"][id]["T_POSX"] == x]))
+            if pos_clear:
+                break
+        return (y, x)
+
+    rand.seed = seed
+    if world_db["MAP_LENGTH"] < 1:
+        print("Ignoring: No map length >= 1 defined.")
+        return
+    libpr.set_maplength(world_db["MAP_LENGTH"])
+    player_will_be_generated = False
+    playertype = world_db["PLAYER_TYPE"]
+    for ThingType in world_db["ThingTypes"]:
+        if playertype == ThingType:
+            if 0 < world_db["ThingTypes"][ThingType]["TT_START_NUMBER"]:
+                player_will_be_generated = True
+            break
+    if not player_will_be_generated:
+        print("Ignoring: No player type with start number >0 defined.")
+        return
+    wait_action = False
+    for ThingAction in world_db["ThingActions"]:
+        if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
+            wait_action = True
+    if not wait_action:
+        print("Ignoring beyond SEED_MAP: " +
+              "No thing action with name 'wait' defined.")
+        return
+    #for name in specials:
+    #    if world_db[name] not in world_db["ThingTypes"]:
+    #        print("Ignoring: No valid " + name + " set.")
+    #        return
+    world_db["Things"] = {}
+    make_map()
+    world_db["WORLD_ACTIVE"] = 1
+    world_db["TURN"] = 1
+    for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
+        id = id_setter(-1, "Things")
+        world_db["Things"][id] = new_Thing(playertype, free_pos())
+    if not world_db["Things"][0]["fovmap"]:
+        empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
+        world_db["Things"][0]["fovmap"] = empty_fovmap
+    update_map_memory(world_db["Things"][0])
+    for type in world_db["ThingTypes"]:
+        for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
+            if type != playertype:
+                id = id_setter(-1, "Things")
+                plantness = world_db["ThingTypes"][type]["TT_PROLIFERATE"]
+                world_db["Things"][id] = new_Thing(type, free_pos(plantness))
+    strong_write(io_db["file_out"], "NEW_WORLD\n")
+
+def thingproliferation(t, prol_map):
+    from server.config.world_data import directions_db, symbols_passable,\
+             world_db
+    from server.utils import mv_yx_in_dir_legal, rand
+    from server.new_thing import new_Thing
+    prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
+    if prolscore and \
+      (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] == 0 or
+       t["T_LIFEPOINTS"] >= 0.9 *
+                        world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]) \
+       and \
+      (1 == prolscore or 1 == (rand.next() % prolscore)):
+        candidates = []
+        for dir in [directions_db[key] for key in directions_db]:
+            mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
+            pos = mv_result[1] * world_db["MAP_LENGTH"] + mv_result[2]
+            if mv_result[0] and \
+               (ord(":") == prol_map[pos]
+                or (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
+                    and ord(".") == prol_map[pos])):
+                candidates.append((mv_result[1], mv_result[2]))
+        if len(candidates):
+            i = rand.next() % len(candidates)
+            id = id_setter(-1, "Things")
+            newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
+            world_db["Things"][id] = newT
+            #if (world_db["FAVOR_STAGE"] > 0
+            #    and t["T_TYPE"] == world_db["PLANT_0"]):
+            #    world_db["GOD_FAVOR"] += 5
+            #elif t["T_TYPE"] == world_db["PLANT_1"];
+            #    world_db["GOD_FAVOR"] += 25
+            #elif world_db["FAVOR_STAGE"] >= 4 and \
+            #     t["T_TYPE"] == world_db["ANIMAL_1"]:
+            #    log("The Island God SMILES upon a new-born bear baby.")
+            #    world_db["GOD_FAVOR"] += 750
+
+def make_map():
+    from server.config.world_data import world_db
+    from server.utils import rand
+
+    def is_neighbor(coordinates, type):
+        y = coordinates[0]
+        x = coordinates[1]
+        length = world_db["MAP_LENGTH"]
+        ind = y % 2
+        diag_west = x + (ind > 0)
+        diag_east = x + (ind < (length - 1))
+        pos = (y * length) + x
+        if (y > 0 and diag_east
+            and type == chr(world_db["MAP"][pos - length + ind])) \
+           or (x < (length - 1)
+               and type == chr(world_db["MAP"][pos + 1])) \
+           or (y < (length - 1) and diag_east
+               and type == chr(world_db["MAP"][pos + length + ind])) \
+           or (y > 0 and diag_west
+               and type == chr(world_db["MAP"][pos - length - (not ind)])) \
+           or (x > 0
+               and type == chr(world_db["MAP"][pos - 1])) \
+           or (y < (length - 1) and diag_west
+               and type == chr(world_db["MAP"][pos + length - (not ind)])):
+            return True
+        return False
+
+    world_db["MAP"] = bytearray(b'~' * (world_db["MAP_LENGTH"] ** 2))
+    length = world_db["MAP_LENGTH"]
+    add_half_width = (not (length % 2)) * int(length / 2)
+    world_db["MAP"][int((length ** 2) / 2) + add_half_width] = ord(".")
+    while (1):
+        y = rand.next() % length
+        x = rand.next() % length
+        pos = (y * length) + x
+        if "~" == chr(world_db["MAP"][pos]) and is_neighbor((y, x), "."):
+            if y == 0 or y == (length - 1) or x == 0 or x == (length - 1):
+                break
+            world_db["MAP"][pos] = ord(".")
+    n_trees = int((length ** 2) / 16)
+    i_trees = 0
+    while (i_trees <= n_trees):
+        single_allowed = rand.next() % 32
+        y = rand.next() % length
+        x = rand.next() % length
+        pos = (y * length) + x
+        if "." == chr(world_db["MAP"][pos]) \
+          and ((not single_allowed) or is_neighbor((y, x), "X")):
+            world_db["MAP"][pos] = ord("X")
+            i_trees += 1
+    n_colons = int((length ** 2) / 16)
+    i_colons = 0
+    while (i_colons <= n_colons):
+        single_allowed = rand.next() % 256
+        y = rand.next() % length
+        x = rand.next() % length
+        pos = (y * length) + x
+        if ("." == chr(world_db["MAP"][pos])
+          and ((not single_allowed) or is_neighbor((y, x), ":"))):
+            world_db["MAP"][pos] = ord(":")
+            i_colons += 1
+    #altar_placed = False
+    #while not altar_placed:
+    #    y = rand.next() % length
+    #    x = rand.next() % length
+    #    pos = (y * length) + x
+    #    if (("." == chr(world_db["MAP"][pos]
+    #         or ":" == chr(world_db["MAP"][pos]))
+    #        and not is_neighbor((y, x), "X"))):
+    #        world_db["MAP"][pos] = ord("_")
+    #        world_db["altar"] = (y, x)
+    #        altar_placed = True
 
 def ai(t):
     from server.ai import get_dir_to_target, get_inventory_slot_to_consume, \
@@ -79,6 +269,9 @@ def actor_drop(t):
 
 
 def actor_move(t):
+    from server.utils import mv_yx_in_dir_legal
+    from server.build_fov_map import build_fov_map
+    from server.config.world_data import directions_db, symbols_passable
     def decrement_lifepoints(t):
         t["T_LIFEPOINTS"] -= 1
         _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
@@ -102,9 +295,6 @@ def actor_move(t):
             log("BAR " + str(t["T_LIFEPOINTS"]))
             return sadness 
         return 0 
-    from server.build_fov_map import build_fov_map
-    from server.utils import mv_yx_in_dir_legal
-    from server.config.world_data import directions_db
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -129,8 +319,7 @@ def actor_move(t):
             if test and t == world_db["Things"][0]:
                 world_db["GOD_FAVOR"] -= test 
             return
-        passable = "." == chr(world_db["MAP"][pos]) or \
-                   ":" == chr(world_db["MAP"][pos])
+        passable = chr(world_db["MAP"][pos]) in symbols_passable
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
     if passable:
@@ -158,12 +347,10 @@ def command_ttid(id_string):
             "TT_TOOL": ""
         }
 
-from server.io import strong_write
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 if not "GOD_FAVOR"  in world_db:
     world_db["GOD_FAVOR"] = 0
-from server.config.io import io_db
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
 import server.config.world_data
@@ -183,3 +370,8 @@ commands_db["TT_ID"] = (1, False, command_ttid)
 commands_db["GOD_FAVOR"] = (1, False, setter(None, "GOD_FAVOR", -32768, 32767))
 commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255))
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
+
+import server.config.misc
+server.config.misc.make_map_func = make_map
+server.config.misc.thingproliferation_func = thingproliferation
+server.config.misc.make_world = make_world
