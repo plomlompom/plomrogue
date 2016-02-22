@@ -260,7 +260,7 @@ def obey(command, prefix, replay=False, do_record=False):
                     io_db["save_wait"] = time.time()
             io_db["worldstate_updateable"] = world_db["WORLD_ACTIVE"]
     elif 0 != len(tokens):
-        print("Invalid command/argument, or bad number of tokens.")
+        print("Invalid command/argument, or bad number of tokens: " + command)
 
 
 def obey_lines_in_file(path, name, do_record=False):
