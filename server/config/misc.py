@@ -4,6 +4,8 @@
 
 from server.make_map import make_map
 from server.thingproliferation import thingproliferation
+from server.make_world import make_world
 
 make_map_func = make_map
 thingproliferation_func = thingproliferation
+make_world_func = make_world

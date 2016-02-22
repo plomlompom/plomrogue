@@ -7,7 +7,8 @@ from server.config.world_data import world_db
 from server.config.io import io_db
 from server.io import log, strong_write 
 from server.utils import integer_test, id_setter
-from server.world import update_map_memory, set_world_inactive, turn_over
+from server.world import set_world_inactive, turn_over
+from server.update_map_memory import update_map_memory
 from server.build_fov_map import build_fov_map
 
 
@@ -83,8 +84,8 @@ def command_makeworld(seed_string):
     """Call make_world()."""
     val = integer_test(seed_string, 0, 4294967295)
     if None != val:
-        from server.world import make_world
-        make_world(val)
+        from server.config.misc import make_world_func
+        make_world_func(val)
 
 
 def command_maplength(maplength_string):
