@@ -5,13 +5,9 @@ from server.config.io import io_db
 from server.new_thing import new_Thing
 
 def make_world(seed):
-    from server.config.world_data import world_db, symbols_passable
-    from server.config.misc import make_map_func
-    from server.config.io import io_db
-    from server.utils import rand, libpr, id_setter
-    from server.new_thing import new_Thing
-    from server.io import strong_write
     from server.update_map_memory import update_map_memory
+    from server.config.misc import make_map_func
+    from server.utils import libpr
 
     def free_pos(plant=False):
         i = 0
@@ -83,10 +79,7 @@ def make_world(seed):
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 def thingproliferation(t, prol_map):
-    from server.config.world_data import directions_db, symbols_passable,\
-             world_db
-    from server.utils import mv_yx_in_dir_legal, rand
-    from server.new_thing import new_Thing
+    global directions_db, new_Thing, mv_yx_in_dir_legal
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and \
       (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] == 0 or
@@ -119,8 +112,7 @@ def thingproliferation(t, prol_map):
             #    world_db["GOD_FAVOR"] += 750
 
 def make_map():
-    from server.config.world_data import world_db
-    from server.utils import rand
+    global rand
 
     def is_neighbor(coordinates, type):
         y = coordinates[0]
@@ -269,9 +261,8 @@ def actor_drop(t):
 
 
 def actor_move(t):
-    from server.utils import mv_yx_in_dir_legal
+    global symbols_passable
     from server.build_fov_map import build_fov_map
-    from server.config.world_data import directions_db, symbols_passable
     def decrement_lifepoints(t):
         t["T_LIFEPOINTS"] -= 1
         _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
