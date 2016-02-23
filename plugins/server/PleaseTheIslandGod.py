@@ -79,7 +79,8 @@ def make_world(seed):
     strong_write(io_db["file_out"], "NEW_WORLD\n")
 
 def thingproliferation(t, prol_map):
-    global directions_db, new_Thing, mv_yx_in_dir_legal
+    from server.new_thing import new_Thing
+    global directions_db, mv_yx_in_dir_legal
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and \
       (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] == 0 or
@@ -261,7 +262,7 @@ def actor_drop(t):
 
 
 def actor_move(t):
-    global symbols_passable
+    from server.config.world_data import symbols_passable
     from server.build_fov_map import build_fov_map
     def decrement_lifepoints(t):
         t["T_LIFEPOINTS"] -= 1
