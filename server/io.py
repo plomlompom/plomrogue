@@ -179,13 +179,13 @@ def save_world():
         return string
 
     string = ""
+    for plugin in world_db["PLUGIN"]:
+        string = string + "PLUGIN " + plugin + "\n"
     for key in sorted(world_db.keys()):
         if (not isinstance(world_db[key], dict) and
             not isinstance(world_db[key], list)) and key != "MAP" and \
            key != "WORLD_ACTIVE":
             string = string + key + " " + str(world_db[key]) + "\n"
-    for plugin in world_db["PLUGIN"]:
-        string = string + "PLUGIN " + plugin + "\n"
     string = string + mapsetter("MAP")()
     string = string + helper("ThingActions", "TA_ID")
     string = string + helper("ThingTypes", "TT_ID", {"TT_CORPSE_ID": False})
