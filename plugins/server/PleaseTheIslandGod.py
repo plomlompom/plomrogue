@@ -172,17 +172,17 @@ def make_map():
           and ((not single_allowed) or is_neighbor((y, x), ":"))):
             world_db["MAP"][pos] = ord(":")
             i_colons += 1
-    #altar_placed = False
-    #while not altar_placed:
-    #    y = rand.next() % length
-    #    x = rand.next() % length
-    #    pos = (y * length) + x
-    #    if (("." == chr(world_db["MAP"][pos]
-    #         or ":" == chr(world_db["MAP"][pos]))
-    #        and not is_neighbor((y, x), "X"))):
-    #        world_db["MAP"][pos] = ord("_")
-    #        world_db["altar"] = (y, x)
-    #        altar_placed = True
+    altar_placed = False
+    while not altar_placed:
+        y = rand.next() % length
+        x = rand.next() % length
+        pos = (y * length) + x
+        if (("." == chr(world_db["MAP"][pos]
+             or ":" == chr(world_db["MAP"][pos]))
+            and not is_neighbor((y, x), "X"))):
+            world_db["MAP"][pos] = ord("_")
+            world_db["altar"] = (y, x)
+            altar_placed = True
 
 def ai(t):
     from server.ai import get_dir_to_target, get_inventory_slot_to_consume, \
@@ -262,6 +262,10 @@ def actor_drop(t):
 
 
 def actor_move(t):
+
+    def enter_altar():
+        log("YOU ENTER SACRED GROUND.")
+
     from server.config.world_data import symbols_passable
     from server.build_fov_map import build_fov_map
     def decrement_lifepoints(t):
@@ -323,6 +327,9 @@ def actor_move(t):
         build_fov_map(t)
         if t == world_db["Things"][0]:
             log("You MOVE " + dir + ".")
+            if (move_result[1] == world_db["altar"][0] and
+                move_result[2] == world_db["altar"][1]):
+                enter_altar()
 
 def command_ttid(id_string):
     id = id_setter(id_string, "ThingTypes", command_ttid)
@@ -339,6 +346,47 @@ def command_ttid(id_string):
             "TT_TOOL": ""
         }
 
+def command_worldactive(worldactive_string):
+    val = integer_test(worldactive_string, 0, 1)
+    if None != val:
+        if 0 != world_db["WORLD_ACTIVE"]:
+            if 0 == val:
+                set_world_inactive()
+            else:
+                print("World already active.")
+        elif 0 == world_db["WORLD_ACTIVE"]:
+            wait_exists = False
+            for ThingAction in world_db["ThingActions"]:
+                if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
+                    wait_exists = True
+                    break
+            player_exists = False
+            for Thing in world_db["Things"]:
+                if 0 == Thing:
+                    player_exists = True
+                    break
+            altar_found = False
+            if world_db["MAP"]:
+                pos = world_db["MAP"].find(b'_')
+                if pos > 0:
+                    y = int(pos / world_db["MAP_LENGTH"])
+                    x = pos % world_db["MAP_LENGTH"]
+                    world_db["altar"] = (y, x)
+                    altar_found = True
+            if altar_found and wait_exists and player_exists and \
+                    world_db["MAP"]:
+                for id in world_db["Things"]:
+                    if world_db["Things"][id]["T_LIFEPOINTS"]:
+                        build_fov_map(world_db["Things"][id])
+                        if 0 == id:
+                            update_map_memory(world_db["Things"][id], False)
+                if not world_db["Things"][0]["T_LIFEPOINTS"]:
+                    empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
+                    world_db["Things"][0]["fovmap"] = empty_fovmap
+                world_db["WORLD_ACTIVE"] = 1
+            else:
+                print("Ignoring: Not all conditions for world activation met.")
+
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 if not "GOD_FAVOR"  in world_db:
@@ -346,7 +394,7 @@ if not "GOD_FAVOR"  in world_db:
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
 import server.config.world_data
-server.config.world_data.symbols_passable += ":"
+server.config.world_data.symbols_passable += ":_"
 
 from server.config.world_data import thing_defaults
 thing_defaults["T_PLAYERDROP"] = 0
@@ -362,6 +410,7 @@ commands_db["TT_ID"] = (1, False, command_ttid)
 commands_db["GOD_FAVOR"] = (1, False, setter(None, "GOD_FAVOR", -32768, 32767))
 commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255))
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
+commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
