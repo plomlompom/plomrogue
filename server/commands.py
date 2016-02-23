@@ -499,6 +499,9 @@ def play_move(str_arg):
         move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+            if ord("~") == world_db["MAP"][pos]:
+                log("You can't SWIM.")
+                return
             if chr(world_db["MAP"][pos]) in symbols_passable:
                 world_db["Things"][0]["T_ARGUMENT"] = dir
                 set_command("move")
