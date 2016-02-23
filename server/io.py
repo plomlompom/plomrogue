@@ -184,7 +184,7 @@ def save_world():
     for key in sorted(world_db.keys()):
         if (not isinstance(world_db[key], dict) and
             not isinstance(world_db[key], list)) and key != "MAP" and \
-           key != "WORLD_ACTIVE":
+           key != "WORLD_ACTIVE" and key[0].isupper():
             string = string + key + " " + str(world_db[key]) + "\n"
     string = string + mapsetter("MAP")()
     string = string + helper("ThingActions", "TA_ID")
