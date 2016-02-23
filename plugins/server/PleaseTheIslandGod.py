@@ -1,3 +1,8 @@
+# This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+# or any later version. For details on its copyright, license, and warranties,
+# see the file NOTICE in the root directory of the PlomRogue source package.
+
+
 from server.io import log, strong_write
 from server.config.world_data import world_db, symbols_passable, directions_db
 from server.utils import mv_yx_in_dir_legal, rand, id_setter
@@ -375,6 +380,28 @@ def actor_move(t):
             if test and t == world_db["Things"][0]:
                 world_db["GOD_FAVOR"] -= test 
             return
+        if (ord("X") == world_db["MAP"][pos]
+            or ord("|") == world_db["MAP"][pos]):
+            carries_axe = False
+            for id in t["T_CARRIES"]:
+                type = world_db["Things"][id]["T_TYPE"]
+                if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":
+                    carries_axe = True
+                    break
+            if carries_axe:
+                axe_name = world_db["ThingTypes"][type]["TT_NAME"]
+                if t == world_db["Things"][0]:
+                    log("With your " + axe_name + ", you chop!")
+                    if ord("X") == world_db["MAP"][pos]:
+                        world_db["GOD_FAVOR"] -= 1
+                chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
+                if (chop_power > 0 and 0 == int(rand.next() / chop_power)):
+                    if t == world_db["Things"][0]:
+                        log("You chop it DOWN.")
+                        world_db["GOD_FAVOR"] -= 10
+                    world_db["MAP"][pos] = ord(".")
+                    build_fov_map(t)
+                return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
@@ -467,8 +494,37 @@ def command_plant0(str_int):
             world_db["WORLD_ACTIVE"] = 0
             print("PLANT_0 matches no known ThingTypes, deactivating world.")
 
+def play_move(str_arg):
+    if action_exists("move"):
+        from server.config.world_data import directions_db, symbols_passable
+        t = world_db["Things"][0]
+        if not str_arg in directions_db:
+            print("Illegal move direction string.")
+            return
+        dir = ord(directions_db[str_arg])
+        from server.utils import mv_yx_in_dir_legal
+        move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
+        if 1 == move_result[0]:
+            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+            if ord("~") == world_db["MAP"][pos]:
+                log("You can't SWIM.")
+                return
+            if (ord("X") == world_db["MAP"][pos]
+                or ord("|") == world_db["MAP"][pos]):
+                carries_axe = False
+                for id in t["T_CARRIES"]:
+                    type = world_db["Things"][id]["T_TYPE"]
+                    if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":
+                        world_db["Things"][0]["T_ARGUMENT"] = dir
+                        set_command("move")
+                        return
+            if chr(world_db["MAP"][pos]) in symbols_passable:
+                world_db["Things"][0]["T_ARGUMENT"] = dir
+                set_command("move")
+                return
+        log("You CAN'T move there.")
+
 def play_use(str_arg):
-    """Try "use" as player's T_COMMAND, int(str_arg) as T_ARGUMENT / slot."""
     if action_exists("use"):
         t = world_db["Things"][0]
         if 0 == len(t["T_CARRIES"]):
@@ -478,7 +534,11 @@ def play_use(str_arg):
             if None != val and val < len(t["T_CARRIES"]):
                 id = t["T_CARRIES"][val]
                 type = world_db["Things"][id]["T_TYPE"]
-                if type != world_db["SLIPPERS"] and not \
+                if (world_db["ThingTypes"][type]["TT_TOOL"] == "axe"
+                      and t == world_db["Things"][0]):
+                    log("To use this item for chopping, move towards a tree "
+                         + "while carrying it in your inventory.")
+                elif type != world_db["SLIPPERS"] and not \
                         world_db["ThingTypes"][type]["TT_TOOL"] == "food":
                     log("You CAN'T consume this thing.")
                     return
@@ -522,6 +582,7 @@ commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
 commands_db["SLIPPERS"] = (1, False, command_slippers)
 commands_db["PLANT_0"] = (1, False, command_plant0)
 commands_db["use"] = (1, False, play_use)
+commands_db["move"] = (1, False, play_move)
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
