@@ -58,6 +58,9 @@ def make_world(seed):
     if not world_db["SLIPPERS"] in world_db["ThingTypes"]:
         print("Ignoring: No valid SLIPPERS set.")
         return
+    if not world_db["PLANT_0"] in world_db["ThingTypes"]:
+        print("Ignoring: No valid PLANT_0 set.")
+        return
     #for name in specials:
     #    if world_db[name] not in world_db["ThingTypes"]:
     #        print("Ignoring: No valid " + name + " set.")
@@ -105,9 +108,9 @@ def thingproliferation(t, prol_map):
             id = id_setter(-1, "Things")
             newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
             world_db["Things"][id] = newT
-            #if (world_db["FAVOR_STAGE"] > 0
-            #    and t["T_TYPE"] == world_db["PLANT_0"]):
-            #    world_db["GOD_FAVOR"] += 5
+            if (world_db["FAVOR_STAGE"] > 0
+                and t["T_TYPE"] == world_db["PLANT_0"]):
+                world_db["GOD_FAVOR"] += 5
             #elif t["T_TYPE"] == world_db["PLANT_1"];
             #    world_db["GOD_FAVOR"] += 25
             #elif world_db["FAVOR_STAGE"] >= 4 and \
@@ -274,7 +277,8 @@ def actor_use(t):
                     + ". It glows in wondrous colors, and emits a sound as if "
                     + "from a dying cat. The Island God laughs.\n")
             t["T_LIFEPOINTS"] = 1
-            decrement_lifepoints(t)
+            from server.config.misc import decrement_lifepoints_func
+            decrement_lifepoints_func(t)
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
@@ -284,15 +288,53 @@ def actor_use(t):
         elif t == world_db["Things"][0]:
             log("You try to use this object, but FAIL.")
 
+def decrement_lifepoints(t):
+    t["T_LIFEPOINTS"] -= 1
+    _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
+    if 0 == t["T_LIFEPOINTS"]:
+        sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
+        for id in t["T_CARRIES"]:
+            t["T_CARRIES"].remove(id)
+            world_db["Things"][id]["T_POSY"] = t["T_POSY"]
+            world_db["Things"][id]["T_POSX"] = t["T_POSX"]
+            world_db["Things"][id]["carried"] = False
+        t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
+        if world_db["Things"][0] == t:
+            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+            log("You die.")
+            log("See README on how to start over.")
+        else:
+            t["fovmap"] = False
+            t["T_MEMMAP"] = False
+            t["T_MEMDEPTHMAP"] = False
+            t["T_MEMTHING"] = []
+        return sadness
+    return 0
+
 def actor_move(t):
 
     def enter_altar():
-        if world_db["GAME_WON"]:
+        from server.new_thing import new_Thing
+        if world_db["FAVOR_STAGE"] > 9000:
            log("You step on a soul-less slab of stone.")
            return
         log("YOU ENTER SACRED GROUND.")
-        if world_db["GOD_FAVOR"] > 9000:
-            world_db["GAME_WON"] = 1
+        if world_db["FAVOR_STAGE"] == 0:
+            world_db["FAVOR_STAGE"] = 1
+            log("The Island God speaks to you: \"I don't trust you. You intrud"
+                 + "e on the island's affairs. I think you're a nuisance at be"
+                 + "st, and a danger to my children at worst. I will give you "
+                 + "a chance to lighten my mood, however: For a while now, I'v"
+                 + "e been trying to spread the plant "
+                 + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+                 + " (\""
+                 + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
+                 + "\"). I have not been very successful so far. Maybe you can"
+                 + " make yourself useful there. I will count each further "
+                 + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
+                 + " that grows to your favor.\"")
+        elif world_db["GOD_FAVOR"] > 150:
+            world_db["FAVOR_STAGE"] = 9001
             log("The Island God speaks to you: \"You have proven yourself wort"
                  + "hy of my respect. You were a good citizen to the island, a"
                  + "nd sometimes a better steward to its inhabitants than me. "
@@ -308,29 +350,7 @@ def actor_move(t):
 
     from server.config.world_data import symbols_passable
     from server.build_fov_map import build_fov_map
-    def decrement_lifepoints(t):
-        t["T_LIFEPOINTS"] -= 1
-        _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
-        if 0 == t["T_LIFEPOINTS"]:
-            sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
-            for id in t["T_CARRIES"]:
-                t["T_CARRIES"].remove(id)
-                world_db["Things"][id]["T_POSY"] = t["T_POSY"]
-                world_db["Things"][id]["T_POSX"] = t["T_POSX"]
-                world_db["Things"][id]["carried"] = False
-            t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
-            if world_db["Things"][0] == t:
-                t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-                log("You die.")
-                log("See README on how to start over.")
-            else:
-                t["fovmap"] = False
-                t["T_MEMMAP"] = False
-                t["T_MEMDEPTHMAP"] = False
-                t["T_MEMTHING"] = []
-            log("BAR " + str(t["T_LIFEPOINTS"]))
-            return sadness 
-        return 0 
+    from server.config.misc import decrement_lifepoints_func
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -351,7 +371,7 @@ def actor_move(t):
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" WOUNDS you.")
-            test = decrement_lifepoints(world_db["Things"][hit_id])
+            test = decrement_lifepoints_func(world_db["Things"][hit_id])
             if test and t == world_db["Things"][0]:
                 world_db["GOD_FAVOR"] -= test 
             return
@@ -414,8 +434,9 @@ def command_worldactive(worldactive_string):
                     world_db["altar"] = (y, x)
                     altar_found = True
             valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]
+            valid_plant0 = world_db["PLANT_0"] in world_db["ThingTypes"]
             if altar_found and wait_exists and player_exists and \
-                    world_db["MAP"] and valid_slippers:
+                    world_db["MAP"] and valid_slippers and valid_plant0:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -437,14 +458,45 @@ def command_slippers(str_int):
             world_db["WORLD_ACTIVE"] = 0
             print("SLIPPERS matches no known ThingTypes, deactivating world.")
 
+def command_plant0(str_int):
+    val = integer_test(str_int, 0)
+    if None != val:
+        world_db["PLANT_0"] = val
+        if world_db["WORLD_ACTIVE"] and \
+           world_db["PLANT_0"] not in world_db["ThingTypes"]:
+            world_db["WORLD_ACTIVE"] = 0
+            print("PLANT_0 matches no known ThingTypes, deactivating world.")
+
+def play_use(str_arg):
+    """Try "use" as player's T_COMMAND, int(str_arg) as T_ARGUMENT / slot."""
+    if action_exists("use"):
+        t = world_db["Things"][0]
+        if 0 == len(t["T_CARRIES"]):
+            log("You have NOTHING to use in your inventory.")
+        else:
+            val = integer_test(str_arg, 0, 255)
+            if None != val and val < len(t["T_CARRIES"]):
+                id = t["T_CARRIES"][val]
+                type = world_db["Things"][id]["T_TYPE"]
+                if type != world_db["SLIPPERS"] and not \
+                        world_db["ThingTypes"][type]["TT_TOOL"] == "food":
+                    log("You CAN'T consume this thing.")
+                    return
+                world_db["Things"][0]["T_ARGUMENT"] = val
+                set_command("use")
+            else:
+                print("Illegal inventory index.")
+
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 if not "GOD_FAVOR" in world_db:
     world_db["GOD_FAVOR"] = 0
-if not "GAME_WON" in world_db:
-    world_db["GAME_WON"] = 0
+if not "FAVOR_STAGE" in world_db:
+    world_db["FAVOR_STAGE"] = 0
 if not "SLIPPERS" in world_db:
     world_db["SLIPPERS"] = 0
+if not "PLANT_0" in world_db:
+    world_db["PLANT_0"] = 0
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
 import server.config.world_data
@@ -457,6 +509,7 @@ import server.config.actions
 server.config.actions.action_db["actor_move"] = actor_move
 server.config.actions.action_db["actor_pickup"] = actor_pickup
 server.config.actions.action_db["actor_drop"] = actor_drop
+server.config.actions.action_db["actor_use"] = actor_use
 server.config.actions.ai_func = ai
 
 from server.config.commands import commands_db
@@ -465,10 +518,13 @@ commands_db["GOD_FAVOR"] = (1, False, setter(None, "GOD_FAVOR", -32768, 32767))
 commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255))
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
 commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
-commands_db["GAME_WON"] = (1, False, setter(None, "GAME_WON", 0, 1))
+commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
 commands_db["SLIPPERS"] = (1, False, command_slippers)
+commands_db["PLANT_0"] = (1, False, command_plant0)
+commands_db["use"] = (1, False, play_use)
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
 server.config.misc.thingproliferation_func = thingproliferation
 server.config.misc.make_world = make_world
+server.config.decrement_lifepoints_func = decrement_lifepoints
