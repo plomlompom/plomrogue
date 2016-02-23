@@ -5,7 +5,9 @@
 from server.make_map import make_map
 from server.thingproliferation import thingproliferation
 from server.make_world import make_world
+from server.decrement_lifepoints import decrement_lifepoints
 
+decrement_lifepoints_func = decrement_lifepoints
 make_map_func = make_map
 thingproliferation_func = thingproliferation
 make_world_func = make_world

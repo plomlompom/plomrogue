@@ -9,32 +9,6 @@ from server.utils import rand
 from server.utils import id_setter
 
 
-def decrement_lifepoints(t):
-    """Decrement t's lifepoints by 1, and if to zero, corpse it.
-
-    If t is the player avatar, only blank its fovmap, so that the client may
-    still display memory data. On non-player things, erase fovmap and memory.
-    Dying actors drop all their things.
-    """
-    t["T_LIFEPOINTS"] -= 1
-    if 0 == t["T_LIFEPOINTS"]:
-        for id in t["T_CARRIES"]:
-            t["T_CARRIES"].remove(id)
-            world_db["Things"][id]["T_POSY"] = t["T_POSY"]
-            world_db["Things"][id]["T_POSX"] = t["T_POSX"]
-            world_db["Things"][id]["carried"] = False
-        t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
-        if world_db["Things"][0] == t:
-            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            log("You die.")
-            log("See README on how to start over.")
-        else:
-            t["fovmap"] = False
-            t["T_MEMMAP"] = False
-            t["T_MEMDEPTHMAP"] = False
-            t["T_MEMTHING"] = []
-
-
 def try_healing(t):
     """If t's HP < max, increment them if well-nourished, maybe waiting."""
     if t["T_LIFEPOINTS"] < \
@@ -57,6 +31,7 @@ def hunger_per_turn(type_id):
 
 def hunger(t):
     """Decrement t's satiation,dependent on it trigger lifepoint dec chance."""
+    from server.config.misc import decrement_lifepoints_func
     if t["T_SATIATION"] > -32768:
         t["T_SATIATION"] -= hunger_per_turn(t["T_TYPE"])
     if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
@@ -65,7 +40,7 @@ def hunger(t):
                 log("You SUFFER from hunger.")
             else:
                 log("You SUFFER from over-eating.")
-        decrement_lifepoints(t)
+        decrement_lifepoints_func(t)
 
 
 def set_world_inactive():
