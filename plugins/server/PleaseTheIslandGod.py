@@ -55,6 +55,9 @@ def make_world(seed):
         print("Ignoring beyond SEED_MAP: " +
               "No thing action with name 'wait' defined.")
         return
+    if not world_db["SLIPPERS"] in world_db["ThingTypes"]:
+        print("Ignoring: No valid SLIPPERS set.")
+        return
     #for name in specials:
     #    if world_db[name] not in world_db["ThingTypes"]:
     #        print("Ignoring: No valid " + name + " set.")
@@ -261,10 +264,47 @@ def actor_drop(t):
             world_db["Things"][id]["T_PLAYERDROP"] = 1
 
 
+def actor_use(t):
+    if len(t["T_CARRIES"]):
+        id = t["T_CARRIES"][t["T_ARGUMENT"]]
+        type = world_db["Things"][id]["T_TYPE"]
+        if type == world_db["SLIPPERS"]:
+            if t == world_db["Things"][0]:
+                log("You use the " + world_db["ThingTypes"][type]["TT_NAME"]
+                    + ". It glows in wondrous colors, and emits a sound as if "
+                    + "from a dying cat. The Island God laughs.\n")
+            t["T_LIFEPOINTS"] = 1
+            decrement_lifepoints(t)
+        elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
+            t["T_CARRIES"].remove(id)
+            del world_db["Things"][id]
+            t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_TOOLPOWER"]
+            if t == world_db["Things"][0]:
+                log("You CONSUME this object.")
+        elif t == world_db["Things"][0]:
+            log("You try to use this object, but FAIL.")
+
 def actor_move(t):
 
     def enter_altar():
+        if world_db["GAME_WON"]:
+           log("You step on a soul-less slab of stone.")
+           return
         log("YOU ENTER SACRED GROUND.")
+        if world_db["GOD_FAVOR"] > 9000:
+            world_db["GAME_WON"] = 1
+            log("The Island God speaks to you: \"You have proven yourself wort"
+                 + "hy of my respect. You were a good citizen to the island, a"
+                 + "nd sometimes a better steward to its inhabitants than me. "
+                 + "The island shall miss you when you leave. But you have ear"
+                 + "ned the right to do so. Take this "
+                 + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"]
+                 + " and USE it when you please. It will take you to where you"
+                 + " came from. (But do feel free to stay here as long as you "
+                 + "like.)\"")
+            id = id_setter(-1, "Things")
+            world_db["Things"][id] = new_Thing(world_db["SLIPPERS"],
+                                               world_db["altar"])
 
     from server.config.world_data import symbols_passable
     from server.build_fov_map import build_fov_map
@@ -373,8 +413,9 @@ def command_worldactive(worldactive_string):
                     x = pos % world_db["MAP_LENGTH"]
                     world_db["altar"] = (y, x)
                     altar_found = True
+            valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]
             if altar_found and wait_exists and player_exists and \
-                    world_db["MAP"]:
+                    world_db["MAP"] and valid_slippers:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -387,10 +428,25 @@ def command_worldactive(worldactive_string):
             else:
                 print("Ignoring: Not all conditions for world activation met.")
 
+def command_slippers(str_int):
+    val = integer_test(str_int, 0)
+    if None != val:
+        world_db["SLIPPERS"] = val
+        if world_db["WORLD_ACTIVE"] and \
+           world_db["SLIPPERS"] not in world_db["ThingTypes"]:
+            print(world_db["ThingTypes"])
+            print(":::" + str(world_db["SLIPPERS"]))
+            world_db["WORLD_ACTIVE"] = 0
+            print("SLIPPERS matches no known ThingTypes, deactivating world.")
+
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
-if not "GOD_FAVOR"  in world_db:
+if not "GOD_FAVOR" in world_db:
     world_db["GOD_FAVOR"] = 0
+if not "GAME_WON" in world_db:
+    world_db["GAME_WON"] = 0
+if not "SLIPPERS" in world_db:
+    world_db["SLIPPERS"] = 0
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
 import server.config.world_data
@@ -411,6 +467,8 @@ commands_db["GOD_FAVOR"] = (1, False, setter(None, "GOD_FAVOR", -32768, 32767))
 commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255))
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
 commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
+commands_db["GAME_WON"] = (1, False, setter(None, "GAME_WON", 0, 1))
+commands_db["SLIPPERS"] = (1, False, command_slippers)
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
