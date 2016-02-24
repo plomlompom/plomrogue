@@ -53,7 +53,7 @@ def set_world_inactive():
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
     from server.config.actions import action_db, ai_func
-    from server.config.misc import thingproliferation_func
+    from server.config.misc import thingproliferation_func, calc_effort_func
     from server.update_map_memory import update_map_memory
     id = 0
     whilebreaker = False
@@ -83,7 +83,8 @@ def turn_over():
                     taid = [a for a in world_db["ThingActions"]
                               if a == Thing["T_COMMAND"]][0]
                     ThingAction = world_db["ThingActions"][taid]
-                    if Thing["T_PROGRESS"] == ThingAction["TA_EFFORT"]:
+                    effort = calc_effort_func(ThingAction, Thing)
+                    if Thing["T_PROGRESS"] == effort:
                         action = action_db["actor_" + ThingAction["TA_NAME"]]
                         action(Thing)
                         Thing["T_COMMAND"] = 0
