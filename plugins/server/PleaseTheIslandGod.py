@@ -462,7 +462,8 @@ def actor_move(t):
                              0 == int(rand.next() / (3 * chop_power))))):
                     if t == world_db["Things"][0]:
                         log("You chop it DOWN.")
-                        world_db["GOD_FAVOR"] -= 10
+                        if ord("X") == world_db["MAP"][pos]:
+                            world_db["GOD_FAVOR"] -= 10
                     world_db["MAP"][pos] = ord(".")
                     i = 3 if case_X else 1
                     for i in range(i):
