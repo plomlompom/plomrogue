@@ -24,18 +24,27 @@ def update_map_memory(t, age_map=True):
         fovmap = c_pointer_to_bytearray(t["fovmap"])
         libpr.age_some_memdepthmap_on_nonfov_cells(memdepthmap, fovmap)
 
+    def update_mem_and_memdepthmap_via_fovmap():
+        # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
+        # for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
+        #             if ord_v == t["fovmap"][pos]]:
+        #     t["T_MEMDEPTHMAP"][pos] = ord_0
+        #     t["T_MEMMAP"][pos] = world_db["MAP"][pos]
+        memdepthmap = c_pointer_to_bytearray(t["T_MEMDEPTHMAP"])
+        memmap = c_pointer_to_bytearray(t["T_MEMMAP"])
+        fovmap = c_pointer_to_bytearray(t["fovmap"])
+        map = c_pointer_to_bytearray(world_db["MAP"])
+        libpr.update_mem_and_memdepthmap_via_fovmap(map, fovmap, memdepthmap,
+                                                    memmap)
+
     if not t["T_MEMMAP"]:
         t["T_MEMMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
     if not t["T_MEMDEPTHMAP"]:
         t["T_MEMDEPTHMAP"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-    ord_v = ord("v")
-    ord_0 = ord("0")
-    for pos in [pos for pos in range(world_db["MAP_LENGTH"] ** 2)
-                if ord_v == t["fovmap"][pos]]:
-        t["T_MEMDEPTHMAP"][pos] = ord_0
-        t["T_MEMMAP"][pos] = world_db["MAP"][pos]
+    update_mem_and_memdepthmap_via_fovmap()
     if age_map:
         age_some_memdepthmap_on_nonfov_cells()
+    ord_v = ord("v")
     t["T_MEMTHING"] = [mt for mt in t["T_MEMTHING"]
                        if ord_v != t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                                + mt[2]]]

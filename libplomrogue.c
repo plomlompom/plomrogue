@@ -618,3 +618,20 @@ extern uint8_t set_cells_passable_on_memmap_to_65534_on_scoremap(char * mem_map,
     }
     return 0;
 }
+
+
+extern void update_mem_and_memdepthmap_via_fovmap(char * map, char * fovmap,
+                                                  char * memdepthmap,
+                                                  char * memmap)
+{
+    uint32_t map_size = maplength * maplength;
+    uint16_t pos;
+    for (pos = 0; pos < map_size; pos++)
+    {
+        if ('v' == fovmap[pos])
+        {
+            memdepthmap[pos] = '0';
+            memmap[pos] = map[pos];
+        }
+    }
+}
