@@ -66,6 +66,9 @@ def make_world(seed):
     if not world_db["PLANT_0"] in world_db["ThingTypes"]:
         print("Ignoring: No valid PLANT_0 set.")
         return
+    if not world_db["LUMBER"] in world_db["ThingTypes"]:
+        print("Ignoring: No valid LUMBER set.")
+        return
     #for name in specials:
     #    if world_db[name] not in world_db["ThingTypes"]:
     #        print("Ignoring: No valid " + name + " set.")
@@ -356,6 +359,7 @@ def actor_move(t):
     from server.config.world_data import symbols_passable
     from server.build_fov_map import build_fov_map
     from server.config.misc import decrement_lifepoints_func
+    from server.new_thing import new_Thing
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -400,6 +404,9 @@ def actor_move(t):
                         log("You chop it DOWN.")
                         world_db["GOD_FAVOR"] -= 10
                     world_db["MAP"][pos] = ord(".")
+                    id = id_setter(-1, "Things")
+                    world_db["Things"][id] = new_Thing(world_db["LUMBER"],
+                            (move_result[1], move_result[2]))
                     build_fov_map(t)
                 return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
@@ -462,8 +469,10 @@ def command_worldactive(worldactive_string):
                     altar_found = True
             valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]
             valid_plant0 = world_db["PLANT_0"] in world_db["ThingTypes"]
+            valid_lumber = world_db["LUMBER"] in world_db["ThingTypes"]
             if altar_found and wait_exists and player_exists and \
-                    world_db["MAP"] and valid_slippers and valid_plant0:
+                    world_db["MAP"] and valid_slippers and valid_plant0 and \
+                    valid_lumber:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -547,6 +556,15 @@ def play_use(str_arg):
             else:
                 print("Illegal inventory index.")
 
+def command_lumber(str_int):  # #
+    val = integer_test(str_int, 0)
+    if None != val:
+        world_db["LUMBER"] = val
+        if world_db["WORLD_ACTIVE"] and \
+           world_db["LUMBER"] not in world_db["ThingTypes"]:
+            world_db["WORLD_ACTIVE"] = 0
+            print("LUMBER matches no known ThingTypes, deactivating world.")
+
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 if not "GOD_FAVOR" in world_db:
@@ -557,6 +575,8 @@ if not "SLIPPERS" in world_db:
     world_db["SLIPPERS"] = 0
 if not "PLANT_0" in world_db:
     world_db["PLANT_0"] = 0
+if not "LUMBER" in world_db:
+    world_db["LUMBER"] = 0
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
 import server.config.world_data
@@ -581,6 +601,7 @@ commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
 commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
 commands_db["SLIPPERS"] = (1, False, command_slippers)
 commands_db["PLANT_0"] = (1, False, command_plant0)
+commands_db["LUMBER"] = (1, False, command_lumber)
 commands_db["use"] = (1, False, play_use)
 commands_db["move"] = (1, False, play_move)
 
