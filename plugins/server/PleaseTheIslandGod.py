@@ -110,8 +110,8 @@ def thingproliferation(t, prol_map):
             if (world_db["FAVOR_STAGE"] > 0
                 and t["T_TYPE"] == world_db["PLANT_0"]):
                 world_db["GOD_FAVOR"] += 5
-            #elif t["T_TYPE"] == world_db["PLANT_1"];
-            #    world_db["GOD_FAVOR"] += 25
+            elif t["T_TYPE"] == world_db["PLANT_1"]:
+                world_db["GOD_FAVOR"] += 25
             #elif world_db["FAVOR_STAGE"] >= 4 and \
             #     t["T_TYPE"] == world_db["ANIMAL_1"]:
             #    log("The Island God SMILES upon a new-born bear baby.")
@@ -357,7 +357,45 @@ def actor_move(t):
                  + " make yourself useful there. I will count each further "
                  + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
                  + " that grows to your favor.\"")
-        elif world_db["GOD_FAVOR"] > 150:
+        elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] < 100:
+            log("The Island God will talk again when it favors you to >=100 "
+                 +" points.")
+        elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
+            world_db["FAVOR_STAGE"] = 2
+            log("The Island God speaks to you: \"You could have done worse so "
+                + "far. Maybe you are not the worst to happen to this island "
+                + "since the metal birds threw the great lightning ball. Maybe"
+                + " you can help me spread another plant. It multiplies faster"
+                + ",and it is highly nutritious: "
+                + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
+                + " (\""
+                + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"]
+                + "\"). It is new. I give you the only example. Be very carefu"
+                + "l with it! I also give you another tool that may be helpful"
+                + ".\"")
+            id = id_setter(-1, "Things")
+            world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
+                                               world_db["altar"])
+            id = id_setter(-1, "Things")
+            world_db["Things"][id] = new_Thing(world_db["TOOL_0"],
+                                               world_db["altar"])
+        elif world_db["FAVOR_STAGE"] == 2 and \
+            0 == len([id for id in world_db["Things"]
+                      if world_db["Things"][id]["T_TYPE"]
+                         == world_db["PLANT_1"]]):
+            log("The Island God speaks to you: \"I am greatly disappointed tha"
+                + "t you lost all "
+                + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
+                + " this island had. Here is another one. It cost me great wor"
+               + "k. Be more careful this time when planting it.\"")
+            id = id_setter(-1, "Things")
+            world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
+                                               world_db["altar"])
+            world_db["GOD_FAVOR"] -= 250
+        elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] < 500:
+            log("The Island God will talk again when it favors you to >=500 "
+                 +" points.")
+        elif world_db["GOD_FAVOR"] > 9000:
             world_db["FAVOR_STAGE"] = 9001
             log("The Island God speaks to you: \"You have proven yourself wort"
                  + "hy of my respect. You were a good citizen to the island, a"
@@ -610,9 +648,13 @@ if not "SLIPPERS" in world_db:
     world_db["SLIPPERS"] = 0
 if not "PLANT_0" in world_db:
     world_db["PLANT_0"] = 0
+if not "PLANT_1" in world_db:
+    world_db["PLANT_1"] = 0
+if not "TOOL_0" in world_db:
+    world_db["TOOL_0"] = 0
 if not "LUMBER" in world_db:
     world_db["LUMBER"] = 0
-world_db["specials"] = ["SLIPPERS", "PLANT_0", "LUMBER"]
+world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "LUMBER"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
 import server.config.world_data
@@ -636,7 +678,9 @@ commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
 commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
 commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
 commands_db["SLIPPERS"] = (1, False, specialtypesetter("SLIPPERS"))
+commands_db["TOOL_0"] = (1, False, specialtypesetter("TOOL_0"))
 commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
+commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
 commands_db["use"] = (1, False, play_use)
 commands_db["move"] = (1, False, play_move)
