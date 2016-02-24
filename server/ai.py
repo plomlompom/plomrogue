@@ -61,11 +61,11 @@ def get_dir_to_target(t, filter):
             raise RuntimeError("No score map allocated for get_map_score().")
         return result
 
-    def animate_in_fov(Thing):
-        if Thing["carried"] or Thing == t or not Thing["T_LIFEPOINTS"]:
+    def animate_in_fov(Thing, maplength):
+        if not Thing["T_LIFEPOINTS"] or Thing["carried"] or Thing == t:
             return False
-        pos = Thing["T_POSY"] * world_db["MAP_LENGTH"] + Thing["T_POSX"]
-        if ord("v") == t["fovmap"][pos]:
+        pos = Thing["T_POSY"] * maplength + Thing["T_POSX"]
+        if 118 == t["fovmap"][pos]: # optimization: 118 = ord("v")
             return True
 
     def good_attack_target(v):
@@ -90,21 +90,23 @@ def get_dir_to_target(t, filter):
         return False
 
     def seeing_thing():
+        maplength = world_db["MAP_LENGTH"]
         if t["fovmap"] and "a" == filter:
             for id in world_db["Things"]:
-                if animate_in_fov(world_db["Things"][id]):
+                if animate_in_fov(world_db["Things"][id], maplength):
                     if good_attack_target(world_db["Things"][id]):
                         return True
         elif t["fovmap"] and "f" == filter:
             for id in world_db["Things"]:
-                if animate_in_fov(world_db["Things"][id]):
+                if animate_in_fov(world_db["Things"][id], maplength):
                     if good_flee_target(world_db["Things"][id]):
                         return True
         elif t["T_MEMMAP"] and "c" == filter:
             eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
+            ord_blank = ord(" ")
             for mt in t["T_MEMTHING"]:
-                if ' ' != chr(t["T_MEMMAP"][(mt[1] * world_db["MAP_LENGTH"])
-                                            + mt[2]]) \
+                if ord_blank != chr(t["T_MEMMAP"][(mt[1] * \
+                       world_db["MAP_LENGTH"]) + mt[2]]) \
                    and world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food" \
                    and world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"] \
                        > eat_cost:
@@ -130,38 +132,38 @@ def get_dir_to_target(t, filter):
         ord_v = ord("v")
         ord_blank = ord(" ")
         set_cells_passable_on_memmap_to_65534_on_scoremap()
+        maplength = world_db["MAP_LENGTH"]
         if "a" == filter:
-            for id in world_db["Things"]:
-                if animate_in_fov(world_db["Things"][id]) \
-                and good_attack_target(world_db["Things"][id]):
-                    set_map_score_at_thingpos(id, 0)
+            [set_map_score_at_thingpos(id, 0)
+             for id in world_db["Things"]
+             if animate_in_fov(world_db["Things"][id], maplength)
+             if good_attack_target(world_db["Things"][id])]
         elif "f" == filter:
-            for id in world_db["Things"]:
-                if animate_in_fov(world_db["Things"][id]) \
-                and good_flee_target(world_db["Things"][id]):
-                    set_map_score_at_thingpos(id, 0)
+            [set_map_score_at_thingpos(id, 0)
+             for id in world_db["Things"]
+             if animate_in_fov(world_db["Things"][id], maplength)
+             if good_flee_target(world_db["Things"][id])]
         elif "c" == filter:
             eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
-            for mt in [mt for mt in t["T_MEMTHING"]
-                       if ord_blank != t["T_MEMMAP"][mt[1]
-                                                     * world_db["MAP_LENGTH"]
-                                                     + mt[2]]
-                       if world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"
-                       if world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"]
-                           > eat_cost]:
-                set_map_score(mt[1] * world_db["MAP_LENGTH"] + mt[2], 0)
+            ord_blank = ord(" ")
+            [set_map_score(mt[1] * maplength + mt[2], 0)
+             for mt in t["T_MEMTHING"]
+             if ord_blank != t["T_MEMMAP"][mt[1] * maplength + mt[2]]
+             if t != world_db["Things"][0] or
+                (world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food" and
+                 world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"] > eat_cost)]
         elif "s" == filter:
             zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
-        if "a" != filter:
-            for id in world_db["Things"]:
-                if animate_in_fov(world_db["Things"][id]):
-                    if "f" == filter:
-                        pos = world_db["Things"][id]["T_POSY"] \
-                              * world_db["MAP_LENGTH"] \
-                              + world_db["Things"][id]["T_POSX"]
-                        if 0 == get_map_score(pos):
-                            continue
-                    set_map_score_at_thingpos(id, 65535)
+        if "f" == filter:
+            [set_map_score_at_thingpos(id, 65535)
+             for id in world_db["Things"]
+             if animate_in_fov(world_db["Things"][id], maplength)
+             if get_map_score(world_db["Things"][id]["T_POSY"] * maplength
+                              + world_db["Things"][id]["T_POSX"])]
+        elif "a" != filter:
+            [set_map_score_at_thingpos(id, 65535)
+             for id in world_db["Things"]
+             if animate_in_fov(world_db["Things"][id], maplength)]
 
     def rand_target_dir(neighbors, cmp, dirs):
         candidates = []
