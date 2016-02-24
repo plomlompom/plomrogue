@@ -287,6 +287,31 @@ def actor_use(t):
             t["T_LIFEPOINTS"] = 1
             from server.config.misc import decrement_lifepoints_func
             decrement_lifepoints_func(t)
+        elif (world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry"):
+            pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+            if (world_db["MAP"][pos] == ord("X")
+                or world_db["MAP"][pos] == ord("|")):
+                return
+            for id in [id for id in world_db["Things"]
+                       if not world_db["Things"][id] == t
+                       if not world_db["Things"][id]["carried"]
+                       if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+                       if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]:
+                 return
+            wood_id = None
+            for id in t["T_CARRIES"]:
+                type_material = world_db["Things"][id]["T_TYPE"]
+                if (world_db["ThingTypes"][type_material]["TT_TOOL"]
+                    == "wood"):
+                    wood_id = id
+                    break
+            if wood_id != None:
+                t["T_CARRIES"].remove(wood_id)
+                del world_db["Things"][wood_id]
+                world_db["MAP"][pos] = ord("|")
+                log("With your " + world_db["ThingTypes"][type]["TT_NAME"]
+                    + " you build a wooden barrier from your "
+                    + world_db["ThingTypes"][type_material]["TT_NAME"] + ".")
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
@@ -399,14 +424,23 @@ def actor_move(t):
                     if ord("X") == world_db["MAP"][pos]:
                         world_db["GOD_FAVOR"] -= 1
                 chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-                if (chop_power > 0 and 0 == int(rand.next() / chop_power)):
+
+                case_X = world_db["MAP"][pos] == ord("X")
+                if (chop_power > 0
+                    and ((case_X and
+                          0 == int(rand.next() / chop_power))
+                    or (not case_X and
+                             0 == int(rand.next() / (3 * chop_power))))):
                     if t == world_db["Things"][0]:
                         log("You chop it DOWN.")
                         world_db["GOD_FAVOR"] -= 10
                     world_db["MAP"][pos] = ord(".")
-                    id = id_setter(-1, "Things")
-                    world_db["Things"][id] = new_Thing(world_db["LUMBER"],
-                            (move_result[1], move_result[2]))
+                    i = 3 if case_X else 1
+                    for i in range(i):
+                        id = id_setter(-1, "Things")
+                        world_db["Things"][id] = \
+                          new_Thing(world_db["LUMBER"],
+                                    (move_result[1], move_result[2]))
                     build_fov_map(t)
                 return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
@@ -547,6 +581,32 @@ def play_use(str_arg):
                       and t == world_db["Things"][0]):
                     log("To use this item for chopping, move towards a tree "
                          + "while carrying it in your inventory.")
+                    return
+                elif (world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry"):
+                    pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+                    if (world_db["MAP"][pos] == ord("X")
+                        or world_db["MAP"][pos] == ord("|")):
+                        log("Can't build when standing on barrier.")
+                        return
+                    for id in [id for id in world_db["Things"]
+                               if not world_db["Things"][id] == t
+                               if not world_db["Things"][id]["carried"]
+                               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+                               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]:
+                         log("Can't build when standing objects.")
+                         return
+                    wood_id = None
+                    for id in t["T_CARRIES"]:
+                        type_material = world_db["Things"][id]["T_TYPE"]
+                        if (world_db["ThingTypes"][type_material]["TT_TOOL"]
+                            == "wood"):
+                            wood_id = id
+                            break
+                    if wood_id == None:
+                        log("You can't use a "
+                            + world_db["ThingTypes"][type]["TT_NAME"]
+                            + " without some wood in your inventory.")
+                        return
                 elif type != world_db["SLIPPERS"] and not \
                         world_db["ThingTypes"][type]["TT_TOOL"] == "food":
                     log("You CAN'T consume this thing.")
