@@ -60,19 +60,10 @@ def make_world(seed):
         print("Ignoring beyond SEED_MAP: " +
               "No thing action with name 'wait' defined.")
         return
-    if not world_db["SLIPPERS"] in world_db["ThingTypes"]:
-        print("Ignoring: No valid SLIPPERS set.")
-        return
-    if not world_db["PLANT_0"] in world_db["ThingTypes"]:
-        print("Ignoring: No valid PLANT_0 set.")
-        return
-    if not world_db["LUMBER"] in world_db["ThingTypes"]:
-        print("Ignoring: No valid LUMBER set.")
-        return
-    #for name in specials:
-    #    if world_db[name] not in world_db["ThingTypes"]:
-    #        print("Ignoring: No valid " + name + " set.")
-    #        return
+    for name in world_db["specials"]:
+        if world_db[name] not in world_db["ThingTypes"]:
+            print("Ignoring: No valid " + name + " set.")
+            return
     world_db["Things"] = {}
     make_map()
     world_db["WORLD_ACTIVE"] = 1
@@ -501,12 +492,12 @@ def command_worldactive(worldactive_string):
                     x = pos % world_db["MAP_LENGTH"]
                     world_db["altar"] = (y, x)
                     altar_found = True
-            valid_slippers = world_db["SLIPPERS"] in world_db["ThingTypes"]
-            valid_plant0 = world_db["PLANT_0"] in world_db["ThingTypes"]
-            valid_lumber = world_db["LUMBER"] in world_db["ThingTypes"]
+            specials_set = True
+            for name in world_db["specials"]:
+                if world_db[name] not in world_db["ThingTypes"]:
+                    specials_set = False
             if altar_found and wait_exists and player_exists and \
-                    world_db["MAP"] and valid_slippers and valid_plant0 and \
-                    valid_lumber:
+                    world_db["MAP"] and specials_set:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -518,24 +509,6 @@ def command_worldactive(worldactive_string):
                 world_db["WORLD_ACTIVE"] = 1
             else:
                 print("Ignoring: Not all conditions for world activation met.")
-
-def command_slippers(str_int):
-    val = integer_test(str_int, 0)
-    if None != val:
-        world_db["SLIPPERS"] = val
-        if world_db["WORLD_ACTIVE"] and \
-           world_db["SLIPPERS"] not in world_db["ThingTypes"]:
-            world_db["WORLD_ACTIVE"] = 0
-            print("SLIPPERS matches no known ThingTypes, deactivating world.")
-
-def command_plant0(str_int):
-    val = integer_test(str_int, 0)
-    if None != val:
-        world_db["PLANT_0"] = val
-        if world_db["WORLD_ACTIVE"] and \
-           world_db["PLANT_0"] not in world_db["ThingTypes"]:
-            world_db["WORLD_ACTIVE"] = 0
-            print("PLANT_0 matches no known ThingTypes, deactivating world.")
 
 def play_move(str_arg):
     if action_exists("move"):
@@ -616,14 +589,16 @@ def play_use(str_arg):
             else:
                 print("Illegal inventory index.")
 
-def command_lumber(str_int):  # #
-    val = integer_test(str_int, 0)
-    if None != val:
-        world_db["LUMBER"] = val
-        if world_db["WORLD_ACTIVE"] and \
-           world_db["LUMBER"] not in world_db["ThingTypes"]:
-            world_db["WORLD_ACTIVE"] = 0
-            print("LUMBER matches no known ThingTypes, deactivating world.")
+def specialtypesetter(name):  # #
+    def helper(str_int):
+        val = integer_test(str_int, 0)
+        if None != val:
+            world_db[name] = val
+            if world_db["WORLD_ACTIVE"] \
+               and world_db[name] not in world_db["ThingTypes"]:
+                world_db["WORLD_ACTIVE"] = 0
+                print(name + " fits no known ThingType, deactivating world.")
+    return helper
 
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
@@ -637,6 +612,7 @@ if not "PLANT_0" in world_db:
     world_db["PLANT_0"] = 0
 if not "LUMBER" in world_db:
     world_db["LUMBER"] = 0
+world_db["specials"] = ["SLIPPERS", "PLANT_0", "LUMBER"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
 import server.config.world_data
@@ -659,9 +635,9 @@ commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255)
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
 commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
 commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
-commands_db["SLIPPERS"] = (1, False, command_slippers)
-commands_db["PLANT_0"] = (1, False, command_plant0)
-commands_db["LUMBER"] = (1, False, command_lumber)
+commands_db["SLIPPERS"] = (1, False, specialtypesetter("SLIPPERS"))
+commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
+commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
 commands_db["use"] = (1, False, play_use)
 commands_db["move"] = (1, False, play_move)
 
