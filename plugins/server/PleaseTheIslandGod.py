@@ -639,6 +639,60 @@ def specialtypesetter(name):  # #
                 print(name + " fits no known ThingType, deactivating world.")
     return helper
 
+def write_metamap_A():
+    from server.worldstate_write_helpers import write_map
+    ord_v = ord("v")
+    length = world_db["MAP_LENGTH"]
+    metamapA = bytearray(b'0' * (length ** 2))
+    for id in [id for id in world_db["Things"]
+                  if not world_db["Things"][id]["carried"]
+                  if world_db["Things"][id]["T_LIFEPOINTS"]
+                  if world_db["Things"][0]["fovmap"][
+                       world_db["Things"][id]["T_POSY"] * length
+                       + world_db["Things"][id]["T_POSX"]] == ord_v]:
+        pos = (world_db["Things"][id]["T_POSY"] * length
+              + world_db["Things"][id]["T_POSX"])
+        if id == 0 or world_db["EMPATHY"]:
+            type = world_db["Things"][id]["T_TYPE"]
+            max_hp = world_db["ThingTypes"][type]["TT_LIFEPOINTS"]
+            third_of_hp = max_hp / 3
+            hp = world_db["Things"][id]["T_LIFEPOINTS"]
+            add = 0
+            if hp > 2 * third_of_hp:
+                 add = 2
+            elif hp > third_of_hp:
+                add = 1
+            metamapA[pos] = ord('a') + add
+        else:
+            metamapA[pos] = ord('X')
+    for mt in world_db["Things"][0]["T_MEMTHING"]:
+        pos = mt[1] * length + mt[2]
+        if metamapA[pos] < ord('2'):
+            metamapA[pos] += 1
+    return write_map(metamapA, length)
+
+def write_metamap_B():
+    from server.worldstate_write_helpers import write_map
+    ord_v = ord("v")
+    length = world_db["MAP_LENGTH"]
+    metamapB = bytearray(b' ' * (length ** 2))
+    for id in [id for id in world_db["Things"]
+                  if not world_db["Things"][id]["carried"]
+                  if world_db["Things"][id]["T_LIFEPOINTS"]
+                  if world_db["Things"][0]["fovmap"][
+                       world_db["Things"][id]["T_POSY"] * length
+                       + world_db["Things"][id]["T_POSX"]] == ord_v]:
+        pos = (world_db["Things"][id]["T_POSY"] * length
+              + world_db["Things"][id]["T_POSX"])
+        if id == 0 or world_db["EMPATHY"]:
+            action = world_db["Things"][id]["T_COMMAND"]
+            if 0 != action:
+                name = world_db["ThingActions"][action]["TA_NAME"]
+            else:
+                name = " "
+            metamapB[pos] = ord(name[0])
+    return write_map(metamapB, length)
+
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 if not "GOD_FAVOR" in world_db:
@@ -655,11 +709,15 @@ if not "TOOL_0" in world_db:
     world_db["TOOL_0"] = 0
 if not "LUMBER" in world_db:
     world_db["LUMBER"] = 0
+if not "EMPATHY" in world_db:
+    world_db["EMPATHY"] = 0
 world_db["terrain_names"][":"] = "SOIL"
 world_db["terrain_names"]["|"] = "WALL"
 world_db["terrain_names"]["_"] = "ALTAR"
 world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "LUMBER"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
+io_db["worldstate_write_order"] += [[write_metamap_A, "func"]]
+io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
 
 import server.config.world_data
 server.config.world_data.symbols_passable += ":_"
@@ -686,6 +744,7 @@ commands_db["TOOL_0"] = (1, False, specialtypesetter("TOOL_0"))
 commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
 commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
+commands_db["EMPATHY"] = (1, False, setter(None, "EMPATHY", 0, 1))
 commands_db["use"] = (1, False, play_use)
 commands_db["move"] = (1, False, play_move)
 
