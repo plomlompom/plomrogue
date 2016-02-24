@@ -655,6 +655,9 @@ if not "TOOL_0" in world_db:
     world_db["TOOL_0"] = 0
 if not "LUMBER" in world_db:
     world_db["LUMBER"] = 0
+world_db["terrain_names"][":"] = "SOIL"
+world_db["terrain_names"]["|"] = "WALL"
+world_db["terrain_names"]["_"] = "ALTAR"
 world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "LUMBER"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 
