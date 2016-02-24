@@ -693,6 +693,16 @@ def write_metamap_B():
             metamapB[pos] = ord(name[0])
     return write_map(metamapB, length)
 
+def calc_effort(thing_action, thing):
+    from math import sqrt
+    effort = thing_action["TA_EFFORT"]
+    if thing_action["TA_NAME"] == "move":
+        typ = thing["T_TYPE"]
+        max_hp = (world_db["ThingTypes"][typ]["TT_LIFEPOINTS"])
+        effort = int(effort / sqrt(max_hp))
+        effort = 1 if effort == 0 else effort
+    return effort
+
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 if not "GOD_FAVOR" in world_db:
@@ -752,4 +762,5 @@ import server.config.misc
 server.config.misc.make_map_func = make_map
 server.config.misc.thingproliferation_func = thingproliferation
 server.config.misc.make_world = make_world
-server.config.decrement_lifepoints_func = decrement_lifepoints
+server.config.misc.decrement_lifepoints_func = decrement_lifepoints
+server.config.misc.calc_effort_func = calc_effort
