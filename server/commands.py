@@ -49,6 +49,9 @@ def command_thingshere(str_y, str_x):
         if None != y and None != x and y < length and x < length:
             pos = (y * world_db["MAP_LENGTH"]) + x
             strong_write(io_db["file_out"], "THINGS_HERE START\n")
+            terrain = chr(world_db["Things"][0]["T_MEMMAP"][pos])
+            terrain_name = world_db["terrain_names"][terrain]
+            strong_write(io_db["file_out"], "terrain: " + terrain_name + "\n")
             if "v" == chr(world_db["Things"][0]["fovmap"][pos]):
                 for id in [id for tid in sorted(list(world_db["ThingTypes"]))
                               for id in world_db["Things"]

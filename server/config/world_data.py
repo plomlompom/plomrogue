@@ -13,7 +13,13 @@ world_db = {
     "PLUGIN": [],
     "ThingActions": {},
     "ThingTypes": {},
-    "Things": {}
+    "Things": {},
+    "terrain_names": {
+        " ": "UNKNOWN",
+        "X": "TREE",
+        "~": "SEA",
+        ".": "EARTH"
+    }
 }
 
 """Mapping of direction names to internal direction chars."""
