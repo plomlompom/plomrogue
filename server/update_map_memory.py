@@ -48,11 +48,13 @@ def update_map_memory(t, age_map=True):
     t["T_MEMTHING"] = [mt for mt in t["T_MEMTHING"]
                        if ord_v != t["fovmap"][(mt[1] * world_db["MAP_LENGTH"])
                                                + mt[2]]]
-    for id in [id for id in world_db["Things"]
-               if not world_db["Things"][id]["carried"]]:
-        type = world_db["Things"][id]["T_TYPE"]
-        if not world_db["ThingTypes"][type]["TT_LIFEPOINTS"]:
-            y = world_db["Things"][id]["T_POSY"]
-            x = world_db["Things"][id]["T_POSX"]
-            if ord_v == t["fovmap"][(y * world_db["MAP_LENGTH"]) + x]:
-                t["T_MEMTHING"].append((type, y, x))
+    maplength = world_db["MAP_LENGTH"]
+    [t["T_MEMTHING"].append((world_db["Things"][id]["T_TYPE"],
+                             world_db["Things"][id]["T_POSY"],
+                             world_db["Things"][id]["T_POSX"]))
+     for id in world_db["Things"]
+     if not world_db["Things"][id]["carried"]
+     if not world_db["ThingTypes"][world_db["Things"][id]["T_TYPE"]]
+                                                              ["TT_LIFEPOINTS"]
+     if ord_v == t["fovmap"][(world_db["Things"][id]["T_POSY"] * maplength)
+                                       + world_db["Things"][id]["T_POSX"]]]
