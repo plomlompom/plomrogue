@@ -321,7 +321,6 @@ def decrement_lifepoints(t):
     t["T_LIFEPOINTS"] -= 1
     _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
     if 0 == t["T_LIFEPOINTS"]:
-        sadness = world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
         for id in t["T_CARRIES"]:
             t["T_CARRIES"].remove(id)
             world_db["Things"][id]["T_POSY"] = t["T_POSY"]
@@ -337,7 +336,7 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
-        return sadness
+        return world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
     return 0
 
 def actor_move(t):
