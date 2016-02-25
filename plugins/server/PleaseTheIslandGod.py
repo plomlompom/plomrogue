@@ -712,6 +712,22 @@ def calc_effort(thing_action, thing):
         effort = 1 if effort == 0 else effort
     return effort
 
+def play_pickup():
+    """Try "pickup" as player's T_COMMAND"."""
+    if action_exists("pickup"):
+        t = world_db["Things"][0]
+        ids = [id for id in world_db["Things"] if id
+               if not world_db["Things"][id]["carried"]
+               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
+               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
+        if not len(ids):
+            log("NOTHING to pick up.")
+        elif len(t["T_CARRIES"]) >= world_db["ThingTypes"][t["T_TYPE"]] \
+                ["TT_STORAGE"]:
+            log("CAN'T pick up: No storage room to carry anything more.")
+        else:
+            set_command("pickup")
+
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 if not "GOD_FAVOR" in world_db:
@@ -769,6 +785,7 @@ commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
 commands_db["EMPATHY"] = (1, False, setter(None, "EMPATHY", 0, 1))
 commands_db["use"] = (1, False, play_use)
 commands_db["move"] = (1, False, play_move)
+commands_db["pickup"] = (0, False, play_pickup)
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
