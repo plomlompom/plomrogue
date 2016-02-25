@@ -112,10 +112,10 @@ def thingproliferation(t, prol_map):
                 world_db["GOD_FAVOR"] += 5
             elif t["T_TYPE"] == world_db["PLANT_1"]:
                 world_db["GOD_FAVOR"] += 25
-            #elif world_db["FAVOR_STAGE"] >= 4 and \
-            #     t["T_TYPE"] == world_db["ANIMAL_1"]:
-            #    log("The Island God SMILES upon a new-born bear baby.")
-            #    world_db["GOD_FAVOR"] += 750
+            elif world_db["FAVOR_STAGE"] >= 4 and \
+                t["T_TYPE"] == world_db["ANIMAL_1"]:
+                log("The Island God SMILES upon a new-born bear baby.")
+                world_db["GOD_FAVOR"] += 750
 
 def make_map():
     global rand
@@ -430,10 +430,30 @@ def actor_move(t):
                 + "moving (maybe for an attack), \"u\": eating, \"p\": picking"
                 + " something up; no letter: waiting).")
             world_db["EMPATHY"] = 1
-        elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] < 9001:
-            log("The Island God will talk again when it favors you to >9000 "
+        elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] < 5000:
+            log("The Island God will talk again when it favors you to >=5000 "
                  +" points.")
-        elif world_db["GOD_FAVOR"] > 9000:
+        elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] >= 5000:
+            world_db["FAVOR_STAGE"] = 4
+            log("The Island God speaks to you: \"You know what animal I find "
+                 + "the cutest? The "
+                 + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
+                 + "! I think what this islands clearly needs more of is "
+                 + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
+                 + "s. Why don't you help? Support them. Make sure they are "
+                 + "well, and they will multiply faster. From now on, I will "
+                 + "count each new-born "
+                 + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
+                 + " (not spawned by me due to undo an extinction event) "
+                 + "greatly to your favor. To help you with the feeding, here "
+                 + "is something to make the ground bear more consumables.")
+            id = id_setter(-1, "Things")
+            world_db["Things"][id] = new_Thing(world_db["TOOL_1"],
+                                               world_db["altar"])
+        elif world_db["GOD_FAVOR"] < 20000:
+            log("The Island God will talk again when it favors you to >=20000 "
+                 +" points.")
+        elif world_db["GOD_FAVOR"] > 20000:
             world_db["FAVOR_STAGE"] = 9001
             log("The Island God speaks to you: \"You have proven yourself wort"
                  + "hy of my respect. You were a good citizen to the island, a"
@@ -779,6 +799,8 @@ if not "PLANT_1" in world_db:
     world_db["PLANT_1"] = 0
 if not "ANIMAL_0" in world_db:
     world_db["ANIMAL_0"] = 0
+if not "ANIMAL_1" in world_db:
+    world_db["ANIMAL_1"] = 0
 if not "TOOL_0" in world_db:
     world_db["TOOL_0"] = 0
 if not "TOOL_1" in world_db:
@@ -791,7 +813,7 @@ world_db["terrain_names"][":"] = "SOIL"
 world_db["terrain_names"]["|"] = "WALL"
 world_db["terrain_names"]["_"] = "ALTAR"
 world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "TOOL_1",
-    "LUMBER", "ANIMAL_0"]
+    "LUMBER", "ANIMAL_0, ANIMAL_1"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 io_db["worldstate_write_order"] += [[write_metamap_A, "func"]]
 io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
@@ -820,6 +842,7 @@ commands_db["SLIPPERS"] = (1, False, specialtypesetter("SLIPPERS"))
 commands_db["TOOL_0"] = (1, False, specialtypesetter("TOOL_0"))
 commands_db["TOOL_1"] = (1, False, specialtypesetter("TOOL_1"))
 commands_db["ANIMAL_0"] = (1, False, specialtypesetter("ANIMAL_0"))
+commands_db["ANIMAL_1"] = (1, False, specialtypesetter("ANIMAL_1"))
 commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
 commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
