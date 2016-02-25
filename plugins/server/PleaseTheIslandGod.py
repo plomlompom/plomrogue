@@ -319,6 +319,7 @@ def actor_use(t):
 
 def decrement_lifepoints(t):
     t["T_LIFEPOINTS"] -= 1
+    live_type = t["T_TYPE"]
     _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
     if 0 == t["T_LIFEPOINTS"]:
         for id in t["T_CARRIES"]:
@@ -336,6 +337,16 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
+            n_species = len([id for id in world_db["Things"]
+                             if world_db["Things"][id]["T_TYPE"] == live_type])
+            if 0 == n_species:
+                from server.new_thing import new_Thing
+                id = id_setter(-1, "Things")
+                world_db["Things"][id] = new_Thing(live_type,
+                                                   world_db["altar"])
+                log("The " + world_db["ThingTypes"][live_type]["TT_NAME"]
+                    + " species has temporarily died out. "
+                    + "One new-born is spawned at the altar.")
         return world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
     return 0
 
