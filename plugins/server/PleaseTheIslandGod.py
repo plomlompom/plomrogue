@@ -303,6 +303,11 @@ def actor_use(t):
                 log("With your " + world_db["ThingTypes"][type]["TT_NAME"]
                     + " you build a wooden barrier from your "
                     + world_db["ThingTypes"][type_material]["TT_NAME"] + ".")
+        elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":
+            pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+            if world_db["MAP"][pos] == ord("."):
+                log("You create SOIL.")
+                world_db["MAP"][pos] = ord(":")
         elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
             t["T_CARRIES"].remove(id)
             del world_db["Things"][id]
@@ -619,6 +624,11 @@ def play_use(str_arg):
                             + world_db["ThingTypes"][type]["TT_NAME"]
                             + " without some wood in your inventory.")
                         return
+                elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":
+                    pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+                    if not world_db["MAP"][pos] == ord("."):
+                        log("Can only make soil out of NON-SOIL earth.")
+                        return
                 elif type != world_db["SLIPPERS"] and not \
                         world_db["ThingTypes"][type]["TT_TOOL"] == "food":
                     log("You CAN'T consume this thing.")
@@ -628,7 +638,7 @@ def play_use(str_arg):
             else:
                 print("Illegal inventory index.")
 
-def specialtypesetter(name):  # #
+def specialtypesetter(name):
     def helper(str_int):
         val = integer_test(str_int, 0)
         if None != val:
@@ -717,6 +727,8 @@ if not "PLANT_1" in world_db:
     world_db["PLANT_1"] = 0
 if not "TOOL_0" in world_db:
     world_db["TOOL_0"] = 0
+if not "TOOL_1" in world_db:
+    world_db["TOOL_1"] = 0
 if not "LUMBER" in world_db:
     world_db["LUMBER"] = 0
 if not "EMPATHY" in world_db:
@@ -751,6 +763,7 @@ commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
 commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
 commands_db["SLIPPERS"] = (1, False, specialtypesetter("SLIPPERS"))
 commands_db["TOOL_0"] = (1, False, specialtypesetter("TOOL_0"))
+commands_db["TOOL_1"] = (1, False, specialtypesetter("TOOL_1"))
 commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
 commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
