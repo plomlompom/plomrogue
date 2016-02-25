@@ -816,7 +816,7 @@ world_db["terrain_names"][":"] = "SOIL"
 world_db["terrain_names"]["|"] = "WALL"
 world_db["terrain_names"]["_"] = "ALTAR"
 world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "TOOL_1",
-    "LUMBER", "ANIMAL_0, ANIMAL_1"]
+    "LUMBER", "ANIMAL_0", "ANIMAL_1"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 io_db["worldstate_write_order"] += [[write_metamap_A, "func"]]
 io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
