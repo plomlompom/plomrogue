@@ -341,12 +341,20 @@ def decrement_lifepoints(t):
                              if world_db["Things"][id]["T_TYPE"] == live_type])
             if 0 == n_species:
                 from server.new_thing import new_Thing
-                id = id_setter(-1, "Things")
-                world_db["Things"][id] = new_Thing(live_type,
-                                                   world_db["altar"])
-                log("The " + world_db["ThingTypes"][live_type]["TT_NAME"]
-                    + " species has temporarily died out. "
-                    + "One new-born is spawned at the altar.")
+                if world_db["FAVOR_STAGE"] >= 3 and \
+                    live_type == world_db["ANIMAL_0"]:
+                    world_db["GOD_FAVOR"] += 3000
+                    log("CONGRATULATIONS! The "
+                        + world_db["ThingTypes"][live_type]["TT_NAME"]
+                        + " species has died out. The Island God is pleased.")
+                else:
+                    id = id_setter(-1, "Things")
+                    world_db["Things"][id] = new_Thing(live_type,
+                                                       world_db["altar"])
+                    log("The "
+                        + world_db["ThingTypes"][live_type]["TT_NAME"]
+                        + " species has temporarily died out. "
+                        + "One new-born is spawned at the altar.")
         return world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
     return 0
 
@@ -410,6 +418,21 @@ def actor_move(t):
         elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] < 500:
             log("The Island God will talk again when it favors you to >=500 "
                  +" points.")
+        elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] >= 500:
+            world_db["FAVOR_STAGE"] = 3
+            log("The Island God speaks to you: \"The "
+                + world_db["ThingTypes"][world_db["ANIMAL_0"]]["TT_NAME"]
+                + " has lately become a pest. These creatures do not please me"
+                + " as much as they used to do. Exterminate them all. I will c"
+                + "ount each kill to your favor. To help you with the hunting,"
+                + " I grant you the empathy and knowledge to read animals.\"")
+            log("You will now see animals' health bars, and activities (\"m\": "
+                + "moving (maybe for an attack), \"u\": eating, \"p\": picking"
+                + " something up; no letter: waiting).")
+            world_db["EMPATHY"] = 1
+        elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] < 9001:
+            log("The Island God will talk again when it favors you to >9000 "
+                 +" points.")
         elif world_db["GOD_FAVOR"] > 9000:
             world_db["FAVOR_STAGE"] = 9001
             log("The Island God speaks to you: \"You have proven yourself wort"
@@ -441,8 +464,8 @@ def actor_move(t):
                   if world_db["Things"][id]["T_POSX"] == move_result[2]]
         if len(hitted):
             hit_id = hitted[0]
+            hitted_type = world_db["Things"][hit_id]["T_TYPE"]
             if t == world_db["Things"][0]:
-                hitted_type = world_db["Things"][hit_id]["T_TYPE"]
                 hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
                 log("You WOUND " + hitted_name + ".")
                 world_db["GOD_FAVOR"] -= 1
@@ -450,8 +473,11 @@ def actor_move(t):
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" WOUNDS you.")
             test = decrement_lifepoints_func(world_db["Things"][hit_id])
-            if test and t == world_db["Things"][0]:
-                world_db["GOD_FAVOR"] -= test 
+            if test and world_db["FAVOR_STAGE"] >= 3 and \
+               hitted_type == world_db["ANIMAL_0"]:
+                world_db["GOD_FAVOR"] += 125
+            elif test and t == world_db["Things"][0]:
+                world_db["GOD_FAVOR"] -= 2 * test
             return
         if (ord("X") == world_db["MAP"][pos]
             or ord("|") == world_db["MAP"][pos]):
@@ -751,6 +777,8 @@ if not "PLANT_0" in world_db:
     world_db["PLANT_0"] = 0
 if not "PLANT_1" in world_db:
     world_db["PLANT_1"] = 0
+if not "ANIMAL_0" in world_db:
+    world_db["ANIMAL_0"] = 0
 if not "TOOL_0" in world_db:
     world_db["TOOL_0"] = 0
 if not "TOOL_1" in world_db:
@@ -762,7 +790,8 @@ if not "EMPATHY" in world_db:
 world_db["terrain_names"][":"] = "SOIL"
 world_db["terrain_names"]["|"] = "WALL"
 world_db["terrain_names"]["_"] = "ALTAR"
-world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "LUMBER"]
+world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "TOOL_1",
+    "LUMBER", "ANIMAL_0"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 io_db["worldstate_write_order"] += [[write_metamap_A, "func"]]
 io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
@@ -790,6 +819,7 @@ commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
 commands_db["SLIPPERS"] = (1, False, specialtypesetter("SLIPPERS"))
 commands_db["TOOL_0"] = (1, False, specialtypesetter("TOOL_0"))
 commands_db["TOOL_1"] = (1, False, specialtypesetter("TOOL_1"))
+commands_db["ANIMAL_0"] = (1, False, specialtypesetter("ANIMAL_0"))
 commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
 commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
