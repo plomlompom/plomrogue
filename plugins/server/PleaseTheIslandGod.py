@@ -580,41 +580,44 @@ def command_worldactive(worldactive_string):
             else:
                 print("World already active.")
         elif 0 == world_db["WORLD_ACTIVE"]:
-            wait_exists = False
             for ThingAction in world_db["ThingActions"]:
                 if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
-                    wait_exists = True
                     break
-            player_exists = False
+            else:
+                print("Ignored: No wait action defined for world to activate.")
+                return
             for Thing in world_db["Things"]:
                 if 0 == Thing:
-                    player_exists = True
                     break
-            altar_found = False
+            else:
+                print("Ignored: No player defined for world to activate.")
+                return
             if world_db["MAP"]:
                 pos = world_db["MAP"].find(b'_')
                 if pos > 0:
                     y = int(pos / world_db["MAP_LENGTH"])
                     x = pos % world_db["MAP_LENGTH"]
                     world_db["altar"] = (y, x)
-                    altar_found = True
-            specials_set = True
+                else:
+                    print("Ignored: No altar defined for world to activate.")
+                    return
+            else:
+                print("Ignored: No map defined for world to activate.")
+                return
             for name in world_db["specials"]:
                 if world_db[name] not in world_db["ThingTypes"]:
-                    specials_set = False
-            if altar_found and wait_exists and player_exists and \
-                    world_db["MAP"] and specials_set:
-                for id in world_db["Things"]:
-                    if world_db["Things"][id]["T_LIFEPOINTS"]:
-                        build_fov_map(world_db["Things"][id])
-                        if 0 == id:
-                            update_map_memory(world_db["Things"][id], False)
-                if not world_db["Things"][0]["T_LIFEPOINTS"]:
-                    empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
-                    world_db["Things"][0]["fovmap"] = empty_fovmap
-                world_db["WORLD_ACTIVE"] = 1
-            else:
-                print("Ignoring: Not all conditions for world activation met.")
+                    print("Ignored: Not all specials set for world to "
+                          "activate.")
+                    return
+            for id in world_db["Things"]:
+                if world_db["Things"][id]["T_LIFEPOINTS"]:
+                    build_fov_map(world_db["Things"][id])
+                    if 0 == id:
+                        update_map_memory(world_db["Things"][id], False)
+            if not world_db["Things"][0]["T_LIFEPOINTS"]:
+                empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
+                world_db["Things"][0]["fovmap"] = empty_fovmap
+            world_db["WORLD_ACTIVE"] = 1
 
 def play_move(str_arg):
     if action_exists("move"):

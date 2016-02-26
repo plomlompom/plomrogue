@@ -118,17 +118,19 @@ def command_worldactive(worldactive_string):
             else:
                 print("World already active.")
         elif 0 == world_db["WORLD_ACTIVE"]:
-            wait_exists = False
             for ThingAction in world_db["ThingActions"]:
                 if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
-                    wait_exists = True
                     break
-            player_exists = False
+            else:
+                print("Ignored: No wait action defined for world to activate.")
+                return
             for Thing in world_db["Things"]:
                 if 0 == Thing:
-                    player_exists = True
                     break
-            if wait_exists and player_exists and world_db["MAP"]:
+            else:
+                print("Ignored: No player defined for world to activate.")
+                return
+            if world_db["MAP"]:
                 for id in world_db["Things"]:
                     if world_db["Things"][id]["T_LIFEPOINTS"]:
                         build_fov_map(world_db["Things"][id])
@@ -139,7 +141,8 @@ def command_worldactive(worldactive_string):
                     world_db["Things"][0]["fovmap"] = empty_fovmap
                 world_db["WORLD_ACTIVE"] = 1
             else:
-                print("Ignoring: Not all conditions for world activation met.")
+                print("Ignoring: No map defined for world to activate.")
+                return
 
 
 def command_tid(id_string):
