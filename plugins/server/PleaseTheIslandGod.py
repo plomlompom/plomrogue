@@ -795,33 +795,21 @@ def play_pickup():
 
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
-if not "GOD_FAVOR" in world_db:
-    world_db["GOD_FAVOR"] = 0
-if not "FAVOR_STAGE" in world_db:
-    world_db["FAVOR_STAGE"] = 0
-if not "SLIPPERS" in world_db:
-    world_db["SLIPPERS"] = 0
-if not "PLANT_0" in world_db:
-    world_db["PLANT_0"] = 0
-if not "PLANT_1" in world_db:
-    world_db["PLANT_1"] = 0
-if not "ANIMAL_0" in world_db:
-    world_db["ANIMAL_0"] = 0
-if not "ANIMAL_1" in world_db:
-    world_db["ANIMAL_1"] = 0
-if not "TOOL_0" in world_db:
-    world_db["TOOL_0"] = 0
-if not "TOOL_1" in world_db:
-    world_db["TOOL_1"] = 0
-if not "LUMBER" in world_db:
-    world_db["LUMBER"] = 0
-if not "EMPATHY" in world_db:
-    world_db["EMPATHY"] = 0
+def set_zero_if_undefined(key):
+    if not key in world_db:
+        world_db[key] = 0
+
+set_zero_if_undefined("GOD_FAVOR")
+set_zero_if_undefined("FAVOR_STAGE")
+set_zero_if_undefined("EMPATHY")
+world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "TOOL_1",
+    "LUMBER", "ANIMAL_0", "ANIMAL_1"]
+for key in world_db["specials"]:
+    set_zero_if_undefined(key)
+
 world_db["terrain_names"][":"] = "SOIL"
 world_db["terrain_names"]["|"] = "WALL"
 world_db["terrain_names"]["_"] = "ALTAR"
-world_db["specials"] = ["SLIPPERS", "PLANT_0", "PLANT_1", "TOOL_0", "TOOL_1",
-    "LUMBER", "ANIMAL_0", "ANIMAL_1"]
 io_db["worldstate_write_order"] += [["GOD_FAVOR", "world_int"]]
 io_db["worldstate_write_order"] += [[write_metamap_A, "func"]]
 io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
