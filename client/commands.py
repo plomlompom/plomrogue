@@ -66,8 +66,15 @@ def command_looker(string):
 
 def command_look_scroller(string):
     def command_look_scroll():
-        win_size = next(win["size"] for win in windows
-                                    if win["func"] == win_look)
+        from client.window_management import windows
+        from client.config.windows import windows_config
+        from client.windows import win_look
+        try:
+            i = next(i for i in range(len(windows_config))
+                        if windows_config[i]["func"] == win_look)
+        except StopIteration:
+            return
+        win_size = windows[i].size
         if string == "up" and world_data["look_scroll"] > 0:
             world_data["look_scroll"] -= 1
         elif string == "down" and world_data["look_scroll"] \
