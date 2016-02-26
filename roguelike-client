@@ -131,10 +131,13 @@ def cursed_main(stdscr):
         if new_open_end:
             message_queue["open_end"] = True
 
+    def set_and_redraw_windows(*ignore):
+        set_windows()
+        draw_screen()
+
     curses.noecho()
     curses.curs_set(False)
-    signal.signal(signal.SIGWINCH,
-        lambda ignore_1, ignore_2: set_windows())
+    signal.signal(signal.SIGWINCH, set_and_redraw_windows)
     set_windows()
     delay = 1
     while True:
