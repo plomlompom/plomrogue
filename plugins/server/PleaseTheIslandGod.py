@@ -507,39 +507,35 @@ def actor_move(t):
             return
         if (ord("X") == world_db["MAP"][pos]
             or ord("|") == world_db["MAP"][pos]):
-            carries_axe = False
             for id in t["T_CARRIES"]:
                 type = world_db["Things"][id]["T_TYPE"]
                 if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":
-                    carries_axe = True
-                    break
-            if carries_axe:
-                axe_name = world_db["ThingTypes"][type]["TT_NAME"]
-                if t == world_db["Things"][0]:
-                    log("With your " + axe_name + ", you chop!")
-                    if ord("X") == world_db["MAP"][pos]:
-                        world_db["GOD_FAVOR"] -= 1
-                chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-
-                case_X = world_db["MAP"][pos] == ord("X")
-                if (chop_power > 0
-                    and ((case_X and
-                          0 == int(rand.next() / chop_power))
-                    or (not case_X and
-                             0 == int(rand.next() / (3 * chop_power))))):
+                    axe_name = world_db["ThingTypes"][type]["TT_NAME"]
                     if t == world_db["Things"][0]:
-                        log("You chop it DOWN.")
+                        log("With your " + axe_name + ", you chop!")
                         if ord("X") == world_db["MAP"][pos]:
-                            world_db["GOD_FAVOR"] -= 10
-                    world_db["MAP"][pos] = ord(".")
-                    i = 3 if case_X else 1
-                    for i in range(i):
-                        id = id_setter(-1, "Things")
-                        world_db["Things"][id] = \
-                          new_Thing(world_db["LUMBER"],
-                                    (move_result[1], move_result[2]))
-                    build_fov_map(t)
-                return
+                            world_db["GOD_FAVOR"] -= 1
+                    chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
+
+                    case_X = world_db["MAP"][pos] == ord("X")
+                    if (chop_power > 0
+                        and ((case_X and
+                              0 == int(rand.next() / chop_power))
+                        or (not case_X and
+                                 0 == int(rand.next() / (3 * chop_power))))):
+                        if t == world_db["Things"][0]:
+                            log("You chop it DOWN.")
+                            if ord("X") == world_db["MAP"][pos]:
+                                world_db["GOD_FAVOR"] -= 10
+                        world_db["MAP"][pos] = ord(".")
+                        i = 3 if case_X else 1
+                        for i in range(i):
+                            id = id_setter(-1, "Things")
+                            world_db["Things"][id] = \
+                              new_Thing(world_db["LUMBER"],
+                                        (move_result[1], move_result[2]))
+                        build_fov_map(t)
+                    return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
