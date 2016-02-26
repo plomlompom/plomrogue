@@ -65,7 +65,7 @@ def make_world(seed):
             print("Ignoring: No valid " + name + " set.")
             return
     world_db["Things"] = {}
-    make_map()
+    make_map_func()
     world_db["WORLD_ACTIVE"] = 1
     world_db["TURN"] = 1
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
