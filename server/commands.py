@@ -142,7 +142,6 @@ def command_worldactive(worldactive_string):
                 world_db["WORLD_ACTIVE"] = 1
             else:
                 print("Ignoring: No map defined for world to activate.")
-                return
 
 
 def command_tid(id_string):
@@ -316,16 +315,13 @@ def command_taname(name):
        or name == "pickup":
         world_db["ThingActions"][command_taid.id]["TA_NAME"] = name
         if 1 == world_db["WORLD_ACTIVE"]:
-            wait_defined = False
             for id in world_db["ThingActions"]:
                 if "wait" == world_db["ThingActions"][id]["TA_NAME"]:
-                    wait_defined = True
                     break
-            if not wait_defined:
+            else:
                 set_world_inactive()
     else:
         print("Ignoring: Invalid action name.")
-    # In contrast to the original,naming won't map a function to a ThingAction.
 
 
 def setter(category, key, min, max=None):
