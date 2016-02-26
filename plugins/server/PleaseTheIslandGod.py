@@ -272,9 +272,9 @@ def actor_use(t):
         type = world_db["Things"][id]["T_TYPE"]
         if type == world_db["SLIPPERS"]:
             if t == world_db["Things"][0]:
-                log("You use the " + world_db["ThingTypes"][type]["TT_NAME"]
-                    + ". It glows in wondrous colors, and emits a sound as if "
-                    + "from a dying cat. The Island God laughs.\n")
+                log("You use the " + world_db["ThingTypes"][type]["TT_NAME"] +
+                    ". It glows in wondrous colors, and emits a sound as if fr"
+                    "om a dying cat. The Island God laughs.\n")
             t["T_LIFEPOINTS"] = 1
             from server.config.misc import decrement_lifepoints_func
             decrement_lifepoints_func(t)
@@ -360,6 +360,67 @@ def decrement_lifepoints(t):
 
 def actor_move(t):
 
+    def altar_msg_wait(limit):
+            log("The Island God will talk again when it favors you to >=" +
+                str(limit) + " points.")
+
+    altar_msg_0 = "The Island God speaks to you: \"I don't trust you. You in" \
+    "trude on the island's affairs. I think you're a nuisance at best, and a" \
+    " danger to my children at worst. I will give you a chance to lighten my" \
+    " mood, however: For a while now, I've been trying to spread the plant " \
+    + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"] + " (\"" + \
+    world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"] + "\"). I have " \
+    "not been very successful so far. Maybe you can make yourself useful the" \
+    "re. I will count each further " + \
+    world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"] + " that grows to" \
+    " your favor.\""
+
+    altar_msg_1 = "The Island God speaks to you: \"You could have done worse" \
+    " so far. Maybe you are not the worst to happen to this island since the" \
+    " metal birds threw the great lightning ball. Maybe you can help me spre" \
+    "ad another plant. It multiplies faster,and it is highly nutritious: " + \
+    world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"] + " (\"" + \
+    world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"] + "\"). It is n" \
+    "ew. I give you the only example. Be very careful with it! I also give y" \
+    "ou another tool that may be helpful.\""
+
+    altar_msg_2 = "The Island God speaks to you: \"I am greatly disappointed" \
+    " that you lost all " + \
+    world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"] + " this island h" \
+    "ad. Here is another one. It cost me great work. Be more careful this ti" \
+    "me when planting it.\""
+
+    altar_msg_3 = "The Island God speaks to you: \"The " + \
+    world_db["ThingTypes"][world_db["ANIMAL_0"]]["TT_NAME"] + " has lately b" \
+    "ecome a pest. These creatures do not please me as much as they used to " \
+    "do. Exterminate them all. I will count each kill to your favor. To help" \
+    " you with the hunting, I grant you the empathy and knowledge to read an" \
+    "imals.\""
+
+    altar_msg_4 = "You will now see animals' health bars, and activities (\"" \
+    "m\": moving (maybe for an attack), \"u\": eating, \"p\": picking someth" \
+    "ing up; no letter: waiting)."
+
+    altar_msg_5 = "The Island God speaks to you: \"You know what animal I fi" \
+    "nd the cutest? The " + \
+    world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"] + "! I think wha" \
+    "t this islands clearly needs more of is " + \
+    world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"] + "s. Why don't " \
+    "you help? Support them. Make sure they are well, and they will multiply" \
+    " faster. From now on, I will count each new-born " + \
+    world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"] + \
+    " (not spawned by me due to undo an extinction event) greatly to your fa" \
+    "vor. To help you with the feeding, here is something to make the ground" \
+    " bear more consumables."
+
+    altar_msg_6 = "The Island God speaks to you: \"You have proven yourself " \
+    "worthy of my respect. You were a good citizen to the island, and someti" \
+    "mes a better steward to its inhabitants than me. The island shall miss " \
+    "you when you leave. But you have earned the right to do so. Take this" + \
+    world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"] + " and USE it w" \
+    "hen you please. It will take you to where you came from. (But do feel f" \
+    "ree to stay here as long as you like.)\""
+
     def enter_altar():
         from server.new_thing import new_Thing
         if world_db["FAVOR_STAGE"] > 9000:
@@ -368,34 +429,12 @@ def actor_move(t):
         log("YOU ENTER SACRED GROUND.")
         if world_db["FAVOR_STAGE"] == 0:
             world_db["FAVOR_STAGE"] = 1
-            log("The Island God speaks to you: \"I don't trust you. You intrud"
-                 + "e on the island's affairs. I think you're a nuisance at be"
-                 + "st, and a danger to my children at worst. I will give you "
-                 + "a chance to lighten my mood, however: For a while now, I'v"
-                 + "e been trying to spread the plant "
-                 + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
-                 + " (\""
-                 + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_SYMBOL"]
-                 + "\"). I have not been very successful so far. Maybe you can"
-                 + " make yourself useful there. I will count each further "
-                 + world_db["ThingTypes"][world_db["PLANT_0"]]["TT_NAME"]
-                 + " that grows to your favor.\"")
+            log(altar_msg_0)
         elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] < 100:
-            log("The Island God will talk again when it favors you to >=100 "
-                 +" points.")
+            altar_msg_wait(100)
         elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
             world_db["FAVOR_STAGE"] = 2
-            log("The Island God speaks to you: \"You could have done worse so "
-                + "far. Maybe you are not the worst to happen to this island "
-                + "since the metal birds threw the great lightning ball. Maybe"
-                + " you can help me spread another plant. It multiplies faster"
-                + ",and it is highly nutritious: "
-                + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
-                + " (\""
-                + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_SYMBOL"]
-                + "\"). It is new. I give you the only example. Be very carefu"
-                + "l with it! I also give you another tool that may be helpful"
-                + ".\"")
+            log(altar_msg_2)
             id = id_setter(-1, "Things")
             world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
                                                world_db["altar"])
@@ -406,64 +445,31 @@ def actor_move(t):
             0 == len([id for id in world_db["Things"]
                       if world_db["Things"][id]["T_TYPE"]
                          == world_db["PLANT_1"]]):
-            log("The Island God speaks to you: \"I am greatly disappointed tha"
-                + "t you lost all "
-                + world_db["ThingTypes"][world_db["PLANT_1"]]["TT_NAME"]
-                + " this island had. Here is another one. It cost me great wor"
-               + "k. Be more careful this time when planting it.\"")
+            log(altar_msg_2)
             id = id_setter(-1, "Things")
             world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
                                                world_db["altar"])
             world_db["GOD_FAVOR"] -= 250
         elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] < 500:
-            log("The Island God will talk again when it favors you to >=500 "
-                 +" points.")
+            altar_msg_wait(500)
         elif world_db["FAVOR_STAGE"] == 2 and world_db["GOD_FAVOR"] >= 500:
             world_db["FAVOR_STAGE"] = 3
-            log("The Island God speaks to you: \"The "
-                + world_db["ThingTypes"][world_db["ANIMAL_0"]]["TT_NAME"]
-                + " has lately become a pest. These creatures do not please me"
-                + " as much as they used to do. Exterminate them all. I will c"
-                + "ount each kill to your favor. To help you with the hunting,"
-                + " I grant you the empathy and knowledge to read animals.\"")
-            log("You will now see animals' health bars, and activities (\"m\": "
-                + "moving (maybe for an attack), \"u\": eating, \"p\": picking"
-                + " something up; no letter: waiting).")
+            log(altar_msg_3)
+            log(altar_msg_4)
             world_db["EMPATHY"] = 1
         elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] < 5000:
-            log("The Island God will talk again when it favors you to >=5000 "
-                 +" points.")
+            altar_msg_wait(5000)
         elif world_db["FAVOR_STAGE"] == 3 and world_db["GOD_FAVOR"] >= 5000:
             world_db["FAVOR_STAGE"] = 4
-            log("The Island God speaks to you: \"You know what animal I find "
-                 + "the cutest? The "
-                 + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
-                 + "! I think what this islands clearly needs more of is "
-                 + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
-                 + "s. Why don't you help? Support them. Make sure they are "
-                 + "well, and they will multiply faster. From now on, I will "
-                 + "count each new-born "
-                 + world_db["ThingTypes"][world_db["ANIMAL_1"]]["TT_NAME"]
-                 + " (not spawned by me due to undo an extinction event) "
-                 + "greatly to your favor. To help you with the feeding, here "
-                 + "is something to make the ground bear more consumables.")
+            log(altar_msg_5)
             id = id_setter(-1, "Things")
             world_db["Things"][id] = new_Thing(world_db["TOOL_1"],
                                                world_db["altar"])
         elif world_db["GOD_FAVOR"] < 20000:
-            log("The Island God will talk again when it favors you to >=20000 "
-                 +" points.")
+            altar_msg_wait(20000)
         elif world_db["GOD_FAVOR"] > 20000:
             world_db["FAVOR_STAGE"] = 9001
-            log("The Island God speaks to you: \"You have proven yourself wort"
-                 + "hy of my respect. You were a good citizen to the island, a"
-                 + "nd sometimes a better steward to its inhabitants than me. "
-                 + "The island shall miss you when you leave. But you have ear"
-                 + "ned the right to do so. Take this "
-                 + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"]
-                 + " and USE it when you please. It will take you to where you"
-                 + " came from. (But do feel free to stay here as long as you "
-                 + "like.)\"")
+            log(altar_msg_6)
             id = id_setter(-1, "Things")
             world_db["Things"][id] = new_Thing(world_db["SLIPPERS"],
                                                world_db["altar"])
@@ -653,7 +659,7 @@ def play_use(str_arg):
                 if (world_db["ThingTypes"][type]["TT_TOOL"] == "axe"
                       and t == world_db["Things"][0]):
                     log("To use this item for chopping, move towards a tree "
-                         + "while carrying it in your inventory.")
+                        "while carrying it in your inventory.")
                     return
                 elif (world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry"):
                     pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
