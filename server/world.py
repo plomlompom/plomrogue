@@ -56,7 +56,6 @@ def turn_over():
     from server.config.misc import thingproliferation_func, calc_effort_func
     from server.update_map_memory import update_map_memory
     id = 0
-    whilebreaker = False
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         proliferable_map = world_db["MAP"][:]
         for id in [id for id in world_db["Things"]
@@ -73,8 +72,7 @@ def turn_over():
                 if not Thing["T_COMMAND"]:
                     update_map_memory(Thing)
                     if 0 == id:
-                        whilebreaker = True
-                        break
+                        return
                     ai_func(Thing)
                 try_healing(Thing)
                 hunger(Thing)
@@ -90,6 +88,4 @@ def turn_over():
                         Thing["T_COMMAND"] = 0
                         Thing["T_PROGRESS"] = 0
             thingproliferation_func(Thing, proliferable_map)
-        if whilebreaker:
-            break
         world_db["TURN"] += 1
