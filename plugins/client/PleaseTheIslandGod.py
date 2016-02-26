@@ -1,5 +1,7 @@
 from client.config.io import io
 from client.config.world_data import world_data
+world_data["log"][-2] = "STATS OVERVIEW: " \
+"T: turn, H: health, S: satiation, G: god's favor."
 world_data["GOD_FAVOR"] = 0
 io["worldstate_read_order"] += [["GOD_FAVOR", "int"]]
 world_data["metamap_A"] = ""
@@ -127,11 +129,11 @@ def win_map(self):
 from client.config.windows import windows_config
 from client.windows import win_log, win_inventory, win_look
 windows_config[:] = [
-    {"config": [1, 33], "func": win_info, "title": "Info"},
+    {"config": [1, 33], "func": win_info, "title": "Stats"},
     {"config": [-7, 33], "func": win_log, "title": "Log"},
     {"config": [4, 16], "func": win_inventory, "title": "Inventory"},
     {"config": [4, 16], "func": win_look, "title": "Things here"},
-    {"config": [0, -34], "func": win_map, "title": "Map"}
+    {"config": [0, -34], "func": win_map, "title": "PLEASE THE ISLAND GOD"}
 ]
 from client.window_management import set_windows
 set_windows()
