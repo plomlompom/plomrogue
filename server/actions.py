@@ -55,7 +55,7 @@ def actor_move(t):
 
 
 def actor_pickup(t):
-    """Make t pick up (topmost?) Thing from ground into inventory.
+    """Make t pick up (topmost?) Thing from ground into inventory. Return it.
 
     Define topmostness by how low the thing's type ID is.
     """
@@ -67,14 +67,16 @@ def actor_pickup(t):
         lowest_tid = -1
         for iid in ids:
             tid = world_db["Things"][iid]["T_TYPE"]
-            if lowest_tid == -1 or tid < lowest_tid:
+            from server.config.actions import actor_pickup_test_hook
+            if (lowest_tid == -1 or tid < lowest_tid) and \
+                    actor_pickup_test_hook(t, tid):
                 id = iid
                 lowest_tid = tid
         world_db["Things"][id]["carried"] = True
         t["T_CARRIES"].append(id)
         if t == world_db["Things"][0]:
                 log("You PICK UP an object.")
-
+        return world_db["Things"][id]
 
 def actor_drop(t):
     """Make t rop Thing from inventory to ground indexed by T_ARGUMENT."""

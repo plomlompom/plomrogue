@@ -5,6 +5,8 @@
 
 from server.actions import actor_wait, actor_move, actor_pickup, actor_drop, \
     actor_use
+
+
 action_db = {
     "actor_wait": actor_wait,
     "actor_move": actor_move,
@@ -12,3 +14,4 @@ action_db = {
     "actor_drop": actor_drop,
     "actor_use": actor_use
 }
+actor_pickup_test_hook = lambda x, y: True

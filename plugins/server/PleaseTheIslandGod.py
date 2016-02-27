@@ -70,40 +70,25 @@ def ai_hook_pickup_test(t):
         world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]
 
 def actor_pickup(t):
-    from server.ai import eat_vs_hunger_threshold
     used_slots = len(t["T_CARRIES"])
     if used_slots < world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]:
-        ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
-               if not world_db["Things"][id]["carried"]
-               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
-        if len(ids):
-            lowest_tid = -1
-            eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
-            for iid in ids:
-                tid = world_db["Things"][iid]["T_TYPE"] 
-                if lowest_tid == -1 or tid < lowest_tid:
-                    if (t != world_db["Things"][0] and
-                        (world_db["ThingTypes"][tid]["TT_TOOL"] != "food"
-                         or (world_db["ThingTypes"][tid]["TT_TOOLPOWER"]
-                             <= eat_cost))):
-                        continue
-                    id = iid
-                    lowest_tid = tid
-            world_db["Things"][id]["carried"] = True
-            ty = world_db["Things"][id]["T_TYPE"]
-            if (t != world_db["Things"][0]
-                and world_db["Things"][id]["T_PLAYERDROP"]
-                and world_db["ThingTypes"][ty]["TT_TOOL"] == "food"):
-                score = int(world_db["ThingTypes"][ty]["TT_TOOLPOWER"] / 32)
+        from server.actions import actor_pickup
+        t_picked = actor_pickup(t)
+        if t_picked != None:
+            ty = world_db["ThingTypes"][t_picked["T_TYPE"]]
+            if t != world_db["Things"][0] and t_picked["T_PLAYERDROP"] \
+                    and ty["TT_TOOL"] == "food":
+                score = int(ty["TT_TOOLPOWER"] / 32)
                 world_db["GOD_FAVOR"] += score
-                world_db["Things"][id]["T_PLAYERDROP"] = 0
-            t["T_CARRIES"].append(id)
-            if t == world_db["Things"][0]:
-                log("You PICK UP an object.")
+                t_picked["T_PLAYERDROP"] = 0
     elif t == world_db["Things"][0]:
         log("CAN'T pick up object: No storage room to carry more.")
 
+def actor_pickup_test_hook(t, tid):
+    from server.ai import eat_vs_hunger_threshold
+    tt = world_db["ThingTypes"][tid]
+    return not (t != world_db["Things"][0] and (tt["TT_TOOL"] != "food" or
+            (tt["TT_TOOLPOWER"] <= eat_vs_hunger_threshold(t["T_TYPE"]))))
 
 def actor_drop(t):
     """Make t rop Thing from inventory to ground indexed by T_ARGUMENT."""
@@ -114,7 +99,6 @@ def actor_drop(t):
         if t == world_db["Things"][0]:
             log("You DROP an object.")
             world_db["Things"][id]["T_PLAYERDROP"] = 1
-
 
 def actor_use(t):
     if len(t["T_CARRIES"]):
@@ -677,6 +661,7 @@ server.config.actions.action_db["actor_move"] = actor_move
 server.config.actions.action_db["actor_pickup"] = actor_pickup
 server.config.actions.action_db["actor_drop"] = actor_drop
 server.config.actions.action_db["actor_use"] = actor_use
+server.config.actions.actor_pickup_test_hook = actor_pickup_test_hook
 
 from server.config.commands import commands_db
 commands_db["TT_ID"] = (1, False, command_ttid)
