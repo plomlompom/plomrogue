@@ -8,9 +8,3 @@ from server.config.world_data import symbols_passable
 
 def field_spreadable(field_type, ignore):
     return field_type in symbols_passable
-
-def thingprol_plugin_conditions(ignore):
-    return True
-
-def thingprol_plugin_post_create_hook(ignore):
-    pass

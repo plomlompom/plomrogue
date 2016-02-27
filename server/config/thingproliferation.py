@@ -7,7 +7,5 @@ import server.thingproliferation_helpers
 
 
 field_spreadable = server.thingproliferation_helpers.field_spreadable
-thingprol_plugin_conditions = \
-    server.thingproliferation_helpers.thingprol_plugin_conditions
-thingprol_plugin_post_create_hook = \
-    server.thingproliferation_helpers.thingprol_plugin_post_create_hook
+thingprol_plugin_conditions = lambda x: True
+thingprol_plugin_post_create_hook = lambda x: None
