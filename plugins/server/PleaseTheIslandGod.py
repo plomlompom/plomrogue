@@ -65,35 +65,9 @@ def thingprol_plugin_post_create_hook(t):
         log("The Island God SMILES upon a new-born bear baby.")
         world_db["GOD_FAVOR"] += 750
 
-def ai(t):
-    from server.ai import get_dir_to_target, get_inventory_slot_to_consume, \
-        standing_on_food
-    t["T_COMMAND"] = [id for id in world_db["ThingActions"]
-                      if world_db["ThingActions"][id]["TA_NAME"] == "wait"][0]
-    eating = len([id for id in world_db["ThingActions"]
-                  if world_db["ThingActions"][id]["TA_NAME"] == "use"]) > 0
-    picking = len([id for id in world_db["ThingActions"]
-                   if world_db["ThingActions"][id]["TA_NAME"] == "pickup"]) > 0
-    if eating and picking:
-        if get_dir_to_target(t, "f"):
-            return
-        sel = get_inventory_slot_to_consume(t)
-        if -1 != sel:
-            t["T_COMMAND"] = [id for id in world_db["ThingActions"]
-                              if world_db["ThingActions"][id]["TA_NAME"]
-                                 == "use"][0]
-            t["T_ARGUMENT"] = sel
-        elif standing_on_food(t) and (len(t["T_CARRIES"]) <
-                world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]):
-                t["T_COMMAND"] = [id for id in world_db["ThingActions"]
-                                  if world_db["ThingActions"][id]["TA_NAME"]
-                                  == "pickup"][0]
-        else:
-            going_to_known_food_spot = get_dir_to_target(t, "c")
-            if not going_to_known_food_spot:
-                aiming_for_walking_food = get_dir_to_target(t, "a")
-                if not aiming_for_walking_food:
-                    get_dir_to_target(t, "s")
+def ai_hook_pickup_test(t):
+    return len(t["T_CARRIES"]) < \
+        world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]
 
 def actor_pickup(t):
     from server.ai import eat_vs_hunger_threshold
@@ -703,7 +677,6 @@ server.config.actions.action_db["actor_move"] = actor_move
 server.config.actions.action_db["actor_pickup"] = actor_pickup
 server.config.actions.action_db["actor_drop"] = actor_drop
 server.config.actions.action_db["actor_use"] = actor_use
-server.config.actions.ai_func = ai
 
 from server.config.commands import commands_db
 commands_db["TT_ID"] = (1, False, command_ttid)
@@ -741,3 +714,6 @@ server.config.thingproliferation.thingprol_plugin_conditions = \
     thingprol_plugin_conditions
 server.config.thingproliferation.thingprol_plugin_post_create_hook = \
     thingprol_plugin_post_create_hook
+
+import server.config.ai
+server.config.ai.ai_hook_pickup = ai_hook_pickup_test

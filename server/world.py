@@ -51,7 +51,8 @@ def set_world_inactive():
 
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
-    from server.config.actions import action_db, ai_func
+    from server.ai import ai
+    from server.config.actions import action_db
     from server.config.misc import calc_effort_func
     from server.update_map_memory import update_map_memory
     from server.thingproliferation import thingproliferation
@@ -73,7 +74,7 @@ def turn_over():
                     update_map_memory(Thing)
                     if 0 == id:
                         return
-                    ai_func(Thing)
+                    ai(Thing)
                 try_healing(Thing)
                 hunger(Thing)
                 if Thing["T_LIFEPOINTS"]:

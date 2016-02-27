@@ -285,12 +285,13 @@ def ai(t):
         if get_dir_to_target(t, "f"):
             return
         sel = get_inventory_slot_to_consume(t)
+        from server.config.ai import ai_hook_pickup_test
         if -1 != sel:
             t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                               if world_db["ThingActions"][id]["TA_NAME"]
                                  == "use"][0]
             t["T_ARGUMENT"] = sel
-        elif standing_on_food(t):
+        elif standing_on_food(t) and ai_hook_pickup_test(t):
                 t["T_COMMAND"] = [id for id in world_db["ThingActions"]
                                   if world_db["ThingActions"][id]["TA_NAME"]
                                   == "pickup"][0]
