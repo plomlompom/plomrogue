@@ -4,10 +4,9 @@
 
 
 from server.io import log, strong_write
-from server.config.world_data import world_db, symbols_passable, directions_db
+from server.config.world_data import world_db, directions_db
 from server.utils import mv_yx_in_dir_legal, rand, id_setter
 from server.config.io import io_db
-from server.new_thing import new_Thing
 
 def pos_test(type, y, x):
     pos = y * world_db["MAP_LENGTH"] + x;
@@ -47,39 +46,24 @@ def make_map():
             world_db["altar"] = (y, x)
             altar_placed = True
 
-def thingproliferation(t, prol_map):
-    from server.new_thing import new_Thing
-    global directions_db, mv_yx_in_dir_legal, rand
-    prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
-    if prolscore and \
-      (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] == 0 or
-       t["T_LIFEPOINTS"] >= 0.9 *
-                        world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]) \
-       and \
-      (1 == prolscore or 1 == (rand.next() % prolscore)):
-        candidates = []
-        for dir in [directions_db[key] for key in directions_db]:
-            mv_result = mv_yx_in_dir_legal(dir, t["T_POSY"], t["T_POSX"])
-            pos = mv_result[1] * world_db["MAP_LENGTH"] + mv_result[2]
-            if mv_result[0] and \
-               (ord(":") == prol_map[pos]
-                or (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
-                    and ord(".") == prol_map[pos])):
-                candidates.append((mv_result[1], mv_result[2]))
-        if len(candidates):
-            i = rand.next() % len(candidates)
-            id = id_setter(-1, "Things")
-            newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
-            world_db["Things"][id] = newT
-            if (world_db["FAVOR_STAGE"] > 0
-                and t["T_TYPE"] == world_db["PLANT_0"]):
-                world_db["GOD_FAVOR"] += 5
-            elif t["T_TYPE"] == world_db["PLANT_1"]:
-                world_db["GOD_FAVOR"] += 25
-            elif world_db["FAVOR_STAGE"] >= 4 and \
-                t["T_TYPE"] == world_db["ANIMAL_1"]:
-                log("The Island God SMILES upon a new-born bear baby.")
-                world_db["GOD_FAVOR"] += 750
+def field_spreadable(c, t):
+    return ":" == c or (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
+                        and "." == c)
+
+def thingprol_plugin_conditions(t):
+    tt = world_db["ThingTypes"][t["T_TYPE"]]
+    return (tt["TT_LIFEPOINTS"] == 0 or \
+            t["T_LIFEPOINTS"] >= 0.9 * tt["TT_LIFEPOINTS"])
+
+def thingprol_plugin_post_create_hook(t):
+    tt = world_db["ThingTypes"][t["T_TYPE"]]
+    if (world_db["FAVOR_STAGE"] > 0 and t["T_TYPE"] == world_db["PLANT_0"]):
+        world_db["GOD_FAVOR"] += 5
+    elif t["T_TYPE"] == world_db["PLANT_1"]:
+        world_db["GOD_FAVOR"] += 25
+    elif world_db["FAVOR_STAGE"] >= 4 and t["T_TYPE"] == world_db["ANIMAL_1"]:
+        log("The Island God SMILES upon a new-born bear baby.")
+        world_db["GOD_FAVOR"] += 750
 
 def ai(t):
     from server.ai import get_dir_to_target, get_inventory_slot_to_consume, \
@@ -370,6 +354,7 @@ def actor_move(t):
     from server.build_fov_map import build_fov_map
     from server.config.misc import decrement_lifepoints_func
     from server.new_thing import new_Thing
+    global mv_yx_in_dir_legal
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
@@ -429,6 +414,7 @@ def actor_move(t):
                         build_fov_map(t)
                     return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
+    global directions_db
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
     if passable:
@@ -515,7 +501,7 @@ def play_move(str_arg):
             print("Illegal move direction string.")
             return
         dir = ord(directions_db[str_arg])
-        from server.utils import mv_yx_in_dir_legal
+        global mv_yx_in_dir_legal
         move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
@@ -741,7 +727,6 @@ commands_db["pickup"] = (0, False, play_pickup)
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
-server.config.misc.thingproliferation_func = thingproliferation
 server.config.misc.decrement_lifepoints_func = decrement_lifepoints
 server.config.misc.calc_effort_func = calc_effort
 
@@ -749,3 +734,10 @@ import server.config.make_world_helpers
 server.config.make_world_helpers.pos_test_func = pos_test
 server.config.make_world_helpers.world_makable_func = world_makable
 server.config.make_world_helpers.make_map_func = make_map
+
+import server.config.thingproliferation
+server.config.thingproliferation.field_spreadable = field_spreadable
+server.config.thingproliferation.thingprol_plugin_conditions = \
+    thingprol_plugin_conditions
+server.config.thingproliferation.thingprol_plugin_post_create_hook = \
+    thingprol_plugin_post_create_hook
