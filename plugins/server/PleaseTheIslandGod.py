@@ -9,79 +9,43 @@ from server.utils import mv_yx_in_dir_legal, rand, id_setter
 from server.config.io import io_db
 from server.new_thing import new_Thing
 
-def make_world(seed):
-    from server.update_map_memory import update_map_memory
-    from server.config.misc import make_map_func
-    from server.utils import libpr
+def pos_test(type, y, x):
+    pos = y * world_db["MAP_LENGTH"] + x;
+    plant = world_db["ThingTypes"][type]["TT_PROLIFERATE"]
+    return (not plant or ":" == chr(world_db["MAP"][pos]))
 
-    def free_pos(plant=False):
-        i = 0
-        while 1:
-            err = "Space to put thing on too hard to find. Map too small?"
-            while 1:
-                y = rand.next() % world_db["MAP_LENGTH"]
-                x = rand.next() % world_db["MAP_LENGTH"]
-                pos = y * world_db["MAP_LENGTH"] + x;
-                if (not plant
-                    and "." == chr(world_db["MAP"][pos])) \
-                   or ":" == chr(world_db["MAP"][pos]):
-                    break
-                i += 1
-                if i == 65535:
-                    raise SystemExit(err)
-            pos_clear = (0 == len([id for id in world_db["Things"]
-                                   if world_db["Things"][id]["T_LIFEPOINTS"]
-                                   if world_db["Things"][id]["T_POSY"] == y
-                                   if world_db["Things"][id]["T_POSX"] == x]))
-            if pos_clear:
-                break
-        return (y, x)
-
-    rand.seed = seed
-    if world_db["MAP_LENGTH"] < 1:
-        print("Ignoring: No map length >= 1 defined.")
-        return
-    libpr.set_maplength(world_db["MAP_LENGTH"])
-    player_will_be_generated = False
-    playertype = world_db["PLAYER_TYPE"]
-    for ThingType in world_db["ThingTypes"]:
-        if playertype == ThingType:
-            if 0 < world_db["ThingTypes"][ThingType]["TT_START_NUMBER"]:
-                player_will_be_generated = True
-            break
-    if not player_will_be_generated:
-        print("Ignoring: No player type with start number >0 defined.")
-        return
-    wait_action = False
-    for ThingAction in world_db["ThingActions"]:
-        if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
-            wait_action = True
-    if not wait_action:
-        print("Ignoring beyond SEED_MAP: " +
-              "No thing action with name 'wait' defined.")
-        return
+def world_makable():
+    from server.world_makable import world_makable
+    playertype = world_makable()
     for name in world_db["specials"]:
         if world_db[name] not in world_db["ThingTypes"]:
             print("Ignoring: No valid " + name + " set.")
-            return
-    world_db["Things"] = {}
-    make_map_func()
-    world_db["WORLD_ACTIVE"] = 1
-    world_db["TURN"] = 1
-    for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):
-        id = id_setter(-1, "Things")
-        world_db["Things"][id] = new_Thing(playertype, free_pos())
-    if not world_db["Things"][0]["fovmap"]:
-        empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
-        world_db["Things"][0]["fovmap"] = empty_fovmap
-    update_map_memory(world_db["Things"][0])
-    for type in world_db["ThingTypes"]:
-        for i in range(world_db["ThingTypes"][type]["TT_START_NUMBER"]):
-            if type != playertype:
-                id = id_setter(-1, "Things")
-                plantness = world_db["ThingTypes"][type]["TT_PROLIFERATE"]
-                world_db["Things"][id] = new_Thing(type, free_pos(plantness))
-    strong_write(io_db["file_out"], "NEW_WORLD\n")
+            return -1
+    return playertype
+
+def make_map():
+    from server.make_map import make_map, is_neighbor, new_pos
+    global rand
+    make_map()
+    length = world_db["MAP_LENGTH"]
+    n_colons = int((length ** 2) / 16)
+    i_colons = 0
+    while (i_colons <= n_colons):
+        single_allowed = rand.next() % 256
+        y, x, pos = new_pos()
+        if ("." == chr(world_db["MAP"][pos])
+          and ((not single_allowed) or is_neighbor((y, x), ":"))):
+            world_db["MAP"][pos] = ord(":")
+            i_colons += 1
+    altar_placed = False
+    while not altar_placed:
+        y, x, pos = new_pos()
+        if (("." == chr(world_db["MAP"][pos]
+             or ":" == chr(world_db["MAP"][pos]))
+            and not is_neighbor((y, x), "X"))):
+            world_db["MAP"][pos] = ord("_")
+            world_db["altar"] = (y, x)
+            altar_placed = True
 
 def thingproliferation(t, prol_map):
     from server.new_thing import new_Thing
@@ -116,30 +80,6 @@ def thingproliferation(t, prol_map):
                 t["T_TYPE"] == world_db["ANIMAL_1"]:
                 log("The Island God SMILES upon a new-born bear baby.")
                 world_db["GOD_FAVOR"] += 750
-
-def make_map():
-    from server.make_map import make_map, is_neighbor, new_pos
-    global rand
-    make_map()
-    length = world_db["MAP_LENGTH"]
-    n_colons = int((length ** 2) / 16)
-    i_colons = 0
-    while (i_colons <= n_colons):
-        single_allowed = rand.next() % 256
-        y, x, pos = new_pos()
-        if ("." == chr(world_db["MAP"][pos])
-          and ((not single_allowed) or is_neighbor((y, x), ":"))):
-            world_db["MAP"][pos] = ord(":")
-            i_colons += 1
-    altar_placed = False
-    while not altar_placed:
-        y, x, pos = new_pos()
-        if (("." == chr(world_db["MAP"][pos]
-             or ":" == chr(world_db["MAP"][pos]))
-            and not is_neighbor((y, x), "X"))):
-            world_db["MAP"][pos] = ord("_")
-            world_db["altar"] = (y, x)
-            altar_placed = True
 
 def ai(t):
     from server.ai import get_dir_to_target, get_inventory_slot_to_consume, \
@@ -802,6 +742,10 @@ commands_db["pickup"] = (0, False, play_pickup)
 import server.config.misc
 server.config.misc.make_map_func = make_map
 server.config.misc.thingproliferation_func = thingproliferation
-server.config.misc.make_world = make_world
 server.config.misc.decrement_lifepoints_func = decrement_lifepoints
 server.config.misc.calc_effort_func = calc_effort
+
+import server.config.make_world_helpers
+server.config.make_world_helpers.pos_test_func = pos_test
+server.config.make_world_helpers.world_makable_func = world_makable
+server.config.make_world_helpers.make_map_func = make_map

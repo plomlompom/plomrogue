@@ -87,8 +87,8 @@ def command_makeworld(seed_string):
     """Call make_world()."""
     val = integer_test(seed_string, 0, 4294967295)
     if None != val:
-        from server.config.misc import make_world_func
-        make_world_func(val)
+        from server.make_world import make_world
+        make_world(val)
 
 
 def command_maplength(maplength_string):
