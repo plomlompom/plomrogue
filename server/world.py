@@ -6,7 +6,6 @@
 from server.config.world_data import world_db
 from server.io import log
 from server.utils import rand
-from server.utils import id_setter
 
 
 def try_healing(t):
