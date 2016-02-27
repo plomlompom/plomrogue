@@ -85,7 +85,7 @@ def make_world(seed):
 
 def thingproliferation(t, prol_map):
     from server.new_thing import new_Thing
-    global directions_db, mv_yx_in_dir_legal
+    global directions_db, mv_yx_in_dir_legal, rand
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and \
       (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"] == 0 or
@@ -118,70 +118,22 @@ def thingproliferation(t, prol_map):
                 world_db["GOD_FAVOR"] += 750
 
 def make_map():
+    from server.make_map import make_map, is_neighbor, new_pos
     global rand
-
-    def is_neighbor(coordinates, type):
-        y = coordinates[0]
-        x = coordinates[1]
-        length = world_db["MAP_LENGTH"]
-        ind = y % 2
-        diag_west = x + (ind > 0)
-        diag_east = x + (ind < (length - 1))
-        pos = (y * length) + x
-        if (y > 0 and diag_east
-            and type == chr(world_db["MAP"][pos - length + ind])) \
-           or (x < (length - 1)
-               and type == chr(world_db["MAP"][pos + 1])) \
-           or (y < (length - 1) and diag_east
-               and type == chr(world_db["MAP"][pos + length + ind])) \
-           or (y > 0 and diag_west
-               and type == chr(world_db["MAP"][pos - length - (not ind)])) \
-           or (x > 0
-               and type == chr(world_db["MAP"][pos - 1])) \
-           or (y < (length - 1) and diag_west
-               and type == chr(world_db["MAP"][pos + length - (not ind)])):
-            return True
-        return False
-
-    world_db["MAP"] = bytearray(b'~' * (world_db["MAP_LENGTH"] ** 2))
+    make_map()
     length = world_db["MAP_LENGTH"]
-    add_half_width = (not (length % 2)) * int(length / 2)
-    world_db["MAP"][int((length ** 2) / 2) + add_half_width] = ord(".")
-    while (1):
-        y = rand.next() % length
-        x = rand.next() % length
-        pos = (y * length) + x
-        if "~" == chr(world_db["MAP"][pos]) and is_neighbor((y, x), "."):
-            if y == 0 or y == (length - 1) or x == 0 or x == (length - 1):
-                break
-            world_db["MAP"][pos] = ord(".")
-    n_trees = int((length ** 2) / 16)
-    i_trees = 0
-    while (i_trees <= n_trees):
-        single_allowed = rand.next() % 32
-        y = rand.next() % length
-        x = rand.next() % length
-        pos = (y * length) + x
-        if "." == chr(world_db["MAP"][pos]) \
-          and ((not single_allowed) or is_neighbor((y, x), "X")):
-            world_db["MAP"][pos] = ord("X")
-            i_trees += 1
     n_colons = int((length ** 2) / 16)
     i_colons = 0
     while (i_colons <= n_colons):
         single_allowed = rand.next() % 256
-        y = rand.next() % length
-        x = rand.next() % length
-        pos = (y * length) + x
+        y, x, pos = new_pos()
         if ("." == chr(world_db["MAP"][pos])
           and ((not single_allowed) or is_neighbor((y, x), ":"))):
             world_db["MAP"][pos] = ord(":")
             i_colons += 1
     altar_placed = False
     while not altar_placed:
-        y = rand.next() % length
-        x = rand.next() % length
-        pos = (y * length) + x
+        y, x, pos = new_pos()
         if (("." == chr(world_db["MAP"][pos]
              or ":" == chr(world_db["MAP"][pos]))
             and not is_neighbor((y, x), "X"))):
