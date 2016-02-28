@@ -31,15 +31,16 @@ def actor_move(t):
                   if world_db["Things"][id]["T_POSX"] == move_result[2]]
         if len(hitted):
             hit_id = hitted[0]
+            hitted_type_id = world_db["Things"][hit_id]["T_TYPE"]
             if t == world_db["Things"][0]:
-                hitted_type = world_db["Things"][hit_id]["T_TYPE"]
-                hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
+                hitted_name = world_db["ThingTypes"][hitted_type_id]["TT_NAME"]
                 log("You WOUND " + hitted_name + ".")
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" WOUNDS you.")
-            decrement_lifepoints_func(world_db["Things"][hit_id])
-            return
+            decr_test = decrement_lifepoints_func(world_db["Things"][hit_id])
+            if decr_test > 0 and t == world_db["Things"][0]:
+                log(hitted_name + " dies.")
         passable = chr(world_db["MAP"][pos]) in symbols_passable
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]

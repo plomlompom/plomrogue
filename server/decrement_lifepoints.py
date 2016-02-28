@@ -14,6 +14,7 @@ def decrement_lifepoints(t):
     from server.io import log
     t["T_LIFEPOINTS"] -= 1
     if 0 == t["T_LIFEPOINTS"]:
+        live_tid = t["T_TYPE"]
         for id in t["T_CARRIES"]:
             t["T_CARRIES"].remove(id)
             world_db["Things"][id]["T_POSY"] = t["T_POSY"]
@@ -29,3 +30,5 @@ def decrement_lifepoints(t):
             t["T_MEMMAP"] = False
             t["T_MEMDEPTHMAP"] = False
             t["T_MEMTHING"] = []
+        return world_db["ThingTypes"][live_tid]["TT_LIFEPOINTS"]
+    return 0
