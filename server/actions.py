@@ -14,7 +14,11 @@ def actor_wait(t):
 
 
 def actor_move(t):
-    """If passable, move/collide(=attack) thing into T_ARGUMENT's direction."""
+    """If passable, move/collide(=attack) thing into T_ARGUMENT's direction.
+
+    On attack, return 0 on non-kill and TT_LIFEPOINTS of killed type on kill,
+    plus type id of attacked Thing. On move, return mv_yx_in_dir_legal result.
+    """
     from server.build_fov_map import build_fov_map
     from server.config.misc import decrement_lifepoints_func
     from server.utils import mv_yx_in_dir_legal
@@ -31,9 +35,9 @@ def actor_move(t):
                   if world_db["Things"][id]["T_POSX"] == move_result[2]]
         if len(hitted):
             hit_id = hitted[0]
-            hitted_type_id = world_db["Things"][hit_id]["T_TYPE"]
+            hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
             if t == world_db["Things"][0]:
-                hitted_name = world_db["ThingTypes"][hitted_type_id]["TT_NAME"]
+                hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
                 log("You WOUND " + hitted_name + ".")
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
@@ -41,6 +45,10 @@ def actor_move(t):
             decr_test = decrement_lifepoints_func(world_db["Things"][hit_id])
             if decr_test > 0 and t == world_db["Things"][0]:
                 log(hitted_name + " dies.")
+            return decr_test, hitted_tid
+        from server.config.actions import actor_move_attempts_hook
+        if actor_move_attempts_hook(t, move_result, pos):
+            return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
     dir = [dir for dir in directions_db
            if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
@@ -53,6 +61,7 @@ def actor_move(t):
         build_fov_map(t)
         if t == world_db["Things"][0]:
             log("You MOVE " + dir + ".")
+        return move_result
 
 
 def actor_pickup(t):

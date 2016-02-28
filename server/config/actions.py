@@ -16,3 +16,4 @@ action_db = {
 }
 actor_pickup_test_hook = lambda x, y: True
 actor_use_attempts_hook = lambda x, y: None
+actor_move_attempts_hook = lambda x, y, z: None

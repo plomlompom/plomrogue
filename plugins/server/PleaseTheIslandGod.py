@@ -135,47 +135,6 @@ def actor_use_attempts_hook(t, ty):
             log("You create SOIL.")
             world_db["MAP"][pos] = ord(":")
 
-def decrement_lifepoints(t):
-    t["T_LIFEPOINTS"] -= 1
-    live_type = t["T_TYPE"]
-    _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
-    if 0 == t["T_LIFEPOINTS"]:
-        for id in t["T_CARRIES"]:
-            t["T_CARRIES"].remove(id)
-            world_db["Things"][id]["T_POSY"] = t["T_POSY"]
-            world_db["Things"][id]["T_POSX"] = t["T_POSX"]
-            world_db["Things"][id]["carried"] = False
-        t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
-        if world_db["Things"][0] == t:
-            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            log("You die.")
-            log("See README on how to start over.")
-        else:
-            t["fovmap"] = False
-            t["T_MEMMAP"] = False
-            t["T_MEMDEPTHMAP"] = False
-            t["T_MEMTHING"] = []
-            n_species = len([id for id in world_db["Things"]
-                             if world_db["Things"][id]["T_TYPE"] == live_type])
-            if 0 == n_species:
-                from server.new_thing import new_Thing
-                if world_db["FAVOR_STAGE"] >= 3 and \
-                    live_type == world_db["ANIMAL_0"]:
-                    world_db["GOD_FAVOR"] += 3000
-                    log("CONGRATULATIONS! The "
-                        + world_db["ThingTypes"][live_type]["TT_NAME"]
-                        + " species has died out. The Island God is pleased.")
-                else:
-                    id = id_setter(-1, "Things")
-                    world_db["Things"][id] = new_Thing(live_type,
-                                                       world_db["altar"])
-                    log("The "
-                        + world_db["ThingTypes"][live_type]["TT_NAME"]
-                        + " species has temporarily died out. "
-                        + "One new-born is spawned at the altar.")
-        return world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
-    return 0
-
 def actor_move(t):
 
     def altar_msg_wait(limit):
@@ -292,85 +251,94 @@ def actor_move(t):
             world_db["Things"][id] = new_Thing(world_db["SLIPPERS"],
                                                world_db["altar"])
 
-    from server.config.world_data import symbols_passable
-    from server.build_fov_map import build_fov_map
-    from server.config.misc import decrement_lifepoints_func
-    from server.new_thing import new_Thing
-    global mv_yx_in_dir_legal
-    passable = False
-    move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
-                                     t["T_POSY"], t["T_POSX"])
-    if 1 == move_result[0]:
-        pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        hitted = [id for id in world_db["Things"]
-                  if world_db["Things"][id] != t
-                  if world_db["Things"][id]["T_LIFEPOINTS"]
-                  if world_db["Things"][id]["T_POSY"] == move_result[1]
-                  if world_db["Things"][id]["T_POSX"] == move_result[2]]
-        if len(hitted):
-            hit_id = hitted[0]
-            hitted_type = world_db["Things"][hit_id]["T_TYPE"]
-            if t == world_db["Things"][0]:
-                hitted_name = world_db["ThingTypes"][hitted_type]["TT_NAME"]
-                log("You WOUND " + hitted_name + ".")
-                world_db["GOD_FAVOR"] -= 1
-            elif 0 == hit_id:
-                hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-                log(hitter_name +" WOUNDS you.")
-            test = decrement_lifepoints_func(world_db["Things"][hit_id])
-            if test and world_db["FAVOR_STAGE"] >= 3 and \
-               hitted_type == world_db["ANIMAL_0"]:
+    from server.actions import actor_move
+    test = actor_move(t)
+    if 2 == len(test):
+        if test[0] > 0:
+            if world_db["FAVOR_STAGE"] >= 3 and \
+                    test[1] == world_db["ANIMAL_0"]:
                 world_db["GOD_FAVOR"] += 125
-            elif test and t == world_db["Things"][0]:
-                world_db["GOD_FAVOR"] -= 2 * test
-            return
-        if (ord("X") == world_db["MAP"][pos]
-            or ord("|") == world_db["MAP"][pos]):
-            for id in t["T_CARRIES"]:
-                type = world_db["Things"][id]["T_TYPE"]
-                if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":
-                    axe_name = world_db["ThingTypes"][type]["TT_NAME"]
-                    if t == world_db["Things"][0]:
-                        log("With your " + axe_name + ", you chop!")
-                        if ord("X") == world_db["MAP"][pos]:
-                            world_db["GOD_FAVOR"] -= 1
-                    chop_power = world_db["ThingTypes"][type]["TT_TOOLPOWER"]
+            elif t == world_db["Things"][0]:
+                world_db["GOD_FAVOR"] -= 2 * test[1]
+        elif t == world_db["Things"][0]:
+            world_db["GOD_FAVOR"] -= 1
+    elif 3 == len(test):
+        if (t == world_db["Things"][0] and
+                test[1] == world_db["altar"][0] and
+                test[2] == world_db["altar"][1]):
+            enter_altar()
 
-                    case_X = world_db["MAP"][pos] == ord("X")
-                    if (chop_power > 0
-                        and ((case_X and
-                              0 == int(rand.next() / chop_power))
-                        or (not case_X and
-                                 0 == int(rand.next() / (3 * chop_power))))):
-                        if t == world_db["Things"][0]:
-                            log("You chop it DOWN.")
-                            if ord("X") == world_db["MAP"][pos]:
-                                world_db["GOD_FAVOR"] -= 10
-                        world_db["MAP"][pos] = ord(".")
-                        i = 3 if case_X else 1
-                        for i in range(i):
-                            id = id_setter(-1, "Things")
-                            world_db["Things"][id] = \
-                              new_Thing(world_db["LUMBER"],
-                                        (move_result[1], move_result[2]))
-                        build_fov_map(t)
-                    return
-        passable = chr(world_db["MAP"][pos]) in symbols_passable
-    global directions_db
-    dir = [dir for dir in directions_db
-           if directions_db[dir] == chr(t["T_ARGUMENT"])][0]
-    if passable:
-        t["T_POSY"] = move_result[1]
-        t["T_POSX"] = move_result[2]
+def actor_move_attempts_hook(t, move_result, pos):
+    if (ord("X") == world_db["MAP"][pos] or ord("|") == world_db["MAP"][pos]):
+        for tid in t["T_CARRIES"]:
+            ty = world_db["Things"][tid]["T_TYPE"]
+            if world_db["ThingTypes"][ty]["TT_TOOL"] == "axe":
+                axe_name = world_db["ThingTypes"][ty]["TT_NAME"]
+                if t == world_db["Things"][0]:
+                    log("With your " + axe_name + ", you chop!")
+                    if ord("X") == world_db["MAP"][pos]:
+                        world_db["GOD_FAVOR"] -= 1
+                chop_power = world_db["ThingTypes"][ty]["TT_TOOLPOWER"]
+                case_X = world_db["MAP"][pos] == ord("X")
+                if (chop_power > 0 and
+                    ((case_X and 0 == int(rand.next() / chop_power))
+                     or (not case_X and
+                         0 == int(rand.next() / (3 * chop_power))))):
+                    if t == world_db["Things"][0]:
+                        log("You chop it DOWN.")
+                        if ord("X") == world_db["MAP"][pos]:
+                            world_db["GOD_FAVOR"] -= 10
+                    world_db["MAP"][pos] = ord(".")
+                    i = 3 if case_X else 1
+                    for i in range(i):
+                        tid = id_setter(-1, "Things")
+                        world_db["Things"][tid] = \
+                          new_Thing(world_db["LUMBER"],
+                                    (move_result[1], move_result[2]))
+                    build_fov_map(t)
+                return True
+    return False
+
+def decrement_lifepoints(t):
+    t["T_LIFEPOINTS"] -= 1
+    live_tid = t["T_TYPE"]
+    _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
+    if 0 == t["T_LIFEPOINTS"]:
         for id in t["T_CARRIES"]:
-            world_db["Things"][id]["T_POSY"] = move_result[1]
-            world_db["Things"][id]["T_POSX"] = move_result[2]
-        build_fov_map(t)
-        if t == world_db["Things"][0]:
-            log("You MOVE " + dir + ".")
-            if (move_result[1] == world_db["altar"][0] and
-                move_result[2] == world_db["altar"][1]):
-                enter_altar()
+            t["T_CARRIES"].remove(id)
+            world_db["Things"][id]["T_POSY"] = t["T_POSY"]
+            world_db["Things"][id]["T_POSX"] = t["T_POSX"]
+            world_db["Things"][id]["carried"] = False
+        t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
+        if world_db["Things"][0] == t:
+            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+            log("You die.")
+            log("See README on how to start over.")
+        else:
+            t["fovmap"] = False
+            t["T_MEMMAP"] = False
+            t["T_MEMDEPTHMAP"] = False
+            t["T_MEMTHING"] = []
+            n_species = len([id for id in world_db["Things"]
+                             if world_db["Things"][id]["T_TYPE"] == live_tid])
+            if 0 == n_species:
+                from server.new_thing import new_Thing
+                if world_db["FAVOR_STAGE"] >= 3 and \
+                    live_tid == world_db["ANIMAL_0"]:
+                    world_db["GOD_FAVOR"] += 3000
+                    log("CONGRATULATIONS! The "
+                        + world_db["ThingTypes"][live_tid]["TT_NAME"]
+                        + " species has died out. The Island God is pleased.")
+                else:
+                    id = id_setter(-1, "Things")
+                    world_db["Things"][id] = new_Thing(live_tid,
+                                                       world_db["altar"])
+                    log("The "
+                        + world_db["ThingTypes"][live_tid]["TT_NAME"]
+                        + " species has temporarily died out. "
+                        + "One new-born is spawned at the altar.")
+        return world_db["ThingTypes"][live_tid]["TT_LIFEPOINTS"]
+    return 0
 
 def command_ttid(id_string):
     id = id_setter(id_string, "ThingTypes", command_ttid)
@@ -646,6 +614,7 @@ server.config.actions.action_db["actor_pickup"] = actor_pickup
 server.config.actions.action_db["actor_drop"] = actor_drop
 server.config.actions.actor_pickup_test_hook = actor_pickup_test_hook
 server.config.actions.actor_use_attempts_hook = actor_use_attempts_hook
+server.config.actions.actor_move_attempts_hook = actor_move_attempts_hook
 
 from server.config.commands import commands_db
 commands_db["TT_ID"] = (1, False, command_ttid)
