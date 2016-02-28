@@ -30,7 +30,7 @@ def hunger_per_turn(type_id):
 
 def hunger(t):
     """Decrement t's satiation,dependent on it trigger lifepoint dec chance."""
-    from server.config.misc import decrement_lifepoints_func
+    from server.config.misc import decrement_lifepoints
     if t["T_SATIATION"] > -32768:
         t["T_SATIATION"] -= hunger_per_turn(t["T_TYPE"])
     if 0 != t["T_SATIATION"] and 0 == int(rand.next() / abs(t["T_SATIATION"])):
@@ -39,7 +39,7 @@ def hunger(t):
                 log("You SUFFER from hunger.")
             else:
                 log("You SUFFER from over-eating.")
-        decrement_lifepoints_func(t)
+        decrement_lifepoints(t)
 
 
 def set_world_inactive():

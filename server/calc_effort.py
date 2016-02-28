@@ -2,9 +2,6 @@
 # or any later version. For details on its copyright, license, and warranties,
 # see the file NOTICE in the root directory of the PlomRogue source package.
 
-from server.thingproliferation import thingproliferation
-from server.decrement_lifepoints import decrement_lifepoints
-from server.calc_effort import calc_effort
 
-decrement_lifepoints = decrement_lifepoints
-calc_effort_func = calc_effort
+def calc_effort(thing_action, thing):
+    return thing_action["TA_EFFORT"]

@@ -20,7 +20,7 @@ def actor_move(t):
     plus type id of attacked Thing. On move, return mv_yx_in_dir_legal result.
     """
     from server.build_fov_map import build_fov_map
-    from server.config.misc import decrement_lifepoints_func
+    from server.config.misc import decrement_lifepoints
     from server.utils import mv_yx_in_dir_legal
     from server.config.world_data import directions_db, symbols_passable
     passable = False
@@ -42,7 +42,7 @@ def actor_move(t):
             elif 0 == hit_id:
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" WOUNDS you.")
-            decr_test = decrement_lifepoints_func(world_db["Things"][hit_id])
+            decr_test = decrement_lifepoints(world_db["Things"][hit_id])
             if decr_test > 0 and t == world_db["Things"][0]:
                 log(hitted_name + " dies.")
             return decr_test, hitted_tid

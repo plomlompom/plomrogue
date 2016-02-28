@@ -103,8 +103,8 @@ def actor_use_attempts_hook(t, ty):
                 "It glows in wondrous colors, and emits a sound as if from a d"
                 "ying cat. The Island God laughs.\n")
         t["T_LIFEPOINTS"] = 1
-        from server.config.misc import decrement_lifepoints_func
-        decrement_lifepoints_func(t)
+        from server.config.misc import decrement_lifepoints
+        decrement_lifepoints(t)
     elif (world_db["ThingTypes"][ty]["TT_TOOL"] == "carpentry"):
         pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
         if (world_db["MAP"][pos] == ord("X")
@@ -300,45 +300,28 @@ def actor_move_attempts_hook(t, move_result, pos):
     return False
 
 def decrement_lifepoints(t):
-    t["T_LIFEPOINTS"] -= 1
+    from server.decrement_lifepoints import decrement_lifepoints
     live_tid = t["T_TYPE"]
-    _id = [_id for _id in world_db["Things"] if world_db["Things"][_id] == t][0]
-    if 0 == t["T_LIFEPOINTS"]:
-        for id in t["T_CARRIES"]:
-            t["T_CARRIES"].remove(id)
-            world_db["Things"][id]["T_POSY"] = t["T_POSY"]
-            world_db["Things"][id]["T_POSX"] = t["T_POSX"]
-            world_db["Things"][id]["carried"] = False
-        t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
-        if world_db["Things"][0] == t:
-            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            log("You die.")
-            log("See README on how to start over.")
-        else:
-            t["fovmap"] = False
-            t["T_MEMMAP"] = False
-            t["T_MEMDEPTHMAP"] = False
-            t["T_MEMTHING"] = []
-            n_species = len([id for id in world_db["Things"]
-                             if world_db["Things"][id]["T_TYPE"] == live_tid])
-            if 0 == n_species:
-                from server.new_thing import new_Thing
-                if world_db["FAVOR_STAGE"] >= 3 and \
+    test = decrement_lifepoints(t)
+    if test > 0 and t != world_db["Things"][0]:
+        n_species = len([tid for tid in world_db["Things"]
+                         if world_db["Things"][tid]["T_TYPE"] == live_tid])
+        if 0 == n_species:
+            from server.new_thing import new_Thing
+            if world_db["FAVOR_STAGE"] >= 3 and \
                     live_tid == world_db["ANIMAL_0"]:
-                    world_db["GOD_FAVOR"] += 3000
-                    log("CONGRATULATIONS! The "
-                        + world_db["ThingTypes"][live_tid]["TT_NAME"]
-                        + " species has died out. The Island God is pleased.")
-                else:
-                    id = id_setter(-1, "Things")
-                    world_db["Things"][id] = new_Thing(live_tid,
-                                                       world_db["altar"])
-                    log("The "
-                        + world_db["ThingTypes"][live_tid]["TT_NAME"]
-                        + " species has temporarily died out. "
-                        + "One new-born is spawned at the altar.")
-        return world_db["ThingTypes"][live_tid]["TT_LIFEPOINTS"]
-    return 0
+                world_db["GOD_FAVOR"] += 3000
+                log("CONGRATULATIONS! The "
+                    + world_db["ThingTypes"][live_tid]["TT_NAME"]
+                    + " species has died out. The Island God is pleased.")
+            else:
+                tid = id_setter(-1, "Things")
+                world_db["Things"][tid] = new_Thing(live_tid,
+                                                    world_db["altar"])
+                log("The " + world_db["ThingTypes"][live_tid]["TT_NAME"] + " s"
+                    "pecies has temporarily died out. One new-born is spawned "
+                    "at the altar.")
+    return test
 
 def command_ttid(id_string):
     id = id_setter(id_string, "ThingTypes", command_ttid)
@@ -638,7 +621,7 @@ commands_db["pickup"] = (0, False, play_pickup)
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
-server.config.misc.decrement_lifepoints_func = decrement_lifepoints
+server.config.misc.decrement_lifepoints = decrement_lifepoints
 server.config.misc.calc_effort_func = calc_effort
 
 import server.config.make_world_helpers
