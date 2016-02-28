@@ -101,5 +101,6 @@ def actor_use(t):
             t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_TOOLPOWER"]
             if t == world_db["Things"][0]:
                 log("You CONSUME this thing.")
-        elif t == world_db["Things"][0]:
-            log("You try to use this object, but FAIL.")
+        else:
+            from server.config.actions import actor_use_attempts_hook
+            actor_use_attempts_hook(t, type)

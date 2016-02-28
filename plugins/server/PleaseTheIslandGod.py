@@ -96,56 +96,44 @@ def actor_drop(t):
     if dropped != None:
         dropped["T_PLAYERDROP"] = 1
 
-def actor_use(t):
-    if len(t["T_CARRIES"]):
-        id = t["T_CARRIES"][t["T_ARGUMENT"]]
-        type = world_db["Things"][id]["T_TYPE"]
-        if type == world_db["SLIPPERS"]:
-            if t == world_db["Things"][0]:
-                log("You use the " + world_db["ThingTypes"][type]["TT_NAME"] +
-                    ". It glows in wondrous colors, and emits a sound as if fr"
-                    "om a dying cat. The Island God laughs.\n")
-            t["T_LIFEPOINTS"] = 1
-            from server.config.misc import decrement_lifepoints_func
-            decrement_lifepoints_func(t)
-        elif (world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry"):
-            pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
-            if (world_db["MAP"][pos] == ord("X")
-                or world_db["MAP"][pos] == ord("|")):
-                return
-            for id in [id for id in world_db["Things"]
-                       if not world_db["Things"][id] == t
-                       if not world_db["Things"][id]["carried"]
-                       if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-                       if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]:
-                 return
-            wood_id = None
-            for id in t["T_CARRIES"]:
-                type_material = world_db["Things"][id]["T_TYPE"]
-                if (world_db["ThingTypes"][type_material]["TT_TOOL"]
-                    == "wood"):
-                    wood_id = id
-                    break
-            if wood_id != None:
-                t["T_CARRIES"].remove(wood_id)
-                del world_db["Things"][wood_id]
-                world_db["MAP"][pos] = ord("|")
-                log("With your " + world_db["ThingTypes"][type]["TT_NAME"]
-                    + " you build a WOODEN BARRIER from your "
-                    + world_db["ThingTypes"][type_material]["TT_NAME"] + ".")
-        elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":
-            pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
-            if world_db["MAP"][pos] == ord("."):
-                log("You create SOIL.")
-                world_db["MAP"][pos] = ord(":")
-        elif world_db["ThingTypes"][type]["TT_TOOL"] == "food":
-            t["T_CARRIES"].remove(id)
-            del world_db["Things"][id]
-            t["T_SATIATION"] += world_db["ThingTypes"][type]["TT_TOOLPOWER"]
-            if t == world_db["Things"][0]:
-                log("You CONSUME this thing.")
-        elif t == world_db["Things"][0]:
-            log("You try to use this object, but FAIL.")
+def actor_use_attempts_hook(t, ty):
+    if ty == world_db["SLIPPERS"]:
+        if t == world_db["Things"][0]:
+            log("You use the " + world_db["ThingTypes"][ty]["TT_NAME"] + ". " \
+                "It glows in wondrous colors, and emits a sound as if from a d"
+                "ying cat. The Island God laughs.\n")
+        t["T_LIFEPOINTS"] = 1
+        from server.config.misc import decrement_lifepoints_func
+        decrement_lifepoints_func(t)
+    elif (world_db["ThingTypes"][ty]["TT_TOOL"] == "carpentry"):
+        pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+        if (world_db["MAP"][pos] == ord("X")
+            or world_db["MAP"][pos] == ord("|")):
+            return
+        for t_id in [t_id for t_id in world_db["Things"]
+                   if not world_db["Things"][t_id] == t
+                   if not world_db["Things"][t_id]["carried"]
+                   if world_db["Things"][t_id]["T_POSY"] == t["T_POSY"]
+                   if world_db["Things"][t_id]["T_POSX"] == t["T_POSX"]]:
+            return
+        wood_id = None
+        for t_id in t["T_CARRIES"]:
+            type_material = world_db["Things"][t_id]["T_TYPE"]
+            if (world_db["ThingTypes"][type_material]["TT_TOOL"] == "wood"):
+                wood_id = t_id
+                break
+        if wood_id != None:
+            t["T_CARRIES"].remove(wood_id)
+            del world_db["Things"][wood_id]
+            world_db["MAP"][pos] = ord("|")
+            log("With your " + world_db["ThingTypes"][ty]["TT_NAME"] + " you" \
+                " build a WOODEN BARRIER from your "
+                + world_db["ThingTypes"][type_material]["TT_NAME"] + ".")
+    elif world_db["ThingTypes"][ty]["TT_TOOL"] == "fertilizer":
+        pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+        if world_db["MAP"][pos] == ord("."):
+            log("You create SOIL.")
+            world_db["MAP"][pos] = ord(":")
 
 def decrement_lifepoints(t):
     t["T_LIFEPOINTS"] -= 1
@@ -656,8 +644,8 @@ import server.config.actions
 server.config.actions.action_db["actor_move"] = actor_move
 server.config.actions.action_db["actor_pickup"] = actor_pickup
 server.config.actions.action_db["actor_drop"] = actor_drop
-server.config.actions.action_db["actor_use"] = actor_use
 server.config.actions.actor_pickup_test_hook = actor_pickup_test_hook
+server.config.actions.actor_use_attempts_hook = actor_use_attempts_hook
 
 from server.config.commands import commands_db
 commands_db["TT_ID"] = (1, False, command_ttid)

@@ -15,3 +15,4 @@ action_db = {
     "actor_use": actor_use
 }
 actor_pickup_test_hook = lambda x, y: True
+actor_use_attempts_hook = lambda x, y: None
