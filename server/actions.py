@@ -79,7 +79,7 @@ def actor_pickup(t):
         return world_db["Things"][id]
 
 def actor_drop(t):
-    """Make t rop Thing from inventory to ground indexed by T_ARGUMENT."""
+    """Drop to ground from t's inventory, return T_ARGUMENT-indexed Thing."""
     # TODO: Handle case where T_ARGUMENT matches nothing.
     if len(t["T_CARRIES"]):
         id = t["T_CARRIES"][t["T_ARGUMENT"]]
@@ -87,7 +87,7 @@ def actor_drop(t):
         world_db["Things"][id]["carried"] = False
         if t == world_db["Things"][0]:
             log("You DROP an object.")
-
+            return world_db["Things"][id]
 
 def actor_use(t):
     """Make t use (for now: consume) T_ARGUMENT-indexed Thing in inventory."""

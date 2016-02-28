@@ -91,14 +91,10 @@ def actor_pickup_test_hook(t, tid):
             (tt["TT_TOOLPOWER"] <= eat_vs_hunger_threshold(t["T_TYPE"]))))
 
 def actor_drop(t):
-    """Make t rop Thing from inventory to ground indexed by T_ARGUMENT."""
-    if len(t["T_CARRIES"]):
-        id = t["T_CARRIES"][t["T_ARGUMENT"]]
-        t["T_CARRIES"].remove(id)
-        world_db["Things"][id]["carried"] = False
-        if t == world_db["Things"][0]:
-            log("You DROP an object.")
-            world_db["Things"][id]["T_PLAYERDROP"] = 1
+    from server.actions import actor_drop
+    dropped = actor_drop(t)
+    if dropped != None:
+        dropped["T_PLAYERDROP"] = 1
 
 def actor_use(t):
     if len(t["T_CARRIES"]):
