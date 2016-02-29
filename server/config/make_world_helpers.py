@@ -5,6 +5,6 @@
 from server.make_map import make_map
 from server.world_makable import world_makable
 
-pos_test_func = lambda a, b, c: True
-make_map_func = make_map
-world_makable_func = world_makable
+pos_test = lambda a, b, c: True
+make_map = make_map
+world_makable = world_makable

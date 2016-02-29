@@ -4,8 +4,7 @@
 
 
 from server.config.world_data import world_db, symbols_passable
-from server.config.make_world_helpers import make_map_func, \
-    world_makable_func, pos_test_func
+from server.config.make_world_helpers import make_map, world_makable, pos_test
 from server.config.io import io_db
 from server.utils import rand, libpr, id_setter
 from server.new_thing import new_Thing
@@ -32,7 +31,7 @@ def make_world(seed):
                 y = rand.next() % world_db["MAP_LENGTH"]
                 x = rand.next() % world_db["MAP_LENGTH"]
                 if chr(world_db["MAP"][y * world_db["MAP_LENGTH"] + x]) in \
-                    symbols_passable and pos_test_func(type, y, x):
+                    symbols_passable and pos_test(type, y, x):
                     break
                 i += 1
                 if i == 65535:
@@ -46,13 +45,13 @@ def make_world(seed):
                 break
         return (y, x)
 
-    playertype = world_makable_func()
+    playertype = world_makable()
     if playertype < 0:
         return
     rand.seed = seed
     libpr.set_maplength(world_db["MAP_LENGTH"])
     world_db["Things"] = {}
-    make_map_func()
+    make_map()
     world_db["WORLD_ACTIVE"] = 1
     world_db["TURN"] = 1
     for i in range(world_db["ThingTypes"][playertype]["TT_START_NUMBER"]):

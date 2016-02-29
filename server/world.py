@@ -53,7 +53,7 @@ def turn_over():
     """Run game world and its inhabitants until new player input expected."""
     from server.ai import ai
     from server.config.actions import action_db
-    from server.config.misc import calc_effort_func
+    from server.config.misc import calc_effort
     from server.update_map_memory import update_map_memory
     from server.thingproliferation import thingproliferation
     id = 0
@@ -82,7 +82,7 @@ def turn_over():
                     taid = [a for a in world_db["ThingActions"]
                               if a == Thing["T_COMMAND"]][0]
                     ThingAction = world_db["ThingActions"][taid]
-                    effort = calc_effort_func(ThingAction, Thing)
+                    effort = calc_effort(ThingAction, Thing)
                     if Thing["T_PROGRESS"] == effort:
                         action = action_db["actor_" + ThingAction["TA_NAME"]]
                         action(Thing)

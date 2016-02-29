@@ -527,14 +527,14 @@ server.config.commands.play_use_attempt_hook = play_use_attempt_hook
 server.config.commands.play_pickup_attempt_hook = play_pickup_attempt_hook
 
 import server.config.misc
-server.config.misc.make_map_func = make_map
+server.config.misc.make_map = make_map
 server.config.misc.decrement_lifepoints = decrement_lifepoints
-server.config.misc.calc_effort_func = calc_effort
+server.config.misc.calc_effort = calc_effort
 
 import server.config.make_world_helpers
-server.config.make_world_helpers.pos_test_func = pos_test
-server.config.make_world_helpers.world_makable_func = world_makable
-server.config.make_world_helpers.make_map_func = make_map
+server.config.make_world_helpers.pos_test = pos_test
+server.config.make_world_helpers.world_makable = world_makable
+server.config.make_world_helpers.make_map = make_map
 
 import server.config.thingproliferation
 server.config.thingproliferation.field_spreadable = field_spreadable

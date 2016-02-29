@@ -7,4 +7,4 @@ from server.decrement_lifepoints import decrement_lifepoints
 from server.calc_effort import calc_effort
 
 decrement_lifepoints = decrement_lifepoints
-calc_effort_func = calc_effort
+calc_effort = calc_effort
