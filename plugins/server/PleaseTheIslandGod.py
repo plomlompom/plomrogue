@@ -350,62 +350,43 @@ def play_move_attempt_hook(t, direction, pos):
                 return True
     return False
 
-def play_use(str_arg):
-    if action_exists("use"):
-        t = world_db["Things"][0]
-        if 0 == len(t["T_CARRIES"]):
-            log("You have NOTHING to use in your inventory.")
-        else:
-            val = integer_test(str_arg, 0, 255)
-            if None != val and val < len(t["T_CARRIES"]):
-                id = t["T_CARRIES"][val]
-                type = world_db["Things"][id]["T_TYPE"]
-                if (world_db["ThingTypes"][type]["TT_TOOL"] == "axe"
-                      and t == world_db["Things"][0]):
-                    log("To use this item for chopping, move towards a tree "
-                        "while carrying it in your inventory.")
-                    return
-                elif (world_db["ThingTypes"][type]["TT_TOOL"] == "carpentry"):
-                    pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
-                    if (world_db["MAP"][pos] == ord("X")
-                        or world_db["MAP"][pos] == ord("|")):
-                        log("CAN'T build when standing on barrier.")
-                        return
-                    for id in [id for id in world_db["Things"]
-                               if not world_db["Things"][id] == t
-                               if not world_db["Things"][id]["carried"]
-                               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-                               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]:
-                         log("CAN'T build when standing objects.")
-                         return
-                    wood_id = None
-                    for id in t["T_CARRIES"]:
-                        type_material = world_db["Things"][id]["T_TYPE"]
-                        if (world_db["ThingTypes"][type_material]["TT_TOOL"]
-                            == "wood"):
-                            wood_id = id
-                            break
-                    if wood_id == None:
-                        log("You CAN'T use a "
-                            + world_db["ThingTypes"][type]["TT_NAME"]
-                            + " without some wood in your inventory.")
-                        return
-                elif world_db["ThingTypes"][type]["TT_TOOL"] == "fertilizer":
-                    pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
-                    if not world_db["MAP"][pos] == ord("."):
-                        log("Can only make soil out of NON-SOIL earth.")
-                        return
-                elif world_db["ThingTypes"][type]["TT_TOOL"] == "wood":
-                        log("To use wood, you NEED a carpentry tool.")
-                        return
-                elif type != world_db["SLIPPERS"] and not \
-                        world_db["ThingTypes"][type]["TT_TOOL"] == "food":
-                    log("You CAN'T consume this thing.")
-                    return
-                world_db["Things"][0]["T_ARGUMENT"] = val
-                set_command("use")
-            else:
-                print("Illegal inventory index.")
+def play_use_attempt_hook(t, tt):
+    pos = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
+    if tt["TT_TOOL"] == "axe":
+        log("To use this item for chopping, MOVE towards a tree while carrying"
+            " it in your inventory.")
+        return False
+    elif tt["TT_TOOL"] == "carpentry":
+        if (world_db["MAP"][pos] == ord("X")
+            or world_db["MAP"][pos] == ord("|")):
+            log("CAN'T build when standing on barrier.")
+            return False
+        for tid in [tid for tid in world_db["Things"]
+                    if not world_db["Things"][tid] == t
+                    if not world_db["Things"][tid]["carried"]
+                    if world_db["Things"][tid]["T_POSY"] == t["T_POSY"]
+                    if world_db["Things"][tid]["T_POSX"] == t["T_POSX"]]:
+             log("CAN'T build when standing objects.")
+             return False
+        wood_id = None
+        for tid in t["T_CARRIES"]:
+            type_material = world_db["Things"][tid]["T_TYPE"]
+            if world_db["ThingTypes"][type_material]["TT_TOOL"] == "wood":
+                wood_id = tid
+                break
+        if wood_id == None:
+            log("You CAN'T use a " + world_db["ThingTypes"][type]["TT_NAME"]
+                + " without some wood in your inventory.")
+            return False
+    elif (tt["TT_TOOL"] == "fertilizer"
+          and not world_db["MAP"][pos] == ord(".")):
+        log("Can only make soil out of NON-SOIL earth.")
+        return False
+    elif tt["TT_TOOL"] == "wood":
+        log("To use wood, you NEED a carpentry tool.")
+        return False
+    elif type == world_db["SLIPPERS"]:
+        return True
 
 def specialtypesetter(name):
     def helper(str_int):
@@ -548,12 +529,12 @@ commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
 commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
 commands_db["EMPATHY"] = (1, False, setter(None, "EMPATHY", 0, 1))
-commands_db["use"] = (1, False, play_use)
 commands_db["pickup"] = (0, False, play_pickup)
 import server.config.commands
 server.config.commands.command_worldactive_test_hook = \
     command_worldactive_test_hook
 server.config.commands.play_move_attempt_hook = play_move_attempt_hook
+server.config.commands.play_use_attempt_hook = play_use_attempt_hook
 
 import server.config.misc
 server.config.misc.make_map_func = make_map

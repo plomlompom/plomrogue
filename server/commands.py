@@ -474,10 +474,13 @@ def play_use(str_arg):
         else:
             val = integer_test(str_arg, 0, 255)
             if None != val and val < len(t["T_CARRIES"]):
-                id = t["T_CARRIES"][val]
-                type = world_db["Things"][id]["T_TYPE"]
-                if not world_db["ThingTypes"][type]["TT_TOOL"] == "food":
-                    log("You CAN'T consume this thing.")
+                tid = t["T_CARRIES"][val]
+                tt = world_db["ThingTypes"][world_db["Things"][tid]["T_TYPE"]]
+                from server.config.commands import play_use_attempt_hook
+                hook_test = play_use_attempt_hook(t, tt)
+                if not (tt["TT_TOOL"] == "food" or hook_test):
+                    if hook_test != False:
+                        log("You CAN'T use this thing.")
                     return
                 world_db["Things"][0]["T_ARGUMENT"] = val
                 set_command("use")
