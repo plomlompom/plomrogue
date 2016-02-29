@@ -26,7 +26,6 @@ def thingproliferation(t, prol_map):
                 + mv_result[2]])
             if mv_result[0] and thingprol_field_spreadable(c, t):
                 from server.io import log
-                log("PROL")
                 candidates.append((mv_result[1], mv_result[2]))
         if len(candidates):
             i = rand.next() % len(candidates)
