@@ -27,16 +27,26 @@ directions_db = {"east": "d", "south-east": "c", "south-west": "x",
                  "west": "s", "north-west": "w", "north-east": "e"}
 
 thing_defaults = {
-        "T_ARGUMENT": 0,
-        "T_PROGRESS": 0,
-        "T_SATIATION": 0,
-        "T_COMMAND": 0,
-        "T_CARRIES": [],
-        "carried": False,
-        "T_MEMTHING": [],
-        "T_MEMMAP": False,
-        "T_MEMDEPTHMAP": False,
-        "fovmap": False
+    "T_ARGUMENT": 0,
+    "T_PROGRESS": 0,
+    "T_SATIATION": 0,
+    "T_COMMAND": 0,
+    "T_CARRIES": [],
+    "carried": False,
+    "T_MEMTHING": [],
+    "T_MEMMAP": False,
+    "T_MEMDEPTHMAP": False,
+    "fovmap": False
+}
+
+thingtype_defaults = {
+        "TT_NAME": "(none)",
+        "TT_TOOLPOWER": 0,
+        "TT_LIFEPOINTS": 0,
+        "TT_PROLIFERATE": 0,
+        "TT_START_NUMBER": 0,
+        "TT_SYMBOL": "?",
+        "TT_TOOL": ""
 }
 
 symbols_passable = "."

@@ -42,7 +42,8 @@ def integer_test(val_string, min, max=None):
 
 
 def id_setter(id, category, id_store=False, start_at_1=False):
-    """Set ID of object of category to manipulate ID. Unused? Create new one.
+    """Set ID of object of category to manipulate. ID unused? Create new one.
+
     The ID is stored as id_store.id (if id_store is set). If the integer of the
     input is valid (if start_at_1, >= 0, else >= -1), but <0 or (if start_at_1)
     <1, calculate new ID: lowest unused ID >=0 or (if start_at_1) >= 1. None is

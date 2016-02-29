@@ -323,21 +323,6 @@ def decrement_lifepoints(t):
                     "at the altar.")
     return test
 
-def command_ttid(id_string):
-    id = id_setter(id_string, "ThingTypes", command_ttid)
-    if None != id:
-        world_db["ThingTypes"][id] = {
-            "TT_NAME": "(none)",
-            "TT_TOOLPOWER": 0,
-            "TT_LIFEPOINTS": 0,
-            "TT_PROLIFERATE": 0,
-            "TT_START_NUMBER": 0,
-            "TT_STORAGE": 0,
-            "TT_SYMBOL": "?",
-            "TT_CORPSE_ID": id,
-            "TT_TOOL": ""
-        }
-
 def command_worldactive(worldactive_string):
     val = integer_test(worldactive_string, 0, 1)
     if None != val:
@@ -588,8 +573,9 @@ io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
 import server.config.world_data
 server.config.world_data.symbols_passable += ":_"
 
-from server.config.world_data import thing_defaults
+from server.config.world_data import thing_defaults, thingtype_defaults
 thing_defaults["T_PLAYERDROP"] = 0
+thingtype_defaults["TT_STORAGE"] = 0
 
 import server.config.actions
 server.config.actions.action_db["actor_move"] = actor_move
@@ -600,7 +586,6 @@ server.config.actions.actor_use_attempts_hook = actor_use_attempts_hook
 server.config.actions.actor_move_attempts_hook = actor_move_attempts_hook
 
 from server.config.commands import commands_db
-commands_db["TT_ID"] = (1, False, command_ttid)
 commands_db["GOD_FAVOR"] = (1, False, setter(None, "GOD_FAVOR", -32768, 32767))
 commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255))
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))

@@ -149,34 +149,28 @@ def command_tid(id_string):
 
     Default new Thing's type to the first available ThingType, others: zero.
     """
-    id = id_setter(id_string, "Things", command_tid)
-    if None != id:
+    tid = id_setter(id_string, "Things", command_tid)
+    if None != tid:
         if world_db["ThingTypes"] == {}:
             print("Ignoring: No ThingType to settle new Thing in.")
             return
-        type = list(world_db["ThingTypes"].keys())[0]
+        ty = list(world_db["ThingTypes"].keys())[0]
         from server.new_thing import new_Thing
-        world_db["Things"][id] = new_Thing(type)
+        world_db["Things"][tid] = new_Thing(ty)
 
 
 def command_ttid(id_string):
     """Set ID of ThingType to manipulate. ID unused? Create new one.
 
-    Default new ThingType's TT_SYMBOL to "?", TT_CORPSE_ID to self, TT_TOOL to
-    "", others: 0. 
+    Set new type's TT_CORPSE_ID to self, other fields to thingtype_defaults.
     """
-    id = id_setter(id_string, "ThingTypes", command_ttid)
-    if None != id:
-        world_db["ThingTypes"][id] = {
-            "TT_NAME": "(none)",
-            "TT_TOOLPOWER": 0,
-            "TT_LIFEPOINTS": 0,
-            "TT_PROLIFERATE": 0,
-            "TT_START_NUMBER": 0,
-            "TT_SYMBOL": "?",
-            "TT_CORPSE_ID": id,
-            "TT_TOOL": ""
-        }
+    ttid = id_setter(id_string, "ThingTypes", command_ttid)
+    if None != ttid:
+        from server.config.world_data import thingtype_defaults
+        world_db["ThingTypes"][ttid] = {}
+        for key in thingtype_defaults:
+            world_db["ThingTypes"][ttid][key] = thingtype_defaults[key]
+        world_db["ThingTypes"][ttid]["TT_CORPSE_ID"] = ttid
 
 
 def command_taid(id_string):
@@ -184,9 +178,9 @@ def command_taid(id_string):
 
     Default new ThingAction's TA_EFFORT to 1, its TA_NAME to "wait".
     """
-    id = id_setter(id_string, "ThingActions", command_taid, True)
-    if None != id:
-        world_db["ThingActions"][id] = {
+    taid = id_setter(id_string, "ThingActions", command_taid, True)
+    if None != taid:
+        world_db["ThingActions"][taid] = {
             "TA_EFFORT": 1,
             "TA_NAME": "wait"
         }
