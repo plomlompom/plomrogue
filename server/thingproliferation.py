@@ -10,21 +10,21 @@ def thingproliferation(t, prol_map):
     marked passable in prol_map. If there are several map cell candidates, one
     is selected randomly.
     """
-    from server.config.world_data import directions_db, world_db
-    from server.config.thingproliferation import field_spreadable, \
-        thingprol_plugin_conditions, thingprol_plugin_post_create_hook
+    from server.config.world_data import directions_db, world_db, \
+        thingprol_field_spreadable, thingprol_test_hook, \
+        thingprol_post_create_hook
     from server.utils import mv_yx_in_dir_legal, rand, id_setter
     from server.new_thing import new_Thing
     prolscore = world_db["ThingTypes"][t["T_TYPE"]]["TT_PROLIFERATE"]
     if prolscore and (1 == prolscore or 1 == (rand.next() % prolscore)) and \
-        thingprol_plugin_conditions(t):
+        thingprol_test_hook(t):
         candidates = []
         for key in sorted(directions_db.keys()):
             mv_result = mv_yx_in_dir_legal(directions_db[key], t["T_POSY"],
                                            t["T_POSX"])
             c = chr(prol_map[mv_result[1] * world_db["MAP_LENGTH"]
                 + mv_result[2]])
-            if mv_result[0] and field_spreadable(c, t):
+            if mv_result[0] and thingprol_field_spreadable(c, t):
                 from server.io import log
                 log("PROL")
                 candidates.append((mv_result[1], mv_result[2]))
@@ -33,4 +33,4 @@ def thingproliferation(t, prol_map):
             tid = id_setter(-1, "Things")
             newT = new_Thing(t["T_TYPE"], (candidates[i][0], candidates[i][1]))
             world_db["Things"][tid] = newT
-            thingprol_plugin_post_create_hook(t)
+            thingprol_post_create_hook(t)

@@ -46,16 +46,16 @@ def make_map():
             world_db["altar"] = (y, x)
             altar_placed = True
 
-def field_spreadable(c, t):
+def thingprol_field_spreadable(c, t):
     return ":" == c or (world_db["ThingTypes"][t["T_TYPE"]]["TT_LIFEPOINTS"]
                         and "." == c)
 
-def thingprol_plugin_conditions(t):
+def thingprol_test(t):
     tt = world_db["ThingTypes"][t["T_TYPE"]]
     return (tt["TT_LIFEPOINTS"] == 0 or \
             t["T_LIFEPOINTS"] >= 0.9 * tt["TT_LIFEPOINTS"])
 
-def thingprol_plugin_post_create_hook(t):
+def thingprol_post_create(t):
     tt = world_db["ThingTypes"][t["T_TYPE"]]
     if (world_db["FAVOR_STAGE"] > 0 and t["T_TYPE"] == world_db["PLANT_0"]):
         world_db["GOD_FAVOR"] += 5
@@ -492,6 +492,9 @@ io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
 
 import server.config.world_data
 server.config.world_data.symbols_passable += ":_"
+server.config.world_data.thingprol_field_spreadable = thingprol_field_spreadable
+server.config.world_data.thingprol_test_hook = thingprol_test
+server.config.world_data.thingprol_post_create_hook = thingprol_post_create
 
 from server.config.world_data import thing_defaults, thingtype_defaults
 thing_defaults["T_PLAYERDROP"] = 0
@@ -535,13 +538,6 @@ import server.config.make_world_helpers
 server.config.make_world_helpers.pos_test = pos_test
 server.config.make_world_helpers.world_makable = world_makable
 server.config.make_world_helpers.make_map = make_map
-
-import server.config.thingproliferation
-server.config.thingproliferation.field_spreadable = field_spreadable
-server.config.thingproliferation.thingprol_plugin_conditions = \
-    thingprol_plugin_conditions
-server.config.thingproliferation.thingprol_plugin_post_create_hook = \
-    thingprol_plugin_post_create_hook
 
 import server.config.ai
 server.config.ai.ai_hook_pickup = ai_hook_pickup_test

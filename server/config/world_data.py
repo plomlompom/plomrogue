@@ -50,3 +50,7 @@ thingtype_defaults = {
 }
 
 symbols_passable = "."
+
+thingprol_field_spreadable = lambda x, y: x in symbols_passable
+thingprol_test_hook = lambda x: True
+thingprol_post_create_hook = lambda x: None
