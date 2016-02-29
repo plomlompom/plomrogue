@@ -493,16 +493,19 @@ def play_move(str_arg):
         if not str_arg in directions_db:
             print("Illegal move direction string.")
             return
-        dir = ord(directions_db[str_arg])
+        d = ord(directions_db[str_arg])
         from server.utils import mv_yx_in_dir_legal
-        move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
+        move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
             if ord("~") == world_db["MAP"][pos]:
                 log("You can't SWIM.")
                 return
+            from server.config.commands import play_move_attempt_hook
+            if play_move_attempt_hook(t, d, pos):
+                return
             if chr(world_db["MAP"][pos]) in symbols_passable:
-                world_db["Things"][0]["T_ARGUMENT"] = dir
+                world_db["Things"][0]["T_ARGUMENT"] = d
                 set_command("move")
                 return
         log("You CAN'T move there.")

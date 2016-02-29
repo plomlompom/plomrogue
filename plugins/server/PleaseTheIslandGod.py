@@ -253,20 +253,21 @@ def actor_move(t):
 
     from server.actions import actor_move
     test = actor_move(t)
-    if 2 == len(test):
-        if test[0] > 0:
-            if world_db["FAVOR_STAGE"] >= 3 and \
-                    test[1] == world_db["ANIMAL_0"]:
-                world_db["GOD_FAVOR"] += 125
+    if test != None:
+        if 2 == len(test):
+            if test[0] > 0:
+                if world_db["FAVOR_STAGE"] >= 3 and \
+                        test[1] == world_db["ANIMAL_0"]:
+                    world_db["GOD_FAVOR"] += 125
+                elif t == world_db["Things"][0]:
+                    world_db["GOD_FAVOR"] -= 2 * test[1]
             elif t == world_db["Things"][0]:
-                world_db["GOD_FAVOR"] -= 2 * test[1]
-        elif t == world_db["Things"][0]:
-            world_db["GOD_FAVOR"] -= 1
-    elif 3 == len(test):
-        if (t == world_db["Things"][0] and
-                test[1] == world_db["altar"][0] and
-                test[2] == world_db["altar"][1]):
-            enter_altar()
+                world_db["GOD_FAVOR"] -= 1
+        elif 3 == len(test):
+            if (t == world_db["Things"][0] and
+                    test[1] == world_db["altar"][0] and
+                    test[2] == world_db["altar"][1]):
+                enter_altar()
 
 def actor_move_attempts_hook(t, move_result, pos):
     if (ord("X") == world_db["MAP"][pos] or ord("|") == world_db["MAP"][pos]):
@@ -290,10 +291,10 @@ def actor_move_attempts_hook(t, move_result, pos):
                             world_db["GOD_FAVOR"] -= 10
                     world_db["MAP"][pos] = ord(".")
                     i = 3 if case_X else 1
+                    from server.new_thing import new_Thing
                     for i in range(i):
                         tid = id_setter(-1, "Things")
-                        world_db["Things"][tid] = \
-                          new_Thing(world_db["LUMBER"],
+                        world_db["Things"][tid] = new_Thing(world_db["LUMBER"],
                                     (move_result[1], move_result[2]))
                     build_fov_map(t)
                 return True
@@ -338,35 +339,16 @@ def command_worldactive_test_hook():
             return False
     return True
 
-def play_move(str_arg):
-    if action_exists("move"):
-        from server.config.world_data import directions_db, symbols_passable
-        t = world_db["Things"][0]
-        if not str_arg in directions_db:
-            print("Illegal move direction string.")
-            return
-        dir = ord(directions_db[str_arg])
-        global mv_yx_in_dir_legal
-        move_result = mv_yx_in_dir_legal(chr(dir), t["T_POSY"], t["T_POSX"])
-        if 1 == move_result[0]:
-            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            if ord("~") == world_db["MAP"][pos]:
-                log("You can't SWIM.")
-                return
-            if (ord("X") == world_db["MAP"][pos]
-                or ord("|") == world_db["MAP"][pos]):
-                carries_axe = False
-                for id in t["T_CARRIES"]:
-                    type = world_db["Things"][id]["T_TYPE"]
-                    if world_db["ThingTypes"][type]["TT_TOOL"] == "axe":
-                        world_db["Things"][0]["T_ARGUMENT"] = dir
-                        set_command("move")
-                        return
-            if chr(world_db["MAP"][pos]) in symbols_passable:
-                world_db["Things"][0]["T_ARGUMENT"] = dir
+def play_move_attempt_hook(t, direction, pos):
+    if (ord("X") == world_db["MAP"][pos] or ord("|") == world_db["MAP"][pos]):
+        carries_axe = False
+        for tid in t["T_CARRIES"]:
+            ty = world_db["Things"][tid]["T_TYPE"]
+            if world_db["ThingTypes"][ty]["TT_TOOL"] == "axe":
+                world_db["Things"][0]["T_ARGUMENT"] = direction
                 set_command("move")
-                return
-        log("You CAN'T move there.")
+                return True
+    return False
 
 def play_use(str_arg):
     if action_exists("use"):
@@ -567,11 +549,11 @@ commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
 commands_db["EMPATHY"] = (1, False, setter(None, "EMPATHY", 0, 1))
 commands_db["use"] = (1, False, play_use)
-commands_db["move"] = (1, False, play_move)
 commands_db["pickup"] = (0, False, play_pickup)
 import server.config.commands
 server.config.commands.command_worldactive_test_hook = \
     command_worldactive_test_hook
+server.config.commands.play_move_attempt_hook = play_move_attempt_hook
 
 import server.config.misc
 server.config.misc.make_map_func = make_map

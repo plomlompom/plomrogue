@@ -68,3 +68,4 @@ commands_db = {
 # TODO: Unhandled cases: (Un-)killing animates (esp. player!) with T_LIFEPOINTS.
 
 command_worldactive_test_hook = lambda: True
+play_move_attempt_hook = lambda x, y, z: False
