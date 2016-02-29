@@ -3,9 +3,9 @@
 # see the file NOTICE in the root directory of the PlomRogue source package.
 
 
-import server.thingproliferation_helpers
+from server.config.world_data import symbols_passable
 
 
-field_spreadable = server.thingproliferation_helpers.field_spreadable
+field_spreadable = lambda x, y: x in symbols_passable
 thingprol_plugin_conditions = lambda x: True
 thingprol_plugin_post_create_hook = lambda x: None

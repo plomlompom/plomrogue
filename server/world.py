@@ -59,10 +59,10 @@ def turn_over():
     id = 0
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         proliferable_map = world_db["MAP"][:]
-        for id in [id for id in world_db["Things"]
-                   if not world_db["Things"][id]["carried"]]:
-            y = world_db["Things"][id]["T_POSY"]
-            x = world_db["Things"][id]["T_POSX"]
+        for tid in [tid for tid in world_db["Things"]
+                   if not world_db["Things"][tid]["carried"]]:
+            y = world_db["Things"][tid]["T_POSY"]
+            x = world_db["Things"][tid]["T_POSX"]
             proliferable_map[y * world_db["MAP_LENGTH"] + x] = ord('X')
         for id in [id for id in world_db["Things"]]:  # Only what's from start!
             if not id in world_db["Things"] or \
