@@ -130,18 +130,21 @@ def command_worldactive(worldactive_string):
             else:
                 print("Ignored: No player defined for world to activate.")
                 return
-            if world_db["MAP"]:
-                for id in world_db["Things"]:
-                    if world_db["Things"][id]["T_LIFEPOINTS"]:
-                        build_fov_map(world_db["Things"][id])
-                        if 0 == id:
-                            update_map_memory(world_db["Things"][id], False)
-                if not world_db["Things"][0]["T_LIFEPOINTS"]:
-                    empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
-                    world_db["Things"][0]["fovmap"] = empty_fovmap
-                world_db["WORLD_ACTIVE"] = 1
-            else:
+            if not world_db["MAP"]:
                 print("Ignoring: No map defined for world to activate.")
+                return
+            from server.config.commands import command_worldactive_test_hook
+            if not command_worldactive_test_hook():
+                return
+            for tid in world_db["Things"]:
+                if world_db["Things"][tid]["T_LIFEPOINTS"]:
+                    build_fov_map(world_db["Things"][tid])
+                    if 0 == tid:
+                        update_map_memory(world_db["Things"][tid], False)
+            if not world_db["Things"][0]["T_LIFEPOINTS"]:
+                empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
+                world_db["Things"][0]["fovmap"] = empty_fovmap
+            world_db["WORLD_ACTIVE"] = 1
 
 
 def command_tid(id_string):

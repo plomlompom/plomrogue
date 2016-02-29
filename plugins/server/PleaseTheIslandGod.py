@@ -323,53 +323,20 @@ def decrement_lifepoints(t):
                     "at the altar.")
     return test
 
-def command_worldactive(worldactive_string):
-    val = integer_test(worldactive_string, 0, 1)
-    if None != val:
-        if 0 != world_db["WORLD_ACTIVE"]:
-            if 0 == val:
-                set_world_inactive()
-            else:
-                print("World already active.")
-        elif 0 == world_db["WORLD_ACTIVE"]:
-            for ThingAction in world_db["ThingActions"]:
-                if "wait" == world_db["ThingActions"][ThingAction]["TA_NAME"]:
-                    break
-            else:
-                print("Ignored: No wait action defined for world to activate.")
-                return
-            for Thing in world_db["Things"]:
-                if 0 == Thing:
-                    break
-            else:
-                print("Ignored: No player defined for world to activate.")
-                return
-            if world_db["MAP"]:
-                pos = world_db["MAP"].find(b'_')
-                if pos > 0:
-                    y = int(pos / world_db["MAP_LENGTH"])
-                    x = pos % world_db["MAP_LENGTH"]
-                    world_db["altar"] = (y, x)
-                else:
-                    print("Ignored: No altar defined for world to activate.")
-                    return
-            else:
-                print("Ignored: No map defined for world to activate.")
-                return
-            for name in world_db["specials"]:
-                if world_db[name] not in world_db["ThingTypes"]:
-                    print("Ignored: Not all specials set for world to "
-                          "activate.")
-                    return
-            for id in world_db["Things"]:
-                if world_db["Things"][id]["T_LIFEPOINTS"]:
-                    build_fov_map(world_db["Things"][id])
-                    if 0 == id:
-                        update_map_memory(world_db["Things"][id], False)
-            if not world_db["Things"][0]["T_LIFEPOINTS"]:
-                empty_fovmap = bytearray(b" " * world_db["MAP_LENGTH"] ** 2)
-                world_db["Things"][0]["fovmap"] = empty_fovmap
-            world_db["WORLD_ACTIVE"] = 1
+def command_worldactive_test_hook():
+    pos = world_db["MAP"].find(b'_')
+    if pos > 0:
+        y = int(pos / world_db["MAP_LENGTH"])
+        x = pos % world_db["MAP_LENGTH"]
+        world_db["altar"] = (y, x)
+    else:
+        print("Ignored: No altar defined for world to activate.")
+        return False
+    for name in world_db["specials"]:
+        if world_db[name] not in world_db["ThingTypes"]:
+            print("Ignored: Not all specials set for world to activate.")
+            return False
+    return True
 
 def play_move(str_arg):
     if action_exists("move"):
@@ -589,7 +556,6 @@ from server.config.commands import commands_db
 commands_db["GOD_FAVOR"] = (1, False, setter(None, "GOD_FAVOR", -32768, 32767))
 commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255))
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
-commands_db["WORLD_ACTIVE"] = (1, False, command_worldactive)
 commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
 commands_db["SLIPPERS"] = (1, False, specialtypesetter("SLIPPERS"))
 commands_db["TOOL_0"] = (1, False, specialtypesetter("TOOL_0"))
@@ -603,6 +569,9 @@ commands_db["EMPATHY"] = (1, False, setter(None, "EMPATHY", 0, 1))
 commands_db["use"] = (1, False, play_use)
 commands_db["move"] = (1, False, play_move)
 commands_db["pickup"] = (0, False, play_pickup)
+import server.config.commands
+server.config.commands.command_worldactive_test_hook = \
+    command_worldactive_test_hook
 
 import server.config.misc
 server.config.misc.make_map_func = make_map
