@@ -388,6 +388,12 @@ def play_use_attempt_hook(t, tt):
     elif type == world_db["SLIPPERS"]:
         return True
 
+def play_pickup_attempt_hook(t):
+    if len(t["T_CARRIES"]) >= world_db["ThingTypes"][t["T_TYPE"]]["TT_STORAGE"]:
+        log("CAN'T pick up: No storage room to carry anything more.")
+        return False
+    return True
+
 def specialtypesetter(name):
     def helper(str_int):
         val = integer_test(str_int, 0)
@@ -463,22 +469,6 @@ def calc_effort(thing_action, thing):
         effort = 1 if effort == 0 else effort
     return effort
 
-def play_pickup():
-    """Try "pickup" as player's T_COMMAND"."""
-    if action_exists("pickup"):
-        t = world_db["Things"][0]
-        ids = [id for id in world_db["Things"] if id
-               if not world_db["Things"][id]["carried"]
-               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
-        if not len(ids):
-            log("NOTHING to pick up.")
-        elif len(t["T_CARRIES"]) >= world_db["ThingTypes"][t["T_TYPE"]] \
-                ["TT_STORAGE"]:
-            log("CAN'T pick up: No storage room to carry anything more.")
-        else:
-            set_command("pickup")
-
 strong_write(io_db["file_out"], "PLUGIN PleaseTheIslandGod\n")
 
 def set_zero_if_undefined(key):
@@ -529,12 +519,12 @@ commands_db["PLANT_0"] = (1, False, specialtypesetter("PLANT_0"))
 commands_db["PLANT_1"] = (1, False, specialtypesetter("PLANT_1"))
 commands_db["LUMBER"] = (1, False, specialtypesetter("LUMBER"))
 commands_db["EMPATHY"] = (1, False, setter(None, "EMPATHY", 0, 1))
-commands_db["pickup"] = (0, False, play_pickup)
 import server.config.commands
 server.config.commands.command_worldactive_test_hook = \
     command_worldactive_test_hook
 server.config.commands.play_move_attempt_hook = play_move_attempt_hook
 server.config.commands.play_use_attempt_hook = play_use_attempt_hook
+server.config.commands.play_pickup_attempt_hook = play_pickup_attempt_hook
 
 import server.config.misc
 server.config.misc.make_map_func = make_map

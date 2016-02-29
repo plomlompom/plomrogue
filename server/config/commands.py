@@ -70,3 +70,4 @@ commands_db = {
 command_worldactive_test_hook = lambda: True
 play_move_attempt_hook = lambda x, y, z: False
 play_use_attempt_hook = lambda x, y: None
+play_pickup_attempt_hook = lambda x: True

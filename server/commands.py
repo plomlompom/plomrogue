@@ -440,13 +440,14 @@ def play_pickup():
     """Try "pickup" as player's T_COMMAND"."""
     if action_exists("pickup"):
         t = world_db["Things"][0]
-        ids = [id for id in world_db["Things"] if id
-               if not world_db["Things"][id]["carried"]
-               if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-               if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
+        ids = [tid for tid in world_db["Things"] if tid
+               if not world_db["Things"][tid]["carried"]
+               if world_db["Things"][tid]["T_POSY"] == t["T_POSY"]
+               if world_db["Things"][tid]["T_POSX"] == t["T_POSX"]]
+        from server.config.commands import play_pickup_attempt_hook
         if not len(ids):
              log("NOTHING to pick up.")
-        else:
+        elif play_pickup_attempt_hook(t):
             set_command("pickup")
 
 
