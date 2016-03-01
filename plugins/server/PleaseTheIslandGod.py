@@ -540,4 +540,4 @@ server.config.make_world_helpers.world_makable = world_makable
 server.config.make_world_helpers.make_map = make_map
 
 import server.config.ai
-server.config.ai.ai_hook_pickup = ai_hook_pickup_test
+server.config.ai.ai_hook_pickup_test = ai_hook_pickup_test
