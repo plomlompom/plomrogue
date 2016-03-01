@@ -167,16 +167,51 @@ def save_world():
 
     def helper(category, id_string, special_keys={}):
         string = ""
-        for id in sorted(world_db[category].keys()):
-            string = string + id_string + " " + str(id) + "\n"
-            for key in sorted(world_db[category][id].keys()):
+        for _id in sorted(world_db[category].keys()):
+            string = string + id_string + " " + str(_id) + "\n"
+            for key in sorted(world_db[category][_id].keys()):
                 if not key in special_keys:
-                    x = world_db[category][id][key]
+                    x = world_db[category][_id][key]
                     argument = quote_escape(x) if str == type(x) else str(x)
                     string = string + key + " " + argument + "\n"
                 elif special_keys[key]:
-                    string = string + special_keys[key](id)
+                    string = string + special_keys[key](_id)
         return string
+
+    def helper_things():
+        string = ""
+        memmap = mapsetter("T_MEMMAP")
+        memdepthmap = mapsetter("T_MEMDEPTHMAP")
+        for tid in sorted(world_db["Things"].keys()):
+            string += "T_ID " + str(tid) + "\n"
+            t = world_db["Things"][tid]
+            for key in sorted(t.keys()):
+                if key not in {"T_CARRIES", "carried", "fovmap", "T_MEMMAP",
+                               "T_MEMTHING", "T_MEMDEPTHMAP"}:
+                    argument = t[key]
+                    string += key + " " + (quote_escape(argument) if \
+                            str == type(argument) else str(argument)) + "\n"
+            string += memthing(tid) + memmap(tid) + memdepthmap(tid)
+        return string
+
+    # ALTERNATIVE TO helper_things, but not more efficient despite listcomp
+    # def helper4():
+    #     def foo(t, key):
+    #         argument = t[key]
+    #         return key + " " + (quote_escape(argument) if \
+    #                 str == type(argument) else str(argument)) + "\n"
+    #     string = ""
+    #     memmap = mapsetter("T_MEMMAP")
+    #     memdepthmap = mapsetter("T_MEMDEPTHMAP")
+    #     for tid in sorted(world_db["Things"].keys()):
+    #         string += "T_ID " + str(tid) + "\n"
+    #         t = world_db["Things"][tid]
+    #         lines = [foo(t, key) for key in sorted(t.keys())
+    #                  if key not in {"T_CARRIES", "carried", "fovmap",
+    #                  "T_MEMMAP", "T_MEMTHING", "T_MEMDEPTHMAP"}]
+    #         string += "".join(lines)
+    #         string += memthing(tid) + memmap(tid) + memdepthmap(tid)
+    #     return string
 
     string = ""
     for plugin in world_db["PLUGIN"]:
@@ -192,15 +227,11 @@ def save_world():
     for id in sorted(world_db["ThingTypes"].keys()):
         string = string + "TT_ID " + str(id) + "\n" + "TT_CORPSE_ID " + \
             str(world_db["ThingTypes"][id]["TT_CORPSE_ID"]) + "\n"
-    string = string + helper("Things", "T_ID",
-                             {"T_CARRIES": False, "carried": False,
-                              "T_MEMMAP": mapsetter("T_MEMMAP"),
-                              "T_MEMTHING": memthing, "fovmap": False,
-                              "T_MEMDEPTHMAP": mapsetter("T_MEMDEPTHMAP")})
-    for id in sorted(world_db["Things"].keys()):
-        if [] != world_db["Things"][id]["T_CARRIES"]:
-            string = string + "T_ID " + str(id) + "\n"
-            for carried in sorted(world_db["Things"][id]["T_CARRIES"]):
+    string += helper_things()
+    for tid in sorted(world_db["Things"].keys()):
+        if [] != world_db["Things"][tid]["T_CARRIES"]:
+            string = string + "T_ID " + str(tid) + "\n"
+            for carried in sorted(world_db["Things"][tid]["T_CARRIES"]):
                 string = string + "T_CARRIES " + str(carried) + "\n"
     string = string + "SEED_RANDOMNESS " + str(rand.seed) + "\n" + \
         "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"])
