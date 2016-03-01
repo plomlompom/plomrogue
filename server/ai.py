@@ -161,9 +161,16 @@ def get_dir_to_target(t, filter):
              if get_map_score(world_db["Things"][id]["T_POSY"] * maplength
                               + world_db["Things"][id]["T_POSX"])]
         elif "a" != filter:
-            [set_map_score_at_thingpos(id, 65535)
-             for id in world_db["Things"]
-             if animate_in_fov(world_db["Things"][id], maplength)]
+            #[set_map_score_at_thingpos(tid, 65535)
+            # for tid in world_db["Things"]
+            # if animate_in_fov(world_db["Things"][tid], maplength)]
+            # ABOVE INLINED FOR PERFORMANCE REASONS BY BLOCK BELOW
+            for Thing in world_db["Things"].values():
+                if Thing["T_LIFEPOINTS"] and not Thing["carried"] and not \
+                        Thing == t:
+                    pos = Thing["T_POSY"] * maplength + Thing["T_POSX"]
+                    if 118 == t["fovmap"][pos]:
+                        set_map_score(pos, 65535)
 
     def rand_target_dir(neighbors, cmp, dirs):
         candidates = []
