@@ -86,25 +86,33 @@ def get_dir_to_target(t, filter):
     def seeing_thing():
         maplength = world_db["MAP_LENGTH"]
         if t["fovmap"] and "a" == filter:
-            targets = [Thing for Thing in animates_in_fov(maplength)
-                       if good_attack_target(Thing)]
-            if len(targets):
-                return True
+            try:
+                next((Thing for Thing in animates_in_fov(maplength)
+                            if good_attack_target(Thing)))
+            except StopIteration:
+                return False
+            return True
         elif t["fovmap"] and "f" == filter:
-            targets = [Thing for Thing in animates_in_fov(maplength)
-                       if good_flee_target(Thing)]
-            if len(targets):
-                return True
+            try:
+                next((Thing for Thing in animates_in_fov(maplength)
+                            if good_flee_target(Thing)))
+            except StopIteration:
+                return False
+            return True
         elif t["T_MEMMAP"] and "c" == filter:
             eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
             ord_blank = ord(" ")
-            for mt in t["T_MEMTHING"]:
-                if ord_blank != chr(t["T_MEMMAP"][(mt[1] * \
-                       world_db["MAP_LENGTH"]) + mt[2]]) \
-                   and world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food" \
-                   and world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"] \
-                       > eat_cost:
-                    return True
+            map_len = world_db["MAP_LENGTH"]
+            try:
+                next(mt for mt in t["T_MEMTHING"]
+                     if ord_blank != t["T_MEMMAP"][mt[1] * map_len + mt[2]]
+                     and world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"
+                     and world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"]
+                        > eat_cost)
+            except StopIteration:
+                return False
+            return True
+
         return False
 
     def set_cells_passable_on_memmap_to_65534_on_scoremap():
