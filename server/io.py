@@ -174,8 +174,6 @@ def save_world():
                     x = world_db[category][_id][key]
                     argument = quote_escape(x) if str == type(x) else str(x)
                     string = string + key + " " + argument + "\n"
-                elif special_keys[key]:
-                    string = string + special_keys[key](_id)
         return string
 
     def helper_things():
@@ -193,25 +191,6 @@ def save_world():
                             str == type(argument) else str(argument)) + "\n"
             string += memthing(tid) + memmap(tid) + memdepthmap(tid)
         return string
-
-    # ALTERNATIVE TO helper_things, but not more efficient despite listcomp
-    # def helper4():
-    #     def foo(t, key):
-    #         argument = t[key]
-    #         return key + " " + (quote_escape(argument) if \
-    #                 str == type(argument) else str(argument)) + "\n"
-    #     string = ""
-    #     memmap = mapsetter("T_MEMMAP")
-    #     memdepthmap = mapsetter("T_MEMDEPTHMAP")
-    #     for tid in sorted(world_db["Things"].keys()):
-    #         string += "T_ID " + str(tid) + "\n"
-    #         t = world_db["Things"][tid]
-    #         lines = [foo(t, key) for key in sorted(t.keys())
-    #                  if key not in {"T_CARRIES", "carried", "fovmap",
-    #                  "T_MEMMAP", "T_MEMTHING", "T_MEMDEPTHMAP"}]
-    #         string += "".join(lines)
-    #         string += memthing(tid) + memmap(tid) + memdepthmap(tid)
-    #     return string
 
     string = ""
     for plugin in world_db["PLUGIN"]:
