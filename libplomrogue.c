@@ -635,3 +635,22 @@ extern void update_mem_and_memdepthmap_via_fovmap(char * map, char * fovmap,
         }
     }
 }
+
+/* USEFUL FOR DEBUGGING
+extern void write_score_map()
+{
+    FILE *f = fopen("score_map", "a");
+
+    fprintf(f, "\n---------------------------------------------------------\n");
+    uint32_t y, x;
+    for (y = 0; y < maplength; y++)
+    {
+        for (x = 0; x < maplength; x++)
+        {
+            fprintf(f, "%2X", score_map[y * maplength + x] % 256);
+        }
+        fprintf(f, "\n");
+    }
+    fclose(f);
+}
+*/

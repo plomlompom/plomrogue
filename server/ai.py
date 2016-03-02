@@ -140,9 +140,8 @@ def get_dir_to_target(t, filter):
             [set_map_score(mt[1] * maplen + mt[2], 0)
              for mt in t["T_MEMTHING"]
              if ord_blank != t["T_MEMMAP"][mt[1] * maplen + mt[2]]
-             if t != world_db["Things"][0] or
-                (world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food" and
-                 world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"] > eat_cost)]
+             if world_db["ThingTypes"][mt[0]]["TT_TOOL"] == "food"
+             if world_db["ThingTypes"][mt[0]]["TT_TOOLPOWER"] > eat_cost]
         elif "s" == filter:
             zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
         if "f" == filter:
