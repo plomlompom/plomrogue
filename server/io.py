@@ -288,7 +288,7 @@ def obey(command, prefix, replay=False, do_record=False):
                     if world_db["WORLD_ACTIVE"]:
                         save_world()
                     io_db["record_chunk"] = ""
-                    io_db["save_wait"] = time.time()
+                    io_db["save_wait_start"] = time.time()
             io_db["worldstate_updateable"] = world_db["WORLD_ACTIVE"]
     elif 0 != len(tokens):
         print("Invalid command/argument, or bad number of tokens: " + command)
