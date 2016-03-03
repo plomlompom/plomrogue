@@ -59,12 +59,7 @@ def get_dir_to_target(t, filter):
     def animates_in_fov(maplength):
         return [Thing for Thing in world_db["Things"].values()
                 if Thing["T_LIFEPOINTS"] and not Thing["carried"]
-                   and not Thing == t and 118 == t["fovmap"][Thing["pos"]]]
-
-    #def animates_in_fov_gen(maplength):
-    #    return (Thing for Thing in world_db["Things"].values()
-    #            if Thing["T_LIFEPOINTS"] and not Thing["carried"]
-    #               and not Thing == t and 118 == t["fovmap"][Thing["pos"]])
+                    and 118 == t["fovmap"][Thing["pos"]] and not Thing == t]
 
     def good_attack_target(v):
         eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
