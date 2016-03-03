@@ -42,6 +42,17 @@ def hunger(t):
         decrement_lifepoints(t)
 
 
+def eat_vs_hunger_threshold(thingtype):
+    """Return satiation cost of eating for type. Good food for it must be >."""
+    hunger_unit = hunger_per_turn(thingtype)
+    try:
+        actiontype = next(taid for taid in world_db["ThingActions"] if
+                          world_db["ThingActions"][taid]["TA_NAME"] == "use")
+    except StopIteration:
+        return 0
+    return world_db["ThingActions"][actiontype]["TA_EFFORT"] * hunger_unit
+
+
 def set_world_inactive():
     """Set world_db["WORLD_ACTIVE"] to 0 and remove worldstate file."""
     from server.io import safely_remove_worldstate_file

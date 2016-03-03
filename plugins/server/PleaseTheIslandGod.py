@@ -85,10 +85,10 @@ def actor_pickup(t):
         log("CAN'T pick up object: No storage room to carry more.")
 
 def actor_pickup_test_hook(t, tid):
-    from server.ai import eat_vs_hunger_threshold
     tt = world_db["ThingTypes"][tid]
     return not (t != world_db["Things"][0] and (tt["TT_TOOL"] != "food" or
-            (tt["TT_TOOLPOWER"] <= eat_vs_hunger_threshold(t["T_TYPE"]))))
+            (tt["TT_TOOLPOWER"] <=
+             world_db["ThingTypes"][t["T_TYPE"]]["eat_vs_hunger_threshold"])))
 
 def actor_drop(t):
     from server.actions import actor_drop

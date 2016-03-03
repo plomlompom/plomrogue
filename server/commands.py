@@ -7,7 +7,7 @@ from server.config.world_data import world_db
 from server.config.io import io_db
 from server.io import log, strong_write 
 from server.utils import integer_test, id_setter
-from server.world import set_world_inactive, turn_over
+from server.world import set_world_inactive, turn_over, eat_vs_hunger_threshold
 from server.update_map_memory import update_map_memory
 from server.build_fov_map import build_fov_map
 
@@ -300,6 +300,13 @@ def command_ttcorpseid(str_int):
             print("Ignoring: Corpse ID belongs to no known ThignType.")
 
 
+@test_ThingType_id
+def command_ttlifepoints(val_string):
+    setter("ThingType", "TT_LIFEPOINTS", 0, 255)(val_string)
+    tt = world_db["ThingTypes"][command_ttid.id]
+    tt["eat_vs_hunger_threshold"] = eat_vs_hunger_threshold(command_ttid.id)
+
+
 @test_ThingAction_id
 def command_taname(name):
     """Set TA_NAME of selected ThingAction.
@@ -318,6 +325,15 @@ def command_taname(name):
                 set_world_inactive()
     else:
         print("Ignoring: Invalid action name.")
+
+
+@test_ThingAction_id
+def command_taeffort(val_string):
+    setter("ThingAction", "TA_EFFORT", 0, 255)(val_string)
+    if world_db["ThingActions"][command_taid.id]["TA_NAME"] == "use":
+        for ttid in world_db["ThingTypes"]:
+            tt = world_db["ThingTypes"][ttid]
+            tt["eat_vs_hunger_threshold"] = eat_vs_hunger_threshold(ttid)
 
 
 def setter(category, key, min, max=None):

@@ -9,7 +9,8 @@ from server.commands import command_plugin, command_quit, command_ping, \
     command_taname, command_ttid, command_ttname, command_tttool, \
     command_ttsymbol, command_ttcorpseid, command_tid, command_tcommand, \
     command_ttype, command_tcarries, command_tmemthing, setter_tpos, \
-    play_wait, play_move, play_pickup, play_drop, play_use, command_ai
+    play_wait, play_move, play_pickup, play_drop, play_use, command_ai, \
+    command_ttlifepoints, command_taeffort
 
 
 """Commands database.
@@ -32,7 +33,7 @@ commands_db = {
     "WORLD_ACTIVE": (1, False, command_worldactive),
     "MAP": (2, False, setter_map("MAP")),
     "TA_ID": (1, False, command_taid),
-    "TA_EFFORT": (1, False, setter("ThingAction", "TA_EFFORT", 0, 255)),
+    "TA_EFFORT": (1, False, command_taeffort),
     "TA_NAME": (1, False, command_taname),
     "TT_ID": (1, False, command_ttid),
     "TT_NAME": (1, False, command_ttname),
@@ -44,7 +45,7 @@ commands_db = {
                                          0, 255)),
     "TT_PROLIFERATE": (1, False, setter("ThingType", "TT_PROLIFERATE",
                                         0, 65535)),
-    "TT_LIFEPOINTS": (1, False, setter("ThingType", "TT_LIFEPOINTS", 0, 255)),
+    "TT_LIFEPOINTS": (1, False, command_ttlifepoints),
     "T_ID": (1, False, command_tid),
     "T_ARGUMENT": (1, False, setter("Thing", "T_ARGUMENT", 0, 255)),
     "T_PROGRESS": (1, False, setter("Thing", "T_PROGRESS", 0, 255)),

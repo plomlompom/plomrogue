@@ -6,15 +6,6 @@
 from server.config.world_data import world_db
 
 
-def eat_vs_hunger_threshold(thingtype):
-    """Return satiation cost of eating for type. Good food for it must be >."""
-    from server.world import hunger_per_turn
-    hunger_unit = hunger_per_turn(thingtype)
-    actiontype = [id for id in world_db["ThingActions"]
-               if world_db["ThingActions"][id]["TA_NAME"] == "use"][0]
-    return world_db["ThingActions"][actiontype]["TA_EFFORT"] * hunger_unit
-
-
 def get_dir_to_target(t, filter):
     """Try to set T_COMMAND/T_ARGUMENT for move to "filter"-determined target.
 
@@ -34,6 +25,7 @@ def get_dir_to_target(t, filter):
     """
     from server.utils import rand, libpr, c_pointer_to_bytearray
     from server.config.world_data import symbols_passable
+    tt = world_db["ThingTypes"][t["T_TYPE"]]
 
     def zero_score_map_where_char_on_memdepthmap(c):
         # OUTSOURCED FOR PERFORMANCE REASONS TO libplomrogue.so:
@@ -59,10 +51,10 @@ def get_dir_to_target(t, filter):
     def animates_in_fov(maplength):
         return [Thing for Thing in world_db["Things"].values()
                 if Thing["T_LIFEPOINTS"] and not Thing["carried"]
-                    and 118 == t["fovmap"][Thing["pos"]] and not Thing == t]
+                and 118 == t["fovmap"][Thing["pos"]] and not Thing == t]
 
     def good_attack_target(v):
-        eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
+        eat_cost = tt["eat_vs_hunger_threshold"]
         ty = world_db["ThingTypes"][v["T_TYPE"]]
         type_corpse = world_db["ThingTypes"][ty["TT_CORPSE_ID"]]
         if t["T_LIFEPOINTS"] > ty["TT_LIFEPOINTS"] \
@@ -78,7 +70,7 @@ def get_dir_to_target(t, filter):
                        else corpse_type["TT_TOOLPOWER"]
         type = world_db["ThingTypes"][m["T_TYPE"]]
         if t["T_LIFEPOINTS"] < type["TT_LIFEPOINTS"] \
-        and targetness > eat_vs_hunger_threshold(m["T_TYPE"]):
+            and targetness > type["eat_vs_hunger_threshold"]:
             return True
         return False
 
@@ -97,7 +89,7 @@ def get_dir_to_target(t, filter):
             return exists(Thing for Thing in animates_in_fov(maplength)
                                 if good_flee_target(Thing))
         elif t["T_MEMMAP"] and "c" == filter:
-            eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
+            eat_cost = tt["eat_vs_hunger_threshold"]
             ord_blank = ord(" ")
             map_len = world_db["MAP_LENGTH"]
             return exists(mt for mt in t["T_MEMTHING"]
@@ -134,7 +126,7 @@ def get_dir_to_target(t, filter):
             [set_map_score(Thing["pos"], 0) for
              Thing in animates_in_fov(maplen) if good_flee_target(Thing)]
         elif "c" == filter:
-            eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
+            eat_cost = tt["eat_vs_hunger_threshold"]
             ord_blank = ord(" ")
             [set_map_score(mt[1] * maplen + mt[2], 0)
              for mt in t["T_MEMTHING"]
@@ -226,7 +218,8 @@ def get_dir_to_target(t, filter):
 
 def standing_on_food(t):
     """Return True/False whether t is standing on healthy consumable."""
-    eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
+    tt = world_db["ThingTypes"][t["T_TYPE"]]
+    eat_cost = tt["eat_vs_hunger_threshold"]
     for id in [id for id in world_db["Things"] if world_db["Things"][id] != t
                if not world_db["Things"][id]["carried"]
                if world_db["Things"][id]["pos"] == t["pos"]
@@ -243,7 +236,8 @@ def get_inventory_slot_to_consume(t):
     cmp_food = -1
     selection = -1
     i = 0
-    eat_cost = eat_vs_hunger_threshold(t["T_TYPE"])
+    tt = world_db["ThingTypes"][t["T_TYPE"]]
+    eat_cost = tt["eat_vs_hunger_threshold"]
     for id in t["T_CARRIES"]:
         type = world_db["Things"][id]["T_TYPE"]
         if world_db["ThingTypes"][type]["TT_TOOL"] == "food" \

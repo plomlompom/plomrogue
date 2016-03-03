@@ -170,7 +170,7 @@ def save_world():
         for _id in sorted(world_db[category].keys()):
             string = string + id_string + " " + str(_id) + "\n"
             for key in sorted(world_db[category][_id].keys()):
-                if not key in special_keys:
+                if key.isupper() and not key in special_keys:
                     x = world_db[category][_id][key]
                     argument = quote_escape(x) if str == type(x) else str(x)
                     string = string + key + " " + argument + "\n"
