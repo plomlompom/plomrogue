@@ -64,8 +64,7 @@ def get_dir_to_target(t, filter):
         return False
 
     def good_flee_target(m):
-        own_corpse_id = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
-        corpse_type = world_db["ThingTypes"][own_corpse_id]
+        corpse_type = world_db["ThingTypes"][tt["TT_CORPSE_ID"]]
         targetness = 0 if corpse_type["TT_TOOL"] != "food" \
                        else corpse_type["TT_TOOLPOWER"]
         type = world_db["ThingTypes"][m["T_TYPE"]]
