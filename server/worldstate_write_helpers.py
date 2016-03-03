@@ -37,12 +37,10 @@ def write_fov_map():
                   if not world_db["Things"][id]["carried"]
                   if world_db["Things"][id]["T_TYPE"] == tid
                   if world_db["Things"][0]["fovmap"][
-                       world_db["Things"][id]["T_POSY"] * length
-                       + world_db["Things"][id]["T_POSX"]] == ord_v]:
+                       world_db["Things"][id]["pos"]] == ord_v]:
         type = world_db["Things"][id]["T_TYPE"]
         c = ord(world_db["ThingTypes"][type]["TT_SYMBOL"])
-        fov[world_db["Things"][id]["T_POSY"] * length
-            + world_db["Things"][id]["T_POSX"]] = c
+        fov[world_db["Things"][id]["pos"]] = c
     return write_map(fov, length)
 
 def write_mem_map():

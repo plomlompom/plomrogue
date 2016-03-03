@@ -55,9 +55,11 @@ def actor_move(t):
     if passable:
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
+        t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         for id in t["T_CARRIES"]:
             world_db["Things"][id]["T_POSY"] = move_result[1]
             world_db["Things"][id]["T_POSX"] = move_result[2]
+            world_db["Things"][id]["pos"] = t["pos"]
         build_fov_map(t)
         if t == world_db["Things"][0]:
             log("You MOVE " + dir + ".")
@@ -71,8 +73,7 @@ def actor_pickup(t):
     """
     ids = [id for id in world_db["Things"] if world_db["Things"][id] != t
            if not world_db["Things"][id]["carried"]
-           if world_db["Things"][id]["T_POSY"] == t["T_POSY"]
-           if world_db["Things"][id]["T_POSX"] == t["T_POSX"]]
+           if world_db["Things"][id]["pos"] == t["pos"]]
     if len(ids):
         lowest_tid = -1
         for iid in ids:

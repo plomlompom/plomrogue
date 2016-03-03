@@ -17,8 +17,6 @@ def decrement_lifepoints(t):
         live_tid = t["T_TYPE"]
         for tid in t["T_CARRIES"]:
             t["T_CARRIES"].remove(tid)
-            world_db["Things"][tid]["T_POSY"] = t["T_POSY"]
-            world_db["Things"][tid]["T_POSX"] = t["T_POSX"]
             world_db["Things"][tid]["carried"] = False
         t["T_TYPE"] = world_db["ThingTypes"][t["T_TYPE"]]["TT_CORPSE_ID"]
         if world_db["Things"][0] == t:

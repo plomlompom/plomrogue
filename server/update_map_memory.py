@@ -56,5 +56,4 @@ def update_map_memory(t, age_map=True):
      if not world_db["Things"][id]["carried"]
      if not world_db["ThingTypes"][world_db["Things"][id]["T_TYPE"]]
                                                               ["TT_LIFEPOINTS"]
-     if ord_v == t["fovmap"][(world_db["Things"][id]["T_POSY"] * maplength)
-                                       + world_db["Things"][id]["T_POSX"]]]
+     if ord_v == t["fovmap"][world_db["Things"][id]["pos"]]]

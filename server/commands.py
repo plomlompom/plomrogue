@@ -57,8 +57,7 @@ def command_thingshere(str_y, str_x):
                               for id in world_db["Things"]
                               if not world_db["Things"][id]["carried"]
                               if world_db["Things"][id]["T_TYPE"] == tid
-                              if y == world_db["Things"][id]["T_POSY"]
-                              if x == world_db["Things"][id]["T_POSX"]]:
+                              if pos == world_db["Things"][id]["pos"]]:
                     type = world_db["Things"][id]["T_TYPE"]
                     name = world_db["ThingTypes"][type]["TT_NAME"]
                     strong_write(io_db["file_out"], name + "\n")
@@ -403,7 +402,9 @@ def setter_tpos(axis):
         val = integer_test(str_int, 0, 255)
         if None != val:
             if val < world_db["MAP_LENGTH"]:
-                world_db["Things"][command_tid.id]["T_POS" + axis] = val
+                t = world_db["Things"][command_tid.id]
+                t["T_POS" + axis] = val
+                t["pos"] = t["T_POSY"] * world_db["MAP_LENGTH"] + t["T_POSX"]
                 if world_db["WORLD_ACTIVE"] \
                    and world_db["Things"][command_tid.id]["T_LIFEPOINTS"]:
                     build_fov_map(world_db["Things"][command_tid.id])
@@ -442,8 +443,7 @@ def play_pickup():
         t = world_db["Things"][0]
         ids = [tid for tid in world_db["Things"] if tid
                if not world_db["Things"][tid]["carried"]
-               if world_db["Things"][tid]["T_POSY"] == t["T_POSY"]
-               if world_db["Things"][tid]["T_POSX"] == t["T_POSX"]]
+               if world_db["Things"][tid]["pos"] == t["pos"]]
         from server.config.commands import play_pickup_attempt_hook
         if not len(ids):
              log("NOTHING to pick up.")

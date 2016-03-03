@@ -16,6 +16,7 @@ def new_Thing(_type, pos=(0, 0)):
     thing["T_TYPE"] = _type
     thing["T_POSY"] = pos[0]
     thing["T_POSX"] = pos[1]
+    thing["pos"] = thing["T_POSY"] * world_db["MAP_LENGTH"] + thing["T_POSX"]
     if world_db["WORLD_ACTIVE"] and thing["T_LIFEPOINTS"]:
         build_fov_map(thing)
     return thing

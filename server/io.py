@@ -185,7 +185,7 @@ def save_world():
             t = world_db["Things"][tid]
             for key in sorted(t.keys()):
                 if key not in {"T_CARRIES", "carried", "fovmap", "T_MEMMAP",
-                               "T_MEMTHING", "T_MEMDEPTHMAP"}:
+                               "T_MEMTHING", "T_MEMDEPTHMAP", "pos"}:
                     argument = t[key]
                     string += key + " " + (quote_escape(argument) if \
                             str == type(argument) else str(argument)) + "\n"
