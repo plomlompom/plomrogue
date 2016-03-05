@@ -108,7 +108,8 @@ def win_log(self):
     number_of_lines = 0
     for line in world_data["log"]:
         number_of_lines += math.ceil(len(line) / win_size[1])
-        padding_size = win_size[1] - (len(line) % win_size[1])
+        mod = len(line) % win_size[1]
+        padding_size = 0 if mod == 0 else win_size[1] - mod
         winmap += line + (padding_size * " ")
     if number_of_lines < win_size[0]:
         winmap = (" " * win_size[1] * (win_size[0] - number_of_lines)) + winmap
