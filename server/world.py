@@ -67,6 +67,8 @@ def turn_over():
     from server.config.misc import calc_effort
     from server.update_map_memory import update_map_memory
     from server.thingproliferation import thingproliferation
+    from server.io import try_worldstate_update
+    from server.config.io import io_db
     id = 0
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         proliferable_map = world_db["MAP"][:]
@@ -101,3 +103,5 @@ def turn_over():
                         Thing["T_PROGRESS"] = 0
             thingproliferation(Thing, proliferable_map)
         world_db["TURN"] += 1
+        io_db["worldstate_updateable"] = True
+        try_worldstate_update()
