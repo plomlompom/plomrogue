@@ -101,7 +101,7 @@ def actor_use_attempts_hook(t, ty):
         if t == world_db["Things"][0]:
             log("You use the " + world_db["ThingTypes"][ty]["TT_NAME"] + ". " \
                 "It glows in wondrous colors, and emits a sound as if from a d"
-                "ying cat. The Island God laughs.\n")
+                "ying cat. The Island God laughs.")
         t["T_LIFEPOINTS"] = 1
         from server.config.misc import decrement_lifepoints
         decrement_lifepoints(t)
