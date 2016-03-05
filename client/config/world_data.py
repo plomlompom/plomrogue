@@ -16,7 +16,7 @@ world_data = {
 "QUICK COMMAND OVERVIEW: "
 "Move through map with 'w', 'e', 's', 'd', 'x', 'c'. "
 "Pick up things with 'P', drop a thing selected from the inventory with 'D' "
-"or use it with 'P'. "
+"or use it with 'U'. "
 "Move through inventory selection with 'j' and 'k'. "
 "Toggle looking around mode with 'l'. "
 "Scroll 'Things here' window with 'J' and 'K'. "
