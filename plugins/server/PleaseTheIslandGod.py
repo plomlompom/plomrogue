@@ -490,6 +490,7 @@ io_db["worldstate_write_order"] += [[write_metamap_B, "func"]]
 
 import server.config.world_data
 server.config.world_data.symbols_passable += ":_"
+server.config.world_data.symbols_hide += "|"
 server.config.world_data.thingprol_field_spreadable = thingprol_field_spreadable
 server.config.world_data.thingprol_test_hook = thingprol_test
 server.config.world_data.thingprol_post_create_hook = thingprol_post_create

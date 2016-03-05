@@ -23,7 +23,8 @@ def get_dir_to_target(t, filter):
     "c": Thing in memorized map is consumable of sufficient nutrition for t
     "s": memory map cell with greatest-reachable degree of unexploredness
     """
-    from server.utils import rand, libpr, c_pointer_to_bytearray
+    from server.utils import rand, libpr, c_pointer_to_bytearray, \
+            c_pointer_to_string
     from server.config.world_data import symbols_passable
     tt = world_db["ThingTypes"][t["T_TYPE"]]
 
@@ -104,9 +105,10 @@ def get_dir_to_target(t, filter):
         # for i in [i for i in range(world_db["MAP_LENGTH"] ** 2)
         #            if memmap[i] in symbols_passable]:
         #     set_map_score(i, 65534) # i.e. 65535-1
-        map = c_pointer_to_bytearray(t["T_MEMMAP"])
-        if libpr.set_cells_passable_on_memmap_to_65534_on_scoremap(map,
-                    symbols_passable):
+        scoremap = c_pointer_to_bytearray(t["T_MEMMAP"])
+        passable_string = c_pointer_to_string(symbols_passable)
+        if libpr.set_cells_passable_on_memmap_to_65534_on_scoremap(scoremap,
+                    passable_string):
             raise RuntimeError("No score map allocated for set_cells_passable"
                                "_on_memmap_to_65534_on_scoremap().")
 

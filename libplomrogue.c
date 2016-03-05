@@ -340,7 +340,8 @@ static uint8_t shade_hex(uint32_t left_angle, uint32_t right_angle,
  */
 static uint8_t eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
                              struct yx_uint8 * test_pos,
-                             struct shadow_angle ** shadows)
+                             struct shadow_angle ** shadows,
+                             const char * symbols_obstacle)
 {
     int32_t left_angle_uncorrected =   ((CIRCLE / 12) / dist)
                                      - (hex_i * (CIRCLE / 6) / dist);
@@ -357,7 +358,7 @@ static uint8_t eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
     uint16_t pos_in_map = test_pos->y * maplength + test_pos->x;
     uint8_t all_shaded = shade_hex(left_angle, right_angle_1st, middle_angle,
                                    shadows, pos_in_map, fov_map);
-    if (!all_shaded && 'X' == worldmap[pos_in_map])
+    if (!all_shaded && NULL != strchr(symbols_obstacle, worldmap[pos_in_map]))
     {
         if (set_shadow(left_angle, right_angle_1st, shadows))
         {
@@ -378,8 +379,9 @@ static uint8_t eval_position(uint16_t dist, uint16_t hex_i, char * fov_map,
 /* Update field of view in "fovmap" of "worldmap_input" as seen from "y"/"x".
  * Return 1 on malloc error, else 0.
  */
-extern uint8_t build_fov_map(uint8_t y, uint8_t x,
-                             char * fovmap, char * worldmap_input)
+extern uint8_t build_fov_map(uint8_t y, uint8_t x, char * fovmap,
+                             char * worldmap_input,
+                             const char * symbols_obstacle)
 {
     worldmap = worldmap_input;
     struct shadow_angle * shadows = NULL;
@@ -408,7 +410,8 @@ extern uint8_t build_fov_map(uint8_t y, uint8_t x,
             }
             if (mv_yx_in_dir_legal(dir_char, &test_pos))
             {
-                if (eval_position(circle_i, hex_i, fovmap, &test_pos, &shadows))
+                if (eval_position(circle_i, hex_i, fovmap, &test_pos, &shadows,
+                                  symbols_obstacle))
                 {
                     return 1;
                 }
@@ -637,6 +640,7 @@ extern void update_mem_and_memdepthmap_via_fovmap(char * map, char * fovmap,
 }
 
 /* USEFUL FOR DEBUGGING
+#include <stdio.h>
 extern void write_score_map()
 {
     FILE *f = fopen("score_map", "a");

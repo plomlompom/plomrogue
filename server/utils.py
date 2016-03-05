@@ -84,8 +84,14 @@ def prep_library():
 
 def c_pointer_to_bytearray(ba):
     """Return C char * pointer to ba."""
-    type = ctypes.c_char * len(ba)
-    return type.from_buffer(ba)
+    ty = ctypes.c_char * len(ba)
+    return ty.from_buffer(ba)
+
+
+def c_pointer_to_string(string):
+    """Return C char * pointer to string."""
+    p = ctypes.c_char_p(string.encode("ascii"))
+    return p
 
 
 def parse_command_line_arguments():
