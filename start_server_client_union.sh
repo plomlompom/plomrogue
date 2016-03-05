@@ -3,6 +3,9 @@
 # Abort the script on error.
 set -e
 
+# Run script in its own process group so SIGINT doesn't kill parent script.
+set -m
+
 # Don't let any log leftovers from before interfere.
 if [ -e ./log ]
 then
@@ -30,7 +33,7 @@ fi
 python3 ./roguelike-server "$@" > log 2>&1 &
 
 # Give server some time to start up and exit on error.
-sleep 0.01
+sleep 0.1
 
 # The client should not start if the server is not running. (If the server was
 # running in the foreground, any error exit of it so far would be caught by "set
@@ -39,14 +42,19 @@ kill -0 $! 2> /dev/null
 
 # Give server some time (max. 10 seconds) to generate its worldstate file.
 i=0
-while [ ! -e server_run/worldstate ] && [ $i -le 1000 ]
+echo -n "Waiting for server to set up world: "
+while [ ! -e server_run/worldstate ] && [ $i -le 100 ]
 do
-    sleep 0.01
+    echo -n '.'
+    sleep 0.1
     i=`expr $i + 1`
 done
+echo
 if [ ! -e server_run/worldstate ]
 then
-    echo "Server failed generating worldstate file within given time limit."
+    kill -9 $!
+    rm -rf server_run
+    echo "Server failed generating worldstate file within time limit."
     false
 fi
 

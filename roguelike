@@ -1,7 +1,9 @@
 #!/bin/sh
 
 # Wrapper to the script so that its suppressed server messages get read on exit.
+# and server_run/ get's deleted in any case.
 ./start_server_client_union.sh "$@"
+rm -rf ./server_run/
 
 # For some reason, mere sync won't ensure a log is written out, so wait a while.
 sync
