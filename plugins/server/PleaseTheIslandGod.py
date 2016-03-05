@@ -412,19 +412,17 @@ def write_metamap_A():
     ord_v = ord("v")
     length = world_db["MAP_LENGTH"]
     metamapA = bytearray(b'0' * (length ** 2))
-    for id in [id for id in world_db["Things"]
-                  if not world_db["Things"][id]["carried"]
-                  if world_db["Things"][id]["T_LIFEPOINTS"]
+    for tid in [tid for tid in world_db["Things"]
+                  if not world_db["Things"][tid]["carried"]
+                  if world_db["Things"][tid]["T_LIFEPOINTS"]
                   if world_db["Things"][0]["fovmap"][
-                       world_db["Things"][id]["T_POSY"] * length
-                       + world_db["Things"][id]["T_POSX"]] == ord_v]:
-        pos = (world_db["Things"][id]["T_POSY"] * length
-              + world_db["Things"][id]["T_POSX"])
-        if id == 0 or world_db["EMPATHY"]:
-            type = world_db["Things"][id]["T_TYPE"]
-            max_hp = world_db["ThingTypes"][type]["TT_LIFEPOINTS"]
+                       world_db["Things"][tid]["pos"]] == ord_v]:
+        pos = (world_db["Things"][tid]["pos"])
+        if tid == 0 or world_db["EMPATHY"]:
+            ttid = world_db["Things"][tid]["T_TYPE"]
+            max_hp = world_db["ThingTypes"][ttid]["TT_LIFEPOINTS"]
             third_of_hp = max_hp / 3
-            hp = world_db["Things"][id]["T_LIFEPOINTS"]
+            hp = world_db["Things"][tid]["T_LIFEPOINTS"]
             add = 0
             if hp > 2 * third_of_hp:
                  add = 2
@@ -444,16 +442,14 @@ def write_metamap_B():
     ord_v = ord("v")
     length = world_db["MAP_LENGTH"]
     metamapB = bytearray(b' ' * (length ** 2))
-    for id in [id for id in world_db["Things"]
-                  if not world_db["Things"][id]["carried"]
-                  if world_db["Things"][id]["T_LIFEPOINTS"]
+    for tid in [tid for tid in world_db["Things"]
+                  if not world_db["Things"][tid]["carried"]
+                  if world_db["Things"][tid]["T_LIFEPOINTS"]
                   if world_db["Things"][0]["fovmap"][
-                       world_db["Things"][id]["T_POSY"] * length
-                       + world_db["Things"][id]["T_POSX"]] == ord_v]:
-        pos = (world_db["Things"][id]["T_POSY"] * length
-              + world_db["Things"][id]["T_POSX"])
-        if id == 0 or world_db["EMPATHY"]:
-            action = world_db["Things"][id]["T_COMMAND"]
+                       world_db["Things"][tid]["pos"]] == ord_v]:
+        pos = (world_db["Things"][tid]["pos"])
+        if tid == 0 or world_db["EMPATHY"]:
+            action = world_db["Things"][tid]["T_COMMAND"]
             if 0 != action:
                 name = world_db["ThingActions"][action]["TA_NAME"]
             else:

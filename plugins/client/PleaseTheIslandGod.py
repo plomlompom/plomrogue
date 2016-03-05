@@ -118,9 +118,17 @@ def win_map(self):
                 elif char == "=":
                     attribute = col_lumber
                 bonus = (" ", attribute)
-                if len(world_data["metamap_A"]) > 0 and \
-                        world_data["metamap_A"][pos] == "2":
-                    bonus = ("+", col_stack)
+                if len(world_data["metamap_A"]) > 0:
+                    if world_data["metamap_A"][pos] == "2":
+                        bonus = ("+", col_stack)
+                    elif not world_data["metamap_A"][pos] in "01":
+                        c = world_data["metamap_B"][pos]
+                        if world_data["metamap_A"][pos] == "a":
+                            bonus = (c, col_health_bad)
+                        elif world_data["metamap_A"][pos] == "b":
+                            bonus = (c, col_health_middle)
+                        elif world_data["metamap_A"][pos] == "c":
+                            bonus = (c, col_health_good)
                 winmap += [(char, attribute), bonus]
         if y % 2 == 0:
             winmap += "  "
