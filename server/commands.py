@@ -441,7 +441,8 @@ def set_command(action):
 
 def play_wait():
     """Try "wait" as player's T_COMMAND."""
-    set_command("wait")
+    if world_db["WORLD_ACTIVE"]:
+        set_command("wait")
 
 
 def action_exists(action):
@@ -455,7 +456,7 @@ def action_exists(action):
 
 def play_pickup():
     """Try "pickup" as player's T_COMMAND"."""
-    if action_exists("pickup"):
+    if action_exists("pickup") and world_db["WORLD_ACTIVE"]:
         t = world_db["Things"][0]
         ids = [tid for tid in world_db["Things"] if tid
                if not world_db["Things"][tid]["carried"]
@@ -469,7 +470,7 @@ def play_pickup():
 
 def play_drop(str_arg):
     """Try "drop" as player's T_COMMAND, int(str_arg) as T_ARGUMENT / slot."""
-    if action_exists("drop"):
+    if action_exists("drop") and world_db["WORLD_ACTIVE"]:
         t = world_db["Things"][0]
         if 0 == len(t["T_CARRIES"]):
             log("You have NOTHING to drop in your inventory.")
@@ -484,7 +485,7 @@ def play_drop(str_arg):
 
 def play_use(str_arg):
     """Try "use" as player's T_COMMAND, int(str_arg) as T_ARGUMENT / slot."""
-    if action_exists("use"):
+    if action_exists("use") and world_db["WORLD_ACTIVE"]:
         t = world_db["Things"][0]
         if 0 == len(t["T_CARRIES"]):
             log("You have NOTHING to use in your inventory.")
@@ -507,7 +508,7 @@ def play_use(str_arg):
 
 def play_move(str_arg):
     """Try "move" as player's T_COMMAND, str_arg as T_ARGUMENT / direction."""
-    if action_exists("move"):
+    if action_exists("move") and world_db["WORLD_ACTIVE"]:
         from server.config.world_data import directions_db, symbols_passable
         t = world_db["Things"][0]
         if not str_arg in directions_db:
@@ -534,5 +535,6 @@ def play_move(str_arg):
 def command_ai():
     """Call ai() on player Thing, then turn_over()."""
     from server.ai import ai
-    ai(world_db["Things"][0])
-    turn_over()
+    if world_db["WORLD_ACTIVE"]:
+        ai(world_db["Things"][0])
+        turn_over()

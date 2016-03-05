@@ -286,7 +286,7 @@ def obey_lines_in_file(path, name, do_record=False):
 
 def try_worldstate_update():
     """Write worldstate file if io_db["worldstate_updateable"] is set."""
-    if io_db["worldstate_updateable"]:
+    if world_db["WORLD_ACTIVE"] and io_db["worldstate_updateable"]:
         string = ""
         for entry in io_db["worldstate_write_order"]:
             if entry[1] == "world_int":
