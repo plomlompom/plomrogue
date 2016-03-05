@@ -211,7 +211,7 @@ def actor_move(t):
             altar_msg_wait(100)
         elif world_db["FAVOR_STAGE"] == 1 and world_db["GOD_FAVOR"] >= 100:
             world_db["FAVOR_STAGE"] = 2
-            log(altar_msg_2)
+            log(altar_msg_1)
             id = id_setter(-1, "Things")
             world_db["Things"][id] = new_Thing(world_db["PLANT_1"],
                                                world_db["altar"])
