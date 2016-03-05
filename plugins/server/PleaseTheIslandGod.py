@@ -378,10 +378,12 @@ def play_use_attempt_hook(t, tt):
             log("You CAN'T use a " + world_db["ThingTypes"][type]["TT_NAME"]
                 + " without some wood in your inventory.")
             return False
-    elif (tt["TT_TOOL"] == "fertilizer"
-          and not world_db["MAP"][pos] == ord(".")):
-        log("Can only make soil out of NON-SOIL earth.")
-        return False
+        return True
+    elif tt["TT_TOOL"] == "fertilizer":
+        if not world_db["MAP"][pos] == ord("."):
+            log("Can only make soil out of NON-SOIL earth.")
+            return False
+        return True
     elif tt["TT_TOOL"] == "wood":
         log("To use wood, you NEED a carpentry tool.")
         return False
