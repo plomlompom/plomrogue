@@ -12,3 +12,4 @@ def query_mapcell():
              + str(world_data["map_center"][1])
     send(string)
     world_data["look"] = ["(polling)"]
+    world_data["look_scroll"] = 0
