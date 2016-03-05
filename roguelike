@@ -1,8 +1,16 @@
 #!/bin/sh
 
 # Wrapper to the script so that its suppressed server messages get read on exit.
-# and server_run/ get's deleted in any case.
 ./start_server_client_union.sh "$@"
+
+# Give server up to ten seconds to wind down properly.
+i=0
+while [ -e ./server_run/in ] && [ $i -le 100 ]
+do
+    echo 'QUIT' >> server_run/in
+    sleep 0.1
+    i=`expr $i + 1`
+done
 rm -rf ./server_run/
 
 # For some reason, mere sync won't ensure a log is written out, so wait a while.
