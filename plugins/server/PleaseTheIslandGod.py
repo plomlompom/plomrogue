@@ -375,7 +375,7 @@ def play_use_attempt_hook(t, tt):
                 wood_id = tid
                 break
         if wood_id == None:
-            log("You CAN'T use a " + world_db["ThingTypes"][type]["TT_NAME"]
+            log("You CAN'T use a " + tt["TT_NAME"]
                 + " without some wood in your inventory.")
             return False
         return True
@@ -387,7 +387,7 @@ def play_use_attempt_hook(t, tt):
     elif tt["TT_TOOL"] == "wood":
         log("To use wood, you NEED a carpentry tool.")
         return False
-    elif type == world_db["SLIPPERS"]:
+    elif tt == world_db["ThingTypes"][world_db["SLIPPERS"]]:
         return True
 
 def play_pickup_attempt_hook(t):
