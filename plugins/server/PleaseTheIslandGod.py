@@ -193,10 +193,10 @@ def actor_move(t):
     altar_msg_6 = "The Island God speaks to you: \"You have proven yourself " \
     "worthy of my respect. You were a good citizen to the island, and someti" \
     "mes a better steward to its inhabitants than me. The island shall miss " \
-    "you when you leave. But you have earned the right to do so. Take this" + \
-    world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"] + " and USE it w" \
-    "hen you please. It will take you to where you came from. (But do feel f" \
-    "ree to stay here as long as you like.)\""
+    "you when you leave. But you have earned the right to do so. Take this "  \
+    + world_db["ThingTypes"][world_db["SLIPPERS"]]["TT_NAME"] + " and USE i" \
+    "t when you please. It will take you to where you came from. (But do fe" \
+    "el free to stay here as long as you like.)\""
 
     def enter_altar():
         from server.new_thing import new_Thing
