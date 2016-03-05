@@ -42,6 +42,7 @@ def read_worldstate():
     if read_anew:
         # TODO: Hardcode order of necessary fields, ensure order dependencies.
         redraw_windows = True
+        old_inventory_size = len(world_data["inventory"])
         world_data["turn"] = int(turn_string)
         for entry in io["worldstate_read_order"]:
             if entry[1] == "int":
@@ -64,6 +65,9 @@ def read_worldstate():
                     world_data[entry[0]] += line
         if not world_data["look_mode"]:
             world_data["map_center"] = world_data["avatar_position"][:]
+        if world_data["inventory_selection"] > 0 and \
+                len(world_data["inventory"]) < old_inventory_size:
+            world_data["inventory_selection"] -= 1
     worldstate_file.close()
 read_worldstate.last_checked_mtime = -1
 
