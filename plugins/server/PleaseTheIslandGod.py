@@ -514,7 +514,7 @@ from server.config.commands import commands_db
 commands_db["GOD_FAVOR"] = (1, False, setter(None, "GOD_FAVOR", -32768, 32767))
 commands_db["TT_STORAGE"] = (1, False, setter("ThingType", "TT_STORAGE", 0, 255))
 commands_db["T_PLAYERDROP"] = (1, False, setter("Thing", "T_PLAYERDROP", 0, 1))
-commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 1))
+commands_db["FAVOR_STAGE"] = (1, False, setter(None, "FAVOR_STAGE", 0, 255))
 commands_db["SLIPPERS"] = (1, False, specialtypesetter("SLIPPERS"))
 commands_db["TOOL_0"] = (1, False, specialtypesetter("TOOL_0"))
 commands_db["TOOL_1"] = (1, False, specialtypesetter("TOOL_1"))
