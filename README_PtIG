@@ -1,0 +1,56 @@
+= PLEASE THE ISLAND GOD =
+
+== plot ==
+
+You're stranded on an island. To leave, you must please the God that rules it. This God sees the island's animals and plants as its children. So hacking and slashing through the wildlife won't do … 
+
+To please the Island God, you may feed its children, do missions provided by the Island God's altar, spread certain plants, curb or grow certain animal populations. All while trying not to die of hunger, or get killed by animals stronger than you. 
+
+You may have to displease the Island God occasionally – by hurting animals, or by chopping down trees (to build something else from the wood).
+
+== features ==
+
+* randomly generated hexagonal island map
+* turn-based
+* permadeath
+* [[FOV]] and map memory (for player ''and'' animals)
+* optional AI control of player avatar (as for the animals, optimized for survival – fleeing, food acqusition –, not for mission solving)
+* each move is recorded, game recording can be replayed
+* agricultural and animal population control missions
+
+=== stats ===
+* "H:" – health / hit points 
+* "S:" – satiation, starts at 0, falls every turn, is boosted by eating; with chance of hitpoint loss growing with its absolute value (there is over-eating, too!), and the chance of hitpoint gain via healing the closer it is to zero
+* "G:" – Island God's favor, as it grows, the Island God will grant new items/tools/abilities
+* player avatar health bar
+* (animals' health bars and activity symbols once the Island God grants the ability to read animals)
+
+=== terrain types ===
+* "~": sea
+* ".": earth
+* ":": soil (plants spread here, but only if no other plants have already)
+* "X": tree (can be chopped down)
+* "|": wall (can be built from wood, and be chopped down again)
+* "_": altar (talk to the Island God here)
+
+=== animal types ===
+* ",": bug (slow, few hitpoints, low food need, barely nutritious)
+* "d": dog (faster, more hitpoints, greater food need, quite nutritious)
+* "B": bear (very strong/fast, great food need, extremely nutritious)
+* "@": you, the human
+
+=== plant types ===
+* "#": unkraut (spreads fast, barely nutritious, useful only for bugs)
+* "*": god flower (spreads slow, not nutritious)
+* ")": god berry (spreads faster, quite nutritious)
+
+=== tools ===
+* "/": axe (chop trees to wood)
+* "-": knife (weaker axe)
+* "]": carpentry tool (turn wood to wall)
+* "[": fertilizer (turn earth to soil)
+* "0": surprise!
+
+== context ==
+
+This game was made for the [[7DRL_Challenge_2015]], based on the [https://github.com/plomlompom/plomrogue|''PlomRogue''] engine.

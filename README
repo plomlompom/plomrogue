@@ -1,32 +1,14 @@
 plomrogue
 =========
 
-plomlompom tries to build his own roguelike. It doesn't do much yet (although
-plomlompom has insanely ambitious long-term plans).
-
-You can move around a player on an island and meet different enemies. You have 5
-hitpoints to lose before death. Enemies start with different amounts of
-hitpoints, depending on their species. Dead enemies become dirt, skeletons, or
-food to consume (each turn reduces one's "satiation", and the further away from
-a healthy center it is, the smaller the chance of regaining lost hitpoints by
-healing, and the stronger the chance of suffering from hunger or  overfeeding
-and thereby losing hitpoints). Note that different kinds of movements/actions
-take different numbers of turns to finish.
-
-Enemies' AI is very dumb so far: Each turn, they look out for actors of
-different species to flee from (if their type starts out with more hitpoints
-than they have) or (if the opposite is the case) move towards for purposes of
-attack. If they see no enemy, they search for and consume "magic meat".
-
-Every move of yours re-writes a file "save" that describes the new state of the
-world, if more than 15 seconds have passed since its last writing. Once you
-re-start the game, the game state is recreated from the "save" file. To
-start over in a new world, simply delete this file.
+plomlompom tries to build his own roguelike engine. There is one game for it so
+far, which is loaded by default: "Please the Island God". See ./README_PtIG for
+details on it.
 
 System requirements / installation / running the game
 -----------------------------------------------------
 
-The game is expected to run:
+The engine is expected to run:
 - on Unix systems with a vt100-like terminal environment (xterm will do)
 - that contain the ncurses library
 - and Python3 (version >= 3.2.3).
@@ -35,7 +17,7 @@ To build it, this is furthermore necessary:
 - gcc (version >= 4.7.2); some llvm masked as gcc was tested successfully on OSX
 - libc library headers (libc6-dev?)
 
-To build and start, just run:
+To build and start it with the default game, just run:
 
 $ ./roguelike
 
@@ -46,11 +28,16 @@ script and start either or both of the two by hand if you please.
 Save files, replay game recording, starting over
 ------------------------------------------------
 
-By default, the game state is saved in the file ./save, and read from there on
-(server) restart. Another file name to use can be given with the -l option (i.e.
-start the game with "./roguelike -l alternate_savefile"). To start over in a new
-world, remove ./save, or use the -l option with the name of a file that does not
-exist yet.
+Every move of yours re-writes a file "save" that describes the new state of the
+world, if more than 15 seconds have passed since its last writing. Once you
+re-start plomrogue, the game state is recreated from the "save" file. To start
+over in a new world, simply delete this file and re-start the engine.
+
+The save file is called ./save be default, but another file name to use can be
+given with the -l option (i.e. start the game with "./roguelike -l
+alternate_savefile"). The -l option can also be used to start over in a new
+world whose state will be read and saved with the alternate file path, without
+overwriting other games saved in other save files.
 
 Once you start a new world, every game action of yours is appended to a file
 called "record_" plus the save file name. Run "./roguelike -s" to watch the
