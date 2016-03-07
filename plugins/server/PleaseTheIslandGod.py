@@ -529,7 +529,7 @@ server.config.commands.play_use_attempt_hook = play_use_attempt_hook
 server.config.commands.play_pickup_attempt_hook = play_pickup_attempt_hook
 
 import server.config.misc
-server.config.misc.make_map = make_map
+#server.config.misc.make_map = make_map
 server.config.misc.decrement_lifepoints = decrement_lifepoints
 server.config.misc.calc_effort = calc_effort
 
