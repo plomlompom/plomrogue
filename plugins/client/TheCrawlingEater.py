@@ -64,13 +64,10 @@ def win_map(self):
     return offset, winmap_size, winmap
 
 from client.config.windows import windows_config
-from client.windows import win_log, win_inventory, win_look, win_info
+from client.windows import win_log
 windows_config[:] = [
-    {"config": [1, 33], "func": win_info, "title": "Stats"},
-    {"config": [-7, 33], "func": win_log, "title": "Log"},
-    {"config": [4, 16], "func": win_inventory, "title": "Inventory"},
-    {"config": [4, 16], "func": win_look, "title": "Things here"},
-    {"config": [0, -34], "func": win_map, "title": "The Crawling Eater"}
+    {"config": [0, -34], "func": win_map, "title": "The Crawling Eater"},
+    {"config": [0, 33], "func": win_log, "title": "Log"}
 ]
 from client.window_management import set_windows
 set_windows()
