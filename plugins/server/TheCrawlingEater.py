@@ -65,7 +65,7 @@ def actor_move(t):
     else:
         if ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
             world_db["MAP"][pos] = ord(".")
-            t["STOMACH"] += 1
+            t["T_STOMACH"] += 1
 
 
 def turn_over():
@@ -155,7 +155,7 @@ def play_wait():
 #server.config.actions.actor_move_attempts_hook = actor_move_attempts_hook
 import server.config.world_data
 server.config.world_data.symbols_hide += "#"
-server.config.world_data.thing_defaults["STOMACH"] = 0
+server.config.world_data.thing_defaults["T_STOMACH"] = 0
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
 from server.config.commands import commands_db
@@ -165,6 +165,7 @@ commands_db["wait"] = (0, False, play_wait)
 commands_db["drop"] = (1, False, lambda x: None)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
+commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_STOMACH", 0, 255))
 from server.actions import actor_wait
 import server.config.actions
 server.config.actions.action_db = {
