@@ -151,8 +151,8 @@ def play_wait():
         world_db["set_command"]("wait")
 
 
-#import server.config.actions
-#server.config.actions.actor_move_attempts_hook = actor_move_attempts_hook
+from server.config.io import io_db
+io_db["worldstate_write_order"] += [["T_STOMACH", "player_int"]]
 import server.config.world_data
 server.config.world_data.symbols_hide += "#"
 server.config.world_data.thing_defaults["T_STOMACH"] = 0

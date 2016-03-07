@@ -3,6 +3,16 @@
 # see the file NOTICE in the root directory of the PlomRogue source package.
 
 
+def win_stomach(self):
+    winmap = []
+    curses.init_pair(80, curses.COLOR_YELLOW, curses.COLOR_RED)
+    for i in range(world_data["stomach"]):
+        winmap += [("#", curses.color_pair(80))]
+    winmap_size = [1, len(winmap)]
+    offset = [0, 0]
+    return offset, winmap_size, winmap
+
+
 def win_map(self):
     win_size = self.size
     offset = [0, 0]
@@ -63,11 +73,16 @@ def win_map(self):
             winmap += "  "
     return offset, winmap_size, winmap
 
+from client.config.world_data import world_data
+world_data["stomach"] = 0
+from client.config.io import io
+io["worldstate_read_order"] += [["stomach", "int"]]
 from client.config.windows import windows_config
 from client.windows import win_log
 windows_config[:] = [
     {"config": [0, -34], "func": win_map, "title": "The Crawling Eater"},
-    {"config": [0, 33], "func": win_log, "title": "Log"}
+    {"config": [1, 33], "func": win_stomach, "title": "stomach"},
+    {"config": [-2, 33], "func": win_log, "title": "log"}
 ]
 from client.window_management import set_windows
 set_windows()
