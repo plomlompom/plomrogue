@@ -1,3 +1,8 @@
+# This file is part of PlomRogue. PlomRogue is licensed under the GPL version 3
+# or any later version. For details on its copyright, license, and warranties,
+# see the file NOTICE in the root directory of the PlomRogue source package.
+
+
 from client.config.io import io
 from client.config.world_data import world_data
 world_data["log"][-2] = "STATS OVERVIEW: " \
