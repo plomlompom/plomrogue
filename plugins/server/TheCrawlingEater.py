@@ -30,12 +30,42 @@ def make_map():
             i_trees += 1
 
 
-def actor_move_attempts_hook(t, move_result, pos):
-    from server.utils import rand
-    if ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
-        world_db["MAP"][pos] = ord(".")
-        return True
-    return False
+def actor_move(t):
+    from server.build_fov_map import build_fov_map
+    from server.utils import mv_yx_in_dir_legal, rand
+    from server.config.world_data import directions_db, symbols_passable
+    passable = False
+    move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
+                                     t["T_POSY"], t["T_POSX"])
+    if 1 == move_result[0]:
+        pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+        hitted = [tid for tid in world_db["Things"]
+                  if world_db["Things"][tid] != t
+                  if world_db["Things"][tid]["T_LIFEPOINTS"]
+                  if world_db["Things"][tid]["T_POSY"] == move_result[1]
+                  if world_db["Things"][tid]["T_POSX"] == move_result[2]]
+        if len(hitted):
+            hit_id = hitted[0]
+            hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
+            if t == world_db["Things"][0]:
+                hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
+                log("You BUMP into " + hitted_name + ".")
+            elif 0 == hit_id:
+                hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+                log(hitter_name +" BUMPS into you.")
+            return
+        passable = chr(world_db["MAP"][pos]) in symbols_passable
+    direction = [direction for direction in directions_db
+                 if directions_db[direction] == chr(t["T_ARGUMENT"])][0]
+    if passable:
+        t["T_POSY"] = move_result[1]
+        t["T_POSX"] = move_result[2]
+        t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
+        build_fov_map(t)
+    else:
+        if ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
+            world_db["MAP"][pos] = ord(".")
+            t["STOMACH"] += 1
 
 
 def turn_over():
@@ -109,7 +139,7 @@ def command_ai():
 def set_command(action):
     """Set player's T_COMMAND, then call turn_over()."""
     tid = [x for x in world_db["ThingActions"]
-          if world_db["ThingActions"][x]["TA_NAME"] == action][0]
+           if world_db["ThingActions"][x]["TA_NAME"] == action][0]
     world_db["Things"][0]["T_COMMAND"] = tid
     world_db["turn_over"]()
 world_db["set_command"] = set_command
@@ -121,10 +151,11 @@ def play_wait():
         world_db["set_command"]("wait")
 
 
-import server.config.actions
-server.config.actions.actor_move_attempts_hook = actor_move_attempts_hook
+#import server.config.actions
+#server.config.actions.actor_move_attempts_hook = actor_move_attempts_hook
 import server.config.world_data
 server.config.world_data.symbols_hide += "#"
+server.config.world_data.thing_defaults["STOMACH"] = 0
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
 from server.config.commands import commands_db
@@ -134,5 +165,11 @@ commands_db["wait"] = (0, False, play_wait)
 commands_db["drop"] = (1, False, lambda x: None)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
+from server.actions import actor_wait
+import server.config.actions
+server.config.actions.action_db = {
+    "actor_wait": actor_wait,
+    "actor_move": actor_move
+}
 
 strong_write(io_db["file_out"], "PLUGIN TheCrawlingEater\n")
