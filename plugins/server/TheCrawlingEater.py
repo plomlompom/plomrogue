@@ -40,7 +40,7 @@ def actor_move_attempts_hook(t, move_result, pos):
 
 def play_move_attempt_hook(t, direction, pos):
     if ord("#") == world_db["MAP"][pos]:
-        log("You bite.")
+        log("You EAT.")
         world_db["Things"][0]["T_ARGUMENT"] = direction
         set_command("move")
         return True
