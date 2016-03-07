@@ -1,0 +1,71 @@
+def win_map(self):
+    win_size = self.size
+    offset = [0, 0]
+    for i in range(2):
+        if world_data["map_center"][i] * (i + 1) > win_size[i] / 2 and \
+                win_size[i] < world_data["map_size"] * (i + 1):
+            if world_data["map_center"][i] * (i + 1) \
+                < world_data["map_size"] * (i + 1) - win_size[i] / 2:
+                offset[i] = world_data["map_center"][i] * (i + 1) \
+                    - int(win_size[i] / 2)
+                if i == 1:
+                    offset[1] = offset[1] + world_data["map_center"][0] % 2
+            else:
+                offset[i] = world_data["map_size"] * (i + 1) - win_size[i] + i
+    winmap_size = [world_data["map_size"], world_data["map_size"] * 2 + 1]
+    winmap = []
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    col_unknown = curses.color_pair(1)
+    col_mem_obstacle = curses.color_pair(2)
+    col_mem = curses.color_pair(2)
+    col_ground = curses.color_pair(3)
+    col_stone = curses.color_pair(4)
+    col_earth = curses.color_pair(3)
+    col_player = curses.color_pair(1)
+    for y in range(world_data["map_size"]):
+        for x in range(world_data["map_size"]):
+            pos = y * world_data["map_size"] + x
+            char = world_data["fov_map"][pos]
+            if world_data["look_mode"] and y == world_data["map_center"][0] \
+                    and x == world_data["map_center"][1]:
+                if char == " ":
+                    char = world_data["mem_map"][pos]
+                winmap += [(char, curses.A_REVERSE), ("?", curses.A_REVERSE)]
+                continue
+            if char == " ":
+                char = world_data["mem_map"][pos]
+                attribute = col_mem
+                if char == " ":
+                    attribute = col_unknown
+                elif char == "X" or char == "#":
+                    attribute = col_mem_obstacle
+                bonus = (" ", attribute)
+                winmap += [(char, attribute), bonus]
+            else:
+                attribute = col_stone
+                if char == ".":
+                    attribute = col_ground
+                if char == "#":
+                    attribute = col_earth
+                elif char == "@":
+                    attribute = col_player
+                bonus = (" ", attribute)
+                winmap += [(char, attribute), bonus]
+        if y % 2 == 0:
+            winmap += "  "
+    return offset, winmap_size, winmap
+
+from client.config.windows import windows_config
+from client.windows import win_log, win_inventory, win_look, win_info
+windows_config[:] = [
+    {"config": [1, 33], "func": win_info, "title": "Stats"},
+    {"config": [-7, 33], "func": win_log, "title": "Log"},
+    {"config": [4, 16], "func": win_inventory, "title": "Inventory"},
+    {"config": [4, 16], "func": win_look, "title": "Things here"},
+    {"config": [0, -34], "func": win_map, "title": "The Crawling Eater"}
+]
+from client.window_management import set_windows
+set_windows()

@@ -55,3 +55,5 @@ import server.config.world_data
 server.config.world_data.symbols_hide += "#"
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
+
+strong_write(io_db["file_out"], "PLUGIN TheCrawlingEater\n")
