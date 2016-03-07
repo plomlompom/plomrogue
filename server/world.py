@@ -69,7 +69,6 @@ def turn_over():
     from server.thingproliferation import thingproliferation
     from server.io import try_worldstate_update
     from server.config.io import io_db
-    id = 0
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         proliferable_map = world_db["MAP"][:]
         for tid in [tid for tid in world_db["Things"]
