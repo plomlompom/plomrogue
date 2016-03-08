@@ -53,7 +53,6 @@ def play_move(str_arg):
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
             if ord("%") == world_db["MAP"][pos] or \
                     ord("#") == world_db["MAP"][pos]:
-                log("You EAT.")
                 world_db["Things"][0]["T_ARGUMENT"] = d
                 world_db["set_command"]("move")
                 return
@@ -97,10 +96,15 @@ def actor_move(t):
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
     else:
-        if ord("%") == world_db["MAP"][pos] and 0 == int(rand.next() % 2):
+        if t["T_STOMACH"] >= 32:
+            if t == world_db["Things"][0]:
+                log("You're too FULL to eat.")
+        elif ord("%") == world_db["MAP"][pos] and 0 == int(rand.next() % 2):
+            log("You EAT.")
             world_db["MAP"][pos] = ord("_")
             t["T_STOMACH"] += 1
-        if ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
+        elif ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
+            log("You EAT.")
             world_db["MAP"][pos] = ord("_")
             t["T_STOMACH"] += 2
 
@@ -136,6 +140,7 @@ def turn_over():
     from server.update_map_memory import update_map_memory
     from server.io import try_worldstate_update
     from server.config.io import io_db
+    from server.utils import rand
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         for tid in [tid for tid in world_db["Things"]]:
             if not tid in world_db["Things"]:
@@ -158,6 +163,9 @@ def turn_over():
                         action(Thing)
                         Thing["T_COMMAND"] = 0
                         Thing["T_PROGRESS"] = 0
+                    if Thing["T_STOMACH"] > 16:
+                        if 0 == (rand.next() % (33 - Thing["T_STOMACH"])):
+                            action_db["actor_drop"](Thing)
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
