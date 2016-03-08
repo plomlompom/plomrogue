@@ -33,13 +33,14 @@ def win_map(self):
     curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
     col_unknown = curses.color_pair(1)
     col_mem_obstacle = curses.color_pair(2)
     col_mem = curses.color_pair(2)
     col_stone = curses.color_pair(1)
     col_dirt = curses.color_pair(4)
     col_earth = curses.color_pair(3)
-    col_player = curses.color_pair(1)
+    col_player = curses.color_pair(5)
     for y in range(world_data["map_size"]):
         for x in range(world_data["map_size"]):
             pos = y * world_data["map_size"] + x
@@ -60,6 +61,7 @@ def win_map(self):
                 bonus = (" ", attribute)
                 winmap += [(char, attribute), bonus]
             else:
+                bonus_char = " "
                 attribute = col_stone
                 if char == ".":
                     attribute = col_dirt
@@ -69,9 +71,10 @@ def win_map(self):
                     attribute = col_earth
                 elif char == "#":
                     attribute = col_dirt
-                elif char == "@":
+                elif char == "o":
                     attribute = col_player
-                bonus = (" ", attribute)
+                    bonus_char = char
+                bonus = (bonus_char, attribute)
                 winmap += [(char, attribute), bonus]
         if y % 2 == 0:
             winmap += "  "
