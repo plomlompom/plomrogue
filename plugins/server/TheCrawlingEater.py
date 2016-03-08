@@ -107,6 +107,8 @@ def actor_move(t):
             log("You EAT.")
             world_db["MAP"][pos] = ord("_")
             t["T_STOMACH"] += 4
+        if t["T_STOMACH"] > 32:
+            t["T_STOMACH"] = 32
 
 
 def make_map():
