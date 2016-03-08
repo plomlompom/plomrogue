@@ -6,28 +6,62 @@
 from server.config.world_data import world_db
 
 
-def make_map():
-    from server.make_map import new_pos, is_neighbor
-    from server.utils import rand
-    world_db["MAP"] = bytearray(b'X' * (world_db["MAP_LENGTH"] ** 2))
-    length = world_db["MAP_LENGTH"]
-    add_half_width = (not (length % 2)) * int(length / 2)
-    world_db["MAP"][int((length ** 2) / 2) + add_half_width] = ord("#")
-    while (1):
-        y, x, pos = new_pos()
-        if "X" == chr(world_db["MAP"][pos]) and is_neighbor((y, x), "#"):
-            if y == 0 or y == (length - 1) or x == 0 or x == (length - 1):
-                break
-            world_db["MAP"][pos] = ord("#")
-    n_trees = int((length ** 2) / 16)
-    i_trees = 0
-    while (i_trees <= n_trees):
-        single_allowed = rand.next() % 32
-        y, x, pos = new_pos()
-        if "#" == chr(world_db["MAP"][pos]) \
-                and ((not single_allowed) or is_neighbor((y, x), ".")):
-            world_db["MAP"][pos] = ord(".")
-            i_trees += 1
+def play_drop():
+    if action_exists("drop") and world_db["WORLD_ACTIVE"]:
+        if world_db["Things"][0]["T_STOMACH"] < 1:
+            log("Nothing to drop from empty stomach.")
+            return
+        world_db["set_command"]("drop")
+
+
+def actor_drop(t):
+    if t["T_STOMACH"] < 1:
+        return
+    if t == world_db["Things"][0]:
+        log("You DEFECATE.")
+    terrain = world_db["MAP"][t["pos"]]
+    t["T_STOMACH"] -= 1
+    if chr(terrain) == "_":
+        world_db["MAP"][t["pos"]] = ord(".")
+    elif chr(terrain) == ".":
+        world_db["MAP"][t["pos"]] = ord(":")
+    elif chr(terrain) == ":":
+        world_db["MAP"][t["pos"]] = ord("%")
+    elif chr(terrain) == "%":
+        world_db["MAP"][t["pos"]] = ord("#")
+    elif chr(terrain) == "#":
+        world_db["MAP"][t["pos"]] = ord("X")
+    elif chr(terrain) == "X":
+        t["T_LIFEPOINTS"] = 0
+        if t == world_db["Things"][0]:
+            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+            log("You SUFFOCATE.")
+
+
+def play_move(str_arg):
+    """Try "move" as player's T_COMMAND, str_arg as T_ARGUMENT / direction."""
+    if action_exists("move") and world_db["WORLD_ACTIVE"]:
+        from server.config.world_data import directions_db, symbols_passable
+        t = world_db["Things"][0]
+        if not str_arg in directions_db:
+            print("Illegal move direction string.")
+            return
+        d = ord(directions_db[str_arg])
+        from server.utils import mv_yx_in_dir_legal
+        move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
+        if 1 == move_result[0]:
+            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+            if ord("%") == world_db["MAP"][pos] or \
+                    ord("#") == world_db["MAP"][pos]:
+                log("You EAT.")
+                world_db["Things"][0]["T_ARGUMENT"] = d
+                world_db["set_command"]("move")
+                return
+            if chr(world_db["MAP"][pos]) in symbols_passable:
+                world_db["Things"][0]["T_ARGUMENT"] = d
+                world_db["set_command"]("move")
+                return
+        log("You CAN'T eat your way through there.")
 
 
 def actor_move(t):
@@ -63,9 +97,36 @@ def actor_move(t):
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
     else:
-        if ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
-            world_db["MAP"][pos] = ord(".")
+        if ord("%") == world_db["MAP"][pos] and 0 == int(rand.next() % 2):
+            world_db["MAP"][pos] = ord("_")
             t["T_STOMACH"] += 1
+        if ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
+            world_db["MAP"][pos] = ord("_")
+            t["T_STOMACH"] += 2
+
+
+def make_map():
+    from server.make_map import new_pos, is_neighbor
+    from server.utils import rand
+    world_db["MAP"] = bytearray(b'X' * (world_db["MAP_LENGTH"] ** 2))
+    length = world_db["MAP_LENGTH"]
+    add_half_width = (not (length % 2)) * int(length / 2)
+    world_db["MAP"][int((length ** 2) / 2) + add_half_width] = ord("#")
+    while (1):
+        y, x, pos = new_pos()
+        if "X" == chr(world_db["MAP"][pos]) and is_neighbor((y, x), "#"):
+            if y == 0 or y == (length - 1) or x == 0 or x == (length - 1):
+                break
+            world_db["MAP"][pos] = ord("#")
+    n_trees = int((length ** 2) / 16)
+    i_trees = 0
+    while (i_trees <= n_trees):
+        single_allowed = rand.next() % 32
+        y, x, pos = new_pos()
+        if "#" == chr(world_db["MAP"][pos]) \
+                and ((not single_allowed) or is_neighbor((y, x), "_")):
+            world_db["MAP"][pos] = ord("_")
+            i_trees += 1
 
 
 def turn_over():
@@ -103,31 +164,6 @@ def turn_over():
 world_db["turn_over"] = turn_over
 
 
-def play_move(str_arg):
-    """Try "move" as player's T_COMMAND, str_arg as T_ARGUMENT / direction."""
-    if action_exists("move") and world_db["WORLD_ACTIVE"]:
-        from server.config.world_data import directions_db, symbols_passable
-        t = world_db["Things"][0]
-        if not str_arg in directions_db:
-            print("Illegal move direction string.")
-            return
-        d = ord(directions_db[str_arg])
-        from server.utils import mv_yx_in_dir_legal
-        move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
-        if 1 == move_result[0]:
-            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            if ord("#") == world_db["MAP"][pos]:
-                log("You EAT.")
-                world_db["Things"][0]["T_ARGUMENT"] = d
-                world_db["set_command"]("move")
-                return
-            if chr(world_db["MAP"][pos]) in symbols_passable:
-                world_db["Things"][0]["T_ARGUMENT"] = d
-                world_db["set_command"]("move")
-                return
-        log("You CAN'T eat your way through there.")
-
-
 def command_ai():
     """Call ai() on player Thing, then turn_over()."""
     from server.ai import ai
@@ -154,15 +190,17 @@ def play_wait():
 from server.config.io import io_db
 io_db["worldstate_write_order"] += [["T_STOMACH", "player_int"]]
 import server.config.world_data
-server.config.world_data.symbols_hide += "#"
+server.config.world_data.symbols_hide = "%#X"
+server.config.world_data.symbols_passable = "_.:"
 server.config.world_data.thing_defaults["T_STOMACH"] = 0
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
 from server.config.commands import commands_db
+commands_db["THINGS_HERE"] = (2, True, lambda x, y: None)
 commands_db["ai"] = (0, False, command_ai)
 commands_db["move"] = (1, False, play_move)
 commands_db["wait"] = (0, False, play_wait)
-commands_db["drop"] = (1, False, lambda x: None)
+commands_db["drop"] = (0, False, play_drop)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
 commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_STOMACH", 0, 255))
@@ -170,7 +208,8 @@ from server.actions import actor_wait
 import server.config.actions
 server.config.actions.action_db = {
     "actor_wait": actor_wait,
-    "actor_move": actor_move
+    "actor_move": actor_move,
+    "actor_drop": actor_drop
 }
 
 strong_write(io_db["file_out"], "PLUGIN TheCrawlingEater\n")

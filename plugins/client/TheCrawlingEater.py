@@ -36,8 +36,8 @@ def win_map(self):
     col_unknown = curses.color_pair(1)
     col_mem_obstacle = curses.color_pair(2)
     col_mem = curses.color_pair(2)
-    col_ground = curses.color_pair(3)
-    col_stone = curses.color_pair(4)
+    col_stone = curses.color_pair(1)
+    col_dirt = curses.color_pair(4)
     col_earth = curses.color_pair(3)
     col_player = curses.color_pair(1)
     for y in range(world_data["map_size"]):
@@ -62,9 +62,13 @@ def win_map(self):
             else:
                 attribute = col_stone
                 if char == ".":
-                    attribute = col_ground
-                if char == "#":
+                    attribute = col_dirt
+                elif char == ":":
                     attribute = col_earth
+                elif char == "%":
+                    attribute = col_earth
+                elif char == "#":
+                    attribute = col_dirt
                 elif char == "@":
                     attribute = col_player
                 bonus = (" ", attribute)
@@ -86,3 +90,6 @@ windows_config[:] = [
 ]
 from client.window_management import set_windows
 set_windows()
+from client.commands import command_sender
+from client.config.commands import commands
+commands["D"] = (command_sender("drop"),)

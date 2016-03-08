@@ -7,8 +7,10 @@ TA_ID 1
 TA_NAME wait
 
 TA_ID 2
-TA_EFFORT 5
 TA_NAME move
+
+TA_ID 3
+TA_NAME drop
 
 TT_ID 0
 TT_START_NUMBER 1
