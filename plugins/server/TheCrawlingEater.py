@@ -102,11 +102,11 @@ def actor_move(t):
         elif ord("%") == world_db["MAP"][pos] and 0 == int(rand.next() % 2):
             log("You EAT.")
             world_db["MAP"][pos] = ord("_")
-            t["T_STOMACH"] += 1
+            t["T_STOMACH"] += 3
         elif ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
             log("You EAT.")
             world_db["MAP"][pos] = ord("_")
-            t["T_STOMACH"] += 2
+            t["T_STOMACH"] += 4
 
 
 def make_map():
@@ -133,10 +133,25 @@ def make_map():
             i_trees += 1
 
 
+def calc_effort(ta, t):
+    from server.utils import mv_yx_in_dir_legal
+    if ta["TA_NAME"] == "move":
+        move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
+                                         t["T_POSY"], t["T_POSX"])
+        if 1 == move_result[0]:
+            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+            terrain = chr(world_db["MAP"][pos])
+            if terrain == ".":
+                return 2
+            elif terrain == ":":
+                return 4
+    return 1
+world_db["calc_effort"] = calc_effort
+
+
 def turn_over():
     from server.ai import ai
     from server.config.actions import action_db
-    from server.config.misc import calc_effort
     from server.update_map_memory import update_map_memory
     from server.io import try_worldstate_update
     from server.config.io import io_db
@@ -157,8 +172,8 @@ def turn_over():
                     taid = [a for a in world_db["ThingActions"]
                               if a == Thing["T_COMMAND"]][0]
                     ThingAction = world_db["ThingActions"][taid]
-                    effort = calc_effort(ThingAction, Thing)
-                    if Thing["T_PROGRESS"] == effort:
+                    effort = world_db["calc_effort"](ThingAction, Thing)
+                    if Thing["T_PROGRESS"] >= effort:
                         action = action_db["actor_" + ThingAction["TA_NAME"]]
                         action(Thing)
                         Thing["T_COMMAND"] = 0
