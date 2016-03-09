@@ -13,10 +13,10 @@ def win_bladder(self):
     return offset, winmap_size, winmap
 
 
-def win_stomach(self):
+def win_bowel(self):
     winmap = []
     curses.init_pair(80, curses.COLOR_YELLOW, curses.COLOR_RED)
-    for i in range(world_data["stomach"]):
+    for i in range(world_data["bowel"]):
         winmap += [("#", curses.color_pair(80))]
     winmap_size = [1, len(winmap)]
     offset = [0, 0]
@@ -85,7 +85,7 @@ def win_map(self):
                     attribute = col_dirt
                 elif char == "~":
                     attribute = col_water
-                elif char == "o":
+                elif char == "@":
                     attribute = col_player
                     bonus = (char, attribute)
                 winmap += [(char, attribute), bonus]
@@ -94,16 +94,16 @@ def win_map(self):
     return offset, winmap_size, winmap
 
 from client.config.world_data import world_data
-world_data["stomach"] = 0
+world_data["bowel"] = 0
 world_data["bladder"] = 0
 from client.config.io import io
-io["worldstate_read_order"] += [["stomach", "int"]]
+io["worldstate_read_order"] += [["bowel", "int"]]
 io["worldstate_read_order"] += [["bladder", "int"]]
 from client.config.windows import windows_config
 from client.windows import win_log
 windows_config[:] = [
     {"config": [0, -34], "func": win_map, "title": "The Crawling Eater"},
-    {"config": [1, 33], "func": win_stomach, "title": "stomach"},
+    {"config": [1, 33], "func": win_bowel, "title": "bowel"},
     {"config": [1, 33], "func": win_bladder, "title": "bladder"},
     {"config": [-4, 33], "func": win_log, "title": "log"}
 ]

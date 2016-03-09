@@ -9,7 +9,7 @@ from server.config.world_data import world_db
 def play_drink():
     if action_exists("drink") and world_db["WORLD_ACTIVE"]:
         if ord("~") != world_db["MAP"][world_db["Things"][0]["pos"]]:
-            log("Nothing to drink here.")
+            log("NOTHING to drink here.")
             return
         world_db["set_command"]("drink")
 
@@ -22,19 +22,19 @@ def actor_drink(t):
 
 def play_drop():
     if action_exists("drop") and world_db["WORLD_ACTIVE"]:
-        if world_db["Things"][0]["T_STOMACH"] < 1:
-            log("Nothing to drop from empty stomach.")
+        if world_db["Things"][0]["T_BOWEL"] < 1:
+            log("Nothing to drop from empty bowel.")
             return
         world_db["set_command"]("drop")
 
 
 def actor_drop(t):
-    if t["T_STOMACH"] < 1:
+    if t["T_BOWEL"] < 1:
         return
     if t == world_db["Things"][0]:
-        log("You DEFECATE.")
+        log("You DROP waste.")
     terrain = world_db["MAP"][t["pos"]]
-    t["T_STOMACH"] -= 1
+    t["T_BOWEL"] -= 1
     if chr(terrain) == "_":
         world_db["MAP"][t["pos"]] = ord(".")
     elif chr(terrain) == ".":
@@ -110,19 +110,19 @@ def actor_move(t):
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
     else:
-        if t["T_STOMACH"] >= 32:
+        if t["T_BOWEL"] >= 32:
             if t == world_db["Things"][0]:
                 log("You're too FULL to eat.")
         elif ord("%") == world_db["MAP"][pos] and 0 == int(rand.next() % 2):
             log("You EAT.")
             world_db["MAP"][pos] = ord("_")
-            t["T_STOMACH"] += 3
+            t["T_BOWEL"] += 3
         elif ord("#") == world_db["MAP"][pos] and 0 == int(rand.next() % 5):
             log("You EAT.")
             world_db["MAP"][pos] = ord("_")
-            t["T_STOMACH"] += 4
-        if t["T_STOMACH"] > 32:
-            t["T_STOMACH"] = 32
+            t["T_BOWEL"] += 4
+        if t["T_BOWEL"] > 32:
+            t["T_BOWEL"] = 32
 
 
 def make_map():
@@ -203,8 +203,8 @@ def turn_over():
                         action(Thing)
                         Thing["T_COMMAND"] = 0
                         Thing["T_PROGRESS"] = 0
-                    if Thing["T_STOMACH"] > 16:
-                        if 0 == (rand.next() % (33 - Thing["T_STOMACH"])):
+                    if Thing["T_BOWEL"] > 16:
+                        if 0 == (rand.next() % (33 - Thing["T_BOWEL"])):
                             action_db["actor_drop"](Thing)
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
@@ -236,12 +236,12 @@ def play_wait():
 
 
 from server.config.io import io_db
-io_db["worldstate_write_order"] += [["T_STOMACH", "player_int"]]
+io_db["worldstate_write_order"] += [["T_BOWEL", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "%#X"
 server.config.world_data.symbols_passable = "_.:~"
-server.config.world_data.thing_defaults["T_STOMACH"] = 0
+server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
@@ -254,7 +254,7 @@ commands_db["drop"] = (0, False, play_drop)
 commands_db["drink"] = (0, False, play_drink)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
-commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_STOMACH", 0, 255))
+commands_db["T_BOWEL"] = (1, False, setter("Thing", "T_BOWEL", 0, 255))
 commands_db["T_BLADDER"] = (1, False, setter("Thing", "T_BLADDER", 0, 255))
 from server.actions import actor_wait
 import server.config.actions
