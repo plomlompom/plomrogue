@@ -11,11 +11,15 @@ def play_drink():
         if ord("~") != world_db["MAP"][world_db["Things"][0]["pos"]]:
             log("NOTHING to drink here.")
             return
+        elif world_db["Things"][0]["T_BLADDER"] >= 32:
+            log("You're too FULL to drink more.")
+            return
         world_db["set_command"]("drink")
 
 
 def actor_drink(t):
-    if ord("~") == world_db["MAP"][world_db["Things"][0]["pos"]]:
+    if ord("~") == world_db["MAP"][world_db["Things"][0]["pos"]] and \
+            t["T_BLADDER"] < 32:
         log("You DRINK.")
         t["T_BLADDER"] += 1
 
