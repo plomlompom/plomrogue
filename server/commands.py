@@ -314,8 +314,8 @@ def command_taname(name):
     The name must match a valid thing action function. If after the name
     setting no ThingAction with name "wait" remains, call set_world_inactive().
     """
-    if name == "wait" or name == "move" or name == "use" or name == "drop" \
-       or name == "pickup":
+    from server.config.commands import commands_db
+    if name in commands_db and name.islower():
         world_db["ThingActions"][command_taid.id]["TA_NAME"] = name
         if 1 == world_db["WORLD_ACTIVE"]:
             for id in world_db["ThingActions"]:
