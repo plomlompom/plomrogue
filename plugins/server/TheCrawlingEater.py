@@ -84,6 +84,10 @@ def play_move(str_arg):
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
             if ord("%") == world_db["MAP"][pos] or \
                     ord("#") == world_db["MAP"][pos]:
+                if t["T_BOWEL"] >= 32:
+                    if t == world_db["Things"][0]:
+                        log("You're too FULL to eat.")
+                    return
                 world_db["Things"][0]["T_ARGUMENT"] = d
                 world_db["set_command"]("move")
                 return
@@ -128,8 +132,7 @@ def actor_move(t):
         build_fov_map(t)
     else:
         if t["T_BOWEL"] >= 32:
-            if t == world_db["Things"][0]:
-                log("You're too FULL to eat.")
+            return
         elif ord("%") == world_db["MAP"][pos] and 0 == int(rand.next() % 2):
             log("You EAT.")
             world_db["MAP"][pos] = ord("_")
@@ -223,6 +226,9 @@ def turn_over():
                     if Thing["T_BOWEL"] > 16:
                         if 0 == (rand.next() % (33 - Thing["T_BOWEL"])):
                             action_db["actor_drop"](Thing)
+                    if Thing["T_BLADDER"] > 16:
+                        if 0 == (rand.next() % (33 - Thing["T_BLADDER"])):
+                            action_db["actor_pee"](Thing)
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
