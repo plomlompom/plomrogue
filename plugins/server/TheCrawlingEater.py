@@ -124,15 +124,24 @@ def make_map():
             if y == 0 or y == (length - 1) or x == 0 or x == (length - 1):
                 break
             world_db["MAP"][pos] = ord("#")
-    n_trees = int((length ** 2) / 16)
-    i_trees = 0
-    while (i_trees <= n_trees):
+    n_ground = int((length ** 2) / 16)
+    i_ground = 0
+    while (i_ground <= n_ground):
         single_allowed = rand.next() % 32
         y, x, pos = new_pos()
         if "#" == chr(world_db["MAP"][pos]) \
                 and ((not single_allowed) or is_neighbor((y, x), "_")):
             world_db["MAP"][pos] = ord("_")
-            i_trees += 1
+            i_ground += 1
+    n_water = int((length ** 2) / 64)
+    i_water = 0
+    while (i_water <= n_water):
+        single_allowed = rand.next() % 32
+        y, x, pos = new_pos()
+        if "_" == chr(world_db["MAP"][pos]) \
+                and ((not single_allowed) or is_neighbor((y, x), "~")):
+            world_db["MAP"][pos] = ord("~")
+            i_water += 1
 
 
 def calc_effort(ta, t):
