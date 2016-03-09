@@ -20,6 +20,23 @@ def actor_drink(t):
         t["T_BLADDER"] += 1
 
 
+def play_pee():
+    if action_exists("pee") and world_db["WORLD_ACTIVE"]:
+        if world_db["Things"][0]["T_BLADDER"] < 1:
+            log("Nothing to drop from empty bladder.")
+            return
+        world_db["set_command"]("pee")
+
+
+def actor_pee(t):
+    if t["T_BLADDER"] < 1:
+        return
+    if t == world_db["Things"][0]:
+        log("You LOSE fluid.")
+    terrain = world_db["MAP"][t["pos"]]
+    t["T_BLADDER"] -= 1
+
+
 def play_drop():
     if action_exists("drop") and world_db["WORLD_ACTIVE"]:
         if world_db["Things"][0]["T_BOWEL"] < 1:
@@ -252,6 +269,7 @@ commands_db["move"] = (1, False, play_move)
 commands_db["wait"] = (0, False, play_wait)
 commands_db["drop"] = (0, False, play_drop)
 commands_db["drink"] = (0, False, play_drink)
+commands_db["pee"] = (0, False, play_pee)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
 commands_db["T_BOWEL"] = (1, False, setter("Thing", "T_BOWEL", 0, 255))
@@ -263,6 +281,7 @@ server.config.actions.action_db = {
     "actor_move": actor_move,
     "actor_drop": actor_drop,
     "actor_drink": actor_drink,
+    "actor_pee": actor_pee,
 }
 
 strong_write(io_db["file_out"], "PLUGIN TheCrawlingEater\n")

@@ -113,3 +113,4 @@ from client.commands import command_sender
 from client.config.commands import commands
 commands["S"] = (command_sender("drop"),)
 commands["D"] = (command_sender("drink"),)
+commands["P"] = (command_sender("pee"),)
