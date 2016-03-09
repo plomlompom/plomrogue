@@ -6,6 +6,20 @@
 from server.config.world_data import world_db
 
 
+def play_drink():
+    if action_exists("drink") and world_db["WORLD_ACTIVE"]:
+        if ord("~") != world_db["MAP"][world_db["Things"][0]["pos"]]:
+            log("Nothing to drink here.")
+            return
+        world_db["set_command"]("drink")
+
+
+def actor_drink(t):
+    if ord("~") == world_db["MAP"][world_db["Things"][0]["pos"]]:
+        log("You DRINK.")
+        t["T_BLADDER"] += 1
+
+
 def play_drop():
     if action_exists("drop") and world_db["WORLD_ACTIVE"]:
         if world_db["Things"][0]["T_STOMACH"] < 1:
@@ -223,10 +237,12 @@ def play_wait():
 
 from server.config.io import io_db
 io_db["worldstate_write_order"] += [["T_STOMACH", "player_int"]]
+io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "%#X"
-server.config.world_data.symbols_passable = "_.:"
+server.config.world_data.symbols_passable = "_.:~"
 server.config.world_data.thing_defaults["T_STOMACH"] = 0
+server.config.world_data.thing_defaults["T_BLADDER"] = 0
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
 from server.config.commands import commands_db
@@ -235,15 +251,18 @@ commands_db["ai"] = (0, False, command_ai)
 commands_db["move"] = (1, False, play_move)
 commands_db["wait"] = (0, False, play_wait)
 commands_db["drop"] = (0, False, play_drop)
+commands_db["drink"] = (0, False, play_drink)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
 commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_STOMACH", 0, 255))
+commands_db["T_BLADDER"] = (1, False, setter("Thing", "T_BLADDER", 0, 255))
 from server.actions import actor_wait
 import server.config.actions
 server.config.actions.action_db = {
     "actor_wait": actor_wait,
     "actor_move": actor_move,
-    "actor_drop": actor_drop
+    "actor_drop": actor_drop,
+    "actor_drink": actor_drink,
 }
 
 strong_write(io_db["file_out"], "PLUGIN TheCrawlingEater\n")
