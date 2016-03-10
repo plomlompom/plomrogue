@@ -212,6 +212,7 @@ def save_world():
             string = string + "T_ID " + str(tid) + "\n"
             for carried in sorted(world_db["Things"][tid]["T_CARRIES"]):
                 string = string + "T_CARRIES " + str(carried) + "\n"
+    string = string + io_db["hook_save"]()
     string = string + "SEED_RANDOMNESS " + str(rand.seed) + "\n" + \
         "WORLD_ACTIVE " + str(world_db["WORLD_ACTIVE"])
     atomic_write(io_db["path_save"], string)

@@ -31,5 +31,6 @@ io_db = {
         ["MAP_LENGTH", "world_int"],
         [write_fov_map, "func"],
         [write_mem_map, "func"]
-    ]
+    ],
+    "hook_save": lambda: "",
 }
