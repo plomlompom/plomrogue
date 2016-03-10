@@ -43,16 +43,41 @@ def win_map(self):
     curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
-    curses.init_pair(6, curses.COLOR_BLACK, curses.COLOR_BLUE)
+    curses.init_pair(5, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    curses.init_pair(6, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+    curses.init_pair(7, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+    curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLUE)
+    curses.init_pair(10, curses.COLOR_BLACK, curses.COLOR_CYAN)
     col_unknown = curses.color_pair(1)
     col_mem_obstacle = curses.color_pair(2)
     col_mem = curses.color_pair(2)
     col_stone = curses.color_pair(1)
-    col_dirt = curses.color_pair(4)
-    col_earth = curses.color_pair(3)
     col_player = curses.color_pair(5)
-    col_water = curses.color_pair(6)
+    col_ground = curses.color_pair(6)
+    col_ground_wet = curses.color_pair(8)
+    col_ground_wetter = curses.color_pair(9)
+    col_ground_wettest = curses.color_pair(10)
+    col_dirt = curses.color_pair(3)
+    col_dirt_wet = curses.color_pair(8)
+    col_dirt_wetter = curses.color_pair(9)
+    col_dirt_wettest = curses.color_pair(10)
+    col_earth = curses.color_pair(3)
+    col_earth_wet = curses.color_pair(8)
+    col_earth_wetter = curses.color_pair(9)
+    col_earth_wettest = curses.color_pair(10)
+    col_wall_dirt = curses.color_pair(4)
+    col_wall_dirt_wet = curses.color_pair(8)
+    col_wall_dirt_wetter = curses.color_pair(9)
+    col_wall_dirt_wettest = curses.color_pair(10)
+    col_wall_earth = curses.color_pair(4)
+    col_wall_earth_wet = curses.color_pair(8)
+    col_wall_earth_wetter = curses.color_pair(9)
+    col_wall_earth_wettest = curses.color_pair(10)
+    col_wall_stone = curses.color_pair(1)
+    col_wall_stone_wet = curses.color_pair(8)
+    col_wall_stone_wetter = curses.color_pair(9)
+    col_wall_stone_wettest = curses.color_pair(10)
     for y in range(world_data["map_size"]):
         for x in range(world_data["map_size"]):
             pos = y * world_data["map_size"] + x
@@ -68,26 +93,92 @@ def win_map(self):
                 attribute = col_mem
                 if char == " ":
                     attribute = col_unknown
-                elif char == "X" or char == "#":
+                elif char in "%#XABCDEFGHI":
                     attribute = col_mem_obstacle
+                    if char in "ADG":
+                        char = "%"
+                    elif char in "BEH":
+                        char = "#"
+                    elif char in "CFI":
+                        char = "X"
+                elif char in "LO":
+                    char = "~"
+                elif char in "JMP":
+                    char = "."
+                elif char in "KNQ":
+                    char = ":"
                 bonus = (" ", attribute)
                 winmap += [(char, attribute), bonus]
             else:
                 attribute = col_stone
                 bonus = " "
+                if char == "_":
+                    attribute = col_ground
+                elif char == "~":
+                    attribute = col_ground_wet
+                elif char == "L":
+                    char = "~"
+                    attribute = col_ground_wetter
+                elif char == "O":
+                    char = "~"
+                    attribute = col_ground_wettest
                 if char == ".":
                     attribute = col_dirt
+                if char == "J":
+                    char = "."
+                    attribute = col_dirt_wet
+                if char == "M":
+                    char = "."
+                    attribute = col_dirt_wetter
+                if char == "P":
+                    char = "."
+                    attribute = col_dirt_wettest
                 elif char == ":":
                     attribute = col_earth
+                elif char == "K":
+                    char = ":"
+                    attribute = col_earth_wet
+                elif char == "N":
+                    char = ":"
+                    attribute = col_earth_wetter
+                elif char == "Q":
+                    char = ":"
+                    attribute = col_earth_wettest
                 elif char == "%":
-                    attribute = col_earth
+                    attribute = col_wall_dirt
+                elif char == "A":
+                    char = "%"
+                    attribute = col_wall_dirt_wet
+                elif char == "D":
+                    char = "%"
+                    attribute = col_wall_dirt_wetter
+                elif char == "G":
+                    char = "%"
+                    attribute = col_wall_dirt_wettest
                 elif char == "#":
-                    attribute = col_dirt
-                elif char == "~":
-                    attribute = col_water
+                    attribute = col_wall_earth
+                elif char == "B":
+                    char = "#"
+                    attribute = col_wall_earth_wet
+                elif char == "E":
+                    char = "#"
+                    attribute = col_wall_earth_wetter
+                elif char == "H":
+                    char = "#"
+                    attribute = col_wall_earth_wettest
+                elif char == "X":
+                    attribute = col_wall_stone
+                elif char == "C":
+                    char = "X"
+                    attribute = col_wall_stone_wet
+                elif char == "F":
+                    char = "X"
+                    attribute = col_wall_stone_wetter
+                elif char == "I":
+                    char = "X"
+                    attribute = col_wall_stone_wettest
                 elif char == "@":
                     attribute = col_player
-                    bonus = (char, attribute)
                 winmap += [(char, attribute), bonus]
         if y % 2 == 0:
             winmap += "  "
