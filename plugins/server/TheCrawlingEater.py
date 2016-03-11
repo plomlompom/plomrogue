@@ -127,6 +127,9 @@ def actor_move(t):
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
+        if world_db["MAP"][t["pos"]] == ord("-"):
+            world_db["die"](t, "You FALL in a hole, and die.")
+            return
         build_fov_map(t)
     else:
         height = world_db["MAP"][pos] - ord("0")
@@ -150,13 +153,18 @@ def actor_move(t):
 def catch_air(t):
     if (world_db["wetmap"][t["pos"]] - ord("0")) \
             + (world_db["MAP"][t["pos"]] - ord("0")) > 4:
-        t["T_LIFEPOINTS"] = 0
-        if t == world_db["Things"][0]:
-            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            log("You SUFFOCATE.")
+        world_db["die"](t, "You SUFFOCATE")
         return False
     return True
 world_db["catch_air"] = catch_air
+
+
+def die(t, message):
+    t["T_LIFEPOINTS"] = 0
+    if t == world_db["Things"][0]:
+        t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+        log(message)
+world_db["die"] = die
 
 
 def make_map():
@@ -241,16 +249,22 @@ def turn_over():
                             action_db["actor_pee"](Thing)
         water = 0
         positions_to_wet = []
-        for i in range(world_db["MAP_LENGTH"] ** 2):
-            if world_db["MAP"][i] == ord("0") \
-                    and world_db["wetmap"][i] < ord("5"):
-                positions_to_wet += [i]
+        for pos in range(world_db["MAP_LENGTH"] ** 2):
+            if world_db["MAP"][pos] == ord("0") \
+                    and world_db["wetmap"][pos] < ord("5"):
+                positions_to_wet += [pos]
         i_positions_to_wet = len(positions_to_wet)
         for pos in range(world_db["MAP_LENGTH"] ** 2):
-            if 0 == rand.next() % 5 \
-                    and ((world_db["wetmap"][pos] > ord("0")
-                          and not world_db["MAP"][pos] == ord("0"))
-                         or world_db["wetmap"][pos] > ord("1")):
+            wetness = world_db["wetmap"][pos] - ord("0")
+            height = world_db["MAP"][pos] - ord("0")
+            if height == 0 and wetness > 0 \
+                    and 0 == rand.next() % ((2 ** 16) / (2 ** wetness)):
+                world_db["MAP"][pos] = ord("-")
+                if pos in positions_to_wet:
+                    positions_to_wet.remove(pos)
+                    i_positions_to_wet -= 1
+            if ((wetness > 0 and height != 0) or wetness > 1) \
+                and 0 == rand.next() % 5:
                 world_db["wetmap"][pos] -= 1
                 water += 1
                 i_positions_to_wet -= 1
@@ -340,7 +354,7 @@ io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
 io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "345"
-server.config.world_data.symbols_passable = "012"
+server.config.world_data.symbols_passable = "012-"
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
 world_db["wetmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)

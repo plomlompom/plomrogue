@@ -31,6 +31,7 @@ def win_map(self):
         "3": "%",
         "4": "#",
         "5": "X",
+        "-": "O",
     }
     win_size = self.size
     offset = [0, 0]
