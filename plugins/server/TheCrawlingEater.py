@@ -197,11 +197,8 @@ def calc_effort(ta, t):
                                          t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            terrain = chr(world_db["MAP"][pos])
-            if terrain == "1":
-                return 2
-            elif terrain == "2":
-                return 4
+            narrowness = world_db["MAP"][pos] - ord("0")
+            return 2 ** narrowness
     return 1
 world_db["calc_effort"] = calc_effort
 
