@@ -8,7 +8,7 @@ from server.config.world_data import world_db
 
 def play_drink():
     if action_exists("drink") and world_db["WORLD_ACTIVE"]:
-        if not chr(world_db["MAP"][world_db["Things"][0]["pos"]]) in "~LO":
+        if not chr(world_db["MAP"][world_db["Things"][0]["pos"]]) == "~":
             log("NOTHING to drink here.")
             return
         elif world_db["Things"][0]["T_BLADDER"] >= 32:
@@ -19,16 +19,12 @@ def play_drink():
 
 def actor_drink(t):
     pos = world_db["Things"][0]["pos"]
-    if chr(world_db["MAP"][pos]) in "~LO" and \
-            t["T_BLADDER"] < 32:
+    if chr(world_db["MAP"][pos]) == "~" and t["T_BLADDER"] < 32:
         log("You DRINK.")
         t["T_BLADDER"] += 1
-        if chr(world_db["MAP"][pos]) == "~":
+        world_db["wetmap"][pos] -= 1
+        if world_db["wetmap"][pos] == 48:
             world_db["MAP"][pos] = ord("_")
-        elif chr(world_db["MAP"][pos]) == "L":
-            world_db["MAP"][pos] = ord("~")
-        elif chr(world_db["MAP"][pos]) == "O":
-            world_db["MAP"][pos] = ord("L")
 
 
 def play_pee():
@@ -46,43 +42,10 @@ def actor_pee(t):
         log("You LOSE fluid.")
     t["T_BLADDER"] -= 1
     terrain = world_db["MAP"][t["pos"]]
+    world_db["wetmap"][t["pos"]] += 1
     if terrain == ord("_"):
         world_db["MAP"][t["pos"]] = ord("~")
-    elif terrain == ord("~"):
-        world_db["MAP"][t["pos"]] = ord("L")
-    elif terrain == ord("L"):
-        world_db["MAP"][t["pos"]] = ord("L") + 3
-    elif terrain == ord("."):
-        world_db["MAP"][t["pos"]] = ord("J")
-    elif terrain == ord("J"):
-        world_db["MAP"][t["pos"]] = ord("J") + 3
-    elif terrain == ord("J") + 3:
-        world_db["MAP"][t["pos"]] = ord("J") + 6
-    elif terrain == ord(":"):
-        world_db["MAP"][t["pos"]] = ord("K")
-    elif terrain == ord("K"):
-        world_db["MAP"][t["pos"]] = ord("K") + 3
-    elif terrain == ord("K") + 3:
-        world_db["MAP"][t["pos"]] = ord("K") + 6
-    elif terrain == ord("%"):
-        world_db["MAP"][t["pos"]] = ord("A")
-    elif terrain == ord("A"):
-        world_db["MAP"][t["pos"]] = ord("A") + 3
-    elif terrain == ord("A") + 3:
-        world_db["MAP"][t["pos"]] = ord("A") + 6
-    elif terrain == ord("#"):
-        world_db["MAP"][t["pos"]] = ord("B")
-    elif terrain == ord("B"):
-        world_db["MAP"][t["pos"]] = ord("B") + 3
-    elif terrain == ord("B") + 3:
-        world_db["MAP"][t["pos"]] = ord("B") + 6
-    elif terrain == ord("X"):
-        world_db["MAP"][t["pos"]] = ord("C")
-    elif terrain == ord("C"):
-        world_db["MAP"][t["pos"]] = ord("C") + 3
-    elif terrain == ord("C") + 3:
-        world_db["MAP"][t["pos"]] = ord("C") + 6
-    elif chr(terrain) in "GHIOPQ":
+    elif world_db["wetmap"][t["pos"]] > 51:
         t["T_LIFEPOINTS"] = 0
         if t == world_db["Things"][0]:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
@@ -104,47 +67,17 @@ def actor_drop(t):
         log("You DROP waste.")
     terrain = world_db["MAP"][t["pos"]]
     t["T_BOWEL"] -= 1
-    if terrain == ord("_"):
+    if chr(terrain) in "_~":
         world_db["MAP"][t["pos"]] = ord(".")
-    elif terrain == ord("~"):
-        world_db["MAP"][t["pos"]] = ord("J")
-    elif terrain == ord("L") :
-        world_db["MAP"][t["pos"]] = ord("J") + 3
-    elif terrain == ord("L") + 3:
-        world_db["MAP"][t["pos"]] = ord("J") + 6
     elif terrain == ord("."):
         world_db["MAP"][t["pos"]] = ord(":")
-    elif terrain == ord("J"):
-        world_db["MAP"][t["pos"]] = ord("K")
-    elif terrain == ord("J") + 3:
-        world_db["MAP"][t["pos"]] = ord("K") + 3
-    elif terrain == ord("J") + 6:
-        world_db["MAP"][t["pos"]] = ord("K") + 6
     elif terrain == ord(":"):
         world_db["MAP"][t["pos"]] = ord("%")
-    elif terrain == ord("K"):
-        world_db["MAP"][t["pos"]] = ord("A")
-    elif terrain == ord("K") + 3:
-        world_db["MAP"][t["pos"]] = ord("A") + 3
-    elif terrain == ord("K") + 6:
-        world_db["MAP"][t["pos"]] = ord("A") + 6
     elif terrain == ord("%"):
         world_db["MAP"][t["pos"]] = ord("#")
-    elif terrain == ord("A"):
-        world_db["MAP"][t["pos"]] = ord("B")
-    elif terrain == ord("A") + 3:
-        world_db["MAP"][t["pos"]] = ord("B") + 3
-    elif terrain == ord("A") + 6:
-        world_db["MAP"][t["pos"]] = ord("B") + 6
     elif terrain == ord("#"):
         world_db["MAP"][t["pos"]] = ord("X")
-    elif terrain == ord("B"):
-        world_db["MAP"][t["pos"]] = ord("C")
-    elif terrain == ord("B") + 3:
-        world_db["MAP"][t["pos"]] = ord("C") + 3
-    elif terrain == ord("B") + 6:
-        world_db["MAP"][t["pos"]] = ord("C") + 6
-    elif chr(terrain) in "XCFI":
+    elif terrain == ord("X"):
         t["T_LIFEPOINTS"] = 0
         if t == world_db["Things"][0]:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
@@ -164,7 +97,7 @@ def play_move(str_arg):
         move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            if chr(world_db["MAP"][pos]) in "%#ABDEGH":
+            if chr(world_db["MAP"][pos]) in "%#":
                 if t["T_BOWEL"] >= 32:
                     if t == world_db["Things"][0]:
                         log("You're too FULL to eat.")
@@ -212,30 +145,17 @@ def actor_move(t):
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
     else:
-        if t["T_BOWEL"] >= 32:
+        if t["T_BOWEL"] >= 32 or chr(world_db["MAP"][pos]) == "X":
             return
-        elif chr(world_db["MAP"][pos]) in "%ADG" and 0 == int(rand.next() % 2):
-            log("You EAT.")
-            if world_db["MAP"][pos] == ord("%"):
-                world_db["MAP"][pos] = ord("_")
-            elif world_db["MAP"][pos] == ord("A"):
-                world_db["MAP"][pos] = ord("~")
-            elif world_db["MAP"][pos] == ord("A") + 3:
-                world_db["MAP"][pos] = ord("L")
-            elif world_db["MAP"][pos] == ord("A") + 6:
-                world_db["MAP"][pos] = ord("L") + 3
+        elif chr(world_db["MAP"][pos]) == "%" and 0 == int(rand.next() % 2):
             t["T_BOWEL"] += 3
         elif chr(world_db["MAP"][pos]) in "#BEH" and 0 == int(rand.next() % 5):
-            log("You EAT.")
-            if world_db["MAP"][pos] == ord("#"):
-                world_db["MAP"][pos] = ord("_")
-            elif world_db["MAP"][pos] == ord("B"):
-                world_db["MAP"][pos] = ord("~")
-            elif world_db["MAP"][pos] == ord("B") + 3:
-                world_db["MAP"][pos] = ord("L")
-            elif world_db["MAP"][pos] == ord("B") + 6:
-                world_db["MAP"][pos] = ord("L") + 3
             t["T_BOWEL"] += 4
+        log("You EAT.")
+        if world_db["wetmap"][pos] == 48:
+            world_db["MAP"][pos] = ord("_")
+        else:
+            world_db["MAP"][pos] = ord("~")
         if t["T_BOWEL"] > 32:
             t["T_BOWEL"] = 32
 
@@ -268,8 +188,9 @@ def make_map():
         single_allowed = rand.next() % 32
         y, x, pos = new_pos()
         if "_" == chr(world_db["MAP"][pos]) \
-                and ((not single_allowed) or is_neighbor((y, x), "O")):
-            world_db["MAP"][pos] = ord("O")
+                and ((not single_allowed) or is_neighbor((y, x), "~")):
+            world_db["MAP"][pos] = ord("~")
+            world_db["wetmap"][pos] = 51
             i_water += 1
 
 
@@ -353,14 +274,60 @@ def play_wait():
         world_db["set_command"]("wait")
 
 
+def save_wetmap():
+    length = world_db["MAP_LENGTH"]
+    string = ""
+    for i in range(length):
+        line = world_db["wetmap"][i * length:(i * length) + length].decode()
+        string = string + "WETMAP" + " "  + str(i) + " " + line + "\n"
+    return string
+
+
+def wetmapset(str_int, mapline):
+    def valid_map_line(str_int, mapline):
+        from server.utils import integer_test
+        val = integer_test(str_int, 0, 255)
+        if None != val:
+            if val >= world_db["MAP_LENGTH"]:
+                print("Illegal value for map line number.")
+            elif len(mapline) != world_db["MAP_LENGTH"]:
+                print("Map line length is unequal map width.")
+            else:
+                return val
+        return None
+    val = valid_map_line(str_int, mapline)
+    if None != val:
+        length = world_db["MAP_LENGTH"]
+        if not world_db["wetmap"]:
+            m = bytearray(b' ' * (length ** 2))
+        else:
+            m = world_db["wetmap"]
+        m[val * length:(val * length) + length] = mapline.encode()
+        if not world_db["wetmap"]:
+            world_db["wetmap"] = m
+
+
+def write_wetmap():
+    from server.worldstate_write_helpers import write_map
+    length = world_db["MAP_LENGTH"]
+    visible_wetmap = bytearray(b' ' * (length ** 2))
+    for i in range(length ** 2):
+        if world_db["Things"][0]["fovmap"][i] == ord('v'):
+            visible_wetmap[i] = world_db["wetmap"][i]
+    return write_map(visible_wetmap, world_db["MAP_LENGTH"])
+
+
 from server.config.io import io_db
 io_db["worldstate_write_order"] += [["T_BOWEL", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
+io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "%#X" + "ABC" + "DEF" + "GHI"
 server.config.world_data.symbols_passable = "_.:" + "~JK" + "LMN" + "OPQ"
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
+world_db["wetmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)
+io_db["hook_save"] = save_wetmap
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
 from server.config.commands import commands_db
@@ -375,6 +342,7 @@ commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
 commands_db["T_BOWEL"] = (1, False, setter("Thing", "T_BOWEL", 0, 255))
 commands_db["T_BLADDER"] = (1, False, setter("Thing", "T_BLADDER", 0, 255))
+commands_db["WETMAP"] = (2, False, wetmapset)
 from server.actions import actor_wait
 import server.config.actions
 server.config.actions.action_db = {

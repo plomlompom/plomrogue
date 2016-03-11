@@ -93,20 +93,8 @@ def win_map(self):
                 attribute = col_mem
                 if char == " ":
                     attribute = col_unknown
-                elif char in "%#XABCDEFGHI":
+                elif char in "%#X":
                     attribute = col_mem_obstacle
-                    if char in "ADG":
-                        char = "%"
-                    elif char in "BEH":
-                        char = "#"
-                    elif char in "CFI":
-                        char = "X"
-                elif char in "LO":
-                    char = "~"
-                elif char in "JMP":
-                    char = "."
-                elif char in "KNQ":
-                    char = ":"
                 bonus = (" ", attribute)
                 winmap += [(char, attribute), bonus]
             else:
@@ -115,68 +103,52 @@ def win_map(self):
                 if char == "_":
                     attribute = col_ground
                 elif char == "~":
-                    attribute = col_ground_wet
-                elif char == "L":
-                    char = "~"
-                    attribute = col_ground_wetter
-                elif char == "O":
-                    char = "~"
-                    attribute = col_ground_wettest
+                    if world_data["wetmap"][pos] == "1":
+                        attribute = col_ground_wet
+                    if world_data["wetmap"][pos] == "2":
+                        attribute = col_ground_wetter
+                    if world_data["wetmap"][pos] == "3":
+                        attribute = col_ground_wettest
                 if char == ".":
                     attribute = col_dirt
-                if char == "J":
-                    char = "."
-                    attribute = col_dirt_wet
-                if char == "M":
-                    char = "."
-                    attribute = col_dirt_wetter
-                if char == "P":
-                    char = "."
-                    attribute = col_dirt_wettest
+                    if world_data["wetmap"][pos] == "1":
+                        attribute = col_dirt_wet
+                    if world_data["wetmap"][pos] == "2":
+                        attribute = col_dirt_wetter
+                    if world_data["wetmap"][pos] == "3":
+                        attribute = col_dirt_wettest
                 elif char == ":":
                     attribute = col_earth
-                elif char == "K":
-                    char = ":"
-                    attribute = col_earth_wet
-                elif char == "N":
-                    char = ":"
-                    attribute = col_earth_wetter
-                elif char == "Q":
-                    char = ":"
-                    attribute = col_earth_wettest
+                    if world_data["wetmap"][pos] == "1":
+                        attribute = col_earth_wet
+                    if world_data["wetmap"][pos] == "2":
+                        attribute = col_earth_wetter
+                    if world_data["wetmap"][pos] == "3":
+                        attribute = col_earth_wettest
                 elif char == "%":
                     attribute = col_wall_dirt
-                elif char == "A":
-                    char = "%"
-                    attribute = col_wall_dirt_wet
-                elif char == "D":
-                    char = "%"
-                    attribute = col_wall_dirt_wetter
-                elif char == "G":
-                    char = "%"
-                    attribute = col_wall_dirt_wettest
+                    if world_data["wetmap"][pos] == "1":
+                        attribute = col_wall_dirt_wet
+                    if world_data["wetmap"][pos] == "2":
+                        attribute = col_wall_dirt_wetter
+                    if world_data["wetmap"][pos] == "3":
+                        attribute = col_wall_dirt_wettest
                 elif char == "#":
                     attribute = col_wall_earth
-                elif char == "B":
-                    char = "#"
-                    attribute = col_wall_earth_wet
-                elif char == "E":
-                    char = "#"
-                    attribute = col_wall_earth_wetter
-                elif char == "H":
-                    char = "#"
-                    attribute = col_wall_earth_wettest
+                    if world_data["wetmap"][pos] == "1":
+                        attribute = col_wall_earth_wet
+                    if world_data["wetmap"][pos] == "2":
+                        attribute = col_wall_earth_wetter
+                    if world_data["wetmap"][pos] == "3":
+                        attribute = col_wall_earth_wettest
                 elif char == "X":
                     attribute = col_wall_stone
-                elif char == "C":
-                    char = "X"
-                    attribute = col_wall_stone_wet
-                elif char == "F":
-                    char = "X"
-                    attribute = col_wall_stone_wetter
-                elif char == "I":
-                    char = "X"
-                    attribute = col_wall_stone_wettest
+                    if world_data["wetmap"][pos] == "1":
+                        attribute = col_wall_stone_wet
+                    if world_data["wetmap"][pos] == "2":
+                        attribute = col_wall_stone_wetter
+                    if world_data["wetmap"][pos] == "3":
+                        attribute = col_wall_stone_wettest
                 elif char == "@":
                     attribute = col_player
                 winmap += [(char, attribute), bonus]
@@ -187,9 +159,11 @@ def win_map(self):
 from client.config.world_data import world_data
 world_data["bowel"] = 0
 world_data["bladder"] = 0
+world_data["wetmap"] = " " * (world_data["map_size"] ** 2)
 from client.config.io import io
 io["worldstate_read_order"] += [["bowel", "int"]]
 io["worldstate_read_order"] += [["bladder", "int"]]
+io["worldstate_read_order"] += [["wetmap", "map"]]
 from client.config.windows import windows_config
 from client.windows import win_log
 windows_config[:] = [
