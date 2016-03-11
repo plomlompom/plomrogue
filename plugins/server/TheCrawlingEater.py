@@ -43,7 +43,7 @@ def actor_pee(t):
         return
     if t == world_db["Things"][0]:
         log("You LOSE fluid.")
-    if not world_db["catch_air"](t):
+    if not world_db["test_air"](t):
         return
     t["T_BLADDER"] -= 1
     world_db["wetmap"][t["pos"]] += 1
@@ -62,7 +62,7 @@ def actor_drop(t):
         return
     if t == world_db["Things"][0]:
         log("You DROP waste.")
-    if not world_db["catch_air"](t):
+    if not world_db["test_air"](t):
         return
     world_db["MAP"][t["pos"]] += 1
     t["T_BOWEL"] -= 1
@@ -127,9 +127,6 @@ def actor_move(t):
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
-        if world_db["MAP"][t["pos"]] == ord("-"):
-            world_db["die"](t, "You FALL in a hole, and die.")
-            return
         build_fov_map(t)
     else:
         height = world_db["MAP"][pos] - ord("0")
@@ -149,14 +146,21 @@ def actor_move(t):
                 t["T_BOWEL"] = 32
 
 
+def test_hole(t):
+    if world_db["MAP"][t["pos"]] == ord("-"):
+        world_db["die"](t, "You FALL in a hole, and die.")
+        return False
+    return True
+world_db["test_hole"] = test_hole
 
-def catch_air(t):
+
+def test_air(t):
     if (world_db["wetmap"][t["pos"]] - ord("0")) \
-            + (world_db["MAP"][t["pos"]] - ord("0")) > 4:
+            + (world_db["MAP"][t["pos"]] - ord("0")) > 5:
         world_db["die"](t, "You SUFFOCATE")
         return False
     return True
-world_db["catch_air"] = catch_air
+world_db["test_air"] = test_air
 
 
 def die(t, message):
@@ -189,7 +193,7 @@ def make_map():
                 and ((not single_allowed) or is_neighbor((y, x), "0")):
             world_db["MAP"][pos] = ord("0")
             i_ground += 1
-    n_water = int((length ** 2) / 64)
+    n_water = int((length ** 2) / 16)
     i_water = 0
     while (i_water <= n_water):
         y, x, pos = new_pos()
@@ -223,30 +227,32 @@ def turn_over():
         for tid in [tid for tid in world_db["Things"]]:
             if not tid in world_db["Things"]:
                 continue
-            Thing = world_db["Things"][tid]
-            if Thing["T_LIFEPOINTS"]:
-                if not Thing["T_COMMAND"]:
-                    update_map_memory(Thing)
+            t = world_db["Things"][tid]
+            if t["T_LIFEPOINTS"]:
+                if not (world_db["test_air"](t) and world_db["test_hole"](t)):
+                    continue
+                if not t["T_COMMAND"]:
+                    update_map_memory(t)
                     if 0 == tid:
                         return
-                    ai(Thing)
-                if Thing["T_LIFEPOINTS"]:
-                    Thing["T_PROGRESS"] += 1
+                    ai(t)
+                if t["T_LIFEPOINTS"]:
+                    t["T_PROGRESS"] += 1
                     taid = [a for a in world_db["ThingActions"]
-                              if a == Thing["T_COMMAND"]][0]
+                              if a == t["T_COMMAND"]][0]
                     ThingAction = world_db["ThingActions"][taid]
-                    effort = world_db["calc_effort"](ThingAction, Thing)
-                    if Thing["T_PROGRESS"] >= effort:
+                    effort = world_db["calc_effort"](ThingAction, t)
+                    if t["T_PROGRESS"] >= effort:
                         action = action_db["actor_" + ThingAction["TA_NAME"]]
-                        action(Thing)
-                        Thing["T_COMMAND"] = 0
-                        Thing["T_PROGRESS"] = 0
-                    if Thing["T_BOWEL"] > 16:
-                        if 0 == (rand.next() % (33 - Thing["T_BOWEL"])):
-                            action_db["actor_drop"](Thing)
-                    if Thing["T_BLADDER"] > 16:
-                        if 0 == (rand.next() % (33 - Thing["T_BLADDER"])):
-                            action_db["actor_pee"](Thing)
+                        action(t)
+                        t["T_COMMAND"] = 0
+                        t["T_PROGRESS"] = 0
+                    if t["T_BOWEL"] > 16:
+                        if 0 == (rand.next() % (33 - t["T_BOWEL"])):
+                            action_db["actor_drop"](t)
+                    if t["T_BLADDER"] > 16:
+                        if 0 == (rand.next() % (33 - t["T_BLADDER"])):
+                            action_db["actor_pee"](t)
         water = 0
         positions_to_wet = []
         for pos in range(world_db["MAP_LENGTH"] ** 2):
@@ -258,7 +264,7 @@ def turn_over():
             wetness = world_db["wetmap"][pos] - ord("0")
             height = world_db["MAP"][pos] - ord("0")
             if height == 0 and wetness > 0 \
-                    and 0 == rand.next() % ((2 ** 16) / (2 ** wetness)):
+                    and 0 == rand.next() % ((2 ** 12) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("-")
                 if pos in positions_to_wet:
                     positions_to_wet.remove(pos)
