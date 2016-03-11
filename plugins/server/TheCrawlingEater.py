@@ -248,22 +248,29 @@ def turn_over():
                     if Thing["T_BLADDER"] > 16:
                         if 0 == (rand.next() % (33 - Thing["T_BLADDER"])):
                             action_db["actor_pee"](Thing)
-        wetness = 0
+        water = 0
+        positions_to_wet = []
         for i in range(world_db["MAP_LENGTH"] ** 2):
-            if world_db["MAP"][i] != ord("~") and world_db["wetmap"][i] > 48 \
-                    and 0 == (rand.next() % 5):
-                world_db["wetmap"][i] -= 1
-                wetness += 1
-        if wetness > 0:
-            positions_to_wet = []
-            for i in range(world_db["MAP_LENGTH"] ** 2):
-                if chr(world_db["MAP"][i]) in "_~":
-                    positions_to_wet += [i]
-            while wetness > 0:
+            if chr(world_db["MAP"][i]) in "_~" and world_db["wetmap"][i] < 51:
+                positions_to_wet += [i]
+        i_positions_to_wet = len(positions_to_wet)
+        for pos in range(world_db["MAP_LENGTH"] ** 2):
+            if world_db["MAP"][pos] != ord("~") \
+               and  world_db["wetmap"][pos] > 48 \
+               or world_db["wetmap"][pos] > 49and 0 == (rand.next() % 5):
+                world_db["unwet_ground"](pos)
+                water += 1
+                i_positions_to_wet -= 1
+            if i_positions_to_wet == 0:
+                break
+        if water > 0:
+            while water > 0:
                 select = rand.next() % len(positions_to_wet)
-                world_db["wet_ground"](positions_to_wet[select])
-                wetness -= 1
-                log("New water at " + str(positions_to_wet[select]))
+                pos = positions_to_wet[select]
+                world_db["wet_ground"](pos)
+                positions_to_wet.remove(pos)
+                water -= 1
+                log("New water at " + str(pos))
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
@@ -324,6 +331,13 @@ def wetmapset(str_int, mapline):
         m[val * length:(val * length) + length] = mapline.encode()
         if not world_db["wetmap"]:
             world_db["wetmap"] = m
+
+def unwet_ground(pos):
+    world_db["wetmap"][pos] -= 1
+    if world_db["MAP"][pos] == ord("~") and world_db["wetmap"][pos] == 48:
+        world_db["MAP"][pos] = ord("_")
+world_db["unwet_ground"] = unwet_ground
+
 
 def wet_ground(pos):
     if world_db["MAP"][pos] == ord("_"):
