@@ -129,14 +129,15 @@ def actor_move(t):
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
     else:
-        if t["T_BOWEL"] >= 32 or chr(world_db["MAP"][pos]) == "5":
+        height = world_db["MAP"][pos] - ord("0")
+        if t["T_BOWEL"] >= 32 or height == 5:
             return
         eaten = False
-        if chr(world_db["MAP"][pos]) == "3" and 0 == int(rand.next() % 2):
-            t["T_BOWEL"] += 3
+        if height == 3 and 0 == int(rand.next() % 2):
+            t["T_BOWEL"] += height
             eaten = True
-        elif chr(world_db["MAP"][pos]) == "4" and 0 == int(rand.next() % 5):
-            t["T_BOWEL"] += 4
+        elif height == 4 and 0 == int(rand.next() % 5):
+            t["T_BOWEL"] += height
             eaten = True
         log("You EAT.")
         if eaten:
