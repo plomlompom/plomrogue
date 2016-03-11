@@ -8,7 +8,9 @@ from server.config.world_data import world_db
 
 def play_drink():
     if action_exists("drink") and world_db["WORLD_ACTIVE"]:
-        if not chr(world_db["MAP"][world_db["Things"][0]["pos"]]) == "~":
+        pos = world_db["Things"][0]["pos"]
+        if not (chr(world_db["MAP"][pos]) == "0"
+                and world_db["wetmap"][pos] > ord("0")):
             log("NOTHING to drink here.")
             return
         elif world_db["Things"][0]["T_BLADDER"] >= 32:
@@ -19,12 +21,13 @@ def play_drink():
 
 def actor_drink(t):
     pos = world_db["Things"][0]["pos"]
-    if chr(world_db["MAP"][pos]) == "~" and t["T_BLADDER"] < 32:
+    if chr(world_db["MAP"][pos]) == "0" and \
+                world_db["wetmap"][pos] > ord("0") and t["T_BLADDER"] < 32:
         log("You DRINK.")
         t["T_BLADDER"] += 1
         world_db["wetmap"][pos] -= 1
-        if world_db["wetmap"][pos] == 48:
-            world_db["MAP"][pos] = ord("_")
+        if world_db["wetmap"][pos] == ord("0"):
+            world_db["MAP"][pos] = ord("0")
 
 
 def play_pee():
@@ -40,15 +43,10 @@ def actor_pee(t):
         return
     if t == world_db["Things"][0]:
         log("You LOSE fluid.")
+    if not world_db["catch_air"](t):
+        return
     t["T_BLADDER"] -= 1
-    terrain = world_db["MAP"][t["pos"]]
-    if world_db["wetmap"][t["pos"]] == 51:
-        t["T_LIFEPOINTS"] = 0
-        if t == world_db["Things"][0]:
-            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            log("You DROWN.")
-    else:
-        world_db["wet_ground"](t["pos"])
+    world_db["wetmap"][t["pos"]] += 1
 
 
 def play_drop():
@@ -64,23 +62,10 @@ def actor_drop(t):
         return
     if t == world_db["Things"][0]:
         log("You DROP waste.")
-    terrain = world_db["MAP"][t["pos"]]
+    if not world_db["catch_air"](t):
+        return
+    world_db["MAP"][t["pos"]] += 1
     t["T_BOWEL"] -= 1
-    if chr(terrain) in "_~":
-        world_db["MAP"][t["pos"]] = ord(".")
-    elif terrain == ord("."):
-        world_db["MAP"][t["pos"]] = ord(":")
-    elif terrain == ord(":"):
-        world_db["MAP"][t["pos"]] = ord("%")
-    elif terrain == ord("%"):
-        world_db["MAP"][t["pos"]] = ord("#")
-    elif terrain == ord("#"):
-        world_db["MAP"][t["pos"]] = ord("X")
-    elif terrain == ord("X"):
-        t["T_LIFEPOINTS"] = 0
-        if t == world_db["Things"][0]:
-            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
-            log("You SUFFOCATE.")
 
 
 def play_move(str_arg):
@@ -96,7 +81,7 @@ def play_move(str_arg):
         move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            if chr(world_db["MAP"][pos]) in "%#":
+            if chr(world_db["MAP"][pos]) in "34":
                 if t["T_BOWEL"] >= 32:
                     if t == world_db["Things"][0]:
                         log("You're too FULL to eat.")
@@ -144,56 +129,64 @@ def actor_move(t):
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
     else:
-        if t["T_BOWEL"] >= 32 or chr(world_db["MAP"][pos]) == "X":
+        if t["T_BOWEL"] >= 32 or chr(world_db["MAP"][pos]) == "5":
             return
         eaten = False
-        if chr(world_db["MAP"][pos]) == "%" and 0 == int(rand.next() % 2):
+        if chr(world_db["MAP"][pos]) == "3" and 0 == int(rand.next() % 2):
             t["T_BOWEL"] += 3
             eaten = True
-        elif chr(world_db["MAP"][pos]) in "#BEH" and 0 == int(rand.next() % 5):
+        elif chr(world_db["MAP"][pos]) == "4" and 0 == int(rand.next() % 5):
             t["T_BOWEL"] += 4
             eaten = True
         log("You EAT.")
         if eaten:
-            if world_db["wetmap"][pos] == 48:
-                world_db["MAP"][pos] = ord("_")
-            else:
-                world_db["MAP"][pos] = ord("~")
+            world_db["MAP"][pos] = ord("0")
             if t["T_BOWEL"] > 32:
                 t["T_BOWEL"] = 32
+
+
+
+def catch_air(t):
+    if (world_db["wetmap"][t["pos"]] - ord("0")) \
+            + (world_db["MAP"][t["pos"]] - ord("0")) > 4:
+        t["T_LIFEPOINTS"] = 0
+        if t == world_db["Things"][0]:
+            t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+            log("You SUFFOCATE.")
+        return False
+    return True
+world_db["catch_air"] = catch_air
 
 
 def make_map():
     from server.make_map import new_pos, is_neighbor
     from server.utils import rand
-    world_db["MAP"] = bytearray(b'X' * (world_db["MAP_LENGTH"] ** 2))
+    world_db["MAP"] = bytearray(b'5' * (world_db["MAP_LENGTH"] ** 2))
     length = world_db["MAP_LENGTH"]
     add_half_width = (not (length % 2)) * int(length / 2)
-    world_db["MAP"][int((length ** 2) / 2) + add_half_width] = ord("#")
+    world_db["MAP"][int((length ** 2) / 2) + add_half_width] = ord("4")
     while (1):
         y, x, pos = new_pos()
-        if "X" == chr(world_db["MAP"][pos]) and is_neighbor((y, x), "#"):
+        if "5" == chr(world_db["MAP"][pos]) and is_neighbor((y, x), "4"):
             if y == 0 or y == (length - 1) or x == 0 or x == (length - 1):
                 break
-            world_db["MAP"][pos] = ord("#")
+            world_db["MAP"][pos] = ord("4")
     n_ground = int((length ** 2) / 16)
     i_ground = 0
     while (i_ground <= n_ground):
         single_allowed = rand.next() % 32
         y, x, pos = new_pos()
-        if "#" == chr(world_db["MAP"][pos]) \
-                and ((not single_allowed) or is_neighbor((y, x), "_")):
-            world_db["MAP"][pos] = ord("_")
+        if "4" == chr(world_db["MAP"][pos]) \
+                and ((not single_allowed) or is_neighbor((y, x), "0")):
+            world_db["MAP"][pos] = ord("0")
             i_ground += 1
     n_water = int((length ** 2) / 64)
     i_water = 0
     while (i_water <= n_water):
-        single_allowed = rand.next() % 32
         y, x, pos = new_pos()
-        if "_" == chr(world_db["MAP"][pos]) \
-                and ((not single_allowed) or is_neighbor((y, x), "~")):
-            world_db["MAP"][pos] = ord("~")
-            world_db["wetmap"][pos] = 51
+        if ord("0") == world_db["MAP"][pos] and \
+                ord("0") == world_db["wetmap"][pos]:
+            world_db["wetmap"][pos] = ord("3")
             i_water += 1
 
 
@@ -205,9 +198,9 @@ def calc_effort(ta, t):
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
             terrain = chr(world_db["MAP"][pos])
-            if terrain == ".":
+            if terrain == "1":
                 return 2
-            elif terrain == ":":
+            elif terrain == "2":
                 return 4
     return 1
 world_db["calc_effort"] = calc_effort
@@ -251,14 +244,16 @@ def turn_over():
         water = 0
         positions_to_wet = []
         for i in range(world_db["MAP_LENGTH"] ** 2):
-            if chr(world_db["MAP"][i]) in "_~" and world_db["wetmap"][i] < 51:
+            if world_db["MAP"][i] == ord("0") \
+                    and world_db["wetmap"][i] < ord("5"):
                 positions_to_wet += [i]
         i_positions_to_wet = len(positions_to_wet)
         for pos in range(world_db["MAP_LENGTH"] ** 2):
-            if world_db["MAP"][pos] != ord("~") \
-               and  world_db["wetmap"][pos] > 48 \
-               or world_db["wetmap"][pos] > 49and 0 == (rand.next() % 5):
-                world_db["unwet_ground"](pos)
+            if 0 == rand.next() % 5 \
+                    and ((world_db["wetmap"][pos] > ord("0")
+                          and not world_db["MAP"][pos] == ord("0"))
+                         or world_db["wetmap"][pos] > ord("1")):
+                world_db["wetmap"][pos] -= 1
                 water += 1
                 i_positions_to_wet -= 1
             if i_positions_to_wet == 0:
@@ -267,10 +262,9 @@ def turn_over():
             while water > 0:
                 select = rand.next() % len(positions_to_wet)
                 pos = positions_to_wet[select]
-                world_db["wet_ground"](pos)
+                world_db["wetmap"][pos] += 1
                 positions_to_wet.remove(pos)
                 water -= 1
-                log("New water at " + str(pos))
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
@@ -332,20 +326,6 @@ def wetmapset(str_int, mapline):
         if not world_db["wetmap"]:
             world_db["wetmap"] = m
 
-def unwet_ground(pos):
-    world_db["wetmap"][pos] -= 1
-    if world_db["MAP"][pos] == ord("~") and world_db["wetmap"][pos] == 48:
-        world_db["MAP"][pos] = ord("_")
-world_db["unwet_ground"] = unwet_ground
-
-
-def wet_ground(pos):
-    if world_db["MAP"][pos] == ord("_"):
-        world_db["MAP"][pos] = ord("~")
-    world_db["wetmap"][pos] += 1
-world_db["wet_ground"] = wet_ground
-
-
 def write_wetmap():
     from server.worldstate_write_helpers import write_map
     length = world_db["MAP_LENGTH"]
@@ -361,8 +341,8 @@ io_db["worldstate_write_order"] += [["T_BOWEL", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
 io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
 import server.config.world_data
-server.config.world_data.symbols_hide = "%#X" + "ABC" + "DEF" + "GHI"
-server.config.world_data.symbols_passable = "_.:" + "~JK" + "LMN" + "OPQ"
+server.config.world_data.symbols_hide = "345"
+server.config.world_data.symbols_passable = "012"
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
 world_db["wetmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)
