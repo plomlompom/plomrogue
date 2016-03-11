@@ -42,14 +42,13 @@ def actor_pee(t):
         log("You LOSE fluid.")
     t["T_BLADDER"] -= 1
     terrain = world_db["MAP"][t["pos"]]
-    world_db["wetmap"][t["pos"]] += 1
-    if terrain == ord("_"):
-        world_db["MAP"][t["pos"]] = ord("~")
-    elif world_db["wetmap"][t["pos"]] > 51:
+    if world_db["wetmap"][t["pos"]] == 51:
         t["T_LIFEPOINTS"] = 0
         if t == world_db["Things"][0]:
             t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
             log("You DROWN.")
+    else:
+        world_db["wet_ground"](t["pos"])
 
 
 def play_drop():
@@ -249,6 +248,22 @@ def turn_over():
                     if Thing["T_BLADDER"] > 16:
                         if 0 == (rand.next() % (33 - Thing["T_BLADDER"])):
                             action_db["actor_pee"](Thing)
+        wetness = 0
+        for i in range(world_db["MAP_LENGTH"] ** 2):
+            if world_db["MAP"][i] != ord("~") and world_db["wetmap"][i] > 48 \
+                    and 0 == (rand.next() % 5):
+                world_db["wetmap"][i] -= 1
+                wetness += 1
+        if wetness > 0:
+            positions_to_wet = []
+            for i in range(world_db["MAP_LENGTH"] ** 2):
+                if chr(world_db["MAP"][i]) in "_~":
+                    positions_to_wet += [i]
+            while wetness > 0:
+                select = rand.next() % len(positions_to_wet)
+                world_db["wet_ground"](positions_to_wet[select])
+                wetness -= 1
+                log("New water at " + str(positions_to_wet[select]))
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
@@ -309,6 +324,12 @@ def wetmapset(str_int, mapline):
         m[val * length:(val * length) + length] = mapline.encode()
         if not world_db["wetmap"]:
             world_db["wetmap"] = m
+
+def wet_ground(pos):
+    if world_db["MAP"][pos] == ord("_"):
+        world_db["MAP"][pos] = ord("~")
+    world_db["wetmap"][pos] += 1
+world_db["wet_ground"] = wet_ground
 
 
 def write_wetmap():
