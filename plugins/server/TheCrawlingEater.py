@@ -147,17 +147,21 @@ def actor_move(t):
     else:
         if t["T_BOWEL"] >= 32 or chr(world_db["MAP"][pos]) == "X":
             return
-        elif chr(world_db["MAP"][pos]) == "%" and 0 == int(rand.next() % 2):
+        eaten = False
+        if chr(world_db["MAP"][pos]) == "%" and 0 == int(rand.next() % 2):
             t["T_BOWEL"] += 3
+            eaten = True
         elif chr(world_db["MAP"][pos]) in "#BEH" and 0 == int(rand.next() % 5):
             t["T_BOWEL"] += 4
+            eaten = True
         log("You EAT.")
-        if world_db["wetmap"][pos] == 48:
-            world_db["MAP"][pos] = ord("_")
-        else:
-            world_db["MAP"][pos] = ord("~")
-        if t["T_BOWEL"] > 32:
-            t["T_BOWEL"] = 32
+        if eaten:
+            if world_db["wetmap"][pos] == 48:
+                world_db["MAP"][pos] = ord("_")
+            else:
+                world_db["MAP"][pos] = ord("~")
+            if t["T_BOWEL"] > 32:
+                t["T_BOWEL"] = 32
 
 
 def make_map():
