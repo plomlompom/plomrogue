@@ -59,8 +59,10 @@ def win_map(self):
     curses.init_pair(12, curses.COLOR_BLACK, curses.COLOR_YELLOW)
     curses.init_pair(13, curses.COLOR_BLACK, curses.COLOR_RED)
     curses.init_pair(14, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
+    curses.init_pair(15, curses.COLOR_RED, curses.COLOR_GREEN)
     col_unknown = curses.color_pair(1)
     col_mem = curses.color_pair(1)
+    col_creature = curses.color_pair(15)
     col_player = curses.color_pair(8)
     earth_colors = [
         curses.color_pair(4),
@@ -110,7 +112,10 @@ def win_map(self):
                 if char in charmap:
                     char = charmap[char]
                 elif char == "@":
-                    attribute = col_player
+                    attribute = col_creature
+                    av_pos = world_data["avatar_position"]
+                    if pos == av_pos[0] * world_data["map_size"] + av_pos[1]:
+                        attribute = col_player
                 winmap += [(char, attribute), bonus]
         if y % 2 == 0:
             winmap += "  "
