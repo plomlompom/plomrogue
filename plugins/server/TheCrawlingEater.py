@@ -13,7 +13,7 @@ def play_drink():
                 and world_db["wetmap"][pos] > ord("0")):
             log("NOTHING to drink here.")
             return
-        elif world_db["Things"][0]["T_BLADDER"] >= 32:
+        elif world_db["Things"][0]["T_KIDNEY"] >= 32:
             log("You're too FULL to drink more.")
             return
         world_db["set_command"]("drink")
@@ -22,9 +22,9 @@ def play_drink():
 def actor_drink(t):
     pos = world_db["Things"][0]["pos"]
     if chr(world_db["MAP"][pos]) == "0" and \
-                world_db["wetmap"][pos] > ord("0") and t["T_BLADDER"] < 32:
+                world_db["wetmap"][pos] > ord("0") and t["T_KIDNEY"] < 32:
         log("You DRINK.")
-        t["T_BLADDER"] += 1
+        t["T_KIDNEY"] += 1
         world_db["wetmap"][pos] -= 1
         if world_db["wetmap"][pos] == ord("0"):
             world_db["MAP"][pos] = ord("0")
@@ -82,12 +82,12 @@ def play_move(str_arg):
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
             if chr(world_db["MAP"][pos]) in "34":
-                if t["T_BOWEL"] >= 32:
+                if t["T_STOMACH"] >= 32:
                     if t == world_db["Things"][0]:
                         log("You're too FULL to eat.")
                     return
                 world_db["Things"][0]["T_ARGUMENT"] = d
-                world_db["set_command"]("move")
+                world_db["set_command"]("eat")
                 return
             if chr(world_db["MAP"][pos]) in symbols_passable:
                 world_db["Things"][0]["T_ARGUMENT"] = d
@@ -96,54 +96,82 @@ def play_move(str_arg):
         log("You CAN'T eat your way through there.")
 
 
-def actor_move(t):
-    from server.build_fov_map import build_fov_map
+def actor_eat(t):
     from server.utils import mv_yx_in_dir_legal, rand
-    from server.config.world_data import directions_db, symbols_passable
+    from server.config.world_data import symbols_passable
     passable = False
     move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
                                      t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        hitted = [tid for tid in world_db["Things"]
-                  if world_db["Things"][tid] != t
-                  if world_db["Things"][tid]["T_LIFEPOINTS"]
-                  if world_db["Things"][tid]["T_POSY"] == move_result[1]
-                  if world_db["Things"][tid]["T_POSX"] == move_result[2]]
-        if len(hitted):
-            hit_id = hitted[0]
-            hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
-            if t == world_db["Things"][0]:
-                hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
-                log("You BUMP into " + hitted_name + ".")
-            elif 0 == hit_id:
-                hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-                log(hitter_name +" BUMPS into you.")
-            return
+        #hitted = [tid for tid in world_db["Things"]
+        #          if world_db["Things"][tid] != t
+        #          if world_db["Things"][tid]["T_LIFEPOINTS"]
+        #          if world_db["Things"][tid]["T_POSY"] == move_result[1]
+        #          if world_db["Things"][tid]["T_POSX"] == move_result[2]]
+        #if len(hitted):
+        #    hit_id = hitted[0]
+        #    hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
+        #    if t == world_db["Things"][0]:
+        #        hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
+        #        log("You BUMP into " + hitted_name + ".")
+        #    elif 0 == hit_id:
+        #        hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+        #        log(hitter_name +" BUMPS into you.")
+        #    return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
-    direction = [direction for direction in directions_db
-                 if directions_db[direction] == chr(t["T_ARGUMENT"])][0]
+    if passable:
+        log("You try to EAT, but fail.")
+    else:
+        height = world_db["MAP"][pos] - ord("0")
+        if t["T_STOMACH"] >= 32 or height == 5:
+            return
+        eaten = False
+        if height == 3 and 0 == int(rand.next() % 2):
+            t["T_STOMACH"] += height
+            eaten = True
+        elif height == 4 and 0 == int(rand.next() % 5):
+            t["T_STOMACH"] += height
+            eaten = True
+        log("You EAT.")
+        if eaten:
+            world_db["MAP"][pos] = ord("0")
+            if t["T_STOMACH"] > 32:
+                t["T_STOMACH"] = 32
+
+
+def actor_move(t):
+    from server.build_fov_map import build_fov_map
+    from server.utils import mv_yx_in_dir_legal, rand
+    from server.config.world_data import symbols_passable
+    passable = False
+    move_result = mv_yx_in_dir_legal(chr(t["T_ARGUMENT"]),
+                                     t["T_POSY"], t["T_POSX"])
+    if 1 == move_result[0]:
+        pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+        #hitted = [tid for tid in world_db["Things"]
+        #          if world_db["Things"][tid] != t
+        #          if world_db["Things"][tid]["T_LIFEPOINTS"]
+        #          if world_db["Things"][tid]["T_POSY"] == move_result[1]
+        #          if world_db["Things"][tid]["T_POSX"] == move_result[2]]
+        #if len(hitted):
+        #    hit_id = hitted[0]
+        #    hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
+        #    if t == world_db["Things"][0]:
+        #        hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
+        #        log("You BUMP into " + hitted_name + ".")
+        #    elif 0 == hit_id:
+        #        hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+        #        log(hitter_name +" BUMPS into you.")
+        #    return
+        passable = chr(world_db["MAP"][pos]) in symbols_passable
     if passable:
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
     else:
-        height = world_db["MAP"][pos] - ord("0")
-        if t["T_BOWEL"] >= 32 or height == 5:
-            return
-        eaten = False
-        if height == 3 and 0 == int(rand.next() % 2):
-            t["T_BOWEL"] += height
-            eaten = True
-        elif height == 4 and 0 == int(rand.next() % 5):
-            t["T_BOWEL"] += height
-            eaten = True
-        log("You EAT.")
-        if eaten:
-            world_db["MAP"][pos] = ord("0")
-            if t["T_BOWEL"] > 32:
-                t["T_BOWEL"] = 32
+        log("You try to MOVE there, but fail.")
 
 
 def test_hole(t):
@@ -193,7 +221,7 @@ def make_map():
                 and ((not single_allowed) or is_neighbor((y, x), "0")):
             world_db["MAP"][pos] = ord("0")
             i_ground += 1
-    n_water = int((length ** 2) / 16)
+    n_water = int((length ** 2) / 64)
     i_water = 0
     while (i_water <= n_water):
         y, x, pos = new_pos()
@@ -253,6 +281,14 @@ def turn_over():
                     if t["T_BLADDER"] > 16:
                         if 0 == (rand.next() % (33 - t["T_BLADDER"])):
                             action_db["actor_pee"](t)
+                    t["T_STOMACH"] -= 1
+                    t["T_BOWEL"] += 1
+                    t["T_KIDNEY"] -= 1
+                    t["T_BLADDER"] += 1
+                    if t["T_STOMACH"] == 0:
+                        world_db["die"](t, "You DIE of hunger.")
+                    elif t["T_KIDNEY"] == 0:
+                        world_db["die"](t, "You DIE of dehydration.")
         water = 0
         positions_to_wet = []
         for pos in range(world_db["MAP_LENGTH"] ** 2):
@@ -264,7 +300,7 @@ def turn_over():
             wetness = world_db["wetmap"][pos] - ord("0")
             height = world_db["MAP"][pos] - ord("0")
             if height == 0 and wetness > 0 \
-                    and 0 == rand.next() % ((2 ** 12) / (2 ** wetness)):
+                    and 0 == rand.next() % ((2 ** 13) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("-")
                 if pos in positions_to_wet:
                     positions_to_wet.remove(pos)
@@ -355,13 +391,17 @@ def write_wetmap():
 
 
 from server.config.io import io_db
+io_db["worldstate_write_order"] += [["T_STOMACH", "player_int"]]
+io_db["worldstate_write_order"] += [["T_KIDNEY", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BOWEL", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
 io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "345"
 server.config.world_data.symbols_passable = "012-"
+server.config.world_data.thing_defaults["T_STOMACH"] = 16
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
+server.config.world_data.thing_defaults["T_KIDNEY"] = 16
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
 world_db["wetmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)
 io_db["hook_save"] = save_wetmap
@@ -371,12 +411,15 @@ from server.config.commands import commands_db
 commands_db["THINGS_HERE"] = (2, True, lambda x, y: None)
 commands_db["ai"] = (0, False, command_ai)
 commands_db["move"] = (1, False, play_move)
+commands_db["eat"] = (1, False, play_move)
 commands_db["wait"] = (0, False, play_wait)
 commands_db["drop"] = (0, False, play_drop)
 commands_db["drink"] = (0, False, play_drink)
 commands_db["pee"] = (0, False, play_pee)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
+commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_BOWEL", 0, 255))
+commands_db["T_KIDNEY"] = (1, False, setter("Thing", "T_BLADDER", 0, 255))
 commands_db["T_BOWEL"] = (1, False, setter("Thing", "T_BOWEL", 0, 255))
 commands_db["T_BLADDER"] = (1, False, setter("Thing", "T_BLADDER", 0, 255))
 commands_db["WETMAP"] = (2, False, wetmapset)
@@ -388,6 +431,7 @@ server.config.actions.action_db = {
     "actor_drop": actor_drop,
     "actor_drink": actor_drink,
     "actor_pee": actor_pee,
+    "actor_eat": actor_eat,
 }
 
 strong_write(io_db["file_out"], "PLUGIN TheCrawlingEater\n")

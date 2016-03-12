@@ -3,24 +3,21 @@
 # see the file NOTICE in the root directory of the PlomRogue source package.
 
 
-def win_bladder(self):
-    winmap = []
-    curses.init_pair(79, curses.COLOR_WHITE, curses.COLOR_BLUE)
-    for i in range(world_data["bladder"]):
-        winmap += [("~", curses.color_pair(79))]
-    winmap_size = [1, len(winmap)]
-    offset = [0, 0]
-    return offset, winmap_size, winmap
+curses.init_pair(77, curses.COLOR_WHITE, curses.COLOR_GREEN)
+curses.init_pair(78, curses.COLOR_BLACK, curses.COLOR_RED)
+curses.init_pair(79, curses.COLOR_WHITE, curses.COLOR_BLUE)
+curses.init_pair(80, curses.COLOR_BLACK, curses.COLOR_YELLOW)
 
 
-def win_bowel(self):
-    winmap = []
-    curses.init_pair(80, curses.COLOR_YELLOW, curses.COLOR_RED)
-    for i in range(world_data["bowel"]):
-        winmap += [("#", curses.color_pair(80))]
-    winmap_size = [1, len(winmap)]
-    offset = [0, 0]
-    return offset, winmap_size, winmap
+def win_bar_maker(color_number, symbol, title):
+    def win_bar(self):
+        winmap = []
+        for i in range(world_data[title]):
+            winmap += [(symbol, curses.color_pair(color_number))]
+        winmap_size = [1, len(winmap)]
+        offset = [0, 0]
+        return offset, winmap_size, winmap
+    return win_bar
 
 
 def win_map(self):
@@ -121,20 +118,38 @@ def win_map(self):
 
 
 from client.config.world_data import world_data
+world_data["kidney"] = 0
+world_data["stomach"] = 0
 world_data["bowel"] = 0
 world_data["bladder"] = 0
 world_data["wetmap"] = " " * (world_data["map_size"] ** 2)
 from client.config.io import io
+io["worldstate_read_order"] += [["stomach", "int"]]
+io["worldstate_read_order"] += [["kidney", "int"]]
 io["worldstate_read_order"] += [["bowel", "int"]]
 io["worldstate_read_order"] += [["bladder", "int"]]
 io["worldstate_read_order"] += [["wetmap", "map"]]
 from client.config.windows import windows_config
 from client.windows import win_log
 windows_config[:] = [
-    {"config": [0, -34], "func": win_map, "title": "The Crawling Eater"},
-    {"config": [1, 33], "func": win_bowel, "title": "bowel"},
-    {"config": [1, 33], "func": win_bladder, "title": "bladder"},
-    {"config": [-4, 33], "func": win_log, "title": "log"}
+    {"config": [0, -34],
+     "func": win_map,
+      "title": "The Crawling Eater"},
+    {"config": [1, 33],
+     "func": win_bar_maker(77, "%", "stomach"),
+     "title": "stomach"},
+    {"config": [1, 33],
+     "func": win_bar_maker(78, "%", "bowel"),
+     "title": "bowel"},
+    {"config": [1, 33],
+     "func": win_bar_maker(79, "~", "kidney"),
+      "title": "kidney"},
+    {"config": [1, 33],
+     "func": win_bar_maker(80, "~", "bladder"),
+      "title": "bladder"},
+    {"config": [-8, 33],
+     "func": win_log,
+     "title": "log"}
 ]
 from client.window_management import set_windows
 set_windows()
