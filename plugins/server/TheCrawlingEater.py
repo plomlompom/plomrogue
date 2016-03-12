@@ -84,6 +84,17 @@ def play_move(str_arg):
         move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
         if 1 == move_result[0]:
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+            hitted = [tid for tid in world_db["Things"]
+                      if world_db["Things"][tid]["T_POSY"] == move_result[1]
+                      if world_db["Things"][tid]["T_POSX"] == move_result[2]]
+            if len(hitted) > 0:
+                if t["T_STOMACH"] >= 32 and t["T_KIDNEY"] >= 32:
+                    if t == world_db["Things"][0]:
+                        log("You're too FULL to suck from another creature.")
+                    return
+                world_db["Things"][0]["T_ARGUMENT"] = d
+                world_db["set_command"]("eat")
+                return
             if chr(world_db["MAP"][pos]) in "34":
                 if t["T_STOMACH"] >= 32:
                     if t == world_db["Things"][0]:
@@ -107,21 +118,26 @@ def actor_eat(t):
                                      t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        #hitted = [tid for tid in world_db["Things"]
-        #          if world_db["Things"][tid] != t
-        #          if world_db["Things"][tid]["T_LIFEPOINTS"]
-        #          if world_db["Things"][tid]["T_POSY"] == move_result[1]
-        #          if world_db["Things"][tid]["T_POSX"] == move_result[2]]
-        #if len(hitted):
-        #    hit_id = hitted[0]
-        #    hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
-        #    if t == world_db["Things"][0]:
-        #        hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
-        #        log("You BUMP into " + hitted_name + ".")
-        #    elif 0 == hit_id:
-        #        hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-        #        log(hitter_name +" BUMPS into you.")
-        #    return
+        hitted = [tid for tid in world_db["Things"]
+                  if world_db["Things"][tid]["T_POSY"] == move_result[1]
+                  if world_db["Things"][tid]["T_POSX"] == move_result[2]]
+        if len(hitted):
+            hit_id = hitted[0]
+            hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
+            if t == world_db["Things"][0]:
+                hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
+                log("You SUCK from " + hitted_name + ".")
+            elif 0 == hit_id:
+                hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+                log(hitter_name +" SUCKS from you.")
+            hitted = world_db["Things"][hit_id]
+            if t["T_STOMACH"] < 32:
+                t["T_STOMACH"] = t["T_STOMACH"] + 1
+                hitted["T_STOMACH"] -= 1
+            if t["T_KIDNEY"] < 32:
+                t["T_KIDNEY"] = t["T_KIDNEY"] + 1
+                hitted["T_KIDNEY"] -= 1
+            return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
     if passable and t == world_db["Things"][0]:
         log("You try to EAT, but fail.")
@@ -149,27 +165,27 @@ def actor_move(t):
                                      t["T_POSY"], t["T_POSX"])
     if 1 == move_result[0]:
         pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-        #hitted = [tid for tid in world_db["Things"]
-        #          if world_db["Things"][tid] != t
-        #          if world_db["Things"][tid]["T_LIFEPOINTS"]
-        #          if world_db["Things"][tid]["T_POSY"] == move_result[1]
-        #          if world_db["Things"][tid]["T_POSX"] == move_result[2]]
-        #if len(hitted):
-        #    hit_id = hitted[0]
-        #    hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
-        #    if t == world_db["Things"][0]:
-        #        hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
-        #        log("You BUMP into " + hitted_name + ".")
-        #    elif 0 == hit_id:
-        #        hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-        #        log(hitter_name +" BUMPS into you.")
-        #    return
+        hitted = [tid for tid in world_db["Things"]
+                  if world_db["Things"][tid]["T_POSY"] == move_result[1]
+                  if world_db["Things"][tid]["T_POSX"] == move_result[2]]
+        if len(hitted):
+            hit_id = hitted[0]
+            hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
+            if t == world_db["Things"][0]:
+                hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
+                log("You BUMP into " + hitted_name + ".")
+            elif 0 == hit_id:
+                hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+                log(hitter_name +" BUMPS into you.")
+            return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
     if passable:
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
+        #if t != world_db["Things"][0]:
+        #    world_db["Things"][0]["T_MEMMAP"][t["pos"]] = ord("?")
     elif t == world_db["Things"][0]:
         log("You try to MOVE there, but fail.")
 
