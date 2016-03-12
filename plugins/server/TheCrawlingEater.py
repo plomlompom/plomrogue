@@ -20,14 +20,17 @@ def play_drink():
 
 
 def actor_drink(t):
-    pos = world_db["Things"][0]["pos"]
+    pos = t["pos"]
     if chr(world_db["MAP"][pos]) == "0" and \
                 world_db["wetmap"][pos] > ord("0") and t["T_KIDNEY"] < 32:
-        log("You DRINK.")
+        if world_db["Things"][0] == t:
+            log("You DRINK.")
         t["T_KIDNEY"] += 1
         world_db["wetmap"][pos] -= 1
         if world_db["wetmap"][pos] == ord("0"):
             world_db["MAP"][pos] = ord("0")
+    elif t == world_db["Things"][0]:
+        log("YOU FAIL TO DRINK " + str(world_db["MAP"][pos] - ord("0")))
 
 
 def play_pee():
@@ -120,14 +123,15 @@ def actor_eat(t):
         #        log(hitter_name +" BUMPS into you.")
         #    return
         passable = chr(world_db["MAP"][pos]) in symbols_passable
-    if passable:
+    if passable and t == world_db["Things"][0]:
         log("You try to EAT, but fail.")
     else:
         height = world_db["MAP"][pos] - ord("0")
         if t["T_STOMACH"] >= 32 or height == 5:
             return
         t["T_STOMACH"] += 1
-        log("You EAT.")
+        if t == world_db["Things"][0]:
+            log("You EAT.")
         eaten = (height == 3 and 0 == int(rand.next() % 2)) or \
                 (height == 4 and 0 == int(rand.next() % 5))
         if eaten:
@@ -166,7 +170,7 @@ def actor_move(t):
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         build_fov_map(t)
-    else:
+    elif t == world_db["Things"][0]:
         log("You try to MOVE there, but fail.")
 
 
@@ -194,8 +198,12 @@ def die(t, message):
         log(message)
     else:
         world_db["MAP"][t["pos"]] = ord("5")
-        world_db["HUMILITY"] = t["T_KIDNEY"] + t["T_BLADDER"]
-        del world_db["Things"][t["T_ID"]]
+        world_db["HUMILITY"] = t["T_KIDNEY"] + t["T_BLADDER"] + \
+            (world_db["wetmap"][t["pos"]] - ord("0"))
+        world_db["wetmap"][t["pos"]] = 0
+        tid = next(tid for tid in world_db["Things"]
+                   if world_db["Things"][tid] == t)
+        del world_db["Things"][tid]
 world_db["die"] = die
 
 
@@ -221,7 +229,7 @@ def make_map():
                 and ((not single_allowed) or is_neighbor((y, x), "0")):
             world_db["MAP"][pos] = ord("0")
             i_ground += 1
-    n_water = int((length ** 2) / 64)
+    n_water = int((length ** 2) / 32)
     i_water = 0
     while (i_water <= n_water):
         y, x, pos = new_pos()
@@ -290,8 +298,6 @@ def turn_over():
                         world_db["die"](t, "You DIE of hunger.")
                     elif t["T_KIDNEY"] <= 0:
                         world_db["die"](t, "You DIE of dehydration.")
-        positions_to_wet = []
-        i_positions_to_wet = len(positions_to_wet)
         for pos in range(world_db["MAP_LENGTH"] ** 2):
             wetness = world_db["wetmap"][pos] - ord("0")
             height = world_db["MAP"][pos] - ord("0")
@@ -302,8 +308,25 @@ def turn_over():
                 and 0 == rand.next() % 5:
                 world_db["wetmap"][pos] -= 1
                 world_db["HUMIDITY"] += 1
-                i_positions_to_wet -= 1
         if world_db["HUMIDITY"] > 0:
+            if world_db["HUMIDITY"] > 2 and 0 == rand.next() % 2:
+                world_db["NEW_SPAWN"] += 1
+                world_db["HUMIDITY"] -= 1
+            if world_db["NEW_SPAWN"] >= 16:
+                world_db["NEW_SPAWN"] -= 16
+                from server.new_thing import new_Thing
+                while 1:
+                    y = rand.next() % world_db["MAP_LENGTH"]
+                    x = rand.next() % world_db["MAP_LENGTH"]
+                    if chr(world_db["MAP"][y * world_db["MAP_LENGTH"] + x]) !=\
+                        "5":
+                        from server.utils import id_setter
+                        tid = id_setter(-1, "Things")
+                        world_db["Things"][tid] = new_Thing(
+                            world_db["PLAYER_TYPE"], (y, x))
+                        pos = y * world_db["MAP_LENGTH"] + x
+                        break
+            positions_to_wet = []
             for pos in range(world_db["MAP_LENGTH"] ** 2):
                 if world_db["MAP"][pos] == ord("0") \
                         and world_db["wetmap"][pos] < ord("5"):
@@ -615,6 +638,8 @@ server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_KIDNEY"] = 16
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
 world_db["wetmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)
+if not "NEW_SPAWN" in world_db:
+    world_db["NEW_SPAWN"] = 0
 if not "HUMIDITY" in world_db:
     world_db["HUMIDITY"] = 0
 io_db["hook_save"] = save_wetmap
@@ -631,6 +656,7 @@ commands_db["drink"] = (0, False, play_drink)
 commands_db["pee"] = (0, False, play_pee)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
+commands_db["NEW_SPAWN"] = (1, False, setter(None, "NEW_SPAWN", 0, 255))
 commands_db["HUMIDITY"] = (1, False, setter(None, "HUMIDITY", 0, 65535))
 commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_STOMACH", 0, 255))
 commands_db["T_KIDNEY"] = (1, False, setter("Thing", "T_KIDNEY", 0, 255))
