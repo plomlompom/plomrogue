@@ -166,19 +166,18 @@ def get_dir_to_target(t, filter):
         import math
         dir_to_target = False
         dirs = "edcxsw"
-        eye_pos = t["pos"]
-        neighbors = get_neighbor_scores(dirs, eye_pos)
+        neighbors = get_neighbor_scores(dirs, t["pos"])
         minmax_start = 0 if "f" == filter else 65535 - 1
         minmax_neighbor = minmax_start
         for i in range(len(dirs)):
-            if ("f" == filter and get_map_score(eye_pos) < neighbors[i] and
+            if ("f" == filter and get_map_score(t["pos"]) < neighbors[i] and
                 minmax_neighbor < neighbors[i] and 65535 != neighbors[i]) \
                or ("f" != filter and minmax_neighbor > neighbors[i]):
                 minmax_neighbor = neighbors[i]
         if minmax_neighbor != minmax_start:
             dir_to_target = rand_target_dir(neighbors, minmax_neighbor, dirs)
         if "f" == filter:
-            distance = get_map_score(eye_pos)
+            distance = get_map_score(t["pos"])
             fear_distance = world_db["MAP_LENGTH"]
             if t["T_SATIATION"] < 0 and math.sqrt(-t["T_SATIATION"]) > 0:
                 fear_distance = fear_distance / math.sqrt(-t["T_SATIATION"])
