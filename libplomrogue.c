@@ -566,6 +566,90 @@ extern uint8_t dijkstra_map()
     return 0;
 }
 
+
+/* 7DRL/TCE addition: movement cost map setting. */
+static uint8_t * TCE_move_cost_map = NULL;
+extern uint8_t TCE_set_movement_cost_map(char * mem_map)
+{
+    uint32_t map_size = maplength * maplength;
+    free(TCE_move_cost_map);
+    TCE_move_cost_map = malloc(map_size * sizeof(uint8_t));
+    uint32_t pos = 0;
+    for (; pos < map_size; pos++)
+    {
+        TCE_move_cost_map[pos] = 0;
+    }
+    if (!TCE_move_cost_map)
+    {
+        return 1;
+    }
+    for (pos = 0; pos < map_size; pos++)
+    {
+        switch(mem_map[pos]) {
+            case '0':
+                TCE_move_cost_map[pos] = 1;
+                break;
+            case '1':
+                TCE_move_cost_map[pos] = 2;
+                break;
+            case '2':
+                TCE_move_cost_map[pos] = 4;
+                break;
+            case '3':
+                TCE_move_cost_map[pos] = 3;
+                break;
+            case '4':
+                TCE_move_cost_map[pos] = 6;
+                break;
+        }
+    }
+    return 0;
+}
+
+
+/* 7DRL/TCE addition: Like dijkstra_map(), but with movement costs applied. */
+extern uint8_t TCE_dijkstra_map_with_movement_cost()
+{
+    if (!score_map || !TCE_move_cost_map)
+    {
+        return 1;
+    }
+    uint16_t max_score = UINT16_MAX - 1;
+    uint32_t map_size = maplength * maplength;
+    uint32_t pos;
+    uint16_t i_scans, neighbors[6], min_neighbor;
+    uint8_t scores_still_changing = 1;
+    uint8_t i_dirs;
+    for (i_scans = 0; scores_still_changing; i_scans++)
+    {
+        scores_still_changing = 0;
+        for (pos = 0; pos < map_size; pos++)
+        {
+            uint16_t score = score_map[pos];
+            uint8_t mov_cost = TCE_move_cost_map[pos];
+            if (mov_cost > 0 && score > i_scans)
+            {
+                get_neighbor_scores(pos, max_score, neighbors);
+                min_neighbor = max_score;
+                for (i_dirs = 0; i_dirs < 6; i_dirs++)
+                {
+                    if (min_neighbor > neighbors[i_dirs])
+                    {
+                        min_neighbor = neighbors[i_dirs];
+                    }
+                }
+                if (score_map[pos] > min_neighbor + mov_cost)
+                {
+                    score_map[pos] = min_neighbor + mov_cost;
+                    scores_still_changing = 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+
 extern uint8_t zero_score_map_where_char_on_memdepthmap(char c,
                                                         char * memdepthmap)
 {

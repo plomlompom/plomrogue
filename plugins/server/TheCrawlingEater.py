@@ -179,8 +179,7 @@ world_db["test_hole"] = test_hole
 
 
 def test_air(t):
-    if (world_db["wetmap"][t["pos"]] - ord("0")) \
-            + (world_db["MAP"][t["pos"]] - ord("0")) > 5:
+    if world_db["terrain_fullness"](t["pos"]) > 5:
         world_db["die"](t, "You SUFFOCATE")
         return False
     return True
@@ -191,6 +190,7 @@ def die(t, message):
     t["T_LIFEPOINTS"] = 0
     if t == world_db["Things"][0]:
         t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
+        t["T_MEMMAP"][t["pos"]] = ord("@")
         log(message)
 world_db["die"] = die
 
@@ -259,7 +259,7 @@ def turn_over():
                     update_map_memory(t)
                     if 0 == tid:
                         return
-                    ai(t)
+                    world_db["ai"](t)
                 if t["T_LIFEPOINTS"]:
                     t["T_PROGRESS"] += 1
                     taid = [a for a in world_db["ThingActions"]
@@ -385,6 +385,222 @@ def write_wetmap():
         if world_db["Things"][0]["fovmap"][i] == ord('v'):
             visible_wetmap[i] = world_db["wetmap"][i]
     return write_map(visible_wetmap, world_db["MAP_LENGTH"])
+
+
+def command_ai():
+    if world_db["WORLD_ACTIVE"]:
+        world_db["ai"](world_db["Things"][0])
+        world_db["turn_over"]()
+
+
+def get_dir_to_target(t, target):
+
+    from server.utils import rand, libpr, c_pointer_to_bytearray
+    from server.config.world_data import symbols_passable
+
+    def zero_score_map_where_char_on_memdepthmap(c):
+        map = c_pointer_to_bytearray(t["T_MEMDEPTHMAP"])
+        if libpr.zero_score_map_where_char_on_memdepthmap(c, map):
+            raise RuntimeError("No score map allocated for "
+                               "zero_score_map_where_char_on_memdepthmap().")
+
+    def set_map_score(pos, score):
+        test = libpr.set_map_score(pos, score)
+        if test:
+            raise RuntimeError("No score map allocated for set_map_score().")
+
+    def set_movement_cost_map():
+        memmap = c_pointer_to_bytearray(t["T_MEMMAP"])
+        if libpr.TCE_set_movement_cost_map(memmap):
+            raise RuntimeError("No movement cost map allocated for "
+                               "set_movement_cost_map().")
+
+    def seeing_thing():
+        def exists(gen):
+            try:
+                next(gen)
+            except StopIteration:
+                return False
+            return True
+        mapsize = world_db["MAP_LENGTH"] ** 2
+        if target == "food" and t["T_MEMMAP"]:
+            return exists(pos for pos in range(mapsize)
+                           if ord("2") < t["T_MEMMAP"][pos] < ord("5"))
+        elif target == "fluid_certain" and t["fovmap"]:
+            return exists(pos for pos in range(mapsize)
+                           if t["fovmap"] == ord("v")
+                           if world_db["MAP"][pos] == ord("0")
+                           if world_db["wetmap"][pos] > ord("0"))
+        elif target == "fluid_potential" and t["T_MEMMAP"] and t["fovmap"]:
+            return exists(pos for pos in range(mapsize)
+                           if t["T_MEMMAP"][pos] == ord("0")
+                           if t["fovmap"] != ord("v"))
+        elif target == "space" and t["T_MEMMAP"] and t["fovmap"]:
+            return exists(pos for pos in range(mapsize)
+                          if ord("0") <= t["T_MEMMAP"][pos] <= ord("2")
+                          if (t["fovmap"] != ord("v")
+                              or world_db["terrain_fullness"](pos) < 5))
+        return False
+
+    def init_score_map():
+        test = libpr.init_score_map()
+        set_movement_cost_map()
+        mapsize = world_db["MAP_LENGTH"] ** 2
+        if test:
+            raise RuntimeError("Malloc error in init_score_map().")
+        if target == "food" and t["T_MEMMAP"]:
+            [set_map_score(pos, 0) for pos in range(mapsize)
+             if ord("2") < t["T_MEMMAP"][pos] < ord("5")]
+        elif target == "fluid_certain" and t["fovmap"]:
+            [set_map_score(pos, 0) for pos in range(mapsize)
+             if t["fovmap"] == ord("v")
+             if world_db["MAP"][pos] == ord("0")
+             if world_db["wetmap"][pos] > ord("0")]
+        elif target == "fluid_potential" and t["T_MEMMAP"] and t["fovmap"]:
+            [set_map_score(pos, 0) for pos in range(mapsize)
+             if t["T_MEMMAP"][pos] == ord("0")
+             if t["fovmap"] != ord("v")]
+        elif target == "space" and t["T_MEMMAP"] and t["fovmap"]:
+            [set_map_score(pos, 0) for pos in range(mapsize)
+             if ord("0") <= t["T_MEMMAP"][pos] <= ord("2")
+             if (t["fovmap"] != ord("v")
+                 or world_db["terrain_fullness"](pos) < 5)]
+        elif target == "search":
+            zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
+
+    def rand_target_dir(neighbors, cmp, dirs):
+        candidates = []
+        n_candidates = 0
+        for i in range(len(dirs)):
+            if cmp == neighbors[i]:
+                candidates.append(dirs[i])
+                n_candidates += 1
+        return candidates[rand.next() % n_candidates] if n_candidates else 0
+
+    def get_neighbor_scores(dirs, eye_pos):
+        scores = []
+        if libpr.ready_neighbor_scores(eye_pos):
+            raise RuntimeError("No score map allocated for " +
+                               "ready_neighbor_scores.()")
+        for i in range(len(dirs)):
+            scores.append(libpr.get_neighbor_score(i))
+        return scores
+
+    def get_dir_from_neighbors():
+        import math
+        dir_to_target = False
+        dirs = "edcxsw"
+        eye_pos = t["pos"]
+        neighbors = get_neighbor_scores(dirs, eye_pos)
+        minmax_start = 65535 - 1
+        minmax_neighbor = minmax_start
+        for i in range(len(dirs)):
+            if minmax_neighbor > neighbors[i]:
+                minmax_neighbor = neighbors[i]
+        if minmax_neighbor != minmax_start:
+            dir_to_target = rand_target_dir(neighbors, minmax_neighbor, dirs)
+        return dir_to_target, minmax_neighbor
+
+    dir_to_target = False
+    mem_depth_c = b' '
+    run_i = 9 + 1 if "search" == target else 1
+    minmax_neighbor = 0
+    while run_i and not dir_to_target and \
+            ("search" == target or seeing_thing()):
+        run_i -= 1
+        init_score_map()
+        mem_depth_c = b'9' if b' ' == mem_depth_c \
+            else bytes([mem_depth_c[0] - 1])
+        if libpr.TCE_dijkstra_map_with_movement_cost():
+            raise RuntimeError("No score map allocated for dijkstra_map().")
+        dir_to_target, minmax_neighbor = get_dir_from_neighbors()
+        libpr.free_score_map()
+        if dir_to_target and str == type(dir_to_target):
+            action = "move"
+            from server.utils import mv_yx_in_dir_legal
+            move_result = mv_yx_in_dir_legal(dir_to_target, t["T_POSY"],
+                                                            t["T_POSX"])
+            if 1 != move_result[0]:
+                return False, 0
+            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+            if world_db["MAP"][pos] > ord("2"):
+                action = "eat"
+            t["T_COMMAND"] = [taid for taid in world_db["ThingActions"]
+                              if world_db["ThingActions"][taid]["TA_NAME"]
+                              == action][0]
+            t["T_ARGUMENT"] = ord(dir_to_target)
+    return dir_to_target, minmax_neighbor
+world_db["get_dir_to_target"] = get_dir_to_target
+
+
+def terrain_fullness(pos):
+    return (world_db["MAP"][pos] - ord("0")) + \
+        (world_db["wetmap"][pos] - ord("0"))
+world_db["terrain_fullness"] = terrain_fullness
+
+
+def ai(t):
+
+    if t["T_LIFEPOINTS"] == 0:
+        return
+
+    def standing_on_fluid(t):
+        if world_db["MAP"][t["pos"]] == ord("0") and \
+            world_db["wetmap"][t["pos"]] > ord("0"):
+                return True
+        else:
+            return False
+
+    def thing_action_id(name):
+        return [taid for taid in world_db["ThingActions"]
+                if world_db["ThingActions"][taid]
+                ["TA_NAME"] == name][0]
+
+    t["T_COMMAND"] = thing_action_id("wait")
+    needs = {
+        "safe_pee": (world_db["terrain_fullness"](t["pos"]) * t["T_BLADDER"]) / 4,
+        "safe_drop": (world_db["terrain_fullness"](t["pos"]) * t["T_BOWEL"]) / 4,
+        "food": 33 - t["T_STOMACH"],
+        "fluid_certain": 33 - t["T_KIDNEY"],
+        "fluid_potential": 32 - t["T_KIDNEY"],
+        "search": 1,
+    }
+    from operator import itemgetter
+    needs = sorted(needs.items(), key=itemgetter(1,0))
+    needs.reverse()
+    for need in needs:
+        if need[1] > 0:
+            if need[0] in {"fluid_certain", "fluid_potential"}:
+                if standing_on_fluid(t):
+                    t["T_COMMAND"] = thing_action_id("drink")
+                    return
+                elif t["T_BLADDER"] > 0 and \
+                         world_db["MAP"][t["pos"]] == ord("0"):
+                    t["T_COMMAND"] = thing_action_id("pee")
+                    return
+            elif need[0] in {"safe_pee", "safe_drop"}:
+                action_name = need[0][len("safe_"):]
+                if world_db["terrain_fullness"](t["pos"]) < 4:
+                    t["T_COMMAND"] = thing_action_id(action_name)
+                    return
+                else:
+                    test = world_db["get_dir_to_target"](t, "space")
+                    if test[0]:
+                        if (not test[1] < 5) and \
+                                world_db["terrain_fullness"](t["pos"]) < 5:
+                            t["T_COMMAND"] = thing_action_id(action_name)
+                        return
+                    if t["T_STOMACH"] < 32 and \
+                            world_db["get_dir_to_target"](t, "food")[0]:
+                        return
+                continue
+            if world_db["get_dir_to_target"](t, need[0])[0]:
+                return
+            elif t["T_STOMACH"] < 32 and \
+                    need[0] in {"fluid_certain", "fluid_potential"} and \
+                    world_db["get_dir_to_target"](t, "food")[0]:
+                return
+world_db["ai"] = ai
 
 
 from server.config.io import io_db
