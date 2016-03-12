@@ -282,10 +282,10 @@ def turn_over():
                         t["T_BOWEL"] += 1
                         t["T_KIDNEY"] -= 1
                         t["T_BLADDER"] += 1
-                        if t["T_STOMACH"] == 0:
-                            world_db["die"](t, "You DIE of hunger.")
-                        elif t["T_KIDNEY"] == 0:
-                            world_db["die"](t, "You DIE of dehydration.")
+                    if t["T_STOMACH"] <= 0:
+                        world_db["die"](t, "You DIE of hunger.")
+                    elif t["T_KIDNEY"] <= 0:
+                        world_db["die"](t, "You DIE of dehydration.")
         water = 0
         positions_to_wet = []
         for pos in range(world_db["MAP_LENGTH"] ** 2):
