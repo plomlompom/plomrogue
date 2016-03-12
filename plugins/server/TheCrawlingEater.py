@@ -286,12 +286,7 @@ def turn_over():
                         world_db["die"](t, "You DIE of hunger.")
                     elif t["T_KIDNEY"] <= 0:
                         world_db["die"](t, "You DIE of dehydration.")
-        water = 0
         positions_to_wet = []
-        for pos in range(world_db["MAP_LENGTH"] ** 2):
-            if world_db["MAP"][pos] == ord("0") \
-                    and world_db["wetmap"][pos] < ord("5"):
-                positions_to_wet += [pos]
         i_positions_to_wet = len(positions_to_wet)
         for pos in range(world_db["MAP_LENGTH"] ** 2):
             wetness = world_db["wetmap"][pos] - ord("0")
@@ -299,23 +294,22 @@ def turn_over():
             if height == 0 and wetness > 0 \
                     and 0 == rand.next() % ((2 ** 13) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("-")
-                if pos in positions_to_wet:
-                    positions_to_wet.remove(pos)
-                    i_positions_to_wet -= 1
             if ((wetness > 0 and height != 0) or wetness > 1) \
                 and 0 == rand.next() % 5:
                 world_db["wetmap"][pos] -= 1
-                water += 1
+                world_db["HUMIDITY"] += 1
                 i_positions_to_wet -= 1
-            if i_positions_to_wet == 0:
-                break
-        if water > 0:
-            while water > 0:
+        if world_db["HUMIDITY"] > 0:
+            for pos in range(world_db["MAP_LENGTH"] ** 2):
+                if world_db["MAP"][pos] == ord("0") \
+                        and world_db["wetmap"][pos] < ord("5"):
+                    positions_to_wet += [pos]
+            while world_db["HUMIDITY"] > 0 and len(positions_to_wet) > 0:
                 select = rand.next() % len(positions_to_wet)
                 pos = positions_to_wet[select]
                 world_db["wetmap"][pos] += 1
                 positions_to_wet.remove(pos)
-                water -= 1
+                world_db["HUMIDITY"] -= 1
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
@@ -617,6 +611,8 @@ server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_KIDNEY"] = 16
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
 world_db["wetmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)
+if not "HUMIDITY" in world_db:
+    world_db["HUMIDITY"] = 0
 io_db["hook_save"] = save_wetmap
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
@@ -631,6 +627,7 @@ commands_db["drink"] = (0, False, play_drink)
 commands_db["pee"] = (0, False, play_pee)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
+commands_db["HUMIDITY"] = (1, False, setter(None, "HUMIDITY", 0, 65535))
 commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_STOMACH", 0, 255))
 commands_db["T_KIDNEY"] = (1, False, setter("Thing", "T_KIDNEY", 0, 255))
 commands_db["T_BOWEL"] = (1, False, setter("Thing", "T_BOWEL", 0, 255))
