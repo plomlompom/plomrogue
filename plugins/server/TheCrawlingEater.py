@@ -192,6 +192,10 @@ def die(t, message):
         t["fovmap"] = bytearray(b' ' * (world_db["MAP_LENGTH"] ** 2))
         t["T_MEMMAP"][t["pos"]] = ord("@")
         log(message)
+    else:
+        world_db["MAP"][t["pos"]] = ord("5")
+        world_db["HUMILITY"] = t["T_KIDNEY"] + t["T_BLADDER"]
+        del world_db["Things"][t["T_ID"]]
 world_db["die"] = die
 
 
