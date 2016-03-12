@@ -126,14 +126,10 @@ def actor_eat(t):
         height = world_db["MAP"][pos] - ord("0")
         if t["T_STOMACH"] >= 32 or height == 5:
             return
-        eaten = False
-        if height == 3 and 0 == int(rand.next() % 2):
-            t["T_STOMACH"] += height
-            eaten = True
-        elif height == 4 and 0 == int(rand.next() % 5):
-            t["T_STOMACH"] += height
-            eaten = True
+        t["T_STOMACH"] += 1
         log("You EAT.")
+        eaten = (height == 3 and 0 == int(rand.next() % 2)) or \
+                (height == 4 and 0 == int(rand.next() % 5))
         if eaten:
             world_db["MAP"][pos] = ord("0")
             if t["T_STOMACH"] > 32:
