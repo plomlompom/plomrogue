@@ -567,6 +567,23 @@ extern uint8_t dijkstra_map()
 }
 
 
+/* 7DRL/TCE addition: Init AI score map to all-eatable unknown fields. */
+extern uint8_t TCE_init_score_map()
+{
+    uint32_t map_size = maplength * maplength;
+    score_map = malloc(map_size * sizeof(uint16_t));
+    if (!score_map)
+    {
+        return 1;
+    }
+    uint32_t i = 0;
+    for (; i < map_size; i++)
+    {
+        score_map[i] = UINT16_MAX - 1;
+    }
+    return 0;
+}
+
 /* 7DRL/TCE addition: movement cost map setting. */
 static uint8_t * TCE_move_cost_map = NULL;
 extern uint8_t TCE_set_movement_cost_map(char * mem_map)
@@ -627,7 +644,7 @@ extern uint8_t TCE_dijkstra_map_with_movement_cost()
         {
             uint16_t score = score_map[pos];
             uint8_t mov_cost = TCE_move_cost_map[pos];
-            if (mov_cost > 0 && score > i_scans)
+            if (score <= max_score && mov_cost > 0 && score > i_scans)
             {
                 get_neighbor_scores(pos, max_score, neighbors);
                 min_neighbor = max_score;
@@ -735,7 +752,16 @@ extern void write_score_map()
     {
         for (x = 0; x < maplength; x++)
         {
-            fprintf(f, "%2X", score_map[y * maplength + x] % 256);
+            uint32_t pos = y * maplength + x;
+            uint16_t val = score_map[pos];
+            if (val == UINT16_MAX)
+            {
+                fprintf(f, " Z");
+            } else if (val == UINT16_MAX - 1) {
+                fprintf(f, " Y");
+            } else {
+                fprintf(f, "%2X", score_map[pos] % 256);
+            }
         }
         fprintf(f, "\n");
     }

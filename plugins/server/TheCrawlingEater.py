@@ -490,7 +490,9 @@ def get_dir_to_target(t, target):
             raise RuntimeError("No score map allocated for set_map_score().")
 
     def set_movement_cost_map():
-        memmap = c_pointer_to_bytearray(t["T_MEMMAP"])
+        copy_memmap = t["T_MEMMAP"][:]
+        copy_memmap.replace(b' ', b'4')
+        memmap = c_pointer_to_bytearray(copy_memmap)
         if libpr.TCE_set_movement_cost_map(memmap):
             raise RuntimeError("No movement cost map allocated for "
                                "set_movement_cost_map().")
@@ -520,20 +522,25 @@ def get_dir_to_target(t, target):
             return exists(pos for pos in range(mapsize)
                            if t["T_MEMMAP"][pos] == ord("0")
                            if t["fovmap"] != ord("v"))
-        elif target == "space" and t["T_MEMMAP"] and t["fovmap"]:
+        elif target == "space_big" and t["T_MEMMAP"] and t["fovmap"]:
             return exists(pos for pos in range(mapsize)
                           if ord("0") <= t["T_MEMMAP"][pos] <= ord("2")
                           if (t["fovmap"] != ord("v")
                               or world_db["terrain_fullness"](pos) < 5))
         elif target in {"hunt", "flee"} and t["fovmap"]:
             return exists(Thing for
-                          Thing in animates_in_fov(world_db["MAP_LENGTH"]))
+                          Thing in animates_in_fov(world_db["MAP_LENGTH"])) \
+                or exists(pos for pos in range(mapsize)
+                          if world_db["soundmap"][pos] > ord("0")
+                          if t["fovmap"][pos] != ord("v"))
         return False
 
     def init_score_map():
-        test = libpr.init_score_map()
-        set_movement_cost_map()
         mapsize = world_db["MAP_LENGTH"] ** 2
+        test = libpr.TCE_init_score_map()
+        [set_map_score(pos, 65535) for pos in range(mapsize)
+         if chr(t["T_MEMMAP"][pos]) in "5-"]
+        set_movement_cost_map()
         if test:
             raise RuntimeError("Malloc error in init_score_map().")
         if target == "food" and t["T_MEMMAP"]:
@@ -558,6 +565,9 @@ def get_dir_to_target(t, target):
         elif target in {"hunt", "flee"}:
             [set_map_score(Thing["pos"], 0) for
              Thing in animates_in_fov(world_db["MAP_LENGTH"])]
+            [set_map_score(pos, 0) for pos in range(mapsize)
+             if world_db["soundmap"][pos] > ord("0")
+             if t["fovmap"][pos] != ord("v")]
 
     def rand_target_dir(neighbors, cmp, dirs):
         candidates = []
@@ -686,19 +696,19 @@ def ai(t):
                     return
             elif need[0] in {"safe_pee", "safe_drop"}:
                 action_name = need[0][len("safe_"):]
-                if world_db["terrain_fullness"](t["pos"]) < 4:
+                if world_db["terrain_fullness"](t["pos"]) <= 3:
                     t["T_COMMAND"] = thing_action_id(action_name)
                     return
-                else:
-                    test = world_db["get_dir_to_target"](t, "space")
-                    if test[0]:
-                        if (not test[1] < 5) and \
-                                world_db["terrain_fullness"](t["pos"]) < 5:
-                            t["T_COMMAND"] = thing_action_id(action_name)
+                test = world_db["get_dir_to_target"](t, "space")
+                if test[0]:
+                    if test[1] < 5:
                         return
-                    if t["T_STOMACH"] < 32 and \
-                            world_db["get_dir_to_target"](t, "food")[0]:
-                        return
+                    elif world["terrain_fullness"](t["pos"]) < 5:
+                        t["T_COMMAND"] = thing_action_id(action_name)
+                    return
+                if t["T_STOMACH"] < 32 and \
+                        world_db["get_dir_to_target"](t, "food")[0]:
+                    return
                 continue
             if need[0] in {"fluid_certain", "fluid_potential", "food"}:
                 if world_db["get_dir_to_target"](t, need[0])[0]:
