@@ -226,11 +226,12 @@ def actor_move(t):
 
 
 def test_hole(t):
-    if world_db["GRACE"] >= 32 and world_db["MAP"][t["pos"]] == ord("&"):
-        world_db["die"](t, "YOU WIN, CONGRATULATIONS.")
-        return False
-    if world_db["GRACE"] >= 24:
-        return True
+    if t == world_db["Things"][0]:
+        if world_db["GRACE"] >= 32 and world_db["MAP"][t["pos"]] == ord("&"):
+            world_db["die"](t, "YOU WIN, CONGRATULATIONS.")
+            return False
+        if world_db["GRACE"] >= 24:
+            return True
     if chr(world_db["MAP"][t["pos"]]) in "*&":
         world_db["die"](t, "You FALL in a hole, and die.")
         return False
