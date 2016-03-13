@@ -117,7 +117,10 @@ def play_move(str_arg):
             world_db["Things"][0]["T_ARGUMENT"] = d
             world_db["set_command"]("eat")
             return
-        if chr(world_db["MAP"][pos]) in "34":
+        legal_targets = "34"
+        if world_db["GRACE"] >= 8:
+            legal_targets += "5"
+        if chr(world_db["MAP"][pos]) in legal_targets:
             if t["T_STOMACH"] >= 32:
                 if t == world_db["Things"][0]:
                     log("You're too FULL to eat.")
@@ -165,13 +168,17 @@ def actor_eat(t):
         log("You try to EAT, but fail.")
     else:
         height = world_db["MAP"][pos] - ord("0")
-        if t["T_STOMACH"] >= 32 or height == 5:
+        if t["T_STOMACH"] >= 32:
+            return
+        if height == 5 and not \
+                (t == world_db["Things"][0] and world_db["GRACE"] >= 8):
             return
         t["T_STOMACH"] += 1
         if t == world_db["Things"][0]:
             log("You EAT.")
         eaten = (height == 3 and 0 == int(rand.next() % 2)) or \
-                (height == 4 and 0 == int(rand.next() % 5))
+                (height == 4 and 0 == int(rand.next() % 5)) or \
+                (height == 5 and 0 == int(rand.next() % 10))
         if eaten:
             world_db["MAP"][pos] = ord("0")
             if t["T_STOMACH"] > 32:
@@ -208,8 +215,9 @@ def actor_move(t):
         world_db["soundmap"][t["pos"]] = ord("9")
         if t == world_db["Things"][0] and world_db["MAP"][t["pos"]] == ord("$"):
             world_db["MAP"][t["pos"]] = ord("0")
+            if world_db["GRACE"] < 8:
+                log("You can now eat ALL walls.")
             world_db["GRACE"] += 8
-            log("BOO!")
     elif t == world_db["Things"][0]:
         log("You try to MOVE there, but fail.")
 
