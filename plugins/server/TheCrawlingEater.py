@@ -260,7 +260,8 @@ def actor_move(t):
                 log("You now have the DEATH touch.")
             if world_db["GRACE"] < 24:
                 log("You will now LEVITATE over holes.")
-            world_db["GRACE"] += 8
+            if world_db["GRACE"] <= 24:
+                world_db["GRACE"] += 8
     elif t == world_db["Things"][0]:
         log("You try to MOVE there, but fail.")
 
