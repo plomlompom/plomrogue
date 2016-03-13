@@ -461,8 +461,8 @@ def get_dir_to_target(t, target):
 
     def animates_in_fov(maplength):
         return [Thing for Thing in world_db["Things"].values()
-                if Thing["T_LIFEPOINTS"] if 118 == t["fovmap"][Thing["pos"]]
-                if not Thing == t]
+                if Thing["T_LIFEPOINTS"] and 118 == t["fovmap"][Thing["pos"]]
+                and (not Thing == t)]
 
     def seeing_thing():
         def exists(gen):
@@ -489,7 +489,7 @@ def get_dir_to_target(t, target):
                           if ord("0") <= t["T_MEMMAP"][pos] <= ord("2")
                           if (t["fovmap"] != ord("v")
                               or world_db["terrain_fullness"](pos) < 5))
-        elif target == "flee" and t["fovmap"]:
+        elif target in {"hunt", "flee"} and t["fovmap"]:
             return exists(Thing for
                           Thing in animates_in_fov(world_db["MAP_LENGTH"]))
         return False
@@ -519,7 +519,7 @@ def get_dir_to_target(t, target):
                  or world_db["terrain_fullness"](pos) < 5)]
         elif target == "search":
             zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
-        elif target == "flee":
+        elif target in {"hunt", "flee"}:
             [set_map_score(Thing["pos"], 0) for
              Thing in animates_in_fov(world_db["MAP_LENGTH"])]
 
@@ -664,11 +664,15 @@ def ai(t):
                             world_db["get_dir_to_target"](t, "food")[0]:
                         return
                 continue
-            if world_db["get_dir_to_target"](t, need[0])[0]:
-                return
-            elif t["T_STOMACH"] < 32 and \
-                    need[0] in {"fluid_certain", "fluid_potential"} and \
-                    world_db["get_dir_to_target"](t, "food")[0]:
+            if need[0] in {"fluid_certain", "fluid_potential", "food"}:
+                if world_db["get_dir_to_target"](t, need[0])[0]:
+                    return
+                elif world_db["get_dir_to_target"](t, "hunt")[0]:
+                    return
+                elif need[0] != "food" and t["T_STOMACH"] < 32 and \
+                        world_db["get_dir_to_target"](t, "food")[0]:
+                    return
+            elif world_db["get_dir_to_target"](t, need[0])[0]:
                 return
 world_db["ai"] = ai
 
