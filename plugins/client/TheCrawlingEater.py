@@ -61,7 +61,6 @@ def win_map(self):
     curses.init_pair(14, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
     curses.init_pair(15, curses.COLOR_RED, curses.COLOR_GREEN)
     col_unknown = curses.color_pair(1)
-    col_mem = curses.color_pair(1)
     col_creature = curses.color_pair(15)
     col_player = curses.color_pair(8)
     earth_colors = [
@@ -90,19 +89,15 @@ def win_map(self):
                 winmap += [(char, curses.A_REVERSE), ("?", curses.A_REVERSE)]
                 continue
             bonus = " "
+            attribute = col_unknown
             if char == " ":
                 if world_data["soundmap"][pos] != "0":
                     bonus = "?"
                 char = world_data["mem_map"][pos]
-                if char == " ":
-                    attribute = col_unknown
-                else:
-                    attribute = col_mem
                 if char in charmap:
                     char = charmap[char]
                 winmap += [(char, attribute), bonus]
             else:
-                attribute = col_unknown
                 wetval = ord(world_data["wetmap"][pos]) - ord("0")
                 if ord("0") <= ord(char) <= ord("5"):
                     mapval = ord(char) - ord("0")
