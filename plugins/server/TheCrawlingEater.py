@@ -424,17 +424,17 @@ def turn_over():
             elif world_db["MAP"][pos] == ord("$"):
                 height = -3
             if height == -2 and wetness > 1 \
-                    and 0 == rand.next() % ((2 ** 11) / (2 ** wetness)):
+                    and 0 == rand.next() % ((2 ** 10) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("*")
                 world_db["HUMIDITY"] += wetness
             if height == -1 and wetness > 1 \
-                    and 0 == rand.next() % ((2 ** 10) / (2 ** wetness)):
+                    and 0 == rand.next() % ((2 ** 9) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("+")
             if height == 0 and wetness > 1 \
-                    and 0 == rand.next() % ((2 ** 9) / (2 ** wetness)):
+                    and 0 == rand.next() % ((2 ** 8) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("-")
             if ((wetness > 0 and height > 0) or wetness > 1) \
-                and 0 == rand.next() % 5:
+                and 0 == rand.next() % 16:
                 world_db["wetmap"][pos] -= 1
                 world_db["HUMIDITY"] += 1
         if world_db["HUMIDITY"] > 0:
