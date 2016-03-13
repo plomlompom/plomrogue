@@ -63,7 +63,8 @@ def actor_pee(t):
     if not world_db["test_air"](t):
         return
     t["T_BLADDER"] -= 1
-    world_db["wetmap"][t["pos"]] += 1
+    if chr(world_db["MAP"][t["pos"]]) not in "*&":
+        world_db["wetmap"][t["pos"]] += 1
 
 
 def play_drop():
@@ -87,7 +88,7 @@ def actor_drop(t):
         world_db["MAP"][t["pos"]] = ord("-")
     elif world_db["MAP"][t["pos"]] == ord("-"):
         world_db["MAP"][t["pos"]] = ord("0")
-    else:
+    elif chr(world_db["MAP"][t["pos"]]) not in "*&":
         world_db["MAP"][t["pos"]] += 1
     t["T_BOWEL"] -= 1
 
@@ -217,6 +218,8 @@ def actor_move(t):
             world_db["MAP"][t["pos"]] = ord("0")
             if world_db["GRACE"] < 8:
                 log("You can now eat ALL walls.")
+            if world_db["GRACE"] < 24:
+                log("You will now LEVITATE over holes.")
             world_db["GRACE"] += 8
     elif t == world_db["Things"][0]:
         log("You try to MOVE there, but fail.")
@@ -226,6 +229,8 @@ def test_hole(t):
     if world_db["GRACE"] >= 32 and world_db["MAP"][t["pos"]] == ord("&"):
         world_db["die"](t, "YOU WIN, CONGRATULATIONS.")
         return False
+    if world_db["GRACE"] >= 24:
+        return True
     if chr(world_db["MAP"][t["pos"]]) in "*&":
         world_db["die"](t, "You FALL in a hole, and die.")
         return False
