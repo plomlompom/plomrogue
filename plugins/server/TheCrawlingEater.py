@@ -13,9 +13,11 @@ def command_help(str_int):
 
 
 def command_ai():
-    if world_db["WORLD_ACTIVE"]:
-        world_db["ai"](world_db["Things"][0])
-        world_db["turn_over"]()
+    if not (world_db["WORLD_ACTIVE"]
+            and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
+        return
+    world_db["ai"](world_db["Things"][0])
+    world_db["turn_over"]()
 
 
 def play_drink():
@@ -379,16 +381,6 @@ def turn_over():
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
 world_db["turn_over"] = turn_over
-
-
-def command_ai():
-    """Call ai() on player Thing, then turn_over()."""
-    if not (world_db["WORLD_ACTIVE"]
-            and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
-        return
-    from server.ai import ai
-    ai(world_db["Things"][0])
-    world_db["turn_over"]()
 
 
 def set_command(action):
