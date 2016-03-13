@@ -7,16 +7,18 @@ from server.config.world_data import world_db
 
 
 def play_drink():
-    if action_exists("drink") and world_db["WORLD_ACTIVE"]:
-        pos = world_db["Things"][0]["pos"]
-        if not (chr(world_db["MAP"][pos]) == "0"
-                and world_db["wetmap"][pos] > ord("0")):
-            log("NOTHING to drink here.")
-            return
-        elif world_db["Things"][0]["T_KIDNEY"] >= 32:
-            log("You're too FULL to drink more.")
-            return
-        world_db["set_command"]("drink")
+    if not (action_exists("drink") and world_db["WORLD_ACTIVE"]
+            and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
+        return
+    pos = world_db["Things"][0]["pos"]
+    if not (chr(world_db["MAP"][pos]) == "0"
+            and world_db["wetmap"][pos] > ord("0")):
+        log("NOTHING to drink here.")
+        return
+    elif world_db["Things"][0]["T_KIDNEY"] >= 32:
+        log("You're too FULL to drink more.")
+        return
+    world_db["set_command"]("drink")
 
 
 def actor_drink(t):
@@ -34,11 +36,13 @@ def actor_drink(t):
 
 
 def play_pee():
-    if action_exists("pee") and world_db["WORLD_ACTIVE"]:
-        if world_db["Things"][0]["T_BLADDER"] < 1:
-            log("Nothing to drop from empty bladder.")
-            return
-        world_db["set_command"]("pee")
+    if not (action_exists("pee") and world_db["WORLD_ACTIVE"]
+            and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
+        return
+    if world_db["Things"][0]["T_BLADDER"] < 1:
+        log("Nothing to drop from empty bladder.")
+        return
+    world_db["set_command"]("pee")
 
 
 def actor_pee(t):
@@ -53,11 +57,13 @@ def actor_pee(t):
 
 
 def play_drop():
-    if action_exists("drop") and world_db["WORLD_ACTIVE"]:
-        if world_db["Things"][0]["T_BOWEL"] < 1:
-            log("Nothing to drop from empty bowel.")
-            return
-        world_db["set_command"]("drop")
+    if not (action_exists("drop") and world_db["WORLD_ACTIVE"]
+            and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
+        return
+    if world_db["Things"][0]["T_BOWEL"] < 1:
+        log("Nothing to drop from empty bowel.")
+        return
+    world_db["set_command"]("drop")
 
 
 def actor_drop(t):
@@ -72,42 +78,43 @@ def actor_drop(t):
 
 
 def play_move(str_arg):
-    """Try "move" as player's T_COMMAND, str_arg as T_ARGUMENT / direction."""
-    if action_exists("move") and world_db["WORLD_ACTIVE"]:
-        from server.config.world_data import directions_db, symbols_passable
-        t = world_db["Things"][0]
-        if not str_arg in directions_db:
-            print("Illegal move direction string.")
+    if not (action_exists("move") and world_db["WORLD_ACTIVE"]
+            and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
+        return
+    from server.config.world_data import directions_db, symbols_passable
+    t = world_db["Things"][0]
+    if not str_arg in directions_db:
+        print("Illegal move direction string.")
+        return
+    d = ord(directions_db[str_arg])
+    from server.utils import mv_yx_in_dir_legal
+    move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
+    if 1 == move_result[0]:
+        pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
+        hitted = [tid for tid in world_db["Things"]
+                  if world_db["Things"][tid]["T_POSY"] == move_result[1]
+                  if world_db["Things"][tid]["T_POSX"] == move_result[2]]
+        if len(hitted) > 0:
+            if t["T_STOMACH"] >= 32 and t["T_KIDNEY"] >= 32:
+                if t == world_db["Things"][0]:
+                    log("You're too FULL to suck from another creature.")
+                return
+            world_db["Things"][0]["T_ARGUMENT"] = d
+            world_db["set_command"]("eat")
             return
-        d = ord(directions_db[str_arg])
-        from server.utils import mv_yx_in_dir_legal
-        move_result = mv_yx_in_dir_legal(chr(d), t["T_POSY"], t["T_POSX"])
-        if 1 == move_result[0]:
-            pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            hitted = [tid for tid in world_db["Things"]
-                      if world_db["Things"][tid]["T_POSY"] == move_result[1]
-                      if world_db["Things"][tid]["T_POSX"] == move_result[2]]
-            if len(hitted) > 0:
-                if t["T_STOMACH"] >= 32 and t["T_KIDNEY"] >= 32:
-                    if t == world_db["Things"][0]:
-                        log("You're too FULL to suck from another creature.")
-                    return
-                world_db["Things"][0]["T_ARGUMENT"] = d
-                world_db["set_command"]("eat")
+        if chr(world_db["MAP"][pos]) in "34":
+            if t["T_STOMACH"] >= 32:
+                if t == world_db["Things"][0]:
+                    log("You're too FULL to eat.")
                 return
-            if chr(world_db["MAP"][pos]) in "34":
-                if t["T_STOMACH"] >= 32:
-                    if t == world_db["Things"][0]:
-                        log("You're too FULL to eat.")
-                    return
-                world_db["Things"][0]["T_ARGUMENT"] = d
-                world_db["set_command"]("eat")
-                return
-            if chr(world_db["MAP"][pos]) in symbols_passable:
-                world_db["Things"][0]["T_ARGUMENT"] = d
-                world_db["set_command"]("move")
-                return
-        log("You CAN'T eat your way through there.")
+            world_db["Things"][0]["T_ARGUMENT"] = d
+            world_db["set_command"]("eat")
+            return
+        if chr(world_db["MAP"][pos]) in symbols_passable:
+            world_db["Things"][0]["T_ARGUMENT"] = d
+            world_db["set_command"]("move")
+            return
+    log("You CAN'T eat your way through there.")
 
 
 def actor_eat(t):
@@ -364,10 +371,12 @@ world_db["turn_over"] = turn_over
 
 def command_ai():
     """Call ai() on player Thing, then turn_over()."""
+    if not (world_db["WORLD_ACTIVE"]
+            and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
+        return
     from server.ai import ai
-    if world_db["WORLD_ACTIVE"]:
-        ai(world_db["Things"][0])
-        world_db["turn_over"]()
+    ai(world_db["Things"][0])
+    world_db["turn_over"]()
 
 
 def set_command(action):
