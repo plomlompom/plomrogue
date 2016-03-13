@@ -254,12 +254,14 @@ def actor_move(t):
         world_db["soundmap"][t["pos"]] = ord("9")
         if t == world_db["Things"][0] and world_db["MAP"][t["pos"]] == ord("$"):
             world_db["MAP"][t["pos"]] = ord("0")
-            if world_db["GRACE"] < 8:
+            if world_db["GRACE"] == 0:
                 log("You can now eat ALL walls.")
-            if world_db["GRACE"] < 16:
+            if world_db["GRACE"] == 8:
                 log("You now have the DEATH touch.")
-            if world_db["GRACE"] < 24:
+            if world_db["GRACE"] == 16:
                 log("You will now LEVITATE over holes.")
+            if world_db["GRACE"] == 24:
+                log("You are now READY to fly through the exit portal.")
             if world_db["GRACE"] <= 24:
                 world_db["GRACE"] += 8
     elif t == world_db["Things"][0]:
