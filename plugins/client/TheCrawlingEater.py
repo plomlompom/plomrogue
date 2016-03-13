@@ -89,7 +89,10 @@ def win_map(self):
                     char = world_data["mem_map"][pos]
                 winmap += [(char, curses.A_REVERSE), ("?", curses.A_REVERSE)]
                 continue
+            bonus = " "
             if char == " ":
+                if world_data["soundmap"][pos] != "0":
+                    bonus = "?"
                 char = world_data["mem_map"][pos]
                 if char == " ":
                     attribute = col_unknown
@@ -97,10 +100,8 @@ def win_map(self):
                     attribute = col_mem
                 if char in charmap:
                     char = charmap[char]
-                bonus = (" ", attribute)
                 winmap += [(char, attribute), bonus]
             else:
-                bonus = " "
                 attribute = col_unknown
                 wetval = ord(world_data["wetmap"][pos]) - ord("0")
                 if ord("0") <= ord(char) <= ord("5"):
@@ -128,12 +129,14 @@ world_data["stomach"] = 0
 world_data["bowel"] = 0
 world_data["bladder"] = 0
 world_data["wetmap"] = " " * (world_data["map_size"] ** 2)
+world_data["soundmap"] = " " * (world_data["map_size"] ** 2)
 from client.config.io import io
 io["worldstate_read_order"] += [["stomach", "int"]]
 io["worldstate_read_order"] += [["kidney", "int"]]
 io["worldstate_read_order"] += [["bowel", "int"]]
 io["worldstate_read_order"] += [["bladder", "int"]]
 io["worldstate_read_order"] += [["wetmap", "map"]]
+io["worldstate_read_order"] += [["soundmap", "map"]]
 from client.config.windows import windows_config
 from client.windows import win_log
 windows_config[:] = [

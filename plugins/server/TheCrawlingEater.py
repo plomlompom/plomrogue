@@ -183,8 +183,7 @@ def actor_move(t):
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
-        #if t != world_db["Things"][0]:
-        #    world_db["Things"][0]["T_MEMMAP"][t["pos"]] = ord("?")
+        world_db["soundmap"][t["pos"]] = ord("9")
     elif t == world_db["Things"][0]:
         log("You try to MOVE there, but fail.")
 
@@ -354,6 +353,9 @@ def turn_over():
                 world_db["wetmap"][pos] += 1
                 positions_to_wet.remove(pos)
                 world_db["HUMIDITY"] -= 1
+        for pos in range(world_db["MAP_LENGTH"] ** 2):
+            if world_db["soundmap"][pos] > ord("0"):
+                world_db["soundmap"][pos] -= 1
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
@@ -383,13 +385,40 @@ def play_wait():
         world_db["set_command"]("wait")
 
 
-def save_wetmap():
+def save_maps():
     length = world_db["MAP_LENGTH"]
     string = ""
     for i in range(length):
         line = world_db["wetmap"][i * length:(i * length) + length].decode()
         string = string + "WETMAP" + " "  + str(i) + " " + line + "\n"
+    for i in range(length):
+        line = world_db["soundmap"][i * length:(i * length) + length].decode()
+        string = string + "SOUNDMAP" + " "  + str(i) + " " + line + "\n"
     return string
+
+
+def soundmapset(str_int, mapline):
+    def valid_map_line(str_int, mapline):
+        from server.utils import integer_test
+        val = integer_test(str_int, 0, 255)
+        if None != val:
+            if val >= world_db["MAP_LENGTH"]:
+                print("Illegal value for map line number.")
+            elif len(mapline) != world_db["MAP_LENGTH"]:
+                print("Map line length is unequal map width.")
+            else:
+                return val
+        return None
+    val = valid_map_line(str_int, mapline)
+    if None != val:
+        length = world_db["MAP_LENGTH"]
+        if not world_db["soundmap"]:
+            m = bytearray(b' ' * (length ** 2))
+        else:
+            m = world_db["soundmap"]
+        m[val * length:(val * length) + length] = mapline.encode()
+        if not world_db["soundmap"]:
+            world_db["soundmap"] = m
 
 
 def wetmapset(str_int, mapline):
@@ -414,6 +443,13 @@ def wetmapset(str_int, mapline):
         m[val * length:(val * length) + length] = mapline.encode()
         if not world_db["wetmap"]:
             world_db["wetmap"] = m
+
+
+def write_soundmap():
+    from server.worldstate_write_helpers import write_map
+    length = world_db["MAP_LENGTH"]
+    return write_map(world_db["soundmap"], world_db["MAP_LENGTH"])
+
 
 def write_wetmap():
     from server.worldstate_write_helpers import write_map
@@ -683,6 +719,7 @@ io_db["worldstate_write_order"] += [["T_KIDNEY", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BOWEL", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
 io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
+io_db["worldstate_write_order"] += [[write_soundmap, "func"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "345"
 server.config.world_data.symbols_passable = "012-"
@@ -690,12 +727,13 @@ server.config.world_data.thing_defaults["T_STOMACH"] = 16
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_KIDNEY"] = 16
 server.config.world_data.thing_defaults["T_BLADDER"] = 0
+world_db["soundmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)
 world_db["wetmap"] = bytearray(b"0" * world_db["MAP_LENGTH"] ** 2)
 if not "NEW_SPAWN" in world_db:
     world_db["NEW_SPAWN"] = 0
 if not "HUMIDITY" in world_db:
     world_db["HUMIDITY"] = 0
-io_db["hook_save"] = save_wetmap
+io_db["hook_save"] = save_maps
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
 from server.config.commands import commands_db
@@ -716,6 +754,7 @@ commands_db["T_KIDNEY"] = (1, False, setter("Thing", "T_KIDNEY", 0, 255))
 commands_db["T_BOWEL"] = (1, False, setter("Thing", "T_BOWEL", 0, 255))
 commands_db["T_BLADDER"] = (1, False, setter("Thing", "T_BLADDER", 0, 255))
 commands_db["WETMAP"] = (2, False, wetmapset)
+commands_db["SOUNDMAP"] = (2, False, soundmapset)
 from server.actions import actor_wait
 import server.config.actions
 server.config.actions.action_db = {
