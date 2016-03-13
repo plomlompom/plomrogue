@@ -136,6 +136,32 @@ def play_move(str_arg):
     log("You CAN'T eat your way through there.")
 
 
+def suck_out_creature(t, tid):
+    if t == None:
+        t = world_db["Things"][tid]
+    elif tid == None:
+        tid = next(tid for tid in world_db["Things"]
+                   if world_db["Things"][tid] == t)
+    room_stomach = 32 - world_db["Things"][0]["T_STOMACH"]
+    room_kidney = 32 - world_db["Things"][0]["T_KIDNEY"]
+    if t["T_STOMACH"] > room_stomach:
+        t["T_STOMACH"] -= room_stomach
+        world_db["Things"][0]["T_STOMACH"] = 32
+    else:
+        world_db["Things"][0]["T_STOMACH"] + t["T_STOMACH"]
+        t["T_STOMACH"] = 0
+    if t["T_KIDNEY"] > room_stomach:
+        t["T_KIDNEY"] -= room_stomach
+        world_db["Things"][0]["T_KIDNEY"] = 32
+    else:
+        world_db["Things"][0]["T_KIDNEY"] + t["T_KIDNEY"]
+        t["T_KIDNEY"] = 0
+    hitted_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
+    log("You SUCK EVERYTHING from " + hitted_name + ", killing them.")
+    world_db["die"](t, "FOO")
+world_db["suck_out_creature"] = suck_out_creature
+
+
 def actor_eat(t):
     from server.utils import mv_yx_in_dir_legal, rand
     from server.config.world_data import symbols_passable
@@ -151,9 +177,15 @@ def actor_eat(t):
             hit_id = hitted[0]
             hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
             if t == world_db["Things"][0]:
+                if world_db["GRACE"] >= 16:
+                    world_db["suck_out_creature"](None, hit_id)
+                    return
                 hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
                 log("You SUCK from " + hitted_name + ".")
             elif 0 == hit_id:
+                if world_db["GRACE"] >= 16:
+                    world_db["suck_out_creature"](t, None)
+                    return
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" SUCKS from you.")
             hitted = world_db["Things"][hit_id]
@@ -202,9 +234,15 @@ def actor_move(t):
             hit_id = hitted[0]
             hitted_tid = world_db["Things"][hit_id]["T_TYPE"]
             if t == world_db["Things"][0]:
+                if world_db["GRACE"] >= 16:
+                    world_db["suck_out_creature"](None, hit_id)
+                    return
                 hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
                 log("You BUMP into " + hitted_name + ".")
             elif 0 == hit_id:
+                if world_db["GRACE"] >= 16:
+                    world_db["suck_out_creature"](t, None)
+                    return
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
                 log(hitter_name +" BUMPS into you.")
             return
@@ -218,6 +256,8 @@ def actor_move(t):
             world_db["MAP"][t["pos"]] = ord("0")
             if world_db["GRACE"] < 8:
                 log("You can now eat ALL walls.")
+            if world_db["GRACE"] < 16:
+                log("You now have the DEATH touch.")
             if world_db["GRACE"] < 24:
                 log("You will now LEVITATE over holes.")
             world_db["GRACE"] += 8
@@ -349,6 +389,8 @@ def turn_over():
                     if t["T_PROGRESS"] >= effort:
                         action = action_db["actor_" + ThingAction["TA_NAME"]]
                         action(t)
+                        if t["T_LIFEPOINTS"] <= 0:
+                            continue
                         t["T_COMMAND"] = 0
                         t["T_PROGRESS"] = 0
                     if t["T_BOWEL"] > 16:
