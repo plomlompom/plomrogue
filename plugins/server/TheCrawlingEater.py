@@ -223,7 +223,7 @@ def actor_move(t):
 
 
 def test_hole(t):
-    if world_db["MAP"][t["pos"]] == ord("&"):
+    if world_db["GRACE"] >= 32 and world_db["MAP"][t["pos"]] == ord("&"):
         world_db["die"](t, "YOU WIN, CONGRATULATIONS.")
         return False
     if chr(world_db["MAP"][t["pos"]]) in "*&":
