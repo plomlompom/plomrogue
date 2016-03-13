@@ -28,7 +28,7 @@ def win_map(self):
         "3": "%",
         "4": "#",
         "5": "X",
-        "-": "O",
+        "*": "O",
     }
     win_size = self.size
     offset = [0, 0]
@@ -101,8 +101,10 @@ def win_map(self):
                 winmap += [(char, attribute), bonus]
             else:
                 wetval = ord(world_data["wetmap"][pos]) - ord("0")
-                if ord("0") <= ord(char) <= ord("5"):
-                    mapval = ord(char) - ord("0")
+                if char in "012345-+":
+                    mapval = 0
+                    if char not in "-+":
+                        mapval = ord(char) - ord("0")
                     if 1 <= wetval <= 5:
                         attribute = water_colors[wetval + (mapval - 1)]
                     else:

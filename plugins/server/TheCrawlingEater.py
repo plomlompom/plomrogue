@@ -25,7 +25,7 @@ def play_drink():
             and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
         return
     pos = world_db["Things"][0]["pos"]
-    if not (chr(world_db["MAP"][pos]) == "0"
+    if not (chr(world_db["MAP"][pos]) in "0-+"
             and world_db["wetmap"][pos] > ord("0")):
         log("NOTHING to drink here.")
         return
@@ -37,16 +37,12 @@ def play_drink():
 
 def actor_drink(t):
     pos = t["pos"]
-    if chr(world_db["MAP"][pos]) == "0" and \
+    if chr(world_db["MAP"][pos]) in "0-+" and \
                 world_db["wetmap"][pos] > ord("0") and t["T_KIDNEY"] < 32:
         if world_db["Things"][0] == t:
             log("You DRINK.")
         t["T_KIDNEY"] += 1
         world_db["wetmap"][pos] -= 1
-        if world_db["wetmap"][pos] == ord("0"):
-            world_db["MAP"][pos] = ord("0")
-    elif t == world_db["Things"][0]:
-        log("YOU FAIL TO DRINK " + str(world_db["MAP"][pos] - ord("0")))
 
 
 def play_pee():
@@ -87,7 +83,12 @@ def actor_drop(t):
         log("You DROP waste.")
     if not world_db["test_air"](t):
         return
-    world_db["MAP"][t["pos"]] += 1
+    if world_db["MAP"][t["pos"]] == ord("+"):
+        world_db["MAP"][t["pos"]] = ord("-")
+    elif world_db["MAP"][t["pos"]] == ord("-"):
+        world_db["MAP"][t["pos"]] = ord("0")
+    else:
+        world_db["MAP"][t["pos"]] += 1
     t["T_BOWEL"] -= 1
 
 
@@ -210,7 +211,7 @@ def actor_move(t):
 
 
 def test_hole(t):
-    if world_db["MAP"][t["pos"]] == ord("-"):
+    if world_db["MAP"][t["pos"]] == ord("*"):
         world_db["die"](t, "You FALL in a hole, and die.")
         return False
     return True
@@ -338,10 +339,21 @@ def turn_over():
         for pos in range(world_db["MAP_LENGTH"] ** 2):
             wetness = world_db["wetmap"][pos] - ord("0")
             height = world_db["MAP"][pos] - ord("0")
-            if height == 0 and wetness > 0 \
-                    and 0 == rand.next() % ((2 ** 13) / (2 ** wetness)):
+            if world_db["MAP"][pos] == ord("-"):
+                height = -1
+            elif world_db["MAP"][pos] == ord("+"):
+                height = -2
+            if height == -2 and wetness > 1 \
+                    and 0 == rand.next() % ((2 ** 11) / (2 ** wetness)):
+                world_db["MAP"][pos] = ord("*")
+                world_db["HUMIDITY"] += wetness
+            if height == -1 and wetness > 1 \
+                    and 0 == rand.next() % ((2 ** 10) / (2 ** wetness)):
+                world_db["MAP"][pos] = ord("+")
+            if height == 0 and wetness > 1 \
+                    and 0 == rand.next() % ((2 ** 9) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("-")
-            if ((wetness > 0 and height != 0) or wetness > 1) \
+            if ((wetness > 0 and height > 0) or wetness > 1) \
                 and 0 == rand.next() % 5:
                 world_db["wetmap"][pos] -= 1
                 world_db["HUMIDITY"] += 1
@@ -365,7 +377,7 @@ def turn_over():
                         break
             positions_to_wet = []
             for pos in range(world_db["MAP_LENGTH"] ** 2):
-                if world_db["MAP"][pos] == ord("0") \
+                if chr(world_db["MAP"][pos]) in "0-+" \
                         and world_db["wetmap"][pos] < ord("5"):
                     positions_to_wet += [pos]
             while world_db["HUMIDITY"] > 0 and len(positions_to_wet) > 0:
@@ -377,6 +389,7 @@ def turn_over():
         for pos in range(world_db["MAP_LENGTH"] ** 2):
             if world_db["soundmap"][pos] > ord("0"):
                 world_db["soundmap"][pos] -= 1
+        log("TURN " + str(world_db["TURN"]))
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
@@ -525,13 +538,16 @@ def get_dir_to_target(t, target):
                            if t["fovmap"] == ord("v")
                            if world_db["MAP"][pos] == ord("0")
                            if world_db["wetmap"][pos] > ord("0"))
+        elif target == "crack" and t["T_MEMMAP"]:
+            return exists(pos for pos in range(mapsize)
+                           if t["T_MEMMAP"][pos] == ord("-"))
         elif target == "fluid_potential" and t["T_MEMMAP"] and t["fovmap"]:
             return exists(pos for pos in range(mapsize)
                            if t["T_MEMMAP"][pos] == ord("0")
                            if t["fovmap"] != ord("v"))
-        elif target == "space_big" and t["T_MEMMAP"] and t["fovmap"]:
+        elif target == "space" and t["T_MEMMAP"] and t["fovmap"]:
             return exists(pos for pos in range(mapsize)
-                          if ord("0") <= t["T_MEMMAP"][pos] <= ord("2")
+                          if ord("-") <= t["T_MEMMAP"][pos] <= ord("2")
                           if (t["fovmap"] != ord("v")
                               or world_db["terrain_fullness"](pos) < 5))
         elif target in {"hunt", "flee"} and t["fovmap"]:
@@ -546,7 +562,7 @@ def get_dir_to_target(t, target):
         mapsize = world_db["MAP_LENGTH"] ** 2
         test = libpr.TCE_init_score_map()
         [set_map_score(pos, 65535) for pos in range(mapsize)
-         if chr(t["T_MEMMAP"][pos]) in "5-"]
+         if chr(t["T_MEMMAP"][pos]) in "5*"]
         set_movement_cost_map()
         if test:
             raise RuntimeError("Malloc error in init_score_map().")
@@ -558,13 +574,16 @@ def get_dir_to_target(t, target):
              if t["fovmap"] == ord("v")
              if world_db["MAP"][pos] == ord("0")
              if world_db["wetmap"][pos] > ord("0")]
+        elif target == "crack" and t["T_MEMMAP"]:
+            [set_map_score(pos, 0) for pos in range(mapsize)
+             if t["T_MEMMAP"][pos] == ord("-")]
         elif target == "fluid_potential" and t["T_MEMMAP"] and t["fovmap"]:
             [set_map_score(pos, 0) for pos in range(mapsize)
              if t["T_MEMMAP"][pos] == ord("0")
              if t["fovmap"] != ord("v")]
         elif target == "space" and t["T_MEMMAP"] and t["fovmap"]:
             [set_map_score(pos, 0) for pos in range(mapsize)
-             if ord("0") <= t["T_MEMMAP"][pos] <= ord("2")
+             if ord("-") <= t["T_MEMMAP"][pos] <= ord("2")
              if (t["fovmap"] != ord("v")
                  or world_db["terrain_fullness"](pos) < 5)]
         elif target == "search":
@@ -656,8 +675,12 @@ world_db["get_dir_to_target"] = get_dir_to_target
 
 
 def terrain_fullness(pos):
-    return (world_db["MAP"][pos] - ord("0")) + \
-        (world_db["wetmap"][pos] - ord("0"))
+    wetness = world_db["wetmap"][pos] - ord("0")
+    if chr(world_db["MAP"][pos]) in "-+":
+        height = 0
+    else:
+        height = world_db["MAP"][pos] - ord("0")
+    return wetness + height
 world_db["terrain_fullness"] = terrain_fullness
 
 
@@ -680,6 +703,7 @@ def ai(t):
 
     t["T_COMMAND"] = thing_action_id("wait")
     needs = {
+        "fix_cracks": 24,
         "flee": 24,
         "safe_pee": (world_db["terrain_fullness"](t["pos"]) * t["T_BLADDER"]) / 4,
         "safe_drop": (world_db["terrain_fullness"](t["pos"]) * t["T_BOWEL"]) / 4,
@@ -693,6 +717,14 @@ def ai(t):
     needs.reverse()
     for need in needs:
         if need[1] > 0:
+            if need[0] == "fix_cracks":
+                if world_db["MAP"][t["pos"]] == ord("-") and \
+                        t["T_BOWEL"] > 0 and \
+                        world_db["terrain_fullness"](t["pos"]) <= 3:
+                    t["T_COMMAND"] = thing_action_id("drop")
+                    return
+                elif world_db["get_dir_to_target"](t, "crack"):
+                    return
             if need[0] in {"fluid_certain", "fluid_potential"}:
                 if standing_on_fluid(t):
                     t["T_COMMAND"] = thing_action_id("drink")
@@ -710,7 +742,7 @@ def ai(t):
                 if test[0]:
                     if test[1] < 5:
                         return
-                    elif world["terrain_fullness"](t["pos"]) < 5:
+                    elif world_db["terrain_fullness"](t["pos"]) < 5:
                         t["T_COMMAND"] = thing_action_id(action_name)
                     return
                 if t["T_STOMACH"] < 32 and \
@@ -739,7 +771,7 @@ io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
 io_db["worldstate_write_order"] += [[write_soundmap, "func"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "345"
-server.config.world_data.symbols_passable = "012-"
+server.config.world_data.symbols_passable = "012-+*"
 server.config.world_data.thing_defaults["T_STOMACH"] = 16
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_KIDNEY"] = 16
