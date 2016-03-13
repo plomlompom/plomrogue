@@ -183,7 +183,6 @@ def actor_move(t):
         t["T_POSY"] = move_result[1]
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
-        build_fov_map(t)
         #if t != world_db["Things"][0]:
         #    world_db["Things"][0]["T_MEMMAP"][t["pos"]] = ord("?")
     elif t == world_db["Things"][0]:
@@ -275,6 +274,7 @@ def turn_over():
     from server.io import try_worldstate_update
     from server.config.io import io_db
     from server.utils import rand
+    from server.build_fov_map import build_fov_map
     while world_db["Things"][0]["T_LIFEPOINTS"]:
         for tid in [tid for tid in world_db["Things"]]:
             if not tid in world_db["Things"]:
@@ -285,6 +285,7 @@ def turn_over():
                     continue
                 if not t["T_COMMAND"]:
                     update_map_memory(t)
+                    build_fov_map(t)
                     if 0 == tid:
                         return
                     world_db["ai"](t)
@@ -563,13 +564,6 @@ def get_dir_to_target(t, target):
                 if attack_distance >= distance:
                     dir_to_target = rand_target_dir(neighbors,
                                                     distance - 1, dirs)
-                elif fear_distance >= distance:
-                    t["T_COMMAND"] = [taid for
-                                      taid in world_db["ThingActions"]
-                                      if
-                                      world_db["ThingActions"][taid]["TA_NAME"]
-                                      == "wait"][0]
-                    return 1, 0
             elif dir_to_target and fear_distance < distance:
                 dir_to_target = 0
         return dir_to_target, minmax_neighbor
