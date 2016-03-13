@@ -53,15 +53,14 @@ def win_map(self):
     curses.init_pair(6, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(7, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
     curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_WHITE)
-    #curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLUE)
+    curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLUE)
     curses.init_pair(10, curses.COLOR_BLACK, curses.COLOR_CYAN)
     curses.init_pair(11, curses.COLOR_BLACK, curses.COLOR_GREEN)
     curses.init_pair(12, curses.COLOR_BLACK, curses.COLOR_YELLOW)
     curses.init_pair(13, curses.COLOR_BLACK, curses.COLOR_RED)
     curses.init_pair(14, curses.COLOR_BLACK, curses.COLOR_MAGENTA)
-    curses.init_pair(15, curses.COLOR_RED, curses.COLOR_GREEN)
     col_unknown = curses.color_pair(1)
-    col_creature = curses.color_pair(15)
+    col_creature = curses.color_pair(13)
     col_player = curses.color_pair(8)
     earth_colors = [
         curses.color_pair(4),
@@ -72,10 +71,10 @@ def win_map(self):
         curses.color_pair(7),
     ]
     water_colors = [
+        curses.color_pair(9),
         curses.color_pair(10),
         curses.color_pair(11),
         curses.color_pair(12),
-        curses.color_pair(13),
         curses.color_pair(14),
     ]
     for y in range(world_data["map_size"]):
