@@ -29,6 +29,7 @@ def win_map(self):
         "4": "#",
         "5": "X",
         "*": "O",
+        "&": "0",
     }
     win_size = self.size
     offset = [0, 0]
@@ -109,6 +110,8 @@ def win_map(self):
                         attribute = water_colors[wetval + (mapval - 1)]
                     else:
                         attribute = earth_colors[mapval]
+                if char == "&":
+                    attribute = col_player
                 if char in charmap:
                     char = charmap[char]
                 elif char == "@":

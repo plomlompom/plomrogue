@@ -211,7 +211,10 @@ def actor_move(t):
 
 
 def test_hole(t):
-    if world_db["MAP"][t["pos"]] == ord("*"):
+    if world_db["MAP"][t["pos"]] == ord("&"):
+        world_db["die"](t, "YOU WIN, CONGRATULATIONS.")
+        return False
+    if chr(world_db["MAP"][t["pos"]]) in "*&":
         world_db["die"](t, "You FALL in a hole, and die.")
         return False
     return True
@@ -336,7 +339,8 @@ def turn_over():
                         world_db["die"](t, "You DIE of hunger.")
                     elif t["T_KIDNEY"] <= 0:
                         world_db["die"](t, "You DIE of dehydration.")
-        for pos in range(world_db["MAP_LENGTH"] ** 2):
+        mapsize = world_db["MAP_LENGTH"] ** 2
+        for pos in range(mapsize):
             wetness = world_db["wetmap"][pos] - ord("0")
             height = world_db["MAP"][pos] - ord("0")
             if world_db["MAP"][pos] == ord("-"):
@@ -376,7 +380,7 @@ def turn_over():
                         pos = y * world_db["MAP_LENGTH"] + x
                         break
             positions_to_wet = []
-            for pos in range(world_db["MAP_LENGTH"] ** 2):
+            for pos in range(mapsize):
                 if chr(world_db["MAP"][pos]) in "0-+" \
                         and world_db["wetmap"][pos] < ord("5"):
                     positions_to_wet += [pos]
@@ -386,10 +390,29 @@ def turn_over():
                 world_db["wetmap"][pos] += 1
                 positions_to_wet.remove(pos)
                 world_db["HUMIDITY"] -= 1
-        for pos in range(world_db["MAP_LENGTH"] ** 2):
+        for pos in range(mapsize):
             if world_db["soundmap"][pos] > ord("0"):
                 world_db["soundmap"][pos] -= 1
-        log("TURN " + str(world_db["TURN"]))
+        from server.utils import libpr
+        libpr.init_score_map()
+        def set_map_score(pos, score):
+            test = libpr.set_map_score(pos, score)
+            if test:
+                raise RuntimeError("No score map allocated for set_map_score().")
+        [set_map_score(pos, 1) for pos in range(mapsize)
+         if world_db["MAP"][pos] == ord("*")]
+        for pos in range(mapsize):
+            if world_db["MAP"][pos] == ord("*"):
+                if libpr.ready_neighbor_scores(pos):
+                    raise RuntimeError("No score map allocated for " +
+                                       "ready_neighbor_scores.()")
+                score = 0
+                dirs = "edcxsw"
+                for i in range(len(dirs)):
+                    score += libpr.get_neighbor_score(i)
+                if score == 5 or score == 6:
+                    world_db["MAP"][pos] = ord("&")
+        libpr.free_score_map()
         world_db["TURN"] += 1
         io_db["worldstate_updateable"] = True
         try_worldstate_update()
@@ -562,7 +585,7 @@ def get_dir_to_target(t, target):
         mapsize = world_db["MAP_LENGTH"] ** 2
         test = libpr.TCE_init_score_map()
         [set_map_score(pos, 65535) for pos in range(mapsize)
-         if chr(t["T_MEMMAP"][pos]) in "5*"]
+         if chr(t["T_MEMMAP"][pos]) in "5*&"]
         set_movement_cost_map()
         if test:
             raise RuntimeError("Malloc error in init_score_map().")
@@ -771,7 +794,7 @@ io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
 io_db["worldstate_write_order"] += [[write_soundmap, "func"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "345"
-server.config.world_data.symbols_passable = "012-+*"
+server.config.world_data.symbols_passable = "012-+*&"
 server.config.world_data.thing_defaults["T_STOMACH"] = 16
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_KIDNEY"] = 16
