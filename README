@@ -1,9 +1,9 @@
 plomrogue
 =========
 
-plomlompom tries to build his own roguelike engine. There is one game for it so
-far, which is loaded by default: "Please the Island God". See ./README_PtIG for
-details on it.
+plomlompom tries to build his own roguelike engine. There is two games for it so
+far, one of which is loaded by default: "The Crawling Eater". See ./README_TCE
+for details on it.
 
 System requirements / installation / running the game
 -----------------------------------------------------
