@@ -140,21 +140,27 @@ from client.windows import win_log
 windows_config[:] = [
     {"config": [0, -34],
      "func": win_map,
+     "scroll_hints": False,
       "title": "The Crawling Eater"},
     {"config": [1, 33],
      "func": win_bar_maker(77, "%", "stomach"),
+     "scroll_hints": False,
      "title": "stomach"},
     {"config": [1, 33],
      "func": win_bar_maker(79, "~", "kidney"),
+     "scroll_hints": False,
       "title": "kidney"},
     {"config": [1, 33],
      "func": win_bar_maker(78, "%", "bowel"),
+     "scroll_hints": False,
      "title": "bowel"},
     {"config": [1, 33],
      "func": win_bar_maker(80, "~", "bladder"),
+     "scroll_hints": False,
       "title": "bladder"},
     {"config": [-8, 33],
      "func": win_log,
+     "scroll_hints": False,
      "title": "log"}
 ]
 from client.window_management import set_windows

@@ -142,11 +142,26 @@ def win_map(self):
 from client.config.windows import windows_config
 from client.windows import win_log, win_inventory, win_look
 windows_config[:] = [
-    {"config": [1, 33], "func": win_info, "title": "Stats"},
-    {"config": [-7, 33], "func": win_log, "title": "Log"},
-    {"config": [4, 16], "func": win_inventory, "title": "Inventory"},
-    {"config": [4, 16], "func": win_look, "title": "Things here"},
-    {"config": [0, -34], "func": win_map, "title": "PLEASE THE ISLAND GOD"}
+    {"config": [1, 33],
+     "func": win_info,
+     "scroll_hints": True,
+     "title": "Stats"},
+    {"config": [-7, 33],
+     "func": win_log,
+     "scroll_hints": True,
+     "title": "Log"},
+    {"config": [4, 16],
+     "func": win_inventory,
+     "scroll_hints": True,
+     "title": "Inventory"},
+    {"config": [4, 16],
+     "func": win_look,
+     "scroll_hints": True,
+     "title": "Things here"},
+    {"config": [0, -34],
+     "func": win_map,
+     "scroll_hints": True,
+     "title": "PLEASE THE ISLAND GOD"}
 ]
 from client.window_management import set_windows
 set_windows()

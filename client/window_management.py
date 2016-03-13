@@ -18,10 +18,11 @@ screen_size = [0,0]
 
 
 class Window:
-    def __init__(self, title, draw_function, size):
+    def __init__(self, title, draw_function, size, draw_scroll_hints):
         self.title = title
         self.draw = types.MethodType(draw_function, self)
         self.size = size
+        self.draw_scroll_hints = draw_scroll_hints
 
 
 def set_windows():
@@ -99,7 +100,8 @@ def set_windows():
     windows = []
     for config in windows_config:
         size = size_window(config["config"])
-        window = Window(config["title"], config["func"], size)
+        window = Window(config["title"], config["func"], size,
+                        config["scroll_hints"])
         windows.append(window)
         place_window(window)
     redraw_windows = True
@@ -211,7 +213,8 @@ def draw_screen():
         for win in windows:
             offset, winmap_size, winmap = win.draw()
             draw_winmap()
-            draw_scroll_hints()
+            if win.draw_scroll_hints:
+                draw_scroll_hints()
 
     stdscr.erase()
     draw_window_border_lines()
