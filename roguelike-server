@@ -64,11 +64,16 @@ try:
     if opts.savefile:
         io_db["path_save"] = opts.savefile
         io_db["path_record"] = "record_" + opts.savefile
+    import os
+    if opts.new:
+        if os.access(io_db["path_record"], os.F_OK):
+            os.remove(io_db["path_record"])
+        if os.access(io_db["path_save"], os.F_OK):
+            os.remove(io_db["path_save"])
     from server.io import setup_server_io
     setup_server_io()
     if opts.verbose:
         io_db["verbose"] = True
-    import os
     from server.config.world_data import world_db
     from server.io import read_command, try_worldstate_update, obey
     if None != opts.replay:

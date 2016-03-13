@@ -98,6 +98,7 @@ def parse_command_line_arguments():
     """Return settings values read from command line arguments."""
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument('-n', dest='new', action='store_true')
     parser.add_argument('-s', nargs='?', type=int, dest='replay', const=1,
                         action='store')
     parser.add_argument('-l', nargs="?", const="save", dest='savefile',
