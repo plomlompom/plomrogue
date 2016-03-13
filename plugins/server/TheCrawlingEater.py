@@ -7,9 +7,95 @@ from server.config.world_data import world_db
 
 
 def command_help(str_int):
-    val = integer_test(str_int, 0, 4)
+    val = integer_test(str_int, 0, 9)
     if None != val:
-        log(str_int)
+        if val == 0:
+            log(" ")
+            log("[HELP SCREEN 0: help screen list]")
+            log("0 - this screen")
+            log("1 - key bindings")
+            log("2 - environment 1/3")
+            log("3 - environment 2/3")
+            log("4 - environment 3/3")
+            log("5 - other beings")
+            log("6 - winning")
+            log("7 - restart and replay")
+            log("For more, see ./README or ./README_TCE files.")
+            pass
+        elif val == 1:
+            log(" ")
+            log("[HELP SCREEN 1: key bindings]")
+            log("movement/eating: w/e/d/c/x/s")
+            log("drink: i")
+            log("defecate: o")
+            log("pee: p")
+            log("autopilot: A")
+            log("look mode: l")
+            log("quit: Q")
+            log("help screens: 1/2/3/4/5/6/7/8/9")
+            log("help overview: 0")
+        elif val == 2:
+            log(" ")
+            log("[HELP SCREEN 2: environment 1/3]")
+            log("There is mostly solid matter and fluid. "
+                "'_', '.', ':' are ground, '%', '#', 'X' are walls. "
+                "Less thick ones can be eaten."
+                "Background color indicates fluid concentration. "
+                "'O'/'0' is holes; stepping into them is dangerous."
+                "'-' and '+' are cracks in the ground, and may becomes holes. "
+                "'$' is special places that will change you. "
+                "Learn more in HELP SCREEN 3."
+                )
+        elif val == 3:
+            log(" ")
+            log("[HELP SCREEN 3: environment 2/3]")
+            log("Use the 'l' command to investigate the environment. "
+                "Its cursor will describe the area pointed at by two numbers: "
+                "ground elevation/matter thickness (left), wetness (right). "
+                "You cannot breathe there if the sum of both is > 5. "
+                "Greater ground elevation means slower movement."
+               )
+        elif val == 4:
+            log(" ")
+            log("[HELP SCREEN 4: environment 3/3]")
+            log("Waste will pile up to ground matter an walls. "
+                "Fluid will trickle down into the environment. "
+                "General humidity will sparkle up new fluid on the ground "
+                "level ('_'). "
+                "Only from there can you drink fluid. "
+                "Much fluid on a ground level tile creates potential for "
+                "cracks to appear there. They may be sealed with waste."
+                )
+        elif val == 5:
+            log(" ")
+            log("[HELP SCREEN 5: other beings]")
+            log(" '?' on the memory map indicate sounds of movement. "
+                "You may encounter the sources. They appear as the general "
+                "humidity of the environment grows, grown from its fluids and " 
+                "earth. "
+               )
+        elif val == 6:
+            log(" ")
+            log("[HELP SCREEN 6: winning]")
+            log("Find '$' tiles. Don't dump waste and fluids on fields with "
+                "great elevation and wetness sums. Control ground wetness "
+                "by providing great or small ground space for fluid sparkling " 
+                "up to concentrate in. "
+                "A special kind of hole will only evolve from a 'O' hole that "
+                "is surrounded by six other holes."
+               )
+        elif val == 7:
+            log(" ")
+            log("[HELP SCREEN 7: restart and replay]")
+            log("You can restart in a new game world by running "
+                "./roguelike -n. You can replay a record of your current game"
+                " by running ./roguelike -s."
+                "See file ./README for more details."
+               )
+        else:
+            log(" ")
+            log("No HELP SCREEN defined for this number.")
+            log(" ")
 
 
 def command_ai():
@@ -50,7 +136,7 @@ def play_pee():
             and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
         return
     if world_db["Things"][0]["T_BLADDER"] < 1:
-        log("Nothing to drop from empty bladder.")
+        log("NOTHING to drop from empty bladder.")
         return
     world_db["set_command"]("pee")
 
@@ -72,7 +158,7 @@ def play_drop():
             and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
         return
     if world_db["Things"][0]["T_BOWEL"] < 1:
-        log("Nothing to drop from empty bowel.")
+        log("NOTHING to drop from empty bowel.")
         return
     world_db["set_command"]("drop")
 
@@ -113,7 +199,7 @@ def play_move(str_arg):
         if len(hitted) > 0:
             if t["T_STOMACH"] >= 32 and t["T_KIDNEY"] >= 32:
                 if t == world_db["Things"][0]:
-                    log("You're too FULL to suck from another creature.")
+                    log("You're too FULL to suck resources from another creature.")
                 return
             world_db["Things"][0]["T_ARGUMENT"] = d
             world_db["set_command"]("eat")
@@ -181,13 +267,13 @@ def actor_eat(t):
                     world_db["suck_out_creature"](None, hit_id)
                     return
                 hitted_name = world_db["ThingTypes"][hitted_tid]["TT_NAME"]
-                log("You SUCK from " + hitted_name + ".")
+                log("You SUCK resources from " + hitted_name + ".")
             elif 0 == hit_id:
                 if world_db["GRACE"] >= 16:
                     world_db["suck_out_creature"](t, None)
                     return
                 hitter_name = world_db["ThingTypes"][t["T_TYPE"]]["TT_NAME"]
-                log(hitter_name +" SUCKS from you.")
+                log(hitter_name +" SUCKS resources from you.")
             hitted = world_db["Things"][hit_id]
             if t["T_STOMACH"] < 32:
                 t["T_STOMACH"] = t["T_STOMACH"] + 1
@@ -254,14 +340,15 @@ def actor_move(t):
         world_db["soundmap"][t["pos"]] = ord("9")
         if t == world_db["Things"][0] and world_db["MAP"][t["pos"]] == ord("$"):
             world_db["MAP"][t["pos"]] = ord("0")
+            log("You feel a strange AURA from this place.")
             if world_db["GRACE"] == 0:
                 log("You can now eat ALL walls.")
             elif world_db["GRACE"] == 8:
-                log("You now have the DEATH touch.")
+                log("You now have a DEATH touch towards other creatures.")
             elif world_db["GRACE"] == 16:
-                log("You will now LEVITATE over holes.")
+                log("You can now LEVITATE over holes.")
             elif world_db["GRACE"] == 24:
-                log("You are now READY to fly through the exit portal.")
+                log("You are now READY to leave through a special hole.")
             elif world_db["GRACE"] == 32:
                 log("You already have all the GRACE you can get.")
             if world_db["GRACE"] <= 24:
@@ -272,13 +359,16 @@ def actor_move(t):
 
 def test_hole(t):
     if t == world_db["Things"][0]:
-        if world_db["GRACE"] >= 32 and world_db["MAP"][t["pos"]] == ord("&"):
-            world_db["die"](t, "YOU WIN, CONGRATULATIONS.")
+        if world_db["GRACE"] < 32 and world_db["MAP"][t["pos"]] == ord("&"):
+            log("You feel you need more GRACE to leave through this hole.")
+        elif world_db["GRACE"] >= 32 and world_db["MAP"][t["pos"]] == ord("&"):
+            world_db["die"](t, "You FLY through the hole, into your waking life."
+                            "Good bye, and CONGRATULATIONS.")
             return False
         if world_db["GRACE"] >= 24:
             return True
     if chr(world_db["MAP"][t["pos"]]) in "*&":
-        world_db["die"](t, "You FALL in a hole, and die.")
+        world_db["die"](t, "You FALL into a hole, and die.")
         return False
     return True
 world_db["test_hole"] = test_hole
@@ -286,7 +376,7 @@ world_db["test_hole"] = test_hole
 
 def test_air(t):
     if world_db["terrain_fullness"](t["pos"]) > 5:
-        world_db["die"](t, "You SUFFOCATE")
+        world_db["die"](t, "You SUFFOCATE.")
         return False
     return True
 world_db["test_air"] = test_air

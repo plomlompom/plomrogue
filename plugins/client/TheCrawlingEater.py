@@ -139,6 +139,14 @@ world_data["bowel"] = 0
 world_data["bladder"] = 0
 world_data["wetmap"] = " " * (world_data["map_size"] ** 2)
 world_data["soundmap"] = " " * (world_data["map_size"] ** 2)
+world_data["log"] = [
+"This is not the environment you are used to. This is not the body you are use"
+"d to. Surely this is a dream. But you have a feeling you might not wake up. U"
+"nless you find a way out of here. Until then, you must survive. Explore, keep"
+" fed, and hydrated. And avoid things that move by themselves.",
+"",
+"[hit '0' for help]"
+]
 from client.config.io import io
 io["worldstate_read_order"] += [["stomach", "int"]]
 io["worldstate_read_order"] += [["kidney", "int"]]
@@ -155,13 +163,17 @@ windows_config[:] = [
      "scroll_hints": False,
       "title": "THE CRAWLING EATER"},
     {"config": [1, 32],
+     "func": win_bar_maker(76, "+", "grace"),
+     "scroll_hints": False,
+      "title": "grace"},
+    {"config": [1, 32],
      "func": win_bar_maker(77, "%", "stomach"),
      "scroll_hints": False,
-     "title": "stomach"},
+     "title": "calories"},
     {"config": [1, 32],
      "func": win_bar_maker(79, "~", "kidney"),
      "scroll_hints": False,
-      "title": "kidney"},
+      "title": "hydration"},
     {"config": [1, 32],
      "func": win_bar_maker(78, "%", "bowel"),
      "scroll_hints": False,
@@ -170,10 +182,6 @@ windows_config[:] = [
      "func": win_bar_maker(80, "~", "bladder"),
      "scroll_hints": False,
       "title": "bladder"},
-    {"config": [1, 32],
-     "func": win_bar_maker(76, "+", "grace"),
-     "scroll_hints": False,
-      "title": "grace"},
     {"config": [-10, 32],
      "func": win_log,
      "scroll_hints": False,
@@ -183,10 +191,16 @@ from client.window_management import set_windows
 set_windows()
 from client.commands import command_sender
 from client.config.commands import commands
-commands["S"] = (command_sender("drop"),)
-commands["D"] = (command_sender("drink"),)
-commands["P"] = (command_sender("pee"),)
+commands["o"] = (command_sender("drop"),)
+commands["i"] = (command_sender("drink"),)
+commands["p"] = (command_sender("pee"),)
+commands["0"] = (command_sender("HELP 0"),)
 commands["1"] = (command_sender("HELP 1"),)
 commands["2"] = (command_sender("HELP 2"),)
 commands["3"] = (command_sender("HELP 3"),)
 commands["4"] = (command_sender("HELP 4"),)
+commands["5"] = (command_sender("HELP 5"),)
+commands["6"] = (command_sender("HELP 6"),)
+commands["7"] = (command_sender("HELP 7"),)
+commands["8"] = (command_sender("HELP 8"),)
+commands["9"] = (command_sender("HELP 9"),)
