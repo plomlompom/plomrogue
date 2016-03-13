@@ -256,12 +256,14 @@ def actor_move(t):
             world_db["MAP"][t["pos"]] = ord("0")
             if world_db["GRACE"] == 0:
                 log("You can now eat ALL walls.")
-            if world_db["GRACE"] == 8:
+            elif world_db["GRACE"] == 8:
                 log("You now have the DEATH touch.")
-            if world_db["GRACE"] == 16:
+            elif world_db["GRACE"] == 16:
                 log("You will now LEVITATE over holes.")
-            if world_db["GRACE"] == 24:
+            elif world_db["GRACE"] == 24:
                 log("You are now READY to fly through the exit portal.")
+            elif world_db["GRACE"] == 32:
+                log("You already have all the GRACE you can get.")
             if world_db["GRACE"] <= 24:
                 world_db["GRACE"] += 8
     elif t == world_db["Things"][0]:
@@ -338,7 +340,7 @@ def make_map():
                 ord("0") == world_db["wetmap"][pos]:
             world_db["wetmap"][pos] = ord("3")
             i_water += 1
-    n_altars = 4
+    n_altars = 16
     i_altars = 0
     while (i_altars < n_altars):
         y, x, pos = new_pos()
