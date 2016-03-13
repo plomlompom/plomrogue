@@ -206,6 +206,10 @@ def actor_move(t):
         t["T_POSX"] = move_result[2]
         t["pos"] = move_result[1] * world_db["MAP_LENGTH"] + move_result[2]
         world_db["soundmap"][t["pos"]] = ord("9")
+        if t == world_db["Things"][0] and world_db["MAP"][t["pos"]] == ord("$"):
+            world_db["MAP"][t["pos"]] = ord("0")
+            world_db["GRACE"] += 8
+            log("BOO!")
     elif t == world_db["Things"][0]:
         log("You try to MOVE there, but fail.")
 
@@ -236,7 +240,8 @@ def die(t, message):
         t["T_MEMMAP"][t["pos"]] = ord("@")
         log(message)
     else:
-        world_db["MAP"][t["pos"]] = ord("5")
+        if world_db["MAP"][t["pos"]] != ord("$"):
+            world_db["MAP"][t["pos"]] = ord("5")
         world_db["HUMILITY"] = t["T_KIDNEY"] + t["T_BLADDER"] + \
             (world_db["wetmap"][t["pos"]] - ord("0"))
         world_db["wetmap"][t["pos"]] = 0
@@ -276,6 +281,13 @@ def make_map():
                 ord("0") == world_db["wetmap"][pos]:
             world_db["wetmap"][pos] = ord("3")
             i_water += 1
+    n_altars = 4
+    i_altars = 0
+    while (i_altars < n_altars):
+        y, x, pos = new_pos()
+        if ord("0") == world_db["MAP"][pos]:
+            world_db["MAP"][pos] = ord("$")
+            i_altars += 1
 
 
 def calc_effort(ta, t):
@@ -347,6 +359,8 @@ def turn_over():
                 height = -1
             elif world_db["MAP"][pos] == ord("+"):
                 height = -2
+            elif world_db["MAP"][pos] == ord("$"):
+                height = -3
             if height == -2 and wetness > 1 \
                     and 0 == rand.next() % ((2 ** 11) / (2 ** wetness)):
                 world_db["MAP"][pos] = ord("*")
@@ -792,9 +806,10 @@ io_db["worldstate_write_order"] += [["T_BOWEL", "player_int"]]
 io_db["worldstate_write_order"] += [["T_BLADDER", "player_int"]]
 io_db["worldstate_write_order"] += [[write_wetmap, "func"]]
 io_db["worldstate_write_order"] += [[write_soundmap, "func"]]
+io_db["worldstate_write_order"] += [["GRACE", "world_int"]]
 import server.config.world_data
 server.config.world_data.symbols_hide = "345"
-server.config.world_data.symbols_passable = "012-+*&"
+server.config.world_data.symbols_passable = "012-+*&$"
 server.config.world_data.thing_defaults["T_STOMACH"] = 16
 server.config.world_data.thing_defaults["T_BOWEL"] = 0
 server.config.world_data.thing_defaults["T_KIDNEY"] = 16
@@ -805,6 +820,8 @@ if not "NEW_SPAWN" in world_db:
     world_db["NEW_SPAWN"] = 0
 if not "HUMIDITY" in world_db:
     world_db["HUMIDITY"] = 0
+if not "GRACE" in world_db:
+    world_db["GRACE"] = 0
 io_db["hook_save"] = save_maps
 import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
@@ -820,6 +837,7 @@ commands_db["drink"] = (0, False, play_drink)
 commands_db["pee"] = (0, False, play_pee)
 commands_db["use"] = (1, False, lambda x: None)
 commands_db["pickup"] = (0, False, lambda: None)
+commands_db["GRACE"] = (1, False, setter(None, "GRACE", 0, 255))
 commands_db["NEW_SPAWN"] = (1, False, setter(None, "NEW_SPAWN", 0, 255))
 commands_db["HUMIDITY"] = (1, False, setter(None, "HUMIDITY", 0, 65535))
 commands_db["T_STOMACH"] = (1, False, setter("Thing", "T_STOMACH", 0, 255))

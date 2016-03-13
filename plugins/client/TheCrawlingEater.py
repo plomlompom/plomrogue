@@ -3,6 +3,7 @@
 # see the file NOTICE in the root directory of the PlomRogue source package.
 
 
+curses.init_pair(76, curses.COLOR_BLACK, curses.COLOR_WHITE)
 curses.init_pair(77, curses.COLOR_WHITE, curses.COLOR_GREEN)
 curses.init_pair(78, curses.COLOR_BLACK, curses.COLOR_RED)
 curses.init_pair(79, curses.COLOR_WHITE, curses.COLOR_BLUE)
@@ -13,6 +14,8 @@ def win_bar_maker(color_number, symbol, title):
     def win_bar(self):
         winmap = []
         for i in range(world_data[title]):
+            if i == 32:
+                break
             winmap += [(symbol, curses.color_pair(color_number))]
         winmap_size = [1, len(winmap)]
         offset = [0, 0]
@@ -48,7 +51,7 @@ def win_map(self):
     winmap = []
     curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
     #curses.init_pair(2, curses.COLOR_BLUE, curses.COLOR_BLACK)
-    #curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(6, curses.COLOR_RED, curses.COLOR_BLACK)
@@ -63,6 +66,7 @@ def win_map(self):
     col_unknown = curses.color_pair(1)
     col_creature = curses.color_pair(13)
     col_player = curses.color_pair(8)
+    col_altar = curses.color_pair(3)
     earth_colors = [
         curses.color_pair(4),
         curses.color_pair(5),
@@ -112,6 +116,8 @@ def win_map(self):
                         attribute = earth_colors[mapval]
                 if char == "&":
                     attribute = col_player
+                elif char == "$":
+                    attribute = col_altar
                 if char in charmap:
                     char = charmap[char]
                 elif char == "@":
@@ -126,6 +132,7 @@ def win_map(self):
 
 
 from client.config.world_data import world_data
+world_data["grace"] = 0
 world_data["kidney"] = 0
 world_data["stomach"] = 0
 world_data["bowel"] = 0
@@ -139,30 +146,35 @@ io["worldstate_read_order"] += [["bowel", "int"]]
 io["worldstate_read_order"] += [["bladder", "int"]]
 io["worldstate_read_order"] += [["wetmap", "map"]]
 io["worldstate_read_order"] += [["soundmap", "map"]]
+io["worldstate_read_order"] += [["grace", "int"]]
 from client.config.windows import windows_config
 from client.windows import win_log
 windows_config[:] = [
-    {"config": [0, -34],
+    {"config": [0, -33],
      "func": win_map,
      "scroll_hints": False,
       "title": "THE CRAWLING EATER"},
-    {"config": [1, 33],
+    {"config": [1, 32],
      "func": win_bar_maker(77, "%", "stomach"),
      "scroll_hints": False,
      "title": "stomach"},
-    {"config": [1, 33],
+    {"config": [1, 32],
      "func": win_bar_maker(79, "~", "kidney"),
      "scroll_hints": False,
       "title": "kidney"},
-    {"config": [1, 33],
+    {"config": [1, 32],
      "func": win_bar_maker(78, "%", "bowel"),
      "scroll_hints": False,
      "title": "bowel"},
-    {"config": [1, 33],
+    {"config": [1, 32],
      "func": win_bar_maker(80, "~", "bladder"),
      "scroll_hints": False,
       "title": "bladder"},
-    {"config": [-8, 33],
+    {"config": [1, 32],
+     "func": win_bar_maker(76, "+", "grace"),
+     "scroll_hints": False,
+      "title": "grace"},
+    {"config": [-10, 32],
      "func": win_log,
      "scroll_hints": False,
      "title": "log"}

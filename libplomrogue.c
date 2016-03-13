@@ -603,6 +603,9 @@ extern uint8_t TCE_set_movement_cost_map(char * mem_map)
     for (pos = 0; pos < map_size; pos++)
     {
         switch(mem_map[pos]) {
+            case '-':
+            case '+':
+            case '$':
             case '0':
                 TCE_move_cost_map[pos] = 1;
                 break;
