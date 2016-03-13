@@ -482,7 +482,7 @@ def turn_over():
                 dirs = "edcxsw"
                 for i in range(len(dirs)):
                     score += libpr.get_neighbor_score(i)
-                if score == 5 or score == 6:
+                if score == 6:
                     world_db["MAP"][pos] = ord("&")
         libpr.free_score_map()
         world_db["TURN"] += 1
