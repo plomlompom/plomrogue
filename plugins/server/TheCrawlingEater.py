@@ -820,7 +820,7 @@ def ai(t):
                         world_db["terrain_fullness"](t["pos"]) <= 3:
                     t["T_COMMAND"] = thing_action_id("drop")
                     return
-                elif world_db["get_dir_to_target"](t, "crack"):
+                elif world_db["get_dir_to_target"](t, "crack")[0]:
                     return
             if need[0] in {"fluid_certain", "fluid_potential"}:
                 if standing_on_fluid(t):
