@@ -140,7 +140,7 @@ windows_config[:] = [
     {"config": [0, -34],
      "func": win_map,
      "scroll_hints": False,
-      "title": "The Crawling Eater"},
+      "title": "THE CRAWLING EATER"},
     {"config": [1, 33],
      "func": win_bar_maker(77, "%", "stomach"),
      "scroll_hints": False,
