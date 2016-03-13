@@ -62,6 +62,7 @@ def set_world_inactive():
 
 def turn_over():
     """Run game world and its inhabitants until new player input expected."""
+    # TODO: Add build_fov_map, actor_move trigger not enough on changing maps.
     from server.ai import ai
     from server.config.actions import action_db
     from server.config.misc import calc_effort
