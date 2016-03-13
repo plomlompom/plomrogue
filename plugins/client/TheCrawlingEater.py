@@ -85,8 +85,11 @@ def win_map(self):
             if world_data["look_mode"] and y == world_data["map_center"][0] \
                     and x == world_data["map_center"][1]:
                 if char == " ":
-                    char = world_data["mem_map"][pos]
-                winmap += [(char, curses.A_REVERSE), ("?", curses.A_REVERSE)]
+                    bonus = "?"
+                else:
+                    bonus = world_data["wetmap"][pos]
+                char = world_data["mem_map"][pos]
+                winmap += [(char, curses.A_REVERSE), (bonus, curses.A_REVERSE)]
                 continue
             bonus = " "
             attribute = col_unknown
