@@ -435,6 +435,12 @@ def get_dir_to_target(t, target):
     from server.utils import rand, libpr, c_pointer_to_bytearray
     from server.config.world_data import symbols_passable
 
+    def get_map_score(pos):
+        result = libpr.get_map_score(pos)
+        if result < 0:
+            raise RuntimeError("No score map allocated for get_map_score().")
+        return result
+
     def zero_score_map_where_char_on_memdepthmap(c):
         map = c_pointer_to_bytearray(t["T_MEMDEPTHMAP"])
         if libpr.zero_score_map_where_char_on_memdepthmap(c, map):
@@ -451,6 +457,11 @@ def get_dir_to_target(t, target):
         if libpr.TCE_set_movement_cost_map(memmap):
             raise RuntimeError("No movement cost map allocated for "
                                "set_movement_cost_map().")
+
+    def animates_in_fov(maplength):
+        return [Thing for Thing in world_db["Things"].values()
+                if Thing["T_LIFEPOINTS"] if 118 == t["fovmap"][Thing["pos"]]
+                if not Thing == t]
 
     def seeing_thing():
         def exists(gen):
@@ -477,6 +488,9 @@ def get_dir_to_target(t, target):
                           if ord("0") <= t["T_MEMMAP"][pos] <= ord("2")
                           if (t["fovmap"] != ord("v")
                               or world_db["terrain_fullness"](pos) < 5))
+        elif target == "flee" and t["fovmap"]:
+            return exists(Thing for
+                          Thing in animates_in_fov(world_db["MAP_LENGTH"]))
         return False
 
     def init_score_map():
@@ -504,6 +518,9 @@ def get_dir_to_target(t, target):
                  or world_db["terrain_fullness"](pos) < 5)]
         elif target == "search":
             zero_score_map_where_char_on_memdepthmap(mem_depth_c[0])
+        elif target == "flee":
+            [set_map_score(Thing["pos"], 0) for
+             Thing in animates_in_fov(world_db["MAP_LENGTH"])]
 
     def rand_target_dir(neighbors, cmp, dirs):
         candidates = []
@@ -529,13 +546,32 @@ def get_dir_to_target(t, target):
         dirs = "edcxsw"
         eye_pos = t["pos"]
         neighbors = get_neighbor_scores(dirs, eye_pos)
-        minmax_start = 65535 - 1
+        minmax_start = 0 if "flee" == target else 65535 - 1
         minmax_neighbor = minmax_start
         for i in range(len(dirs)):
-            if minmax_neighbor > neighbors[i]:
+            if ("flee" == target and get_map_score(t["pos"]) < neighbors[i] and
+                minmax_neighbor < neighbors[i] and 65535 != neighbors[i]) \
+               or ("flee" != target and minmax_neighbor > neighbors[i]):
                 minmax_neighbor = neighbors[i]
         if minmax_neighbor != minmax_start:
             dir_to_target = rand_target_dir(neighbors, minmax_neighbor, dirs)
+        if "flee" == target:
+            distance = get_map_score(t["pos"])
+            fear_distance = 5
+            attack_distance = 1
+            if not dir_to_target:
+                if attack_distance >= distance:
+                    dir_to_target = rand_target_dir(neighbors,
+                                                    distance - 1, dirs)
+                elif fear_distance >= distance:
+                    t["T_COMMAND"] = [taid for
+                                      taid in world_db["ThingActions"]
+                                      if
+                                      world_db["ThingActions"][taid]["TA_NAME"]
+                                      == "wait"][0]
+                    return 1, 0
+            elif dir_to_target and fear_distance < distance:
+                dir_to_target = 0
         return dir_to_target, minmax_neighbor
 
     dir_to_target = False
@@ -560,7 +596,9 @@ def get_dir_to_target(t, target):
             if 1 != move_result[0]:
                 return False, 0
             pos = (move_result[1] * world_db["MAP_LENGTH"]) + move_result[2]
-            if world_db["MAP"][pos] > ord("2"):
+            hitted = [tid for tid in world_db["Things"]
+                      if world_db["Things"][tid]["pos"] == pos]
+            if world_db["MAP"][pos] > ord("2") or len(hitted) > 0:
                 action = "eat"
             t["T_COMMAND"] = [taid for taid in world_db["ThingActions"]
                               if world_db["ThingActions"][taid]["TA_NAME"]
@@ -595,6 +633,7 @@ def ai(t):
 
     t["T_COMMAND"] = thing_action_id("wait")
     needs = {
+        "flee": 24,
         "safe_pee": (world_db["terrain_fullness"](t["pos"]) * t["T_BLADDER"]) / 4,
         "safe_drop": (world_db["terrain_fullness"](t["pos"]) * t["T_BOWEL"]) / 4,
         "food": 33 - t["T_STOMACH"],
