@@ -166,3 +166,7 @@ from client.config.commands import commands
 commands["S"] = (command_sender("drop"),)
 commands["D"] = (command_sender("drink"),)
 commands["P"] = (command_sender("pee"),)
+commands["1"] = (command_sender("HELP 1"),)
+commands["2"] = (command_sender("HELP 2"),)
+commands["3"] = (command_sender("HELP 3"),)
+commands["4"] = (command_sender("HELP 4"),)

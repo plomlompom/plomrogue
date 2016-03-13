@@ -6,6 +6,18 @@
 from server.config.world_data import world_db
 
 
+def command_help(str_int):
+    val = integer_test(str_int, 0, 4)
+    if None != val:
+        log(str_int)
+
+
+def command_ai():
+    if world_db["WORLD_ACTIVE"]:
+        world_db["ai"](world_db["Things"][0])
+        world_db["turn_over"]()
+
+
 def play_drink():
     if not (action_exists("drink") and world_db["WORLD_ACTIVE"]
             and world_db["Things"][0]["T_LIFEPOINTS"] > 0):
@@ -470,12 +482,6 @@ def write_wetmap():
     return write_map(visible_wetmap, world_db["MAP_LENGTH"])
 
 
-def command_ai():
-    if world_db["WORLD_ACTIVE"]:
-        world_db["ai"](world_db["Things"][0])
-        world_db["turn_over"]()
-
-
 def get_dir_to_target(t, target):
 
     from server.utils import rand, libpr, c_pointer_to_bytearray
@@ -757,6 +763,7 @@ import server.config.make_world_helpers
 server.config.make_world_helpers.make_map = make_map
 from server.config.commands import commands_db
 commands_db["THINGS_HERE"] = (2, True, lambda x, y: None)
+commands_db["HELP"] = (1, False, command_help)
 commands_db["ai"] = (0, False, command_ai)
 commands_db["move"] = (1, False, play_move)
 commands_db["eat"] = (1, False, play_move)
