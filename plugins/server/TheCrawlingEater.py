@@ -340,7 +340,7 @@ def make_map():
                 ord("0") == world_db["wetmap"][pos]:
             world_db["wetmap"][pos] = ord("3")
             i_water += 1
-    n_altars = 16
+    n_altars = 8
     i_altars = 0
     while (i_altars < n_altars):
         y, x, pos = new_pos()
