@@ -29,6 +29,7 @@ def command_help(str_int):
             log("drink: i")
             log("defecate: o")
             log("pee: p")
+            log("wait: .")
             log("autopilot: A")
             log("look mode: l")
             log("quit: Q")
@@ -50,7 +51,7 @@ def command_help(str_int):
             log(" ")
             log("[HELP SCREEN 3: environment 2/3]")
             log("Use the 'l' command to investigate the environment. "
-                "Its cursor will describe the area pointed at by two numbers: "
+                "Its cursor may describe the area pointed at by two numbers: "
                 "ground elevation/matter thickness (left), wetness (right). "
                 "You cannot breathe there if the sum of both is > 5. "
                 "Greater ground elevation means slower movement."
