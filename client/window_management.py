@@ -110,14 +110,20 @@ def set_windows():
 def draw_screen():
 
     def healthy_addch(y, x, char, attr=0):
-        """Workaround for <http://stackoverflow.com/questions/7063128/>."""
+        """Wrap Python curses' addch() weirdnesses into sane interface.
+
+        Works around <http://stackoverflow.com/questions/7063128/> with
+        <https://stackoverflow.com/a/26797300> and enforces char to be a byte
+        instead of a single-char string.
+        """
         if y == screen_size[0] - 1 and x == screen_size[1] - 1:
             char_before = stdscr.inch(y, x - 1)
-            stdscr.addch(y, x - 1, char, attr)
+            stdscr.addch(y, x - 1, char.encode(), attr)
             stdscr.insstr(y, x - 1, " ")
-            stdscr.addch(y, x - 1, char_before)
+            stdscr.addch(y, x - 1,
+                         char_before & 0xFF, char_before & curses.A_ATTRIBUTES)
         else:
-            stdscr.addch(y, x, char, attr)
+            stdscr.addch(y, x, char.encode(), attr)
 
     def draw_window_border_lines():
         for win in windows:
